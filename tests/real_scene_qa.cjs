@@ -52,3 +52,9 @@ test('only preexisting crown kinds can be replaced',()=>{
   assert.equal(M.parseKind('crown_4_0_0'),null);
   assert.equal(M.parseKind('random_external_asset'),null);
 });
+// Regression: render sync must have its own Babylon namespace binding.
+test('real crown synchronization binds Babylon namespace locally',()=>{
+  const source=code.slice(code.indexOf('function sync(layer){'),code.indexOf('root.KlinikRealMesh='));
+  assert.match(source,/function sync\(layer\)\s*\{[\s\S]*?const B=layer\.B;/);
+  assert.match(source,/new B\.Color3\(/);
+});
