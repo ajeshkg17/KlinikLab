@@ -44,11 +44,11 @@ class DentalScene {
     gl.useProgram(this.program);this.loc={};for(const n of ['uModel','uView','uProj','uNormal','uColor','uAlpha','uTextured','uUnlit','uFinish','uTexture'])this.loc[n]=gl.getUniformLocation(this.program,n);
     this.attr={pos:gl.getAttribLocation(this.program,'aPos'),normal:gl.getAttribLocation(this.program,'aNormal'),uv:gl.getAttribLocation(this.program,'aUV')};
     this.geom={box:this.geometry(this.boxData()),sphere:this.geometry(this.sphereData(20,28)),cylinder:this.geometry(this.cylinderData(16)),torus:this.geometry(this.torusData(24,9)),quad:this.geometry(this.quadData())};
-    this.whiteTex=this.makeTexture(null);
+    this.labelCanvases=new Map();this.whiteTex=this.makeTexture(null);
     this.target=[0,1.33,-2.28];this.yaw=.28;this.pitch=.27;this.distance=3.8;this.selectedKey='';this.hoverKey='';this.mode='clinic';this.xrSession=null;this.xrRef=null;this.frameCount=0;
     this.installEvents();this.buildScene();this.loop();
   }
-  geometry(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);return {buffer:b,count:data.length/8};}
+  geometry(data){const gl=this.gl,b=gl.createBuffer(),cpu=new Float32Array(data);gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,cpu,gl.STATIC_DRAW);return {buffer:b,count:cpu.length/8,cpu};}
   tri(a,b,c,n=null){const A=a.p||a,B=b.p||b,C=c.p||c;const normal=n||M3.unit(M3.cross(M3.sub(B,A),M3.sub(C,A)));return [...A,...normal,...(a.uv||[0,0]),...B,...normal,...(b.uv||[1,0]),...C,...normal,...(c.uv||[1,1])];}
   quadData(){return [...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,-.5,0],uv:[1,0]},{p:[.5,.5,0],uv:[1,1]},[0,0,1]),...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,.5,0],uv:[1,1]},{p:[-.5,.5,0],uv:[0,1]},[0,0,1])];}
   boxData(){const p=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],v=[];for(let ax=0;ax<3;ax++)for(const dir of [-1,1]){const n=[0,0,0];n[ax]=dir;const other=[0,1,2].filter(x=>x!==ax),corners=[];for(const [a,b] of [[-1,-1],[1,-1],[1,1],[-1,1]]){const q=[0,0,0];q[ax]=dir*.5;q[other[0]]=a*.5;q[other[1]]=b*.5;corners.push(q)}if(dir*(ax===1?-1:1)<0)corners.reverse();v.push(...this.tri(corners[0],corners[1],corners[2],n),...this.tri(corners[0],corners[2],corners[3],n));}return v}
@@ -151,7 +151,7 @@ class DentalScene {
     return this.smoothSurfaceData(V);
   }
   makeTexture(canvas){const gl=this.gl,tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));if(canvas)this.updateTexture(tex,canvas);this.textures.push(tex);return tex;}
-  updateTexture(tex,canvas){const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas)}
+  updateTexture(tex,canvas){const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas);this.labelCanvases?.set(tex,canvas)}
   makeLabel(text,opts={}){const w=opts.width||512,h=opts.height||100;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');if(opts.background){ctx.fillStyle=opts.background;ctx.fillRect(0,0,w,h)}ctx.fillStyle=opts.color||'#e2f8ec';ctx.font=`${opts.bold?'700':'550'} ${opts.font||32}px system-ui, sans-serif`;ctx.textAlign=opts.align||'center';ctx.textBaseline='middle';ctx.fillText(text,opts.align==='left'?14:w/2,h/2,w-24);return this.makeTexture(c)}
   add(kind,p,s,c,opts={}){const m={kind,p:p.slice(),s:s.slice(),rot:opts.rot||[0,0,0],color:this.rgb(c),alpha:opts.alpha??1,tex:opts.tex||null,unlit:!!opts.unlit,finish:opts.finish??0,key:opts.key||null,tag:opts.tag||'',hidden:false};this.meshes.push(m);if(m.key)this.pickables.push({key:m.key,p:m.p.slice(),radius:opts.radius||Math.max(...s)*.7,kind,mesh:m});return m}
   rgb(h){if(Array.isArray(h))return h;const x=parseInt(h.replace('#',''),16);return [(x>>16&255)/255,(x>>8&255)/255,(x&255)/255]}
