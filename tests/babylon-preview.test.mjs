@@ -38,7 +38,7 @@ test('isolated screenshot worker only permits the exact external Babylon script'
   const {localRequestAllowed,validateJob}=await import('../visual-qa/worker-core.mjs');
   assert.equal(localRequestAllowed('https://cdn.babylonjs.com/babylon.js'),true);
   assert.equal(localRequestAllowed('https://cdn.babylonjs.com/other.js'),false);
-  assert.equal(localRequestAllowed('https://assets.babylonjs.com/environments/environmentSpecular.env'),true);
+  assert.equal(localRequestAllowed('https://assets.babylonjs.com/environments/environmentSpecular.env'),false);
   assert.equal(localRequestAllowed('https://assets.babylonjs.com/environments/other.env'),false);
   assert.equal(localRequestAllowed('https://evil.com/babylon.js'),false);
   assert.equal(localRequestAllowed('http://127.0.0.1:8787/index.html'),true);
