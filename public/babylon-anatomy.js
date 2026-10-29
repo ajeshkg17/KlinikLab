@@ -101,31 +101,37 @@
     // For review/QA, the mesh reports the same source-independent crown geometry.
     return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper};
   }
-  // Lower-profile gingival collar following the arch, with interproximal papillae.
-  // A synthetic tissue envelope, not periodontal or patient-specific anatomy.
+  // Continuous synthetic gingival ridge with a broad attached-tissue skirt,
+  // a narrow cervical crest and interpolated interdental papillae.
+  // Educational approximation only; not a periodontal reconstruction.
   function gingivaData(upper){
     const path=upper?
       [[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]]:
       [[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]];
     const points=[...path.slice().reverse().map(p=>[-p[0],p[1]]),...path.map(p=>[p[0],p[1]])];
-    const d=upper?1:-1,base=upper?1.759:1.332,seg=176,around=12,pos=[],indices=[];
+    const d=upper?1:-1,base=upper?1.759:1.332,seg=240,around=24,pos=[],indices=[];
     const spline=(u)=>{
       const k=Math.min(points.length-2,Math.floor(u)),t=u-k;
       const p0=points[Math.max(0,k-1)],p1=points[k],p2=points[k+1],p3=points[Math.min(points.length-1,k+2)];
       const f=(j)=>.5*((2*p1[j])+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t*t+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t*t*t);
       return [f(0),f(1)];
     };
+    // Cross section: cervical crest at the top, soft rounded shoulder,
+    // attached gingiva extending toward the vestibule/lingual side.
     for(let i=0;i<=seg;i++){
       const u=(points.length-1)*i/seg,xy=spline(u),prev=spline(Math.max(0,u-.008)),next=spline(Math.min(points.length-1,u+.008));
       let tx=next[0]-prev[0],tz=next[1]-prev[1],len=Math.hypot(tx,tz)||1;tx/=len;tz/=len;
       const nx=-tz,nz=tx;
-      const fraction=u-Math.floor(u),papilla=Math.sin(Math.PI*fraction)**4;
-      const cy=base+d*(.010-.012*papilla);
+      const nearest=Math.abs(u-Math.round(u));
+      const papilla=Math.exp(-(nearest/.16)**2);
+      const crest=base+d*(.009+.018*papilla);
       for(let j=0;j<around;j++){
-        const a=TAU*j/around;
-        const outward=.045*Math.cos(a);
-        const y=cy+d*(.042*Math.sin(a));
-        pos.push(xy[0]+nx*outward,y,xy[1]+nz*outward);
+        const a=TAU*j/around,cs=Math.cos(a),sn=Math.sin(a);
+        const lateral=(.039+.011*Math.max(0,-sn))*cs;
+        const shoulder=.019*Math.max(0,sn);
+        const attached=.075*Math.max(0,-sn);
+        const y=crest+d*(shoulder-attached);
+        pos.push(xy[0]+nx*lateral,y,xy[1]+nz*lateral);
       }
     }
     for(let i=0;i<seg;i++)for(let j=0;j<around;j++){
@@ -153,8 +159,8 @@
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
     v.applyToMesh(template,true);
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:3,vertices:data.vertices};
+    template.metadata={synthetic:true,anatomyVersion:4,vertices:data.vertices};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,gingivaData,createTemplate,version:3,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,gingivaData,createTemplate,version:4,notes:'Educational procedural tooth morphology; not an anatomical scan'};
 })(typeof window!=='undefined'?window:globalThis);
