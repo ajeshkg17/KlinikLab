@@ -305,6 +305,7 @@ test('XR frame binds left/right rays by handedness, not input array order, and c
   getXRInputPose:(frame,source)=>source.missing?null:{transform:{position:{
    x:source===left?-1:1,y:1.5,z:-.25},orientation:{x:0,y:0,z:0,w:1}}},
   rotateByQuat:()=>[0,0,-1],
+  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}},
   xrGuide:{placeForViewer(){placed++}},
   xrPrep:{triggers:{clear(){cleared++}},tip:{hidden:false},onXRFrame(){cutFrameCalls++}},
   draw(){}};
