@@ -91,7 +91,7 @@ async function capture(job){
       return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     item.ok=true;
-   }catch(e){item.errors.push(String(e.message||e).slice(0,500));trace(`Scene ${scene.name}: ${item.errors.at(-1)}`)}
+   }catch(e){item.errors.push(String(e.message||e).slice(0,500));item.atlasDebug=await page.evaluate(()=>window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,error:window.KlinikDundeeAtlas.error,decoderDiagnostic:window.KlinikDundeeAtlas.decoderDiagnostic}:null).catch(()=>null);trace(`Scene ${scene.name}: ${item.errors.at(-1)}`)}
    manifest.scenes.push(item);await page.close();
   }
   await context.close();
