@@ -8,6 +8,7 @@ export const DEFAULT_ORIGIN = 'http://127.0.0.1:8787';
 export const CONTROLS = Object.freeze({
   teeth: '#focus',
   renderer: '#renderer-toggle',
+  appearance: '#appearance-toggle',
   atlasOpen: '#dundee-atlas-open',
   atlasNext: '#dundee-atlas-next',
   atlasPrev: '#dundee-atlas-prev',
