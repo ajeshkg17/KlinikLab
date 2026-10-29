@@ -85,9 +85,10 @@
       disposeScene();
       const token=assetGeneration;
       const B=window.BABYLON;
-      // Babylon 9's versioned decoder URL can 404 on its learning CDN.
-      // Explicitly use the documented, unversioned Draco distribution.
-      const draco={wasmUrl:'https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js',wasmBinaryUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.wasm',fallbackUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.js'};
+      // Self-hosted, checksum-pinned Google Draco runtime avoids CDN redirects.
+      // Absolute same-origin URLs also work inside blob-backed WASM workers.
+      const dracoBase=new URL('assets/draco/',window.location.href).href;
+      const draco={wasmUrl:dracoBase+'draco_wasm_wrapper_gltf.js',wasmBinaryUrl:dracoBase+'draco_decoder_gltf.wasm',fallbackUrl:dracoBase+'draco_decoder_gltf.js'};
       state.decoderDiagnostic={
         names:Object.keys(B).filter(name=>/draco/i.test(name)).slice(0,16),
         initial:B.DracoDecoder?.DefaultConfiguration?.wasmBinaryUrl||null,
