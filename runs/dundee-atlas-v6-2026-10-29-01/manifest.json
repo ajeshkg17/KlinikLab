@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "jobId": "dundee-atlas-v6-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T13:38:45.403Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-classic-arch",
+      "file": "01-classic-arch.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 111259,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-dundee-maxillary-molar",
+      "file": "02-dundee-maxillary-molar.png",
+      "capture": "atlas",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 96109,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "rendering",
+          "ready": true,
+          "asset": "maxillary_first_molar",
+          "meshes": 1,
+          "triangles": 976,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "03-dundee-premolar",
+      "file": "03-dundee-premolar.png",
+      "capture": "atlas",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 80486,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "rendering",
+          "ready": true,
+          "asset": "maxillary_first_premolar",
+          "meshes": 1,
+          "triangles": 636,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-dundee-canine",
+      "file": "04-dundee-canine.png",
+      "capture": "atlas",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 70228,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "rendering",
+          "ready": true,
+          "asset": "maxillary_canine",
+          "meshes": 1,
+          "triangles": 392,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 4,
+  "failureCount": 0
+}
