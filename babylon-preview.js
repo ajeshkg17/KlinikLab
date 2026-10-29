@@ -82,6 +82,7 @@
       this.materials=new Map();
       this.frame=0;
       this.lastSize='';
+      this.realTeethStarted=false;
       this.build();
       this.engine.runRenderLoop(()=>{
         if(!this.visible)return;
@@ -202,8 +203,27 @@
         }
         if(mesh.material.alpha!==m.alpha)mesh.material.alpha=m.alpha;
       }
+      // The Babylon display replaces the synthetic crown only once its matching
+      // licensed tooth GLB has loaded. The original source still owns picking.
+      window.KlinikRealMesh?.sync(this);
     }
-    enable(){this.visible=true;this.canvas.style.display='block';this.engine.resize();status.mode='babylon';status.ready=true;status.error=null}
+    startRealTeeth(){
+      if(this.realTeethStarted||!window.KlinikRealMesh)return;
+      this.realTeethStarted=true;
+      const btn=document.getElementById('renderer-toggle');
+      if(btn&&this.visible)btn.textContent='🦷 Loading real teeth…';
+      Promise.resolve(window.KlinikRealMesh.replace(this)).then(()=>{
+        const result=window.KlinikRealTeeth;
+        status.realTeeth=result?.instances||0;
+        status.realModels=result?.loaded||0;
+        if(btn&&this.visible)btn.textContent=result?.ready?'🦷 Real teeth ON':'✨ Babylon ON';
+        if(btn&&result?.failures?.length)btn.title=result.failures.length+' model(s) not loaded; procedural fallback retained.';
+      }).catch(e=>{
+        status.realError=String(e.message||e).slice(0,180);
+        if(btn&&this.visible)btn.textContent='✨ Babylon ON';
+      });
+    }
+    enable(){this.visible=true;this.canvas.style.display='block';this.engine.resize();status.mode='babylon';status.ready=true;status.error=null;this.startRealTeeth()}
     disable(){this.visible=false;this.canvas.style.display='none';status.mode='classic'}
   }
 
@@ -212,23 +232,23 @@
     if(!titleCard||document.getElementById('renderer-toggle'))return;
     const button=document.createElement('button');
     button.id='renderer-toggle';button.type='button';
-    button.textContent='✨ Babylon';
-    button.title='Compare improved Babylon.js lighting on your RTX GPU. Desktop preview only; VR stays on original renderer.';
+    button.textContent='🦷 Real teeth';
+    button.title='Show licensed Dundee crowns in the main dental scene with Babylon.js. Desktop preview; VR and cutting remain unchanged.';
     button.setAttribute('aria-pressed','false');
     button.style.cssText='display:block;margin-top:8px;padding:7px 10px;background:#163c4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
     titleCard.appendChild(button);
     button.addEventListener('click',async()=>{
       if(status.loading)return;
-      if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='✨ Babylon';return}
+      if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='🦷 Real teeth';return}
       if(window.kliniklab?.viewMode!=='3d')window.kliniklab?.setView?.('3d');
       status.loading=true;status.error=null;button.textContent='Loading 3D…';button.disabled=true;
       try{
         const B=await loadLibrary();
         if(!layer)layer=new BabylonDesktopLayer(window.kliniklab,B);
-        layer.enable();button.textContent='✨ Babylon ON';button.classList.add('active');button.style.background='#187e70';button.setAttribute('aria-pressed','true');
+        layer.enable();button.textContent=window.KlinikRealTeeth?.ready?'🦷 Real teeth ON':'🦷 Loading real teeth…';button.classList.add('active');button.style.background='#187e70';button.setAttribute('aria-pressed','true');
       }catch(error){
         status.error=String(error.message||error).slice(0,250);
-        status.mode='classic';button.textContent='✨ Babylon';button.title='Preview unavailable: '+status.error;
+        status.mode='classic';button.textContent='🦷 Real teeth';button.title='Preview unavailable: '+status.error;
       }finally{status.loading=false;button.disabled=false;}
     });
   }
