@@ -1708,28 +1708,28 @@ window.addEventListener('DOMContentLoaded',()=>{
       const add=(mesh,panel=true)=>{this.meshes.push(mesh);if(panel)this.panelMeshes.push(mesh);mesh.hidden=true;return mesh};
       add(scene.box(spec.panel.p,spec.panel.s,'#143644'));
       add(scene.box([.08,1.926,-1.151],[.94,.064,.055],'#258578'));
-      this.title=add(scene.label('QUEST 2 | GET STARTED',[.08,1.856,-1.141],[.87,.089,1],{font:35,bold:true,color:'#e9fff6'}));
+      this.title=add(scene.label('QUEST 2 | GET STARTED',[.08,1.856,-1.141],[.87,.089,1],{font:43,bold:true,color:'#e9fff6'}));
       this.progress=add(scene.label('1 / 5',[.08,1.775,-1.139],[.78,.065,1],{font:30,color:'#90d9ce'}));
       for(let i=0;i<5;i++){
         this.labels.push(add(scene.label('',[.08,1.686-i*.083,-1.139],[.875,.078,1],
-          {font:32,color:'#e3f4ef'})));
+          {font:49,color:'#e3f4ef'})));
       }
       for(const [key,p] of Object.entries(spec.controls)){
         const color=key==='next'?'#197e72':'#2b5f68';
         add(scene.box(p,[.29,.116,.056],color,{key:'guide:'+key}));
         const label=key==='next'?'NEXT':key==='back'?'BACK':'CLOSE';
-        add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:34,bold:true}));
+        add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:43,bold:true}));
       }
       this.launcher=add(scene.box(spec.launcher.p,spec.launcher.s,'#236f75',{key:'guide:open'}),false);
       this.launcherLabel=add(scene.label('VR HELP / GRIP',
         [spec.launcher.p[0],spec.launcher.p[1]+.005,spec.launcher.p[2]+.035],
-        [.37,.080,1],{font:32,color:'#e8fff3'}),false);
+        [.37,.080,1],{font:43,color:'#e8fff3'}),false);
     }
     render(){
       const page=PAGES[state.index];if(!page)return;
-      this.scene.replaceLabel(this.title,page.title,32);
-      this.scene.replaceLabel(this.progress,(state.index+1)+' / '+PAGES.length,30);
-      for(let i=0;i<5;i++)this.scene.replaceLabel(this.labels[i],page.lines[i],26);
+      this.scene.replaceLabel(this.title,page.title,43);
+      this.scene.replaceLabel(this.progress,(state.index+1)+' / '+PAGES.length,40);
+      for(let i=0;i<5;i++)this.scene.replaceLabel(this.labels[i],page.lines[i],49);
       for(const mesh of this.panelMeshes)mesh.hidden=!state.open;
       this.launcher.hidden=!state.active;
       this.launcherLabel.hidden=!state.active;
