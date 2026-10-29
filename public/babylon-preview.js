@@ -6,7 +6,7 @@
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
   const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'disabled',
-    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0,appearance:'balanced',appearanceVersion:0,vertexColoredTemplates:0,jawVisible:false,jawMeshes:0,fineCrownTemplates:0,fineCrownVertices:0};
+    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0,appearance:'balanced',appearanceVersion:0,vertexColoredTemplates:0,jawVisible:false,jawMeshes:0,fineCrownTemplates:0,fineCrownVertices:0,crownSource:'dundee'};
   window.KlinikBabylon = status;
   let layer = null;
   let loadingPromise = null;
@@ -194,6 +194,10 @@
       }
       status.materialsUpdated=changed.size;
     }
+    setCrownSource(mode){
+      this.crownSource=mode==='procedural'?'procedural':'dundee';
+      status.crownSource=this.crownSource;
+    }
     showJaw(visible){
       this.jawVisible=Boolean(visible);
       status.jawVisible=this.jawVisible;
@@ -233,6 +237,7 @@
       }
       status.jawMeshes=this.jawMeshes.length;
       this.jawVisible=status.jawVisible;
+      this.crownSource=status.crownSource;
       status.meshes=this.items.length;
     }
     sync(){
@@ -335,6 +340,20 @@
       jawButton.setAttribute('aria-pressed',String(status.jawVisible));
     });
     titleCard.appendChild(jawButton);
+    const detail=document.createElement('button');
+    detail.id='crown-detail-toggle';detail.type='button';
+    detail.textContent='Teeth: Dundee';
+    detail.title='Switch between original licensed low-LOD Dundee crown surfaces and higher-tessellation synthetic fine crowns. Fine does not mean clinically more accurate.';
+    detail.style.cssText='display:block;margin-top:6px;padding:7px 10px;background:#203e4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
+    detail.setAttribute('aria-pressed','false');
+    detail.addEventListener('click',()=>{
+      const next=status.crownSource==='dundee'?'procedural':'dundee';
+      status.crownSource=next;
+      layer?.setCrownSource(next);
+      detail.textContent=next==='procedural'?'Teeth: Fine model':'Teeth: Dundee';
+      detail.setAttribute('aria-pressed',String(next==='procedural'));
+    });
+    titleCard.appendChild(detail);
     button.addEventListener('click',async()=>{
       if(status.loading)return;
       if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='🦷 Real teeth';return}
