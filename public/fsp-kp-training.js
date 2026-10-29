@@ -58,10 +58,10 @@
      ]
     },
     kollegen:{
-     prompt:'Übergeben Sie den Fall in präziser zahnärztlicher Fachsprache an eine Kollegin/einen Kollegen. Nennen Sie Diagnoseunsicherheit und weiteres Vorgehen.',
+     prompt:'Übergeben Sie den Fall in präziser zahnärztlicher Fachsprache an eine Kollegin/einen Kollegen. Nennen Sie Diagnoseunsicherheit und weiteres Vorgehen. Erklären Sie anschließend den Begriff Pulpitis für eine Patientin oder einen Patienten.',
      b2:'Es handelt sich um einen Fall an Zahn ...',
      c1:'In Zusammenschau von Anamnese, Sensibilitätstest und radiologischem Befund besteht der Verdacht ...',
-     model:'Bei Zahn 36 bestehen seit gestern spontane und nächtliche Schmerzen. Der Kältetest zeigt eine verlängerte Reizantwort, die Perkussion ist leicht empfindlich. Es besteht der Verdacht auf eine symptomatische irreversible Pulpitis. Die Restaurierbarkeit und definitive Diagnose sind noch abzuklären. Bei gesicherter Indikation wäre eine endodontische Behandlung unter Aufklärung und Einwilligung zu besprechen.',
+     model:'Bei Zahn 36 bestehen seit gestern spontane und nächtliche Schmerzen. Der Kältetest zeigt eine verlängerte Reizantwort, die Perkussion ist leicht empfindlich. Es besteht der Verdacht auf eine symptomatische irreversible Pulpitis. Die Restaurierbarkeit und definitive Diagnose sind noch abzuklären. Bei gesicherter Indikation wäre eine endodontische Behandlung unter Aufklärung und Einwilligung zu besprechen. Patientengerecht bedeutet Pulpitis: Entzündung im Zahninneren.',
      checks:[
       criterion('FDI-Zahnnummer','(?:^|\\D)36(?:\\D|$)','Zahnbezeichnung präzise nennen.'),
       criterion('Anamnestischer Verlauf','nachts|spontan|kälte','Leitsymptome kurz zusammenfassen.'),
@@ -117,10 +117,10 @@
      ]
     },
     kollegen:{
-     prompt:'Geben Sie den Fall an eine Kollegin/einen Kollegen weiter. Trennen Sie aktuelle Befunde, Gefährdungsprüfung und Therapieplan.',
+     prompt:'Geben Sie den Fall an eine Kollegin/einen Kollegen weiter. Trennen Sie aktuelle Befunde, Gefährdungsprüfung und Therapieplan. Erklären Sie anschließend den Fachbegriff Dysphagie allgemeinverständlich.',
      b2:'Am Zahn 48 zeigt sich eine lokale Entzündung ...',
      c1:'Im gegenwärtigen Fall bestehen keine berichteten systemischen Ausbreitungszeichen; bei Änderung sofortige Reevaluation ...',
-     model:'An Zahn 48 besteht bei teilweise durchgebrochenem Weisheitszahn ein entzündetes Operculum mit rezidivierenden Beschwerden. Aktuell sind Fieber, Trismus, Dysphagie und Atemnot im fiktiven Fall verneint. Die Arbeitsdiagnose ist eine lokale Perikoronitis. Vorrangig sind lokale Maßnahmen und Verlaufskontrolle; bei Rezidiv ist die Extraktionsindikation zu prüfen. Warnzeichen erfordern eine umgehende erneute Beurteilung.',
+     model:'An Zahn 48 besteht bei teilweise durchgebrochenem Weisheitszahn ein entzündetes Operculum mit rezidivierenden Beschwerden. Aktuell sind Fieber, Trismus, Dysphagie und Atemnot im fiktiven Fall verneint. Die Arbeitsdiagnose ist eine lokale Perikoronitis. Vorrangig sind lokale Maßnahmen und Verlaufskontrolle; bei Rezidiv ist die Extraktionsindikation zu prüfen. Warnzeichen erfordern eine umgehende erneute Beurteilung. Für Patientinnen und Patienten bedeutet Dysphagie: Schwierigkeiten beim Schlucken.',
      checks:[
       criterion('FDI-Zahnnummer','(?:^|\\D)48(?:\\D|$)','Betroffenen Zahn nennen.'),
       criterion('Lokaler Befund','operculum|teilweise durchgebroch|teilretin','Klinischen Befund übergeben.'),
