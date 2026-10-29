@@ -1,0 +1,40 @@
+name: Quest 2 VR comfort and tutorial regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Quest controller tutorial and reversible-scale regressions
+        run: node --test tests/quest2_vr_guide.test.cjs tests/app_tutorial.test.cjs tests/phase6_practice.test.cjs
+      - name: JavaScript syntax and source mirror checks
+        run: |
+          node --check engine.js
+          node --check xr-procedure.js
+          node --check xr-guide.js
+          cmp engine.js public/engine.js
+          cmp xr-procedure.js public/xr-procedure.js
+          cmp xr-guide.js public/xr-guide.js
+          cmp index.html public/index.html
+      - name: Serve in-headset tutorial script over local HTTP
+        run: |
+          node server/server.mjs >/tmp/kliniklab-vr.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/xr-guide.js -o /tmp/kliniklab-vr-guide.js; then break; fi
+            sleep 1
+          done
+          test -s /tmp/kliniklab-vr-guide.js
+          grep -q KlinikXRGuide /tmp/kliniklab-vr-guide.js
+      - name: Reproduce portable standalone HTML
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
