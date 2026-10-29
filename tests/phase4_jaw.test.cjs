@@ -61,7 +61,7 @@ test('Phase 4 jaw templates remain display-only, uncoupled from FDI selection me
   const mesh=A.createTemplate(B,{},kind,layout);
   assert(mesh);assert.equal(mesh.metadata.synthetic,true);
   assert.equal(mesh.metadata.structuralLayer,'alveolar-proxy');
-  assert.equal(mesh.metadata.anatomyVersion,6);
+  assert.equal(mesh.metadata.anatomyVersion,7);
   assert.equal(mesh.data.positions.length/3,5786);
   assert.equal(mesh.isPickable,false);
  }
@@ -95,4 +95,36 @@ test('jaw and crown-detail controls change display states without WebGL or XR si
  jaw.listeners.click();detail.listeners.click();
  assert.equal(ctx.window.KlinikBabylon.jawVisible,false);
  assert.equal(ctx.window.KlinikBabylon.crownSource,'dundee');
+});
+
+
+test('schematic upper four-cusp and lower five-cusp molars differ in real mesh relief',()=>{
+  const u=A.molarCusps(true),l=A.molarCusps(false);
+  assert.equal(u.length,4);assert.equal(l.length,5);
+  for(const c of [...u,...l])assert.equal(c.length,3);
+  assert(A.molarRelief(true,-.46,.46,.65)>A.molarRelief(true,0,0,0));
+  assert(A.molarRelief(false,-.03,-.50,.65)>A.molarRelief(false,0,0,0));
+  const up=A.crownData(4,true,1),lo=A.crownData(4,false,1);
+  assert.equal(up.occlusalCusps,4);assert.equal(lo.occlusalCusps,5);
+  const difference=up.positions.reduce((sum,v,i)=>sum+(i%3===1?Math.abs(Math.abs(v)-Math.abs(lo.positions[i])):0),0);
+  assert(difference>.05,'upper and lower occlusal relief differs');
+});
+test('procedural crown LOD levels have bounded and deterministic geometry',()=>{
+  const budgets=[[609,1184],[3169,6264],[7617,15120]];
+  for(let q=0;q<3;q++){
+    const m=A.crownData(4,false,q);
+    assert.equal(m.quality,q);assert.equal(m.vertices,budgets[q][0]);assert.equal(m.triangles,budgets[q][1]);
+    assert(m.positions.every(Number.isFinite)&&m.normals.every(Number.isFinite));
+    assert(m.indices.every(i=>i>=0&&i<m.vertices));
+  }
+  for(const q of [-1,3,1.25,NaN,'2'])assert.throws(()=>A.crownData(4,true,q),/quality/);
+  class Mesh{constructor(name){this.name=name}}
+  class VertexData{applyToMesh(mesh){mesh.data=this}}
+  const B={Mesh,VertexData};
+  const defaultMesh=A.createTemplate(B,{},'crown_4_0_6');
+  const lowMesh=A.createTemplate(B,{},'crown_4_0_6',null,{crownQuality:0});
+  assert.equal(defaultMesh.metadata.vertices,7617);
+  assert.equal(defaultMesh.metadata.occlusalCusps,4);
+  assert.equal(lowMesh.metadata.vertices,609);assert.equal(lowMesh.metadata.crownQuality,0);
+  assert.equal(defaultMesh.isPickable,false);assert.equal(lowMesh.isPickable,false);
 });

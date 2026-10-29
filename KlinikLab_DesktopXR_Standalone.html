@@ -1791,8 +1791,29 @@ window.addEventListener('DOMContentLoaded',()=>{
   const smooth=(x)=>x*x*(3-2*x);
   const gauss=(x,z,cx,cz,sx,sz)=>Math.exp(-((x-cx)**2/(sx*sx)+(z-cz)**2/(sz*sz)));
   const sizes={1:0.164,2:0.186,3:0.169,4:0.160};
+
+  // Schematic permanent-molar classes, not scans or second/third-molar templates.
+  const MOLAR_CUSPS=Object.freeze({
+    maxillary:Object.freeze([[-.46,-.43,.0160],[.45,-.43,.0142],[-.46,.46,.0180],[.46,.46,.0128]]),
+    mandibular:Object.freeze([[-.60,-.44,.0138],[-.03,-.50,.0162],[.55,-.38,.0127],[-.44,.45,.0155],[.45,.44,.0145]])
+  });
+  function molarCusps(upper){return MOLAR_CUSPS[upper?'maxillary':'mandibular'].map(c=>c.slice())}
+  function molarRelief(upper,x,z,r){
+    const cusps=MOLAR_CUSPS[upper?'maxillary':'mandibular'];
+    let elevation=0;
+    for(const [cx,cz,amp] of cusps)
+      elevation+=amp*gauss(x,z,cx,cz,upper?.33:.29,upper?.31:.30);
+    // Stylized fissures and central fossa. No claim of clinical measurements.
+    const fossa=-.0061*gauss(x,z,0,0,.31,.30);
+    const centralGroove=-.0023*Math.exp(-((z/.085)**2))*Math.exp(-((x/.68)**2));
+    const transverseGroove=-.0019*Math.exp(-((x/.090)**2))*Math.exp(-((z/.66)**2));
+    const distalBranch=upper?0:-.0011*gauss(x,z,.52,-.07,.20,.15);
+    const edge=1-smooth(clamp((r-.69)/.31,0,1));
+    return elevation+fossa+centralGroove+transverseGroove+distalBranch+.0025*edge;
+  }
   function crownData(style,upper,quality=1){
     style=Number(style);if(!sizes[style])throw Error('Unsupported crown type');
+    if(!Number.isInteger(quality)||quality<0||quality>2)throw Error('Crown quality must be 0, 1 or 2');
     const fine=quality>=2,seg=fine?112:quality<1?32:72, heightRings=fine?36:quality<1?10:24,radialRings=fine?32:quality<1?9:20;
     const d=upper?-1:1,height=sizes[style],pos=[],indices=[];
     const s=(a,p)=>{const c=Math.cos(a),t=Math.sin(a),e=2/p;return [Math.sign(c)*Math.abs(c)**e,Math.sign(t)*Math.abs(t)**e]};
@@ -1814,14 +1835,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         const fissure=-.006*Math.exp(-((z/.095)**2))*Math.exp(-((x/.64)**2));
         return cusp+fissure-.0017*(1-r*r);
       }
-      // Four rounded cusp ridges and a Y-like fissure network.
-      let cusp=0;
-      for(const [cx,cz,amp] of [[-.49,-.47,.016],[.47,-.47,.015],[-.46,.47,.0135],[.45,.44,.0155]])
-        cusp+=amp*gauss(x,z,cx,cz,.34,.31);
-      const fossa=-.0065*gauss(x,z,0,0,.38,.35);
-      const groove=-.0025*Math.exp(-((x/.095)**2))*Math.exp(-((z/.65)**2))
-                  -.002*Math.exp(-((z/.09)**2))*Math.exp(-((x/.66)**2));
-      return cusp+fossa+groove+.0025*edge;
+      return molarRelief(upper,x,z,r);
     }
     const vertex=(x,y,z)=>{pos.push(x,y,z);return pos.length/3-1};
     const side=[];
@@ -1882,7 +1896,8 @@ window.addEventListener('DOMContentLoaded',()=>{
       normals[i]/=l;normals[i+1]/=l;normals[i+2]/=l;
     }
     // For review/QA, the mesh reports the same source-independent crown geometry.
-    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper};
+    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper,
+      quality,occlusalCusps:style===4?MOLAR_CUSPS[upper?'maxillary':'mandibular'].length:null};
   }
   // Phase 2 is a display-only placement correction. It must never mutate the
   // source WebGL picking targets, WebXR geometry, or FDI identifiers.
@@ -2080,11 +2095,11 @@ window.addEventListener('DOMContentLoaded',()=>{
     return {positions,indices,normals,vertices:positions.length/3,triangles:indices.length/3,
       upper,closedEnds:true,synthetic:true,structuralLayer:'alveolar-proxy',cervicalSites:16};
   }
-  function createTemplate(B,scene,kind,layout){
+  function createTemplate(B,scene,kind,layout,options={}){
     const match=/^crown_([1-4])_([01])(?:_([1-8]))?$/.exec(kind);
     const bone=/^jaw[01]$/.test(kind);
     if(!match&&!bone&&!/^gingiva[01]$/.test(kind))return null;
-    const data=match?crownData(Number(match[1]),match[2]==='0',2):
+    const data=match?crownData(Number(match[1]),match[2]==='0',options.crownQuality??2):
       bone?jawData(kind==='jaw0',layout?.arches?.[kind==='jaw0'?0:1]):
       gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
@@ -2098,10 +2113,14 @@ window.addEventListener('DOMContentLoaded',()=>{
     v.applyToMesh(template,true);
     template.useVertexColors=!!v.colors;
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:6,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0,structuralLayer:data.structuralLayer||null};
+    template.metadata={synthetic:true,anatomyVersion:7,vertices:data.vertices,triangles:data.triangles,
+      crownQuality:data.quality??null,occlusalCusps:data.occlusalCusps??null,
+      cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0,
+      structuralLayer:data.structuralLayer||null};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,gingivaData,jawData,archPlacement,createTemplate,version:6,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,molarCusps,molarRelief,gingivaData,jawData,archPlacement,createTemplate,
+    version:7,notes:'Educational procedural tooth morphology; molar classes simplified, not anatomical scans'};
 })(typeof window!=='undefined'?window:globalThis);
 </script>
 <script>

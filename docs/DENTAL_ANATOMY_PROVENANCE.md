@@ -70,3 +70,8 @@ git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
 ```
 
 The standalone bundle is generated from public mirrors. It is a collision-prone shared output: coordinate its final merge with the coordinator and other concurrent workstreams.
+
+
+## Procedural molar morphology and controllable LOD
+
+Only the **synthetic procedural fallback** now differentiates schematic four-cusp maxillary and five-cusp mandibular molars. These patterns approximate common first-molar classes, not tooth-specific measurements; second and third molars vary. The Dundee GLB assets remain unchanged. The procedural crown generator accepts quality 0, 1, or 2 with **609 / 3,169 / 7,617 vertices** and **1,184 / 6,264 / 15,120 triangles** respectively (molar example). The desktop still defaults to level 2. Callers can use `createTemplate(B,scene,kind,layout,{crownQuality:0})` or quality 1 as a controlled fallback. There is **no change to picking, drillable volumes or Quest's actual XR mesh**; benchmark hardware before making any framerate or comfort claims.
