@@ -243,6 +243,20 @@ async function desktop(browser,url){
       await page.locator('#practice-panel').isHidden(),'Close restores anatomy panel');
     const nav=await page.evaluate(()=>performance.getEntriesByType('navigation')[0]?.toJSON()||{});
     report.environment.navigation={durationMs:Math.round(nav.duration||0),domContentLoadedMs:Math.round(nav.domContentLoadedEventEnd||0)};
+  }catch(error){
+    try{
+      const file='desktop-failure.png';
+      await page.screenshot({path:path.join(OUT,file),fullPage:true,animations:'disabled',timeout:12000});
+      report.screenshots.push({name:'desktop-failure',file,kind:'failure-evidence'});
+    }catch(captureError){report.notes.push('Desktop failure screenshot unavailable: '+String(captureError).slice(0,250))}
+    throw error;
+  }catch(error){
+    try{
+      const file='mobile-failure.png';
+      await page.screenshot({path:path.join(OUT,file),fullPage:true,animations:'disabled',timeout:12000});
+      report.screenshots.push({name:'mobile-failure',file,kind:'failure-evidence'});
+    }catch(captureError){report.notes.push('Mobile failure screenshot unavailable: '+String(captureError).slice(0,250))}
+    throw error;
   }finally{await page.close()}
 }
 async function mobile(browser,url){
@@ -304,7 +318,9 @@ async function main(){
     report.passed=report.checks.filter(x=>x.ok).length;
     report.failed=report.checks.filter(x=>!x.ok).length;
     await writeFile(path.join(OUT,'report.json'),JSON.stringify(report,null,2)+'\n');
-    console.log(JSON.stringify({passed:report.passed,failed:report.failed,artifacts:OUT,checks:report.checks},null,2));
+    console.log(JSON.stringify({passed:report.passed,failed:report.failed,artifacts:OUT,
+      checks:report.checks,accessibility:report.accessibility,timings:report.timings,
+      screenshots:report.screenshots},null,2));
     if(report.failed)process.exitCode=1;
   }
 }
