@@ -2375,7 +2375,7 @@ window.addEventListener('DOMContentLoaded',()=>{
                 status.fineCrownVertices+=anatomy.metadata.vertices;
               }
             }
-            else {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
+            else if(kind.startsWith('gingiva')) {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
             status.anatomyVersion=window.KlinikBabylonAnatomy.version;
             return anatomy;}
         }catch(e){status.error='Anatomy fallback: '+String(e.message||e).slice(0,100);}
