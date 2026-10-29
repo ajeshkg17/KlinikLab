@@ -1,0 +1,58 @@
+name: QA release gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engineering:
+    name: Unit + integration + reproducibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: QA-UNIT - all Node regression suites, including server and FDI tests
+        run: |
+          node --test tests/*.test.cjs tests/*.test.mjs tests/real_scene_qa.cjs
+          node tests/qa_logic.js
+          node --test visual-qa/tests/*.test.mjs
+      - name: QA-STATIC - all local JS syntax and source/public mirrors
+        run: python3 scripts/qa_gate.py static
+      - name: QA-HTTP - localhost smoke and asset isolation
+        run: python3 scripts/qa_gate.py http
+      - name: QA-BUNDLE - repeatable standalone regeneration
+        run: python3 scripts/qa_gate.py bundle
+      - name: QA-DEPS - dependency audit of visual worker (high+)
+        run: |
+          npm install --prefix visual-qa --package-lock-only --ignore-scripts --no-fund --no-audit
+          npm audit --prefix visual-qa --omit=dev --audit-level=high
+      - name: QA-REPORT - evidence labels and release risks
+        if: always()
+        run: |
+          echo "### QA evidence boundaries" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Evidence source | Status in this job |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Node unit/DOM mock | Executed above; check steps |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Local HTTP/static and standalone | Executed above; check steps |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Desktop browser screenshots | Not run by this job; separate visual worker |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Mocked XR | Unit tests only, not headset hardware |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Physical Quest 2 | Not verified by CI |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Dental clinician validation | Not verified by CI |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Do not merge on the strength of a mock screenshot alone. See docs/qa/RELEASE_READINESS.md." >> "$GITHUB_STEP_SUMMARY"
