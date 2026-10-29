@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase3-materials-final-2026-10-29-03",
+  "jobId": "phase3-gingiva-final-2026-10-29-04",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -42,37 +42,6 @@
         {
           "action": "click",
           "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "03-balanced-oblique",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 140,
-          "dy": -65
         },
         {
           "action": "wait",
@@ -150,84 +119,11 @@
       "capture": "stage"
     },
     {
-      "name": "06-studio-oblique",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 140,
-          "dy": -65
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "appearance"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
       "name": "07-studio-upper",
       "steps": [
         {
           "action": "click",
           "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "appearance"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "08-studio-lower",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
         },
         {
           "action": "click",
