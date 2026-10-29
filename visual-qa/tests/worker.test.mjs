@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {validateJob,validatedBase,localRequestAllowed,safeRunFolder} from '../worker-core.mjs';
 const sample=JSON.parse(readFileSync(new URL('../jobs/current.json',import.meta.url),'utf8'));
-test('first screenshot job validates',()=>assert.equal(validateJob(sample).scenes.length,11));
+test('first screenshot job validates',()=>assert.equal(validateJob(sample).scenes.length,sample.scenes.length));
 test('refuse remote URLs',()=>{
  assert.throws(()=>validatedBase('https://evil.example.com:8787/'));
  assert.equal(localRequestAllowed('https://google.com/'),false);
