@@ -69,7 +69,7 @@ async function compareSnapshot(page,name,actual){
   const base=await readFile(baselinePath);
   const verified=checkBaselineApproval(entry,{
     sha256:createHash('sha256').update(base).digest('hex'),
-    browserMajor:Number(report.environment.browser.match(/chromium (\\d+)/)?.[1]),
+    browserMajor:Number(report.environment.browser.match(/chromium (\d+)/)?.[1]),
     viewport:page.viewportSize()
   });
   if(!verified.ok)throw Error('Baseline approval refused for '+name+': '+verified.reason);
@@ -118,12 +118,12 @@ async function auditAccessibility(page,label){
     for(const el of all)count.set(el.id,(count.get(el.id)||0)+1);
     const duplicateIds=[...count].filter(([,n])=>n>1).map(([id,n])=>id+' ('+n+')');
     const brokenAriaControls=[...document.querySelectorAll('[aria-controls]')]
-      .filter(el=>el.getAttribute('aria-controls')?.split(/\\s+/).some(id=>id&&!document.getElementById(id)))
+      .filter(el=>el.getAttribute('aria-controls')?.split(/\s+/).some(id=>id&&!document.getElementById(id)))
       .map(el=>(el.id||el.tagName)+' -> '+el.getAttribute('aria-controls'));
     const controls=[...document.querySelectorAll('button,a[href],input:not([type=hidden]),select,textarea')]
       .filter(visible).filter(el=>!el.disabled);
     const nameOf=el=>{
-      const ids=(el.getAttribute('aria-labelledby')||'').trim().split(/\\s+/).filter(Boolean);
+      const ids=(el.getAttribute('aria-labelledby')||'').trim().split(/\s+/).filter(Boolean);
       const labelled=ids.map(id=>document.getElementById(id)?.textContent||'').join(' ');
       return (el.getAttribute('aria-label')||labelled||el.getAttribute('title')||
         el.textContent||el.getAttribute('alt')||'').trim();
