@@ -1,0 +1,33 @@
+name: FSP and KP German dental training
+on:
+  pull_request:
+  push:
+    branches: [feature/fsp-kp-training]
+jobs:
+  language-practice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify existing anatomy and new German case modules
+        run: node --test tests/phase5_structures.test.cjs tests/phase6_practice.test.cjs tests/fsp_kp_training.test.cjs
+      - name: Verify syntax, public mirror and generated offline build
+        run: |
+          node --check fsp-kp-training.js
+          cmp fsp-kp-training.js public/fsp-kp-training.js
+          cmp index.html public/index.html
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
+      - name: Verify localhost serves the module
+        run: |
+          node server/server.mjs >/tmp/kliniklab-fsp.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/fsp-kp-training.js -o /tmp/fsp-kp-training.js; then break; fi
+            sleep 1
+          done
+          test -s /tmp/fsp-kp-training.js
+          grep -q KlinikFSPTraining /tmp/fsp-kp-training.js
