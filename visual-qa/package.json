@@ -1,0 +1,15 @@
+{
+  "name": "kliniklab-visual-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-only Playwright screenshot worker for KlinikLab",
+  "scripts": {
+    "start": "node worker.mjs",
+    "once": "node worker.mjs --once",
+    "validate": "node worker.mjs --validate",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {"playwright": "1.57.0"},
+  "engines": {"node": ">=20"}
+}
