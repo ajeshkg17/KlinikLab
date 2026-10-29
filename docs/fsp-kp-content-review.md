@@ -16,10 +16,13 @@ The existing `clinical-pathway.js` provides six fictional patient pathways with 
 
 ## Cases and exemplars
 
-Two complete, internally consistent, **fictional** cases are supplied in `fsp-kp-training.js`:
+Four complete, internally consistent, **fictional** cases are supplied in `fsp-kp-training.js`:
 
 1. **Zahn 36:** simulated symptoms and test findings supporting *suspected* symptomatic irreversible pulpitis pending full assessment. Each of the four workflows includes a German prompt, B2 scaffold, C1 scaffold, worked model response, and five rubric criteria.
 2. **Zahn 48:** simulated local pericoronitis without described systemic spread, with explicit screening for dangerous escalation. Local measures and reassessment are emphasized; systemic antibiotics are not presented as automatic treatment. All four workflows have corresponding exemplars and checks.
+
+3. **Zahn 46:** simulated longstanding gingival bleeding and tooth mobility, possible periodontal disease and unquantified bone loss. Diabetes control is unknown; smoking and plaque-control factors are described without asserting stage or grade. German questions, patient education, written note, and handoff emphasize **full periodontal assessment before classification** and individualized, staged planning.
+4. **Zahn 16:** simulated occluso-approximal caries with short cold response and biting discomfort. Neither a definitive pulpal diagnosis nor restoration choice is assumed. Patient-facing communication contrasts a conditional composite filling and indirect onlay/partial crown after evaluation.
 
 All clinical/radiology descriptions are **invented text**, not radiographic analysis or clinical observations. No real patient record is inserted or uploaded.
 
@@ -34,6 +37,8 @@ Official SH information: https://www.zahnaerzte-sh.de/zahnaerzte/praxisservice/b
 - European Society of Endodontology. *Quality guidelines for endodontic treatment: consensus report*. International Endodontic Journal 2006;39:921–930. Documented history, clinical and radiographic findings, treatment choices, informed consent, and follow-up: https://www.endodontologie-hagen.de/fileadmin/editorial/endodontie/downloads/Quality_guidelines_for_endodontic_treatment-_consensus_report_of_the_European_Society_of_Endodontology-A4.pdf
 - SDCEP, *Drug Prescribing for Dentistry — Acute periodontal conditions*, accessed 2026-10-29. Local measures first for uncomplicated pericoronitis; systemic infection and persistent swelling may require additional assessment and management: https://sdcepdentalprescribing.nhs.scot/guidance/bacterial-infections/acute-periodontal-conditions/
 - SDCEP, *Management of spreading or systemic infection*, accessed 2026-10-29: https://www.acutedentalproblems.sdcep.org.uk/guidance/overarching-principles/management-of-spreading-or-systemic-infection/
+- European Federation of Periodontology, *Treatment of Stage I–III Periodontitis: S3 Clinical Practice Guideline*, issued July 2020; reviewed 2026-10-29 for stepwise therapy, full assessment, behavior/risk modification, and supportive care: https://www.efp.org/education/continuing-education/clinical-guidelines/guideline-on-treatment-of-stage-i-iii-periodontitis/
+- German implementation AWMF 083-043, version 1.2 was listed valid only through **30 Nov 2025** and currently requires renewed currency check; **do not claim that it remains a current German recommendation**: https://www.awmf.org/aktuelles/awmf-aktuell/die-behandlung-von-parodontitis-stadium-i-bis-iii-die-deutsche-implementierung-der-s3-leitlinie-treatment-of-stage-i-iii-periodontitis-der-european-federation-of-periodontology-efp
 
 These are learning-content sources and do **not** constitute clinician approval. Guidelines may change. No medication dose is taught by this prototype.
 
@@ -45,11 +50,11 @@ This is **lexical coverage**, not a measure of correctness. For example, merely 
 
 ## Clinician / German-language reviewer checklist — outstanding
 
-- [ ] **Diagnosis:** verify endodontic symptom description and uncertainty; confirm that no single test establishes definitive diagnosis.
+- [ ] **Diagnosis:** verify endodontic symptom description and uncertainty; confirm that no single test establishes definitive diagnosis. Review gingival/periodontal classification uncertainty for Zahn 46 and pulpal/restorative limits in Zahn 16.
 - [ ] **Patient safety:** confirm appropriate red-flag wording for dysphagia, dyspnea, trismus, spreading infection; verify escalation advice.
-- [ ] **Consent:** review alternatives, patient comprehension, risk/prognosis, and consent phrasing; verify state-specific expectations.
-- [ ] **Treatment / contraindications:** review the local-first pericoronitis approach and antibiotic nuance; do not operationalize doses.
-- [ ] **Terminology:** German grammar, B2/C1 register, FDI 36/48 and tooth-side consistency; review colloquial paraphrases of Pulpitis and Dysphagie; cross-review with the Anatomy workstream.
+- [ ] **Consent:** review alternatives, patient comprehension, risk/prognosis, and consent phrasing; verify state-specific expectations. In the restoration case, validate conditional direct versus indirect options, not an automatic treatment choice.
+- [ ] **Treatment / contraindications:** review the local-first pericoronitis approach and antibiotic nuance; do not operationalize doses. Review periodontal risk-factor guidance and verify guideline currency with a German periodontist.
+- [ ] **Terminology:** German grammar, B2/C1 register, FDI 16/36/46/48 and tooth-side consistency; review colloquial paraphrases of Pulpitis and Dysphagie; cross-review with the Anatomy workstream.
 - [ ] **Rubrics:** manually inspect incorrect, misleading and negated responses; QA to check false positives and missed unsafe cases, focus trapping, screen-reader announcements, and small screens.
 - [ ] **Exam rules:** re-verify SH FSP description before official use and separately validate any KP-specific claims.
 
