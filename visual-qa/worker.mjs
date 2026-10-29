@@ -112,10 +112,22 @@ async function capture(job){
       const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,structure:window.KlinikStructureExplorer?{...window.KlinikStructureExplorer.status}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     // A missing script may return HTTP 404 without producing a pageerror.
     // Require the local appearance module to be active for every Phase 3 view.
+    if(job.jobId.startsWith('phase5-')){
+      const st=item.checks?.structure||{},b=item.checks?.babylon||{};
+      const expectsOpen=scene.steps.some(x=>x.action==='click'&&x.control==='structure');
+      const fdi=scene.steps.filter(x=>x.action==='click'&&/^tooth(?:11|24|26|36|48)$/.test(x.control)).at(-1)?.control?.slice(5);
+      const focused=scene.steps.some(x=>x.action==='click'&&x.control==='structureFocus');
+      const pulp=scene.steps.some(x=>x.action==='click'&&x.control==='structurePulp');
+      const dentin=scene.steps.some(x=>x.action==='click'&&x.control==='structureDentin');
+      const selected=scene.steps.some(x=>x.action==='validateFDI')?'38':fdi;
+      if(st.version!==1||st.open!==expectsOpen||st.selectedFDI!==selected||st.focusSelected!==focused
+        ||st.layer!==(pulp?'pulp':dentin?'dentin':'enamel')||b.mode!=='babylon'||b.anatomyVersion!==6)
+        throw Error('Phase 5 tissue explorer mismatch: '+JSON.stringify({st,expected:{selected,focused,pulp,dentin,expectsOpen},b:b.mode}).slice(0,650));
+    }
     if(job.jobId.startsWith('phase4-')){
       const b=item.checks?.babylon||{},r=item.checks?.realTeeth||{};
       const expectedJaw=scene.steps.some(x=>x.action==='click'&&x.control==='jaw');
@@ -146,9 +158,9 @@ async function capture(job){
     if(scene.steps.some(step=>step.action==='click'&&step.control==='renderer')){
       const checks=item.checks||{},real=checks.realTeeth||{},b=checks.babylon||{};
       const expected=checks.archMode==='both'?32:16;
-      const phase4=job.jobId.startsWith('phase4-');
-      const expectedReal=phase4&&b.crownSource==='procedural'?0:expected;
-      const anatomyVersion=phase4?6:5;
+      const modern=/^phase[45]-/.test(job.jobId);
+      const expectedReal=modern&&b.crownSource==='procedural'?0:expected;
+      const anatomyVersion=modern?6:5;
       if(b.mode!=='babylon'||b.anatomyVersion!==anatomyVersion||b.gingivalVertices!==11572||b.gingivalTriangles!==23136)
        throw Error('Phase 2 Babylon/gingiva diagnostic mismatch: '+JSON.stringify(b).slice(0,400));
       if(!real.ready||real.loaded!==16||real.instances!==32||real.visibleInstances!==expectedReal||real.failures?.length)

@@ -10,6 +10,7 @@
   window.KlinikBabylon = status;
   let layer = null;
   let loadingPromise = null;
+  const rootOrNull=()=>window.KlinikStructureExplorer||null;
 
   function loadLibrary() {
     if (window.BABYLON?.Engine && window.BABYLON?.Mesh) return Promise.resolve(window.BABYLON);
@@ -278,7 +279,11 @@
           if(mesh.material?.albedoColor)mesh.material.albedoColor=this.color(m.color);
           lastColor.splice(0,3,...m.color);
         }
-        if(mesh.material.alpha!==m.alpha)mesh.material.alpha=m.alpha;
+        const anatomy=rootOrNull();
+        const chosen=anatomy?.status?.focusSelected&&anatomy.status.selectedFDI;
+        const wanted=chosen?'tooth:'+anatomy.status.selectedFDI:null;
+        const alpha=wanted&&m.tag==='crown'&&m.key!==wanted?Math.min(m.alpha,.19):m.alpha;
+        if(mesh.material.alpha!==alpha)mesh.material.alpha=alpha;
       }
       // The Babylon display replaces the synthetic crown only once its matching
       // licensed tooth GLB has loaded. The original source still owns picking.
