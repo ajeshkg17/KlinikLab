@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "babylon-pbr-2026-10-29-05",
+  "jobId": "babylon-pbr-2026-10-29-06",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -22,42 +22,6 @@
         {
           "action": "click",
           "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 1200
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "03-babylon-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 1200
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "06-babylon-clinic",
-      "steps": [
-        {
-          "action": "click",
-          "control": "clinic"
         },
         {
           "action": "click",
