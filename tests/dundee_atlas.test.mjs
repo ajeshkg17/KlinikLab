@@ -15,7 +15,7 @@ test('Dundee atlas asset allowlist and attribution',()=>{
  assert.match(atlas,/KlinikDundeeAtlas/);
  assert.match(atlas,/SceneLoader\.ImportMeshAsync/);
  assert.match(atlas,/surface-only study/);
- assert.match(readme,/not included/);
+ assert.match(readme,/mandible\\.glb.*\\*\\*not\\*\\* included/);
  assert.match(readme,/CC BY-NC/);
  assert.equal(models.filter(x=>x.endsWith('.glb')).length,16);
  assert.ok(!models.includes('mandible.glb'));
