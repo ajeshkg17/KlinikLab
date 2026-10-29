@@ -38,12 +38,12 @@ class DentalScene {
     if(!this.gl)throw Error('WebGL unavailable. Enable hardware acceleration in your browser.');
     const gl=this.gl;this.meshes=[];this.pickables=[];this.dynamicMeshes=[];this.textures=[];this.started=false;
     const vs=`attribute vec3 aPos;attribute vec3 aNormal;attribute vec2 aUV;uniform mat4 uModel,uView,uProj;uniform mat3 uNormal;varying vec3 vNormal,vWorld;varying vec2 vUV;void main(){vec4 p=uModel*vec4(aPos,1.);vWorld=p.xyz;vNormal=uNormal*aNormal;vUV=aUV;gl_Position=uProj*uView*p;}`;
-    const fs=`precision mediump float;varying vec3 vNormal,vWorld;varying vec2 vUV;uniform vec3 uColor;uniform float uAlpha,uTextured,uUnlit,uFinish;uniform sampler2D uTexture;void main(){vec3 n=normalize(vNormal);vec3 view=normalize(vec3(0.35,2.6,3.2)-vWorld);vec3 key=normalize(vec3(-0.52,0.85,0.77));vec3 fillLight=normalize(vec3(.81,.34,-.48));vec3 rim=normalize(vec3(-.72,.40,-.65));float a=max(dot(n,key),0.),b=max(dot(n,fillLight),0.),r=max(dot(n,rim),0.);float sky=.45+.15*max(n.y,0.);vec3 light=vec3(sky)+vec3(.65,.62,.57)*a+vec3(.24,.28,.34)*b+vec3(.14,.17,.19)*r;float shine=pow(max(dot(reflect(-key,n),view),0.),37.)*(.06+.21*uFinish);shine+=pow(max(dot(reflect(-fillLight,n),view),0.),72.)*(.025+.09*uFinish);vec4 tx=texture2D(uTexture,vUV);if(uTextured>.5&&tx.a<.04)discard;vec3 base=mix(uColor,tx.rgb,clamp(uTextured,0.,1.));vec3 lit=base*light+vec3(1.,.98,.92)*shine;gl_FragColor=vec4(mix(lit,base,clamp(uUnlit,0.,1.)),uAlpha*mix(1.,tx.a,clamp(uTextured,0.,1.)));}`;
+    const fs=`precision mediump float;varying vec3 vNormal,vWorld;varying vec2 vUV;uniform vec3 uColor;uniform float uAlpha,uTextured,uUnlit,uFinish;uniform sampler2D uTexture;void main(){vec3 n=normalize(vNormal);vec3 view=normalize(vec3(0.35,2.6,3.2)-vWorld);vec3 key=normalize(vec3(-0.52,0.85,0.77));vec3 fillLight=normalize(vec3(.81,.34,-.48));vec3 rim=normalize(vec3(-.72,.40,-.65));float a=max(dot(n,key),0.),b=max(dot(n,fillLight),0.),r=max(dot(n,rim),0.);float sky=.45+.15*max(n.y,0.);vec3 light=vec3(sky)+vec3(.65,.62,.57)*a+vec3(.24,.28,.34)*b+vec3(.14,.17,.19)*r;float shine=pow(max(dot(reflect(-key,n),view),0.),37.)*(.05+.13*uFinish);shine+=pow(max(dot(reflect(-fillLight,n),view),0.),72.)*(.025+.09*uFinish);vec4 tx=texture2D(uTexture,vUV);if(uTextured>.5&&tx.a<.04)discard;vec3 base=mix(uColor,tx.rgb,clamp(uTextured,0.,1.));vec3 lit=base*light+vec3(1.,.98,.92)*shine;gl_FragColor=vec4(mix(lit,base,clamp(uUnlit,0.,1.)),uAlpha*mix(1.,tx.a,clamp(uTextured,0.,1.)));}`;
     const compile=(kind,src)=>{const sh=gl.createShader(kind);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;};
     this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,vs));gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
     gl.useProgram(this.program);this.loc={};for(const n of ['uModel','uView','uProj','uNormal','uColor','uAlpha','uTextured','uUnlit','uFinish','uTexture'])this.loc[n]=gl.getUniformLocation(this.program,n);
     this.attr={pos:gl.getAttribLocation(this.program,'aPos'),normal:gl.getAttribLocation(this.program,'aNormal'),uv:gl.getAttribLocation(this.program,'aUV')};
-    this.geom={box:this.geometry(this.boxData()),sphere:this.geometry(this.sphereData(12,16)),cylinder:this.geometry(this.cylinderData(16)),torus:this.geometry(this.torusData(24,9)),quad:this.geometry(this.quadData())};
+    this.geom={box:this.geometry(this.boxData()),sphere:this.geometry(this.sphereData(20,28)),cylinder:this.geometry(this.cylinderData(16)),torus:this.geometry(this.torusData(24,9)),quad:this.geometry(this.quadData())};
     this.whiteTex=this.makeTexture(null);
     this.target=[0,1.33,-2.28];this.yaw=.28;this.pitch=.27;this.distance=3.8;this.selectedKey='';this.hoverKey='';this.mode='clinic';this.xrSession=null;this.xrRef=null;this.frameCount=0;
     this.installEvents();this.buildScene();this.loop();
@@ -104,15 +104,15 @@ class DentalScene {
         relief-=.014*peak(x,z,0,0,.64,.065); // crossing groove
         relief-=.013*peak(x,z,-.38,.16,.11,.20);
       }else if(style===3){
-        relief+=.072*peak(x,z,-.43,.06,.36,.32)+.050*peak(x,z,.40,-.04,.34,.32);
-        relief-=.032*peak(x,z,0,0,.10,.53);
+        relief+=.058*peak(x,z,-.43,.06,.36,.32)+.042*peak(x,z,.40,-.04,.34,.32);
+        relief-=.027*peak(x,z,0,0,.10,.53);
       }else if(style===2){
-        relief+=.110*peak(x,z,-.05,0,.42,.49)-.016*peak(x,z,.60,0,.27,.30);
+        relief+=.073*peak(x,z,-.05,0,.45,.53)-.009*peak(x,z,.60,0,.27,.30);
       }else{
         // Smooth incisal ridge and shallow three-lobed mamelons, not a molar cap.
-        relief+=.038*peak(x,z,0,0,.78,.28)+.014*Math.cos(3.5*x+seed)*Math.exp(-sq(z/.34));
+        relief+=.017*peak(x,z,0,0,.78,.26)+.003*Math.cos(3.5*x+seed)*Math.exp(-sq(z/.34));
       }
-      const rootSlope=style===1?.013:style===2?.022:.018;
+      const rootSlope=style===1?0:style===2?.014:.018;
       const crownTop=height+envelope*(relief-rootSlope*(1-r*r));
       return [x,dir*crownTop,z];
     };
@@ -189,8 +189,8 @@ class DentalScene {
       const upper=upperIndex===0,base=upper?1.759:1.332,path=upper?upperPath:lowerPath;
       const archPoints=[...path.slice().reverse().map(v=>[-v[0],base,v[1]]),...path.map(v=>[v[0],base,v[1]])];
       const gumGeo='gingiva'+upperIndex;
-      this.geom[gumGeo]=this.geometry(this.gingivaData(archPoints,upper?1.793:1.290,upper?.070:.066,.025));
-      this.add(gumGeo,[0,0,0],[1,1,1],upper?'#bc7e85':'#c68b90');
+      this.geom[gumGeo]=this.geometry(this.gingivaData(archPoints,upper?1.776:1.304,upper?.054:.052,.018));
+      this.add(gumGeo,[0,0,0],[1,1,1],upper?'#b9838c':'#bf8990');
       // Palatal/lingual support, recessed behind the gingival collar.
       // Keep the occlusal opening unobstructed for anatomical instruction.
       for(let q of (upper?[1,2]:[4,3])){
