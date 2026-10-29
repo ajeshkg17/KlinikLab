@@ -163,7 +163,7 @@ test('runtime licensed-tooth renderer sync keeps all 32 FDI IDs visible, then sa
     const realMesh={
       isVisible:false,position:{...transform,values:[]},scaling:{...transform,values:[]},
       rotation:{...transform,values:[]},
-      material:{albedoColor:null,alpha:1},
+      material:{albedoColor:{r:1,g:1,b:1},alpha:1},
       getVerticesData:()=>[0,0,0,1,0,0,0,1,0],
       getIndices:()=>[0,1,2],
       computeWorldMatrix(){return {x:this.position.values[0],y:this.position.values[1],z:this.position.values[2]};}
