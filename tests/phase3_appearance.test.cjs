@@ -79,3 +79,19 @@ test('studio lighting is reversible and has no new environment-map dependency',(
   assert.equal(lights.key.intensity,p.key);
   assert.equal(A.version,1);
 });
+
+test('Node static server allows the appearance module and both HTML entrypoints load it',()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const server=fs.readFileSync(path.join(__dirname,'../server/server.mjs'),'utf8');
+  const app=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  const publicApp=fs.readFileSync(path.join(__dirname,'../public/index.html'),'utf8');
+  assert.match(server,/['"]\/dental-appearance\.js['"]/);
+  assert.equal(app,publicApp,'static and server HTML must agree');
+  const order=['babylon-anatomy.js','dental-appearance.js','real-dental-scene.js','babylon-preview.js'];
+  let previous=-1;
+  for(const script of order){
+    const at=app.indexOf('<script src="'+script+'"></script>');
+    assert(at>previous,'script missing or in wrong load order: '+script);
+    previous=at;
+  }
+});
