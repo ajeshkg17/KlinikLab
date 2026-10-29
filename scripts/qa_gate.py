@@ -37,7 +37,9 @@ def mirror_and_syntax() -> None:
     # Only referenced modules must have a matching public export; legacy
     # root-only files (e.g. unused ux.css) are not part of the deployed bundle.
     html = (ROOT / "index.html").read_text(encoding="utf-8")
-    referenced = re.findall(r'(?:src|href)="([a-zA-Z0-9_-]+\\.(?:js|css))"', html)
+    referenced = re.findall(r'(?:src|href)="([a-zA-Z0-9_-]+[.](?:js|css))"', html)
+    if not referenced:
+        raise AssertionError("QA-STATIC-005: no deployed JS/CSS references detected")
     for name in referenced:
         if not (public / name).is_file():
             raise AssertionError(f"QA-STATIC-004: deployed module lacks public mirror: {name}")
