@@ -26,7 +26,7 @@ createServer(async(req,res)=>{
   if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed.'});
   let p=decodeURIComponent(u.pathname);if(p==='/')p='/index.html';
   // Only serve front-end files, never server scripts or configuration.
-  if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/babylon-preview.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
+  if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/babylon-preview.js','/babylon-anatomy.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
   const full=path.join(ROOT,p);
   const data=await readFile(full);
   res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self' https://cdn.babylonjs.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});
