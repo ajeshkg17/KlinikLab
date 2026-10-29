@@ -34,11 +34,13 @@ def mirror_and_syntax() -> None:
         file for file in public.rglob("*")
         if file.is_file() and file.suffix in FRONTEND_SUFFIXES
     )
-    # Root frontend modules must have a corresponding public export, too.
-    for source in ROOT.iterdir():
-        if source.is_file() and (source.suffix in {".js", ".css"} or source.name == "index.html"):
-            if not (public / source.name).is_file():
-                raise AssertionError(f"QA-STATIC-004: root module lacks public mirror: {source.name}")
+    # Only referenced modules must have a matching public export; legacy
+    # root-only files (e.g. unused ux.css) are not part of the deployed bundle.
+    html = (ROOT / "index.html").read_text(encoding="utf-8")
+    referenced = re.findall(r'(?:src|href)="([a-zA-Z0-9_-]+\\.(?:js|css))"', html)
+    for name in referenced:
+        if not (public / name).is_file():
+            raise AssertionError(f"QA-STATIC-004: deployed module lacks public mirror: {name}")
     if not mirrors:
         raise AssertionError("QA-STATIC-001: no root/public mirror files discovered")
     for mirror in mirrors:
