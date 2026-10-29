@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../fsp-kp-training.js'),'utf8');
 function setup(withDOM=false){
  const window={kliniklab:{score:42},KlinikAnatomyPractice:{score:7}};
- const all={};
+ const all={},created=[];
  function node(id=''){
   const obj={id,parentNode:null,nextSibling:null,hidden:false,innerHTML:'',textContent:'',value:'',className:'',style:{},attributes:{},listeners:{},focused:false,
    classList:{values:new Set(),add(x){this.values.add(x)},remove(x){this.values.delete(x)}},
@@ -17,7 +17,7 @@ function setup(withDOM=false){
    appendChild(child){child.parentNode=this;return child},
    insertBefore(child){child.parentNode=this;return child},
    querySelector(selector){return selector==='[data-fsp="close"]'?{focus(){}}:null}};
-  if(id)all[id]=obj;
+  created.push(obj);if(id)all[id]=obj;
   return obj;
  }
  let document;
@@ -26,7 +26,7 @@ function setup(withDOM=false){
   anchor.parentNode=parent;
   document={readyState:'complete',head,body,activeElement:{focus(){}},
    createElement(){return node()},
-   getElementById(id){return all[id]||null},
+   getElementById(id){return created.find(x=>x.id===id)||null},
    addEventListener(name,fn){this.listeners[name]=fn},
    listeners:{}};
  }
@@ -83,8 +83,8 @@ test('no storage or remote requests, and mirrored script/server/standalone wirin
  assert(!/\b(fetch|localStorage|sessionStorage|XMLHttpRequest|sendBeacon)\b/.test(source));
 });
 test('lightweight DOM mount opens and closes without altering other training modules',()=>{
- const {api,window,all}=setup(true);
- const trigger=all['fsp-kp-open'],panel=all['fsp-kp-overlay'];
+ const {api,window,document}=setup(true);
+ const trigger=document.getElementById('fsp-kp-open'),panel=document.getElementById('fsp-kp-overlay');
  assert(trigger&&panel);assert.equal(panel.hidden,true);
  trigger.listeners.click();
  assert.equal(api.status.open,true);assert.equal(panel.hidden,false);
