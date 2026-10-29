@@ -272,7 +272,7 @@ class DentalScene {
       const snapshot=[];
       const groups=[
         {meshes:this.vrCompactMeshes,pivot:[0,1.02,-1.83],factor:this.xrComfortScale},
-        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.74}
+        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.68}
       ];
       for(const group of groups){
         const members=new Set(group.meshes);
@@ -291,7 +291,7 @@ class DentalScene {
         }
       }
       this.xrComfortSnapshot=snapshot;
-      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.74};
+      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.68};
     }else{
       for(const item of this.xrComfortSnapshot||[]){
         item.object.p=item.p.slice();
