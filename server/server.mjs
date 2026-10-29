@@ -29,7 +29,7 @@ createServer(async(req,res)=>{
   if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/babylon-preview.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
   const full=path.join(ROOT,p);
   const data=await readFile(full);
-  res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self' https://cdn.babylonjs.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});
+  res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self' https://cdn.babylonjs.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://assets.babylonjs.com; connect-src 'self' https://assets.babylonjs.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});
   res.end(req.method==='HEAD'?undefined:data);
  }catch(e){const {status,body}=errorPayload(e);return json(res,status,body)}
 }).listen(PORT,'127.0.0.1',()=>console.log(`KlinikLab running on http://127.0.0.1:${PORT} | Gemini configured: ${Boolean(process.env.GEMINI_API_KEY)}`));
