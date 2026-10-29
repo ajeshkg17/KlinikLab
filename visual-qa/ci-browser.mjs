@@ -120,7 +120,10 @@ async function auditAccessibility(page,label){
   });
   const result=reviewAccessibility(snapshot);
   report.accessibility.push({label,snapshot,...result});
-  check('QA-A11Y-DOM-'+label.toUpperCase(),result.pass,JSON.stringify(result.blocking));
+  // Preserve all remaining regression evidence even if a pre-existing DOM
+  // accessibility defect is detected. The job still fails at final status.
+  report.checks.push({id:'QA-A11Y-DOM-'+label.toUpperCase(),
+    ok:result.pass,detail:JSON.stringify(result.blocking).slice(0,1000)});
   return result;
 }
 async function assertTopmost(page,selector,id){
