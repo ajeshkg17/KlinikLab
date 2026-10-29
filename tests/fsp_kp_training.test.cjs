@@ -68,7 +68,11 @@ test('rubric credits are deterministic, explain missed concepts and do not claim
  assert.equal(first.score,4);assert.equal(first.criteria.filter(x=>x.matched).length,2);
  assert(first.criteria.filter(x=>!x.matched).every(x=>x.tip.length>10));
  assert.match(first.method,/NOT|not|does not/);
- assert.equal(api.score('surgery','aufklaerung','Antibiotika sind immer notwendig').score,2);
+ const unsafe=api.score('surgery','aufklaerung','Antibiotika sind immer notwendig');
+ assert.equal(unsafe.lexicalScore,2);
+ assert.equal(unsafe.score,null,'unsafe assertion must not appear to receive a score');
+ assert(unsafe.safetyFlags.length>0);
+ assert.equal(api.score('surgery','aufklaerung','Antibiotika sind nicht immer notwendig').safetyFlags.length,0);
 });
 test('no storage or remote requests, and mirrored script/server/standalone wiring are consistent',()=>{
  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
@@ -91,4 +95,49 @@ test('lightweight DOM mount opens and closes without altering other training mod
  assert.match(panel.innerHTML,/Schleswig-Holstein FSP/);
  assert.equal(window.kliniklab.score,42);
  api.close();assert.equal(api.status.open,false);assert.equal(panel.hidden,true);
+});
+
+test('red-flag language can suspend scoring but never claims comprehensive safety analysis',()=>{
+ const {api}=setup();
+ const dangerous=api.score('surgery','kollegen','Bei Atemnot abwarten.');
+ assert.equal(dangerous.score,null);
+ assert.equal(dangerous.safetyFlags.length,1);
+ assert.equal(api.score('surgery','kollegen','Bei Atemnot nicht abwarten.').safetyFlags.length,0);
+ assert.equal(api.score('endo','kollegen','Atemnot abwarten.').safetyFlags.length,0);
+ assert.match(dangerous.method,/Does not establish/);
+});
+test('both colleague exchanges include patient-friendly technical term explanations',()=>{
+ const {api}=setup();
+ assert.match(api.taskFor('endo','kollegen').model,/Pulpitis: Entzündung im Zahninneren/);
+ assert.match(api.taskFor('surgery','kollegen').model,/Dysphagie: Schwierigkeiten beim Schlucken/);
+});
+test('editing answer clears a previous rubric result without touching anatomy scores',()=>{
+ const {api,window,document}=setup(true);
+ const panel=document.getElementById('fsp-kp-overlay');
+ const k=api.status.caseId+'|'+api.status.phaseId;
+ api.status.answers[k]='Alte Antwort';
+ api.status.results[k]={score:10};
+ panel.listeners.input({target:{id:'fsp-answer',value:'Neue Antwort'}});
+ assert.equal(api.status.results[k],undefined);
+ assert.equal(api.status.answers[k],'Neue Antwort');
+ assert.equal(window.kliniklab.score,42);
+ assert.equal(window.KlinikAnatomyPractice.score,7);
+});
+test('Escape restores modal state and Tab keyboard focus is contained inside the overlay',()=>{
+ const {api,document}=setup(true);
+ const panel=document.getElementById('fsp-kp-overlay');
+ api.open();
+ const first={focused:false,focus(){this.focused=true}};
+ const last={focused:false,focus(){this.focused=true}};
+ panel.querySelectorAll=()=>[first,last];
+ panel.contains=(x)=>x===first||x===last;
+ let prevented=false;
+ document.activeElement=last;
+ document.listeners.keydown({key:'Tab',shiftKey:false,preventDefault(){prevented=true}});
+ assert(prevented&&first.focused);
+ document.activeElement=first;first.focused=false;prevented=false;
+ document.listeners.keydown({key:'Tab',shiftKey:true,preventDefault(){prevented=true}});
+ assert(prevented&&last.focused);
+ document.listeners.keydown({key:'Escape',preventDefault(){}});
+ assert.equal(api.status.open,false);
 });
