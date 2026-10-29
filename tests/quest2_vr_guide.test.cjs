@@ -192,6 +192,6 @@ test('VR entry refuses insecure context and duplicate pending requests without l
  assert.equal(scene.xrStarting,false);
 });
 test('engine anchors guide after a valid XR viewer pose, not before tracking',()=>{
- assert.match(engine,/this\\.xrGuide\\?\\.placeForViewer\\(pose\\)/);
- assert.match(engine,/if\\(!pose\\)\\{this\\.clearControllers\\(\\)/);
+ assert(engine.includes('this.xrGuide?.placeForViewer(pose)'));
+ assert(engine.includes('if(!pose){this.clearControllers()'));
 });
