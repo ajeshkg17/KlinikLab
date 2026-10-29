@@ -146,9 +146,12 @@ async function capture(job){
     if(scene.steps.some(step=>step.action==='click'&&step.control==='renderer')){
       const checks=item.checks||{},real=checks.realTeeth||{},b=checks.babylon||{};
       const expected=checks.archMode==='both'?32:16;
-      if(b.mode!=='babylon'||b.anatomyVersion!==5||b.gingivalVertices!==11572||b.gingivalTriangles!==23136)
+      const phase4=job.jobId.startsWith('phase4-');
+      const expectedReal=phase4&&b.crownSource==='procedural'?0:expected;
+      const anatomyVersion=phase4?6:5;
+      if(b.mode!=='babylon'||b.anatomyVersion!==anatomyVersion||b.gingivalVertices!==11572||b.gingivalTriangles!==23136)
        throw Error('Phase 2 Babylon/gingiva diagnostic mismatch: '+JSON.stringify(b).slice(0,400));
-      if(!real.ready||real.loaded!==16||real.instances!==32||real.visibleInstances!==expected||real.failures?.length)
+      if(!real.ready||real.loaded!==16||real.instances!==32||real.visibleInstances!==expectedReal||real.failures?.length)
        throw Error('Phase 2 crown loading/visibility mismatch: '+JSON.stringify(real).slice(0,400));
       if(b.archDiagnostics?.teeth!==32||b.archDiagnostics?.archCounts?.join(',')!=='16,16')
        throw Error('FDI placement inventory incomplete.');
