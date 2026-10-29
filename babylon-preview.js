@@ -53,9 +53,9 @@
       this.scene.useRightHandedSystem=true;
       this.scene.clearColor=new B.Color4(.037,.070,.100,1);
       this.scene.ambientColor=new B.Color3(.30,.36,.41);
-      this.scene.imageProcessingConfiguration.contrast=1.12;
-      this.scene.imageProcessingConfiguration.exposure=1.22;
-      this.scene.imageProcessingConfiguration.toneMappingEnabled=false;
+      this.scene.imageProcessingConfiguration.contrast=1.10;
+      this.scene.imageProcessingConfiguration.exposure=1.20;
+      this.scene.imageProcessingConfiguration.toneMappingEnabled=true;
       this.scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;
       this.camera=new B.FreeCamera('matchingOriginalCamera',new B.Vector3(0,1,4),this.scene);
       this.camera.fov=.87;
@@ -64,16 +64,16 @@
       this.camera.inputs.clear(); // Original canvas owns orbit, scroll, and selection.
       this.scene.activeCamera=this.camera;
       const soft=new B.HemisphericLight('clinicalFill',new B.Vector3(.18,1,.25),this.scene);
-      soft.intensity=.78;
+      soft.intensity=.70;
       soft.groundColor=new B.Color3(.22,.26,.34);
       const key=new B.DirectionalLight('clinicalKey',new B.Vector3(-.38,-.75,-.67),this.scene);
-      key.intensity=1.75;
+      key.intensity=1.50;
       key.diffuse=new B.Color3(1,.95,.86);
       const fill=new B.DirectionalLight('clinicalCoolFill',new B.Vector3(.72,-.38,.68),this.scene);
-      fill.intensity=.40;
+      fill.intensity=.30;
       fill.diffuse=new B.Color3(.69,.83,1);
       const rim=new B.PointLight('dentalRim',new B.Vector3(1.7,2.8,.8),this.scene);
-      rim.intensity=.73;
+      rim.intensity=.52;
       rim.range=9;
       this.geometry=new Map();
       this.items=[];
@@ -137,7 +137,7 @@
       mat.backFaceCulling=false;
       mat.albedoColor=this.color(m.color);
       mat.metallic=0;
-      mat.roughness=tooth?.28:gum?.56:.62;
+      mat.roughness=tooth?.32:gum?.59:.65;
       mat.environmentIntensity=.42;
       if(tooth){mat.clearCoat.isEnabled=true;mat.clearCoat.intensity=.72;mat.clearCoat.roughness=.15;}
       if(m.unlit){mat.emissiveColor=this.color(m.color);}
@@ -191,23 +191,24 @@
   }
 
   function init(){
-    const stageControls=document.querySelector('#stage-controls .stage-controls');
-    if(!stageControls||document.getElementById('renderer-toggle'))return;
+    const titleCard=document.querySelector('#stage-controls .float-title');
+    if(!titleCard||document.getElementById('renderer-toggle'))return;
     const button=document.createElement('button');
     button.id='renderer-toggle';button.type='button';
     button.textContent='✨ Babylon';
     button.title='Compare improved Babylon.js lighting on your RTX GPU. Desktop preview only; VR stays on original renderer.';
     button.setAttribute('aria-pressed','false');
-    stageControls.appendChild(button);
+    button.style.cssText='display:block;margin-top:8px;padding:7px 10px;background:#163c4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
+    titleCard.appendChild(button);
     button.addEventListener('click',async()=>{
       if(status.loading)return;
-      if(layer?.visible){layer.disable();button.classList.remove('active');button.setAttribute('aria-pressed','false');button.textContent='✨ Babylon';return}
+      if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='✨ Babylon';return}
       if(window.kliniklab?.viewMode!=='3d')window.kliniklab?.setView?.('3d');
       status.loading=true;status.error=null;button.textContent='Loading 3D…';button.disabled=true;
       try{
         const B=await loadLibrary();
         if(!layer)layer=new BabylonDesktopLayer(window.kliniklab,B);
-        layer.enable();button.textContent='✨ Babylon ON';button.classList.add('active');button.setAttribute('aria-pressed','true');
+        layer.enable();button.textContent='✨ Babylon ON';button.classList.add('active');button.style.background='#187e70';button.setAttribute('aria-pressed','true');
       }catch(error){
         status.error=String(error.message||error).slice(0,250);
         status.mode='classic';button.textContent='✨ Babylon';button.title='Preview unavailable: '+status.error;
