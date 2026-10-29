@@ -1,0 +1,33 @@
+name: Phase 3 dental appearance regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  appearance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dental appearance and anatomy tests
+        run: node --test tests/phase3_appearance.test.cjs tests/babylon_anatomy.test.cjs tests/real_scene_qa.cjs
+      - name: JavaScript syntax checks
+        run: |
+          node --check dental-appearance.js
+          node --check babylon-preview.js
+          node --check babylon-anatomy.js
+          node --check real-dental-scene.js
+      - name: Verify static mirror copies
+        run: |
+          cmp dental-appearance.js public/dental-appearance.js
+          cmp babylon-preview.js public/babylon-preview.js
+          cmp babylon-anatomy.js public/babylon-anatomy.js
+          cmp real-dental-scene.js public/real-dental-scene.js
+          cmp index.html public/index.html
+      - name: Verify standalone bundle matches source
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
