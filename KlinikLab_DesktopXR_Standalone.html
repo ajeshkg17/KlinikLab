@@ -2924,6 +2924,28 @@ window.addEventListener('DOMContentLoaded',()=>{
     }
     return triangles;
   }
+
+  // Exact projected world-space Y extrema of the displayed crown's vertices.
+  // This is only a 1D projection, not tooth collision/occlusal contact.
+  function meshYBounds(mesh,B){
+    const positions=mesh?.getVerticesData?.(B.VertexBuffer.PositionKind);
+    if(!positions||positions.length<9||positions.length%3) return null;
+    const matrix=mesh.computeWorldMatrix(true);
+    let min=Infinity,max=-Infinity;
+    for(let i=0;i<positions.length;i+=3){
+      const v=B.Vector3.FromArray(positions,i);
+      const y=B.Vector3.TransformCoordinates(v,matrix).y;
+      if(!Number.isFinite(y))throw Error('Nonfinite world-space tooth vertex');
+      min=Math.min(min,y);max=Math.max(max,y);
+    }
+    return {min,max};
+  }
+  function opposingFDIPairs(){
+    const pairs=[];
+    for(const [upper,lower] of [['1','4'],['2','3']])
+      for(let n=1;n<=8;n++)pairs.push([upper+n,lower+n]);
+    return pairs;
+  }
   function measureArchSurfaces(layer){
     const byId=Object.create(null),cache=Object.create(null),pairs=[];
     for(const item of layer.items||[]){
@@ -2943,10 +2965,33 @@ window.addEventListener('DOMContentLoaded',()=>{
           measurement.distance<=.008?'near in sample':'no near contact observed in sample',
         sampledTriangles:[a.length,b.length]});
     }
-    return {pairs,teethMeasured:Object.keys(cache).length,units:'KlinikLab scene units (not mm)',
+    const verticalBounds=Object.create(null),opposingPairs=[];
+    for(const [first,second] of opposingFDIPairs()){
+      const pair=first+'-'+second;
+      if(!cache[first]&&byId[first])cache[first]=sampledMeshTriangles(byId[first],layer.B);
+      if(!cache[second]&&byId[second])cache[second]=sampledMeshTriangles(byId[second],layer.B);
+      const a=cache[first],b=cache[second];
+      if(!a||!b){opposingPairs.push({pair,status:'unavailable'});continue;}
+      if(!verticalBounds[first])verticalBounds[first]=meshYBounds(byId[first],layer.B);
+      if(!verticalBounds[second])verticalBounds[second]=meshYBounds(byId[second],layer.B);
+      const upper=verticalBounds[first],lower=verticalBounds[second];
+      if(!upper||!lower){opposingPairs.push({pair,status:'no vertex bounds'});continue;}
+      const gap=upper.min-lower.max,measurement=surfaceDistance(a,b);
+      opposingPairs.push({
+        pair,
+        projectedVerticalClearance:Number(gap.toFixed(6)),
+        sampledSurfaceDistance:Number(measurement.distance.toFixed(6)),
+        intersectsSampledTriangles:measurement.intersectsSampledTriangles,
+        status:measurement.intersectsSampledTriangles?'sampled facet intersection':
+          gap>.008?'vertical projection separated':
+          gap<-.008?'vertical projections overlap (not necessarily contact)':
+          'near vertically (not necessarily contact)',
+        sampledTriangles:[a.length,b.length]});
+    }
+    return {pairs,opposingPairs,teethMeasured:Object.keys(cache).length,units:'KlinikLab scene units (not mm)',
       contactThreshold:.008,source:'licensed Dundee crown display meshes, cropped and normalized',
-      method:'3D sampled triangle-triangle proximity (48 triangles per crown maximum)',
-      limitations:'Not complete contact analysis; not penetration depth or clinical occlusion. Open cropped surfaces are not solid teeth.'};
+      method:'3D sampled triangle-triangle proximity (48 triangles per crown maximum) with full-vertex vertical projection extrema for opposing FDI pairs',
+      limitations:'Projected vertical clearance = minimum upper world Y minus maximum lower world Y; negative can reflect lateral separation despite Y overlap. No calibrated bite registration, complete contact analysis, penetration depth or clinical occlusion. Open cropped surfaces are not solid teeth.'};
   }
 
   function sync(layer){

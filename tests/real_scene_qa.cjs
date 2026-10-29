@@ -104,9 +104,41 @@ test('sampled world-space arch diagnostics cover 30 adjacent FDI pairs without c
   }});
   assert.equal(diagnostics.teethMeasured,32);
   assert.equal(diagnostics.pairs.length,30);
+  assert.equal(diagnostics.opposingPairs.length,16);
+  assert.equal(diagnostics.opposingPairs[0].pair,'11-41');
+  assert.equal(diagnostics.opposingPairs[8].pair,'21-31');
+  assert(diagnostics.opposingPairs.every(p=>Number.isFinite(p.projectedVerticalClearance)));
+  assert(diagnostics.opposingPairs.every(p=>Number.isFinite(p.sampledSurfaceDistance)));
   assert.equal(diagnostics.pairs[0].pair,'18-17');
   assert.equal(diagnostics.pairs[15].pair,'48-47');
   assert.ok(diagnostics.pairs.every(p=>Number.isFinite(p.distance)&&p.distance>0));
   assert.match(diagnostics.units,/not mm/);
   assert.deepEqual(items.map(item=>item.source.key),originals);
+});
+
+
+test('opposing FDI pairs report projected separation without confusing it with occlusal contact',()=>{
+  const arches=[['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'],
+    ['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38']];
+  const items=arches.flatMap((arch,archIndex)=>arch.map((id,i)=>{
+    const y=archIndex===0?3:1, x=i*4;
+    return {source:{key:'tooth:'+id},realMesh:{
+      getVerticesData:()=>[0,y,0,1,y,0,0,y+.2,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix:()=>({x})
+    }};
+  }));
+  const B={VertexBuffer:{PositionKind:'position'},Vector3:{
+    FromArray:(p,i)=>({x:p[i],y:p[i+1],z:p[i+2]}),
+    TransformCoordinates:(v,m)=>({x:v.x+m.x,y:v.y,z:v.z})
+  }};
+  const report=M.measureArchSurfaces({B,items,anatomyLayout:{arches:arches.map(x=>x.map(id=>({id})))}});
+  assert.equal(report.opposingPairs.length,16);
+  assert.equal(report.pairs.length,30);
+  assert(report.opposingPairs.every(p=>Math.abs(p.projectedVerticalClearance-1.8)<1e-9));
+  assert(report.opposingPairs.every(p=>p.status==='vertical projection separated'));
+  assert(report.opposingPairs.every(p=>p.sampledSurfaceDistance>0));
+  assert.equal(report.opposingPairs[0].pair,'11-41');
+  assert.equal(report.opposingPairs[15].pair,'28-38');
+  assert.match(report.limitations,/No calibrated bite/);
 });

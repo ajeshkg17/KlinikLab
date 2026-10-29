@@ -75,3 +75,16 @@ The standalone bundle is generated from public mirrors. It is a collision-prone 
 ## Procedural molar morphology and controllable LOD
 
 Only the **synthetic procedural fallback** now differentiates schematic four-cusp maxillary and five-cusp mandibular molars. These patterns approximate common first-molar classes, not tooth-specific measurements; second and third molars vary. The Dundee GLB assets remain unchanged. The procedural crown generator accepts quality 0, 1, or 2 with **609 / 3,169 / 7,617 vertices** and **1,184 / 6,264 / 15,120 triangles** respectively (molar example). The desktop still defaults to level 2. Callers can use `createTemplate(B,scene,kind,layout,{crownQuality:0})` or quality 1 as a controlled fallback. There is **no change to picking, drillable volumes or Quest's actual XR mesh**; benchmark hardware before making any framerate or comfort claims.
+
+
+## Opposing-arch geometric audit (workstream follow-up)
+
+The diagnostic report now includes **16 registered opposing FDI pairs** (11–41 through 18–48 and 21–31 through 28–38) in addition to the **30 adjacent pairs**. Each opposing entry records a sampled 3D surface minimum distance and a **projected vertical clearance** defined as `minY(upper crown) − maxY(lower crown)` from all displayed mesh vertices, both in **uncalibrated scene units**. Positive vertical clearance implies Y-separated surfaces; negative means their **Y projections** overlap and **does not** imply physical mesh intersection (X/Z separation may remain). The projected calculation is not a true occlusal contact test: interarch spatial alignment, articulation, ligament compliance, and calibrated jaw closure are unverified. Neither default arch placements nor any selection, cutting, or XR controller transforms are changed.
+
+### Prioritized morphology review queue
+
+1. Clinician review of Dundee crown axial/occlusal silhouettes and FDI left/right orientation before making any model-placement correction.
+2. Independent root/cervical-margin assets with suitable permissive redistribution licenses; do not turn a cropped crown shell into a fake tooth-root measurement.
+3. Gingival papilla and alveolar-ridge junction with objective overlap/clearance measures and workstation screenshots.
+4. Calibrated interarch registrations and explicit closure poses before representing any contact diagram as occlusion; until then use only projected metrics.
+5. Quantified VR/mobile LOD benchmarking with real hardware; procedural quality parameters alone do not establish FPS improvement.
