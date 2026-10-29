@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "jobId": "real-dental-arches-v2-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T14:56:47.763Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-real-frontal",
+      "file": "01-real-frontal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 111001,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": true,
+          "meshes": 176,
+          "frames": 26,
+          "environment": "disabled",
+          "error": "B is not defined"
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-real-occlusal",
+      "file": "02-real-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 107365,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": true,
+          "meshes": 176,
+          "frames": 23,
+          "environment": "disabled",
+          "error": "B is not defined"
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "03-real-oblique",
+      "file": "03-real-oblique.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 114206,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": true,
+          "meshes": 176,
+          "frames": 21,
+          "environment": "disabled",
+          "error": "B is not defined"
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-real-clinic",
+      "file": "04-real-clinic.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 141077,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": true,
+          "meshes": 176,
+          "frames": 16,
+          "environment": "disabled",
+          "error": "B is not defined"
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 4,
+  "failureCount": 0
+}
