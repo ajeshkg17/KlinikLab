@@ -18,7 +18,7 @@
   ]);
   const HEIGHTS=[0,.167,.181,.166,.153];
   const STYLE=Object.freeze([0,1,1,2,3,3,4,4,4]);
-  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,triangles:0,failures:[],error:null,
+  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,visibleInstances:0,triangles:0,failures:[],error:null,
     source:'University of Dundee, School of Dentistry (CC BY 4.0)',surfaceOnly:true,webxr:false};
   root.KlinikRealTeeth=state;
 
@@ -63,13 +63,17 @@
     const capHeight=upper?cut-mins[1]:maxs[1]-cut;
     const width=maxs[0]-mins[0],depth=maxs[2]-mins[2];
     const zFactor=style===1?.76:style===2?.86:style===3?.93:1;
+    const sx=1.84/width,sy=HEIGHTS[style]/capHeight,sz=1.84*zFactor/depth;
     const positions=[],normals=[],uvs=[],indices=[];
     for(const tri of triangles)for(const clipped of sliceTriangle(tri,cut,upper)){
       for(const v of clipped){
         positions.push((v.p[0]-(mins[0]+maxs[0])/2)/width*1.84,
           (v.p[1]-cut)/capHeight*HEIGHTS[style],
           (v.p[2]-(mins[2]+maxs[2])/2)/depth*1.84*zFactor);
-        const n=v.n;const len=Math.hypot(...n)||1;normals.push(n[0]/len,n[1]/len,n[2]/len);
+        // The mesh is stretched independently along three axes. Transform
+        // surface normals by inverse scale so enamel highlights remain correct.
+        const n=[v.n[0]/sx,v.n[1]/sy,v.n[2]/sz];
+        const len=Math.hypot(...n)||1;normals.push(n[0]/len,n[1]/len,n[2]/len);
         uvs.push(...v.uv);
         indices.push(indices.length);
       }
@@ -169,6 +173,7 @@
   }
   function sync(layer){
     if(!state.ready)return;
+    let visibleInstances=0;
     for(const item of layer.items){
       const mesh=item.realMesh;if(!mesh)continue;
       const source=item.source,original=item.mesh;
@@ -176,6 +181,7 @@
       original.isVisible=false;
       mesh.isVisible=active;
       if(!active)continue;
+      visibleInstances++;
       const id=source.key?.split(':')[1]||'';
       // Existing source geometry is mirrored across the midline for contralateral teeth.
       // Preserve the stable tooth IDs and the original canvas's picking targets.
@@ -187,6 +193,7 @@
       if(mesh.material?.albedoColor)mesh.material.albedoColor=tint;
       if(mesh.material)mesh.material.alpha=source.alpha;
     }
+    state.visibleInstances=visibleInstances;
   }
   root.KlinikRealMesh={filename,parseKind,sliceTriangle,cropMesh,replace,sync,state};
 })(typeof window!=='undefined'?window:globalThis);
