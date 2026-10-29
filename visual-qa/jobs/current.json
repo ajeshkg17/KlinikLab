@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "babylon-anatomy-v3-2026-10-29-01",
+  "jobId": "dundee-atlas-v1-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-classic-teeth",
+      "name": "01-original-procedural",
       "steps": [
         {
           "action": "click",
@@ -17,81 +17,58 @@
       "capture": "stage"
     },
     {
-      "name": "02-anatomy-babylon",
+      "name": "02-dundee-molar",
       "steps": [
         {
           "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 1700
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "03-anatomy-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
+          "control": "atlasOpen"
         },
         {
           "action": "wait",
           "ms": 1200
         }
       ],
-      "capture": "stage"
+      "capture": "atlas"
     },
     {
-      "name": "04-anatomy-oblique",
+      "name": "03-dundee-premolar",
       "steps": [
         {
           "action": "click",
-          "control": "teeth"
+          "control": "atlasOpen"
         },
         {
           "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 170,
-          "dy": -75
+          "control": "atlasNext"
         },
         {
           "action": "wait",
-          "ms": 700
+          "ms": 800
         }
       ],
-      "capture": "stage"
+      "capture": "atlas"
     },
     {
-      "name": "05-babylon-clinic",
+      "name": "04-dundee-canine",
       "steps": [
         {
           "action": "click",
-          "control": "clinic"
+          "control": "atlasOpen"
         },
         {
           "action": "click",
-          "control": "renderer"
+          "control": "atlasNext"
+        },
+        {
+          "action": "click",
+          "control": "atlasNext"
         },
         {
           "action": "wait",
-          "ms": 900
+          "ms": 800
         }
       ],
-      "capture": "stage"
+      "capture": "atlas"
     }
   ]
 }
