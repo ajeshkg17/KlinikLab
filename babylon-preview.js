@@ -148,6 +148,9 @@
     build(){
       const source=this.source;
       source.meshes.forEach((m,index)=>{
+        // XR preparation meshes are registered before their voxel geometry exists.
+        // They are hidden in desktop mode and should never block the preview.
+        if(!source.geom[m.kind]?.cpu)return;
         const template=this.baseMesh(m.kind);
         const copy=template.clone('dentalscene:'+index,null,true);
         copy.isVisible=true;
