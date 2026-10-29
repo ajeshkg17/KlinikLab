@@ -233,10 +233,10 @@ class DentalScene {
     if(!this.gl)throw Error('WebGL unavailable. Enable hardware acceleration in your browser.');
     const gl=this.gl;this.meshes=[];this.pickables=[];this.dynamicMeshes=[];this.textures=[];this.started=false;
     const vs=`attribute vec3 aPos;attribute vec3 aNormal;attribute vec2 aUV;uniform mat4 uModel,uView,uProj;uniform mat3 uNormal;varying vec3 vNormal,vWorld;varying vec2 vUV;void main(){vec4 p=uModel*vec4(aPos,1.);vWorld=p.xyz;vNormal=uNormal*aNormal;vUV=aUV;gl_Position=uProj*uView*p;}`;
-    const fs=`precision mediump float;varying vec3 vNormal,vWorld;varying vec2 vUV;uniform vec3 uColor;uniform float uAlpha,uTextured,uUnlit;uniform sampler2D uTexture;void main(){vec3 n=normalize(vNormal);vec3 l1=normalize(vec3(-0.38,0.88,0.65));vec3 l2=normalize(vec3(0.72,0.42,-0.6));float diff=max(dot(n,l1),0.)*.49+max(dot(n,l2),0.)*.16+max(dot(n,normalize(vec3(0.,-1.,.45))),0.)*.28;float lit=.46+diff;float spec=pow(max(dot(reflect(-l1,n),normalize(vec3(0.1,1.,2.5)-vWorld)),0.),22.)*.11;vec4 tex=texture2D(uTexture,vUV);vec3 c=mix(uColor,tex.rgb,clamp(uTextured,0.,1.));if(uTextured>.5 && tex.a<.04)discard;gl_FragColor=vec4(c*(uUnlit>.5?1.:lit)+vec3(spec)*(1.-uUnlit),uAlpha*mix(1.,tex.a,clamp(uTextured,0.,1.)));}`;
+    const fs=`precision mediump float;varying vec3 vNormal,vWorld;varying vec2 vUV;uniform vec3 uColor;uniform float uAlpha,uTextured,uUnlit,uFinish;uniform sampler2D uTexture;void main(){vec3 n=normalize(vNormal);vec3 view=normalize(vec3(0.35,2.6,3.2)-vWorld);vec3 key=normalize(vec3(-0.52,0.85,0.77));vec3 fillLight=normalize(vec3(.81,.34,-.48));vec3 rim=normalize(vec3(-.72,.40,-.65));float a=max(dot(n,key),0.),b=max(dot(n,fillLight),0.),r=max(dot(n,rim),0.);float sky=.45+.15*max(n.y,0.);vec3 light=vec3(sky)+vec3(.65,.62,.57)*a+vec3(.24,.28,.34)*b+vec3(.14,.17,.19)*r;float shine=pow(max(dot(reflect(-key,n),view),0.),37.)*(.06+.21*uFinish);shine+=pow(max(dot(reflect(-fillLight,n),view),0.),72.)*(.025+.09*uFinish);vec4 tx=texture2D(uTexture,vUV);if(uTextured>.5&&tx.a<.04)discard;vec3 base=mix(uColor,tx.rgb,clamp(uTextured,0.,1.));vec3 lit=base*light+vec3(1.,.98,.92)*shine;gl_FragColor=vec4(mix(lit,base,clamp(uUnlit,0.,1.)),uAlpha*mix(1.,tx.a,clamp(uTextured,0.,1.)));}`;
     const compile=(kind,src)=>{const sh=gl.createShader(kind);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;};
     this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,vs));gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
-    gl.useProgram(this.program);this.loc={};for(const n of ['uModel','uView','uProj','uNormal','uColor','uAlpha','uTextured','uUnlit','uTexture'])this.loc[n]=gl.getUniformLocation(this.program,n);
+    gl.useProgram(this.program);this.loc={};for(const n of ['uModel','uView','uProj','uNormal','uColor','uAlpha','uTextured','uUnlit','uFinish','uTexture'])this.loc[n]=gl.getUniformLocation(this.program,n);
     this.attr={pos:gl.getAttribLocation(this.program,'aPos'),normal:gl.getAttribLocation(this.program,'aNormal'),uv:gl.getAttribLocation(this.program,'aUV')};
     this.geom={box:this.geometry(this.boxData()),sphere:this.geometry(this.sphereData(12,16)),cylinder:this.geometry(this.cylinderData(16)),torus:this.geometry(this.torusData(24,9)),quad:this.geometry(this.quadData())};
     this.whiteTex=this.makeTexture(null);
@@ -250,72 +250,105 @@ class DentalScene {
   sphereData(lat,long){const v=[],point=(t,p)=>{const st=Math.sin(t);return [st*Math.cos(p),Math.cos(t),st*Math.sin(p)]};for(let i=0;i<lat;i++)for(let j=0;j<long;j++){const t=i*Math.PI/lat,t2=(i+1)*Math.PI/lat,p=j*2*Math.PI/long,p2=(j+1)*2*Math.PI/long;const a=point(t,p),b=point(t2,p),c=point(t2,p2),d=point(t,p2);for(const [x,y,z]of [[a,b,c],[a,c,d]]){for(const q of [x,y,z])v.push(...q,...q,0,0)}}return v}
   cylinderData(segments){let a=[],r=(i)=>i/segments*Math.PI*2;for(let i=0;i<segments;i++){const th=r(i),th2=r(i+1),x=Math.cos(th),z=Math.sin(th),X=Math.cos(th2),Z=Math.sin(th2);const A=[x*.5,-.5,z*.5],B=[X*.5,-.5,Z*.5],C=[X*.5,.5,Z*.5],D=[x*.5,.5,z*.5];a.push(...this.tri(A,B,C,M3.unit([x+X,0,z+Z])),...this.tri(A,C,D,M3.unit([x+X,0,z+Z])),...this.tri([0,.5,0],D,C,[0,1,0]),...this.tri([0,-.5,0],B,A,[0,-1,0]));}return a}
   torusData(M,N){const v=[],pos=(a,b)=>[(.73+.24*Math.cos(b))*Math.cos(a),.24*Math.sin(b),(.73+.24*Math.cos(b))*Math.sin(a)];for(let i=0;i<M;i++)for(let j=0;j<N;j++){const a=i/M*Math.PI*2,A=(i+1)/M*Math.PI*2,b=j/N*Math.PI*2,B=(j+1)/N*Math.PI*2;const p=[pos(a,b),pos(A,b),pos(A,B),pos(a,B)];const center=q=>M3.unit([q[0],q[1],q[2]]);v.push(...this.tri(p[0],p[1],p[2],null),...this.tri(p[0],p[2],p[3],null))}return v}
-  // Actual crown topology: tapered cervical section, rounded incisal edge or
-  // multi-cusp occlusal anatomy. Units are metres in the world scene.
-  crownData(style,upper){
-    const v=[], direction=upper?-1:1, n=28, rings=9;
-    const height=style===1?.162:style===2?.190:style===3?.170:.163;
-    const power=style===1?3.8:style===2?2.45:style===3?3.15:3.75;
-    const squircle=(a)=>{const co=Math.cos(a),si=Math.sin(a),e=2/power;return [Math.sign(co)*Math.pow(Math.abs(co),e),Math.sign(si)*Math.pow(Math.abs(si),e)]};
-    // Morphologically broader incisal edges and constricted cervical regions.
-    const factor=t=>.76+.20*Math.sin(Math.PI*t*.8)+.035*t;
-    const point=(t,a)=>{const [xx,zz]=squircle(a),r=factor(t);
-      const taper=style===1?1+.065*t:1, lingual=style===1?.79:style===2?.91:1;
-      return [xx*r*taper,direction*height*t,zz*r*lingual];};
+  // Preserve the silhouette, but share vertex normals across individual triangles.
+  // Without welding, each triangle is independently lit and teeth resemble low-poly blocks.
+  smoothSurfaceData(data){
+    const normals=new Map(),key=(i)=>`${data[i].toFixed(5)},${data[i+1].toFixed(5)},${data[i+2].toFixed(5)}`;
+    for(let i=0;i<data.length;i+=24){
+      const a=data.slice(i,i+3),c=data.slice(i+8,i+11),d=data.slice(i+16,i+19);
+      const n=M3.cross(M3.sub(c,a),M3.sub(d,a));
+      for(let j=0;j<3;j++){const at=i+j*8,k=key(at),sum=normals.get(k)||[0,0,0];normals.set(k,M3.add(sum,n));}
+    }
+    for(let i=0;i<data.length;i+=8){const n=M3.unit(normals.get(key(i))||[0,1,0]);data[i+3]=n[0];data[i+4]=n[1];data[i+5]=n[2];}
+    return data;
+  }
+  // Four distinct synthetic crown morphologies: incisors (incisal ridge), canines
+  // (single cusp), premolars (buccal/lingual cusps), molars (four-cusp fossa).
+  // Morphology is educational artwork, NOT a tooth scan or calibrated anatomy.
+  crownData(style,upper,individual=0){
+    const v=[],dir=upper?-1:1,n=52,rings=16,capRings=16;
+    const height=[0,.167,.181,.166,.153][style],power=[0,3.5,2.65,2.65,2.77][style];
+    const oval=style===1?.70:style===2?.82:style===3?.91:1.0;
+    const seed=individual*.61;
+    const squircle=a=>{const c=Math.cos(a),s=Math.sin(a),e=2/power;
+      return [Math.sign(c)*Math.pow(Math.abs(c),e),Math.sign(s)*Math.pow(Math.abs(s),e)];};
+    const ringWidth=t=>.75+.19*Math.sin(Math.PI*(.22+.73*t))+.018*Math.sin(Math.PI*t);
+    const point=(t,a)=>{
+      const [u,w]=squircle(a),f=ringWidth(t);
+      const lobe=style===1?1+.017*Math.cos(3*a+.3*seed)*Math.pow(t,2):1+.019*Math.cos((style===4?5:3)*a+seed)*Math.pow(t,2);
+      const tipNarrow=style===2?1-.075*t*t:1;
+      return [u*f*lobe*tipNarrow,dir*height*t,w*f*oval*lobe];
+    };
     for(let k=0;k<rings;k++)for(let j=0;j<n;j++){
       const a=j*2*Math.PI/n,b=(j+1)*2*Math.PI/n,t=k/rings,T=(k+1)/rings;
       const A=point(t,a),B=point(t,b),C=point(T,b),D=point(T,a);
-      // Winding correct for both maxillary and mandibular crowns.
       if(upper)v.push(...this.tri(A,B,C),...this.tri(A,C,D));
       else v.push(...this.tri(A,C,B),...this.tri(A,D,C));
     }
-    // Occlusal anatomy is a single smooth surface: NOT a collection of spheres.
-    // Small Gaussian cusps create molar/premolar anatomy and a central fossa.
-    const cusps=style===3?[[-.47,0.02],[.47,.02]]:style===4?[[-.46,-.45],[.46,-.45],[-.43,.47],[.43,.47]]:style===2?[[0,.09]]:[];
+    const sq=x=>x*x,peak=(x,z,cx,cz,sx,sz)=>Math.exp(-sq((x-cx)/sx)-sq((z-cz)/sz));
     const cap=(r,a)=>{
-      const [xx,zz]=squircle(a),x=xx*factor(1)*r,z=zz*factor(1)*(style===1?.79:style===2?.91:1)*r;
-      let cusp=0;
-      for(const [u,w] of cusps)cusp+=.027*Math.exp(-((x-u)**2+(z-w)**2)/.065);
-      const cuspProfile=style===1?.007*Math.pow(Math.abs(x),4):cusp;
-      const fossa=(style>=3?-.009*Math.exp(-(x*x+z*z)/.13):0);
-      const y=direction*(height - .010*(1-r*r) + cuspProfile + fossa);
-      return [x,y,z];
+      const [u,w]=squircle(a),f=ringWidth(1),x=u*f*r,z=w*f*oval*r;
+      // Envelope gives a continuous join to the crown wall instead of a sharp ledge.
+      const envelope=Math.pow(Math.max(0,1-r*r),.70);
+      let relief=0;
+      if(style===4){
+        for(const [cx,cz,amp] of [[-.47,-.45,.067],[.48,-.44,.060],[-.46,.43,.064],[.46,.45,.056]])
+          relief+=amp*peak(x,z,cx,cz,.31,.30);
+        relief-=.032*peak(x,z,0,0,.27,.27); // central fossa
+        relief-=.021*peak(x,z,0,0,.067,.58); // central developmental fissure
+        relief-=.014*peak(x,z,0,0,.64,.065); // crossing groove
+        relief-=.013*peak(x,z,-.38,.16,.11,.20);
+      }else if(style===3){
+        relief+=.072*peak(x,z,-.43,.06,.36,.32)+.050*peak(x,z,.40,-.04,.34,.32);
+        relief-=.032*peak(x,z,0,0,.10,.53);
+      }else if(style===2){
+        relief+=.110*peak(x,z,-.05,0,.42,.49)-.016*peak(x,z,.60,0,.27,.30);
+      }else{
+        // Smooth incisal ridge and shallow three-lobed mamelons, not a molar cap.
+        relief+=.038*peak(x,z,0,0,.78,.28)+.014*Math.cos(3.5*x+seed)*Math.exp(-sq(z/.34));
+      }
+      const rootSlope=style===1?.013:style===2?.022:.018;
+      const crownTop=height+envelope*(relief-rootSlope*(1-r*r));
+      return [x,dir*crownTop,z];
     };
-    const rn=7;
-    for(let k=0;k<rn;k++)for(let j=0;j<n;j++){
-      const a=j*2*Math.PI/n,b=(j+1)*2*Math.PI/n,r=k/rn,R=(k+1)/rn;
+    // Polar fan from the center, with a small center cap to avoid zero-area triangles.
+    for(let k=0;k<capRings;k++)for(let j=0;j<n;j++){
+      const a=j*2*Math.PI/n,b=(j+1)*2*Math.PI/n,r=k/capRings,R=(k+1)/capRings;
       const A=cap(r,a),B=cap(r,b),C=cap(R,b),D=cap(R,a);
       if(upper)v.push(...this.tri(A,C,B),...this.tri(A,D,C));
       else v.push(...this.tri(A,B,C),...this.tri(A,C,D));
     }
-    return v;
+    return this.smoothSurfaceData(v);
   }
-  // Smooth continuous horseshoe gum line, built from interpolated positions.
-  gingivaData(positions,y,wide=.110,thick=.059){
-    const V=[],steps=4,sides=12,points=[];
+  // Thin, scalloped gingival collars. The old thick circular tube obscured
+  // much of the crowns and looked like a pink horseshoe-shaped plastic bumper.
+  gingivaData(positions,y,wide=.064,thick=.023){
+    const V=[],steps=9,sides=20,points=[];
     const cat=(p0,p1,p2,p3,t)=>{
       const t2=t*t,t3=t2*t;
       return [0,1,2].map(i=>.5*((2*p1[i])+(-p0[i]+p2[i])*t+(2*p0[i]-5*p1[i]+4*p2[i]-p3[i])*t2+(-p0[i]+3*p1[i]-3*p2[i]+p3[i])*t3));
     };
-    for(let i=0;i<positions.length-1;i++)for(let k=0;k<steps;k++)points.push(cat(positions[Math.max(i-1,0)],positions[i],positions[i+1],positions[Math.min(i+2,positions.length-1)],k/steps));
-    points.push(positions[positions.length-1]);
+    for(let i=0;i<positions.length-1;i++)for(let k=0;k<steps;k++)points.push({p:cat(positions[Math.max(i-1,0)],positions[i],positions[i+1],positions[Math.min(i+2,positions.length-1)],k/steps),t:k/steps});
+    points.push({p:positions.at(-1),t:1});
     const section=(i,j)=>{
-      const p=points[i],p0=points[Math.max(0,i-1)],p1=points[Math.min(points.length-1,i+1)];
-      const tang=M3.unit([p1[0]-p0[0],0,p1[2]-p0[2]]);
-      const lateral=M3.unit([-tang[2],0,tang[0]]);
+      const {p,t}=points[i],p0=points[Math.max(0,i-1)].p,p1=points[Math.min(points.length-1,i+1)].p;
+      const tangent=M3.unit([p1[0]-p0[0],0,p1[2]-p0[2]]),lat=M3.unit([-tangent[2],0,tangent[0]]);
       const a=j*2*Math.PI/sides;
-      return [p[0]+lateral[0]*Math.cos(a)*wide,y+Math.sin(a)*thick,p[2]+lateral[2]*Math.cos(a)*wide];
+      const papilla=Math.pow(Math.abs(Math.sin(Math.PI*t)),3)*.012;
+      const taper=.95+.05*Math.cos(2*Math.PI*t);
+      const side=Math.cos(a),surface=Math.sin(a);
+      return [p[0]+lat[0]*side*wide*taper,y+surface*thick+papilla*surface,p[2]+lat[2]*side*wide*taper];
     };
     for(let i=0;i<points.length-1;i++)for(let j=0;j<sides;j++){
       const A=section(i,j),B=section(i,j+1),C=section(i+1,j+1),D=section(i+1,j);
       V.push(...this.tri(A,C,B),...this.tri(A,D,C));
     }
-    return V;
+    return this.smoothSurfaceData(V);
   }
   makeTexture(canvas){const gl=this.gl,tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));if(canvas)this.updateTexture(tex,canvas);this.textures.push(tex);return tex;}
   updateTexture(tex,canvas){const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas)}
   makeLabel(text,opts={}){const w=opts.width||512,h=opts.height||100;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');if(opts.background){ctx.fillStyle=opts.background;ctx.fillRect(0,0,w,h)}ctx.fillStyle=opts.color||'#e2f8ec';ctx.font=`${opts.bold?'700':'550'} ${opts.font||32}px system-ui, sans-serif`;ctx.textAlign=opts.align||'center';ctx.textBaseline='middle';ctx.fillText(text,opts.align==='left'?14:w/2,h/2,w-24);return this.makeTexture(c)}
-  add(kind,p,s,c,opts={}){const m={kind,p:p.slice(),s:s.slice(),rot:opts.rot||[0,0,0],color:this.rgb(c),alpha:opts.alpha??1,tex:opts.tex||null,unlit:!!opts.unlit,key:opts.key||null,tag:opts.tag||'',hidden:false};this.meshes.push(m);if(m.key)this.pickables.push({key:m.key,p:m.p.slice(),radius:opts.radius||Math.max(...s)*.7,kind,mesh:m});return m}
+  add(kind,p,s,c,opts={}){const m={kind,p:p.slice(),s:s.slice(),rot:opts.rot||[0,0,0],color:this.rgb(c),alpha:opts.alpha??1,tex:opts.tex||null,unlit:!!opts.unlit,finish:opts.finish??0,key:opts.key||null,tag:opts.tag||'',hidden:false};this.meshes.push(m);if(m.key)this.pickables.push({key:m.key,p:m.p.slice(),radius:opts.radius||Math.max(...s)*.7,kind,mesh:m});return m}
   rgb(h){if(Array.isArray(h))return h;const x=parseInt(h.replace('#',''),16);return [(x>>16&255)/255,(x>>8&255)/255,(x&255)/255]}
   box(p,s,c,o={}){return this.add('box',p,s,c,o)}sphere(p,s,c,o={}){return this.add('sphere',p,s,c,o)}cy(p,s,c,o={}){return this.add('cylinder',p,s,c,o)}tor(p,s,c,o={}){return this.add('torus',p,s,c,o)}label(text,p,s,o={}){return this.add('quad',p,s,'#ffffff',{...o,unlit:true,tex:this.makeLabel(text,o)})}
   buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
@@ -345,14 +378,14 @@ class DentalScene {
     this.teeth={};this.archMeshes=[[],[]];this.archMode='both';
     const upperPath=[[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]];
     const lowerPath=[[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]];
-    const toothColors=['#f3ecdb','#f7efe0','#eee7d7','#f1e8d3'];
+    const toothColors=['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'];
     for(let upperIndex=0;upperIndex<2;upperIndex++){
       const archStart=this.meshes.length;
       const upper=upperIndex===0,base=upper?1.759:1.332,path=upper?upperPath:lowerPath;
       const archPoints=[...path.slice().reverse().map(v=>[-v[0],base,v[1]]),...path.map(v=>[v[0],base,v[1]])];
       const gumGeo='gingiva'+upperIndex;
-      this.geom[gumGeo]=this.geometry(this.gingivaData(archPoints,upper?1.807:1.274,upper?.087:.081,.050));
-      this.add(gumGeo,[0,0,0],[1,1,1],upper?'#cd8f9b':'#ce939e');
+      this.geom[gumGeo]=this.geometry(this.gingivaData(archPoints,upper?1.793:1.290,upper?.070:.066,.025));
+      this.add(gumGeo,[0,0,0],[1,1,1],upper?'#bc7e85':'#c68b90');
       // Palatal/lingual support, recessed behind the gingival collar.
       // Keep the occlusal opening unobstructed for anatomical instruction.
       for(let q of (upper?[1,2]:[4,3])){
@@ -363,9 +396,9 @@ class DentalScene {
           const orientation=sign<0?Math.atan2(dz,dx):-Math.atan2(dz,dx);
           const width=(i===1?.090:i===2?.076:i===3?.082:i<=5?.085:.105)*(upper?1:.95);
           const depth=(i<=2?.074:i===3?.079:i<=5?.094:.113);
-          const pos=[sign*xx,base,z];const key='crown_'+style+'_'+upperIndex;
-          if(!this.geom[key])this.geom[key]=this.geometry(this.crownData(style,upper));
-          const crown=this.add(key,pos,[width,1,depth],toothColors[style-1],{key:'tooth:'+id,radius:Math.max(width,depth)+.034,rot:[0,orientation,0],tag:'crown'});
+          const pos=[sign*xx,base,z];const key='crown_'+style+'_'+upperIndex+'_'+i;
+          if(!this.geom[key])this.geom[key]=this.geometry(this.crownData(style,upper,i));
+          const crown=this.add(key,pos,[width,1,depth],toothColors[style-1],{finish:.78,key:'tooth:'+id,radius:Math.max(width,depth)+.034,rot:[0,orientation,0],tag:'crown'});
           const picker=this.pickables[this.pickables.length-1];picker.p=[pos[0],base+(upper?-.080:.080),pos[2]];picker.radius=Math.max(width,depth)+.042;
           // Pit-and-fissure discoloration on two illustrative molars. Surface marker
           // intentionally subdued rather than a misleading cavity diagnosis.
@@ -412,7 +445,7 @@ class DentalScene {
   buildXRControllers(){this.xrControllers=[];for(let i=0;i<2;i++){const hand=this.sphere([0,-20,0],[.055,.09,.07],i?'#80dec9':'#d1e7e8');const ray=this.cy([0,-20,0],[.008,1.5,.008],'#8fe9d6',{alpha:.56});this.xrControllers.push({hand,ray})}}
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,27)}}}
-  select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':'#f5e8c9')}}}
+  select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
   getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
@@ -434,7 +467,7 @@ class DentalScene {
   focusRoom(){this.mode='clinic';this.target=[0,1.52,-2.6];this.distance=4.4;this.yaw=.37;this.pitch=.22}
   resetCamera(){this.target=[0,1.53,-2.23];this.distance=3.65;this.yaw=.22;this.pitch=.28}
   resize(){if(this.xrSession)return;const gl=this.gl,c=this.canvas;const w=Math.max(1,Math.round(c.clientWidth* Math.min(devicePixelRatio||1,1.6))),h=Math.max(1,Math.round(c.clientHeight*Math.min(devicePixelRatio||1,1.6)));if(c.width!==w||c.height!==h){c.width=w;c.height=h}gl.viewport(0,0,w,h)}
-  draw(view,proj){const gl=this.gl,L=this.loc;gl.uniformMatrix4fv(L.uView,false,new Float32Array(view));gl.uniformMatrix4fv(L.uProj,false,new Float32Array(proj));const opaque=this.meshes.filter(m=>!m.hidden&&m.alpha>=1),transparent=this.meshes.filter(m=>!m.hidden&&m.alpha<1);for(const m of [...opaque,...transparent]){if(m.alpha<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false)}else{gl.disable(gl.BLEND);gl.depthMask(true)}const g=this.geom[m.kind];gl.bindBuffer(gl.ARRAY_BUFFER,g.buffer);for(const [a,k] of [[this.attr.pos,0],[this.attr.normal,3],[this.attr.uv,6]]){gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,k===6?2:3,gl.FLOAT,false,32,k*4)}const model=m.model||M3.trs(m.p,m.rot,m.s);gl.uniformMatrix4fv(L.uModel,false,new Float32Array(model));const inv=M3.inverse(model);gl.uniformMatrix3fv(L.uNormal,false,new Float32Array([inv[0],inv[4],inv[8],inv[1],inv[5],inv[9],inv[2],inv[6],inv[10]]));gl.uniform3fv(L.uColor,m.color);gl.uniform1f(L.uAlpha,m.alpha);gl.uniform1f(L.uTextured,m.tex?1:0);gl.uniform1f(L.uUnlit,m.unlit?1:0);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,m.tex||this.whiteTex);gl.uniform1i(L.uTexture,0);gl.drawArrays(gl.TRIANGLES,0,g.count)}gl.disable(gl.BLEND);gl.depthMask(true)}
+  draw(view,proj){const gl=this.gl,L=this.loc;gl.uniformMatrix4fv(L.uView,false,new Float32Array(view));gl.uniformMatrix4fv(L.uProj,false,new Float32Array(proj));const opaque=this.meshes.filter(m=>!m.hidden&&m.alpha>=1),transparent=this.meshes.filter(m=>!m.hidden&&m.alpha<1);for(const m of [...opaque,...transparent]){if(m.alpha<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false)}else{gl.disable(gl.BLEND);gl.depthMask(true)}const g=this.geom[m.kind];gl.bindBuffer(gl.ARRAY_BUFFER,g.buffer);for(const [a,k] of [[this.attr.pos,0],[this.attr.normal,3],[this.attr.uv,6]]){gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,k===6?2:3,gl.FLOAT,false,32,k*4)}const model=m.model||M3.trs(m.p,m.rot,m.s);gl.uniformMatrix4fv(L.uModel,false,new Float32Array(model));const inv=M3.inverse(model);gl.uniformMatrix3fv(L.uNormal,false,new Float32Array([inv[0],inv[4],inv[8],inv[1],inv[5],inv[9],inv[2],inv[6],inv[10]]));gl.uniform3fv(L.uColor,m.color);gl.uniform1f(L.uAlpha,m.alpha);gl.uniform1f(L.uTextured,m.tex?1:0);gl.uniform1f(L.uUnlit,m.unlit?1:0);gl.uniform1f(L.uFinish,m.finish);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,m.tex||this.whiteTex);gl.uniform1i(L.uTexture,0);gl.drawArrays(gl.TRIANGLES,0,g.count)}gl.disable(gl.BLEND);gl.depthMask(true)}
   loop(){this.gl.enable(this.gl.DEPTH_TEST);this.gl.clearColor(.038,.09,.13,1);let prev=0;const tick=(time,frame)=>{if(frame&&this.xrSession){this.xrFrame(time,frame)}else{this.resize();const eye=this.camera();for(const m of this.focusDecor)m.hidden=this.mode==='teeth';if(this.mode!=='teeth'){this.leftWall.hidden=eye[0]<-3.5;this.rightWall.hidden=eye[0]>3.5;}const gl=this.gl;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);this.draw(this.view(),M3.perspective(.87,this.canvas.width/this.canvas.height,.05,100))}this.frameCount++};this.animation=tick;const animate=(t)=>{if(!this.xrSession){tick(t);requestAnimationFrame(animate)}};requestAnimationFrame(animate)}
   async enterVR(){
     if(!navigator.xr?.requestSession)throw Error('Immersive VR unavailable. Open the HTTPS page in Meta Quest Browser.');
@@ -983,19 +1016,24 @@ class ToothSolid{
  isUpperMolar(){return this.caseKey==='molar'||this.caseKey==='crown'}
  rootCenters(){return this.isAnterior()?[[0,0]]:this.isUpperMolar()?[[-.49,-.33],[.47,-.34],[.02,.41]]:[[-.41,-.10],[.41,-.10]]}
  profile(x,z){const a=this.isAnterior()?.76:1.00,b=this.isAnterior()?.56:.86;return Math.pow(Math.pow(Math.abs(x)/a,4)+Math.pow(Math.abs(z)/b,4),.25)}
- height(x,z){const a=this.isAnterior()?0:.205;
+ height(x,z){const a=this.isAnterior()?0:.242;
    const cusp=(u,w)=>Math.exp(-SQ((x-u)/.32)-SQ((z-w)/.31));
-   let h=1.04+a*(cusp(-.53,-.45)+cusp(.53,-.45)+cusp(-.53,.45)+cusp(.53,.45));
-   h-=this.isAnterior()?.00:.082*Math.exp(-SQ(x/.22)-SQ(z/.63));
+   let h=1.016+a*(cusp(-.53,-.45)+.96*cusp(.53,-.45)+.90*cusp(-.53,.45)+.83*cusp(.53,.45));
+   if(!this.isAnterior()){
+     h-=.088*Math.exp(-SQ(x/.27)-SQ(z/.27)); // mesial/central fossa
+     h-=.059*Math.exp(-SQ(x/.075)-SQ(z/.70)); // central fissure
+     h-=.034*Math.exp(-SQ(x/.68)-SQ(z/.082)); // intersecting groove
+   }
    if(this.isAnterior())h=.99+.024*Math.cos(x*3.0)-.022*SQ(z/.55);
    return h;
  }
- crown(x,y,z,inner=0){const r=this.profile(x,z);const vertical=clamp((y+.20)/1.44,0,1);const bulge=.82+.22*Math.sin(vertical*Math.PI);const p=(r/bulge-1+inner);const top=y-this.height(x,z)+inner*.65;
+ crown(x,y,z,inner=0){const r=this.profile(x,z);const vertical=clamp((y+.20)/1.44,0,1);const bulge=.79+.24*Math.sin(vertical*Math.PI*.88);const p=(r/bulge-1+inner);const top=y-this.height(x,z)+inner*.65;
    const base=-y-.20+inner*.20;let f=Math.max(p,top,base);const edge=.040;return f-edge;}
  roots(x,y,z,inner=0){const an=this.isAnterior(),roots=this.rootCenters();
    let result=10;for(const [cx,cz] of roots){const t=clamp(-y/1.53,0,1),rad=(an?.40:this.isUpperMolar()?.285:.37)*(1-t*.82)-inner*.45;
-     const bend=(an?.08:.12)*t*t*(cx<0?-1:1);const dx=x-cx-bend, dz=z-cz-(an?.02:.12)*t;
-     const root=Math.max(Math.hypot(dx,dz)-Math.max(.05,rad),y-.08,-y-1.55);
+     const bend=(an?.065:.18)*t*t*(cx<0?-1:1);const dx=x-cx-bend, dz=z-cz-(an?.02:.12)*t;
+     const tapered=rad*(1-.09*Math.sin(Math.PI*t));
+     const root=Math.max(Math.hypot(dx,dz)-Math.max(.055,tapered),y-.08,-y-1.55);
      result=Math.min(result,root);
    }
    return result;
@@ -1048,21 +1086,77 @@ class VoxelMesher{
   return {faces:materialFaces,res,size:[N,Ny,N],geometry:'marching-tetrahedra',count:faces.length};
  }
 }
+// Desktop GPU rasterization for the SAME editable marching-tetrahedra mesh.
+// This avoids the painter's-algorithm transparency/overdraw seams on Canvas 2D.
+// Uses only WebGL1 features so desktop Chrome and many WebXR-capable browsers work.
+class VolumeMeshWebGL{
+ constructor(canvas){
+  this.canvas=canvas;this.gl=canvas.getContext('webgl2',{antialias:true,alpha:true,premultipliedAlpha:false})||canvas.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false});
+  if(!this.gl)throw Error('WebGL not available');
+  const gl=this.gl;
+  const compile=(type,code)=>{const sh=gl.createShader(type);gl.shaderSource(sh,code);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh};
+  const vert=`attribute vec3 aPos,aNormal,aColor;uniform vec4 uOrbit;uniform vec3 uScale;varying vec3 vNormal,vColor,vView;void main(){float cy=uOrbit.x,sy=uOrbit.y,cp=uOrbit.z,sp=uOrbit.w;float xx=cy*aPos.x+sy*aPos.z,zz=-sy*aPos.x+cy*aPos.z;float yy=cp*aPos.y-sp*zz,depth=sp*aPos.y+cp*zz;gl_Position=vec4(xx*uScale.x,yy*uScale.y-.04,-depth*.18,1.);vec3 n=aNormal;float nx=cy*n.x+sy*n.z,nz=-sy*n.x+cy*n.z;vNormal=normalize(vec3(nx,cp*n.y-sp*nz,sp*n.y+cp*nz));vColor=aColor;vView=vec3(xx,yy,depth);}`;
+  const frag=`precision mediump float;varying vec3 vNormal,vColor,vView;void main(){vec3 n=normalize(vNormal);vec3 key=normalize(vec3(-.47,.86,1.0));vec3 fill=normalize(vec3(.65,.32,-.60));float sun=max(0.,dot(n,key)),bounce=max(0.,dot(n,fill));float ambient=.51+.08*max(n.y,0.);float spec=pow(max(dot(reflect(-key,n),normalize(vec3(.2,1.0,3.0)-vView)),0.),28.)*.20;vec3 rgb=vColor*(ambient+.48*sun+.17*bounce)+vec3(1.,.98,.90)*spec;gl_FragColor=vec4(rgb,1.);}`;
+  this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,vert));gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,frag));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
+  this.attrs=['aPos','aNormal','aColor'].map(n=>gl.getAttribLocation(this.program,n));
+  this.orbit=gl.getUniformLocation(this.program,'uOrbit');this.scale=gl.getUniformLocation(this.program,'uScale');
+  this.buffer=gl.createBuffer();this.count=0;this.mesh=null;this.failed=false;
+  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();this.failed=true;canvas.style.display='none'});
+  canvas.addEventListener('webglcontextrestored',()=>{this.failed=true;canvas.style.display='none'});
+ }
+ update(mesh,solid){
+  if(this.failed)return;
+  const gl=this.gl,colors={enamel:[.955,.915,.826],dentin:[.876,.676,.392],pulp:[.75,.30,.37],cementum:[.64,.48,.38],caries:[.37,.23,.21]};
+  const adjacent=new Map(),indices=[],faceNormals=[];
+  const key=p=>`${p[0].toFixed(5)},${p[1].toFixed(5)},${p[2].toFixed(5)}`;
+  for(const f of mesh.faces){
+   const e=V3.sub(f.p[1],f.p[0]),d=V3.sub(f.p[2],f.p[0]);let n=V3.cross(e,d),length=V3.norm(n)||1;
+   n=n.map(v=>v/length);
+   // Tetrahedron triangles arrive with inconsistent winding: orient via SDF sign.
+   const c=f.center,delta=.026;
+   const ahead=solid.field(c[0]+n[0]*delta,c[1]+n[1]*delta,c[2]+n[2]*delta,solid.section||false);
+   const behind=solid.field(c[0]-n[0]*delta,c[1]-n[1]*delta,c[2]-n[2]*delta,solid.section||false);
+   if(ahead<behind)n=n.map(x=>-x);
+   faceNormals.push(n);
+   for(const vertex of f.p){const k=key(vertex),v=adjacent.get(k)||[0,0,0];adjacent.set(k,[v[0]+n[0]*length,v[1]+n[1]*length,v[2]+n[2]*length]);}
+  }
+  for(let i=0;i<mesh.faces.length;i++){
+   const f=mesh.faces[i],material=colors[f.material]||colors.enamel;
+   for(const point of f.p){let normal=adjacent.get(key(point))||faceNormals[i];const l=V3.norm(normal)||1;normal=normal.map(x=>x/l);indices.push(...point,...normal,...material);}
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(indices),gl.DYNAMIC_DRAW);this.count=indices.length/9;this.mesh=mesh;
+ }
+ render(mesh,solid,yaw,pitch,zoom,width,height,size){
+  if(this.failed)return false;
+  try{
+   if(this.mesh!==mesh)this.update(mesh,solid);
+   const gl=this.gl,c=this.canvas;if(c.width!==width||c.height!==height){c.width=width;c.height=height;}
+   gl.viewport(0,0,width,height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);
+   gl.useProgram(this.program);gl.uniform4f(this.orbit,Math.cos(yaw),Math.sin(yaw),Math.cos(pitch),Math.sin(pitch));
+   gl.uniform3f(this.scale,2*size/width,2*size/height,1);
+   gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
+   for(let i=0;i<3;i++){gl.enableVertexAttribArray(this.attrs[i]);gl.vertexAttribPointer(this.attrs[i],3,gl.FLOAT,false,36,i*12)}
+   gl.drawArrays(gl.TRIANGLES,0,this.count);return true;
+  }catch(e){console.warn('KlinikLab WebGL volume fallback:',e);this.failed=true;this.canvas.style.display='none';return false}
+ }
+}
 class ProceduralVolumeLab{
  constructor(host,app){this.host=host;this.app=app;this.caseKey='molar';this.solid=new ToothSolid('molar');this.mesh=null;this.section=false;this.yaw=-.42;this.pitch=.35;this.zoom=1.0;this.mode='orbit';this.depth=.93;this.burRadius=.125;this.strokes=0;this.distance=0;this.demoRunning=false;this.demoTick=0;this.history=[];this.physics={speed:.65,load:.45,tilt:0,trace:[],model:'normalized-surrogate-v1',calibrated:false};this.active=false;this.previewPoint=null;this.lastPointer=null;this.status='Bereit';this.init();this.reset();}
  init(){this.host.innerHTML=`<div class="vl-inner">
  <div class="vl-topline"><div><span class="vl-eyebrow">KP PRAKTISCH · 3D VOLUME ENGINE</span><h2 id="vl-title">16 · MOD / Komposit</h2><div class="vl-sub" id="vl-sub">Originales 3D-Zahnmodell · modellhafte Anatomie</div></div><div class="vl-top-actions"><button id="vl-back" class="vl-chip">← Klinik</button><button id="vl-section" class="vl-chip" title="Open an anatomical cross section">◒ Schnittbild</button><button id="vl-reset" class="vl-chip" title="Restore the uncut tooth">↺ Neustart</button></div></div>
- <div class="vl-viewport"><canvas id="vl-canvas" width="900" height="640" aria-label="Rotatable three-dimensional tooth with editable enamel dentin and pulp layers" tabindex="0"></canvas><div class="vl-legend"><span><i style="background:#f2e9d5"></i> Schmelz</span><span><i style="background:#e0b572"></i> Dentin</span><span><i style="background:#b64a58"></i> Pulpa</span><span><i style="background:#a17b63"></i> Wurzel</span></div><div id="vl-pointer" class="vl-bur-indicator" aria-hidden="true"></div><div id="vl-slice-frame" class="vl-slice-frame" hidden><span>ORIGINALER SCHNITT · z = 0</span><canvas id="vl-slice" width="180" height="220" aria-label="Computed layer-by-layer longitudinal tooth section"></canvas></div><div id="vl-render-message" class="vl-render-message">3D-VOLUMEN · Drehen zum Inspizieren</div></div>
+ <div class="vl-viewport"><canvas id="vl-canvas" width="900" height="640" aria-label="Rotatable three-dimensional tooth with editable enamel dentin and pulp layers" tabindex="0"></canvas><canvas id="vl-gpu" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none"></canvas><div class="vl-legend"><span><i style="background:#f2e9d5"></i> Schmelz</span><span><i style="background:#e0b572"></i> Dentin</span><span><i style="background:#b64a58"></i> Pulpa</span><span><i style="background:#a17b63"></i> Wurzel</span></div><div id="vl-pointer" class="vl-bur-indicator" aria-hidden="true"></div><div id="vl-slice-frame" class="vl-slice-frame" hidden><span>ORIGINALER SCHNITT · z = 0</span><canvas id="vl-slice" width="180" height="220" aria-label="Computed layer-by-layer longitudinal tooth section"></canvas></div><div id="vl-render-message" class="vl-render-message">3D-VOLUMEN · Drehen zum Inspizieren</div></div>
  <div class="vl-bottom"><div class="vl-toolbar"><button id="vl-orbit" class="vl-chip is-on">⟳ 3D drehen</button><button id="vl-drill" class="vl-chip">◉ Präparieren</button><button id="vl-top" class="vl-chip">↑ Okklusal</button><button id="vl-demo" class="vl-chip demo">▶ Demonstration</button><button id="vl-undo" class="vl-chip">↶ Undo</button><button id="vl-report" class="vl-chip">↓ Bericht</button><button id="vl-ai-review" class="vl-chip">✦ KI-Feedback</button></div>
  <div class="vl-sliders"><label>Arbeitstiefe <b id="vl-depth-label">0.93</b><input id="vl-depth" type="range" min="-0.10" max="1.21" step="0.025" value="0.93" aria-label="Cutting plane depth, in normalized model units"/></label><label>Bohrer-Radius <b id="vl-radius-label">0.125</b><input id="vl-radius" type="range" min="0.055" max="0.215" step="0.01" value="0.125" aria-label="Spherical simulated cutting tool radius in model units"/></label></div>
  <div class="vl-metrics"><div><b id="vl-coverage">0%</b><span>Zielvolumen entfernt</span></div><div><b id="vl-precision">—</b><span>Präzision</span></div><div><b id="vl-offcut">0%</b><span>Außerhalb des Ziels</span></div><div><b id="vl-pulp">Nein</b><span>Simulierte Pulpaeröffnung</span></div></div>
  <div class="vl-stepper"><span class="vl-eyebrow">THERAPIEABLAUF</span><div id="vl-steps"></div><div class="vl-tip" id="vl-tip"></div><p class="vl-clinical">Modellbasierte Lernmessung, nicht klinisch kalibriert oder zahnärztlich begutachtet. Die Präparationsbewegung wird nur bei <b>Okklusal</b> plus <b>Präparieren</b> erfasst. Keine Kraft-, Drehzahl-, Angulations- oder Kollisionsmessung. Für die KP-Vorbereitung ergänzend am Phantom üben.</p></div></div></div>`;
   this.canvas=$('vl-canvas');this.ctx=this.canvas.getContext('2d',{alpha:false});this.sliceCanvas=$('vl-slice');
+  this.gpu=null;try{this.gpu=new VolumeMeshWebGL($('vl-gpu'))}catch(e){$('vl-gpu').style.display='none'}
   $('vl-back').onclick=()=>this.app.setView('3d');$('vl-orbit').onclick=()=>this.setMode('orbit');$('vl-drill').onclick=()=>this.setMode('drill');$('vl-top').onclick=()=>this.topView();$('vl-section').onclick=()=>this.toggleSection();$('vl-reset').onclick=()=>this.reset();$('vl-demo').onclick=()=>this.demo();$('vl-undo').onclick=()=>this.undo();$('vl-report').onclick=()=>this.exportReport();$('vl-ai-review').onclick=()=>{this.app?.setView('volume');$('ai-open')?.click();document.querySelector('[data-ai-tab="procedure"]')?.click();};
   $('vl-depth').oninput=e=>{this.depth=+e.target.value;$('vl-depth-label').textContent=this.depth.toFixed(2);this.render()};$('vl-radius').oninput=e=>{this.burRadius=+e.target.value;$('vl-radius-label').textContent=this.burRadius.toFixed(3);this.render()};
   let pointer=null,last=null;this.canvas.addEventListener('pointerdown',e=>{if(this.demoRunning)return;pointer={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};this.canvas.setPointerCapture(e.pointerId);if(this.mode==='drill'){this.applyPointer(e,true);last=this.mapPointer(e)}});
   this.canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;if(this.mode==='orbit'){this.yaw=pointer.yaw+(e.clientX-pointer.x)*.008;this.pitch=clamp(pointer.pitch+(e.clientY-pointer.y)*.006,-1.28,1.28);this.render()}else{this.applyPointer(e,false,last);last=this.mapPointer(e)}});
-  for(const type of ['pointerup','pointercancel','lostpointercapture'])this.canvas.addEventListener(type,()=>{pointer=null;last=null});
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])this.canvas.addEventListener(type,()=>{const finished=!!pointer;pointer=null;last=null;if(finished&&this.mode==='drill'&&this.solid.bur.length&&!this.demoRunning)this.rebuild(true)});
   this.canvas.addEventListener('wheel',e=>{e.preventDefault();this.zoom=clamp(this.zoom*Math.exp(-e.deltaY*.001),.55,2.4);this.render()},{passive:false});
   this.canvas.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){this.yaw+=(e.key==='ArrowLeft'?-1:1)*.12;this.render()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){this.pitch=clamp(this.pitch+(e.key==='ArrowUp'?-1:1)*.12,-1.28,1.28);this.render()}});
   new ResizeObserver(()=>{if(this.active)this.render()}).observe(this.host);
@@ -1076,7 +1170,10 @@ class ProceduralVolumeLab{
  exportReport(){const metrics=this.measures();const data={project:'KlinikLab – volumetric procedure lab',case:this.caseKey,procedure:CASES[this.caseKey].name,createdAt:new Date().toISOString(),geometry:{method:'sampled implicit solid; marching tetrahedra',meshTriangles:this.mesh?.count||0,units:'normalized, not calibrated',clinicallyReviewed:false},metrics,virtualBurPhysics:{parameters:{speed:this.physics.speed,load:this.physics.load,tilt:this.physics.tilt},trace:this.physics.trace,units:'arbitrary/uncalibrated',measurementsFromRealHardware:false},burPath:this.solid.bur.map(v=>({x:+v.p[0].toFixed(3),y:+v.p[1].toFixed(3),z:+v.p[2].toFixed(3),radius:+v.r.toFixed(3)})),limitations:['Does not measure forces, RPM, bur angulation, haptics, anatomy-specific clinical depth or infection control','Model has not been validated by a licensed dentist','For endodontics, modeled pulp chamber access is expected, not automatically a complication']};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`KlinikLab_${this.caseKey}_3D_training_report.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);this.status='Trainingsbericht exportiert';}
  undo(){if(this.solid.bur.length){this.solid.bur.pop();this.physics.trace.pop();this.strokes=Math.max(0,this.strokes-1);this.rebuild();}}
- rebuild(){this.revision=(this.revision||0)+1;this.mesh=VoxelMesher.build(this.solid,this.section,26);this.updateMetrics();if(this.section)this.drawSectionSlice();if(this.active)this.render()}
+ rebuild(fullDetail=false){this.revision=(this.revision||0)+1;
+  const moving=this.mode==='drill'&&this.solid.bur.length>0&&!fullDetail;
+  this.mesh=VoxelMesher.build(this.solid,this.section,moving?27:35);
+  if(this.gpu){this.solid.section=this.section;this.gpu.update(this.mesh,this.solid);}this.updateMetrics();if(this.section)this.drawSectionSlice();if(this.active)this.render()}
  mapPointer(e){const rect=this.canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width,z=(e.clientY-rect.top)/rect.height;const w=Math.min(rect.width/2.05,rect.height/3.3)*this.zoom;return {x:(x-.5)*rect.width/w, z:(z-.50)*rect.height/w};}
  applyPointer(e,first,last){const p=this.mapPointer(e);if(!Number.isFinite(p.x)||!Number.isFinite(p.z)||Math.abs(p.x)>1.17||Math.abs(p.z)>1.06)return;
   const steps=last?Math.min(8,Math.max(1,Math.ceil(Math.hypot(p.x-last.x,p.z-last.z)/.11))):1;
@@ -1134,6 +1231,11 @@ class ProceduralVolumeLab{
   const grad=ctx.createRadialGradient(W*.48,H*.36,15,W*.5,H*.5,Math.max(W,H)*.75);grad.addColorStop(0,'#294b58');grad.addColorStop(.72,'#102c39');grad.addColorStop(1,'#071924');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
   const size=Math.min(W/3.65,H/3.8)*this.zoom, cx=W*.50,cy=H*.52;
   ctx.save();ctx.strokeStyle='#5877871e';ctx.lineWidth=1;for(let x=0;x<W;x+=Math.max(23,W/22)){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=Math.max(23,H/20)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.restore();
+  if(this.gpu?.render(this.mesh,this.solid,this.yaw,this.pitch,this.zoom,W,H,size)){
+    const label=$('vl-render-message');
+    label.textContent=(this.mode==='drill'?'● MATERIALABTRAG · Tiefe '+this.depth.toFixed(2):this.section?'◒ GPU-SCHNITT · Materialschichten sichtbar':'◉ GPU 3D-ZAHN · '+this.mesh.count+' Dreiecke');
+    return;
+  }
   const color={enamel:[244,235,213],dentin:[221,170,98],pulp:[180,69,90],cementum:[152,129,110],caries:[100,72,66]};
   const draw=[];for(const f of this.mesh.faces){const p=f.p.map(q=>this.transform(q));const center=p.reduce((s,q)=>s+q[2],0)/3;
     const v0=p[0],v1=p[1],v2=p[2],u=V3.sub(v1,v0),v=V3.sub(v2,v0),n=V3.cross(u,v);const length=V3.norm(n)||1;
@@ -1144,7 +1246,7 @@ class ProceduralVolumeLab{
   }
   
   draw.sort((a,b)=>a.depth-b.depth);
-  for(const f of draw){ctx.beginPath();ctx.moveTo(f.p[0][0],f.p[0][1]);ctx.lineTo(f.p[1][0],f.p[1][1]);ctx.lineTo(f.p[2][0],f.p[2][1]);ctx.closePath();ctx.fillStyle=f.fill;ctx.fill();}
+  for(const f of draw){ctx.beginPath();ctx.moveTo(f.p[0][0],f.p[0][1]);ctx.lineTo(f.p[1][0],f.p[1][1]);ctx.lineTo(f.p[2][0],f.p[2][1]);ctx.closePath();ctx.fillStyle=f.fill;ctx.fill();ctx.strokeStyle=f.fill;ctx.lineWidth=.65;ctx.stroke();}
   if(this.previewPoint){const a=this.transform(this.previewPoint),bx=cx+size*a[0],by=cy-size*a[1];
    ctx.save();ctx.strokeStyle='#0719249a';ctx.lineWidth=16;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(bx+67,by-104);ctx.lineTo(bx+7,by-13);ctx.stroke();
    ctx.strokeStyle='#c8e3e6';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(bx+60,by-99);ctx.lineTo(bx+7,by-13);ctx.stroke();
