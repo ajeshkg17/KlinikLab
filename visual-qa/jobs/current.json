@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "real-dental-arches-v2-2026-10-29-01",
+  "jobId": "real-dental-arches-v3-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-real-frontal",
+      "name": "01-real-frontal-visible",
       "steps": [
         {
           "action": "click",
@@ -33,68 +33,11 @@
       "capture": "stage"
     },
     {
-      "name": "02-real-occlusal",
+      "name": "02-real-occlusal-visible",
       "steps": [
         {
           "action": "click",
           "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "03-real-oblique",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "orbit",
-          "dx": 140,
-          "dy": -50
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "04-real-clinic",
-      "steps": [
-        {
-          "action": "click",
-          "control": "clinic"
         },
         {
           "action": "click",
