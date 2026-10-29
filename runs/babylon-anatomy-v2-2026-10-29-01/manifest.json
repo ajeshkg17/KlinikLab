@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "jobId": "babylon-anatomy-v2-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T12:57:28.082Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-classic-teeth",
+      "file": "01-classic-teeth.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 109590,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-anatomy-babylon",
+      "file": "02-anatomy-babylon.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 87790,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 190,
+          "environment": "disabled",
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "03-anatomy-occlusal",
+      "file": "03-anatomy-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 82707,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 163,
+          "environment": "disabled",
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-anatomy-oblique",
+      "file": "04-anatomy-oblique.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 96055,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 176,
+          "environment": "disabled",
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "05-babylon-clinic",
+      "file": "05-babylon-clinic.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 127761,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 144,
+          "environment": "disabled",
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 5,
+  "failureCount": 0
+}
