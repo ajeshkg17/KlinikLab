@@ -69,6 +69,9 @@ export function validateJob(raw) {
       if (!step || typeof step !== 'object') throw new Error('Invalid step.');
       if (step.action === 'click') {
         if (!Object.hasOwn(CONTROLS,step.control)) throw new Error(`Control is not approved: ${step.control}`);
+      } else if (step.action === 'localDemoGLB') {
+        // The only permitted local upload source is the bundled public demo tooth;
+        // job files cannot choose a filesystem path or access private files.
       } else if (step.action === 'wait') {
         if (!pnum(step.ms,100,3000)) throw new Error('Wait must be 100–3000 ms.');
       } else if (step.action === 'orbit') {
