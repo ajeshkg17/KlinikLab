@@ -1,0 +1,95 @@
+/* UX audit revision: responsive layout, accessible navigation and readable controls */
+:root{--focus:#1cb4a2}
+html,body{max-width:100%;overflow-x:hidden}
+.app{min-width:0}
+button{touch-action:manipulation}
+#open-nav,#close-nav,#case-quick,#jump-exercise{display:none}
+#case-quick,#jump-exercise{border:1px solid #b9d9d1;background:#f1faf6;color:#086f68;font-size:11px;font-weight:850;border-radius:9px;padding:9px 12px}
+#mobile-scrim{display:none}
+.stage canvas#scene{outline:none}
+.stage canvas#scene:focus-visible{outline:3px solid #59ddc3;outline-offset:-5px}
+.case-strip{min-width:0}
+.stage-top .stage-controls{max-width:none}
+#scene-label{font-weight:850}
+.stage-bottom .stage-hint{max-width:75%}
+.right .patient{border-color:#cde1dc}
+.stations-wrap .station{min-height:49px}
+.station:focus-visible,.case:focus-visible,.tooth:focus-visible,.tool:focus-visible{outline:3px solid #25b9a8;outline-offset:2px}
+#nav-instruction{color:#417b7c;background:#e8f5ef;border-radius:10px;padding:9px 11px;font-size:11px;font-weight:650;margin-top:12px}
+.fallback-label{font-size:11px;color:#afd8d3}
+@media(min-width:951px){.left{scrollbar-width:thin}.right{scrollbar-width:thin}.understage{scrollbar-width:thin}}
+@media(max-width:950px){
+  body{overflow-x:hidden}
+  .app{width:100%;min-width:0;grid-template-rows:auto 1fr;height:auto;min-height:100dvh}
+  header{min-height:66px;padding:9px 16px;gap:8px;position:sticky;top:0;z-index:40}
+  .header-right{gap:7px;flex-shrink:0}
+  #open-nav,#case-quick,#jump-exercise,#close-nav{display:inline-flex;align-items:center;justify-content:center}
+  #open-nav{border:1px solid #bcd6d2;background:#eff8f4;color:#165c5e;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:800}
+  .header-right .status{display:none}
+  .main{display:flex;flex-direction:column;min-width:0;overflow:visible}
+  .left{grid-row:unset;position:fixed;top:0;bottom:0;left:0;z-index:101;transform:translateX(-103%);transition:transform .21s ease;box-shadow:12px 0 42px #001b2830;width:min(370px,92vw);padding:20px 18px 40px;overflow-y:auto;background:#f8faf9;border-right:1px solid #a9c5c1}
+  .left.open{transform:translateX(0)}
+  #mobile-scrim.open{display:block;position:fixed;z-index:100;inset:0;background:#081d2980}
+  .side-title{font-size:19px}
+  .side-desc{margin-bottom:14px}
+  #close-nav{float:right;border:1px solid #bed9d2;color:#1c555a;background:#fff;border-radius:10px;padding:6px 11px}
+  .stations-wrap{display:block}
+  .station{margin:4px 0}
+  .cases{grid-template-columns:1fr 1fr}
+  .center{grid-row:unset;display:grid;grid-template-rows:auto clamp(350px,52vh,500px) auto;min-width:0}
+  .right{grid-row:unset;padding:24px min(5vw,32px) 52px;max-width:800px;width:100%;margin:auto;border-left:0}
+  .understage{max-height:none;padding:15px min(4vw,24px)}
+  .case-strip{padding:13px 18px}
+  .case-status{display:none}
+  .stage-top{top:12px;left:12px;right:12px}
+  .stage-bottom{bottom:11px;left:12px;right:12px}
+  .right .patient{max-width:740px}
+  .right h1{font-size:25px}
+  .btn.primary{min-height:43px}
+}
+@media(max-width:590px){
+  header{padding:8px 10px;min-height:62px;gap:4px}
+  .mark{height:35px;width:35px;border-radius:10px;font-size:19px}
+  .brand{gap:7px;min-width:0}
+  .brand strong{font-size:16px}
+  .brand small{font-size:8px;letter-spacing:.5px;white-space:nowrap}
+  #open-nav{font-size:0;padding:9px;width:35px;height:35px;order:0}
+  #open-nav:before{content:'☰';font-size:18px}
+  .header-right{gap:5px}
+  .header-right #expert,.header-right #help,.header-right #vr{display:none}
+  .header-right #ai-open{font-size:11px;padding:8px 9px;white-space:nowrap}
+  .case-strip{gap:6px;padding:10px 12px}
+  .case-strip strong{font-size:13px;line-height:1.22}
+  .case-strip small{font-size:10px}
+  #case-quick{white-space:nowrap;padding:7px 9px}
+  #jump-exercise{font-size:10px;padding:7px 9px;white-space:nowrap}
+  .center{grid-template-rows:auto 375px auto}
+  .stage-top{top:9px;left:9px;right:9px;display:flex;flex-direction:column;gap:8px}
+  .float-title{display:none}
+  .stage-controls{display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;gap:5px;max-width:none;scrollbar-width:thin;padding-bottom:4px}
+  .stage-controls button{padding:7px 10px;font-size:10px;flex:0 0 auto;min-height:32px}
+  .stage-bottom{left:8px;right:8px;bottom:8px}
+  .stage-bottom .stage-hint{font-size:9px;padding:7px 9px;line-height:1.45;max-width:100%}
+  .stage-bottom .selection{display:none}
+  .understage{grid-template-columns:1fr;gap:17px;padding:15px 12px}
+  .chart{grid-template-columns:repeat(8,minmax(0,1fr));gap:3px}
+  .tooth{min-height:36px;font-size:11px}
+  .tray{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tool{min-height:40px}
+  .right{padding:18px 14px 45px;scroll-margin-top:70px}
+  .right h1{font-size:25px}
+  .right .sub,.task p{font-size:13px}
+  .brief-grid,.vocab{grid-template-columns:1fr 1fr}
+  .procedure{padding:58px 9px 22px}
+  .proc-top{left:9px;right:9px;top:46px}
+  .proc-top strong{font-size:11px}.proc-top small{display:none}
+  .proc-metrics{font-size:10px;padding:5px 6px}
+  .proc-bottom{font-size:10px}
+  .xray{padding:62px 13px 30px}
+  .xray p{line-height:1.5}
+  .ai-panel{width:100vw;max-width:100vw}
+  .ai-head h2{font-size:19px}
+  .ai-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ai-tabs button{min-width:0;white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){.left,.toast,.station,.btn{transition:none!important}}

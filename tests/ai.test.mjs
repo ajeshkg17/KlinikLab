@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {runGemini,validateInput,makeGeminiPayload,buildSystemInstruction,checkAccess} from '../server/ai-core.mjs';
+const base={mode:'generate_patient',caseId:'molar',stationId:'interview',difficulty:'FSP B2-C1'};
+const sample={name:'Frau Johanna Meyer',age:41,complaint:'Seit zwei Wochen tut mein rechter Oberkiefer beim Kauen weh.',facts:'Kalte Getränke machen kurz Beschwerden, spontan keine Schmerzen.',history:'Seit zwei Wochen, zunehmend beim Kauen.',exam:'Noch keine Untersuchung durchgeführt.',risk:'Medikamente und Allergien müssen erfragt werden.',communication:'Etwas ängstlich, spricht ruhig.',hiddenFacts:'Keine Nachtschmerzen, der Schmerz klingt rasch ab.',treatmentGoal:'Möglichst Zahnerhalt.',redFlags:'Keine berichtete Schwellung, kein Fieber.'};
+const seen=[];
+const mockFetch=async (url,opts)=>{seen.push({url,opts});const payload=JSON.parse(opts.body);const answer=payload.generationConfig.responseMimeType==='application/json'?JSON.stringify(sample):'Klinisches Feedback: Plan prüfen, Anamnese ergänzen. Nicht offiziell bewertet.';return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:answer}]}}],usageMetadata:{promptTokenCount:100,candidatesTokenCount:50}})}};
+const env={GEMINI_API_KEY:'test-secret',GEMINI_MODEL:'gemini-3.6-flash'};
+const generated=await runGemini(base,env,mockFetch);assert.equal(generated.patient.archetype,'molar');assert.equal(generated.patient.tooth,'16');assert.equal(generated.patient.name,sample.name);assert.equal(seen[0].opts.headers['x-goog-api-key'],'test-secret');assert(!seen[0].opts.body.includes('test-secret'));
+const p={mode:'patient',caseId:'molar',stationId:'interview',message:'Seit wann haben Sie Schmerzen?',history:[],generatedPatient:generated.patient};const pr=await runGemini(p,env,mockFetch);assert(pr.reply.includes('Klinisches Feedback'));
+assert(buildSystemInstruction(validateInput(p)).includes('Johanna Meyer'));
+const plan={mode:'plan_review',caseId:'molar',stationId:'written',document:'Anamnese, Vitalität, Differenzialdiagnosen, Aufklärung, direkte Restauration oder Teilkrone.',message:'Examine risks.'};assert((await runGemini(plan,env,mockFetch)).reply.length>0);
+const procedure={mode:'procedure_review',caseId:'molar',stationId:'practical',procedureMetrics:{coveragePct:75,precisionPct:78,offTargetPct:22,overcutCells:19,removedCells:80,targetCells:100,strokeCount:14,pathLengthPx:530},procedureTrace:[{action:'instrument_selection',step:'practical / 3',detail:'Diamantbohrer',correct:true}]};const report=await runGemini(procedure,env,mockFetch);assert(report.reply.length>0);assert(seen.at(-1).opts.body.includes('coveragePct'));assert(buildSystemInstruction(validateInput(procedure)).includes('No clinically calibrated depth'));
+assert.throws(()=>validateInput({...procedure,procedureMetrics:{...procedure.procedureMetrics,coveragePct:500}}));
+assert.throws(()=>checkAccess('bad',{AI_ACCESS_CODE:'good'},true));assert.throws(()=>checkAccess('',{},true));
+assert.throws(()=>validateInput({...base,caseId:'fake'}));
+assert.equal(seen.length,4);
+console.log('Gemini modes tested:',seen.length,'generated patient, chat, KP plan review, procedure review, validation and secret handling OK');

@@ -1,0 +1,272 @@
+
+'use strict';
+const M3 = (() => {
+  const v=(x=0,y=0,z=0)=>[x,y,z];
+  const add=(a,b)=>a.map((t,i)=>t+b[i]); const sub=(a,b)=>a.map((t,i)=>t-b[i]);
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const mul=(a,s)=>a.map(x=>x*s);const len=a=>Math.hypot(...a);const unit=a=>mul(a,1/(len(a)||1));
+  const I=()=>[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+  function mm(a,b){const out=new Array(16).fill(0);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)out[c*4+r]+=a[k*4+r]*b[c*4+k];return out}
+  function trs(p=[0,0,0],rot=[0,0,0],s=[1,1,1]){
+    const [x,y,z]=rot,[cx,sx]=[Math.cos(x),Math.sin(x)],[cy,sy]=[Math.cos(y),Math.sin(y)],[cz,sz]=[Math.cos(z),Math.sin(z)];
+    const Rx=[1,0,0,0,0,cx,sx,0,0,-sx,cx,0,0,0,0,1];
+    const Ry=[cy,0,-sy,0,0,1,0,0,sy,0,cy,0,0,0,0,1];
+    const Rz=[cz,sz,0,0,-sz,cz,0,0,0,0,1,0,0,0,0,1];
+    const T=I();T[12]=p[0];T[13]=p[1];T[14]=p[2];
+    const S=I();S[0]=s[0];S[5]=s[1];S[10]=s[2];return mm(T,mm(Ry,mm(Rx,mm(Rz,S))))
+  }
+  function perspective(fovy,aspect,near,far){const f=1/Math.tan(fovy/2), nf=1/(near-far);return [f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0]}
+  function lookAt(eye,target,up=[0,1,0]){
+    const z=unit(sub(eye,target)),x=unit(cross(up,z)),y=cross(z,x);
+    return [x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1]
+  }
+  // Generic Gauss-Jordan inverse, column-major.
+  function inverse(m){const a=[];for(let r=0;r<4;r++){a[r]=[];for(let c=0;c<4;c++)a[r][c]=m[c*4+r];for(let c=0;c<4;c++)a[r][4+c]=+(c===r)}for(let i=0;i<4;i++){let k=i;for(let j=i+1;j<4;j++)if(Math.abs(a[j][i])>Math.abs(a[k][i]))k=j;if(Math.abs(a[k][i])<1e-12)return I();[a[i],a[k]]=[a[k],a[i]];let t=a[i][i];for(let j=0;j<8;j++)a[i][j]/=t;for(let r=0;r<4;r++)if(r!==i){const f=a[r][i];for(let j=0;j<8;j++)a[r][j]-=f*a[i][j]}}const o=[];for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r][4+c];return o}
+  function transform(m,p,w=1){const q=[...p,w],r=[0,0,0,0];for(let row=0;row<4;row++)for(let k=0;k<4;k++)r[row]+=m[k*4+row]*q[k];return r}
+  function raySphere(o,d,c,r){const oc=sub(o,c),b=dot(oc,d),h=b*b-dot(oc,oc)+r*r;if(h<0)return null;const t=-b-Math.sqrt(h);return t>=0?t:null}
+  return {v,add,sub,dot,cross,mul,len,unit,I,mm,trs,perspective,lookAt,inverse,transform,raySphere};
+})();
+
+
+
+'use strict';
+/* Dependency-free WebGL 3D renderer and native WebXR input layer.
+   All patient anatomy is schematic and intended for teaching recognition. */
+class DentalScene {
+  constructor(canvas,onPick){
+    this.canvas=canvas;this.onPick=onPick;this.gl=canvas.getContext('webgl2',{antialias:true,alpha:false,xrCompatible:true})||canvas.getContext('webgl',{antialias:true,alpha:false,xrCompatible:true});
+    if(!this.gl)throw Error('WebGL unavailable. Enable hardware acceleration in your browser.');
+    const gl=this.gl;this.meshes=[];this.pickables=[];this.dynamicMeshes=[];this.textures=[];this.started=false;
+    const vs=`attribute vec3 aPos;attribute vec3 aNormal;attribute vec2 aUV;uniform mat4 uModel,uView,uProj;uniform mat3 uNormal;varying vec3 vNormal,vWorld;varying vec2 vUV;void main(){vec4 p=uModel*vec4(aPos,1.);vWorld=p.xyz;vNormal=uNormal*aNormal;vUV=aUV;gl_Position=uProj*uView*p;}`;
+    const fs=`precision mediump float;varying vec3 vNormal,vWorld;varying vec2 vUV;uniform vec3 uColor;uniform float uAlpha,uTextured,uUnlit;uniform sampler2D uTexture;void main(){vec3 n=normalize(vNormal);vec3 l1=normalize(vec3(-0.38,0.88,0.65));vec3 l2=normalize(vec3(0.72,0.42,-0.6));float diff=max(dot(n,l1),0.)*.49+max(dot(n,l2),0.)*.16+max(dot(n,normalize(vec3(0.,-1.,.45))),0.)*.28;float lit=.46+diff;float spec=pow(max(dot(reflect(-l1,n),normalize(vec3(0.1,1.,2.5)-vWorld)),0.),22.)*.11;vec4 tex=texture2D(uTexture,vUV);vec3 c=mix(uColor,tex.rgb,clamp(uTextured,0.,1.));if(uTextured>.5 && tex.a<.04)discard;gl_FragColor=vec4(c*(uUnlit>.5?1.:lit)+vec3(spec)*(1.-uUnlit),uAlpha*mix(1.,tex.a,clamp(uTextured,0.,1.)));}`;
+    const compile=(kind,src)=>{const sh=gl.createShader(kind);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;};
+    this.program=gl.createProgram();gl.attachShader(this.program,compile(gl.VERTEX_SHADER,vs));gl.attachShader(this.program,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(this.program);if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(this.program));
+    gl.useProgram(this.program);this.loc={};for(const n of ['uModel','uView','uProj','uNormal','uColor','uAlpha','uTextured','uUnlit','uTexture'])this.loc[n]=gl.getUniformLocation(this.program,n);
+    this.attr={pos:gl.getAttribLocation(this.program,'aPos'),normal:gl.getAttribLocation(this.program,'aNormal'),uv:gl.getAttribLocation(this.program,'aUV')};
+    this.geom={box:this.geometry(this.boxData()),sphere:this.geometry(this.sphereData(12,16)),cylinder:this.geometry(this.cylinderData(16)),torus:this.geometry(this.torusData(24,9)),quad:this.geometry(this.quadData())};
+    this.whiteTex=this.makeTexture(null);
+    this.target=[0,1.33,-2.28];this.yaw=.28;this.pitch=.27;this.distance=3.8;this.selectedKey='';this.hoverKey='';this.mode='clinic';this.xrSession=null;this.xrRef=null;this.frameCount=0;
+    this.installEvents();this.buildScene();this.loop();
+  }
+  geometry(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);return {buffer:b,count:data.length/8};}
+  tri(a,b,c,n=null){const A=a.p||a,B=b.p||b,C=c.p||c;const normal=n||M3.unit(M3.cross(M3.sub(B,A),M3.sub(C,A)));return [...A,...normal,...(a.uv||[0,0]),...B,...normal,...(b.uv||[1,0]),...C,...normal,...(c.uv||[1,1])];}
+  quadData(){return [...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,-.5,0],uv:[1,0]},{p:[.5,.5,0],uv:[1,1]},[0,0,1]),...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,.5,0],uv:[1,1]},{p:[-.5,.5,0],uv:[0,1]},[0,0,1])];}
+  boxData(){const p=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],v=[];for(let ax=0;ax<3;ax++)for(const dir of [-1,1]){const n=[0,0,0];n[ax]=dir;const other=[0,1,2].filter(x=>x!==ax),corners=[];for(const [a,b] of [[-1,-1],[1,-1],[1,1],[-1,1]]){const q=[0,0,0];q[ax]=dir*.5;q[other[0]]=a*.5;q[other[1]]=b*.5;corners.push(q)}if(dir*(ax===1?-1:1)<0)corners.reverse();v.push(...this.tri(corners[0],corners[1],corners[2],n),...this.tri(corners[0],corners[2],corners[3],n));}return v}
+  sphereData(lat,long){const v=[],point=(t,p)=>{const st=Math.sin(t);return [st*Math.cos(p),Math.cos(t),st*Math.sin(p)]};for(let i=0;i<lat;i++)for(let j=0;j<long;j++){const t=i*Math.PI/lat,t2=(i+1)*Math.PI/lat,p=j*2*Math.PI/long,p2=(j+1)*2*Math.PI/long;const a=point(t,p),b=point(t2,p),c=point(t2,p2),d=point(t,p2);for(const [x,y,z]of [[a,b,c],[a,c,d]]){for(const q of [x,y,z])v.push(...q,...q,0,0)}}return v}
+  cylinderData(segments){let a=[],r=(i)=>i/segments*Math.PI*2;for(let i=0;i<segments;i++){const th=r(i),th2=r(i+1),x=Math.cos(th),z=Math.sin(th),X=Math.cos(th2),Z=Math.sin(th2);const A=[x*.5,-.5,z*.5],B=[X*.5,-.5,Z*.5],C=[X*.5,.5,Z*.5],D=[x*.5,.5,z*.5];a.push(...this.tri(A,B,C,M3.unit([x+X,0,z+Z])),...this.tri(A,C,D,M3.unit([x+X,0,z+Z])),...this.tri([0,.5,0],D,C,[0,1,0]),...this.tri([0,-.5,0],B,A,[0,-1,0]));}return a}
+  torusData(M,N){const v=[],pos=(a,b)=>[(.73+.24*Math.cos(b))*Math.cos(a),.24*Math.sin(b),(.73+.24*Math.cos(b))*Math.sin(a)];for(let i=0;i<M;i++)for(let j=0;j<N;j++){const a=i/M*Math.PI*2,A=(i+1)/M*Math.PI*2,b=j/N*Math.PI*2,B=(j+1)/N*Math.PI*2;const p=[pos(a,b),pos(A,b),pos(A,B),pos(a,B)];const center=q=>M3.unit([q[0],q[1],q[2]]);v.push(...this.tri(p[0],p[1],p[2],null),...this.tri(p[0],p[2],p[3],null))}return v}
+  // Actual crown topology: tapered cervical section, rounded incisal edge or
+  // multi-cusp occlusal anatomy. Units are metres in the world scene.
+  crownData(style,upper){
+    const v=[], direction=upper?-1:1, n=28, rings=9;
+    const height=style===1?.162:style===2?.190:style===3?.170:.163;
+    const power=style===1?3.8:style===2?2.45:style===3?3.15:3.75;
+    const squircle=(a)=>{const co=Math.cos(a),si=Math.sin(a),e=2/power;return [Math.sign(co)*Math.pow(Math.abs(co),e),Math.sign(si)*Math.pow(Math.abs(si),e)]};
+    // Morphologically broader incisal edges and constricted cervical regions.
+    const factor=t=>.76+.20*Math.sin(Math.PI*t*.8)+.035*t;
+    const point=(t,a)=>{const [xx,zz]=squircle(a),r=factor(t);
+      const taper=style===1?1+.065*t:1, lingual=style===1?.79:style===2?.91:1;
+      return [xx*r*taper,direction*height*t,zz*r*lingual];};
+    for(let k=0;k<rings;k++)for(let j=0;j<n;j++){
+      const a=j*2*Math.PI/n,b=(j+1)*2*Math.PI/n,t=k/rings,T=(k+1)/rings;
+      const A=point(t,a),B=point(t,b),C=point(T,b),D=point(T,a);
+      // Winding correct for both maxillary and mandibular crowns.
+      if(upper)v.push(...this.tri(A,B,C),...this.tri(A,C,D));
+      else v.push(...this.tri(A,C,B),...this.tri(A,D,C));
+    }
+    // Occlusal anatomy is a single smooth surface: NOT a collection of spheres.
+    // Small Gaussian cusps create molar/premolar anatomy and a central fossa.
+    const cusps=style===3?[[-.47,0.02],[.47,.02]]:style===4?[[-.46,-.45],[.46,-.45],[-.43,.47],[.43,.47]]:style===2?[[0,.09]]:[];
+    const cap=(r,a)=>{
+      const [xx,zz]=squircle(a),x=xx*factor(1)*r,z=zz*factor(1)*(style===1?.79:style===2?.91:1)*r;
+      let cusp=0;
+      for(const [u,w] of cusps)cusp+=.027*Math.exp(-((x-u)**2+(z-w)**2)/.065);
+      const cuspProfile=style===1?.007*Math.pow(Math.abs(x),4):cusp;
+      const fossa=(style>=3?-.009*Math.exp(-(x*x+z*z)/.13):0);
+      const y=direction*(height - .010*(1-r*r) + cuspProfile + fossa);
+      return [x,y,z];
+    };
+    const rn=7;
+    for(let k=0;k<rn;k++)for(let j=0;j<n;j++){
+      const a=j*2*Math.PI/n,b=(j+1)*2*Math.PI/n,r=k/rn,R=(k+1)/rn;
+      const A=cap(r,a),B=cap(r,b),C=cap(R,b),D=cap(R,a);
+      if(upper)v.push(...this.tri(A,C,B),...this.tri(A,D,C));
+      else v.push(...this.tri(A,B,C),...this.tri(A,C,D));
+    }
+    return v;
+  }
+  // Smooth continuous horseshoe gum line, built from interpolated positions.
+  gingivaData(positions,y,wide=.110,thick=.059){
+    const V=[],steps=4,sides=12,points=[];
+    const cat=(p0,p1,p2,p3,t)=>{
+      const t2=t*t,t3=t2*t;
+      return [0,1,2].map(i=>.5*((2*p1[i])+(-p0[i]+p2[i])*t+(2*p0[i]-5*p1[i]+4*p2[i]-p3[i])*t2+(-p0[i]+3*p1[i]-3*p2[i]+p3[i])*t3));
+    };
+    for(let i=0;i<positions.length-1;i++)for(let k=0;k<steps;k++)points.push(cat(positions[Math.max(i-1,0)],positions[i],positions[i+1],positions[Math.min(i+2,positions.length-1)],k/steps));
+    points.push(positions[positions.length-1]);
+    const section=(i,j)=>{
+      const p=points[i],p0=points[Math.max(0,i-1)],p1=points[Math.min(points.length-1,i+1)];
+      const tang=M3.unit([p1[0]-p0[0],0,p1[2]-p0[2]]);
+      const lateral=M3.unit([-tang[2],0,tang[0]]);
+      const a=j*2*Math.PI/sides;
+      return [p[0]+lateral[0]*Math.cos(a)*wide,y+Math.sin(a)*thick,p[2]+lateral[2]*Math.cos(a)*wide];
+    };
+    for(let i=0;i<points.length-1;i++)for(let j=0;j<sides;j++){
+      const A=section(i,j),B=section(i,j+1),C=section(i+1,j+1),D=section(i+1,j);
+      V.push(...this.tri(A,C,B),...this.tri(A,D,C));
+    }
+    return V;
+  }
+  makeTexture(canvas){const gl=this.gl,tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));if(canvas)this.updateTexture(tex,canvas);this.textures.push(tex);return tex;}
+  updateTexture(tex,canvas){const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas)}
+  makeLabel(text,opts={}){const w=opts.width||512,h=opts.height||100;const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');if(opts.background){ctx.fillStyle=opts.background;ctx.fillRect(0,0,w,h)}ctx.fillStyle=opts.color||'#e2f8ec';ctx.font=`${opts.bold?'700':'550'} ${opts.font||32}px system-ui, sans-serif`;ctx.textAlign=opts.align||'center';ctx.textBaseline='middle';ctx.fillText(text,opts.align==='left'?14:w/2,h/2,w-24);return this.makeTexture(c)}
+  add(kind,p,s,c,opts={}){const m={kind,p:p.slice(),s:s.slice(),rot:opts.rot||[0,0,0],color:this.rgb(c),alpha:opts.alpha??1,tex:opts.tex||null,unlit:!!opts.unlit,key:opts.key||null,tag:opts.tag||'',hidden:false};this.meshes.push(m);if(m.key)this.pickables.push({key:m.key,p:m.p.slice(),radius:opts.radius||Math.max(...s)*.7,kind,mesh:m});return m}
+  rgb(h){if(Array.isArray(h))return h;const x=parseInt(h.replace('#',''),16);return [(x>>16&255)/255,(x>>8&255)/255,(x&255)/255]}
+  box(p,s,c,o={}){return this.add('box',p,s,c,o)}sphere(p,s,c,o={}){return this.add('sphere',p,s,c,o)}cy(p,s,c,o={}){return this.add('cylinder',p,s,c,o)}tor(p,s,c,o={}){return this.add('torus',p,s,c,o)}label(text,p,s,o={}){return this.add('quad',p,s,'#ffffff',{...o,unlit:true,tex:this.makeLabel(text,o)})}
+  buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
+    // Environment: room, floor, side cabinetry, architectural framing.
+    this.box([0,-.06,-2.6],[7,.12,8],'#627b82');this.box([0,2.52,-6.1],[7,5,.12],'#88a3aa');this.leftWall=this.box([-3.6,2,-2.6],[.1,4.4,7.8],'#728d95');this.rightWall=this.box([3.6,2,-2.6],[.1,4.4,7.8],'#809ba1');
+    for(let i=-3;i<=3;i++)this.box([i,0.003,-2.65],[.012,.005,8],'#435f68');for(let i=-6;i<=1;i++)this.box([0,.004,i],[7,.005,.012],'#435f68');
+    this.box([0,3.75,-5.96],[2.55,.08,.15],'#d8efdf');this.box([0,2.4,-5.96],[.08,2.8,.1],'#bfd2d0');this.box([0,2.15,-5.91],[2.15,1.45,.02],'#acc3c3');this.box([0,2.15,-5.87],[1.87,1.17,.023],'#598f9e');
+    this.box([0,1.5,-5.85],[2.2,.08,.11],'#e2eddf');this.box([-2.3,.72,-4.6],[1.8,1.3,.65],'#c3d1d0');this.box([-2.3,1.4,-4.55],[1.8,.10,.78],'#eaf0e5');
+    for(let i=0;i<3;i++){this.box([-2.85+i*.55,.86,-4.24],[.48,.35,.027],'#a8bdbf');this.cy([-2.85+i*.55,.88,-4.213],[.025,.018,.025],'#75979b',{rot:[Math.PI/2,0,0]})}
+    this.box([2.4,.84,-4.35],[1.2,1.35,.6],'#d4e0dc');this.box([2.4,1.49,-4.38],[1.3,.08,.69],'#f4f3e7');this.cy([2.4,1.52,-4.28],[.37,.045,.37],'#9dbabd');this.cy([2.4,1.52,-4.28],[.21,.063,.21],'#ebf3ee');
+    this.box([2.42,2.52,-5.91],[1.45,.95,.07],'#f1f4e8');this.box([2.42,2.52,-5.86],[1.28,.78,.03],'#18465a');this.label('IMAGING', [2.42,2.73,-5.825],[.88,.16,1],{font:35,color:'#b9efdb'});
+    // Chair: base, backrest, articulated headrest, cushions, overhead operating lamp.
+    this.cy([0,.17,-3.5],[.95,.27,.95],'#aec8c9');this.cy([0,.55,-3.5],[.26,.8,.26],'#d5e4df');
+    this.box([0,.93,-3.5],[1.04,.24,1.95],'#244c5b',{rot:[-.14,0,0]});this.box([0,1.04,-3.44],[.96,.25,1.73],'#3a9b98',{rot:[-.14,0,0]});
+    this.box([0,1.43,-4.37],[.94,1.4,.24],'#295969',{rot:[-.49,0,0]});this.box([0,1.44,-4.24],[.87,1.26,.19],'#2f9091',{rot:[-.49,0,0]});this.box([0,1.94,-4.6],[.56,.48,.2],'#20636d',{rot:[-.45,0,0]});
+    for(const x of [-.68,.68]){this.box([x,1.09,-3.55],[.18,.12,1.3],'#a7c4c2');this.box([x,1.11,-3.53],[.15,.08,1.1],'#347b7d')}
+    // Stylized patient silhouette, separate from teaching models.
+    this.sphere([0,2.17,-4.43],[.29,.37,.27],'#d5ad94');this.sphere([0,2.43,-4.54],[.29,.16,.28],'#493e3c');this.sphere([0,2.08,-4.15],[.12,.045,.04],'#915b65');this.sphere([-.115,2.24,-4.186],[.028,.023,.025],'#433c42');this.sphere([.115,2.24,-4.186],[.028,.023,.025],'#433c42');this.sphere([0,2.17,-4.138],[.047,.09,.057],'#c99b86');
+    this.box([0,1.12,-3.55],[.66,.27,1.18],'#c4d2c7');this.box([0,1.0,-2.81],[.53,.18,.62],'#bdcfd0');
+    this.cy([1.38,2.82,-3.95],[.07,1.5,.07],'#b5c9c8');this.cy([.72,3.42,-3.82],[.064,1.35,.064],'#b5c9c8',{rot:[0,0,1.05]});this.cy([.10,3.39,-3.69],[.065,.75,.065],'#9fb8b8',{rot:[-.65,0,.35]});this.sphere([-.02,3.11,-3.42],[.33,.13,.33],'#e4ece6');this.cy([-.02,3.055,-3.42],[.24,.065,.24],'#f6e1a8');
+    this.roomMeshes=this.meshes.slice();
+    // Table and pedestal for enlarged, schematic anatomy.
+    this.cy([0,.56,-1.88],[.12,1.08,.12],'#acc0c2');this.cy([0,.13,-1.88],[.73,.11,.73],'#9cb6b8');this.box([0,1.08,-1.83],[2.00,.09,1.6],'#ecf1e7');this.box([0,1.025,-1.83],[2.02,.04,1.63],'#93babc');
+    this.label('ANATOMY MODEL', [0,1.13,-1.012],[1.23,.17,1],{font:33,color:'#365b60'});
+    // Separate U-shaped maxillary and mandibular arches with anatomically
+    // differentiated incisors, canines, premolars and molars.
+    this.teeth={};this.archMeshes=[[],[]];this.archMode='both';
+    const upperPath=[[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]];
+    const lowerPath=[[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]];
+    const toothColors=['#f3ecdb','#f7efe0','#eee7d7','#f1e8d3'];
+    for(let upperIndex=0;upperIndex<2;upperIndex++){
+      const archStart=this.meshes.length;
+      const upper=upperIndex===0,base=upper?1.759:1.332,path=upper?upperPath:lowerPath;
+      const archPoints=[...path.slice().reverse().map(v=>[-v[0],base,v[1]]),...path.map(v=>[v[0],base,v[1]])];
+      const gumGeo='gingiva'+upperIndex;
+      this.geom[gumGeo]=this.geometry(this.gingivaData(archPoints,upper?1.807:1.274,upper?.087:.081,.050));
+      this.add(gumGeo,[0,0,0],[1,1,1],upper?'#cd8f9b':'#ce939e');
+      // Palatal/lingual support, recessed behind the gingival collar.
+      // Keep the occlusal opening unobstructed for anatomical instruction.
+      for(let q of (upper?[1,2]:[4,3])){
+        const sign=(q===1||q===4)?-1:1;
+        for(let i=1;i<=8;i++){
+          const [xx,z]=path[i-1],id=String(q)+i,style=i<=2?1:i===3?2:i<=5?3:4;
+          const at=path[Math.max(0,i-2)],bt=path[Math.min(7,i)],dx=bt[0]-at[0],dz=bt[1]-at[1];
+          const orientation=sign<0?Math.atan2(dz,dx):-Math.atan2(dz,dx);
+          const width=(i===1?.090:i===2?.076:i===3?.082:i<=5?.085:.105)*(upper?1:.95);
+          const depth=(i<=2?.074:i===3?.079:i<=5?.094:.113);
+          const pos=[sign*xx,base,z];const key='crown_'+style+'_'+upperIndex;
+          if(!this.geom[key])this.geom[key]=this.geometry(this.crownData(style,upper));
+          const crown=this.add(key,pos,[width,1,depth],toothColors[style-1],{key:'tooth:'+id,radius:Math.max(width,depth)+.034,rot:[0,orientation,0],tag:'crown'});
+          const picker=this.pickables[this.pickables.length-1];picker.p=[pos[0],base+(upper?-.080:.080),pos[2]];picker.radius=Math.max(width,depth)+.042;
+          // Pit-and-fissure discoloration on two illustrative molars. Surface marker
+          // intentionally subdued rather than a misleading cavity diagnosis.
+          if(id==='16'||id==='36'){
+            const occlusalY=base+(upper?-.173:.173);
+            this.sphere([sign*xx,occlusalY,z],[.020,.008,.027],'#95775d',{key:'tooth:'+id,radius:.027,tag:'caries'});
+          }
+          this.teeth[id]={id,pos,kind:['','Incisor','Canine','Premolar','Molar'][style],upper,mesh:crown};
+        }
+      }
+      this.archMeshes[upperIndex]=this.meshes.slice(archStart);
+    }
+    this.box([0,1.275,-1.8],[1.76,.065,1.16],'#acc8c4');
+    // Practical instrument tray at right (ray/select targets include multiple pieces).
+    this.box([1.64,.97,-1.65],[1.16,.085,.75],'#e5ece6');this.cy([1.64,.53,-1.65],[.075,.85,.075],'#adc6c6');
+    this.box([1.64,1.02,-1.65],[1.06,.014,.64],'#91b0b2');
+    const tools=[['mirror',1.24,'#c4d9d6'],['probe',1.44,'#d6e2dd'],['suction',1.64,'#89d5d1'],['excavator',1.84,'#e1c69e'],['composite',2.04,'#c5a8d7']];
+    for(const [name,x,color] of tools){this.cy([x,1.08,-1.64],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-1.43],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
+      if(name==='mirror'){this.cy([x,1.085,-1.80],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
+      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-1.85],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
+      if(name==='suction'){this.cy([x,1.11,-1.86],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
+      if(name==='composite'){this.cy([x,1.09,-1.85],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
+      this.label(name.toUpperCase(),[x,.985,-1.24],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
+    }
+    // Other procedure items displayed on the side trolley.
+    this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
+    this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
+    for(const [i,n]of ['putty','lightbody','heavybody','mediumbody'].entries()){let x=-1.83+i*.19;this.cy([x,1.015,-2.5],[.105,.16,.105],['#e2b88d','#8bb7e2','#aad7a5','#cda6d0'][i],{key:`tool:${n}`,radius:.135});this.cy([x,1.103,-2.5],[.11,.035,.11],'#ebebe0',{key:`tool:${n}`,radius:.09})}
+    this.focusDecor=this.meshes.filter(m=>!this.archMeshes[0].includes(m)&&!this.archMeshes[1].includes(m));
+    const vrMeshesStart=this.meshes.length;
+    // Interactive XR lesson board - all its buttons are also available via standard HTML.
+    this.box([-1.66,1.48,-2.2],[.88,2.35,.065],'#143345');this.box([-1.66,2.56,-2.16],[.87,.13,.08],'#237269');
+    this.label('KLINIKLAB',[-1.66,2.565,-2.105],[.80,.13,1],{font:40,bold:true});
+    this.label('TRAINING MODULES',[-1.66,2.36,-2.105],[.74,.11,1],{font:29,color:'#92bdc2'});
+    this.menuButtons=[];for(let i=0;i<7;i++){const y=2.17-i*.182;const item=this.box([-1.66,y,-2.095],[.79,.177,.048],i===0?'#2c8b7b':'#265064',{key:`module:${i}`,radius:.33});this.menuButtons.push(item);this.label(`${i+1}. ${['FSP Interview','FSP Arztbrief','FSP Handover','KP Written','KP Practical','KP Viva','Praxis German'][i]}`,[-1.66,y,-2.057],[.74,.115,1],{font:34,color:'#e7f9f0'})}
+    // Answer buttons for VR only, populated by setVRState().
+    this.answerMeshes=[];for(let i=0;i<4;i++){const yy=.79-i*.17,m=this.box([-1.66,yy,-2.08],[.79,.15,.048],'#225a5f',{key:`answer:${i}`,radius:.31});m.hidden=true;this.answerMeshes.push(m);this.label(['Option A','Option B','Option C','Option D'][i],[-1.66,yy,-2.041],[.75,.115,1],{font:32,tag:`answerlabel:${i}`})}
+    // Live status board and current objective for in-headset reading.
+    this.box([0,2.72,-2.32],[1.62,.43,.07],'#183647');this.liveTitle=this.label('SELECT A LESSON',[0,2.805,-2.272],[1.49,.15,1],{font:32,bold:true});this.liveStep=this.label('Choose a module on the left', [0,2.65,-2.272],[1.49,.15,1],{font:32});
+    this.xrBoardMeshes=this.meshes.slice(vrMeshesStart);
+    for(const m of this.xrBoardMeshes)m.hidden=true;
+    this.buildXRControllers();
+  }
+  buildXRControllers(){this.xrControllers=[];for(let i=0;i<2;i++){const hand=this.sphere([0,-20,0],[.055,.09,.07],i?'#80dec9':'#d1e7e8');const ray=this.cy([0,-20,0],[.008,1.5,.008],'#8fe9d6',{alpha:.56});this.xrControllers.push({hand,ray})}}
+  replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
+  setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,27)}}}
+  select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':'#f5e8c9')}}}
+  getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
+      // In-world lesson controls are true rectangular targets; overlapping selection
+      // spheres would otherwise make adjacent menu buttons select the wrong lesson.
+      if(p.key.startsWith('module:')||p.key.startsWith('answer:')){
+        const faceZ=p.p[2]+p.mesh.s[2]*.5;
+        if(Math.abs(d[2])>1e-6){const t=(faceZ-o[2])/d[2];if(t>=0){const x=o[0]+t*d[0],y=o[1]+t*d[1];if(Math.abs(x-p.p[0])<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t}}
+      }else r=M3.raySphere(o,d,p.p,p.radius);
+      if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
+    }return hit}
+
+  installEvents(){const canvas=this.canvas;let down=null,dragged=false;canvas.addEventListener('pointerdown',e=>{if(this.xrSession)return;down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};dragged=false;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!down||this.xrSession)return;let dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>5){dragged=true;canvas.classList.add('dragging')}if(dragged){this.yaw=down.yaw+dx*.008;this.pitch=Math.max(-1.2,Math.min(1.2,down.pitch+dy*.006))}});canvas.addEventListener('pointerup',e=>{if(!dragged){const ray=this.desktopRay(e.clientX,e.clientY);const hit=this.getRayHit(ray.o,ray.d);if(hit)this.onPick(hit.key)}down=null;canvas.classList.remove('dragging')});canvas.addEventListener('wheel',e=>{e.preventDefault();this.distance=Math.min(7.5,Math.max(1.15,this.distance*Math.exp(e.deltaY*.001)))},{passive:false});window.addEventListener('resize',()=>this.resize());}
+  camera(){const y=this.target[1]+this.distance*Math.sin(this.pitch);const h=this.distance*Math.cos(this.pitch),x=this.target[0]+Math.sin(this.yaw)*h,z=this.target[2]+Math.cos(this.yaw)*h;return [x,y,z]}
+  view(){return M3.lookAt(this.camera(),this.target)}
+  desktopRay(cx,cy){const b=this.canvas.getBoundingClientRect(),x=2*(cx-b.left)/b.width-1,y=1-2*(cy-b.top)/b.height;const P=M3.perspective(.87,b.width/b.height,.05,100),inv=M3.inverse(M3.mm(P,this.view()));const a=M3.transform(inv,[x,y,-1]),c=M3.transform(inv,[x,y,1]);const v=a.slice(0,3).map(q=>q/a[3]),w=c.slice(0,3).map(q=>q/c[3]);return {o:v,d:M3.unit(M3.sub(w,v))}}
+  occlusalView(){this.focusTeeth();if(this.archMode==='both')this.setArchMode('lower');this.pitch=this.archMode==='upper'?-1.08:1.08;this.distance=1.93;this.yaw=.04}
+  cycleArches(){this.archMode=this.archMode==='both'?'upper':this.archMode==='upper'?'lower':'both';this.setArchMode(this.archMode);return this.archMode}
+  setArchMode(mode){this.archMode=mode;for(let i=0;i<this.archMeshes.length;i++)for(const m of this.archMeshes[i])m.hidden=mode==='upper'&&i===1||mode==='lower'&&i===0}
+  focusTeeth(){this.mode='teeth';this.target=[0,1.49,-1.77];this.distance=2.25;this.yaw=.10;this.pitch=.38}
+  focusRoom(){this.mode='clinic';this.target=[0,1.52,-2.6];this.distance=4.4;this.yaw=.37;this.pitch=.22}
+  resetCamera(){this.target=[0,1.53,-2.23];this.distance=3.65;this.yaw=.22;this.pitch=.28}
+  resize(){if(this.xrSession)return;const gl=this.gl,c=this.canvas;const w=Math.max(1,Math.round(c.clientWidth* Math.min(devicePixelRatio||1,1.6))),h=Math.max(1,Math.round(c.clientHeight*Math.min(devicePixelRatio||1,1.6)));if(c.width!==w||c.height!==h){c.width=w;c.height=h}gl.viewport(0,0,w,h)}
+  draw(view,proj){const gl=this.gl,L=this.loc;gl.uniformMatrix4fv(L.uView,false,new Float32Array(view));gl.uniformMatrix4fv(L.uProj,false,new Float32Array(proj));const opaque=this.meshes.filter(m=>!m.hidden&&m.alpha>=1),transparent=this.meshes.filter(m=>!m.hidden&&m.alpha<1);for(const m of [...opaque,...transparent]){if(m.alpha<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false)}else{gl.disable(gl.BLEND);gl.depthMask(true)}const g=this.geom[m.kind];gl.bindBuffer(gl.ARRAY_BUFFER,g.buffer);for(const [a,k] of [[this.attr.pos,0],[this.attr.normal,3],[this.attr.uv,6]]){gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,k===6?2:3,gl.FLOAT,false,32,k*4)}const model=m.model||M3.trs(m.p,m.rot,m.s);gl.uniformMatrix4fv(L.uModel,false,new Float32Array(model));const inv=M3.inverse(model);gl.uniformMatrix3fv(L.uNormal,false,new Float32Array([inv[0],inv[4],inv[8],inv[1],inv[5],inv[9],inv[2],inv[6],inv[10]]));gl.uniform3fv(L.uColor,m.color);gl.uniform1f(L.uAlpha,m.alpha);gl.uniform1f(L.uTextured,m.tex?1:0);gl.uniform1f(L.uUnlit,m.unlit?1:0);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,m.tex||this.whiteTex);gl.uniform1i(L.uTexture,0);gl.drawArrays(gl.TRIANGLES,0,g.count)}gl.disable(gl.BLEND);gl.depthMask(true)}
+  loop(){this.gl.enable(this.gl.DEPTH_TEST);this.gl.clearColor(.038,.09,.13,1);let prev=0;const tick=(time,frame)=>{if(frame&&this.xrSession){this.xrFrame(time,frame)}else{this.resize();const eye=this.camera();for(const m of this.focusDecor)m.hidden=this.mode==='teeth';if(this.mode!=='teeth'){this.leftWall.hidden=eye[0]<-3.5;this.rightWall.hidden=eye[0]>3.5;}const gl=this.gl;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);this.draw(this.view(),M3.perspective(.87,this.canvas.width/this.canvas.height,.05,100))}this.frameCount++};this.animation=tick;const animate=(t)=>{if(!this.xrSession){tick(t);requestAnimationFrame(animate)}};requestAnimationFrame(animate)}
+  async enterVR(){
+    if(!navigator.xr?.requestSession)throw Error('Immersive VR unavailable. Open the HTTPS page in Meta Quest Browser.');
+    // requestSession must begin INSIDE the click's transient user activation.
+    // Do not await a support check or makeXRCompatible before requesting it.
+    const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
+    let session;
+    try{
+      session=await promise;const gl=this.gl;
+      if(gl.makeXRCompatible)await gl.makeXRCompatible();
+      session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
+      let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
+      this.xrSession=session;this.xrRef=ref;
+      for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
+      session.addEventListener('selectstart',e=>{const pose=this.latestFrame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});
+      session.addEventListener('end',()=>{this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      session.requestAnimationFrame(this.xrLoop.bind(this));return session;
+    }catch(err){if(session)try{await session.end()}catch{}throw err}
+  }
+  resumeDesktop(t){if(!this.xrSession){this.animation(t);requestAnimationFrame(this.resumeDesktop.bind(this))}}
+  xrLoop(t,frame){if(!this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
+  rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
+  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0]}}
+  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose)return;let n=0;for(const source of frame.session.inputSources){if(n>=this.xrControllers.length)break;const p=frame.getPose(source.targetRaySpace,this.xrRef);if(!p)continue;const t=p.transform,c=this.xrControllers[n++];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
+    for(let i=n;i<2;i++){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
+    const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
+  }
+}
+

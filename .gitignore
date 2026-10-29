@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+user-scans/
+patient-data/
+*.dcm
+*.nii
+*.nii.gz
+*.mha
+*.stl
+*.obj
+qa_screens/
