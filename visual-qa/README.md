@@ -4,10 +4,9 @@ This is a local **Playwright screenshot agent**, not a remote shell. It watches 
 
 ## Install on `officegopi` (normal PowerShell)
 
-Your existing checkout is:
+From your existing KlinikLab checkout directory, run:
 
 ```powershell
-Set-Location 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
 powershell -NoProfile -ExecutionPolicy Bypass -File .\visual-qa\setup.ps1
 ```
 
@@ -16,7 +15,6 @@ You need Windows Chrome, Git, Node.js 20+, and GitHub **push** authorization in 
 When installed, start it in a **separate terminal** from the website server:
 
 ```powershell
-Set-Location 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
 node .\visual-qa\worker.mjs
 ```
 
