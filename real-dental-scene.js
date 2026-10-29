@@ -101,12 +101,11 @@
     try{
       await loadScript(LOADER,()=>!!B.GLTFFileLoader);
       configureDecoder(B);
-      for(let upperIndex=0;upperIndex<2;upperIndex++){
-        const upper=upperIndex===0;
-        for(let tooth=1;tooth<=8;tooth++){
+      const loadOne=async(upperIndex,tooth)=>{
+          const upper=upperIndex===0;
           const kind=`crown_${STYLE[tooth]}_${upperIndex}_${tooth}`;
           const items=layer.items.filter(item=>item.source.kind===kind&&item.source.tag==='crown');
-          if(!items.length)continue;
+          if(!items.length)return;
           let result;
           try{
             result=await B.SceneLoader.ImportMeshAsync(null,DIR,filename(upper,tooth),layer.scene,undefined,'.glb');
@@ -156,8 +155,13 @@
             if(result?.meshes)for(const mesh of result.meshes){mesh.isVisible=false;mesh.isPickable=false;}
             state.failures.push({file:filename(upper,tooth),message:String(error.message||error).slice(0,160)});
           }
-        }
-      }
+      };
+      // Sixteen small local assets can decode concurrently on an RTX workstation.
+      // Loader errors are isolated per model; remaining teeth still render.
+      const jobs=[];
+      for(let upperIndex=0;upperIndex<2;upperIndex++)for(let tooth=1;tooth<=8;tooth++)
+        jobs.push(loadOne(upperIndex,tooth));
+      await Promise.all(jobs);
       state.ready=state.instances>0;
       state.mode=state.ready?'ready':'error';
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
