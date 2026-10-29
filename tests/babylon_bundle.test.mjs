@@ -16,6 +16,6 @@ test('standalone includes anatomical Babylon preview and Dundee atlas',()=>{
 });
 
 test('standalone generator includes the atlas source',()=>{
-  assert.match(text('build_standalone.py'),/['\"]dundee-atlas\\.js['\"]/);
-  assert.match(text('public/index.html'),/<script src="dundee-atlas\\.js"><\\/script>/);
+  assert.ok(text('build_standalone.py').includes("'dundee-atlas.js'"));
+  assert.ok(text('public/index.html').includes('src="dundee-atlas.js"'));
 });
