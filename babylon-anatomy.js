@@ -10,7 +10,7 @@
   const sizes={1:0.164,2:0.186,3:0.169,4:0.160};
   function crownData(style,upper,quality=1){
     style=Number(style);if(!sizes[style])throw Error('Unsupported crown type');
-    const seg=quality<1?32:72, heightRings=quality<1?10:24,radialRings=quality<1?9:20;
+    const fine=quality>=2,seg=fine?112:quality<1?32:72, heightRings=fine?36:quality<1?10:24,radialRings=fine?32:quality<1?9:20;
     const d=upper?-1:1,height=sizes[style],pos=[],indices=[];
     const s=(a,p)=>{const c=Math.cos(a),t=Math.sin(a),e=2/p;return [Math.sign(c)*Math.abs(c)**e,Math.sign(t)*Math.abs(t)**e]};
     const shape=style===1?4.2:style===2?2.6:style===3?3.3:3.8;
@@ -234,23 +234,89 @@
     return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,upper,
       cervicalSites:points.length,continuous:true,closedEnds:true};
   }
+
+  // Phase 4 — synthetic alveolar-ridge teaching support, NEVER CT bone.
+  // It sits on the rootward side of the existing gum/crown connection and is
+  // rendered only on explicit user request in the Babylon desktop layer.
+  function jawData(upper,sites){
+    if(!Array.isArray(sites)||sites.length!==16)throw Error('Jaw support requires 16 registered FDI sites');
+    const base=upper?1.759:1.332,root=upper?1:-1;
+    const centers=sites.map(site=>{
+      if(!site||!Array.isArray(site.p)||!Array.isArray(site.s)||!site.p.every(Number.isFinite))
+        throw Error('Invalid FDI site');
+      return [site.p[0],site.p[2],clamp(Math.max(site.s[0],site.s[2])*.92,.075,.119)];
+    });
+    const cat=(a,b,c,d,t)=>{
+      const t2=t*t,t3=t2*t;
+      return .5*(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);
+    };
+    const path=u=>{
+      const k=Math.min(14,Math.max(0,Math.floor(u))),t=clamp(u-k,0,1);
+      const a=centers[Math.max(k-1,0)],b=centers[k],c=centers[k+1],d=centers[Math.min(k+2,15)];
+      return [0,1,2].map(i=>cat(a[i],b[i],c[i],d[i],t));
+    };
+    const steps=240,ring=24,positions=[],indices=[];
+    for(let i=0;i<=steps;i++){
+      const u=i/steps*15,p=path(u),ahead=path(Math.min(15,u+.01)),behind=path(Math.max(0,u-.01));
+      let tx=ahead[0]-behind[0],tz=ahead[1]-behind[1];
+      const l=Math.hypot(tx,tz)||1;tx/=l;tz/=l;
+      const nx=-tz,nz=tx;
+      for(let j=0;j<ring;j++){
+        const a=TAU*j/ring;
+        const lateral=Math.cos(a)*(.88*p[2]+.009);
+        const y=base+root*(.149+.111*Math.sin(a));
+        positions.push(p[0]+nx*lateral,y,p[1]+nz*lateral);
+      }
+    }
+    for(let i=0;i<steps;i++)for(let j=0;j<ring;j++){
+      const a=i*ring+j,b=i*ring+(j+1)%ring,c=(i+1)*ring+(j+1)%ring,d=(i+1)*ring+j;
+      if(upper)indices.push(a,b,c,a,c,d);
+      else indices.push(a,c,b,a,d,c);
+    }
+    const first=positions.length/3;
+    positions.push(centers[0][0],base+root*.149,centers[0][1]);
+    const last=positions.length/3;
+    positions.push(centers[15][0],base+root*.149,centers[15][1]);
+    for(let j=0;j<ring;j++){
+      const n=(j+1)%ring;
+      if(upper)indices.push(first,n,j,last,steps*ring+j,steps*ring+n);
+      else indices.push(first,j,n,last,steps*ring+n,steps*ring+j);
+    }
+    const normals=new Array(positions.length).fill(0);
+    for(let i=0;i<indices.length;i+=3){
+      const ia=indices[i]*3,ib=indices[i+1]*3,ic=indices[i+2]*3;
+      const ax=positions[ib]-positions[ia],ay=positions[ib+1]-positions[ia+1],az=positions[ib+2]-positions[ia+2];
+      const bx=positions[ic]-positions[ia],by=positions[ic+1]-positions[ia+1],bz=positions[ic+2]-positions[ia+2];
+      const cross=[ay*bz-az*by,az*bx-ax*bz,ax*by-ay*bx];
+      for(const k of [ia,ib,ic])for(let d=0;d<3;d++)normals[k+d]+=cross[d];
+    }
+    for(let i=0;i<normals.length;i+=3){
+      const norm=Math.hypot(normals[i],normals[i+1],normals[i+2])||1;
+      for(let d=0;d<3;d++)normals[i+d]/=norm;
+    }
+    return {positions,indices,normals,vertices:positions.length/3,triangles:indices.length/3,
+      upper,closedEnds:true,synthetic:true,structuralLayer:'alveolar-proxy',cervicalSites:16};
+  }
   function createTemplate(B,scene,kind,layout){
     const match=/^crown_([1-4])_([01])(?:_([1-8]))?$/.exec(kind);
-    if(!match&&!/^gingiva[01]$/.test(kind))return null;
-    const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
+    const bone=/^jaw[01]$/.test(kind);
+    if(!match&&!bone&&!/^gingiva[01]$/.test(kind))return null;
+    const data=match?crownData(Number(match[1]),match[2]==='0',2):
+      bone?jawData(kind==='jaw0',layout?.arches?.[kind==='jaw0'?0:1]):
+      gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
     const appearance=root.KlinikDentalAppearance;
     if(appearance){
       v.colors=match
         ?appearance.crownColors(data.positions,match[2]==='0',Number(match[1]))
-        :appearance.gingivaColors(data.positions,24);
+        :bone?null:appearance.gingivaColors(data.positions,24);
     }
     v.applyToMesh(template,true);
     template.useVertexColors=!!v.colors;
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0};
+    template.metadata={synthetic:true,anatomyVersion:6,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0,structuralLayer:data.structuralLayer||null};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,gingivaData,archPlacement,createTemplate,version:5,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,gingivaData,jawData,archPlacement,createTemplate,version:6,notes:'Educational procedural tooth morphology; not an anatomical scan'};
 })(typeof window!=='undefined'?window:globalThis);

@@ -6,7 +6,7 @@
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
   const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'disabled',
-    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0,appearance:'balanced',appearanceVersion:0,vertexColoredTemplates:0};
+    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0,appearance:'balanced',appearanceVersion:0,vertexColoredTemplates:0,jawVisible:false,jawMeshes:0,fineCrownTemplates:0,fineCrownVertices:0,crownSource:'dundee'};
   window.KlinikBabylon = status;
   let layer = null;
   let loadingPromise = null;
@@ -102,12 +102,18 @@
       if(this.geometry.has(kind))return this.geometry.get(kind);
       // Replace only the Babylon preview's crown meshes; the original browser,
       // VR selection geometry, and actual preparation volume stay untouched.
-      if((kind.startsWith('crown_')||kind.startsWith('gingiva')) && window.KlinikBabylonAnatomy?.createTemplate){
+      if((kind.startsWith('crown_')||kind.startsWith('gingiva')||kind.startsWith('jaw')) && window.KlinikBabylonAnatomy?.createTemplate){
         try {
           const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind,this.anatomyLayout);
           if(anatomy){this.geometry.set(kind,anatomy);
             if(anatomy.metadata?.appearanceVersion)status.vertexColoredTemplates++;
-            if(kind.startsWith('crown_'))status.enhancedCrowns++;
+            if(kind.startsWith('crown_')){
+              status.enhancedCrowns++;
+              if(anatomy.metadata?.vertices>3169){
+                status.fineCrownTemplates++;
+                status.fineCrownVertices+=anatomy.metadata.vertices;
+              }
+            }
             else {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
             status.anatomyVersion=window.KlinikBabylonAnatomy.version;
             return anatomy;}
@@ -188,6 +194,14 @@
       }
       status.materialsUpdated=changed.size;
     }
+    setCrownSource(mode){
+      this.crownSource=mode==='procedural'?'procedural':'dundee';
+      status.crownSource=this.crownSource;
+    }
+    showJaw(visible){
+      this.jawVisible=Boolean(visible);
+      status.jawVisible=this.jawVisible;
+    }
     build(){
       const source=this.source;
       this.anatomyLayout=window.KlinikBabylonAnatomy?.archPlacement?.(source.meshes)||null;
@@ -204,6 +218,26 @@
         copy.alwaysSelectAsActiveMesh=true;
         this.items.push({source:m,mesh:copy,lastColor:m.color.slice(),lastAlpha:m.alpha});
       });
+      // Licensed whole-mandible files are intentionally excluded: this
+      // *synthetic* alveolar ridge is optional and separate from the crowns.
+      this.jawMeshes=[];
+      if(this.anatomyLayout?.diagnostics?.teeth===32){
+        for(let arch=0;arch<2;arch++){
+          try{
+            const mesh=this.baseMesh('jaw'+arch).clone('synthetic-alveolar:'+arch,null,true);
+            const bone=new this.B.PBRMaterial('illustrative-cortical-bone:'+arch,this.scene);
+            bone.albedoColor=new this.B.Color3(.80,.71,.61);
+            bone.metallic=0;bone.roughness=.84;bone.environmentIntensity=0;
+            bone.backFaceCulling=false;
+            mesh.material=bone;mesh.isPickable=false;mesh.isVisible=false;
+            mesh.alwaysSelectAsActiveMesh=true;
+            this.jawMeshes.push(mesh);
+          }catch(e){status.jawError=String(e.message||e).slice(0,170)}
+        }
+      }
+      status.jawMeshes=this.jawMeshes.length;
+      this.jawVisible=status.jawVisible;
+      this.crownSource=status.crownSource;
       status.meshes=this.items.length;
     }
     sync(){
@@ -217,7 +251,15 @@
       if(current!==this.lastSize){this.lastSize=current;this.engine.resize()}
       const in3D=(this.app.viewMode==='3d'&&!source.xrSession);
       this.canvas.style.display=in3D?'block':'none';
-      if(!in3D)return;
+      if(!in3D){
+        for(const m of this.jawMeshes)m.isVisible=false;
+        return;
+      }
+      for(let arch=0;arch<this.jawMeshes.length;arch++){
+        this.jawMeshes[arch].isVisible=Boolean(this.jawVisible)
+          && !(source.archMode==='upper'&&arch===1)
+          && !(source.archMode==='lower'&&arch===0);
+      }
       for(const {source:m,mesh,lastColor} of this.items){
         mesh.isVisible=!m.hidden && !(m.tag==='caries'&&window.KlinikRealTeeth?.ready);
         if(m.hidden||!mesh.isVisible)continue;
@@ -285,6 +327,33 @@
     });
     lighting.setAttribute('aria-pressed','false');
     titleCard.appendChild(lighting);
+    const jawButton=document.createElement('button');
+    jawButton.id='jaw-layer-toggle';jawButton.type='button';
+    jawButton.textContent='◡ Jaw support: Off';
+    jawButton.title='Show/hide a synthetic alveolar ridge for anatomy orientation. Not a scan or a clinical jaw model.';
+    jawButton.style.cssText='display:block;margin-top:6px;padding:7px 10px;background:#203e4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
+    jawButton.setAttribute('aria-pressed','false');
+    jawButton.addEventListener('click',()=>{
+      status.jawVisible=!status.jawVisible;
+      layer?.showJaw(status.jawVisible);
+      jawButton.textContent=status.jawVisible?'◡ Jaw support: On':'◡ Jaw support: Off';
+      jawButton.setAttribute('aria-pressed',String(status.jawVisible));
+    });
+    titleCard.appendChild(jawButton);
+    const detail=document.createElement('button');
+    detail.id='crown-detail-toggle';detail.type='button';
+    detail.textContent='Teeth: Dundee';
+    detail.title='Switch between original licensed low-LOD Dundee crown surfaces and higher-tessellation synthetic fine crowns. Fine does not mean clinically more accurate.';
+    detail.style.cssText='display:block;margin-top:6px;padding:7px 10px;background:#203e4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
+    detail.setAttribute('aria-pressed','false');
+    detail.addEventListener('click',()=>{
+      const next=status.crownSource==='dundee'?'procedural':'dundee';
+      status.crownSource=next;
+      layer?.setCrownSource(next);
+      detail.textContent=next==='procedural'?'Teeth: Fine model':'Teeth: Dundee';
+      detail.setAttribute('aria-pressed',String(next==='procedural'));
+    });
+    titleCard.appendChild(detail);
     button.addEventListener('click',async()=>{
       if(status.loading)return;
       if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='🦷 Real teeth';return}
