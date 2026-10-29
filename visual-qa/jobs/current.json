@@ -1,18 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "graphics-v3b-2026-10-29-01",
+  "jobId": "babylon-pbr-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-desktop-overview",
-      "steps": [],
-      "capture": "page"
-    },
-    {
-      "name": "02-3d-teeth",
+      "name": "01-classic-teeth",
       "steps": [
         {
           "action": "click",
@@ -22,32 +17,62 @@
       "capture": "stage"
     },
     {
-      "name": "03-3d-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "04-3d-orbited",
+      "name": "02-babylon-teeth",
       "steps": [
         {
           "action": "click",
           "control": "teeth"
         },
         {
-          "action": "orbit",
-          "dx": 150,
-          "dy": -55
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
         }
       ],
       "capture": "stage"
     },
     {
-      "name": "05-clinic-room",
+      "name": "03-babylon-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-babylon-orbited",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "orbit",
+          "dx": 140,
+          "dy": -60
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-classic-clinic",
       "steps": [
         {
           "action": "click",
@@ -55,6 +80,34 @@
         }
       ],
       "capture": "stage"
+    },
+    {
+      "name": "06-babylon-clinic",
+      "steps": [
+        {
+          "action": "click",
+          "control": "clinic"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "07-preparation-unchanged",
+      "steps": [
+        {
+          "action": "click",
+          "control": "volume"
+        }
+      ],
+      "capture": "volume"
     }
   ]
 }
