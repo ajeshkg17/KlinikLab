@@ -6,7 +6,7 @@
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
   const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'disabled',
-    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR'};
+    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,anatomyVersion:0};
   window.KlinikBabylon = status;
   let layer = null;
   let loadingPromise = null;
@@ -54,7 +54,7 @@
       this.scene.clearColor=new B.Color4(.037,.070,.100,1);
       this.scene.ambientColor=new B.Color3(.30,.36,.41);
       this.scene.imageProcessingConfiguration.contrast=1.10;
-      this.scene.imageProcessingConfiguration.exposure=1.20;
+      this.scene.imageProcessingConfiguration.exposure=1.36;
       this.scene.imageProcessingConfiguration.toneMappingEnabled=true;
       this.scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;
       // Environment maps are disabled until a self-hosted, verified asset is available.
@@ -66,16 +66,16 @@
       this.camera.inputs.clear(); // Original canvas owns orbit, scroll, and selection.
       this.scene.activeCamera=this.camera;
       const soft=new B.HemisphericLight('clinicalFill',new B.Vector3(.18,1,.25),this.scene);
-      soft.intensity=.54;
+      soft.intensity=.83;
       soft.groundColor=new B.Color3(.22,.26,.34);
       const key=new B.DirectionalLight('clinicalKey',new B.Vector3(-.38,-.75,-.67),this.scene);
-      key.intensity=1.15;
+      key.intensity=1.44;
       key.diffuse=new B.Color3(1,.95,.86);
       const fill=new B.DirectionalLight('clinicalCoolFill',new B.Vector3(.72,-.38,.68),this.scene);
-      fill.intensity=.24;
+      fill.intensity=.42;
       fill.diffuse=new B.Color3(.69,.83,1);
       const rim=new B.PointLight('dentalRim',new B.Vector3(1.7,2.8,.8),this.scene);
-      rim.intensity=.42;
+      rim.intensity=.56;
       rim.range=9;
       this.geometry=new Map();
       this.items=[];
@@ -95,6 +95,16 @@
     color(rgb){const B=this.B;return new B.Color3(rgb[0],rgb[1],rgb[2])}
     baseMesh(kind){
       if(this.geometry.has(kind))return this.geometry.get(kind);
+      // Replace only the Babylon preview's crown meshes; the original browser,
+      // VR selection geometry, and actual preparation volume stay untouched.
+      if(kind.startsWith('crown_') && window.KlinikBabylonAnatomy?.createTemplate){
+        try {
+          const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind);
+          if(anatomy){this.geometry.set(kind,anatomy);
+            status.enhancedCrowns++;status.anatomyVersion=window.KlinikBabylonAnatomy.version;
+            return anatomy;}
+        }catch(e){status.error='Anatomy fallback: '+String(e.message||e).slice(0,100);}
+      }
       const g=this.source.geom[kind];if(!g?.cpu)throw new Error('CPU geometry missing for '+kind);
       const B=this.B,flat=g.cpu;
       const positions=[],normals=[],uvs=[],indices=[];
@@ -139,9 +149,13 @@
       mat.backFaceCulling=false;
       mat.albedoColor=this.color(m.color);
       mat.metallic=0;
-      mat.roughness=tooth?.30:gum?.59:.65;
+      mat.roughness=tooth?.31:gum?.59:.65;
       mat.environmentIntensity=.42;
-      if(tooth){mat.clearCoat.isEnabled=true;mat.clearCoat.intensity=.64;mat.clearCoat.roughness=.13;}
+      if(tooth){
+        mat.clearCoat.isEnabled=true;mat.clearCoat.intensity=.57;mat.clearCoat.roughness=.19;
+        // Soft enamel fill restores shade when no licensed IBL asset is available.
+        mat.emissiveColor=new B.Color3(.105,.099,.088);
+      }else if(gum){mat.emissiveColor=new B.Color3(.035,.014,.019);}
       if(m.unlit){mat.emissiveColor=this.color(m.color);}
       mat.alpha=m.alpha;
       if(cacheKey)this.materials.set(cacheKey,mat);
