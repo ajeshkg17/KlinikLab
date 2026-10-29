@@ -1,23 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "dundee-atlas-v6-2026-10-29-01",
+  "jobId": "dundee-atlas-v7-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-classic-arch",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "02-dundee-maxillary-molar",
+      "name": "01-licensed-model",
       "steps": [
         {
           "action": "click",
@@ -27,33 +17,14 @@
       "capture": "atlas"
     },
     {
-      "name": "03-dundee-premolar",
+      "name": "02-local-import",
       "steps": [
         {
           "action": "click",
           "control": "atlasOpen"
         },
         {
-          "action": "click",
-          "control": "atlasNext"
-        }
-      ],
-      "capture": "atlas"
-    },
-    {
-      "name": "04-dundee-canine",
-      "steps": [
-        {
-          "action": "click",
-          "control": "atlasOpen"
-        },
-        {
-          "action": "click",
-          "control": "atlasNext"
-        },
-        {
-          "action": "click",
-          "control": "atlasNext"
+          "action": "localDemoGLB"
         }
       ],
       "capture": "atlas"
