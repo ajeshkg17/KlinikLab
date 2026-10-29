@@ -1,0 +1,29 @@
+name: Phase 4 jaw support and fine crown geometry
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Phase 2–4 regression suite
+        run: node --test tests/babylon_anatomy.test.cjs tests/real_scene_qa.cjs tests/phase3_appearance.test.cjs tests/phase4_jaw.test.cjs
+      - name: Check source syntax and mirrors
+        run: |
+          node --check babylon-anatomy.js
+          node --check babylon-preview.js
+          node --check real-dental-scene.js
+          cmp babylon-anatomy.js public/babylon-anatomy.js
+          cmp babylon-preview.js public/babylon-preview.js
+          cmp real-dental-scene.js public/real-dental-scene.js
+          cmp index.html public/index.html
+      - name: Verify portable standalone is regenerated correctly
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
