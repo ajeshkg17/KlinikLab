@@ -69,6 +69,9 @@ export function validateJob(raw) {
       if (!step || typeof step !== 'object') throw new Error('Invalid step.');
       if (step.action === 'click') {
         if (!Object.hasOwn(CONTROLS,step.control)) throw new Error(`Control is not approved: ${step.control}`);
+      } else if (step.action === 'validateFDI') {
+        // Fixed, local-only interaction audit of every permanent-tooth chart button.
+        if (Object.keys(step).length !== 1) throw new Error('validateFDI takes no parameters.');
       } else if (step.action === 'localDemoGLB') {
         // The only permitted local upload source is the bundled public demo tooth;
         // job files cannot choose a filesystem path or access private files.
