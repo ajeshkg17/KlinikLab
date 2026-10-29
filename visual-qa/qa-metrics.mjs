@@ -29,3 +29,22 @@ export function reviewAccessibility(snapshot) {
     advisory.push({id:'A11Y-HORIZONTAL-OVERFLOW',pixels:snapshot.horizOverflowPx});
   return {pass:blocking.length===0,blocking,advisory};
 }
+
+/** Registry metadata check; human approval is still established by PR review. */
+export function checkBaselineApproval(entry,observation) {
+  if(!entry||typeof entry!=='object')return {ok:false,reason:'NO_APPROVAL'};
+  if(!observation||typeof observation!=='object')return {ok:false,reason:'NO_OBSERVATION'};
+  const shaOk=/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.sha256===observation.sha256;
+  if(!shaOk)return {ok:false,reason:'BASELINE_HASH_MISMATCH'};
+  if(!/^[a-f0-9]{40}$/.test(entry.sourceCommit||'')||
+     !/^https:\/\/github\.com\/ajeshkg17\/KlinikLab\/actions\/runs\/[0-9]+$/.test(entry.sourceRun||'')||
+     !/^[A-Za-z0-9-]{1,39}$/.test(entry.approvedBy||'')||
+     !/^\d{4}-\d{2}-\d{2}$/.test(entry.approvedAt||''))
+    return {ok:false,reason:'INCOMPLETE_APPROVAL_PROVENANCE'};
+  if(!Number.isInteger(entry.browserMajor)||entry.browserMajor!==observation.browserMajor)
+    return {ok:false,reason:'BROWSER_VERSION_MISMATCH'};
+  if(!entry.viewport||entry.viewport.width!==observation.viewport?.width||
+     entry.viewport.height!==observation.viewport?.height)
+    return {ok:false,reason:'VIEWPORT_MISMATCH'};
+  return {ok:true,reason:'APPROVED_METADATA_MATCH'};
+}
