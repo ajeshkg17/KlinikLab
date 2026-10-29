@@ -62,7 +62,7 @@ test('malformed and empty inputs return zero score without crashing or touching 
 });
 test('rubric credits are deterministic, explain missed concepts and do not claim clinical accuracy',()=>{
  const {api}=setup();
- const sample='Zahn 36; Kältetest positiv.';
+ const sample='Zahn 36; Perkussion unauffällig.';
  const first=api.score('endo','kollegen',sample),second=api.score('endo','kollegen',sample);
  assert.equal(JSON.stringify(first),JSON.stringify(second));
  assert.equal(first.score,4);assert.equal(first.criteria.filter(x=>x.matched).length,2);
