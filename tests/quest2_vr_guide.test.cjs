@@ -73,11 +73,11 @@ test('XR-only comfort resizing preserves model and ray hit positions on exit',()
  fn.call(scene,true);
  assert.equal(scene.xrComfort.active,true);
  assert.equal(scene.xrComfort.scale,.78);
- assert.equal(scene.xrComfort.lessonScale,.74);
+ assert.equal(scene.xrComfort.lessonScale,.68);
  assert(Math.abs(model.s[0]-.702)<1e-9);
- assert(Math.abs(board.s[1]-1.739)<1e-9);
+ assert(Math.abs(board.s[1]-1.598)<1e-9);
  assert.equal(hitModel.radius,.25*.78);
- assert.equal(hitBoard.radius,.39*.74);
+ assert.equal(hitBoard.radius,.39*.68);
  fn.call(scene,true); // idempotent
  fn.call(scene,false);
  assert.equal(scene.xrComfort.active,false);
