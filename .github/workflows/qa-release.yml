@@ -50,9 +50,40 @@ jobs:
           echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
           echo "| Node unit/DOM mock | Executed above; check steps |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Local HTTP/static and standalone | Executed above; check steps |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Desktop browser screenshots | Not run by this job; separate visual worker |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Desktop browser screenshots | Separate Chromium job below, with uploaded report |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Mocked XR | Unit tests only, not headset hardware |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Physical Quest 2 | Not verified by CI |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Dental clinician validation | Not verified by CI |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Do not merge on the strength of a mock screenshot alone. See docs/qa/RELEASE_READINESS.md." >> "$GITHUB_STEP_SUMMARY"
+
+  desktop-browser:
+    name: Real Chromium interactions + screenshot evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned visual worker dependency
+        run: npm install --prefix visual-qa --no-audit --no-fund
+      - name: Install CI Chromium with system dependencies
+        working-directory: visual-qa
+        run: npx playwright install --with-deps chromium
+      - name: QA-BROWSER - desktop and mobile actions, screenshots, asset report
+        run: node visual-qa/ci-browser.mjs
+      - name: Preserve browser evidence on failures and successes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-chromium-evidence
+          path: visual-qa/ci-artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Report evidence boundaries
+        if: always()
+        run: |
+          echo "### Browser QA evidence" >> "$GITHUB_STEP_SUMMARY"
+          echo "Chromium desktop/mobile interactions only. Screenshot comparisons are reported as NO_APPROVED_BASELINE until reviewed reference PNGs are committed under visual-qa/baselines/." >> "$GITHUB_STEP_SUMMARY"
+          echo "No physical Quest 2 or clinical validation performed by this job." >> "$GITHUB_STEP_SUMMARY"
