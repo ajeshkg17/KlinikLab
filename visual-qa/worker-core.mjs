@@ -8,6 +8,10 @@ export const DEFAULT_ORIGIN = 'http://127.0.0.1:8787';
 export const CONTROLS = Object.freeze({
   teeth: '#focus',
   renderer: '#renderer-toggle',
+  atlasOpen: '#dundee-atlas-open',
+  atlasNext: '#dundee-atlas-next',
+  atlasPrev: '#dundee-atlas-prev',
+  atlasClose: '#dundee-atlas-close',
   clinic: '#room',
   occlusal: '#occlusal',
   arches: '#arches',
@@ -38,6 +42,7 @@ export const CAPTURES = Object.freeze({
   volume: '#volume-root',
   radiograph: '#xray',
   imaging: '#desktop-suite',
+  atlas: '#dundee-atlas-dialog',
 });
 const ID = /^[a-z0-9][a-z0-9_-]{3,63}$/;
 const pnum = (x, min, max) => Number.isInteger(x) && x >= min && x <= max;
@@ -80,6 +85,6 @@ export function safeRunFolder(jobId) {
 export function localRequestAllowed(raw) {
   try {
     const u = new URL(raw);
-    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (u.href === 'https://cdn.babylonjs.com/babylon.js') || u.protocol === 'data:' || u.protocol === 'blob:';
+    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (['https://cdn.babylonjs.com/babylon.js','https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js','https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js','https://cdn.babylonjs.com/draco_decoder_gltf.wasm','https://cdn.babylonjs.com/draco_decoder_gltf.js'].includes(u.href)) || u.protocol === 'data:' || u.protocol === 'blob:';
   } catch { return false; }
 }
