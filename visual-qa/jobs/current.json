@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase2-final-2026-10-29-04",
+  "jobId": "phase2-fdi-2026-10-29-05",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-frontal",
+      "name": "01-all-fdi-selections",
       "steps": [
         {
           "action": "click",
@@ -28,158 +28,9 @@
         {
           "action": "wait",
           "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "02-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
         },
         {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "03-oblique",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 140,
-          "dy": -65
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "04-lateral",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 300,
-          "dy": 0
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "05-upper-only",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "06-lower-only",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
+          "action": "validateFDI"
         }
       ],
       "capture": "stage"
