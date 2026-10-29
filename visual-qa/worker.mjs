@@ -87,6 +87,34 @@ async function capture(job){
       if(item.fdiValidation.checked!==32||item.fdiValidation.failures.length||item.fdiValidation.mode!=='babylon')
        throw Error('FDI selection regression: '+JSON.stringify(item.fdiValidation));
      }
+     else if(['practiceAnswerCorrect','practiceAnswerWrong','practiceComplete'].includes(step.action)){
+      // Fixed local practice interactions; job JSON cannot inject a selector, path or code.
+      const outcome=await page.evaluate(mode=>{
+       const api=window.KlinikAnatomyPractice;
+       if(!api?.status?.open)return {error:'Practice is not open'};
+       const choose=correct=>{
+        const q=api.currentQuestion;
+        if(!q)return false;
+        const i=q.options.findIndex(v=>correct?v===q.correct:v!==q.correct);
+        const el=document.querySelector('#practice-options [data-practice-option="'+i+'"]');
+        if(!el||el.disabled)return false;
+        el.click();return api.status.answered;
+       };
+       if(mode==='practiceComplete'){
+        for(let i=0;i<10;i++){
+          if(!choose(true))return {error:'Could not answer '+(i+1)};
+          const next=document.getElementById('practice-next');
+          if(!next||next.hidden)return {error:'No next question button at '+i};
+          next.click();
+        }
+        return {finished:api.status.completed,score:api.status.score};
+       }
+       const expected=mode==='practiceAnswerCorrect';
+       return {answered:choose(expected),correct:api.status.lastCorrect};
+      },step.action);
+      if(outcome.error||outcome.answered===false||outcome.finished===false)
+       throw Error('Practice interaction failed: '+JSON.stringify(outcome));
+     }
      else if(step.action==='localDemoGLB'){
       // Never accept arbitrary path arguments from the GitHub instruction JSON.
       await page.locator('#dundee-atlas-import').setInputFiles(path.join(REPO,'assets','dundee','maxillary_first_molar.glb'));
@@ -112,10 +140,29 @@ async function capture(job){
       const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,structure:window.KlinikStructureExplorer?{...window.KlinikStructureExplorer.status}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,structure:window.KlinikStructureExplorer?{...window.KlinikStructureExplorer.status}:null,practice:window.KlinikAnatomyPractice?{...window.KlinikAnatomyPractice.status}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     // A missing script may return HTTP 404 without producing a pageerror.
     // Require the local appearance module to be active for every Phase 3 view.
+    if(job.jobId.startsWith('phase6-')){
+      const p=item.checks?.practice||{},structure=item.checks?.structure||{};
+      const controls=scene.steps.map(x=>x.control||x.action);
+      const selected=controls.filter(x=>/^tooth(?:11|24|26|36|48)$/.test(x)).at(-1)?.slice(5);
+      const closed=controls.includes('practiceClose');
+      const restarted=controls.includes('practiceRestart');
+      const completed=controls.includes('practiceComplete');
+      const correct=controls.includes('practiceAnswerCorrect');
+      const wrong=controls.includes('practiceAnswerWrong');
+      const advanced=controls.includes('practiceNext');
+      const score=completed?10:restarted||wrong?0:correct?1:0;
+      const index=completed?9:advanced&&!restarted?1:0;
+      const answered=completed||(!restarted&&!advanced&&(correct||wrong));
+      if(p.version!==1||!p.started||p.open===closed||p.selectedFDI!==selected||
+        p.total!==10||p.score!==score||p.questionIndex!==index||
+        p.answered!==answered||p.completed!==completed||
+        !structure.open)
+        throw Error('Phase 6 practice mismatch: '+JSON.stringify({p,selected,closed,restarted,score,index,answered,completed,structure}).slice(0,650));
+    }
     if(job.jobId.startsWith('phase5-')){
       const st=item.checks?.structure||{},b=item.checks?.babylon||{};
       const expectsOpen=scene.steps.some(x=>x.action==='click'&&x.control==='structure');
@@ -158,7 +205,7 @@ async function capture(job){
     if(scene.steps.some(step=>step.action==='click'&&step.control==='renderer')){
       const checks=item.checks||{},real=checks.realTeeth||{},b=checks.babylon||{};
       const expected=checks.archMode==='both'?32:16;
-      const modern=/^phase[45]-/.test(job.jobId);
+      const modern=/^phase[456]-/.test(job.jobId);
       const expectedReal=modern&&b.crownSource==='procedural'?0:expected;
       const anatomyVersion=modern?6:5;
       if(b.mode!=='babylon'||b.anatomyVersion!==anatomyVersion||b.gingivalVertices!==11572||b.gingivalTriangles!==23136)
