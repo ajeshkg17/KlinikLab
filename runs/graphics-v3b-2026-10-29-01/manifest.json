@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "jobId": "graphics-v3b-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T10:33:29.580Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-desktop-overview",
+      "file": "01-desktop-overview.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "bytes": 251514,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "02-3d-teeth",
+      "file": "02-3d-teeth.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 108306,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "03-3d-occlusal",
+      "file": "03-3d-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 104527,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "04-3d-orbited",
+      "file": "04-3d-orbited.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 109408,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "05-clinic-room",
+      "file": "05-clinic-room.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 138109,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d"
+      }
+    }
+  ],
+  "successCount": 5,
+  "failureCount": 0
+}
