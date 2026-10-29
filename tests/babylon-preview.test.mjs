@@ -35,7 +35,7 @@ test('geometry and labels remain available to the optional display layer',async(
 });
 
 test('isolated screenshot worker only permits the exact external Babylon script',async()=>{
-  const {localRequestAllowed,validateJob}=await import('../visual-qa/worker-core.mjs');
+  const {localRequestAllowed,validateJob,CONTROLS}=await import('../visual-qa/worker-core.mjs');
   assert.equal(localRequestAllowed('https://cdn.babylonjs.com/babylon.js'),true);
   assert.equal(localRequestAllowed('https://cdn.babylonjs.com/other.js'),false);
   assert.equal(localRequestAllowed('https://assets.babylonjs.com/environments/environmentSpecular.env'),false);
@@ -44,7 +44,13 @@ test('isolated screenshot worker only permits the exact external Babylon script'
   assert.equal(localRequestAllowed('http://127.0.0.1:8787/index.html'),true);
   const job=JSON.parse(await text('visual-qa/jobs/current.json'));
   assert.equal(validateJob(job).jobId,job.jobId);
-  assert.ok(job.scenes.some(scene=>scene.steps.some(step=>step.control==='renderer')));
+  // Current job can legitimately be a tutorial/Quest mock instead of renderer QA.
+  // Assert renderer actions remain approved independently of that mutable job.
+  assert.equal(CONTROLS.renderer,'#renderer-toggle');
+  const rendererJob={...job,jobId:'qa-renderer-check',scenes:[
+    {name:'renderer-check',capture:'scene',steps:[{action:'click',control:'renderer'}]}
+  ]};
+  assert.equal(validateJob(rendererJob).scenes[0].steps[0].control,'renderer');
 });
 
 test('local server allows preview script with narrow CSP exception',async()=>{
