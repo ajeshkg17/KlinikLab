@@ -14,6 +14,10 @@ export const CONTROLS = Object.freeze({
   structure: '#structure-toggle',
   structureClose: '#structure-close',
   structureFocus: '#structure-focus',
+  practice: '#practice-toggle',
+  practiceNext: '#practice-next',
+  practiceRestart: '#practice-restart',
+  practiceClose: '#practice-close',
   structurePulp: '#structure-layers [data-layer="pulp"]',
   structureDentin: '#structure-layers [data-layer="dentin"]',
   tooth11: '#chart [data-tooth="11"]',
@@ -85,6 +89,8 @@ export function validateJob(raw) {
       } else if (step.action === 'validateFDI') {
         // Fixed, local-only interaction audit of every permanent-tooth chart button.
         if (Object.keys(step).length !== 1) throw new Error('validateFDI takes no parameters.');
+      } else if (['practiceAnswerCorrect','practiceAnswerWrong','practiceComplete'].includes(step.action)) {
+        if (Object.keys(step).length !== 1) throw new Error('Practice action takes no parameters.');
       } else if (step.action === 'localDemoGLB') {
         // The only permitted local upload source is the bundled public demo tooth;
         // job files cannot choose a filesystem path or access private files.
