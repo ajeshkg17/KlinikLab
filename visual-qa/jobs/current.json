@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "babylon-pbr-2026-10-29-07",
+  "jobId": "babylon-anatomy-v2-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -17,7 +17,7 @@
       "capture": "stage"
     },
     {
-      "name": "02-babylon-teeth",
+      "name": "02-anatomy-babylon",
       "steps": [
         {
           "action": "click",
@@ -29,7 +29,66 @@
         },
         {
           "action": "wait",
+          "ms": 1700
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "03-anatomy-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
           "ms": 1200
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-anatomy-oblique",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "orbit",
+          "dx": 170,
+          "dy": -75
+        },
+        {
+          "action": "wait",
+          "ms": 700
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-babylon-clinic",
+      "steps": [
+        {
+          "action": "click",
+          "control": "clinic"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 900
         }
       ],
       "capture": "stage"
