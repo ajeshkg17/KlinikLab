@@ -1702,13 +1702,13 @@ window.addEventListener('DOMContentLoaded',()=>window.clinicalJourney=new Journe
  }
  /* Selected phrases trigger a caution, not an overall clinical quality verdict. */
  function safetyReview(caseId,answer){
-  if(caseId!=='surgery'||!answer)return [];
+  if(!Object.prototype.hasOwnProperty.call(CASES,caseId)||!answer)return [];
   const flags=[];
   const clauses=answer.toLocaleLowerCase('de-DE').split(/[.!?;\n]+/);
   for(const clause of clauses){
    if(/\b(?:antibiotika\s+sind\s+(?:immer|grundsätzlich|routinemäßig)\s+(?:notwendig|erforderlich|indiziert)|(?:immer|routinemäßig|grundsätzlich)\s+antibiotika\s+(?:geben|verordnen|verschreiben)|antibiotika\s+bei\s+jeder\s+perikoronitis)\b/iu.test(clause)&&
       !/\b(?:nicht|keine|niemals)\s+(?:immer|grundsätzlich|routinemäßig)\b/iu.test(clause)){
-    flags.push('Pauschale Antibiotikagabe ist bei unkomplizierter Perikoronitis nicht gerechtfertigt. Bitte fachlich prüfen.');
+    flags.push('Pauschale Antibiotikagabe ohne fallbezogene Indikation ist nicht gerechtfertigt. Bitte fachlich prüfen.');
    }
    if(/\b(?:atemnot|schluckbeschwerden|dysphagie)\b.{0,65}\b(?:abwarten|zu\s+hause\s+bleiben|keine\s+hilfe\s+holen)\b/iu.test(clause)&&
       !/\b(?:nicht|niemals|keinesfalls)\s+abwarten\b/iu.test(clause)){
