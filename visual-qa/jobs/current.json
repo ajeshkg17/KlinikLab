@@ -1,35 +1,33 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase5-structures-2026-10-29-01",
+  "jobId": "phase6-practice-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-incisor-enamel",
+      "name": "01-quiz-start",
       "capture": "stage",
       "steps": [
         {
           "action": "click",
-          "control": "teeth"
+          "control": "tooth26"
         },
         {
           "action": "click",
-          "control": "renderer"
+          "control": "structure"
         },
         {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
+          "action": "click",
+          "control": "practice"
+        }
+      ]
+    },
+    {
+      "name": "02-quiz-incorrect",
+      "capture": "stage",
+      "steps": [
         {
           "action": "click",
           "control": "tooth11"
@@ -37,11 +35,111 @@
         {
           "action": "click",
           "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "practice"
+        },
+        {
+          "action": "practiceAnswerWrong"
         }
       ]
     },
     {
-      "name": "02-molar-pulp",
+      "name": "03-quiz-correct-next",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tooth36"
+        },
+        {
+          "action": "click",
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "practice"
+        },
+        {
+          "action": "practiceAnswerCorrect"
+        },
+        {
+          "action": "click",
+          "control": "practiceNext"
+        }
+      ]
+    },
+    {
+      "name": "04-quiz-complete",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tooth48"
+        },
+        {
+          "action": "click",
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "practice"
+        },
+        {
+          "action": "practiceComplete"
+        }
+      ]
+    },
+    {
+      "name": "05-quiz-restart",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tooth24"
+        },
+        {
+          "action": "click",
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "practice"
+        },
+        {
+          "action": "practiceAnswerWrong"
+        },
+        {
+          "action": "click",
+          "control": "practiceRestart"
+        }
+      ]
+    },
+    {
+      "name": "06-quiz-return",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tooth26"
+        },
+        {
+          "action": "click",
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "practice"
+        },
+        {
+          "action": "click",
+          "control": "practiceClose"
+        }
+      ]
+    },
+    {
+      "name": "07-quiz-and-fdi",
       "capture": "stage",
       "steps": [
         {
@@ -74,113 +172,7 @@
         },
         {
           "action": "click",
-          "control": "structurePulp"
-        }
-      ]
-    },
-    {
-      "name": "03-molar-focus",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "tooth36"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "structureFocus"
-        }
-      ]
-    },
-    {
-      "name": "04-premolar-dentin",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "tooth24"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "structureDentin"
-        }
-      ]
-    },
-    {
-      "name": "05-fdi-32",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "structure"
+          "control": "practice"
         },
         {
           "action": "validateFDI"
