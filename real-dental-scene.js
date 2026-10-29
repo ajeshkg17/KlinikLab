@@ -156,12 +156,12 @@
             state.failures.push({file:filename(upper,tooth),message:String(error.message||error).slice(0,160)});
           }
       };
-      // Sixteen small local assets can decode concurrently on an RTX workstation.
-      // Loader errors are isolated per model; remaining teeth still render.
-      const jobs=[];
-      for(let upperIndex=0;upperIndex<2;upperIndex++)for(let tooth=1;tooth<=8;tooth++)
-        jobs.push(loadOne(upperIndex,tooth));
-      await Promise.all(jobs);
+      // Four bounded loaders prevent a Draco/WebGL decode spike in the browser.
+      // Every crown has an individual failure fallback to the procedural mesh.
+      let next=0;
+      await Promise.all(Array.from({length:4},async()=>{
+        while(next<16){const i=next++;await loadOne(Math.floor(i/8),i%8+1)}
+      }));
       state.ready=state.instances>0;
       state.mode=state.ready?'ready':'error';
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
