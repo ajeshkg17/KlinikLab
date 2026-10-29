@@ -7,7 +7,6 @@ clinical correctness, or third-party network availability.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import os
 from pathlib import Path
 import re
@@ -32,13 +31,18 @@ def run(*args: str) -> None:
 def mirror_and_syntax() -> None:
     public = ROOT / "public"
     mirrors = sorted(
-        file for file in public.iterdir()
+        file for file in public.rglob("*")
         if file.is_file() and file.suffix in FRONTEND_SUFFIXES
     )
+    # Root frontend modules must have a corresponding public export, too.
+    for source in ROOT.iterdir():
+        if source.is_file() and (source.suffix in {".js", ".css"} or source.name == "index.html"):
+            if not (public / source.name).is_file():
+                raise AssertionError(f"QA-STATIC-004: root module lacks public mirror: {source.name}")
     if not mirrors:
         raise AssertionError("QA-STATIC-001: no root/public mirror files discovered")
     for mirror in mirrors:
-        original = ROOT / mirror.name
+        original = ROOT / mirror.relative_to(public)
         if not original.is_file() or original.read_bytes() != mirror.read_bytes():
             raise AssertionError(f"QA-STATIC-002: source/public mirror drift: {mirror.name}")
 
@@ -78,7 +82,6 @@ def http_smoke() -> None:
         port = listener.getsockname()[1]
     origin = f"http://127.0.0.1:{port}"
     env = {**os.environ, "PORT": str(port), "GEMINI_API_KEY": "", "AI_ACCESS_CODE": ""}
-    log_path = ROOT / ".qa-http.log"
     # Avoid retaining server output in the working tree, even after exceptions.
     import tempfile
     with tempfile.TemporaryFile() as log:
