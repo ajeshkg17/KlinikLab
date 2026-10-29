@@ -12,7 +12,7 @@ function json(res,status,obj){res.writeHead(status,{'content-type':'application/
 async function readJSON(req){let raw='',size=0;for await(const b of req){size+=b.length;if(size>LIMIT)throw Object.assign(new Error('Request too large.'),{status:413});raw+=b.toString('utf8')}try{return JSON.parse(raw)}catch{throw Object.assign(new Error('Invalid JSON.'),{status:400})}}
 function rateLimit(ip){const now=Date.now(),h=hits.get(ip)||[];const fresh=h.filter(n=>now-n<300000);if(fresh.length>=30)throw Object.assign(new Error('Too many requests; try again in a few minutes.'),{status:429});fresh.push(now);hits.set(ip,fresh);if(hits.size>2000)for(const [k,v] of hits)if(!v.some(n=>now-n<300000))hits.delete(k)}
 function assertSameOrigin(req){const origin=req.headers.origin;if(!origin)return;try{const u=new URL(origin);if(u.host!==req.headers.host)throw Error('bad origin')}catch{throw Object.assign(new Error('Cross-origin requests are disabled.'),{status:403})}}
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.ico':'image/x-icon','.json':'application/json'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.ico':'image/x-icon','.json':'application/json','.glb':'model/gltf-binary'};
 createServer(async(req,res)=>{
  try{
   const u=new URL(req.url,'http://localhost');
@@ -26,10 +26,11 @@ createServer(async(req,res)=>{
   if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed.'});
   let p=decodeURIComponent(u.pathname);if(p==='/')p='/index.html';
   // Only serve front-end files, never server scripts or configuration.
-  if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/babylon-preview.js','/babylon-anatomy.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
+  const isDundeeModel=/^\/assets\/dundee\/(?:maxillary|mandibular)_[a-z_]+\.glb$/.test(p);
+  if(!isDundeeModel && !['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/babylon-preview.js','/babylon-anatomy.js','/dundee-atlas.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
   const full=path.join(ROOT,p);
   const data=await readFile(full);
-  res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self' https://cdn.babylonjs.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});
+  res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self' https://cdn.babylonjs.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cdn.babylonjs.com; worker-src 'self' blob:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});
   res.end(req.method==='HEAD'?undefined:data);
  }catch(e){const {status,body}=errorPayload(e);return json(res,status,body)}
 }).listen(PORT,'127.0.0.1',()=>console.log(`KlinikLab running on http://127.0.0.1:${PORT} | Gemini configured: ${Boolean(process.env.GEMINI_API_KEY)}`));
