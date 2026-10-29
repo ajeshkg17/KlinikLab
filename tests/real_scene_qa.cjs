@@ -58,3 +58,157 @@ test('real crown synchronization binds Babylon namespace locally',()=>{
   assert.match(source,/function sync\(layer\)\s*\{[\s\S]*?const B=layer\.B;/);
   assert.match(source,/new B\.Color3\(/);
 });
+
+
+test('3D sampled surface distance detects separated triangles in scene units',()=>{
+  const a=[[[-1,-1,0],[1,-1,0],[0,1,0]]];
+  const b=[[[-1,-1,1],[1,-1,1],[0,1,1]]];
+  const result=M.surfaceDistance(a,b);
+  assert.ok(Math.abs(result.distance-1)<1e-9);
+  assert.equal(result.intersectsSampledTriangles,false);
+  assert.match(result.units,/scene units/);
+  assert.match(result.limitations,/upper bound/);
+});
+test('3D sampled surface distance detects edge-through-face intersections',()=>{
+  const a=[[[-1,-1,0],[1,-1,0],[0,1,0]]];
+  const b=[[[0,-.5,-1],[0,-.5,1],[0,.6,.5]]];
+  const result=M.surfaceDistance(a,b);
+  assert.equal(result.distance,0);
+  assert.equal(result.intersectsSampledTriangles,true);
+});
+test('sampled surface distance rejects invalid or missing geometry',()=>{
+  assert.throws(()=>M.surfaceDistance([],[]),/required/);
+  assert.throws(()=>M.surfaceDistance([[[0,0,0],[1,0,0],[NaN,0,0]]],[[[0,0,0],[1,0,0],[0,1,0]]]),/finite/);
+});
+
+
+test('sampled world-space arch diagnostics cover 30 adjacent FDI pairs without changing source records',()=>{
+  const upper=['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'];
+  const lower=['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'];
+  let offset=0;
+  const items=[...upper,...lower].map(id=>{
+    const x=offset++*2.5;
+    return {source:{key:'tooth:'+id},realMesh:{
+      getVerticesData:()=>[0,0,0,1,0,0,0,1,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix:()=>({dx:x})
+    }};
+  });
+  const originals=items.map(item=>item.source.key);
+  const B={VertexBuffer:{PositionKind:'position'},Vector3:{
+    FromArray:(positions,i)=>({x:positions[i],y:positions[i+1],z:positions[i+2]}),
+    TransformCoordinates:(v,m)=>({x:v.x+m.dx,y:v.y,z:v.z})
+  }};
+  const diagnostics=M.measureArchSurfaces({B,items,anatomyLayout:{
+    arches:[upper.map(id=>({id})),lower.map(id=>({id}))]
+  }});
+  assert.equal(diagnostics.teethMeasured,32);
+  assert.equal(diagnostics.pairs.length,30);
+  assert.equal(diagnostics.opposingPairs.length,16);
+  assert.equal(diagnostics.opposingPairs[0].pair,'11-41');
+  assert.equal(diagnostics.opposingPairs[8].pair,'21-31');
+  assert(diagnostics.opposingPairs.every(p=>Number.isFinite(p.projectedVerticalClearance)));
+  assert(diagnostics.opposingPairs.every(p=>Number.isFinite(p.sampledSurfaceDistance)));
+  assert.equal(diagnostics.pairs[0].pair,'18-17');
+  assert.equal(diagnostics.pairs[15].pair,'48-47');
+  assert.ok(diagnostics.pairs.every(p=>Number.isFinite(p.distance)&&p.distance>0));
+  assert.match(diagnostics.units,/not mm/);
+  assert.deepEqual(items.map(item=>item.source.key),originals);
+});
+
+
+test('opposing FDI pairs report projected separation without confusing it with occlusal contact',()=>{
+  const arches=[['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'],
+    ['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38']];
+  const items=arches.flatMap((arch,archIndex)=>arch.map((id,i)=>{
+    const y=archIndex===0?3:1, x=i*4;
+    return {source:{key:'tooth:'+id},realMesh:{
+      getVerticesData:()=>[0,y,0,1,y,0,0,y+.2,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix:()=>({x})
+    }};
+  }));
+  const B={VertexBuffer:{PositionKind:'position'},Vector3:{
+    FromArray:(p,i)=>({x:p[i],y:p[i+1],z:p[i+2]}),
+    TransformCoordinates:(v,m)=>({x:v.x+m.x,y:v.y,z:v.z})
+  }};
+  const report=M.measureArchSurfaces({B,items,anatomyLayout:{arches:arches.map(x=>x.map(id=>({id})))}});
+  assert.equal(report.opposingPairs.length,16);
+  assert.equal(report.pairs.length,30);
+  assert(report.opposingPairs.every(p=>Math.abs(p.projectedVerticalClearance-1.8)<1e-9));
+  assert(report.opposingPairs.every(p=>p.status==='vertical projection separated'));
+  assert(report.opposingPairs.every(p=>p.sampledSurfaceDistance>0));
+  assert.equal(report.opposingPairs[0].pair,'11-41');
+  assert.equal(report.opposingPairs[15].pair,'28-38');
+  assert.match(report.limitations,/No calibrated bite/);
+});
+
+
+
+test('runtime licensed-tooth renderer sync keeps all 32 FDI IDs visible, then safely falls back',()=>{
+  const upper=['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'];
+  const lower=['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'];
+  const byId=Object.create(null),items=[];
+  for(const [arch,ids] of [upper,lower].entries())for(let i=0;i<ids.length;i++){
+    const id=ids[i],source={
+      key:'tooth:'+id,tag:'crown',p:[i*3,arch?1:3,0],s:[1,1,1],
+      rot:[0,0,0],hidden:false,alpha:1
+    };
+    const site={p:source.p.slice(),s:source.s.slice(),rot:source.rot.slice(),
+      mirrored:id[0]==='1'||id[0]==='4'};
+    byId[id]=site;
+    const transform={
+      values:[],set(...args){this.values=args;}
+    };
+    const realMesh={
+      isVisible:false,position:{...transform,values:[]},scaling:{...transform,values:[]},
+      rotation:{...transform,values:[]},
+      material:{albedoColor:{r:1,g:1,b:1},alpha:1},
+      getVerticesData:()=>[0,0,0,1,0,0,0,1,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix(){return {x:this.position.values[0],y:this.position.values[1],z:this.position.values[2]};}
+    };
+    const originalMesh={isVisible:true};
+    items.push({source,mesh:originalMesh,realMesh});
+  }
+  const B={
+    Color3:class Color3{constructor(r,g,b){this.r=r;this.g=g;this.b=b;}},
+    VertexBuffer:{PositionKind:'position'},
+    Vector3:{
+      FromArray:(p,i)=>({x:p[i],y:p[i+1],z:p[i+2]}),
+      TransformCoordinates:(v,m)=>({x:v.x+m.x,y:v.y+m.y,z:v.z+m.z})
+    }
+  };
+  const layer={B,visible:true,crownSource:'dundee',
+    app:{viewMode:'3d'},source:{xrSession:null,selectedKey:'tooth:11'},
+    anatomyLayout:{byId,arches:[upper.map(id=>({id})),lower.map(id=>({id}))]},items};
+  const prior=M.state.ready;
+  const priorReport=M.state.surfaceDiagnostics;
+  try{
+    M.state.ready=true;M.state.surfaceDiagnostics=null;
+    M.sync(layer);
+    assert.equal(M.state.visibleInstances,32);
+    assert.equal(M.state.surfaceDiagnostics.pairs.length,30);
+    assert.equal(M.state.surfaceDiagnostics.opposingPairs.length,16);
+    assert(items.every(x=>x.realMesh.isVisible&&!x.mesh.isVisible));
+    assert(items.every(x=>x.realMesh.position.values.length===3));
+    assert.deepEqual(items.find(x=>x.source.key==='tooth:11').realMesh.scaling.values,[-1,1,1]);
+    assert.deepEqual(items.find(x=>x.source.key==='tooth:21').realMesh.scaling.values,[1,1,1]);
+    const chosen=items.find(x=>x.source.key==='tooth:11').realMesh.material.albedoColor;
+    assert.equal(chosen.r,.64);
+    layer.crownSource='procedural';M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    assert(items.every(x=>!x.realMesh.isVisible&&x.mesh.isVisible));
+    layer.crownSource='dundee';layer.source.xrSession={};M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    assert(items.every(x=>!x.realMesh.isVisible&&!x.mesh.isVisible));
+    layer.source.xrSession=null;layer.app.viewMode='2d';M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    layer.app.viewMode='3d';layer.visible=false;M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    layer.visible=true;M.state.ready=false;M.sync(layer);
+    assert.equal(M.state.visibleInstances,0,'a failed/unfinished load must not publish stale visibility');
+  }finally{
+    M.state.ready=prior;M.state.surfaceDiagnostics=priorReport;M.state.visibleInstances=0;
+  }
+});
