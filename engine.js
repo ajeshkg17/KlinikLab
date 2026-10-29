@@ -234,7 +234,8 @@ class DentalScene {
     this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
     for(const [i,n]of ['putty','lightbody','heavybody','mediumbody'].entries()){let x=-1.83+i*.19;this.cy([x,1.015,-2.5],[.105,.16,.105],['#e2b88d','#8bb7e2','#aad7a5','#cda6d0'][i],{key:`tool:${n}`,radius:.135});this.cy([x,1.103,-2.5],[.11,.035,.11],'#ebebe0',{key:`tool:${n}`,radius:.09})}
     this.vrCompactMeshes=this.meshes.slice(vrPropsStart);
-    this.xrComfortScale=.78;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
+    this.xrComfortConfig={furniture:{scale:.78,pivot:[0,1.02,-1.83]},lessonBoard:{scale:.68,pivot:[-1.66,1.51,-2.13]}};
+    this.xrComfortScale=this.xrComfortConfig.furniture.scale;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
     this.focusDecor=this.meshes.filter(m=>!this.archMeshes[0].includes(m)&&!this.archMeshes[1].includes(m));
     const vrMeshesStart=this.meshes.length;
     // Interactive XR lesson board - all its buttons are also available via standard HTML.
@@ -254,7 +255,7 @@ class DentalScene {
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
-  getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
+  getRayHit(o,d,allow=null){let hit=null;for(const p of this.pickables){if(p.mesh.hidden||(allow&&!allow(p)))continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
       if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
@@ -270,9 +271,10 @@ class DentalScene {
     if(Boolean(active)===this.xrComfort.active)return;
     if(active){
       const snapshot=[];
+      const layout=this.xrComfortConfig||{furniture:{scale:this.xrComfortScale,pivot:[0,1.02,-1.83]},lessonBoard:{scale:.68,pivot:[-1.66,1.51,-2.13]}};
       const groups=[
-        {meshes:this.vrCompactMeshes,pivot:[0,1.02,-1.83],factor:this.xrComfortScale},
-        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.68}
+        {meshes:this.vrCompactMeshes,pivot:layout.furniture.pivot,factor:layout.furniture.scale},
+        {meshes:this.xrBoardMeshes,pivot:layout.lessonBoard.pivot,factor:layout.lessonBoard.scale}
       ];
       for(const group of groups){
         const members=new Set(group.meshes);
@@ -291,7 +293,7 @@ class DentalScene {
         }
       }
       this.xrComfortSnapshot=snapshot;
-      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.68};
+      this.xrComfort={active:true,scale:groups[0].factor,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:groups[1].factor};
     }else{
       for(const item of this.xrComfortSnapshot||[]){
         item.object.p=item.p.slice();
@@ -321,7 +323,7 @@ class DentalScene {
     const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
     let session;
     try{
-      session=await promise;const gl=this.gl;
+      session=await promise;session.addEventListener('end',()=>this.handleXREnd(session));const gl=this.gl;
       if(gl.makeXRCompatible)await gl.makeXRCompatible();
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
@@ -329,18 +331,28 @@ class DentalScene {
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
-      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=frame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
-      session.addEventListener('end',()=>{this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
-    }catch(err){if(session)try{await session.end()}catch{}throw err}
+    }catch(err){if(session){try{await session.end()}catch{}this.handleXREnd(session)}throw err}
+  }
+  handleXREnd(session){
+    if(this.xrSession!==session)return;
+    this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);
+    this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();
+    for(const m of this.xrBoardMeshes)m.hidden=true;
+    requestAnimationFrame(t=>this.resumeDesktop(t));
   }
   resumeDesktop(t){if(!this.xrSession){this.animation(t);requestAnimationFrame(this.resumeDesktop.bind(this))}}
-  xrLoop(t,frame){if(!this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  xrLoop(t,frame){if(!this.xrSession||frame?.session!==this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  getXRInputPose(frame,source){
+    if(!frame?.getPose||!source?.targetRaySpace||!this.xrRef)return null;
+    try{return frame.getPose(source.targetRaySpace,this.xrRef)||null}catch{return null}
+  }
   pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
   rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
-  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0]}}
-  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose)return;let n=0;for(const source of frame.session.inputSources){if(n>=this.xrControllers.length)break;const p=frame.getPose(source.targetRaySpace,this.xrRef);if(!p)continue;const t=p.transform,c=this.xrControllers[n++];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
-    for(let i=n;i<2;i++){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
+  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}}
+  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep?.tip)this.xrPrep.tip.hidden=true;return}const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;const p=this.getXRInputPose(frame,source);if(!p)continue;used.add(slot);const t=p.transform,c=this.xrControllers[slot];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
+    for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
     this.xrPrep?.onXRFrame(frame,t);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
   }

@@ -100,3 +100,46 @@ test('script served before Quest preparation initializes and standalone bundler 
  assert(html.indexOf('<script src="xr-guide.js"></script>')>html.indexOf('<script src="xr-procedure.js"></script>'));
  assert.match(build,/['"]xr-guide\.js['"]/);
 });
+
+test('guide ray ignores closer tooth targets and no-pose selects are safe',()=>{
+ const {guide,scene,ctx}=makeGuide();guide.onEnter();
+ let filtered=false;scene.getRayHit=(o,d,allow)=>{filtered=!!allow&&allow({key:'guide:next'})&&!allow({key:'tooth:16'});return filtered?{key:'guide:next'}:{key:'tooth:16'}};
+ const event={inputSource:{targetRaySpace:{}}},frame={getPose:()=>({transform:{position:{x:0,y:1.5,z:0},orientation:{x:0,y:0,z:0,w:1}}})};
+ assert.equal(guide.onSelectStart(event,frame),true);assert(filtered);
+ assert.equal(ctx.KlinikXRGuide.state.index,1);
+ assert.equal(guide.onSelectStart(event,{getPose(){throw Error('tracking lost')}}),true);
+ guide.close();assert.equal(guide.onSelectStart(event,{getPose:()=>null}),false);
+ guide.onExit();
+});
+test('XR pose helper returns null for missing or throwing controller poses',()=>{
+ const start=engine.indexOf('  getXRInputPose(frame,source){'),end=engine.indexOf('  pickXR(pose){',start);
+ assert(start>0&&end>start);
+ const fn=vm.runInNewContext('({'+engine.slice(start,end)+'}).getXRInputPose');
+ const space={},scene={xrRef:{}};
+ assert.equal(fn.call(scene,null,{targetRaySpace:space}),null);
+ assert.equal(fn.call(scene,{getPose(){return null}},{targetRaySpace:space}),null);
+ assert.equal(fn.call(scene,{getPose(){throw Error('tracking lost')}},{targetRaySpace:space}),null);
+ assert.equal(fn.call(scene,{getPose(){return 123}},{targetRaySpace:space}),123);
+});
+test('XR session cleanup is idempotent and scoped to the active session',()=>{
+ const start=engine.indexOf('  handleXREnd(session){'),end=engine.indexOf('  resumeDesktop(t){',start);
+ assert(start>0&&end>start);
+ let scheduled=0;
+ const fn=vm.runInNewContext('({'+engine.slice(start,end)+'}).handleXREnd',{requestAnimationFrame:()=>{scheduled++}});
+ const session={},calls=[];
+ const scene={xrSession:session,xrRef:{},latestFrame:{},xrBoardMeshes:[{hidden:false}],
+ xrGuide:{onExit(){calls.push('guide')}},xrPrep:{onExit(){calls.push('prep')}},
+ setXRComfort(a){assert.equal(a,false);calls.push('comfort')},
+ clearControllers(){calls.push('controllers')},resumeDesktop(){}};
+ fn.call(scene,{});fn.call(scene,session);fn.call(scene,session);
+ assert.deepEqual(calls,['guide','prep','comfort','controllers']);assert.equal(scheduled,1);
+ assert.equal(scene.xrSession,null);assert.equal(scene.xrRef,null);assert.equal(scene.latestFrame,null);
+ assert(scene.xrBoardMeshes[0].hidden);
+});
+test('opening VR help with grip clears held cutting input immediately',()=>{
+ const {guide,scene}=makeGuide();let cleared=0;
+ scene.xrPrep={triggers:{clear(){cleared++}},lastCut:{time:1},tip:{hidden:false}};
+ guide.onEnter();guide.close();assert.equal(guide.onSqueezeStart(),true);
+ assert.equal(cleared,2);assert.equal(scene.xrPrep.lastCut,null);
+ assert(scene.xrPrep.tip.hidden);guide.onExit();
+});

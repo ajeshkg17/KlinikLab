@@ -78,7 +78,11 @@
     }
     open(){
       if(!state.active)return false;
-      state.index=0;state.open=true;this.render();return true;
+      state.index=0;state.open=true;
+      // Prevent a held trigger from continuing a cut when help opens by grip.
+      this.scene.xrPrep?.triggers?.clear();
+      if(this.scene.xrPrep){this.scene.xrPrep.lastCut=null;if(this.scene.xrPrep.tip)this.scene.xrPrep.tip.hidden=true}
+      this.render();return true;
     }
     close(){if(!state.open)return false;state.open=false;this.render();return true}
     next(){if(!state.open)return false;if(state.index===PAGES.length-1)return this.close();state.index++;this.render();return true}
@@ -94,13 +98,15 @@
     onSelectStart(event,frame){
       if(!state.active)return false;
       // Invisible panels never receive interaction, but the launcher always does.
-      const pose=frame&&event?.inputSource?.targetRaySpace&&this.scene.xrRef
-        ?frame.getPose(event.inputSource.targetRaySpace,this.scene.xrRef):null;
+      let pose=null;
+      if(frame?.getPose&&event?.inputSource?.targetRaySpace&&this.scene.xrRef){
+        try{pose=frame.getPose(event.inputSource.targetRaySpace,this.scene.xrRef)}catch{pose=null}
+      }
       let key=null;
       if(pose){
         const q=pose.transform.orientation,p=pose.transform.position;
         const ray={o:[p.x,p.y,p.z],d:this.scene.rotateByQuat([0,0,-1],q)};
-        key=this.scene.getRayHit(ray.o,ray.d)?.key||null;
+        key=this.scene.getRayHit(ray.o,ray.d,p=>p.key?.startsWith('guide:'))?.key||null;
       }
       if(key==='guide:open'){this.open();state.controllerSelects++;return true}
       if(!state.open)return false;
