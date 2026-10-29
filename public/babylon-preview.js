@@ -100,9 +100,10 @@
       // VR selection geometry, and actual preparation volume stay untouched.
       if((kind.startsWith('crown_')||kind.startsWith('gingiva')) && window.KlinikBabylonAnatomy?.createTemplate){
         try {
-          const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind);
+          const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind,this.anatomyLayout);
           if(anatomy){this.geometry.set(kind,anatomy);
-            if(kind.startsWith('crown_'))status.enhancedCrowns++;else status.enhancedGingiva++;
+            if(kind.startsWith('crown_'))status.enhancedCrowns++;
+            else {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
             status.anatomyVersion=window.KlinikBabylonAnatomy.version;
             return anatomy;}
         }catch(e){status.error='Anatomy fallback: '+String(e.message||e).slice(0,100);}
@@ -165,6 +166,8 @@
     }
     build(){
       const source=this.source;
+      this.anatomyLayout=window.KlinikBabylonAnatomy?.archPlacement?.(source.meshes)||null;
+      status.archDiagnostics=this.anatomyLayout?.diagnostics||null;
       source.meshes.forEach((m,index)=>{
         // XR preparation meshes are registered before their voxel geometry exists.
         // They are hidden in desktop mode and should never block the preview.
@@ -192,11 +195,13 @@
       this.canvas.style.display=in3D?'block':'none';
       if(!in3D)return;
       for(const {source:m,mesh,lastColor} of this.items){
-        mesh.isVisible=!m.hidden;
-        if(m.hidden)continue;
-        mesh.position.set(m.p[0],m.p[1],m.p[2]);
-        mesh.scaling.set(m.s[0],m.s[1],m.s[2]);
-        mesh.rotation.set(m.rot[0],m.rot[1],m.rot[2]);
+        mesh.isVisible=!m.hidden && !(m.tag==='caries'&&window.KlinikRealTeeth?.ready);
+        if(m.hidden||!mesh.isVisible)continue;
+        const site=m.tag==='crown'?this.anatomyLayout?.byId[m.key?.split(':')[1]]:null;
+        const p=site?.p||m.p,scale=site?.s||m.s,rotation=site?.rot||m.rot;
+        mesh.position.set(p[0],p[1],p[2]);
+        mesh.scaling.set(scale[0],scale[1],scale[2]);
+        mesh.rotation.set(rotation[0],rotation[1],rotation[2]);
         if(m.color.some((v,i)=>v!==lastColor[i])){
           mesh.material.albedoColor=this.color(m.color);
           lastColor.splice(0,3,...m.color);

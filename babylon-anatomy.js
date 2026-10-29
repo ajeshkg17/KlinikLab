@@ -101,42 +101,102 @@
     // For review/QA, the mesh reports the same source-independent crown geometry.
     return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper};
   }
-  // Continuous synthetic gingival ridge with a broad attached-tissue skirt,
-  // a narrow cervical crest and interpolated interdental papillae.
-  // Educational approximation only; not a periodontal reconstruction.
-  function gingivaData(upper){
+  // Phase 2 is a display-only placement correction. It must never mutate the
+  // source WebGL picking targets, WebXR geometry, or FDI identifiers.
+  function archPlacement(meshes){
+    const byId=Object.create(null),arches=[[],[]];
+    for(const m of meshes||[]){
+      const match=/^tooth:([1-4])([1-8])$/.exec(m.key||'');
+      if(!match||m.tag!=='crown'||!Array.isArray(m.p)||!Array.isArray(m.s))continue;
+      const quadrant=Number(match[1]),tooth=Number(match[2]);
+      const upper=quadrant<=2,arch=upper?0:1,id=match[1]+match[2];
+      if(byId[id])throw Error('Duplicate FDI tooth '+id);
+      // Reduce the unnatural central-incisor diastema without moving the
+      // original hit-testing geometry. Deliberately conservative correction.
+      const medial=tooth===1?(upper?.016:.011):0;
+      const p=m.p.slice();
+      p[0]-=Math.sign(p[0])*medial;
+      const site={id,tooth,quadrant,arch,p,s:m.s.slice(),rot:(m.rot||[0,0,0]).slice(),
+        mirrored:quadrant===1||quadrant===4,sourceKey:m.key};
+      byId[id]=site;arches[arch].push(site);
+    }
+    const pairDiagnostics=[];
+    for(const arch of arches){
+      arch.sort((a,b)=>a.p[0]-b.p[0]);
+      for(let i=0;i+1<arch.length;i++){
+        const a=arch[i],b=arch[i+1],dx=b.p[0]-a.p[0],dz=b.p[2]-a.p[2];
+        const distance=Math.hypot(dx,dz);
+        if(distance<1e-8)continue;
+        const ux=dx/distance,uz=dz/distance;
+        const radius=site=>{
+          const theta=site.rot[1],c=Math.cos(theta),s=Math.sin(theta);
+          const localX=ux*c-uz*s,localZ=ux*s+uz*c;
+          // Low-resolution Dundee crowns are individually cropped; this is a
+          // conservative bounding-ellipse estimate, not a surface collision test.
+          return Math.hypot(.92*site.s[0]*localX,.92*site.s[2]*localZ);
+        };
+        const gap=distance-radius(a)-radius(b);
+        pairDiagnostics.push({pair:a.id+'-'+b.id,gap:Number(gap.toFixed(4))});
+      }
+    }
+    const values=pairDiagnostics.map(p=>p.gap);
+    return {arches,byId,diagnostics:{teeth:Object.keys(byId).length,archCounts:arches.map(a=>a.length),
+      pairs:pairDiagnostics,minGap:values.length?Math.min(...values):null,
+      largeGaps:pairDiagnostics.filter(p=>p.gap>.040).map(p=>p.pair),
+      possibleOverlaps:pairDiagnostics.filter(p=>p.gap<-.035).map(p=>p.pair),
+      note:'Contact gaps estimated using crown bounding ellipses; not validated occlusion.'}};
+  }
+  // A single smooth mesh per arch: continuously sampled cervical crest, with
+  // interdental papillae BETWEEN tooth centres and attached tissue rootward.
+  // Source geometry is synthetic, deliberately independent of clinical scans.
+  function gingivaData(upper,sites){
     const path=upper?
       [[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]]:
       [[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]];
-    const points=[...path.slice().reverse().map(p=>[-p[0],p[1]]),...path.map(p=>[p[0],p[1]])];
-    const d=upper?1:-1,base=upper?1.759:1.332,seg=240,around=24,pos=[],indices=[];
-    const spline=(u)=>{
+    const defaults=[...path.slice().reverse().map(p=>[-p[0],p[1],.085]),
+                    ...path.map(p=>[p[0],p[1],.085])];
+    const points=sites?.length===16?sites.map(s=>[s.p[0],s.p[2],
+      clamp(.90*Math.max(s.s[0],s.s[2]),.065,.110)]):defaults;
+    const toward=upper?-1:1,base=upper?1.759:1.332;
+    const seg=240,around=24,pos=[],indices=[];
+    const spline=u=>{
       const k=Math.min(points.length-2,Math.floor(u)),t=u-k;
       const p0=points[Math.max(0,k-1)],p1=points[k],p2=points[k+1],p3=points[Math.min(points.length-1,k+2)];
-      const f=(j)=>.5*((2*p1[j])+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t*t+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t*t*t);
-      return [f(0),f(1)];
+      const f=j=>.5*((2*p1[j])+(-p0[j]+p2[j])*t+
+        (2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t*t+
+        (-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t*t*t);
+      return [f(0),f(1),clamp(f(2),.060,.115)];
     };
-    // Cross section: cervical crest at the top, soft rounded shoulder,
-    // attached gingiva extending toward the vestibule/lingual side.
     for(let i=0;i<=seg;i++){
-      const u=(points.length-1)*i/seg,xy=spline(u),prev=spline(Math.max(0,u-.008)),next=spline(Math.min(points.length-1,u+.008));
-      let tx=next[0]-prev[0],tz=next[1]-prev[1],len=Math.hypot(tx,tz)||1;tx/=len;tz/=len;
+      const u=(points.length-1)*i/seg;
+      const site=spline(u),prev=spline(Math.max(0,u-.008)),next=spline(Math.min(points.length-1,u+.008));
+      let tx=next[0]-prev[0],tz=next[1]-prev[1],len=Math.hypot(tx,tz)||1;
+      tx/=len;tz/=len;
       const nx=-tz,nz=tx;
-      const nearest=Math.abs(u-Math.round(u));
-      const papilla=Math.exp(-((nearest/.16)**2));
-      const crest=base+d*(.009+.018*papilla);
+      // The old formula peaked AT each tooth centre, obscuring the crowns.
+      // These peaks lie halfway between the 16 consecutive cervical sites.
+      const papilla=Math.exp(-((Math.abs(u-Math.floor(u)-.5)/.21)**2));
+      const crest=base+toward*(.008+.027*papilla);
       for(let j=0;j<around;j++){
-        const a=TAU*j/around,cs=Math.cos(a),sn=Math.sin(a);
-        const lateral=(.039+.011*Math.max(0,-sn))*cs;
-        const shoulder=.019*Math.max(0,sn);
-        const attached=.075*Math.max(0,-sn);
-        const y=crest+d*(shoulder-attached);
-        pos.push(xy[0]+nx*lateral,y,xy[1]+nz*lateral);
+        const a=TAU*j/around,sn=Math.sin(a),cs=Math.cos(a);
+        const lateral=(site[2]+.020*Math.max(0,-sn))*cs;
+        const y=crest+toward*(.012*Math.max(0,sn)-.115*Math.max(0,-sn));
+        pos.push(site[0]+nx*lateral,y,site[1]+nz*lateral);
       }
     }
     for(let i=0;i<seg;i++)for(let j=0;j<around;j++){
       const a=i*around+j,b=i*around+(j+1)%around,c=(i+1)*around+(j+1)%around,e=(i+1)*around+j;
       if(upper)indices.push(a,c,b,a,e,c);else indices.push(a,b,c,a,c,e);
+    }
+    // Close the ends to avoid leaving open pink tissue tubes at the molars.
+    const first=pos.length/3;
+    pos.push(points[0][0],base,points[0][1]);
+    const last=pos.length/3;
+    pos.push(points.at(-1)[0],base,points.at(-1)[1]);
+    for(let j=0;j<around;j++){
+      const n=(j+1)%around;
+      if(upper)indices.push(first,j,n,last,seg*around+n,seg*around+j);
+      else indices.push(first,n,j,last,seg*around+j,seg*around+n);
     }
     const normals=new Array(pos.length).fill(0);
     for(let k=0;k<indices.length;k+=3){
@@ -146,21 +206,23 @@
       const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
       for(const x of [a,b,c])for(let t=0;t<3;t++)normals[x+t]+=n[t];
     }
-    for(let i=0;i<normals.length;i+=3){const l=Math.hypot(normals[i],normals[i+1],normals[i+2])||1;
+    for(let i=0;i<normals.length;i+=3){
+      const l=Math.hypot(normals[i],normals[i+1],normals[i+2])||1;
       for(let k=0;k<3;k++)normals[i+k]/=l;
     }
-    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,upper};
+    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,upper,
+      cervicalSites:points.length,continuous:true,closedEnds:true};
   }
-  function createTemplate(B,scene,kind){
+  function createTemplate(B,scene,kind,layout){
     const match=/^crown_([1-4])_([01])$/.exec(kind);
     if(!match&&!/^gingiva[01]$/.test(kind))return null;
-    const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0');
+    const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
     v.applyToMesh(template,true);
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:4,vertices:data.vertices};
+    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,gingivaData,createTemplate,version:4,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,gingivaData,archPlacement,createTemplate,version:5,notes:'Educational procedural tooth morphology; not an anatomical scan'};
 })(typeof window!=='undefined'?window:globalThis);
