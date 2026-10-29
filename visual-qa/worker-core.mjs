@@ -95,6 +95,9 @@ export function validateJob(raw) {
         if (Object.keys(step).length !== 1) throw new Error('validateFDI takes no parameters.');
       } else if (['practiceAnswerCorrect','practiceAnswerWrong','practiceComplete'].includes(step.action)) {
         if (Object.keys(step).length !== 1) throw new Error('Practice action takes no parameters.');
+      } else if (['xrGuidePreview','xrGuideNext','xrGuideClose'].includes(step.action)) {
+        // Fixed local-only desktop render preview; does not request a WebXR session.
+        if(Object.keys(step).length!==1)throw new Error('XR preview action takes no arguments.');
       } else if (step.action === 'localDemoGLB') {
         // The only permitted local upload source is the bundled public demo tooth;
         // job files cannot choose a filesystem path or access private files.

@@ -14,8 +14,8 @@ class XRToothPractice {
     this.scene=scene;this.app=app;this.active=false;this.triggers=new Set();this.lastCut=null;this.lastMeshAt=0;
     this.dirty=true;this.currentCase='';this.lastRevision=-1;this.cutCount=0;this.lastHapticAt=0;this.sourceKind='controller-target-ray';
     this.presentation=[];
-    this.toggleButton=scene.box([.65,2.31,-2.09],[.86,.21,.055],'#246b71',{key:'xrprep:toggle',radius:.39});
-    this.toggleText=scene.label('VR TOOTH PREP',[.65,2.32,-2.053],[.82,.125,1],{font:34,color:'#effff8'});
+    this.toggleButton=scene.box([.73,1.85,-1.90],[.64,.14,.055],'#246b71',{key:'xrprep:toggle',radius:.39});
+    this.toggleText=scene.label('VR TOOTH PREP',[.73,1.855,-1.861],[.60,.082,1],{font:34,color:'#effff8'});
     this.toggleButton.hidden=true;this.toggleText.hidden=true;
     this.meshes=materials.map((material)=>{
       const kind='xrvol-'+material;
@@ -26,7 +26,7 @@ class XRToothPractice {
     });
     this.tip=scene.sphere([0,-20,0],[.025,.025,.025],'#46ead5',{alpha:.82});
     this.tip.hidden=true;
-    this.info=scene.label('VR PRACTICE | NOT CALIBRATED',[.37,2.63,-1.85],[1.6,.17,1],{font:32,color:'#e7fff1'});
+    this.info=scene.label('VR PRACTICE | NOT CALIBRATED',[.43,2.03,-1.76],[1.10,.12,1],{font:32,color:'#e7fff1'});
     this.info.hidden=true;
   }
   get lab(){return this.app.volLab}
@@ -81,6 +81,7 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
+    if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
     this.syncCase();if(this.dirty&&t-this.lastMeshAt>230)this.updateMesh();
     let best=null;
     for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray)continue;

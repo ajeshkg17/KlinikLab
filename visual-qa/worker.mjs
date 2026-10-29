@@ -115,6 +115,24 @@ async function capture(job){
       if(outcome.error||outcome.answered===false||outcome.finished===false)
        throw Error('Practice interaction failed: '+JSON.stringify(outcome));
      }
+     else if(['xrGuidePreview','xrGuideNext','xrGuideClose'].includes(step.action)){
+      // Preview only; DO NOT claim a physical headset or WebXR session was tested.
+      const report=await page.evaluate(action=>{
+        const scene=window.kliniklab?.scene,guide=scene?.xrGuide;
+        if(!scene?.gl||!guide)return {error:'VR tutorial scene unavailable'};
+        if(action==='xrGuidePreview'){
+          scene.setXRComfort(true);
+          for(const mesh of scene.xrBoardMeshes)mesh.hidden=false;
+          guide.onEnter();
+          scene.mode='clinic';scene.target=[0,1.48,-1.26];scene.distance=2.25;
+          scene.yaw=0;scene.pitch=.04;
+        }else if(action==='xrGuideNext')guide.next();
+        else if(action==='xrGuideClose')guide.close();
+        return {guide:{...guide.state},comfort:{...scene.xrComfort},mock:true};
+      },step.action);
+      if(report.error||!report.guide.active||!report.comfort.active)throw Error('VR tutorial mock preview failed: '+JSON.stringify(report));
+      item.xrMock=report;
+     }
      else if(step.action==='localDemoGLB'){
       // Never accept arbitrary path arguments from the GitHub instruction JSON.
       await page.locator('#dundee-atlas-import').setInputFiles(path.join(REPO,'assets','dundee','maxillary_first_molar.glb'));
@@ -140,10 +158,19 @@ async function capture(job){
       const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,structure:window.KlinikStructureExplorer?{...window.KlinikStructureExplorer.status}:null,tutorial:window.KlinikTutorial?{...window.KlinikTutorial.status}:null,practice:window.KlinikAnatomyPractice?{...window.KlinikAnatomyPractice.status}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,archMode:window.kliniklab?.scene?.archMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics,appearance:window.KlinikBabylon.appearance,appearanceVersion:window.KlinikBabylon.appearanceVersion,vertexColoredTemplates:window.KlinikBabylon.vertexColoredTemplates,materialsUpdated:window.KlinikBabylon.materialsUpdated,jawMeshes:window.KlinikBabylon.jawMeshes,jawVisible:window.KlinikBabylon.jawVisible,fineCrownTemplates:window.KlinikBabylon.fineCrownTemplates,fineCrownVertices:window.KlinikBabylon.fineCrownVertices,crownSource:window.KlinikBabylon.crownSource}:null,structure:window.KlinikStructureExplorer?{...window.KlinikStructureExplorer.status}:null,tutorial:window.KlinikTutorial?{...window.KlinikTutorial.status}:null,practice:window.KlinikAnatomyPractice?{...window.KlinikAnatomyPractice.status}:null,xrGuide:window.KlinikXRGuide?{...window.KlinikXRGuide.state}:null,xrComfort:window.kliniklab?.scene?.xrComfort||null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics,vertexColoredInstances:window.KlinikRealTeeth.vertexColoredInstances,appearanceVersion:window.KlinikRealTeeth.appearanceVersion}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     // A missing script may return HTTP 404 without producing a pageerror.
     // Require the local appearance module to be active for every Phase 3 view.
+    if(job.jobId.startsWith('quest2-vr-preview')){
+      const st=item.checks?.xrGuide||{},comfort=item.checks?.xrComfort||{};
+      const controls=scene.steps.map(x=>x.action);
+      const next=controls.filter(x=>x==='xrGuideNext').length;
+      const closed=controls.includes('xrGuideClose');
+      if(st.version!==1||!st.active||st.open===closed||st.index!==next||
+        !comfort.active||comfort.scale!==.78||comfort.lessonScale!==.68)
+        throw Error('VR preview diagnostic mismatch: '+JSON.stringify({st,comfort,controls}).slice(0,650));
+    }
     if(job.jobId.startsWith('tutorial-')){
       const tour=item.checks?.tutorial||{},controls=scene.steps.map(s=>s.control||s.action);
       const closed=controls.includes('tutorialSkip');

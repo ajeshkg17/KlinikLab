@@ -175,6 +175,7 @@ class DentalScene {
     this.box([0,1.12,-3.55],[.66,.27,1.18],'#c4d2c7');this.box([0,1.0,-2.81],[.53,.18,.62],'#bdcfd0');
     this.cy([1.38,2.82,-3.95],[.07,1.5,.07],'#b5c9c8');this.cy([.72,3.42,-3.82],[.064,1.35,.064],'#b5c9c8',{rot:[0,0,1.05]});this.cy([.10,3.39,-3.69],[.065,.75,.065],'#9fb8b8',{rot:[-.65,0,.35]});this.sphere([-.02,3.11,-3.42],[.33,.13,.33],'#e4ece6');this.cy([-.02,3.055,-3.42],[.24,.065,.24],'#f6e1a8');
     this.roomMeshes=this.meshes.slice();
+    const vrPropsStart=this.meshes.length;
     // Table and pedestal for enlarged, schematic anatomy.
     this.cy([0,.56,-1.88],[.12,1.08,.12],'#acc0c2');this.cy([0,.13,-1.88],[.73,.11,.73],'#9cb6b8');this.box([0,1.08,-1.83],[2.00,.09,1.6],'#ecf1e7');this.box([0,1.025,-1.83],[2.02,.04,1.63],'#93babc');
     this.label('ANATOMY MODEL', [0,1.13,-1.012],[1.23,.17,1],{font:33,color:'#365b60'});
@@ -232,6 +233,8 @@ class DentalScene {
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
     this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
     for(const [i,n]of ['putty','lightbody','heavybody','mediumbody'].entries()){let x=-1.83+i*.19;this.cy([x,1.015,-2.5],[.105,.16,.105],['#e2b88d','#8bb7e2','#aad7a5','#cda6d0'][i],{key:`tool:${n}`,radius:.135});this.cy([x,1.103,-2.5],[.11,.035,.11],'#ebebe0',{key:`tool:${n}`,radius:.09})}
+    this.vrCompactMeshes=this.meshes.slice(vrPropsStart);
+    this.xrComfortScale=.78;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
     this.focusDecor=this.meshes.filter(m=>!this.archMeshes[0].includes(m)&&!this.archMeshes[1].includes(m));
     const vrMeshesStart=this.meshes.length;
     // Interactive XR lesson board - all its buttons are also available via standard HTML.
@@ -254,13 +257,50 @@ class DentalScene {
   getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
-      if(p.key.startsWith('module:')||p.key.startsWith('answer:')){
+      if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
         const faceZ=p.p[2]+p.mesh.s[2]*.5;
         if(Math.abs(d[2])>1e-6){const t=(faceZ-o[2])/d[2];if(t>=0){const x=o[0]+t*d[0],y=o[1]+t*d[1];if(Math.abs(x-p.p[0])<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t}}
       }else r=M3.raySphere(o,d,p.p,p.radius);
       if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
     }return hit}
 
+
+  // Restore desktop transforms and hit targets exactly after the XR session.
+  setXRComfort(active){
+    if(Boolean(active)===this.xrComfort.active)return;
+    if(active){
+      const snapshot=[];
+      const groups=[
+        {meshes:this.vrCompactMeshes,pivot:[0,1.02,-1.83],factor:this.xrComfortScale},
+        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.68}
+      ];
+      for(const group of groups){
+        const members=new Set(group.meshes);
+        for(const mesh of group.meshes){
+          snapshot.push({kind:'mesh',object:mesh,p:mesh.p.slice(),s:mesh.s.slice(),model:mesh.model||null});
+          for(let i=0;i<3;i++){
+            mesh.p[i]=group.pivot[i]+(mesh.p[i]-group.pivot[i])*group.factor;
+            mesh.s[i]*=group.factor;
+          }
+          mesh.model=null;
+        }
+        for(const hit of this.pickables.filter(p=>members.has(p.mesh))){
+          snapshot.push({kind:'pick',object:hit,p:hit.p.slice(),radius:hit.radius});
+          for(let i=0;i<3;i++)hit.p[i]=group.pivot[i]+(hit.p[i]-group.pivot[i])*group.factor;
+          hit.radius*=group.factor;
+        }
+      }
+      this.xrComfortSnapshot=snapshot;
+      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.68};
+    }else{
+      for(const item of this.xrComfortSnapshot||[]){
+        item.object.p=item.p.slice();
+        if(item.kind==='mesh'){item.object.s=item.s.slice();item.object.model=item.model}
+        else item.object.radius=item.radius;
+      }
+      this.xrComfortSnapshot=null;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};
+    }
+  }
   installEvents(){const canvas=this.canvas;let down=null,dragged=false;canvas.addEventListener('pointerdown',e=>{if(this.xrSession)return;down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};dragged=false;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!down||this.xrSession)return;let dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>5){dragged=true;canvas.classList.add('dragging')}if(dragged){this.yaw=down.yaw+dx*.008;this.pitch=Math.max(-1.2,Math.min(1.2,down.pitch+dy*.006))}});canvas.addEventListener('pointerup',e=>{if(!dragged){const ray=this.desktopRay(e.clientX,e.clientY);if(this.xrPrep?.onDesktopClick(ray)){down=null;canvas.classList.remove('dragging');return;}const hit=this.getRayHit(ray.o,ray.d);if(hit)this.onPick(hit.key)}down=null;canvas.classList.remove('dragging')});canvas.addEventListener('wheel',e=>{e.preventDefault();this.distance=Math.min(7.5,Math.max(1.15,this.distance*Math.exp(e.deltaY*.001)))},{passive:false});window.addEventListener('resize',()=>this.resize());}
   camera(){const y=this.target[1]+this.distance*Math.sin(this.pitch);const h=this.distance*Math.cos(this.pitch),x=this.target[0]+Math.sin(this.yaw)*h,z=this.target[2]+Math.cos(this.yaw)*h;return [x,y,z]}
   view(){return M3.lookAt(this.camera(),this.target)}
@@ -286,9 +326,11 @@ class DentalScene {
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       this.xrSession=session;this.xrRef=ref;
+      this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
-      session.addEventListener('selectstart',e=>{if(this.xrPrep?.onSelectStart(e,e.frame||this.latestFrame))return;const pose=(e.frame||this.latestFrame)?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
-      session.addEventListener('end',()=>{this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();this.xrPrep?.onExit();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      this.xrGuide?.onEnter();
+      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=frame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
+      session.addEventListener('end',()=>{this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){if(session)try{await session.end()}catch{}throw err}
   }
