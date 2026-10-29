@@ -25,7 +25,7 @@ All clinical/radiology descriptions are **invented text**, not radiographic anal
 
 ## Format: dental FSP versus KP
 
-The Zahnärztekammer Schleswig-Holstein page (checked 2026-10-29) describes a **60-minute dental FSP** in three 20-minute stages: physician–patient discussion, handwritten Arztbrief, and professional discussion of the first two stages. It explicitly assesses German language proficiency, not dental knowledge. The simulator has a **separate additional Aufklärung exercise within the patient-conversation learning sequence**, not a claimed fourth official part. Other German states may use different processes. KP content and professional competency must not be conflated with the language exam.
+The Zahnärztekammer Schleswig-Holstein page (checked 2026-10-29) describes a **60-minute dental FSP** in three 20-minute stages: physician–patient discussion, handwritten Arztbrief, and professional discussion of the first two stages, **including explaining selected technical terms in patient-friendly language**. It explicitly assesses German language proficiency, not dental knowledge. The simulator has a **separate additional Aufklärung exercise within the patient-conversation learning sequence**, not a claimed fourth official part. Other German states may use different processes. KP content and professional competency must not be conflated with the language exam.
 
 Official SH information: https://www.zahnaerzte-sh.de/zahnaerzte/praxisservice/beruflicher-nachwuchs/auslaendische-berufsqualifikationen/fachsprachpruefung/
 
@@ -39,9 +39,9 @@ These are learning-content sources and do **not** constitute clinician approval.
 
 ## Scoring contract and limitations
 
-Each task has **five explicit keyword-regex criteria, worth two points each (0–10)**. Empty, malformed, and unrecognized answers receive zero for missed criteria. Per-criterion feedback identifies concepts to review. Worked model responses cover all five criteria in each exemplar.
+Each task has **five explicit keyword-regex criteria, worth two points each (0–10)**. Empty, malformed, and unrecognized answers receive zero for missed criteria. A narrow set of explicit unsafe phrases (e.g. automatic antibiotics for every pericoronitis or advising inaction for breathing difficulties) suspends the numeric score and requires review. The warning patterns are not a comprehensive medical safety check. Editing an answer invalidates its old score. Per-criterion feedback identifies concepts to review. Worked model responses cover all five criteria in each exemplar.
 
-This is **lexical coverage**, not a measure of correctness. For example, merely mentioning “Antibiotika” can score keyword credit even if the sentence incorrectly prescribes antibiotics routinely. Similarly, negation, synonyms not in the rules, grammar, fluency, speech intelligibility, professionalism, and diagnostic reasoning are **not** automatically verified. The UI states these limits at the point of scoring; no official FSP/KP readiness score is claimed. In-memory answers and results do not modify existing anatomy or journey scores. No persistence, analytics, or remote calls are present in the new module.
+This is **lexical coverage**, not a measure of correctness. For example, merely mentioning “Antibiotika” can score keyword credit even if the sentence incorrectly prescribes antibiotics routinely. Similarly, negation, synonyms not in the rules, grammar, fluency, speech intelligibility, professionalism, and diagnostic reasoning are **not** automatically verified. The UI states these limits at the point of scoring; no official FSP/KP readiness score is claimed. In-memory answers and results do not modify existing anatomy or journey scores. Keyboard focus is trapped inside the open modal and returned to its invoking element on close; answers remain in memory only until page reload. No persistence, analytics, or remote calls are present in the new module.
 
 ## Clinician / German-language reviewer checklist — outstanding
 
@@ -49,8 +49,8 @@ This is **lexical coverage**, not a measure of correctness. For example, merely 
 - [ ] **Patient safety:** confirm appropriate red-flag wording for dysphagia, dyspnea, trismus, spreading infection; verify escalation advice.
 - [ ] **Consent:** review alternatives, patient comprehension, risk/prognosis, and consent phrasing; verify state-specific expectations.
 - [ ] **Treatment / contraindications:** review the local-first pericoronitis approach and antibiotic nuance; do not operationalize doses.
-- [ ] **Terminology:** German grammar, B2/C1 register, FDI 36/48 and tooth-side consistency; cross-review with the Anatomy workstream.
-- [ ] **Rubrics:** manually inspect incorrect, misleading and negated responses; QA to check false positives, accessibility and small screens.
+- [ ] **Terminology:** German grammar, B2/C1 register, FDI 36/48 and tooth-side consistency; review colloquial paraphrases of Pulpitis and Dysphagie; cross-review with the Anatomy workstream.
+- [ ] **Rubrics:** manually inspect incorrect, misleading and negated responses; QA to check false positives and missed unsafe cases, focus trapping, screen-reader announcements, and small screens.
 - [ ] **Exam rules:** re-verify SH FSP description before official use and separately validate any KP-specific claims.
 
 ## Required tests and manual checks
