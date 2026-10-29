@@ -7,6 +7,10 @@ export const MAX_SCENES = 14;
 export const DEFAULT_ORIGIN = 'http://127.0.0.1:8787';
 export const CONTROLS = Object.freeze({
   teeth: '#focus',
+  tutorial: '#help',
+  tutorialNext: '#kl-tour-next',
+  tutorialBack: '#kl-tour-back',
+  tutorialSkip: '#kl-tour-skip',
   renderer: '#renderer-toggle',
   appearance: '#appearance-toggle',
   jaw: '#jaw-layer-toggle',

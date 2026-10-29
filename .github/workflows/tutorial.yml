@@ -1,0 +1,38 @@
+name: Guided tutorial regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tutorial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run tutorial and previous anatomy regressions
+        run: node --test tests/app_tutorial.test.cjs tests/phase5_structures.test.cjs tests/phase6_practice.test.cjs
+      - name: Check scripts and source mirrors
+        run: |
+          node --check app-tutorial.js
+          node --check app.js
+          cmp app-tutorial.js public/app-tutorial.js
+          cmp app.js public/app.js
+          cmp index.html public/index.html
+      - name: HTTP smoke check of guided tutorial asset
+        run: |
+          node server/server.mjs >/tmp/kliniklab-tutorial.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/app-tutorial.js -o /tmp/kliniklab-tour.js; then break; fi
+            sleep 1
+          done
+          test -s /tmp/kliniklab-tour.js
+          grep -q KlinikTutorial /tmp/kliniklab-tour.js
+      - name: Check standalone reproducibility
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
