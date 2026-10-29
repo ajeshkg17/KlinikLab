@@ -1731,9 +1731,30 @@ window.addEventListener('DOMContentLoaded',()=>{
       const medial=tooth===1?(upper?.016:.011):0;
       const p=m.p.slice();
       p[0]-=Math.sign(p[0])*medial;
-      const site={id,tooth,quadrant,arch,p,s:m.s.slice(),rot:(m.rot||[0,0,0]).slice(),
+      const site={id,tooth,quadrant,arch,p,rawP:p.slice(),s:m.s.slice(),rot:(m.rot||[0,0,0]).slice(),
         mirrored:quadrant===1||quadrant===4,sourceKey:m.key};
       byId[id]=site;arches[arch].push(site);
+    }
+    // Close exaggerated premolar spaces along each quadrant's original
+    // centreline. Relax toward an illustrated 0.018-unit gap, rather than
+    // creating interpenetrations or displacing the legacy pick targets.
+    for(const q of [1,2,3,4]){
+      const side=Object.values(byId).filter(site=>site.quadrant===q).sort((a,b)=>a.tooth-b.tooth);
+      for(let i=1;i<side.length;i++){
+        const a=side[i-1],b=side[i];
+        const dx=b.rawP[0]-a.rawP[0],dz=b.rawP[2]-a.rawP[2];
+        const distance=Math.hypot(dx,dz);
+        if(distance<1e-8)continue;
+        const ux=dx/distance,uz=dz/distance;
+        const reach=site=>{
+          const t=site.rot[1],c=Math.cos(t),s=Math.sin(t);
+          return Math.hypot(.92*site.s[0]*(ux*c-uz*s),.92*site.s[2]*(ux*s+uz*c));
+        };
+        const estimatedGap=distance-reach(a)-reach(b);
+        const shorten=clamp((estimatedGap-.018)*.80,0,.045);
+        b.p[0]=a.p[0]+dx*(1-shorten/distance);
+        b.p[2]=a.p[2]+dz*(1-shorten/distance);
+      }
     }
     const pairDiagnostics=[];
     for(const arch of arches){
