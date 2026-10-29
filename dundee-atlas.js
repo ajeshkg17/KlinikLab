@@ -88,8 +88,21 @@
       // Babylon 9's versioned decoder URL can 404 on its learning CDN.
       // Explicitly use the documented, unversioned Draco distribution.
       const draco={wasmUrl:'https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js',wasmBinaryUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.wasm',fallbackUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.js'};
-      if(B.DracoDecoder)B.DracoDecoder.DefaultConfiguration=draco;
-      if(B.DracoCompression)B.DracoCompression.Configuration={decoder:draco};
+      state.decoderDiagnostic={
+        names:Object.keys(B).filter(name=>/draco/i.test(name)).slice(0,16),
+        initial:B.DracoDecoder?.DefaultConfiguration?.wasmBinaryUrl||null,
+        hasCompression:!!B.DracoCompression
+      };
+      if(B.DracoDecoder){
+        // In current Babylon versions this is a mutable, shared configuration.
+        Object.assign(B.DracoDecoder.DefaultConfiguration,draco);
+      }
+      if(B.DracoCompression){
+        B.DracoCompression.Configuration={decoder:draco};
+        try{Object.assign(B.DracoCompression.Configuration.decoder,draco)}catch{}
+      }
+      state.decoderDiagnostic.after=B.DracoDecoder?.DefaultConfiguration?.wasmBinaryUrl||null;
+      state.decoderDiagnostic.compression=B.DracoCompression?.Configuration?.decoder?.wasmBinaryUrl||null;
       engine=new B.Engine(canvas,true,{preserveDrawingBuffer:true,stencil:true},true);
       scene=new B.Scene(engine);
       scene.useRightHandedSystem=true;
