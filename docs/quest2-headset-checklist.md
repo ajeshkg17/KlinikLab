@@ -35,3 +35,19 @@ python3 build_standalone.py && git diff --exit-code -- KlinikLab_DesktopXR_Stand
 | GPU/FPS and headset screenshots | Not measured/captured | BLOCKED |
 
 Clinical, treatment-competence and FSP/KP certification gates are **not verified**. The root XR files mirror into `public/`, and the generated standalone HTML is a **shared integration artifact**: coordinate merging with the parallel workstreams; do not merge this branch without review.
+
+
+## Placement and startup notes (commit 2)
+
+- On the first valid VR viewer pose, the guide translates to the viewer's initial X/Z
+  location and sets its **panel center 4 cm below eye level**, supporting both seated
+  and standing startup positions. It does **not** follow the head during the session.
+  Panel orientation remains world-aligned; users may need to face it.
+- Ray-hit targets receive the exact same translation as visible guide meshes and are
+  restored to their original coordinates on exit. Furniture/lesson board transforms
+  are still restored by the separate XR comfort snapshot.
+- VR startup rejects insecure origins with an HTTPS/localhost explanation, prevents
+  duplicate pending requests and provides permission-denied/unsupported-device
+  messages while preserving synchronous requestSession activation.
+- **Headset validation remains BLOCKED:** the 4 cm vertical offset, initial Z distance,
+  standing/seated comfort and world-aligned orientation must be measured on hardware.

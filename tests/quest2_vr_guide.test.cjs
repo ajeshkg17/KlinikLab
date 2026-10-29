@@ -9,10 +9,10 @@ const engine=fs.readFileSync(path.join(__dirname,'../engine.js'),'utf8');
 const prep=fs.readFileSync(path.join(__dirname,'../xr-procedure.js'),'utf8');
 function makeGuide(){
  const ctx={};vm.runInNewContext(code,ctx);
- const meshes=[],hits=new Map();let selected=null;
+ const meshes=[],hits=new Map(),pickables=[];let selected=null;
  const scene={
-  xrRef:{},meshes,
-  box(p,s,c,o={}){const m={p:p.slice(),s:s.slice(),key:o.key||null,hidden:false,kind:'box',label:null};meshes.push(m);if(m.key)hits.set(m.key,m);return m},
+  xrRef:{},meshes,pickables,
+  box(p,s,c,o={}){const m={p:p.slice(),s:s.slice(),key:o.key||null,hidden:false,kind:'box',label:null};meshes.push(m);if(m.key){hits.set(m.key,m);pickables.push({key:m.key,p:m.p.slice(),mesh:m,radius:.3})}return m},
   label(str,p,s){const m={p:p.slice(),s:s.slice(),hidden:false,kind:'quad',label:str};meshes.push(m);return m},
   replaceLabel(m,str){m.label=str},
   rotateByQuat(){return [0,0,-1]},
@@ -142,4 +142,56 @@ test('opening VR help with grip clears held cutting input immediately',()=>{
  guide.onEnter();guide.close();assert.equal(guide.onSqueezeStart(),true);
  assert.equal(cleared,2);assert.equal(scene.xrPrep.lastCut,null);
  assert(scene.xrPrep.tip.hidden);guide.onExit();
+});
+
+test('headset-relative guide placement follows initial seated/standing eye and restores all hit targets',()=>{
+ const {guide,scene,ctx}=makeGuide(),state=ctx.KlinikXRGuide.state;
+ const origins=guide.meshes.map(m=>m.p.slice());
+ const hits=scene.pickables.map(h=>h.p.slice());
+ const panel=guide.meshes[0];
+ assert.equal(guide.placeForViewer({transform:{position:{x:0,y:1.6,z:0}}}),false);
+ guide.onEnter();
+ assert.equal(guide.placeForViewer({transform:{position:{x:0,y:NaN,z:0}}}),false);
+ assert.equal(guide.placeForViewer({transform:{position:{x:.25,y:1.18,z:-.3}}}),true);
+ assert.equal(panel.p[0],ctx.KlinikXRGuide.spec.panel.p[0]+.25);
+ assert(Math.abs(panel.p[1]-(1.18-.04))<1e-9);
+ assert.equal(panel.p[2],ctx.KlinikXRGuide.spec.panel.p[2]-.3);
+ assert.equal(guide.placeForViewer({transform:{position:{x:1,y:1.8,z:1}}}),false);
+ const target=scene.pickables.find(h=>h.key==='guide:next');
+ const originalTarget=hits[scene.pickables.indexOf(target)];
+ assert(Math.abs(target.p[1]-(originalTarget[1]+1.18-.04-1.56))<1e-9);
+ assert.equal(state.open,true);
+ guide.onExit();
+ assert.deepEqual(guide.meshes.map(m=>m.p),origins);
+ assert.deepEqual(scene.pickables.map(h=>h.p),hits);
+ guide.onEnter();
+ assert.equal(guide.placeForViewer({transform:{position:{x:0,y:1.65,z:0}}}),true);
+ assert(Math.abs(panel.p[1]-1.61)<1e-9);
+ guide.onExit();
+});
+test('VR entry refuses insecure context and duplicate pending requests without losing activation',async()=>{
+ const start=engine.indexOf('  async enterVR(){'),end=engine.indexOf('  handleXREnd(session){',start);
+ assert(start>0&&end>start);
+ let requested=0;
+ const insecure=vm.runInNewContext('({'+engine.slice(start,end)+'}).enterVR',{
+  navigator:{xr:{requestSession(){requested++;throw Error('should not request')}}},isSecureContext:false
+ });
+ await assert.rejects(insecure.call({xrSession:null}),/requires HTTPS/);
+ assert.equal(requested,0);
+ let deny;
+ const pending=new Promise((resolve,reject)=>{deny=reject});
+ const enter=vm.runInNewContext('({'+engine.slice(start,end)+'}).enterVR',{
+  navigator:{xr:{requestSession(){requested++;return pending}}},isSecureContext:true
+ });
+ const scene={xrSession:null,xrStarting:false};
+ const first=enter.call(scene);
+ await assert.rejects(enter.call(scene),/already starting/);
+ assert.equal(requested,1);
+ deny(Object.assign(Error('user denied'),{name:'NotAllowedError'}));
+ await assert.rejects(first,/permission was denied/);
+ assert.equal(scene.xrStarting,false);
+});
+test('engine anchors guide after a valid XR viewer pose, not before tracking',()=>{
+ assert.match(engine,/this\\.xrGuide\\?\\.placeForViewer\\(pose\\)/);
+ assert.match(engine,/if\\(!pose\\)\\{this\\.clearControllers\\(\\)/);
 });
