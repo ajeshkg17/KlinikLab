@@ -70,7 +70,7 @@ async function capture(job){
      if(step.action==='wait'){await page.waitForTimeout(step.ms)}
      else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});await page.waitForTimeout(650)}
      else if(step.action==='orbit'){
-      const canvas=page.locator('#scene canvas');if(await canvas.count()===0)throw Error('The clinic canvas was not rendered');
+      const canvas=page.locator('#scene');if(await canvas.count()!==1)throw Error('The clinic canvas was not rendered');
       const b=await canvas.first().boundingBox();if(!b)throw Error('Canvas unavailable');
       const x=b.x+b.width/2,y=b.y+b.height/2;
       await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+step.dx,y+step.dy,{steps:12});await page.mouse.up();await page.waitForTimeout(450);
@@ -84,10 +84,10 @@ async function capture(job){
     if(item.bytes<2500)throw Error('Screenshot too small to be useful');
     item.checks=await page.evaluate(()=>{
       const box=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {width:Math.round(r.width),height:Math.round(r.height),visible:r.width>0&&r.height>0&&getComputedStyle(e).display!=='none'}};
-      const can=document.querySelector('#scene canvas');
+      const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,viewMode:window.kliniklab?.viewMode||null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null};
     });
     item.ok=true;
    }catch(e){item.errors.push(String(e.message||e).slice(0,500));trace(`Scene ${scene.name}: ${item.errors.at(-1)}`)}
