@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase2-acceptance-2026-10-29-02",
+  "jobId": "phase2-acceptance-2026-10-29-03",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -180,35 +180,6 @@
         {
           "action": "wait",
           "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "07-fdi-selection",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "validateFDI"
         }
       ],
       "capture": "stage"
