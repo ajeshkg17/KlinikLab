@@ -5,8 +5,7 @@
    If loading/rendering fails, the original canvas remains fully functional. */
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
-  const STUDIO_ENV = 'https://assets.babylonjs.com/environments/environmentSpecular.env';
-  const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'not-requested',
+  const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'disabled',
     library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR'};
   window.KlinikBabylon = status;
   let layer = null;
@@ -58,20 +57,8 @@
       this.scene.imageProcessingConfiguration.exposure=1.20;
       this.scene.imageProcessingConfiguration.toneMappingEnabled=true;
       this.scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;
-      // PBR clearcoat needs a surrounding environment to reflect; direct lights alone
-      // made our teeth look like matte gray blocks. The image is a public Babylon demo
-      // asset, fetched only after opt-in and never required for the classic renderer.
-      try{
-        const environment=B.CubeTexture.CreateFromPrefilteredData(STUDIO_ENV,this.scene);
-        environment.gammaSpace=false;
-        environment.level=.66;
-        this.scene.environmentTexture=environment;
-        status.environment='loading';
-        const timeout=setTimeout(()=>{if(status.environment==='loading')status.environment='failed'},7000);
-        environment.onLoadObservable.addOnce(()=>{clearTimeout(timeout);status.environment='ready'});
-        environment.onErrorObservable?.addOnce(()=>{clearTimeout(timeout);status.environment='failed'});
-      }catch(error){status.environment='failed';}
-
+      // Environment maps are disabled until a self-hosted, verified asset is available.
+      // Avoid relying on external textures that failed to initialize during QA.
       this.camera=new B.FreeCamera('matchingOriginalCamera',new B.Vector3(0,1,4),this.scene);
       this.camera.fov=.87;
       this.camera.minZ=.05;
@@ -183,7 +170,6 @@
       this.camera.setTarget(new B.Vector3(...source.target));
       this.camera.fov=.87;
       this.camera.minZ=.05;
-      if(status.environment==='loading'&&this.scene.environmentTexture?.isReady?.())status.environment='ready';
       const current=this.canvas.clientWidth+'x'+this.canvas.clientHeight;
       if(current!==this.lastSize){this.lastSize=current;this.engine.resize()}
       const in3D=(this.app.viewMode==='3d'&&!source.xrSession);
