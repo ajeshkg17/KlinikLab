@@ -1,0 +1,25 @@
+name: Phase 2 dental geometry regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify anatomical geometry, FDI positions and real model sync
+        run: node --test tests/babylon_anatomy.test.cjs tests/real_scene_qa.cjs
+      - name: Verify static hosting mirrors
+        run: |
+          cmp babylon-anatomy.js public/babylon-anatomy.js
+          cmp babylon-preview.js public/babylon-preview.js
+          cmp real-dental-scene.js public/real-dental-scene.js
+      - name: Verify standalone exactly matches its source
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
