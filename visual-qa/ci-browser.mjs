@@ -1,6 +1,7 @@
 /** GitHub-hosted Chromium QA; no Quest/headset or clinical claims. */
 import {chromium} from 'playwright';
-import {reviewAccessibility,summarizeTimings} from './qa-metrics.mjs';
+import {reviewAccessibility,summarizeTimings,checkBaselineApproval} from './qa-metrics.mjs';
+import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {createServer} from 'node:net';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
@@ -50,11 +51,28 @@ async function ready(url,proc){
 }
 async function compareSnapshot(page,name,actual){
   const baselinePath=path.join(ROOT,'visual-qa','baselines',name+'.png');
-  let base;
-  try{base=await readFile(baselinePath);}catch(e){
-    if(e.code!=='ENOENT')throw e;
-    return {status:'NO_APPROVED_BASELINE',note:'Capture stored as candidate; no visual comparison claim.'};
+
+  const registry=JSON.parse(await readFile(path.join(ROOT,'visual-qa','baselines','manifest.json'),'utf8'));
+  if(registry.schemaVersion!==1||!registry.captures||typeof registry.captures!=='object')
+    throw Error('Invalid baseline approval manifest schema');
+  const entry=registry.captures[name];
+  if(!entry){
+    // An unregistered PNG must never silently become an approved comparison.
+    try{
+      await readFile(baselinePath);
+      throw Error('Unregistered screenshot baseline: '+name);
+    }catch(e){
+      if(e.code!=='ENOENT')throw e;
+    }
+    return {status:'NO_APPROVED_BASELINE',note:'Candidate image only; no visual-diff acceptance asserted.'};
   }
+  const base=await readFile(baselinePath);
+  const verified=checkBaselineApproval(entry,{
+    sha256:createHash('sha256').update(base).digest('hex'),
+    browserMajor:Number(report.environment.browser.match(/chromium (\\d+)/)?.[1]),
+    viewport:page.viewportSize()
+  });
+  if(!verified.ok)throw Error('Baseline approval refused for '+name+': '+verified.reason);
   const score=await page.evaluate(async({original,current})=>{
     const image=async encoded=>{
       const element=new Image();element.src='data:image/png;base64,'+encoded;
@@ -84,7 +102,8 @@ async function screenshot(page,name){
   const png=await page.screenshot({fullPage:true,animations:'disabled',timeout:20000});
   await writeFile(path.join(OUT,name+'.png'),png);
   const comparison=await compareSnapshot(page,name,png);
-  report.screenshots.push({name,file:name+'.png',bytes:png.byteLength,comparison});
+  report.screenshots.push({name,file:name+'.png',bytes:png.byteLength,
+    sha256:createHash('sha256').update(png).digest('hex'),comparison});
 }
 
 async function auditAccessibility(page,label){
