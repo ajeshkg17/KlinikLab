@@ -226,8 +226,9 @@
           try{
             const mesh=this.baseMesh('jaw'+arch).clone('synthetic-alveolar:'+arch,null,true);
             const bone=new this.B.PBRMaterial('illustrative-cortical-bone:'+arch,this.scene);
-            bone.albedoColor=new this.B.Color3(.80,.71,.61);
-            bone.metallic=0;bone.roughness=.84;bone.environmentIntensity=0;
+            bone.albedoColor=new this.B.Color3(.89,.76,.62);
+            bone.emissiveColor=new this.B.Color3(.033,.025,.017);
+            bone.metallic=0;bone.roughness=.86;bone.environmentIntensity=0;
             bone.backFaceCulling=false;
             mesh.material=bone;mesh.isPickable=false;mesh.isVisible=false;
             mesh.alwaysSelectAsActiveMesh=true;
