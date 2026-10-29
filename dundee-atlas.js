@@ -29,7 +29,7 @@
   ]);
   const state = {mode:'idle',ready:false,selected:0,asset:null,meshes:0,triangles:0,error:null,engine:'Babylon.js',source:'University of Dundee (CC BY 4.0)',clinicalValidation:false};
   window.KlinikDundeeAtlas = state;
-  let canvas, modal, engine, scene, camera, previousFocus, assetGeneration=0;
+  let canvas, modal, engine, scene, camera, orientation, previousFocus, assetGeneration=0;
   const scripts = new Map();
   function loadScript(url, ready){
     if(ready())return Promise.resolve();
@@ -53,7 +53,7 @@
   function disposeScene(){
     assetGeneration++;
     if(engine){try{engine.stopRenderLoop();engine.dispose()}catch{}}
-    engine=null;scene=null;camera=null;
+    engine=null;scene=null;camera=null;orientation=null;
   }
   function boundsFor(meshes,B){
     const min=new B.Vector3(Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY);
@@ -68,16 +68,16 @@
     if(!Number.isFinite(dimensions.length())||dimensions.length()<0.0001)throw Error('Imported model has no valid geometry bounds');
     return {center:max.add(min).scale(.5),dimensions};
   }
-  async function select(index){
+  async function select(index, localFile=null){
     if(!modal||modal.hidden)return;
     index=((index%models.length)+models.length)%models.length;
     state.selected=index;state.ready=false;state.error=null;state.mode='loading';
-    const item=models[index];state.asset=item[0];
+    const item=models[index];state.asset=localFile?'local-glb':item[0];
     const selectNode=document.getElementById('dundee-atlas-select');
     if(selectNode)selectNode.value=String(index);
     const source=document.getElementById('dundee-atlas-source');
-    if(source){source.href=item[2];source.textContent='Original Dundee model ↗';}
-    showStatus('Loading '+item[1]+'…');
+    if(source){source.href=item[2];source.textContent=localFile?'Dundee source (bundled models only) ↗':'Original Dundee model ↗';}
+    showStatus('Loading '+(localFile?localFile.name:item[1])+'…');
     const requested=++assetGeneration;
     try{
       await loadLibraries();
@@ -124,7 +124,10 @@
       engine.runRenderLoop(()=>{if(scene&&modal&&!modal.hidden)scene.render();});
       engine.resize();
       // The 16 filenames are fixed in this file; no user-provided path is fetched.
-      const result=await B.SceneLoader.ImportMeshAsync(null,ROOT,item[0]+'.glb',scene,undefined,'.glb');
+      const localUrl=localFile?URL.createObjectURL(localFile):null;
+      let result;
+      try { result=await B.SceneLoader.ImportMeshAsync(null,localUrl?'':ROOT,localUrl||item[0]+'.glb',scene,undefined,'.glb'); }
+      finally { if(localUrl)URL.revokeObjectURL(localUrl); }
       if(token!==assetGeneration||!scene)return;
       const geometry=result.meshes.filter(x=>typeof x.getTotalVertices==='function'&&x.getTotalVertices()>0);
       if(!geometry.length)throw Error('GLB loaded without visible tooth geometry');
@@ -135,6 +138,11 @@
       const scale=2.85/dimension;
       pivot.scaling.setAll(scale);
       pivot.position.copyFrom(center.scale(-scale));
+      orientation=new B.TransformNode('atlas-presentation',scene);
+      pivot.parent=orientation;
+      // Upper-tooth roots point up in the source's jaw coordinate frame.
+      // Present all bundled crowns up for easier morphology comparison.
+      orientation.rotation.z=(!localFile&&item[0].startsWith('maxillary_'))?Math.PI:0;
       state.meshes=geometry.length;
       state.triangles=geometry.reduce((sum,m)=>sum+Math.floor((m.getTotalIndices?.()||0)/3),0);
       for(const m of geometry){
@@ -149,7 +157,7 @@
         }
       }
       state.mode='rendering';state.ready=true;
-      showStatus(item[1]+' · '+state.triangles.toLocaleString()+' triangles · source GLB surface (no internal tissues)');
+      showStatus((localFile?localFile.name:item[1])+' · '+state.triangles.toLocaleString()+' triangles · surface-only study (no internal tissues)');
     }catch(e){
       if(modal.hidden)return;
       state.mode='error';state.error=String(e.message||e).slice(0,300);
@@ -176,7 +184,7 @@
     style.textContent=`#dundee-atlas[hidden]{display:none!important}#dundee-atlas{position:fixed;inset:0;z-index:1900;background:#07151edb;display:grid;place-items:center;padding:20px;box-sizing:border-box}#dundee-atlas-dialog{display:flex;flex-direction:column;gap:10px;width:min(1050px,97vw);height:min(860px,94vh);box-sizing:border-box;padding:18px;border:1px solid #456875;border-radius:16px;background:#102b39;color:#e9f8f7;box-shadow:0 24px 70px #0009;font:14px system-ui}#dundee-atlas-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#dundee-atlas-toolbar select,#dundee-atlas-toolbar button{border:1px solid #567989;border-radius:8px;background:#1f4754;color:#efffff;padding:9px 10px;font:600 13px system-ui;cursor:pointer}#dundee-atlas-toolbar select{flex:1;min-width:180px}#dundee-atlas-canvas{display:block;width:100%;height:100%;min-height:260px;outline:none;touch-action:none;border-radius:12px;background:#0a1c29}#dundee-atlas-vp{flex:1;min-height:260px;overflow:hidden}#dundee-atlas small{font-size:12px;line-height:1.5;color:#c3d3d9}#dundee-atlas a{color:#7bdbec}#dundee-atlas-status{min-height:18px}`;
     document.head.appendChild(style);
     modal=document.createElement('div');modal.id='dundee-atlas';modal.hidden=true;
-    modal.innerHTML=`<section id="dundee-atlas-dialog" role="dialog" aria-modal="true" aria-label="Licensed 3D dental anatomy"><div style="display:flex;justify-content:space-between;gap:15px;align-items:center"><div><strong style="font-size:20px">Anatomical tooth atlas</strong><div style="font-size:12px;color:#a9c6cd">CT-informed source models · Babylon.js WebGL · Educational viewer only</div></div><button type="button" id="dundee-atlas-close" style="background:#295563;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer">Close ✕</button></div><div id="dundee-atlas-toolbar"><button type="button" id="dundee-atlas-prev" aria-label="Previous tooth">◀</button><select id="dundee-atlas-select" aria-label="Choose tooth model"></select><button type="button" id="dundee-atlas-next" aria-label="Next tooth">Next tooth ▶</button></div><div id="dundee-atlas-vp"><canvas id="dundee-atlas-canvas" aria-label="Interactive imported tooth model; drag to rotate and scroll to zoom"></canvas></div><div id="dundee-atlas-status" role="status">Choose a tooth to load its licensed model.</div><small>3D models © University of Dundee, School of Dentistry · CC BY 4.0 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">license</a> · Repacked GLB files from <a href="https://github.com/sameralseedbth-Dental/dental-3d-models" target="_blank" rel="noopener">dental-3d-models</a> · <a id="dundee-atlas-source" target="_blank" rel="noopener">Original Dundee model ↗</a>. This is a surface-only educational reference, not a clinically validated model, scanned patient data or a drillable enamel/dentin/pulp volume.</small></section>`;
+    modal.innerHTML=`<section id="dundee-atlas-dialog" role="dialog" aria-modal="true" aria-label="Licensed 3D dental anatomy"><div style="display:flex;justify-content:space-between;gap:15px;align-items:center"><div><strong style="font-size:20px">Anatomical tooth atlas</strong><div style="font-size:12px;color:#a9c6cd">CT-informed source models · Babylon.js WebGL · Educational viewer only</div></div><button type="button" id="dundee-atlas-close" style="background:#295563;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer">Close ✕</button></div><div id="dundee-atlas-toolbar"><button type="button" id="dundee-atlas-prev" aria-label="Previous tooth">◀</button><select id="dundee-atlas-select" aria-label="Choose tooth model"></select><button type="button" id="dundee-atlas-next" aria-label="Next tooth">Next tooth ▶</button><button type="button" id="dundee-atlas-flip" title="Turn the tooth upside down">↕ Flip</button><button type="button" id="dundee-atlas-import-trigger" title="Load a high-resolution GLB from this computer without uploading">Import GLB…</button><input id="dundee-atlas-import" type="file" accept=".glb,model/gltf-binary" style="display:none" /></div><div id="dundee-atlas-vp"><canvas id="dundee-atlas-canvas" aria-label="Interactive imported tooth model; drag to rotate and scroll to zoom"></canvas></div><div id="dundee-atlas-status" role="status">Choose a tooth to load its licensed model.</div><small>3D models © University of Dundee, School of Dentistry · CC BY 4.0 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">license</a> · Repacked GLB files from <a href="https://github.com/sameralseedbth-Dental/dental-3d-models" target="_blank" rel="noopener">dental-3d-models</a> · <a id="dundee-atlas-source" target="_blank" rel="noopener">Original Dundee model ↗</a>. Bundled GLBs are decimated surfaces; import your properly licensed high-resolution GLB locally for more detail. Local files stay in this browser and retain their own licenses. None of these meshes are clinical scans for diagnosis or drillable enamel/dentin/pulp volumes.</small></section>`;
     document.body.appendChild(modal);
     canvas=document.getElementById('dundee-atlas-canvas');
     const selectNode=document.getElementById('dundee-atlas-select');
@@ -186,6 +194,14 @@
     document.getElementById('dundee-atlas-prev').addEventListener('click',()=>select(state.selected-1));
     document.getElementById('dundee-atlas-next').addEventListener('click',()=>select(state.selected+1));
     document.getElementById('dundee-atlas-close').addEventListener('click',close);
+    document.getElementById('dundee-atlas-flip').addEventListener('click',()=>{if(orientation)orientation.rotation.z+=Math.PI;});
+    const filePicker=document.getElementById('dundee-atlas-import');
+    document.getElementById('dundee-atlas-import-trigger').addEventListener('click',()=>filePicker.click());
+    filePicker.addEventListener('change',()=>{
+      const file=filePicker.files?.[0];if(!file)return;
+      if(!/\.glb$/i.test(file.name)||file.size<100||file.size>50*1024*1024){showStatus('Please select a .glb model under 50 MB.',true);return;}
+      select(state.selected,file);filePicker.value='';
+    });
     modal.addEventListener('click',e=>{if(e.target===modal)close()});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
   }
