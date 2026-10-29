@@ -15,6 +15,29 @@ Date: 2026-10-29 · Workstream: 3D Dental Anatomy · Status: engineering audit, 
 
 The upstream `mandible.glb` is intentionally **excluded** because the original mandible was identified in the existing source note as CC BY-NC, not CC BY. **Do not bundle it.** Verify per-asset author/license and intended use against primary source records before any separate distribution. No unlicensed files were introduced in this workstream.
 
+## Individual licensed tooth asset inventory
+
+All paths below are under `assets/dundee/` (and mirrored to `public/assets/dundee/`). Each is attributed as Dundee School of Dentistry CC BY 4.0 through the same immediate-source commit recorded above; runtime display-only cropping/scaling/mirroring is described in the transformation contract below.
+
+| File | Original left-side FDI | Mirrored right-side FDI |
+| --- | --- | --- |
+| `maxillary_left_central_incisor.glb` | 21 | 11 |
+| `maxillary_lateral_incisor.glb` | 22 | 12 |
+| `maxillary_canine.glb` | 23 | 13 |
+| `maxillary_first_premolar.glb` | 24 | 14 |
+| `maxillary_second_premolar.glb` | 25 | 15 |
+| `maxillary_first_molar.glb` | 26 | 16 |
+| `maxillary_second_molar.glb` | 27 | 17 |
+| `maxillary_third_molar.glb` | 28 | 18 |
+| `mandibular_left_central_incisor.glb` | 31 | 41 |
+| `mandibular_left_lateral_incisor.glb` | 32 | 42 |
+| `mandibular_left_canine.glb` | 33 | 43 |
+| `mandibular_first_premolar.glb` | 34 | 44 |
+| `mandibular_left_second_premolar.glb` | 35 | 45 |
+| `mandibular_first_molar.glb` | 36 | 46 |
+| `mandibular_second_molar.glb` | 37 | 47 |
+| `mandibular_third_molar.glb` | 38 | 48 |
+
 ## FDI and transformation contract
 
 The eight maxillary files are **21–28** and the eight mandibular files **31–38** (left-sided source set). `real-dental-scene.js` reuses them for **11–18** and **41–48** by display-only mirroring. The resulting 32 FDI IDs stay attached to legacy picking, selection and cutting meshes, which are not altered by this workstream. See `PAIRS`, `STYLE`, `archPlacement`, and `sync`.

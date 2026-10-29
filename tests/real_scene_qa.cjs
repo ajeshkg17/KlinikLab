@@ -80,3 +80,33 @@ test('sampled surface distance rejects invalid or missing geometry',()=>{
   assert.throws(()=>M.surfaceDistance([],[]),/required/);
   assert.throws(()=>M.surfaceDistance([[[0,0,0],[1,0,0],[NaN,0,0]]],[[[0,0,0],[1,0,0],[0,1,0]]]),/finite/);
 });
+
+
+test('sampled world-space arch diagnostics cover 30 adjacent FDI pairs without changing source records',()=>{
+  const upper=['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'];
+  const lower=['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'];
+  let offset=0;
+  const items=[...upper,...lower].map(id=>{
+    const x=offset++*2.5;
+    return {source:{key:'tooth:'+id},realMesh:{
+      getVerticesData:()=>[0,0,0,1,0,0,0,1,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix:()=>({dx:x})
+    }};
+  });
+  const originals=items.map(item=>item.source.key);
+  const B={VertexBuffer:{PositionKind:'position'},Vector3:{
+    FromArray:(positions,i)=>({x:positions[i],y:positions[i+1],z:positions[i+2]}),
+    TransformCoordinates:(v,m)=>({x:v.x+m.dx,y:v.y,z:v.z})
+  }};
+  const diagnostics=M.measureArchSurfaces({B,items,anatomyLayout:{
+    arches:[upper.map(id=>({id})),lower.map(id=>({id}))]
+  }});
+  assert.equal(diagnostics.teethMeasured,32);
+  assert.equal(diagnostics.pairs.length,30);
+  assert.equal(diagnostics.pairs[0].pair,'18-17');
+  assert.equal(diagnostics.pairs[15].pair,'48-47');
+  assert.ok(diagnostics.pairs.every(p=>Number.isFinite(p.distance)&&p.distance>0));
+  assert.match(diagnostics.units,/not mm/);
+  assert.deepEqual(items.map(item=>item.source.key),originals);
+});
