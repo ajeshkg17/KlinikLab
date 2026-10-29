@@ -21,8 +21,8 @@ test('reject unsupported crown styles',()=>assert.throws(()=>A.crownData(0,true)
 test('gingival mesh follows upper and lower arches with finite smooth normals',()=>{
  for(const upper of [true,false]){
   const g=A.gingivaData(upper);
-  assert.equal(g.vertices,2124);
-  assert.equal(g.triangles,4224);
+  assert.equal(g.vertices,5784); // (240 segments + 1) × 24 perimeter vertices
+  assert.equal(g.triangles,11520); // 240 segments × 24 quads × 2 triangles
   assert(g.indices.every(i=>i>=0&&i<g.vertices));
   assert(g.positions.every(Number.isFinite));
   for(let i=0;i<g.normals.length;i+=3)assert(Math.abs(Math.hypot(...g.normals.slice(i,i+3))-1)<.0001);
