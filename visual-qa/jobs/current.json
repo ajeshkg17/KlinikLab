@@ -1,33 +1,129 @@
 {
   "schemaVersion": 1,
-  "jobId": "dundee-atlas-v7-2026-10-29-01",
+  "jobId": "real-dental-arches-v1-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-licensed-model",
+      "name": "01-classic-arch",
       "steps": [
         {
           "action": "click",
-          "control": "atlasOpen"
+          "control": "teeth"
         }
       ],
-      "capture": "atlas"
+      "capture": "stage"
     },
     {
-      "name": "02-local-import",
+      "name": "02-dundee-real-teeth",
       "steps": [
         {
           "action": "click",
-          "control": "atlasOpen"
+          "control": "teeth"
         },
         {
-          "action": "localDemoGLB"
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
         }
       ],
-      "capture": "atlas"
+      "capture": "stage"
+    },
+    {
+      "name": "03-real-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-real-oblique",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "orbit",
+          "dx": 180,
+          "dy": -68
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-real-clinic",
+      "steps": [
+        {
+          "action": "click",
+          "control": "clinic"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
     }
   ]
 }
