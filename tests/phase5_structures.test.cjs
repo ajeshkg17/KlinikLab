@@ -26,7 +26,7 @@ test('every morphological cross-section has five explicit tissue layers and no e
   assert.match(svg,/role="img"/);
   for(const layer of ['enamel','dentin','pulp','cementum','ligament'])
    assert(svg.includes('data-structure-layer="'+layer+'"'));
-  assert(!/<script|<image|https?:|<foreignObject|javascript:/i.test(svg));
+  assert(!/<script|<image|\shref=|<foreignObject|javascript:/i.test(svg));
  }
  assert.throws(()=>m.diagram('custom'),/Unsupported/);
 });
