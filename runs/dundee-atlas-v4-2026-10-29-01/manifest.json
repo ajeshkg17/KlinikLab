@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "jobId": "dundee-atlas-v4-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T13:30:44.719Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-dundee-molar",
+      "file": "01-dundee-molar.png",
+      "capture": "atlas",
+      "ok": false,
+      "errors": [
+        "Licensed atlas unavailable: Unable to load from assets/dundee/maxillary_first_molar.glb: /meshes/0/primitives/0: Error status: 404  - Unable to load https://cdn.babylonjs.com/v9.33.0/draco_decoder_gltf.wasm"
+      ],
+      "networkFailures": [],
+      "atlasDebug": {
+        "mode": "error",
+        "error": "Unable to load from assets/dundee/maxillary_first_molar.glb: /meshes/0/primitives/0: Error status: 404  - Unable to load https://cdn.babylonjs.com/v9.33.0/draco_decoder_gltf.wasm",
+        "decoderDiagnostic": {
+          "names": [
+            "DracoCompression",
+            "DracoDecoder",
+            "DracoEncoder"
+          ],
+          "initial": "https://cdn.babylonjs.com/draco_decoder_gltf.wasm",
+          "hasCompression": true,
+          "after": "https://cdn.babylonjs.com/draco_decoder_gltf.wasm",
+          "compression": "https://cdn.babylonjs.com/draco_decoder_gltf.wasm"
+        }
+      }
+    }
+  ],
+  "successCount": 0,
+  "failureCount": 1
+}
