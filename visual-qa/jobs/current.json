@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "babylon-pbr-2026-10-29-02",
+  "jobId": "babylon-pbr-2026-10-29-03",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -53,35 +53,6 @@
       "capture": "stage"
     },
     {
-      "name": "04-babylon-orbited",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "orbit",
-          "dx": 140,
-          "dy": -60
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "05-classic-clinic",
-      "steps": [
-        {
-          "action": "click",
-          "control": "clinic"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
       "name": "06-babylon-clinic",
       "steps": [
         {
@@ -98,16 +69,6 @@
         }
       ],
       "capture": "stage"
-    },
-    {
-      "name": "07-preparation-unchanged",
-      "steps": [
-        {
-          "action": "click",
-          "control": "volume"
-        }
-      ],
-      "capture": "volume"
     }
   ]
 }
