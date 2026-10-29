@@ -158,9 +158,9 @@ async function capture(job){
     if(scene.steps.some(step=>step.action==='click'&&step.control==='renderer')){
       const checks=item.checks||{},real=checks.realTeeth||{},b=checks.babylon||{};
       const expected=checks.archMode==='both'?32:16;
-      const phase4=job.jobId.startsWith('phase4-');
-      const expectedReal=phase4&&b.crownSource==='procedural'?0:expected;
-      const anatomyVersion=phase4?6:5;
+      const modern=/^phase[45]-/.test(job.jobId);
+      const expectedReal=modern&&b.crownSource==='procedural'?0:expected;
+      const anatomyVersion=modern?6:5;
       if(b.mode!=='babylon'||b.anatomyVersion!==anatomyVersion||b.gingivalVertices!==11572||b.gingivalTriangles!==23136)
        throw Error('Phase 2 Babylon/gingiva diagnostic mismatch: '+JSON.stringify(b).slice(0,400));
       if(!real.ready||real.loaded!==16||real.instances!==32||real.visibleInstances!==expectedReal||real.failures?.length)
