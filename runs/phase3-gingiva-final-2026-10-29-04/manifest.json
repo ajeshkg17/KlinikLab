@@ -1,0 +1,1674 @@
+{
+  "schemaVersion": 1,
+  "jobId": "phase3-gingiva-final-2026-10-29-04",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T17:30:20.180Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-balanced-frontal",
+      "file": "01-balanced-frontal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 100126,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 609,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 5,
+          "gingivalVertices": 11572,
+          "gingivalTriangles": 23136,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "appearance": "balanced",
+          "appearanceVersion": 1,
+          "vertexColoredTemplates": 18
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "visibleInstances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "vertexColoredInstances": 32,
+          "appearanceVersion": 1
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-balanced-occlusal",
+      "file": "02-balanced-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 95193,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "lower",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 607,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 5,
+          "gingivalVertices": 11572,
+          "gingivalTriangles": 23136,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "appearance": "balanced",
+          "appearanceVersion": 1,
+          "vertexColoredTemplates": 18
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "visibleInstances": 16,
+          "triangles": 6765,
+          "failures": [],
+          "error": null,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "vertexColoredInstances": 32,
+          "appearanceVersion": 1
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-studio-frontal",
+      "file": "04-studio-frontal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 102019,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 644,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 5,
+          "gingivalVertices": 11572,
+          "gingivalTriangles": 23136,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "appearance": "studio",
+          "appearanceVersion": 1,
+          "vertexColoredTemplates": 18,
+          "materialsUpdated": 66
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "visibleInstances": 32,
+          "triangles": 6765,
+          "failures": [],
+          "error": null,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "vertexColoredInstances": 32,
+          "appearanceVersion": 1
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "05-studio-occlusal",
+      "file": "05-studio-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 98230,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "lower",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 646,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 5,
+          "gingivalVertices": 11572,
+          "gingivalTriangles": 23136,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "appearance": "studio",
+          "appearanceVersion": 1,
+          "vertexColoredTemplates": 18,
+          "materialsUpdated": 66
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "visibleInstances": 16,
+          "triangles": 6765,
+          "failures": [],
+          "error": null,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "vertexColoredInstances": 32,
+          "appearanceVersion": 1
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "07-studio-upper",
+      "file": "07-studio-upper.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 65859,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "upper",
+        "babylon": {
+          "mode": "babylon",
+          "ready": true,
+          "meshes": 176,
+          "frames": 644,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 5,
+          "gingivalVertices": 11572,
+          "gingivalTriangles": 23136,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "appearance": "studio",
+          "appearanceVersion": 1,
+          "vertexColoredTemplates": 18,
+          "materialsUpdated": 66
+        },
+        "realTeeth": {
+          "mode": "ready",
+          "ready": true,
+          "loaded": 16,
+          "instances": 32,
+          "visibleInstances": 16,
+          "triangles": 6765,
+          "failures": [],
+          "error": null,
+          "archDiagnostics": {
+            "teeth": 32,
+            "archCounts": [
+              16,
+              16
+            ],
+            "pairs": [
+              {
+                "pair": "18-17",
+                "gap": 0.0204
+              },
+              {
+                "pair": "17-16",
+                "gap": 0.0197
+              },
+              {
+                "pair": "16-15",
+                "gap": 0.0199
+              },
+              {
+                "pair": "15-14",
+                "gap": 0.0263
+              },
+              {
+                "pair": "14-13",
+                "gap": 0.0232
+              },
+              {
+                "pair": "13-12",
+                "gap": 0.0127
+              },
+              {
+                "pair": "12-11",
+                "gap": 0.0182
+              },
+              {
+                "pair": "11-21",
+                "gap": 0.0126
+              },
+              {
+                "pair": "21-22",
+                "gap": 0.0182
+              },
+              {
+                "pair": "22-23",
+                "gap": 0.0127
+              },
+              {
+                "pair": "23-24",
+                "gap": 0.0232
+              },
+              {
+                "pair": "24-25",
+                "gap": 0.0263
+              },
+              {
+                "pair": "25-26",
+                "gap": 0.0199
+              },
+              {
+                "pair": "26-27",
+                "gap": 0.0197
+              },
+              {
+                "pair": "27-28",
+                "gap": 0.0204
+              },
+              {
+                "pair": "48-47",
+                "gap": 0.0209
+              },
+              {
+                "pair": "47-46",
+                "gap": 0.0204
+              },
+              {
+                "pair": "46-45",
+                "gap": 0.0219
+              },
+              {
+                "pair": "45-44",
+                "gap": 0.0266
+              },
+              {
+                "pair": "44-43",
+                "gap": 0.0229
+              },
+              {
+                "pair": "43-42",
+                "gap": 0.0078
+              },
+              {
+                "pair": "42-41",
+                "gap": 0.0084
+              },
+              {
+                "pair": "41-31",
+                "gap": 0.0108
+              },
+              {
+                "pair": "31-32",
+                "gap": 0.0084
+              },
+              {
+                "pair": "32-33",
+                "gap": 0.0078
+              },
+              {
+                "pair": "33-34",
+                "gap": 0.0229
+              },
+              {
+                "pair": "34-35",
+                "gap": 0.0266
+              },
+              {
+                "pair": "35-36",
+                "gap": 0.0219
+              },
+              {
+                "pair": "36-37",
+                "gap": 0.0204
+              },
+              {
+                "pair": "37-38",
+                "gap": 0.0209
+              }
+            ],
+            "minGap": 0.0078,
+            "largeGaps": [],
+            "possibleOverlaps": [],
+            "note": "Contact gaps estimated using crown bounding ellipses; not validated occlusion."
+          },
+          "vertexColoredInstances": 32,
+          "appearanceVersion": 1
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 5,
+  "failureCount": 0
+}
