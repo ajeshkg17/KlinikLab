@@ -10,6 +10,7 @@ export const CONTROLS = Object.freeze({
   renderer: '#renderer-toggle',
   appearance: '#appearance-toggle',
   jaw: '#jaw-layer-toggle',
+  detail: '#crown-detail-toggle',
   atlasOpen: '#dundee-atlas-open',
   atlasNext: '#dundee-atlas-next',
   atlasPrev: '#dundee-atlas-prev',
