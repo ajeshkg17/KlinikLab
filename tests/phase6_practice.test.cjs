@@ -145,3 +145,22 @@ test('module is local, server-allowed, and ordered immediately after structure e
  assert.match(server,/['"]\/dental-practice\.js['"]/);
  assert(!/fetch\(|localStorage|sessionStorage|XMLHttpRequest|navigator\.sendBeacon/.test(source));
 });
+
+
+test('completion removes stale answer buttons and restarting restores the four-choice grid',()=>{
+ const {quiz,document}=setup({withDOM:true});
+ quiz.start('48');
+ for(let i=0;i<10;i++){
+  const q=quiz.currentQuestion,index=q.options.indexOf(q.correct);
+  assert.equal(quiz.answer(index),true);
+  assert.equal(quiz.next(),true);
+ }
+ const options=document.getElementById('practice-options');
+ assert.equal(quiz.status.completed,true);
+ assert.equal(options.style.display,'none');
+ assert.equal(document.getElementById('practice-results').hidden,false);
+ quiz.start('48');
+ assert.equal(options.style.display,'grid');
+ assert.equal(options.hidden,false);
+ assert.equal(document.getElementById('practice-results').hidden,true);
+});
