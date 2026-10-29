@@ -7,16 +7,17 @@ This board is a coordination snapshot, not application code. Repository: ajeshkg
 - Coordinator owns edits to this file on the `coordination-board` branch. Read the latest version and its blob SHA immediately before updating it; use a conditional update and retry after rereading if another edit wins. Keep existing messages intact.
 - Workers post updates and questions as comments on their assigned GitHub issue. Include workstream, current branch and commit, PR, status, tests, blockers and the next action. The coordinator reads those comments and records decisions and links here; workers read this board before starting a new action.
 - GitHub does not automatically deliver updates to ChatGPT chats. A participant must actively check this board and its issue; do not claim messages were read or acknowledged without evidence. A board update alone does not wake or notify another chat.
+- Never interrupt a chat while it is working. Wait until its current turn is complete before asking it to check the board or its issue. If completion is unclear, wait.
 - This repository and board are public: do not post credentials, patient information, private files or sensitive personal data.
 
 ## Workstreams
 
 | Workstream | Assigned issue | PR | Branch |
 |---|---|---|---|
-| Quest 2 VR | [#8](../../issues/8) | [#13](../../pull/13) | `feature/quest2-vr-ux` |
-| Dental anatomy | [#9](../../issues/9) | [#15](../../pull/15) | `feature/dental-anatomy` |
-| FSP/KP training | [#10](../../issues/10) | [#14](../../pull/14) | `feature/fsp-kp-training` |
-| Quality assurance | [#11](../../issues/11) | [#12](../../pull/12) | `feature/qa-automation` |
+| Quest 2 VR | [#8](https://github.com/ajeshkg17/KlinikLab/issues/8) | [#13](https://github.com/ajeshkg17/KlinikLab/pull/13) | `feature/quest2-vr-ux` |
+| Dental anatomy | [#9](https://github.com/ajeshkg17/KlinikLab/issues/9) | [#15](https://github.com/ajeshkg17/KlinikLab/pull/15) | `feature/dental-anatomy` |
+| FSP/KP training | [#10](https://github.com/ajeshkg17/KlinikLab/issues/10) | [#14](https://github.com/ajeshkg17/KlinikLab/pull/14) | `feature/fsp-kp-training` |
+| Quality assurance | [#11](https://github.com/ajeshkg17/KlinikLab/issues/11) | [#12](https://github.com/ajeshkg17/KlinikLab/pull/12) | `feature/qa-automation` |
 
 All four workers have acknowledged their individual issues. The coordinator should recheck issue comments and current PR heads; an acknowledgement is a point-in-time report, not proof of continuous availability.
 
@@ -33,7 +34,7 @@ All four workers have acknowledged their individual issues. The coordinator shou
 ## Current handoff and decisions
 
 - The coordinator reported #13, #14 and #15 unmerged, and QA #12 draft. Verify actual current states and checks.
-- Duplicate DOM ID [#16](../../issues/16) was reported as causing QA checks to fail; assign an owner through the coordination process and verify a fix with appropriate review. No fix has been performed by the board setup.
+- Duplicate DOM ID [#16](https://github.com/ajeshkg17/KlinikLab/issues/16) was reported as causing QA checks to fail; assign an owner through the coordination process and verify a fix with appropriate review. No fix has been performed by the board setup.
 - Anatomy visual baseline, actual Quest 2 testing, and clinical/language review remain separate unverified gates.
 - Coordinator: review the latest acknowledgments, establish the integration proposal and outstanding approvals, and record the next decision here. Workers: report progress on your assigned issue and link relevant evidence.
 
