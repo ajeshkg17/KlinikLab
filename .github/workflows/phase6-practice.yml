@@ -1,0 +1,40 @@
+name: Phase 6 anatomy practice
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  practice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Phases 2–6 anatomy and interface tests
+        run: node --test tests/babylon_anatomy.test.cjs tests/real_scene_qa.cjs tests/phase3_appearance.test.cjs tests/phase4_jaw.test.cjs tests/phase5_structures.test.cjs tests/phase6_practice.test.cjs
+      - name: Check JavaScript syntax and static mirror consistency
+        run: |
+          node --check dental-practice.js
+          node --check dental-structures.js
+          node --check babylon-preview.js
+          node --check real-dental-scene.js
+          cmp dental-practice.js public/dental-practice.js
+          cmp dental-structures.js public/dental-structures.js
+          cmp index.html public/index.html
+      - name: Verify secure localhost file-serving path
+        run: |
+          node server/server.mjs >/tmp/kliniklab-phase6.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/dental-practice.js -o /tmp/kliniklab-practice.js; then break; fi
+            sleep 1
+          done
+          test -s /tmp/kliniklab-practice.js
+          grep -q KlinikAnatomyPractice /tmp/kliniklab-practice.js
+      - name: Verify regenerated self-contained HTML
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
