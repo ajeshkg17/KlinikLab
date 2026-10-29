@@ -19,14 +19,14 @@ createServer(async(req,res)=>{
   if(u.pathname==='/api/health'&&req.method==='GET')return json(res,200,{configured:!!process.env.GEMINI_API_KEY,model:process.env.GEMINI_MODEL||DEFAULT_MODEL,requiresCode:!!process.env.AI_ACCESS_CODE});
   if(u.pathname==='/api/ai'){
    if(req.method!=='POST')return json(res,405,{error:'Use POST.'});
-   assertSameOrigin(req);rateLimit(req.socket.remoteAddress||'local');checkAccess(req.headers['x-ai-access-code']);
+   assertSameOrigin(req);rateLimit(req.socket.remoteAddress||'local');checkAccess(req.headers['x-ai-access-code'],process.env,!!process.env.GEMINI_API_KEY);
    if(!String(req.headers['content-type']||'').startsWith('application/json'))return json(res,415,{error:'Use application/json.'});
    const body=await readJSON(req);return json(res,200,await runGemini(body));
   }
   if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed.'});
   let p=decodeURIComponent(u.pathname);if(p==='/')p='/index.html';
   // Only serve front-end files, never server scripts or configuration.
-  if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
+  if(!['/index.html','/app.js','/engine.js','/fallback.js','/ai-ui.js','/video-guide.js','/volumetric-lab.js','/volumetric-lab.css','/clinical-pathway.js','/clinical-pathway.css','/desktop-suite.css','/desktop-suite.js','/xr-procedure.js','/favicon.ico'].includes(p))return json(res,404,{error:'Not found.'});
   const full=path.join(ROOT,p);
   const data=await readFile(full);
   res.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream','x-content-type-options':'nosniff','cache-control':'no-store','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'none'; base-uri 'self'"});

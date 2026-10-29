@@ -228,7 +228,7 @@ class DentalScene {
       if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
     }return hit}
 
-  installEvents(){const canvas=this.canvas;let down=null,dragged=false;canvas.addEventListener('pointerdown',e=>{if(this.xrSession)return;down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};dragged=false;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!down||this.xrSession)return;let dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>5){dragged=true;canvas.classList.add('dragging')}if(dragged){this.yaw=down.yaw+dx*.008;this.pitch=Math.max(-1.2,Math.min(1.2,down.pitch+dy*.006))}});canvas.addEventListener('pointerup',e=>{if(!dragged){const ray=this.desktopRay(e.clientX,e.clientY);const hit=this.getRayHit(ray.o,ray.d);if(hit)this.onPick(hit.key)}down=null;canvas.classList.remove('dragging')});canvas.addEventListener('wheel',e=>{e.preventDefault();this.distance=Math.min(7.5,Math.max(1.15,this.distance*Math.exp(e.deltaY*.001)))},{passive:false});window.addEventListener('resize',()=>this.resize());}
+  installEvents(){const canvas=this.canvas;let down=null,dragged=false;canvas.addEventListener('pointerdown',e=>{if(this.xrSession)return;down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};dragged=false;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!down||this.xrSession)return;let dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>5){dragged=true;canvas.classList.add('dragging')}if(dragged){this.yaw=down.yaw+dx*.008;this.pitch=Math.max(-1.2,Math.min(1.2,down.pitch+dy*.006))}});canvas.addEventListener('pointerup',e=>{if(!dragged){const ray=this.desktopRay(e.clientX,e.clientY);if(this.xrPrep?.onDesktopClick(ray)){down=null;canvas.classList.remove('dragging');return;}const hit=this.getRayHit(ray.o,ray.d);if(hit)this.onPick(hit.key)}down=null;canvas.classList.remove('dragging')});canvas.addEventListener('wheel',e=>{e.preventDefault();this.distance=Math.min(7.5,Math.max(1.15,this.distance*Math.exp(e.deltaY*.001)))},{passive:false});window.addEventListener('resize',()=>this.resize());}
   camera(){const y=this.target[1]+this.distance*Math.sin(this.pitch);const h=this.distance*Math.cos(this.pitch),x=this.target[0]+Math.sin(this.yaw)*h,z=this.target[2]+Math.cos(this.yaw)*h;return [x,y,z]}
   view(){return M3.lookAt(this.camera(),this.target)}
   desktopRay(cx,cy){const b=this.canvas.getBoundingClientRect(),x=2*(cx-b.left)/b.width-1,y=1-2*(cy-b.top)/b.height;const P=M3.perspective(.87,b.width/b.height,.05,100),inv=M3.inverse(M3.mm(P,this.view()));const a=M3.transform(inv,[x,y,-1]),c=M3.transform(inv,[x,y,1]);const v=a.slice(0,3).map(q=>q/a[3]),w=c.slice(0,3).map(q=>q/c[3]);return {o:v,d:M3.unit(M3.sub(w,v))}}
@@ -254,8 +254,8 @@ class DentalScene {
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       this.xrSession=session;this.xrRef=ref;
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
-      session.addEventListener('selectstart',e=>{const pose=this.latestFrame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});
-      session.addEventListener('end',()=>{this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      session.addEventListener('selectstart',e=>{if(this.xrPrep?.onSelectStart(e,e.frame||this.latestFrame))return;const pose=(e.frame||this.latestFrame)?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
+      session.addEventListener('end',()=>{this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();this.xrPrep?.onExit();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){if(session)try{await session.end()}catch{}throw err}
   }
@@ -266,7 +266,7 @@ class DentalScene {
   clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0]}}
   xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose)return;let n=0;for(const source of frame.session.inputSources){if(n>=this.xrControllers.length)break;const p=frame.getPose(source.targetRaySpace,this.xrRef);if(!p)continue;const t=p.transform,c=this.xrControllers[n++];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
     for(let i=n;i<2;i++){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
+    this.xrPrep?.onXRFrame(frame,t);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
   }
 }
-

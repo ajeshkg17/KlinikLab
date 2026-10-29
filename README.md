@@ -7,14 +7,22 @@
 - Open `KlinikLab_DesktopXR_Standalone.html` directly in a PC browser for **offline** exercises, or run `node server/server.mjs` and visit `http://127.0.0.1:8787` for the server-backed version.
 - Use **Clinical imaging & QA** in the header. Six tabs: synthetic radiography; STL/OBJ scan inspection; virtual bur mechanics; Quest capability diagnostics; external clinician review; linked research datasets.
 - **3D Präparation** opens the original volumetric cutting engine. Change *virtual* load/rotation/tilt in the mechanics tab, then make a cut. The cut volume and geometry are genuinely recomputed, but the strength/force index is arbitrary and not calibrated to hardware.
-- **AI Clinic** optionally uses Gemini through the local server. Set `GEMINI_API_KEY` in the server environment, not in HTML or git. The application works without AI.
+- **AI Clinic** optionally uses Gemini through the local server. Set both `GEMINI_API_KEY` and a strong `AI_ACCESS_CODE` in the server environment, not in HTML or git. The server refuses Gemini requests when the API key is configured without an access code. The application works without AI.
 
 ## Windows hosting and Quest 2
 
 1. Install Node.js 18+ (Node.js 22 recommended). In PowerShell, from this folder run `node server/server.mjs`.
 2. For a private trusted HTTPS tunnel, with Tailscale installed and configured, use `tailscale serve --bg http://127.0.0.1:8787` (check syntax in your installed Tailscale version). It provides a `https://<machine>.<tailnet>.ts.net` URL for authorized peers.
 3. Meta Quest Browser needs access to that HTTPS site, and its browser must support `immersive-vr`. The headset must be able to reach the private endpoint. The `Quest diagnostics` tab provides a self-test but is not equivalent to actual hardware QA.
-4. The existing Quest immersive clinic uses stereo WebXR with controller ray selection. **3D volumetric tooth cutting is currently a 2D canvas workstation, not tracked stereo VR handpiece drilling.**
+4. The existing Quest immersive clinic uses stereo WebXR with controller ray selection. **An experimental WebXR tooth preparation mode now uses tracked controller rays and the same volumetric solid as the PC cutter.** It is ray-based material removal, not true physical bur–tooth collision, force calibration, or clinically validated handpiece motion. In VR, point at the `VR TOOTH PREP` panel and trigger to enable; hold the trigger on the simulated tooth to cut.
+
+## Experimental XR preparation
+
+- Source: `xr-procedure.js`, loaded after the shared volume and desktop modules; generated into the standalone HTML.
+- On the PC: Clinical imaging & QA → Quest diagnostics → **Preview XR tooth mesh on PC** (requires WebGL). Desktop 3D preparation remains available without WebGL.
+- In the Quest headset: use the in-scene **VR TOOTH PREP** panel, then controller target ray + trigger to cut. Optional controller vibration is a cue, not haptic force feedback.
+- Reset/undo/case changes resynchronize the shared model. Read the learning metrics in desktop `3D Präparation` or the exported report.
+- Quest 2 VR functionality and haptics **have not been verified on a physical headset**. Automated tests use simulated XR poses and cannot establish headset compatibility.
 
 ## Anatomy and imaging provenance
 
@@ -44,9 +52,11 @@
 - `node tests/qa_logic.js`: 42 case–station structural tests.
 - `node --test tests/ai.test.mjs`: mock Gemini generation, clinical plan/review, validation and API key handling.
 - `python tests/final_browser_qa.py`: existing 3D regression tests across six cases, reset, mesh cut and report export.
+- `python tests/xr_workstation_qa.py`: mocked tracked-controller input, shared volumetric removal, blocker, reset and case-switch tests. Not a physical headset test.
+- `node --test tests/server_security.test.mjs`: when Gemini is configured, the public Node endpoint rejects requests without `AI_ACCESS_CODE`.
 
 **No licensed dental professional or physical Quest 2 has verified this build.**
 
 ## GitHub source publication
 
-This project is published to `ajeshkg17/KlinikLab` as a public source repository. Do not commit `.env`, API keys, patient-identifying data or restricted dental scan datasets. Use the built-in `.gitignore` and keep local clinical files outside the repository.
+Source is maintained in [ajeshkg17/KlinikLab](https://github.com/ajeshkg17/KlinikLab) (currently public). Never commit real patient data, API keys, or restricted dental scans.
