@@ -2411,7 +2411,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     sourcePanel.appendChild(hint);
     panel=document.createElement('section');panel.id='practice-panel';panel.hidden=true;
     panel.setAttribute('role','region');panel.setAttribute('aria-label','Dental anatomy practice');
-    panel.style.cssText='position:absolute;right:15px;top:72px;z-index:9;width:min(315px,48vw);max-height:calc(100% - 133px);overflow:auto;border:1px solid #486a73;border-radius:13px;background:rgba(10,29,39,.98);color:#e8f3f0;padding:13px 14px;box-shadow:0 12px 28px #0008;pointer-events:auto;font:12px/1.45 system-ui,sans-serif;';
+    panel.style.cssText='position:absolute;right:15px;top:72px;z-index:9;width:min(315px,calc(100% - 30px));max-height:calc(100% - 120px);overflow:auto;border:1px solid #486a73;border-radius:13px;background:rgba(10,29,39,.98);color:#e8f3f0;padding:13px 14px;box-shadow:0 12px 28px #0008;pointer-events:auto;font:12px/1.45 system-ui,sans-serif;';
     const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:6px;';
     const title=document.createElement('strong');title.textContent='Anatomy practice / Anatomieübungen';title.style.cssText='font-size:13px;';
     const back=document.createElement('button');back.id='practice-close';back.type='button';back.textContent='Back to anatomy';
