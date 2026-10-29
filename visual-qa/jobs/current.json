@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase4-jaw-refined-2026-10-29-03",
+  "jobId": "phase5-structures-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "02-dundee-jaw",
+      "name": "01-incisor-enamel",
       "capture": "stage",
       "steps": [
         {
@@ -32,76 +32,16 @@
         },
         {
           "action": "click",
-          "control": "jaw"
+          "control": "tooth11"
+        },
+        {
+          "action": "click",
+          "control": "structure"
         }
       ]
     },
     {
-      "name": "03-dundee-jaw-occlusal",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "jaw"
-        }
-      ]
-    },
-    {
-      "name": "04-dundee-upper-jaw",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "jaw"
-        }
-      ]
-    },
-    {
-      "name": "06-fine-jaw-oblique",
+      "name": "02-molar-pulp",
       "capture": "stage",
       "steps": [
         {
@@ -126,21 +66,20 @@
         },
         {
           "action": "click",
-          "control": "detail"
+          "control": "tooth26"
         },
         {
           "action": "click",
-          "control": "jaw"
+          "control": "structure"
         },
         {
-          "action": "orbit",
-          "dx": 130,
-          "dy": -50
+          "action": "click",
+          "control": "structurePulp"
         }
       ]
     },
     {
-      "name": "08-fine-jaw-fdi",
+      "name": "03-molar-focus",
       "capture": "stage",
       "steps": [
         {
@@ -165,11 +104,83 @@
         },
         {
           "action": "click",
-          "control": "detail"
+          "control": "tooth36"
         },
         {
           "action": "click",
-          "control": "jaw"
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "structureFocus"
+        }
+      ]
+    },
+    {
+      "name": "04-premolar-dentin",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "tooth24"
+        },
+        {
+          "action": "click",
+          "control": "structure"
+        },
+        {
+          "action": "click",
+          "control": "structureDentin"
+        }
+      ]
+    },
+    {
+      "name": "05-fdi-32",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "structure"
         },
         {
           "action": "validateFDI"
