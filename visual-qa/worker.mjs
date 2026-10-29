@@ -70,6 +70,13 @@ async function capture(job){
     for (const step of scene.steps){
      if(step.action==='wait'){await page.waitForTimeout(step.ms)}
      else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,null,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}if(step.control==='atlasOpen'||step.control==='atlasNext'||step.control==='atlasPrev'){await page.waitForFunction(()=>window.KlinikDundeeAtlas?.ready||window.KlinikDundeeAtlas?.mode==='error',null,{timeout:25000});const atlas=await page.evaluate(()=>({...window.KlinikDundeeAtlas}));if(!atlas.ready)throw Error('Licensed atlas unavailable: '+(atlas.error||'unknown'));}await page.waitForTimeout(650)}
+     else if(step.action==='localDemoGLB'){
+      // Never accept arbitrary path arguments from the GitHub instruction JSON.
+      await page.locator('#dundee-atlas-import').setInputFiles(path.join(REPO,'assets','dundee','maxillary_first_molar.glb'));
+      await page.waitForFunction(()=>window.KlinikDundeeAtlas?.ready||window.KlinikDundeeAtlas?.mode==='error',null,{timeout:25000});
+      const imported=await page.evaluate(()=>({...window.KlinikDundeeAtlas}));
+      if(!imported.ready||imported.asset!=='local-glb')throw Error('Local GLB import failed: '+(imported.error||imported.asset));
+     }
      else if(step.action==='orbit'){
       const canvas=page.locator('#scene');if(await canvas.count()!==1)throw Error('The clinic canvas was not rendered');
       const b=await canvas.first().boundingBox();if(!b)throw Error('Canvas unavailable');
