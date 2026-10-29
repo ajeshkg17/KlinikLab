@@ -18,7 +18,7 @@
   ]);
   const HEIGHTS=[0,.167,.181,.166,.153];
   const STYLE=Object.freeze([0,1,1,2,3,3,4,4,4]);
-  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,visibleInstances:0,triangles:0,failures:[],error:null,
+  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,visibleInstances:0,triangles:0,surfaceDiagnostics:null,failures:[],error:null,
     source:'University of Dundee, School of Dentistry (CC BY 4.0)',surfaceOnly:true,webxr:false};
   root.KlinikRealTeeth=state;
 
@@ -100,7 +100,7 @@
   }
   async function replace(layer){
     if(state.mode==='loading'||state.mode==='ready')return;
-    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;state.vertexColoredInstances=0;
+    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;state.vertexColoredInstances=0;state.surfaceDiagnostics=null;
     const B=layer.B;
     try{
       await loadScript(LOADER,()=>!!B.GLTFFileLoader);
@@ -173,6 +173,137 @@
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
     }catch(error){state.mode='error';state.error=String(error.message||error).slice(0,180);}
   }
+
+  // Mesh proximity is a sampled desktop QA metric in uncalibrated scene units.
+  // It never changes FDI positions, drillable geometry, or hit-testing.
+  const CONTACT_EDGES=[[0,1],[1,2],[2,0]];
+  const subtract=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const squared=v=>dot(v,v);
+  const clip01=x=>Math.max(0,Math.min(1,x));
+  function pointSegmentSquared(p,a,b){
+    const v=subtract(b,a),len=squared(v);
+    const t=len>1e-15?clip01(dot(subtract(p,a),v)/len):0;
+    return squared(subtract(p,a.map((x,i)=>x+t*v[i])));
+  }
+  function pointTriangleSquared(p,t){
+    const [a,b,c]=t,ab=subtract(b,a),ac=subtract(c,a),n=cross(ab,ac),n2=squared(n);
+    if(n2>1e-15){
+      const projection=subtract(p,n.map(x=>dot(subtract(p,a),n)/n2*x));
+      const v=subtract(projection,a);
+      const d00=dot(ab,ab),d01=dot(ab,ac),d11=dot(ac,ac);
+      const d20=dot(v,ab),d21=dot(v,ac),det=d00*d11-d01*d01;
+      if(det>1e-15){
+        const u=(d11*d20-d01*d21)/det,w=(d00*d21-d01*d20)/det;
+        if(u>=-1e-10&&w>=-1e-10&&u+w<=1+1e-10)return squared(subtract(p,projection));
+      }
+    }
+    return Math.min(...CONTACT_EDGES.map(([i,j])=>pointSegmentSquared(p,t[i],t[j])));
+  }
+  function segmentSegmentSquared(p,q,r,s){
+    const u=subtract(q,p),v=subtract(s,r),w=subtract(p,r);
+    let best=Math.min(pointSegmentSquared(p,r,s),pointSegmentSquared(q,r,s),
+      pointSegmentSquared(r,p,q),pointSegmentSquared(s,p,q));
+    const a=dot(u,u),b=dot(u,v),c=dot(v,v),d=dot(u,w),e=dot(v,w),den=a*c-b*b;
+    if(den>1e-15){
+      const x=(b*e-c*d)/den,y=(a*e-b*d)/den;
+      if(x>=0&&x<=1&&y>=0&&y<=1)
+        best=Math.min(best,squared(subtract(p.map((z,i)=>z+x*u[i]),r.map((z,i)=>z+y*v[i]))));
+    }
+    return best;
+  }
+  function segmentHitsTriangle(p,q,t){
+    const direction=subtract(q,p),edge1=subtract(t[1],t[0]),edge2=subtract(t[2],t[0]);
+    const h=cross(direction,edge2),det=dot(edge1,h);
+    if(Math.abs(det)<1e-12)return false;
+    const f=1/det,s=subtract(p,t[0]),u=f*dot(s,h);
+    if(u<-1e-10||u>1+1e-10)return false;
+    const qv=cross(s,edge1),v=f*dot(direction,qv),fraction=f*dot(edge2,qv);
+    return v>=-1e-10&&u+v<=1+1e-10&&fraction>=-1e-10&&fraction<=1+1e-10;
+  }
+  function triangleBounds(t){
+    return [0,1,2].map(k=>[Math.min(t[0][k],t[1][k],t[2][k]),
+      Math.max(t[0][k],t[1][k],t[2][k])]);
+  }
+  function boxesDistanceSquared(a,b){
+    let d=0;
+    for(let i=0;i<3;i++){
+      const gap=Math.max(0,a[i][0]-b[i][1],b[i][0]-a[i][1]);
+      d+=gap*gap;
+    }
+    return d;
+  }
+  function surfaceDistance(trianglesA,trianglesB){
+    for(const triangles of [trianglesA,trianglesB]){
+      if(!Array.isArray(triangles)||!triangles.length)throw Error('Surface triangles required');
+      for(const t of triangles){
+        if(!Array.isArray(t)||t.length!==3||t.some(p=>!Array.isArray(p)||p.length!==3||!p.every(Number.isFinite)))
+          throw Error('Surface triangle coordinates must be finite xyz triples');
+      }
+    }
+    const boundsA=trianglesA.map(triangleBounds),boundsB=trianglesB.map(triangleBounds);
+    let best=Infinity,intersection=false,comparisons=0;
+    for(let i=0;i<trianglesA.length&&best>0;i++)for(let j=0;j<trianglesB.length;j++){
+      if(boxesDistanceSquared(boundsA[i],boundsB[j])>best)continue;
+      const a=trianglesA[i],b=trianglesB[j];comparisons++;
+      for(const [x,y] of CONTACT_EDGES){
+        if(segmentHitsTriangle(a[x],a[y],b)||segmentHitsTriangle(b[x],b[y],a)){
+          best=0;intersection=true;break;
+        }
+      }
+      if(intersection)break;
+      for(const p of a)best=Math.min(best,pointTriangleSquared(p,b));
+      for(const p of b)best=Math.min(best,pointTriangleSquared(p,a));
+      for(const [u,v] of CONTACT_EDGES)for(const [x,y] of CONTACT_EDGES)
+        best=Math.min(best,segmentSegmentSquared(a[u],a[v],b[x],b[y]));
+    }
+    return {distance:Math.sqrt(best),intersectsSampledTriangles:intersection,
+      sampledTrianglesA:trianglesA.length,sampledTrianglesB:trianglesB.length,
+      comparedTrianglePairs:comparisons,units:'KlinikLab scene units (not mm)',
+      limitations:'Deterministic subsampled surfaces; minimum is an upper bound on true separation. Intersection is not penetration depth.'};
+  }
+  function sampledMeshTriangles(mesh,B,maxTriangles=48){
+    const vertices=mesh?.getVerticesData?.(B.VertexBuffer.PositionKind),indices=mesh?.getIndices?.();
+    if(!vertices||!indices||indices.length<3)return null;
+    const world=mesh.computeWorldMatrix(true),triangles=[],total=Math.floor(indices.length/3);
+    const stride=Math.max(1,Math.ceil(total/maxTriangles));
+    for(let i=0;i<total;i+=stride){
+      const triangle=[];
+      for(let j=0;j<3;j++){
+        const k=indices[i*3+j],source=B.Vector3.FromArray(vertices,k*3);
+        const p=B.Vector3.TransformCoordinates(source,world);
+        triangle.push([p.x,p.y,p.z]);
+      }
+      triangles.push(triangle);
+    }
+    return triangles;
+  }
+  function measureArchSurfaces(layer){
+    const byId=Object.create(null),cache=Object.create(null),pairs=[];
+    for(const item of layer.items||[]){
+      const id=/^tooth:([1-4][1-8])$/.exec(item.source?.key||'')?.[1];
+      if(id&&item.realMesh)byId[id]=item.realMesh;
+    }
+    for(const arch of layer.anatomyLayout?.arches||[])for(let i=0;i+1<arch.length;i++){
+      const first=arch[i].id,second=arch[i+1].id;
+      if(!cache[first]&&byId[first])cache[first]=sampledMeshTriangles(byId[first],layer.B);
+      if(!cache[second]&&byId[second])cache[second]=sampledMeshTriangles(byId[second],layer.B);
+      const a=cache[first],b=cache[second],pair=first+'-'+second;
+      if(!a||!b){pairs.push({pair,status:'unavailable'});continue;}
+      const measurement=surfaceDistance(a,b);
+      pairs.push({pair,distance:Number(measurement.distance.toFixed(6)),
+        intersectsSampledTriangles:measurement.intersectsSampledTriangles,
+        status:measurement.intersectsSampledTriangles?'sampled facet intersection':
+          measurement.distance<=.008?'near in sample':'no near contact observed in sample',
+        sampledTriangles:[a.length,b.length]});
+    }
+    return {pairs,teethMeasured:Object.keys(cache).length,units:'KlinikLab scene units (not mm)',
+      contactThreshold:.008,source:'licensed Dundee crown display meshes, cropped and normalized',
+      method:'3D sampled triangle-triangle proximity (48 triangles per crown maximum)',
+      limitations:'Not complete contact analysis; not penetration depth or clinical occlusion. Open cropped surfaces are not solid teeth.'};
+  }
+
   function sync(layer){
     if(!state.ready)return;
     const B=layer.B;
@@ -204,6 +335,11 @@
       }
     }
     state.visibleInstances=visibleInstances;
+    // Run once on the fully visible desktop licensed arch; never inside XR.
+    if(visibleInstances===32&&!state.surfaceDiagnostics&&layer.crownSource!=='procedural'){
+      try{state.surfaceDiagnostics=measureArchSurfaces(layer)}
+      catch(error){state.surfaceDiagnostics={error:String(error.message||error),units:'scene units'}}
+    }
   }
-  root.KlinikRealMesh={filename,parseKind,sliceTriangle,cropMesh,replace,sync,state};
+  root.KlinikRealMesh={filename,parseKind,sliceTriangle,cropMesh,surfaceDistance,measureArchSurfaces,replace,sync,state};
 })(typeof window!=='undefined'?window:globalThis);

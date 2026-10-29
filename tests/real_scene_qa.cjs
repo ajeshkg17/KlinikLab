@@ -58,3 +58,25 @@ test('real crown synchronization binds Babylon namespace locally',()=>{
   assert.match(source,/function sync\(layer\)\s*\{[\s\S]*?const B=layer\.B;/);
   assert.match(source,/new B\.Color3\(/);
 });
+
+
+test('3D sampled surface distance detects separated triangles in scene units',()=>{
+  const a=[[[-1,-1,0],[1,-1,0],[0,1,0]]];
+  const b=[[[-1,-1,1],[1,-1,1],[0,1,1]]];
+  const result=M.surfaceDistance(a,b);
+  assert.ok(Math.abs(result.distance-1)<1e-9);
+  assert.equal(result.intersectsSampledTriangles,false);
+  assert.match(result.units,/scene units/);
+  assert.match(result.limitations,/upper bound/);
+});
+test('3D sampled surface distance detects edge-through-face intersections',()=>{
+  const a=[[[-1,-1,0],[1,-1,0],[0,1,0]]];
+  const b=[[[0,-.5,-1],[0,-.5,1],[0,.6,.5]]];
+  const result=M.surfaceDistance(a,b);
+  assert.equal(result.distance,0);
+  assert.equal(result.intersectsSampledTriangles,true);
+});
+test('sampled surface distance rejects invalid or missing geometry',()=>{
+  assert.throws(()=>M.surfaceDistance([],[]),/required/);
+  assert.throws(()=>M.surfaceDistance([[[0,0,0],[1,0,0],[NaN,0,0]]],[[[0,0,0],[1,0,0],[0,1,0]]]),/finite/);
+});
