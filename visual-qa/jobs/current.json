@@ -1,65 +1,14 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase3-gingiva-final-2026-10-29-04",
+  "jobId": "phase3-fdi-final-2026-10-29-05",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-balanced-frontal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "02-balanced-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "04-studio-frontal",
+      "name": "01-studio-fdi-interaction",
+      "capture": "stage",
       "steps": [
         {
           "action": "click",
@@ -84,73 +33,11 @@
         {
           "action": "click",
           "control": "appearance"
+        },
+        {
+          "action": "validateFDI"
         }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "05-studio-occlusal",
-      "steps": [
-        {
-          "action": "click",
-          "control": "occlusal"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "appearance"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "07-studio-upper",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        },
-        {
-          "action": "click",
-          "control": "arches"
-        },
-        {
-          "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "click",
-          "control": "appearance"
-        }
-      ],
-      "capture": "stage"
+      ]
     }
   ]
 }
