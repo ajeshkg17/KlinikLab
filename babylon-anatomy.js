@@ -221,7 +221,7 @@
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
     v.applyToMesh(template,true);
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices};
+    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0};
     return template;
   }
   root.KlinikBabylonAnatomy={crownData,gingivaData,archPlacement,createTemplate,version:5,notes:'Educational procedural tooth morphology; not an anatomical scan'};
