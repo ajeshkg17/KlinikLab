@@ -435,10 +435,10 @@ class DentalScene {
     // Interactive XR lesson board - all its buttons are also available via standard HTML.
     this.box([-1.66,1.48,-2.2],[.88,2.35,.065],'#143345');this.box([-1.66,2.56,-2.16],[.87,.13,.08],'#237269');
     this.label('KLINIKLAB',[-1.66,2.565,-2.105],[.80,.13,1],{font:40,bold:true});
-    this.label('TRAINING MODULES',[-1.66,2.36,-2.105],[.74,.11,1],{font:29,color:'#92bdc2'});
-    this.menuButtons=[];for(let i=0;i<7;i++){const y=2.17-i*.182;const item=this.box([-1.66,y,-2.095],[.79,.177,.048],i===0?'#2c8b7b':'#265064',{key:`module:${i}`,radius:.33});this.menuButtons.push(item);this.label(`${i+1}. ${['FSP Interview','FSP Arztbrief','FSP Handover','KP Written','KP Practical','KP Viva','Praxis German'][i]}`,[-1.66,y,-2.057],[.74,.115,1],{font:34,color:'#e7f9f0'})}
+    this.label('TRAINING MODULES',[-1.66,2.36,-2.105],[.74,.11,1],{font:43,color:'#b6e7df'});
+    this.menuButtons=[];for(let i=0;i<7;i++){const y=2.17-i*.182;const item=this.box([-1.66,y,-2.095],[.79,.177,.048],i===0?'#2c8b7b':'#265064',{key:`module:${i}`,radius:.33});this.menuButtons.push(item);this.label(`${i+1}. ${['FSP Interview','FSP Arztbrief','FSP Handover','KP Written','KP Practical','KP Viva','Praxis German'][i]}`,[-1.66,y,-2.057],[.74,.115,1],{font:49,color:'#f5fff5'})}
     // Answer buttons for VR only, populated by setVRState().
-    this.answerMeshes=[];for(let i=0;i<4;i++){const yy=.79-i*.17,m=this.box([-1.66,yy,-2.08],[.79,.15,.048],'#225a5f',{key:`answer:${i}`,radius:.31});m.hidden=true;this.answerMeshes.push(m);this.label(['Option A','Option B','Option C','Option D'][i],[-1.66,yy,-2.041],[.75,.115,1],{font:32,tag:`answerlabel:${i}`})}
+    this.answerMeshes=[];for(let i=0;i<4;i++){const yy=.79-i*.17,m=this.box([-1.66,yy,-2.08],[.79,.15,.048],'#225a5f',{key:`answer:${i}`,radius:.31});m.hidden=true;this.answerMeshes.push(m);this.label(['Option A','Option B','Option C','Option D'][i],[-1.66,yy,-2.041],[.75,.115,1],{font:47,tag:`answerlabel:${i}`})}
     // Live status board and current objective for in-headset reading.
     this.box([0,2.72,-2.32],[1.62,.43,.07],'#183647');this.liveTitle=this.label('SELECT A LESSON',[0,2.805,-2.272],[1.49,.15,1],{font:32,bold:true});this.liveStep=this.label('Choose a module on the left', [0,2.65,-2.272],[1.49,.15,1],{font:32});
     this.xrBoardMeshes=this.meshes.slice(vrMeshesStart);
@@ -447,7 +447,7 @@ class DentalScene {
   }
   buildXRControllers(){this.xrControllers=[];for(let i=0;i<2;i++){const hand=this.sphere([0,-20,0],[.055,.09,.07],i?'#80dec9':'#d1e7e8');const ray=this.cy([0,-20,0],[.008,1.5,.008],'#8fe9d6',{alpha:.56});this.xrControllers.push({hand,ray})}}
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
-  setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,27)}}}
+  setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
   getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
