@@ -350,7 +350,7 @@
   }
 
   function sync(layer){
-    if(!state.ready)return;
+    if(!state.ready){state.visibleInstances=0;return;}
     const B=layer.B;
     let visibleInstances=0;
     for(const item of layer.items){

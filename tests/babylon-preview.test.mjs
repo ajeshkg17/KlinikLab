@@ -52,3 +52,9 @@ test('local server allows preview script with narrow CSP exception',async()=>{
   assert.ok(server.includes("'/babylon-preview.js'"));
   assert.ok(server.includes("script-src 'self' https://cdn.babylonjs.com"));
 });
+
+test('desktop overlay reports no licensed teeth when disabled or outside 3D',async()=>{
+  const code=await text('babylon-preview.js');
+  assert.match(code,/if\(!in3D\)\s*\{[\s\S]*?KlinikRealMesh\?\.sync\(this\);[\s\S]*?return;/);
+  assert.match(code,/disable\(\)\s*\{[\s\S]*?KlinikRealTeeth\.visibleInstances=0;/);
+});

@@ -47,3 +47,8 @@ git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
 ~~~
 
 Attach the tested Git commit SHA, actual screenshot URLs, visual worker manifest, browser error state and comparison notes to PR #15. Physical Quest 2 testing, licensed biological root geometry and specialist clinical validation remain unverified.
+
+
+## Visibility-state regression (follow-up)
+
+The optional Babylon desktop overlay now clears the displayed licensed-tooth count when disabled, and synchronizes licensed meshes into a non-visible state when the app enters a non-3D view or WebXR. A runtime fake-Babylon regression test exercises all 32 FDI tooth keys, source mirroring, selected highlighting, licensed-to-procedural switching, XR entry, 2D entry and failed-load state. This checks JavaScript state transitions and historical unbound-B regression risk, **not** pixel output. A new workstation run is still required to establish whether actual teeth render without errors. The historical 2026-10-29 visual-feedback manifest remains a failed rendering baseline, not a new test result.

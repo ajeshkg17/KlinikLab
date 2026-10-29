@@ -142,3 +142,73 @@ test('opposing FDI pairs report projected separation without confusing it with o
   assert.equal(report.opposingPairs[15].pair,'28-38');
   assert.match(report.limitations,/No calibrated bite/);
 });
+
+
+
+test('runtime licensed-tooth renderer sync keeps all 32 FDI IDs visible, then safely falls back',()=>{
+  const upper=['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'];
+  const lower=['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'];
+  const byId=Object.create(null),items=[];
+  for(const [arch,ids] of [upper,lower].entries())for(let i=0;i<ids.length;i++){
+    const id=ids[i],source={
+      key:'tooth:'+id,tag:'crown',p:[i*3,arch?1:3,0],s:[1,1,1],
+      rot:[0,0,0],hidden:false,alpha:1
+    };
+    const site={p:source.p.slice(),s:source.s.slice(),rot:source.rot.slice(),
+      mirrored:id[0]==='1'||id[0]==='4'};
+    byId[id]=site;
+    const transform={
+      values:[],set(...args){this.values=args;}
+    };
+    const realMesh={
+      isVisible:false,position:{...transform,values:[]},scaling:{...transform,values:[]},
+      rotation:{...transform,values:[]},
+      material:{albedoColor:null,alpha:1},
+      getVerticesData:()=>[0,0,0,1,0,0,0,1,0],
+      getIndices:()=>[0,1,2],
+      computeWorldMatrix(){return {x:this.position.values[0],y:this.position.values[1],z:this.position.values[2]};}
+    };
+    const originalMesh={isVisible:true};
+    items.push({source,mesh:originalMesh,realMesh});
+  }
+  const B={
+    Color3:class Color3{constructor(r,g,b){this.r=r;this.g=g;this.b=b;}},
+    VertexBuffer:{PositionKind:'position'},
+    Vector3:{
+      FromArray:(p,i)=>({x:p[i],y:p[i+1],z:p[i+2]}),
+      TransformCoordinates:(v,m)=>({x:v.x+m.x,y:v.y+m.y,z:v.z+m.z})
+    }
+  };
+  const layer={B,visible:true,crownSource:'dundee',
+    app:{viewMode:'3d'},source:{xrSession:null,selectedKey:'tooth:11'},
+    anatomyLayout:{byId,arches:[upper.map(id=>({id})),lower.map(id=>({id}))]},items};
+  const prior=M.state.ready;
+  const priorReport=M.state.surfaceDiagnostics;
+  try{
+    M.state.ready=true;M.state.surfaceDiagnostics=null;
+    M.sync(layer);
+    assert.equal(M.state.visibleInstances,32);
+    assert.equal(M.state.surfaceDiagnostics.pairs.length,30);
+    assert.equal(M.state.surfaceDiagnostics.opposingPairs.length,16);
+    assert(items.every(x=>x.realMesh.isVisible&&!x.mesh.isVisible));
+    assert(items.every(x=>x.realMesh.position.values.length===3));
+    assert.deepEqual(items.find(x=>x.source.key==='tooth:11').realMesh.scaling.values,[-1,1,1]);
+    assert.deepEqual(items.find(x=>x.source.key==='tooth:21').realMesh.scaling.values,[1,1,1]);
+    const chosen=items.find(x=>x.source.key==='tooth:11').realMesh.material.albedoColor;
+    assert.equal(chosen.r,.64);
+    layer.crownSource='procedural';M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    assert(items.every(x=>!x.realMesh.isVisible&&x.mesh.isVisible));
+    layer.crownSource='dundee';layer.source.xrSession={};M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    assert(items.every(x=>!x.realMesh.isVisible&&!x.mesh.isVisible));
+    layer.source.xrSession=null;layer.app.viewMode='2d';M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    layer.app.viewMode='3d';layer.visible=false;M.sync(layer);
+    assert.equal(M.state.visibleInstances,0);
+    layer.visible=true;M.state.ready=false;M.sync(layer);
+    assert.equal(M.state.visibleInstances,0,'a failed/unfinished load must not publish stale visibility');
+  }finally{
+    M.state.ready=prior;M.state.surfaceDiagnostics=priorReport;M.state.visibleInstances=0;
+  }
+});
