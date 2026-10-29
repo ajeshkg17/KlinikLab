@@ -1,0 +1,772 @@
+{
+  "schemaVersion": 1,
+  "jobId": "quest2-vr-preview-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T19:17:23.091Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-controller-start",
+      "file": "01-controller-start.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 0,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 97660,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 0,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-module-select",
+      "file": "02-module-select.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 1,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 97723,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 1,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "03-tooth-controls",
+      "file": "03-tooth-controls.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 2,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 98034,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 2,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-preparation-safety",
+      "file": "04-preparation-safety.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 3,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 98449,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 3,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "05-exit-help",
+      "file": "05-exit-help.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 4,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 97741,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": true,
+          "index": 4,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "06-dismiss-guide",
+      "file": "06-dismiss-guide.png",
+      "capture": "scene",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "xrMock": {
+        "guide": {
+          "version": 1,
+          "active": true,
+          "open": false,
+          "index": 4,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "comfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "mock": true
+      },
+      "bytes": 125107,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "xrGuide": {
+          "version": 1,
+          "active": true,
+          "open": false,
+          "index": 4,
+          "pages": 5,
+          "controllerSelects": 0,
+          "gripOpens": 0
+        },
+        "xrComfort": {
+          "active": true,
+          "scale": 0.78,
+          "objects": 105,
+          "lessonScale": 0.68
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 6,
+  "failureCount": 0
+}
