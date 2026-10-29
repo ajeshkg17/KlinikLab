@@ -46,7 +46,7 @@
   const state={version:1,active:false,open:false,index:0,pages:PAGES.length,controllerSelects:0,gripOpens:0};
   class XRControllerGuide{
     constructor(scene){
-      this.scene=scene;this.meshes=[];this.panelMeshes=[];this.labels=[];
+      this.scene=scene;this.state=state;this.meshes=[];this.panelMeshes=[];this.labels=[];
       const add=(mesh,panel=true)=>{this.meshes.push(mesh);if(panel)this.panelMeshes.push(mesh);mesh.hidden=true;return mesh};
       add(scene.box(spec.panel.p,spec.panel.s,'#143644'));
       add(scene.box([.08,1.926,-1.151],[.94,.064,.055],'#258578'));
