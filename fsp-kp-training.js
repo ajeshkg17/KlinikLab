@@ -173,6 +173,9 @@
  const key=function(){return status.caseId+'|'+status.phaseId;};
  function render(){
   if(!panel)return;
+  const previous=typeof document!=='undefined'?document.activeElement:null;
+  const focusKey=previous&&panel.contains&&panel.contains(previous)?
+   {action:previous.getAttribute('data-fsp'),id:previous.getAttribute('data-id'),textarea:previous.id==='fsp-answer'}:null;
   const item=CASES[status.caseId],task=taskFor(status.caseId,status.phaseId),result=status.results[key()];
   let html='<div class="fsp-shell" role="dialog" aria-modal="true" aria-label="FSP und KP Deutschtraining">';
   html+='<header class="fsp-header"><div><strong>✚ FSP/KP Sprachtraining</strong><p>Fiktive Fälle · lokale formative Übung · klinische Prüfung ausstehend</p></div><button type="button" data-fsp="close" aria-label="Training schließen">✕ Schließen</button></header>';
@@ -203,6 +206,12 @@
   html+='<p class="fsp-muted">Wiederholen: '+(remaining.length?remaining.map(x=>escapeHTML(x.name)).join(', '):'Alle Schlüsselbegriff-Rubriken abgedeckt (keine fachliche Freigabe)')+'</p>';
   html+='</div></main></div><footer class="fsp-footer">Quellen: <a href="https://www.zahnaerzte-sh.de/zahnaerzte/praxisservice/beruflicher-nachwuchs/auslaendische-berufsqualifikationen/fachsprachpruefung/" target="_blank" rel="noopener">ZÄK SH – FSP</a> · <a href="https://sdcepdentalprescribing.nhs.scot/guidance/bacterial-infections/acute-periodontal-conditions/" target="_blank" rel="noopener">SDCEP</a>. Medizinische Inhalte: fachliche Endprüfung ausstehend.</footer></div>';
   panel.innerHTML=html;
+  if(focusKey){
+   const all=Array.from(panel.querySelectorAll('[data-fsp]'));
+   const matching=all.find(x=>x.getAttribute('data-fsp')===focusKey.action&&x.getAttribute('data-id')===focusKey.id);
+   const follow=focusKey.textarea?panel.querySelector('#fsp-answer'):matching||panel.querySelector('#fsp-answer')||panel.querySelector('[data-fsp="close"]');
+   if(follow&&follow.focus)follow.focus();
+  }
  }
  function open(){if(!panel)return false;returnFocus=typeof document!=='undefined'?document.activeElement:null;status.open=true;panel.hidden=false;document.body.classList.add('fsp-open');render();panel.querySelector('[data-fsp="close"]').focus();return true;}
  function close(){if(!panel)return false;status.open=false;panel.hidden=true;document.body.classList.remove('fsp-open');if(returnFocus&&typeof returnFocus.focus==='function')returnFocus.focus();else if(trigger)trigger.focus();return true;}
@@ -227,7 +236,19 @@
    if(action==='model'){status.showModel=!status.showModel;render();return;}
    if(action==='retry'){delete status.results[key()];status.showModel=false;render();panel.querySelector('#fsp-answer').focus();}
   });
-  document.addEventListener('keydown',function(e){if(status.open&&e.key==='Escape')close();});
+  document.addEventListener('keydown',function(e){
+   if(!status.open)return;
+   if(e.key==='Escape'){e.preventDefault();close();return;}
+   if(e.key!=='Tab')return;
+   const focusable=Array.from(panel.querySelectorAll('button:not([disabled]),a[href],textarea,[tabindex]:not([tabindex="-1"])'));
+   if(!focusable.length)return;
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(e.shiftKey&&(document.activeElement===first||!panel.contains(document.activeElement))){
+    e.preventDefault();last.focus();
+   }else if(!e.shiftKey&&(document.activeElement===last||!panel.contains(document.activeElement))){
+    e.preventDefault();first.focus();
+   }
+  });
  }
  root.KlinikFSPTraining={version:2,cases:CASES,phases:PHASES,score:score,safetyReview:safetyReview,taskFor:taskFor,status:status,open:open,close:close,mount:mount};
  if(typeof document!=='undefined'){
