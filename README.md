@@ -25,6 +25,14 @@
 - WebXR is rendered on the **Quest 2 headset itself**; hosting HTML on a powerful PC does not offload WebGL/voxel meshing to that PC. Meshing is reduced during held-trigger cuts and restored on trigger release, but headset performance is still unknown.
 - Quest 2 VR functionality and haptics **have not been verified on a physical headset**. Automated tests use simulated XR poses and cannot establish headset compatibility.
 
+## Desktop rendering and visual screenshot QA (29 October 2026)
+
+- The browser clinic now uses smoothed procedural crown meshes with incisal, canine, premolar, and molar surface relief and thinner scalloped synthetic gingiva. These are **illustrative models**, not patient anatomy or calibrated scans.
+- In `3D Präparation`, the *same editable volumetric solid* is drawn using a GPU-accelerated WebGL overlay when available. Canvas 2D remains the functional fallback if WebGL is blocked or unavailable. Tooth meshing and scoring are still computed by the CPU; the GPU accelerates rasterization and depth-tested display, not clinical physics.
+- Desktop rendering is tested through `visual-qa/worker.mjs` on the owner’s local workstation, which runs approved screenshot jobs from `visual-qa/jobs/current.json` and pushes results to the separate `visual-feedback` GitHub branch. The browser worker is isolated from logged-in profiles; avoid placing real patient information in screenshots because the repository is public.
+- The local workstation's RTX 5060 does **not** accelerate standalone Meta Quest 2 rendering; headset-specific performance and input require physical testing.
+- `python tests/graphics_qa.py` verifies crown triangles, normal vectors, GPU-overlay presence, cutting and cross-section fallback. It does not substitute for the workstation screenshot gallery or Quest testing.
+
 ## Anatomy and imaging provenance
 
 - Built-in tooth material and cutting geometry are **synthetic, uncalibrated models**, not clinical scans.
