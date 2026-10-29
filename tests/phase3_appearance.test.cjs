@@ -95,3 +95,30 @@ test('Node static server allows the appearance module and both HTML entrypoints 
     previous=at;
   }
 });
+
+test('desktop lighting control switches Balanced ↔ Studio without enabling Babylon',()=>{
+  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+  const source=fs.readFileSync(path.join(__dirname,'../babylon-preview.js'),'utf8');
+  const children=[];
+  function element(){
+    return {id:'',textContent:'',style:{},attributes:{},listeners:{},
+      setAttribute(k,v){this.attributes[k]=v},
+      addEventListener(k,fn){this.listeners[k]=fn},
+      appendChild(child){children.push(child)}
+    };
+  }
+  const title=element();
+  const document={readyState:'complete',querySelector:q=>q==='#stage-controls .float-title'?title:null,
+    getElementById:id=>children.find(x=>x.id===id)||null,createElement:()=>element()};
+  const context={window:{},document,setTimeout:fn=>fn()};
+  vm.runInNewContext(source,context);
+  const button=document.getElementById('appearance-toggle');
+  assert(button,'appearance control must exist');
+  assert.equal(context.window.KlinikBabylon.appearance,'balanced');
+  button.listeners.click();
+  assert.equal(context.window.KlinikBabylon.appearance,'studio');
+  assert.equal(button.attributes['aria-pressed'],'true');
+  button.listeners.click();
+  assert.equal(context.window.KlinikBabylon.appearance,'balanced');
+  assert.equal(button.attributes['aria-pressed'],'false');
+});
