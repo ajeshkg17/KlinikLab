@@ -138,14 +138,34 @@
   if(!task)throw new RangeError('Unknown fictional case or training phase');
   return task;
  }
+ /* Selected phrases trigger a caution, not an overall clinical quality verdict. */
+ function safetyReview(caseId,answer){
+  if(caseId!=='surgery'||!answer)return [];
+  const flags=[];
+  const clauses=answer.toLocaleLowerCase('de-DE').split(/[.!?;\n]+/);
+  for(const clause of clauses){
+   if(/\b(?:antibiotika\s+sind\s+(?:immer|grundsätzlich|routinemäßig)\s+(?:notwendig|erforderlich|indiziert)|(?:immer|routinemäßig|grundsätzlich)\s+antibiotika\s+(?:geben|verordnen|verschreiben)|antibiotika\s+bei\s+jeder\s+perikoronitis)\b/iu.test(clause)&&
+      !/\b(?:nicht|keine|niemals)\s+(?:immer|grundsätzlich|routinemäßig)\b/iu.test(clause)){
+    flags.push('Pauschale Antibiotikagabe ist bei unkomplizierter Perikoronitis nicht gerechtfertigt. Bitte fachlich prüfen.');
+   }
+   if(/\b(?:atemnot|schluckbeschwerden|dysphagie)\b.{0,65}\b(?:abwarten|zu\s+hause\s+bleiben|keine\s+hilfe\s+holen)\b/iu.test(clause)&&
+      !/\b(?:nicht|niemals|keinesfalls)\s+abwarten\b/iu.test(clause)){
+    flags.push('Atem- oder relevante Schluckprobleme dürfen nicht mit Abwarten bagatellisiert werden. Bitte dringend fachlich prüfen.');
+   }
+  }
+  return [...new Set(flags)];
+ }
  function score(caseId,phaseId,value){
   const task=taskFor(caseId,phaseId);
   const answer=typeof value==='string'?value.normalize('NFKC').trim():'';
   const results=task.checks.map(function(x){
    return {label:x.label,matched:answer.length>0&&new RegExp(x.pattern,'iu').test(answer),tip:x.tip};
   });
-  return {caseId:caseId,phaseId:phaseId,score:results.filter(x=>x.matched).length*2,max:10,
-   blank:answer.length===0,criteria:results,method:'German keyword coverage only. Does not assess clinical accuracy, negation, grammar, fluency, or certification.'};
+  const safetyFlags=safetyReview(caseId,answer);
+  const lexicalScore=results.filter(x=>x.matched).length*2;
+  return {caseId:caseId,phaseId:phaseId,score:safetyFlags.length?null:lexicalScore,
+   lexicalScore:lexicalScore,max:10,blank:answer.length===0,safetyFlags:safetyFlags,criteria:results,
+   method:'Formative German keyword coverage only; selected explicit safety phrases can suspend the score. Does not establish diagnosis, overall clinical accuracy, negation handling, grammar, fluency, or certification.'};
  }
  const status={caseId:'endo',phaseId:'anamnese',answers:{},results:{},showModel:false,showGlossary:false,open:false};
  let panel=null,trigger=null,returnFocus=null;
@@ -161,7 +181,7 @@
   Object.keys(CASES).forEach(function(id){html+='<button type="button" data-fsp="case" data-id="'+id+'" aria-pressed="'+(id===status.caseId)+'">'+escapeHTML(CASES[id].title)+'</button>';});
   html+='<p class="fsp-muted">Sämtliche Angaben sind erfunden; keine realen Patientenakten oder Röntgenbilder.</p></aside><main class="fsp-main">';
   html+='<h2>'+escapeHTML(item.title)+'</h2><p class="fsp-facts">'+escapeHTML(item.facts)+'</p><nav class="fsp-steps" aria-label="Sprachübungen">';
-  PHASES.forEach(function(p){const done=!!status.results[status.caseId+'|'+p.id];html+='<button type="button" data-fsp="phase" data-id="'+p.id+'" aria-current="'+(p.id===status.phaseId?'step':'false')+'">'+escapeHTML(p.name)+(done?' ✓':'')+'</button>';});
+  PHASES.forEach(function(p){const r=status.results[status.caseId+'|'+p.id];const done=!!r&&r.score===10;html+='<button type="button" data-fsp="phase" data-id="'+p.id+'" aria-current="'+(p.id===status.phaseId?'step':'false')+'">'+escapeHTML(p.name)+(done?' ✓':r?' •':'')+'</button>';});
   html+='</nav><div class="fsp-task"><span class="fsp-kicker">'+escapeHTML(PHASES.find(x=>x.id===status.phaseId).audience)+' · B2/C1</span>';
   html+='<h3>'+escapeHTML(PHASES.find(x=>x.id===status.phaseId).name)+'</h3><p>'+escapeHTML(task.prompt)+'</p>';
   html+='<p class="fsp-scaffold"><strong>B2:</strong> '+escapeHTML(task.b2)+'<br><strong>C1:</strong> '+escapeHTML(task.c1)+'</p>';
@@ -169,16 +189,17 @@
   html+='<div class="fsp-actions"><button type="button" data-fsp="submit">Formativ prüfen</button><button type="button" data-fsp="glossary" aria-expanded="'+status.showGlossary+'">Deutsch–Englisch Glossar</button><button type="button" data-fsp="retry">Erneut üben</button></div>';
   if(status.showGlossary){html+='<dl class="fsp-glossary">'+item.glossary.map(x=>'<div><dt>'+escapeHTML(x[0])+'</dt><dd>'+escapeHTML(x[1])+'</dd></div>').join('')+'</dl>';}
   if(result){
-   html+='<section class="fsp-feedback" aria-live="polite"><h4>Rubrik: '+result.score+' / '+result.max+' Punkte</h4>';
-   html+='<p>Nur Schlüsselbegriff-Abdeckung (je 2 Punkte). Die Auswertung prüft weder Grammatik noch klinische Richtigkeit, Negation oder flüssiges Sprechen.</p>';
+   html+='<section class="fsp-feedback" aria-live="polite"><h4>'+(result.safetyFlags.length?'Sicherheitswarnung · Punktwert ausgesetzt':'Rubrik: '+result.score+' / '+result.max+' Punkte')+'</h4>';
+   if(result.safetyFlags.length)html+='<div role="alert" class="fsp-warning"><b>Bitte prüfen lassen:</b><ul>'+result.safetyFlags.map(x=>'<li>'+escapeHTML(x)+'</li>').join('')+'</ul>Die Begriffsdeckung ('+result.lexicalScore+' / 10) ist keine klinische Bewertung.</div>';
+   html+='<p>Nur Schlüsselbegriff-Abdeckung (je 2 Punkte). Einzelne gefährliche Aussagen lösen Warnungen aus. Die Rubrik prüft weder Grammatik, klinische Richtigkeit, alle Negationen noch flüssiges Sprechen.</p>';
    if(result.blank)html+='<p role="alert">Keine Eingabe erkannt. Bitte einen deutschen Antworttext eintragen.</p>';
    html+='<ul>'+result.criteria.map(x=>'<li><b>'+(x.matched?'✓ ':'○ ')+escapeHTML(x.label)+'</b> — '+escapeHTML(x.matched?'Stichwort erkannt. Keine inhaltliche Validierung.':x.tip)+'</li>').join('')+'</ul>';
-   if(result.score<result.max)html+='<p class="fsp-revise">Wiederholen Sie die nicht erkannten Begriffe und lassen Sie die medizinische Richtigkeit fachlich beurteilen.</p>';
+   if(result.score===null||result.score<result.max)html+='<p class="fsp-revise">Wiederholen Sie die nicht erkannten Begriffe und lassen Sie die medizinische Richtigkeit fachlich beurteilen.</p>';
    html+='<button type="button" data-fsp="model" aria-expanded="'+status.showModel+'">'+(status.showModel?'Musterantwort ausblenden':'Musterantwort anzeigen')+'</button>';
    if(status.showModel)html+='<blockquote>'+escapeHTML(task.model)+'</blockquote>';
    html+='</section>';
   }else html+='<p class="fsp-muted">Musterantwort und Kriterien erscheinen nach Abgabe. Freitext verlässt Ihren Browser nicht; es gibt keine automatische Speicherung.</p>';
-  const remaining=PHASES.filter(p=>{const r=status.results[status.caseId+'|'+p.id];return !r||r.score<10;});
+  const remaining=PHASES.filter(p=>{const r=status.results[status.caseId+'|'+p.id];return !r||r.score!==10;});
   html+='<p class="fsp-muted">Wiederholen: '+(remaining.length?remaining.map(x=>escapeHTML(x.name)).join(', '):'Alle Schlüsselbegriff-Rubriken abgedeckt (keine fachliche Freigabe)')+'</p>';
   html+='</div></main></div><footer class="fsp-footer">Quellen: <a href="https://www.zahnaerzte-sh.de/zahnaerzte/praxisservice/beruflicher-nachwuchs/auslaendische-berufsqualifikationen/fachsprachpruefung/" target="_blank" rel="noopener">ZÄK SH – FSP</a> · <a href="https://sdcepdentalprescribing.nhs.scot/guidance/bacterial-infections/acute-periodontal-conditions/" target="_blank" rel="noopener">SDCEP</a>. Medizinische Inhalte: fachliche Endprüfung ausstehend.</footer></div>';
   panel.innerHTML=html;
@@ -191,7 +212,7 @@
   trigger=document.createElement('button');trigger.id='fsp-kp-open';trigger.type='button';trigger.className=anchor.className;
   trigger.textContent='FSP/KP Deutsch';trigger.title='Strukturierte fiktive deutsche Zahnarzt-Kommunikation üben';
   trigger.addEventListener('click',open);anchor.parentNode.insertBefore(trigger,anchor.nextSibling);
-  const style=document.createElement('style');style.textContent='.fsp-open{overflow:hidden}#fsp-kp-overlay[hidden]{display:none!important}#fsp-kp-overlay{position:fixed;inset:0;z-index:1100;background:rgba(6,26,33,.75);padding:clamp(8px,2vw,24px);overflow:auto}#fsp-kp-overlay .fsp-shell{background:#f5faf8;color:#18323b;max-width:1050px;min-height:min(680px,94vh);margin:auto;border-radius:14px;overflow:hidden;font:14px/1.5 system-ui,sans-serif}#fsp-kp-overlay .fsp-header{background:#143e48;color:white;padding:14px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center}#fsp-kp-overlay .fsp-header p{margin:2px 0 0;font-size:12px}#fsp-kp-overlay button{cursor:pointer;border:1px solid #9bbab5;border-radius:7px;padding:8px 11px;background:white;color:#173a42}#fsp-kp-overlay button[aria-current="step"],#fsp-kp-overlay button[aria-pressed="true"]{background:#d3f4eb;border-color:#007e79;font-weight:700}#fsp-kp-overlay button:focus-visible,#fsp-kp-overlay textarea:focus-visible{outline:3px solid #00a68f;outline-offset:2px}#fsp-kp-overlay .fsp-notice{margin:13px 20px;background:#e2f2f2;padding:12px;border-radius:9px;font-size:12px}#fsp-kp-overlay .fsp-grid{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:18px;padding:10px 20px}#fsp-kp-overlay .fsp-sidebar{display:flex;flex-direction:column;align-items:stretch;gap:9px}#fsp-kp-overlay .fsp-main{min-width:0}#fsp-kp-overlay h2{margin:0 0 5px;font-size:19px}#fsp-kp-overlay .fsp-facts{border-left:3px solid #6faeaa;padding:9px;background:white}#fsp-kp-overlay .fsp-steps,#fsp-kp-overlay .fsp-actions{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}#fsp-kp-overlay .fsp-task{background:white;border-radius:9px;padding:16px}#fsp-kp-overlay .fsp-task h3{margin:5px 0;font-size:18px}#fsp-kp-overlay .fsp-kicker,#fsp-kp-overlay .fsp-muted{font-size:12px;color:#596b70}#fsp-kp-overlay .fsp-scaffold{padding:9px;background:#edf5f4}#fsp-kp-overlay textarea{display:block;width:100%;min-height:130px;max-width:100%;padding:10px;border-radius:7px;border:1px solid #72959a}#fsp-kp-overlay .fsp-feedback{padding:12px;background:#eef8f6;border-radius:9px}#fsp-kp-overlay .fsp-feedback ul{padding-left:22px}#fsp-kp-overlay .fsp-feedback li{margin:7px 0}#fsp-kp-overlay .fsp-glossary{display:grid;gap:5px}#fsp-kp-overlay .fsp-glossary div{display:flex;gap:12px}#fsp-kp-overlay .fsp-glossary dt{font-weight:700}#fsp-kp-overlay .fsp-glossary dd{margin:0}#fsp-kp-overlay .fsp-footer{padding:15px 20px;font-size:11px;color:#536b72}#fsp-kp-overlay a{color:#05665f}@media(max-width:650px){#fsp-kp-overlay .fsp-grid{grid-template-columns:1fr}#fsp-kp-overlay .fsp-sidebar{flex-direction:row;flex-wrap:wrap}#fsp-kp-overlay .fsp-header{align-items:flex-start}#fsp-kp-open{font-size:11px}}';
+  const style=document.createElement('style');style.textContent='.fsp-open{overflow:hidden}#fsp-kp-overlay[hidden]{display:none!important}#fsp-kp-overlay{position:fixed;inset:0;z-index:1100;background:rgba(6,26,33,.75);padding:clamp(8px,2vw,24px);overflow:auto}#fsp-kp-overlay .fsp-shell{background:#f5faf8;color:#18323b;max-width:1050px;min-height:min(680px,94vh);margin:auto;border-radius:14px;overflow:hidden;font:14px/1.5 system-ui,sans-serif}#fsp-kp-overlay .fsp-header{background:#143e48;color:white;padding:14px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center}#fsp-kp-overlay .fsp-header p{margin:2px 0 0;font-size:12px}#fsp-kp-overlay button{cursor:pointer;border:1px solid #9bbab5;border-radius:7px;padding:8px 11px;background:white;color:#173a42}#fsp-kp-overlay button[aria-current="step"],#fsp-kp-overlay button[aria-pressed="true"]{background:#d3f4eb;border-color:#007e79;font-weight:700}#fsp-kp-overlay button:focus-visible,#fsp-kp-overlay textarea:focus-visible{outline:3px solid #00a68f;outline-offset:2px}#fsp-kp-overlay .fsp-notice{margin:13px 20px;background:#e2f2f2;padding:12px;border-radius:9px;font-size:12px}#fsp-kp-overlay .fsp-grid{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:18px;padding:10px 20px}#fsp-kp-overlay .fsp-sidebar{display:flex;flex-direction:column;align-items:stretch;gap:9px}#fsp-kp-overlay .fsp-main{min-width:0}#fsp-kp-overlay h2{margin:0 0 5px;font-size:19px}#fsp-kp-overlay .fsp-facts{border-left:3px solid #6faeaa;padding:9px;background:white}#fsp-kp-overlay .fsp-steps,#fsp-kp-overlay .fsp-actions{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}#fsp-kp-overlay .fsp-task{background:white;border-radius:9px;padding:16px}#fsp-kp-overlay .fsp-task h3{margin:5px 0;font-size:18px}#fsp-kp-overlay .fsp-kicker,#fsp-kp-overlay .fsp-muted{font-size:12px;color:#596b70}#fsp-kp-overlay .fsp-scaffold{padding:9px;background:#edf5f4}#fsp-kp-overlay textarea{display:block;width:100%;min-height:130px;max-width:100%;padding:10px;border-radius:7px;border:1px solid #72959a}#fsp-kp-overlay .fsp-feedback{padding:12px;background:#eef8f6;border-radius:9px}#fsp-kp-overlay .fsp-warning{padding:10px;background:#fff1e8;border-left:4px solid #a44f1c}#fsp-kp-overlay .fsp-feedback ul{padding-left:22px}#fsp-kp-overlay .fsp-feedback li{margin:7px 0}#fsp-kp-overlay .fsp-glossary{display:grid;gap:5px}#fsp-kp-overlay .fsp-glossary div{display:flex;gap:12px}#fsp-kp-overlay .fsp-glossary dt{font-weight:700}#fsp-kp-overlay .fsp-glossary dd{margin:0}#fsp-kp-overlay .fsp-footer{padding:15px 20px;font-size:11px;color:#536b72}#fsp-kp-overlay a{color:#05665f}@media(max-width:650px){#fsp-kp-overlay .fsp-grid{grid-template-columns:1fr}#fsp-kp-overlay .fsp-sidebar{flex-direction:row;flex-wrap:wrap}#fsp-kp-overlay .fsp-header{align-items:flex-start}#fsp-kp-open{font-size:11px}}';
   document.head.appendChild(style);
   panel=document.createElement('section');panel.id='fsp-kp-overlay';panel.hidden=true;panel.setAttribute('aria-label','FSP/KP language training');document.body.appendChild(panel);
   panel.addEventListener('input',function(e){if(e.target&&e.target.id==='fsp-answer')status.answers[key()]=e.target.value;});
@@ -208,7 +229,7 @@
   });
   document.addEventListener('keydown',function(e){if(status.open&&e.key==='Escape')close();});
  }
- root.KlinikFSPTraining={version:1,cases:CASES,phases:PHASES,score:score,taskFor:taskFor,status:status,open:open,close:close,mount:mount};
+ root.KlinikFSPTraining={version:2,cases:CASES,phases:PHASES,score:score,safetyReview:safetyReview,taskFor:taskFor,status:status,open:open,close:close,mount:mount};
  if(typeof document!=='undefined'){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
   else mount();
