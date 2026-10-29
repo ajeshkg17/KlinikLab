@@ -22,6 +22,7 @@
 - On the PC: Clinical imaging & QA → Quest diagnostics → **Preview XR tooth mesh on PC** (requires WebGL). Desktop 3D preparation remains available without WebGL.
 - In the Quest headset: use the in-scene **VR TOOTH PREP** panel, then controller target ray + trigger to cut. Optional controller vibration is a cue, not haptic force feedback.
 - Reset/undo/case changes resynchronize the shared model. Read the learning metrics in desktop `3D Präparation` or the exported report.
+- WebXR is rendered on the **Quest 2 headset itself**; hosting HTML on a powerful PC does not offload WebGL/voxel meshing to that PC. Meshing is reduced during held-trigger cuts and restored on trigger release, but headset performance is still unknown.
 - Quest 2 VR functionality and haptics **have not been verified on a physical headset**. Automated tests use simulated XR poses and cannot establish headset compatibility.
 
 ## Anatomy and imaging provenance
