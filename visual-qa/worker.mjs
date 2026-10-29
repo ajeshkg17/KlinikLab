@@ -59,8 +59,9 @@ async function capture(job){
   const context=await browser.newContext({viewport:job.viewport,deviceScaleFactor:1,acceptDownloads:false,serviceWorkers:'block',permissions:[]});
   await context.route('**/*',route=>localRequestAllowed(route.request().url()) ? route.continue() : route.abort('blockedbyclient'));
   for (const scene of job.scenes){
-   const page=await context.newPage();const item={name:scene.name,file:scene.name+'.png',capture:scene.capture,ok:false,errors:[]};
+   const page=await context.newPage();const item={name:scene.name,file:scene.name+'.png',capture:scene.capture,ok:false,errors:[],networkFailures:[]};
    page.on('pageerror',e=>{if(item.errors.length<6)item.errors.push(String(e.message||e).slice(0,240))});
+   page.on('requestfailed',req=>{if(/https:\/\/(?:cdn|assets)\.babylonjs\.com\//.test(req.url())&&item.networkFailures.length<5)item.networkFailures.push({asset:req.url().slice(0,130),reason:String(req.failure()||'blocked').slice(0,130)})});
    try{
     await page.goto(ORIGIN,{waitUntil:'domcontentloaded',timeout:20000});
     await page.locator('#stage').waitFor({timeout:14000});
