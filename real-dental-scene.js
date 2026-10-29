@@ -166,6 +166,7 @@
       await Promise.all(Array.from({length:4},async()=>{
         while(next<16){const i=next++;await loadOne(Math.floor(i/8),i%8+1)}
       }));
+      state.archDiagnostics=layer.anatomyLayout?.diagnostics||null;
       state.ready=state.instances>0;
       state.mode=state.ready?'ready':'error';
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
@@ -186,10 +187,12 @@
       const id=source.key?.split(':')[1]||'';
       // Existing source geometry is mirrored across the midline for contralateral teeth.
       // Preserve the stable tooth IDs and the original canvas's picking targets.
-      const right=id[0]==='1'||id[0]==='4';
-      mesh.position.set(...source.p);
-      mesh.scaling.set(right?-source.s[0]:source.s[0],source.s[1],source.s[2]);
-      mesh.rotation.set(...source.rot);
+      const site=layer.anatomyLayout?.byId[id];
+      const right=site?site.mirrored:(id[0]==='1'||id[0]==='4');
+      const p=site?.p||source.p,scale=site?.s||source.s,rotation=site?.rot||source.rot;
+      mesh.position.set(...p);
+      mesh.scaling.set(right?-scale[0]:scale[0],scale[1],scale[2]);
+      mesh.rotation.set(...rotation);
       const tint=source.key===layer.source.selectedKey?new B.Color3(.64,.96,.87):new B.Color3(1,1,1);
       if(mesh.material?.albedoColor)mesh.material.albedoColor=tint;
       if(mesh.material)mesh.material.alpha=source.alpha;
