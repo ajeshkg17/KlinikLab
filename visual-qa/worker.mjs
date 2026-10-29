@@ -118,7 +118,7 @@ async function capture(job){
     // Require the local appearance module to be active for every Phase 3 view.
     if(job.jobId.startsWith('phase3-')){
       const b=item.checks?.babylon||{},r=item.checks?.realTeeth||{};
-      if(b.appearanceVersion!==1||b.vertexColoredTemplates<10
+      if(b.appearanceVersion!==1||b.vertexColoredTemplates<18
         ||r.appearanceVersion!==1||r.vertexColoredInstances!==32)
         throw Error('Phase 3 assets did not initialize (server static allowlist?): '+JSON.stringify({
           appearanceVersion:b.appearanceVersion,templates:b.vertexColoredTemplates,
@@ -126,7 +126,7 @@ async function capture(job){
     }
     if(scene.steps.some(step=>step.action==='click'&&step.control==='appearance')){
       const b=item.checks?.babylon||{},r=item.checks?.realTeeth||{};
-      if(b.appearance!=='studio'||b.appearanceVersion!==1||b.vertexColoredTemplates<10
+      if(b.appearance!=='studio'||b.appearanceVersion!==1||b.vertexColoredTemplates<18
         ||r.appearanceVersion!==1||r.vertexColoredInstances!==32)
         throw Error('Phase 3 appearance QA failed: '+JSON.stringify({b,r}).slice(0,500));
     }
