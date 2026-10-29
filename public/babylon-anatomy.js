@@ -123,7 +123,7 @@
       let tx=next[0]-prev[0],tz=next[1]-prev[1],len=Math.hypot(tx,tz)||1;tx/=len;tz/=len;
       const nx=-tz,nz=tx;
       const nearest=Math.abs(u-Math.round(u));
-      const papilla=Math.exp(-(nearest/.16)**2);
+      const papilla=Math.exp(-((nearest/.16)**2));
       const crest=base+d*(.009+.018*papilla);
       for(let j=0;j<around;j++){
         const a=TAU*j/around,cs=Math.cos(a),sn=Math.sin(a);
