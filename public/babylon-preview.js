@@ -5,7 +5,8 @@
    If loading/rendering fails, the original canvas remains fully functional. */
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
-  const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,
+  const STUDIO_ENV = 'https://assets.babylonjs.com/environments/environmentSpecular.env';
+  const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'not-requested',
     library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR'};
   window.KlinikBabylon = status;
   let layer = null;
@@ -57,6 +58,19 @@
       this.scene.imageProcessingConfiguration.exposure=1.20;
       this.scene.imageProcessingConfiguration.toneMappingEnabled=true;
       this.scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;
+      // PBR clearcoat needs a surrounding environment to reflect; direct lights alone
+      // made our teeth look like matte gray blocks. The image is a public Babylon demo
+      // asset, fetched only after opt-in and never required for the classic renderer.
+      try{
+        const environment=B.CubeTexture.CreateFromPrefilteredData(STUDIO_ENV,this.scene);
+        environment.gammaSpace=false;
+        environment.level=.66;
+        this.scene.environmentTexture=environment;
+        status.environment='loading';
+        environment.onLoadObservable.addOnce(()=>{status.environment='ready'});
+        environment.onErrorObservable?.addOnce(()=>{status.environment='failed'});
+      }catch(error){status.environment='failed';}
+
       this.camera=new B.FreeCamera('matchingOriginalCamera',new B.Vector3(0,1,4),this.scene);
       this.camera.fov=.87;
       this.camera.minZ=.05;
@@ -64,16 +78,16 @@
       this.camera.inputs.clear(); // Original canvas owns orbit, scroll, and selection.
       this.scene.activeCamera=this.camera;
       const soft=new B.HemisphericLight('clinicalFill',new B.Vector3(.18,1,.25),this.scene);
-      soft.intensity=.70;
+      soft.intensity=.54;
       soft.groundColor=new B.Color3(.22,.26,.34);
       const key=new B.DirectionalLight('clinicalKey',new B.Vector3(-.38,-.75,-.67),this.scene);
-      key.intensity=1.50;
+      key.intensity=1.15;
       key.diffuse=new B.Color3(1,.95,.86);
       const fill=new B.DirectionalLight('clinicalCoolFill',new B.Vector3(.72,-.38,.68),this.scene);
-      fill.intensity=.30;
+      fill.intensity=.24;
       fill.diffuse=new B.Color3(.69,.83,1);
       const rim=new B.PointLight('dentalRim',new B.Vector3(1.7,2.8,.8),this.scene);
-      rim.intensity=.52;
+      rim.intensity=.42;
       rim.range=9;
       this.geometry=new Map();
       this.items=[];
@@ -137,9 +151,9 @@
       mat.backFaceCulling=false;
       mat.albedoColor=this.color(m.color);
       mat.metallic=0;
-      mat.roughness=tooth?.32:gum?.59:.65;
+      mat.roughness=tooth?.30:gum?.59:.65;
       mat.environmentIntensity=.42;
-      if(tooth){mat.clearCoat.isEnabled=true;mat.clearCoat.intensity=.72;mat.clearCoat.roughness=.15;}
+      if(tooth){mat.clearCoat.isEnabled=true;mat.clearCoat.intensity=.64;mat.clearCoat.roughness=.13;}
       if(m.unlit){mat.emissiveColor=this.color(m.color);}
       mat.alpha=m.alpha;
       if(cacheKey)this.materials.set(cacheKey,mat);
