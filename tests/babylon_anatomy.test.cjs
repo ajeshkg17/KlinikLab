@@ -18,3 +18,13 @@ test('eight anatomically differentiated crown meshes are watertight along occlus
   }
 });
 test('reject unsupported crown styles',()=>assert.throws(()=>A.crownData(0,true),/Unsupported/));
+test('gingival mesh follows upper and lower arches with finite smooth normals',()=>{
+ for(const upper of [true,false]){
+  const g=A.gingivaData(upper);
+  assert.equal(g.vertices,2124);
+  assert.equal(g.triangles,4224);
+  assert(g.indices.every(i=>i>=0&&i<g.vertices));
+  assert(g.positions.every(Number.isFinite));
+  for(let i=0;i<g.normals.length;i+=3)assert(Math.abs(Math.hypot(...g.normals.slice(i,i+3))-1)<.0001);
+ }
+});
