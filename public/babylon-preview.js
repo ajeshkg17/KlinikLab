@@ -102,7 +102,8 @@
         try {
           const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind,this.anatomyLayout);
           if(anatomy){this.geometry.set(kind,anatomy);
-            if(kind.startsWith('crown_'))status.enhancedCrowns++;else status.enhancedGingiva++;
+            if(kind.startsWith('crown_'))status.enhancedCrowns++;
+            else {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
             status.anatomyVersion=window.KlinikBabylonAnatomy.version;
             return anatomy;}
         }catch(e){status.error='Anatomy fallback: '+String(e.message||e).slice(0,100);}
