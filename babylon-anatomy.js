@@ -19,25 +19,25 @@
     function relief(x,z,r){
       const edge=1-smooth(clamp((r-.69)/.31,0,1));
       if(style===1){ // Incisal enamel ridge and slight scalloping, not a hollow cap.
-        const ridge=.0066*Math.exp(-(((z+.035)/.17)**2));
+        const ridge=.0046*Math.exp(-(((z+.035)/.17)**2));
         const scallop=.0012*(Math.cos(x*PI*2.2)+1);
         return ridge-scallop-.006*(1-r*r);
       }
       if(style===2){ // Single rounded canine cusp.
-        return .0145*gauss(x,z,0,-.11,.33,.32)-.0045*(1-r*r);
+        return .0105*gauss(x,z,0,-.11,.38,.38)-.0045*(1-r*r);
       }
       if(style===3){ // Two cusps separated by a narrow central groove.
-        const cusp=.019*gauss(x,z,-.06,-.44,.39,.30)+.015*gauss(x,z,.06,.43,.40,.30);
-        const fissure=-.010*Math.exp(-((z/.095)**2))*Math.exp(-((x/.64)**2));
+        const cusp=.014*gauss(x,z,-.06,-.44,.42,.33)+.011*gauss(x,z,.06,.43,.44,.34);
+        const fissure=-.006*Math.exp(-((z/.095)**2))*Math.exp(-((x/.64)**2));
         return cusp+fissure-.0017*(1-r*r);
       }
       // Four rounded cusp ridges and a Y-like fissure network.
       let cusp=0;
-      for(const [cx,cz,amp] of [[-.49,-.47,.023],[.47,-.47,.020],[-.46,.47,.0185],[.45,.44,.021]])
+      for(const [cx,cz,amp] of [[-.49,-.47,.016],[.47,-.47,.015],[-.46,.47,.0135],[.45,.44,.0155]])
         cusp+=amp*gauss(x,z,cx,cz,.34,.31);
-      const fossa=-.0105*gauss(x,z,0,0,.38,.35);
-      const groove=-.004*Math.exp(-((x/.095)**2))*Math.exp(-((z/.65)**2))
-                  -.003*Math.exp(-((z/.09)**2))*Math.exp(-((x/.66)**2));
+      const fossa=-.0065*gauss(x,z,0,0,.38,.35);
+      const groove=-.0025*Math.exp(-((x/.095)**2))*Math.exp(-((z/.65)**2))
+                  -.002*Math.exp(-((z/.09)**2))*Math.exp(-((x/.66)**2));
       return cusp+fossa+groove+.0025*edge;
     }
     const vertex=(x,y,z)=>{pos.push(x,y,z);return pos.length/3-1};
@@ -101,16 +101,60 @@
     // For review/QA, the mesh reports the same source-independent crown geometry.
     return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper};
   }
+  // Lower-profile gingival collar following the arch, with interproximal papillae.
+  // A synthetic tissue envelope, not periodontal or patient-specific anatomy.
+  function gingivaData(upper){
+    const path=upper?
+      [[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]]:
+      [[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]];
+    const points=[...path.slice().reverse().map(p=>[-p[0],p[1]]),...path.map(p=>[p[0],p[1]])];
+    const d=upper?1:-1,base=upper?1.759:1.332,seg=176,around=12,pos=[],indices=[];
+    const spline=(u)=>{
+      const k=Math.min(points.length-2,Math.floor(u)),t=u-k;
+      const p0=points[Math.max(0,k-1)],p1=points[k],p2=points[k+1],p3=points[Math.min(points.length-1,k+2)];
+      const f=(j)=>.5*((2*p1[j])+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t*t+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t*t*t);
+      return [f(0),f(1)];
+    };
+    for(let i=0;i<=seg;i++){
+      const u=(points.length-1)*i/seg,xy=spline(u),prev=spline(Math.max(0,u-.008)),next=spline(Math.min(points.length-1,u+.008));
+      let tx=next[0]-prev[0],tz=next[1]-prev[1],len=Math.hypot(tx,tz)||1;tx/=len;tz/=len;
+      const nx=-tz,nz=tx;
+      const fraction=u-Math.floor(u),papilla=Math.sin(Math.PI*fraction)**4;
+      const cy=base+d*(.010-.012*papilla);
+      for(let j=0;j<around;j++){
+        const a=TAU*j/around;
+        const outward=.045*Math.cos(a);
+        const y=cy+d*(.042*Math.sin(a));
+        pos.push(xy[0]+nx*outward,y,xy[1]+nz*outward);
+      }
+    }
+    for(let i=0;i<seg;i++)for(let j=0;j<around;j++){
+      const a=i*around+j,b=i*around+(j+1)%around,c=(i+1)*around+(j+1)%around,e=(i+1)*around+j;
+      if(upper)indices.push(a,c,b,a,e,c);else indices.push(a,b,c,a,c,e);
+    }
+    const normals=new Array(pos.length).fill(0);
+    for(let k=0;k<indices.length;k+=3){
+      const a=indices[k]*3,b=indices[k+1]*3,c=indices[k+2]*3;
+      const u=[pos[b]-pos[a],pos[b+1]-pos[a+1],pos[b+2]-pos[a+2]];
+      const v=[pos[c]-pos[a],pos[c+1]-pos[a+1],pos[c+2]-pos[a+2]];
+      const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+      for(const x of [a,b,c])for(let t=0;t<3;t++)normals[x+t]+=n[t];
+    }
+    for(let i=0;i<normals.length;i+=3){const l=Math.hypot(normals[i],normals[i+1],normals[i+2])||1;
+      for(let k=0;k<3;k++)normals[i+k]/=l;
+    }
+    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,upper};
+  }
   function createTemplate(B,scene,kind){
     const match=/^crown_([1-4])_([01])$/.exec(kind);
-    if(!match)return null;
-    const data=crownData(Number(match[1]),match[2]==='0');
+    if(!match&&!/^gingiva[01]$/.test(kind))return null;
+    const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0');
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
     v.applyToMesh(template,true);
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:2,vertices:data.vertices};
+    template.metadata={synthetic:true,anatomyVersion:3,vertices:data.vertices};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,createTemplate,version:2,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,gingivaData,createTemplate,version:3,notes:'Educational procedural tooth morphology; not an anatomical scan'};
 })(typeof window!=='undefined'?window:globalThis);
