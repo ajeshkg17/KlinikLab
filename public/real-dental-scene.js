@@ -197,7 +197,11 @@
       mesh.rotation.set(...rotation);
       const tint=source.key===layer.source.selectedKey?new B.Color3(.64,.96,.87):new B.Color3(1,1,1);
       if(mesh.material?.albedoColor)mesh.material.albedoColor=tint;
-      if(mesh.material)mesh.material.alpha=source.alpha;
+      if(mesh.material){
+        const explorer=root.KlinikStructureExplorer?.status;
+        const wanted=explorer?.focusSelected&&explorer.selectedFDI?'tooth:'+explorer.selectedFDI:null;
+        mesh.material.alpha=wanted&&source.key!==wanted?Math.min(source.alpha,.19):source.alpha;
+      }
     }
     state.visibleInstances=visibleInstances;
   }
