@@ -79,7 +79,7 @@
     const results=panel.querySelector('#practice-results');
     if(status.completed){
       if(prompt)prompt.textContent='Session complete';
-      if(options)options.hidden=true;
+      if(options){options.hidden=true;options.style.display='none';}
       if(results){results.hidden=false;results.textContent='You answered '+status.score+
         ' of '+status.total+' correctly. Review the tissue diagrams, then try again.';}
       if(feedback){feedback.textContent='';feedback.hidden=true;}
@@ -88,7 +88,7 @@
     }
     if(!q)return;
     if(prompt)prompt.textContent=q.text;
-    if(options)options.hidden=false;
+    if(options){options.hidden=false;options.style.display='grid';}
     if(results)results.hidden=true;
     answerButtons.forEach((b,i)=>{
       b.textContent=String.fromCharCode(65+i)+'. '+q.options[i];
