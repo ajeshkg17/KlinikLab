@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "jobId": "baseline-2026-10-29-01",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "scenes": [
+    {
+      "name": "01-desktop-overview",
+      "steps": [],
+      "capture": "page"
+    },
+    {
+      "name": "02-3d-teeth",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "03-3d-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-3d-orbited",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "orbit",
+          "dx": 150,
+          "dy": -55
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-clinic-room",
+      "steps": [
+        {
+          "action": "click",
+          "control": "clinic"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "06-tooth-volume",
+      "steps": [
+        {
+          "action": "click",
+          "control": "volume"
+        }
+      ],
+      "capture": "volume"
+    },
+    {
+      "name": "07-tooth-cross-section",
+      "steps": [
+        {
+          "action": "click",
+          "control": "volume"
+        },
+        {
+          "action": "click",
+          "control": "crossSection"
+        }
+      ],
+      "capture": "volume"
+    },
+    {
+      "name": "08-tooth-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "volume"
+        },
+        {
+          "action": "click",
+          "control": "prepTop"
+        }
+      ],
+      "capture": "volume"
+    },
+    {
+      "name": "09-endo-case-tooth",
+      "steps": [
+        {
+          "action": "click",
+          "control": "case36"
+        },
+        {
+          "action": "click",
+          "control": "volume"
+        }
+      ],
+      "capture": "volume"
+    },
+    {
+      "name": "10-synthetic-radiography",
+      "steps": [
+        {
+          "action": "click",
+          "control": "imaging"
+        }
+      ],
+      "capture": "imaging"
+    },
+    {
+      "name": "11-scan-workstation",
+      "steps": [
+        {
+          "action": "click",
+          "control": "imaging"
+        },
+        {
+          "action": "click",
+          "control": "imagingScan"
+        }
+      ],
+      "capture": "imaging"
+    }
+  ]
+}
