@@ -85,6 +85,6 @@ export function safeRunFolder(jobId) {
 export function localRequestAllowed(raw) {
   try {
     const u = new URL(raw);
-    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (['https://cdn.babylonjs.com/babylon.js','https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js','https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js','https://cdn.babylonjs.com/draco_decoder_gltf.wasm','https://cdn.babylonjs.com/draco_decoder_gltf.js'].includes(u.href)) || u.protocol === 'data:' || u.protocol === 'blob:';
+    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (['https://cdn.babylonjs.com/babylon.js','https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js','https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js','https://cdn.babylonjs.com/draco_decoder_gltf.wasm','https://cdn.babylonjs.com/draco_decoder_gltf.js'].includes(u.href)) || /^https:\/\/cdn\.babylonjs\.com\/v[0-9]+\.[0-9]+\.[0-9]+\/draco_(?:wasm_wrapper_gltf\.js|decoder_gltf\.(?:wasm|js))$/.test(u.href) || u.protocol === 'data:' || u.protocol === 'blob:';
   } catch { return false; }
 }
