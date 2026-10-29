@@ -1,23 +1,13 @@
 {
   "schemaVersion": 1,
-  "jobId": "dundee-atlas-v3-2026-10-29-01",
+  "jobId": "dundee-atlas-v4-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-original-procedural",
-      "steps": [
-        {
-          "action": "click",
-          "control": "teeth"
-        }
-      ],
-      "capture": "stage"
-    },
-    {
-      "name": "02-dundee-molar",
+      "name": "01-dundee-molar",
       "steps": [
         {
           "action": "click",
@@ -25,47 +15,7 @@
         },
         {
           "action": "wait",
-          "ms": 1200
-        }
-      ],
-      "capture": "atlas"
-    },
-    {
-      "name": "03-dundee-premolar",
-      "steps": [
-        {
-          "action": "click",
-          "control": "atlasOpen"
-        },
-        {
-          "action": "click",
-          "control": "atlasNext"
-        },
-        {
-          "action": "wait",
-          "ms": 800
-        }
-      ],
-      "capture": "atlas"
-    },
-    {
-      "name": "04-dundee-canine",
-      "steps": [
-        {
-          "action": "click",
-          "control": "atlasOpen"
-        },
-        {
-          "action": "click",
-          "control": "atlasNext"
-        },
-        {
-          "action": "click",
-          "control": "atlasNext"
-        },
-        {
-          "action": "wait",
-          "ms": 800
+          "ms": 700
         }
       ],
       "capture": "atlas"
