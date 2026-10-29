@@ -6,7 +6,7 @@
 (() => {
   const LIBRARY = 'https://cdn.babylonjs.com/babylon.js';
   const status = {mode:'classic', ready:false, loading:false, meshes:0, frames:0, error:null,environment:'disabled',
-    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0};
+    library:'Babylon.js (official learning CDN)', headsetRendering:'legacy-WebXR',enhancedCrowns:0,enhancedGingiva:0,anatomyVersion:0,appearance:'balanced',appearanceVersion:0,vertexColoredTemplates:0};
   window.KlinikBabylon = status;
   let layer = null;
   let loadingPromise = null;
@@ -77,6 +77,10 @@
       const rim=new B.PointLight('dentalRim',new B.Vector3(1.7,2.8,.8),this.scene);
       rim.intensity=.44;
       rim.range=9;
+      this.lights={hemi:soft,key,fill,rim};
+      this.appearanceMode=status.appearance;
+      window.KlinikDentalAppearance?.applyLighting(this.scene,this.lights,this.appearanceMode);
+      status.appearanceVersion=window.KlinikDentalAppearance?.version||0;
       this.geometry=new Map();
       this.items=[];
       this.materials=new Map();
@@ -102,6 +106,7 @@
         try {
           const anatomy=window.KlinikBabylonAnatomy.createTemplate(this.B,this.scene,kind,this.anatomyLayout);
           if(anatomy){this.geometry.set(kind,anatomy);
+            if(anatomy.metadata?.appearanceVersion)status.vertexColoredTemplates++;
             if(kind.startsWith('crown_'))status.enhancedCrowns++;
             else {status.enhancedGingiva++;status.gingivalVertices=(status.gingivalVertices||0)+(anatomy.metadata?.vertices||0);status.gingivalTriangles=(status.gingivalTriangles||0)+(anatomy.metadata?.triangles||0);}
             status.anatomyVersion=window.KlinikBabylonAnatomy.version;
@@ -160,9 +165,28 @@
         mat.emissiveColor=new B.Color3(.082,.078,.066);
       }else if(gum){mat.emissiveColor=new B.Color3(.035,.014,.019);}
       if(m.unlit){mat.emissiveColor=this.color(m.color);}
+      if((tooth||gum)&&window.KlinikDentalAppearance)
+        window.KlinikDentalAppearance.applyMaterial(B,mat,tooth?'enamel':'gingiva',this.appearanceMode);
       mat.alpha=m.alpha;
       if(cacheKey)this.materials.set(cacheKey,mat);
       return mat;
+    }
+    applyAppearancePreset(mode){
+      const appearance=window.KlinikDentalAppearance;
+      this.appearanceMode=appearance?.modeName(mode)||'balanced';
+      status.appearance=this.appearanceMode;
+      if(!appearance)return;
+      appearance.applyLighting(this.scene,this.lights,this.appearanceMode);
+      const changed=new Set();
+      for(const item of this.items){
+        for(const mesh of [item.mesh,item.realMesh]){
+          const mat=mesh?.material;
+          if(!mat||changed.has(mat))continue;
+          const kind=item.source.tag==='crown'?'enamel':item.source.kind.startsWith('gingiva')?'gingiva':null;
+          if(kind&&appearance.applyMaterial(this.B,mat,kind,this.appearanceMode))changed.add(mat);
+        }
+      }
+      status.materialsUpdated=changed.size;
     }
     build(){
       const source=this.source;
@@ -202,8 +226,13 @@
         mesh.position.set(p[0],p[1],p[2]);
         mesh.scaling.set(scale[0],scale[1],scale[2]);
         mesh.rotation.set(rotation[0],rotation[1],rotation[2]);
-        if(m.color.some((v,i)=>v!==lastColor[i])){
-          mesh.material.albedoColor=this.color(m.color);
+        if(m.tag==='crown'&&window.KlinikDentalAppearance){
+          // A selection overlay multiplies the vertex palette rather than
+          // replacing its cervical/incisal tonal gradient.
+          const selected=m.key===source.selectedKey;
+          mesh.material.albedoColor=selected?new B.Color3(.70,.94,.85):new B.Color3(1,1,1);
+        }else if(m.color.some((v,i)=>v!==lastColor[i])){
+          if(mesh.material?.albedoColor)mesh.material.albedoColor=this.color(m.color);
           lastColor.splice(0,3,...m.color);
         }
         if(mesh.material.alpha!==m.alpha)mesh.material.alpha=m.alpha;
@@ -242,6 +271,20 @@
     button.setAttribute('aria-pressed','false');
     button.style.cssText='display:block;margin-top:8px;padding:7px 10px;background:#163c4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
     titleCard.appendChild(button);
+    const lighting=document.createElement('button');
+    lighting.id='appearance-toggle';lighting.type='button';
+    lighting.textContent='☀ Lighting: Balanced';
+    lighting.title='Switch between balanced and studio direct-light presets. Both are synthetic display styles, not optical calibration.';
+    lighting.style.cssText='display:block;margin-top:6px;padding:7px 10px;background:#203e4a;border:1px solid #52717e;border-radius:7px;color:#dff7f0;font:750 11px system-ui;pointer-events:auto;';
+    lighting.addEventListener('click',()=>{
+      const next=status.appearance==='balanced'?'studio':'balanced';
+      status.appearance=next;
+      layer?.applyAppearancePreset(next);
+      lighting.textContent=next==='studio'?'☀ Lighting: Studio':'☀ Lighting: Balanced';
+      lighting.setAttribute('aria-pressed',String(next==='studio'));
+    });
+    lighting.setAttribute('aria-pressed','false');
+    titleCard.appendChild(lighting);
     button.addEventListener('click',async()=>{
       if(status.loading)return;
       if(layer?.visible){layer.disable();button.classList.remove('active');button.style.background='#163c4a';button.setAttribute('aria-pressed','false');button.textContent='🦷 Real teeth';return}
