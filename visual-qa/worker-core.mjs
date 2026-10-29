@@ -7,6 +7,7 @@ export const MAX_SCENES = 14;
 export const DEFAULT_ORIGIN = 'http://127.0.0.1:8787';
 export const CONTROLS = Object.freeze({
   teeth: '#focus',
+  renderer: '#renderer-toggle',
   clinic: '#room',
   occlusal: '#occlusal',
   arches: '#arches',
@@ -79,6 +80,6 @@ export function safeRunFolder(jobId) {
 export function localRequestAllowed(raw) {
   try {
     const u = new URL(raw);
-    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || u.protocol === 'data:' || u.protocol === 'blob:';
+    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (u.href === 'https://cdn.babylonjs.com/babylon.js') || u.protocol === 'data:' || u.protocol === 'blob:';
   } catch { return false; }
 }
