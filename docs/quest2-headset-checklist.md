@@ -51,3 +51,10 @@ Clinical, treatment-competence and FSP/KP certification gates are **not verified
   messages while preserving synchronous requestSession activation.
 - **Headset validation remains BLOCKED:** the 4 cm vertical offset, initial Z distance,
   standing/seated comfort and world-aligned orientation must be measured on hardware.
+
+## Facing-direction regression (yaw orientation)
+
+- The first valid viewer pose now rotates the **native guide only** around the vertical axis, preserving upright text while presenting it in the user's initial facing direction.
+- Guide mesh rotations and ray-hit coordinates transform together. The engine intersects an oriented guide rectangle rather than assuming world-Z alignment. FDI meshes and lesson-board geometry are not rotated.
+- Grip or the VR HELP launcher reopens/recenters the guide from the latest valid tracked pose; it does not chase the headset every frame. Exit restores original positions, rotations and guide ray-hit coordinates exactly.
+- **Quest 2 hardware check (BLOCKED):** Start facing forward, 90° left/right and backward; test each eye, both controller triggers, and launcher/grip reopening after turning. Confirm buttons are reachable and normal interactions resume. Verify no disorientation, occlusion, collisions, or unexpected cut continuation. Record any change to initial panel comfort distance or font readability. Do not mark hardware pass from mock tests.

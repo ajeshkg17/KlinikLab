@@ -259,8 +259,18 @@ class DentalScene {
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
       if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
-        const faceZ=p.p[2]+p.mesh.s[2]*.5;
-        if(Math.abs(d[2])>1e-6){const t=(faceZ-o[2])/d[2];if(t>=0){const x=o[0]+t*d[0],y=o[1]+t*d[1];if(Math.abs(x-p.p[0])<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t}}
+        // A tutorial panel can face the headset at any yaw. Intersect the
+        // front plane and check its actual rotated rectangular dimensions.
+        const yaw=p.mesh.rot?.[1]||0,c=Math.cos(yaw),s=Math.sin(yaw);
+        const denom=d[0]*s+d[2]*c;
+        if(Math.abs(denom)>1e-6){
+          const t=((p.p[0]-o[0])*s+(p.p[2]-o[2])*c+p.mesh.s[2]*.5)/denom;
+          if(t>=0){
+            const dx=o[0]+t*d[0]-p.p[0],dz=o[2]+t*d[2]-p.p[2];
+            const localX=c*dx-s*dz,y=o[1]+t*d[1];
+            if(Math.abs(localX)<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t;
+          }
+        }
       }else r=M3.raySphere(o,d,p.p,p.radius);
       if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
     }return hit}

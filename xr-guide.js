@@ -41,7 +41,7 @@
     ]}
   ]);
   const spec=Object.freeze({panel:{p:[.08,1.56,-1.18],s:[.96,.80,.047]},
-    placement:{panelYOffsetFromEyes:-.04,anchorOncePerSession:true},
+    placement:{panelYOffsetFromEyes:-.04,anchorOncePerSession:true,faceInitialViewerYaw:true,recenterOnHelpReopen:true},
     font:{title:43,progress:40,body:49,button:43},
     launcher:{p:[-1.12,1.40,-1.55],s:[.41,.13,.055]},
     controlSize:[.29,.116,.056],
@@ -70,22 +70,46 @@
         [spec.launcher.p[0],spec.launcher.p[1]+.005,spec.launcher.p[2]+.035],
         [.37,.080,1],{font:spec.font.button,color:'#e8fff3'}),false);
       // Snapshot the guide's positions AND its ray hit targets. Changes are XR-only.
-      this.meshOrigins=this.meshes.map(mesh=>({mesh,p:mesh.p.slice()}));
+      this.meshOrigins=this.meshes.map(mesh=>({
+        mesh,p:mesh.p.slice(),rot:mesh.rot?.slice()||null
+      }));
       const guideMeshes=new Set(this.meshes);
       this.hitOrigins=(scene.pickables||[]).filter(hit=>guideMeshes.has(hit.mesh))
         .map(hit=>({hit,p:hit.p.slice()}));
-      this.anchored=false;
+      this.anchored=false;this.lastViewerPose=null;
     }
     placeForViewer(pose){
-      if(!state.active||this.anchored)return false;
-      const p=pose?.transform?.position;
+      if(!state.active)return false;
+      const p=pose?.transform?.position,q=pose?.transform?.orientation;
       if(!p||![p.x,p.y,p.z].every(Number.isFinite))return false;
-      // Anchor once per session to initial eye height and X/Z. No per-frame panel chase.
-      const delta=[p.x,p.y+spec.placement.panelYOffsetFromEyes-spec.panel.p[1],p.z];
-      for(const item of this.meshOrigins)item.mesh.p=item.p.map((v,i)=>v+delta[i]);
-      for(const item of this.hitOrigins)item.hit.p=item.p.map((v,i)=>v+delta[i]);
-      this.anchored=true;
-      return true;
+      if(q&&![q.x,q.y,q.z,q.w].every(Number.isFinite))return false;
+      // Preserve a plain transform snapshot, not a live XRFrame reference.
+      this.lastViewerPose={transform:{position:{x:p.x,y:p.y,z:p.z},
+        orientation:q?{x:q.x,y:q.y,z:q.z,w:q.w}:null}};
+      if(this.anchored)return false;
+      // Only yaw matters: preserve upright text even when the user looks up/down.
+      const forward=q&&this.scene.rotateByQuat?this.scene.rotateByQuat([0,0,-1],q):[0,0,-1];
+      if(!forward||![forward[0],forward[2]].every(Number.isFinite))return false;
+      const horizontal=Math.hypot(forward[0],forward[2]);
+      if(horizontal<.05)return false; // unstable yaw while looking vertically
+      const yaw=spec.placement.faceInitialViewerYaw
+        ?Math.atan2(-forward[0],-forward[2]):0;
+      const c=Math.cos(yaw),s=Math.sin(yaw);
+      const place=base=>[p.x+c*base[0]+s*base[2],
+        base[1]+p.y+spec.placement.panelYOffsetFromEyes-spec.panel.p[1],
+        p.z-s*base[0]+c*base[2]];
+      for(const item of this.meshOrigins){
+        item.mesh.p=place(item.p);
+        item.mesh.rot=(item.rot||[0,0,0]).slice();
+        item.mesh.rot[1]+=yaw;
+      }
+      for(const item of this.hitOrigins)item.hit.p=place(item.p);
+      this.anchored=true;return true;
+    }
+    recenter(){
+      if(!state.active)return false;
+      this.anchored=false;
+      return this.placeForViewer(this.lastViewerPose);
     }
     render(){
       const page=PAGES[state.index];if(!page)return;
@@ -110,15 +134,21 @@
     onEnter(){state.active=true;state.controllerSelects=0;state.gripOpens=0;this.open()}
     onExit(){
       state.active=false;state.open=false;state.index=0;
-      for(const item of this.meshOrigins)item.mesh.p=item.p.slice();
+      for(const item of this.meshOrigins){
+        item.mesh.p=item.p.slice();
+        item.mesh.rot=item.rot?item.rot.slice():undefined;
+      }
       for(const item of this.hitOrigins)item.hit.p=item.p.slice();
-      this.anchored=false;
+      this.anchored=false;this.lastViewerPose=null;
       for(const mesh of this.meshes)mesh.hidden=true;
     }
     onSqueezeStart(){
       if(!state.active)return false;
       state.gripOpens++;
-      if(!state.open)this.open();
+      if(!state.open){
+        if(spec.placement.recenterOnHelpReopen)this.recenter();
+        this.open();
+      }
       return true;
     }
     onSelectStart(event,frame){
@@ -134,7 +164,10 @@
         const ray={o:[p.x,p.y,p.z],d:this.scene.rotateByQuat([0,0,-1],q)};
         key=this.scene.getRayHit(ray.o,ray.d,p=>p.key?.startsWith('guide:'))?.key||null;
       }
-      if(key==='guide:open'){this.open();state.controllerSelects++;return true}
+      if(key==='guide:open'){
+        if(spec.placement.recenterOnHelpReopen)this.recenter();
+        this.open();state.controllerSelects++;return true;
+      }
       if(!state.open)return false;
       // Suppress simulated drilling and background selections while the guide is up.
       state.controllerSelects++;

@@ -195,3 +195,71 @@ test('engine anchors guide after a valid XR viewer pose, not before tracking',()
  assert(engine.includes('this.xrGuide?.placeForViewer(pose)'));
  assert(engine.includes('if(!pose){this.clearControllers()'));
 });
+
+test('guide rotates toward initial viewer yaw while upright and restores rotations',()=>{
+ const {guide,scene}=makeGuide();
+ // 90-degree headset yaw means the user faces -X instead of -Z.
+ scene.rotateByQuat=(v,q)=>[-2*q.y*q.w,0,-1+2*q.y*q.y];
+ const q={x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2};
+ const origin=guide.meshes.map(m=>({p:m.p.slice(),rot:m.rot?.slice()||null}));
+ const hitOrigins=scene.pickables.map(h=>h.p.slice());
+ guide.onEnter();
+ assert.equal(guide.placeForViewer({transform:{position:{x:.5,y:1.6,z:.25},orientation:q}}),true);
+ const panel=guide.meshes[0];
+ assert(Math.abs(panel.p[0]-(.5-1.18))<1e-9);
+ assert(Math.abs(panel.p[2]-(.25-.08))<1e-9);
+ assert(Math.abs(panel.p[1]-1.56)<1e-9);
+ assert(Math.abs(panel.rot[1]-Math.PI/2)<1e-9);
+ assert.equal(guide.placeForViewer({transform:{position:{x:1,y:1.6,z:.25},orientation:q}}),false);
+ const next=scene.pickables.find(h=>h.key==='guide:next');
+ const nextMesh=guide.meshes.find(m=>m.key==='guide:next');
+ assert(Math.abs(next.p[0]-nextMesh.p[0])<1e-9);
+ assert(Math.abs(next.p[2]-nextMesh.p[2])<1e-9);
+ guide.onExit();
+ for(let i=0;i<origin.length;i++){
+   assert.deepEqual(guide.meshes[i].p,origin[i].p);
+   assert.deepEqual(guide.meshes[i].rot||null,origin[i].rot);
+ }
+ assert.deepEqual(scene.pickables.map(h=>h.p),hitOrigins);
+});
+
+test('rotated guide rectangle accepts front ray, rejects side rays, and keeps flat board picking',()=>{
+ const start=engine.indexOf('  getRayHit(o,d,allow=null){'),end=engine.indexOf('  // Restore desktop transforms',start);
+ assert(start>=0&&end>start);
+ const fn=vm.runInNewContext('({'+engine.slice(start,end)+'}).getRayHit',{
+   M3:{add:(a,b)=>a.map((v,i)=>v+b[i]),mul:(a,n)=>a.map(v=>v*n),raySphere:()=>null}
+ });
+ const button={key:'guide:next',p:[-1.2,1.25,-.3],
+   mesh:{hidden:false,s:[.29,.116,.056],rot:[0,Math.PI/2,0]}};
+ const scene={pickables:[button]};
+ const front=fn.call(scene,[-.6,1.25,-.3],[-1,0,0]);
+ assert.equal(front?.key,'guide:next');
+ assert(Math.abs(front.distance-(.6-.028))<1e-9);
+ assert.equal(fn.call(scene,[-.6,1.25,.5],[-1,0,0]),null);
+ assert.equal(fn.call(scene,[-.6,1.55,-.3],[-1,0,0]),null);
+ const board={key:'module:1',p:[0,1,-2],mesh:{hidden:false,s:[.8,.15,.05],rot:[0,0,0]}};
+ scene.pickables=[board];
+ assert.equal(fn.call(scene,[0,1,0],[0,0,-1])?.key,'module:1');
+});
+
+test('grip reopening recenters the guide at latest tracked pose, without drift',()=>{
+ const {guide,scene}=makeGuide();
+ scene.rotateByQuat=(v,q)=>[-2*q.y*q.w,0,-1+2*q.y*q.y];
+ const identity={x:0,y:0,z:0,w:1};
+ const quarter={x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2};
+ guide.onEnter();
+ assert(guide.placeForViewer({transform:{position:{x:0,y:1.6,z:0},orientation:identity}}));
+ guide.close();
+ // The next valid frame still updates the last pose even though the panel stays fixed.
+ assert.equal(guide.placeForViewer({transform:{position:{x:1,y:1.2,z:2},orientation:quarter}}),false);
+ assert(guide.onSqueezeStart());
+ assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9);
+ assert(Math.abs(guide.meshes[0].p[2]-(2-.08))<1e-9);
+ assert(Math.abs(guide.meshes[0].rot[1]-Math.PI/2)<1e-9);
+ guide.close();
+ assert(guide.onSqueezeStart());
+ assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9); // no accumulated transform
+ guide.onExit();
+ assert.equal(guide.lastViewerPose,null);
+ assert.equal(guide.anchored,false);
+});
