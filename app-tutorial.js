@@ -57,7 +57,7 @@
  }
  function resolveTarget(step){
   const target=document.querySelector(step.selector);
-  if(target){const rect=target.getBoundingClientRect();if(rect.width>0&&rect.height>0)return target;}
+  if(target){const rect=target.getBoundingClientRect();if(rect.width>0&&rect.height>0&&rect.right>0&&rect.left<(root.innerWidth||1024))return target;}
   return step.fallback?document.querySelector(step.fallback):null;
  }
  function place(){
@@ -135,7 +135,8 @@
   card=element('section','kl-tour-panel');card.hidden=true;card.tabIndex=-1;
   card.setAttribute('role','dialog');card.setAttribute('aria-modal','false');
   card.setAttribute('aria-labelledby','kl-tour-heading');
-  counter=element('div','kl-tour-counter');counter.style.cssText='color:#95d6cd;font-size:10px;font-weight:850;letter-spacing:1.1px;';
+  card.setAttribute('aria-describedby','kl-tour-body');
+  counter=element('div','kl-tour-counter');counter.setAttribute('aria-live','polite');counter.style.cssText='color:#95d6cd;font-size:10px;font-weight:850;letter-spacing:1.1px;';
   card.appendChild(counter);
   const bar=element('div','kl-tour-bar');bar.setAttribute('aria-hidden','true');bar.appendChild(element('span'));card.appendChild(bar);
   heading=element('h2','kl-tour-heading');card.appendChild(heading);
