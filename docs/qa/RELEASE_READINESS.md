@@ -28,9 +28,9 @@ KlinikLab is a dental education **research prototype**, not an approved dental d
 | Q-08 | Syntax of local JavaScript modules and worker | `python3 scripts/qa_gate.py static`, excluding vendored Draco code | Vendor supply-chain verification separate |
 | Q-09 | HTTP delivery and restricted paths | `python3 scripts/qa_gate.py http`; existing server security test | Local-only gate, not HTTPS tunnel or headset network path |
 | Q-10 | Standalone reproducibility | `python3 scripts/qa_gate.py bundle` runs generator twice + byte comparison + git diff | Fails if committed standalone does not match source |
-| Q-11 | Visual/accessibility, responsive and occlusion | Worker screenshots and Playwright CI suite (see workflow) | Screenshot acceptance must cite baseline, browser, GPU, failure count; screenshot ≠ accessibility certification |
+| Q-11 | Visual/accessibility, responsive and occlusion | Chromium FDI keyboard Enter, tutorial Arrow keys/Escape/focus return, quiz keyboard Enter, panel hit-testing, duplicate IDs, ARIA targets and visible controls; DOM scoring in `visual-qa/qa-metrics.mjs` | **Known blocker:** duplicate `#vl-title` on desktop and mobile ([issue #16](https://github.com/ajeshkg17/KlinikLab/issues/16)); other advisory checks still run. Browser assertions are not screen-reader certification. |
 | Q-12 | Vulnerable third-party dependencies | `npm audit --prefix visual-qa --omit=dev --audit-level=high` in QA workflow | Audits declared npm packages, not CDN-loaded browser libraries or OS runtime |
-| Q-13 | Performance and asset failures | Browser CI emits navigation time and local request failures | Hardware FPS/latency still requires physical testing |
+| Q-13 | Performance and asset failures | Three repeat page-load-to-FDI samples, median/p95, local/external request failures, candidate-image SHA-256, failure screenshots | CI software-renderer timings are not headset FPS/latency; 20s failsafe is not a performance-service-level objective |
 
 ## Reproduce QA locally
 
@@ -49,6 +49,8 @@ node visual-qa/ci-browser.mjs
 
 The `ci-browser.mjs` suite uses an installed Playwright Chromium browser and produces artifacts in `visual-qa/ci-artifacts/`. Install it using `cd visual-qa && npx playwright install chromium` if needed. Never upload patient data.
 
+**Screenshot baseline governance:** `visual-qa/baselines/manifest.json` is initially empty. The comparator treats such images as candidate evidence (`NO_APPROVED_BASELINE`), not successful comparisons. When baselines are approved, the approval registry must match the reference PNG's SHA-256, source run, reviewer, browser major version and viewport; unregistered PNGs are refused. See `visual-qa/baselines/README.md`. This still requires human pixel-diff review.
+
 ## Risk register
 
 | Risk | Severity | Gate / owner |
@@ -56,6 +58,7 @@ The `ci-browser.mjs` suite uses an installed Playwright Chromium browser and pro
 | No physical Quest 2 regression with measured input latency, frame stability and session teardown | **Blocking** for hardware release or compatibility claims | VR developer + device tester |
 | No independent clinician sign-off on FDI accuracy, anatomy, exam content and safe clinical wording | **Blocking** for clinical accuracy claims | Clinical reviewer |
 | GPU/WebGL/browser and CDN dependencies differ across Chrome, mobile and Quest Browser | High | Browser CI and supported-browser matrix; log renderer, GPU, asset failures |
+| Duplicate `vl-title` DOM IDs on desktop/mobile | **Blocking QA defect** | [Issue #16](https://github.com/ajeshkg17/KlinikLab/issues/16); feature-owner investigation; QA deliberately reports failure, not suppressed |
 | Screenshot green despite inaccessible focus order or occluded controls | High | A11y checks, keyboard interaction, viewport metrics; independent manual keyboard/screen-reader check |
 | Standalone HTML silently out of date after feature merge | High | Byte-identical generator check, required PR status |
 | Source/public script drift | High | Complete mirror inventory, not selective module lists |
@@ -65,6 +68,7 @@ The `ci-browser.mjs` suite uses an installed Playwright Chromium browser and pro
 ## Integration and release sign-off
 
 - [ ] Node tests, syntax, mirror checks, HTTP smoke, dependency audit and standalone checks pass on proposed merge commit.
+- [ ] Resolve or explicitly disposition [QA defect #16](https://github.com/ajeshkg17/KlinikLab/issues/16) with feature owner; no silent QA exception.
 - [ ] Chromium desktop and mobile browser QA artifacts inspected; visual changes reviewed against approved baselines or explicitly labelled **no baseline**.
 - [ ] Blocking regressions resolved with exact reproduction case, environment, logs and screenshot.
 - [ ] Physical Quest 2 checklist executed and signed off separately if any hardware support is claimed.
@@ -86,3 +90,11 @@ A qualified dentist must review all 32 permanent FDI placements/names, anatomy l
 - `visual-feedback/runs/quest2-vr-preview-2026-10-29-02/manifest.json`: four successful desktop XR **mock preview** screenshots, `headsetTested=false`, `clinicalValidation=false`.
 
 No result above demonstrates a physical headset test or verified patient/clinical safety.
+
+
+### QA extension after the initial handoff (29 October 2026)
+
+The second iteration adds automated keyboard interactions for the FDI chart and anatomy quiz, tutorial ArrowLeft/ArrowRight/Escape and focus return, panel centre-point hit-tests, a desktop/mobile DOM accessibility audit, three repeated software-Chromium ready-time measurements (median/p95), and preservation of failure screenshots. Exact per-run numbers are stored in the `qa-chromium-evidence/report.json` artifact.
+
+The new audit uncovered a duplicate `vl-title` ID on **both desktop and mobile**. This is an observed issue, not a physical-headset or clinical failure. It has been reported to the feature owner via [issue #16](https://github.com/ajeshkg17/KlinikLab/issues/16). The audit records a failed QA check but continues with the remainder of the suite so further regressions remain visible. Release acceptance requires resolving or explicitly reviewing this blocker; QA must not conceal it by approving a defective screenshot baseline.
+
