@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "quest2-vr-preview-2026-10-29-01",
+  "jobId": "quest2-vr-preview-2026-10-29-02",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -16,22 +16,6 @@
         {
           "action": "wait",
           "ms": 1200
-        }
-      ]
-    },
-    {
-      "name": "02-module-select",
-      "capture": "scene",
-      "steps": [
-        {
-          "action": "xrGuidePreview"
-        },
-        {
-          "action": "xrGuideNext"
-        },
-        {
-          "action": "wait",
-          "ms": 600
         }
       ]
     },
@@ -60,31 +44,6 @@
       "steps": [
         {
           "action": "xrGuidePreview"
-        },
-        {
-          "action": "xrGuideNext"
-        },
-        {
-          "action": "xrGuideNext"
-        },
-        {
-          "action": "xrGuideNext"
-        },
-        {
-          "action": "wait",
-          "ms": 600
-        }
-      ]
-    },
-    {
-      "name": "05-exit-help",
-      "capture": "scene",
-      "steps": [
-        {
-          "action": "xrGuidePreview"
-        },
-        {
-          "action": "xrGuideNext"
         },
         {
           "action": "xrGuideNext"
