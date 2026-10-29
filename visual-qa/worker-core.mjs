@@ -80,6 +80,6 @@ export function safeRunFolder(jobId) {
 export function localRequestAllowed(raw) {
   try {
     const u = new URL(raw);
-    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (u.href === 'https://cdn.babylonjs.com/babylon.js') || u.protocol === 'data:' || u.protocol === 'blob:';
+    return (u.protocol === 'http:' && u.hostname === '127.0.0.1' && u.port === '8787') || (u.href === 'https://cdn.babylonjs.com/babylon.js') || (u.href === 'https://assets.babylonjs.com/environments/environmentSpecular.env') || u.protocol === 'data:' || u.protocol === 'blob:';
   } catch { return false; }
 }
