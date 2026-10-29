@@ -1,0 +1,52 @@
+# KlinikLab DesktopXR — BDS → FSP/KP dental simulator
+
+**29 October 2026 — research prototype.** Desktop HTML front-end, optional local Node.js/Gemini server, Meta Quest 2 WebXR clinic preview. Not a clinical device or official examination assessment.
+
+## Quick start
+
+- Open `KlinikLab_DesktopXR_Standalone.html` directly in a PC browser for **offline** exercises, or run `node server/server.mjs` and visit `http://127.0.0.1:8787` for the server-backed version.
+- Use **Clinical imaging & QA** in the header. Six tabs: synthetic radiography; STL/OBJ scan inspection; virtual bur mechanics; Quest capability diagnostics; external clinician review; linked research datasets.
+- **3D Präparation** opens the original volumetric cutting engine. Change *virtual* load/rotation/tilt in the mechanics tab, then make a cut. The cut volume and geometry are genuinely recomputed, but the strength/force index is arbitrary and not calibrated to hardware.
+- **AI Clinic** optionally uses Gemini through the local server. Set `GEMINI_API_KEY` in the server environment, not in HTML or git. The application works without AI.
+
+## Windows hosting and Quest 2
+
+1. Install Node.js 18+ (Node.js 22 recommended). In PowerShell, from this folder run `node server/server.mjs`.
+2. For a private trusted HTTPS tunnel, with Tailscale installed and configured, use `tailscale serve --bg http://127.0.0.1:8787` (check syntax in your installed Tailscale version). It provides a `https://<machine>.<tailnet>.ts.net` URL for authorized peers.
+3. Meta Quest Browser needs access to that HTTPS site, and its browser must support `immersive-vr`. The headset must be able to reach the private endpoint. The `Quest diagnostics` tab provides a self-test but is not equivalent to actual hardware QA.
+4. The existing Quest immersive clinic uses stereo WebXR with controller ray selection. **3D volumetric tooth cutting is currently a 2D canvas workstation, not tracked stereo VR handpiece drilling.**
+
+## Anatomy and imaging provenance
+
+- Built-in tooth material and cutting geometry are **synthetic, uncalibrated models**, not clinical scans.
+- The new synthetic radiographic projection is produced by integrating approximate, arbitrary tissue attenuation through the simulated tooth. It is **not a real radiograph** and does **not** validate X-ray diagnosis.
+- Local OBJ/STL import only provides **surface inspection**; it does not extract enamel/dentin/pulp labels from a mesh. Imports stay in the browser; do not use real patient-identifying records.
+- The scan viewer requires you to supply files legally: ToothFairy2 (CC BY-SA), ToothFairy3 (CC BY-NC-SA), 3DTeethSeg22 (CC BY-NC-ND), BodyParts3D (CC BY-SA 2.1 Japan) have different rules and some require registration. The code does not bundle these datasets.
+- Haptic pulses use an optional WebXR gamepad API and are only *vibration*, not calibrated force feedback.
+- Expert review form stores **unverified reviewer assertions**. Human credential verification and independent clinical review must happen outside the app.
+
+## Clinical and engineering references
+
+- SHIBB (Schleswig-Holstein) dental recognition: https://www.schleswig-holstein.de/DE/landesregierung/ministerien-behoerden/SHIBB/Behoerde/05_Gesundheitsberufe/aGesundheitsberufe/Akad.Gesundheitsberufe/Zahnarzt/ZahnarztHauptartikel
+- German dental KP practical section ZApprO §110: https://www.gesetze-im-internet.de/zappro/__110.html
+- ToothFairy2 imaging and segmentation: https://ditto.ing.unimore.it/toothfairy2/
+- ToothFairy3 dataset restrictions: https://toothfairy3.grand-challenge.org/dataset/
+- MICCAI 3DTeethSeg22 scan dataset: https://github.com/sergionatans/3DTeethSeg22_challenge
+- DENTEX dental panoramic dataset: https://dentex.grand-challenge.org/data/
+- BodyParts3D attribution example: https://github.com/organui/teeth-3d
+- Web Gamepad haptics limitations: https://developer.mozilla.org/en-US/docs/Web/API/GamepadHapticActuator
+- Meta Quest Browser haptics incident: https://developers.meta.com/vr/support/investigations/938861405320634/
+- VR dental training umbrella review: https://pubmed.ncbi.nlm.nih.gov/41906451/
+
+## Tests
+
+- `python tests/desktop_suite_qa.py`: desktop browser renders all six new tabs, local OBJ import, radiography decision, volumetric bur-response integration, expert-review report, Quest API preflight. Uses Chromium and Playwright.
+- `node tests/qa_logic.js`: 42 case–station structural tests.
+- `node --test tests/ai.test.mjs`: mock Gemini generation, clinical plan/review, validation and API key handling.
+- `python tests/final_browser_qa.py`: existing 3D regression tests across six cases, reset, mesh cut and report export.
+
+**No licensed dental professional or physical Quest 2 has verified this build.**
+
+## GitHub source publication
+
+This project is published to `ajeshkg17/KlinikLab` as a public source repository. Do not commit `.env`, API keys, patient-identifying data or restricted dental scan datasets. Use the built-in `.gitignore` and keep local clinical files outside the repository.
