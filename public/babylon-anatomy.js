@@ -240,9 +240,16 @@
     const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
     v.positions=data.positions;v.indices=data.indices;v.normals=data.normals;
+    const appearance=root.KlinikDentalAppearance;
+    if(appearance){
+      v.colors=match
+        ?appearance.crownColors(data.positions,match[2]==='0',Number(match[1]))
+        :appearance.gingivaColors(data.positions,24);
+    }
     v.applyToMesh(template,true);
+    template.useVertexColors=!!v.colors;
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0};
+    template.metadata={synthetic:true,anatomyVersion:5,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0};
     return template;
   }
   root.KlinikBabylonAnatomy={crownData,gingivaData,archPlacement,createTemplate,version:5,notes:'Educational procedural tooth morphology; not an anatomical scan'};
