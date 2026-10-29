@@ -173,6 +173,7 @@
   }
   function sync(layer){
     if(!state.ready)return;
+    const B=layer.B;
     let visibleInstances=0;
     for(const item of layer.items){
       const mesh=item.realMesh;if(!mesh)continue;
