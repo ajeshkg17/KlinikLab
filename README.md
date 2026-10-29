@@ -69,3 +69,11 @@
 ## GitHub source publication
 
 Source is maintained in [ajeshkg17/KlinikLab](https://github.com/ajeshkg17/KlinikLab) (currently public). Never commit real patient data, API keys, or restricted dental scans.
+## Experimental Babylon.js desktop preview (29 October 2026)
+
+- **No Unity/Blender installation is needed.** With the Node server running, open the **3D clinic** view and click **✨ Babylon** to switch to an opt-in Babylon.js PBR-lit desktop preview. Click again to return to the original renderer.
+- The preview converts **the same synthetic tooth geometry** into Babylon meshes, reuses the existing camera and selection controls, and adds PBR enamel roughness/clearcoat and layered clinic lighting. It is **not** a licensed anatomical scan, a validated tooth model, or a change to cutting physics.
+- On first use the preview fetches `https://cdn.babylonjs.com/babylon.js` from the official Babylon learning CDN (internet required). The CDN is suitable for this prototype, **not production**; a later release should vendor a pinned, self-hosted library. The script is requested only when the Babylon button is clicked; default HTML and offline exercises remain available without it. Do not use the preview with confidential patient data.
+- Existing built-in WebGL **continues to handle desktop picking and Meta Quest WebXR**. The Babylon canvas is a display-only desktop layer; headset performance/functionality is not established by desktop screenshots. Re-enable Classic for immersive Quest use.
+- The visual QA worker approves only that exact CDN URL, inside its isolated unsigned-in browser, and records `babylon.mode`, scene mesh count, and frame count for screenshot checks.
+- Compare screenshots on the `visual-feedback` branch under `runs/babylon-pbr-2026-10-29-01/`; new captures should be assessed for black/invisible canvases, correct tooth topology, label visibility, occlusal alignment, and output consistency.
