@@ -100,7 +100,7 @@
   }
   async function replace(layer){
     if(state.mode==='loading'||state.mode==='ready')return;
-    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;
+    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;state.vertexColoredInstances=0;
     const B=layer.B;
     try{
       await loadScript(LOADER,()=>!!B.GLTFFileLoader);
@@ -133,23 +133,23 @@
             const cropped=cropMesh(tris,upper,STYLE[tooth]);
             const template=new B.Mesh('licensed-tooth-template:'+kind,layer.scene);
             const data=new B.VertexData();Object.assign(data,cropped);delete data.trim;delete data.originalHeight;delete data.crownHeight;
+            // Preserve Dundee geometry while providing a deterministic educational
+            // enamel shade. No imported texture, palette network fetch or patient data.
+            const appearance=root.KlinikDentalAppearance;
+            if(appearance)data.colors=appearance.crownColors(cropped.positions,upper,STYLE[tooth]);
             data.applyToMesh(template,true);
+            template.useVertexColors=!!data.colors;
             template.isVisible=false;template.isPickable=false;
-            const from=meshes.find(m=>m.material)?.material;
             for(const item of items){
               const mesh=template.clone('dundee:'+item.source.key,null,true);
               mesh.isVisible=true;mesh.isPickable=false;
               mesh.alwaysSelectAsActiveMesh=true;
-              mesh.material=from?.clone('Dundee-material:'+item.source.key) || layer.materialFor(item.source,0);
-              if(mesh.material instanceof B.PBRMaterial){
-                mesh.material.metallic=0;mesh.material.roughness=.34;
-                mesh.material.backFaceCulling=false;
-                mesh.material.clearCoat.isEnabled=true;
-                mesh.material.clearCoat.intensity=.27;
-                mesh.material.clearCoat.roughness=.20;
-              }
+              // One common PBR appearance for licensed and procedural enamel.
+              // Imported GLB materials remain on the hidden source mesh.
+              mesh.material=layer.materialFor(item.source,0);
               item.realMesh=mesh;
               state.instances++;
+              if(data.colors)state.vertexColoredInstances=(state.vertexColoredInstances||0)+1;
             }
             state.loaded++;
             state.triangles+=cropped.indices.length/3;
@@ -167,6 +167,7 @@
         while(next<16){const i=next++;await loadOne(Math.floor(i/8),i%8+1)}
       }));
       state.archDiagnostics=layer.anatomyLayout?.diagnostics||null;
+      state.appearanceVersion=root.KlinikDentalAppearance?.version||0;
       state.ready=state.instances>0;
       state.mode=state.ready?'ready':'error';
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
