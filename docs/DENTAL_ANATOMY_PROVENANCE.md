@@ -6,26 +6,26 @@ Date: 2026-10-29 · Workstream: 3D Dental Anatomy · Status: engineering audit, 
 
 | Assets | Source and license | Changes / usage | Anatomical evidence level |
 | --- | --- | --- | --- |
-| \`assets/dundee/maxillary_*.glb\` (8), \`assets/dundee/mandibular_*.glb\` (8) | University of Dundee School of Dentistry, CC BY 4.0, via [sameralseedbth-Dental/dental-3d-models commit 4f0ffb6](https://github.com/sameralseedbth-Dental/dental-3d-models/commit/4f0ffb651998a4641ddf45c7632ea236cc164fcb). The [original Dundee collection](https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f) and [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) are credited in \`assets/dundee/README.md\`. | Bundled binaries are described there as copied without edits; \`real-dental-scene.js\` clips each mesh to an illustrative crown (47% of the imported height), recenters/rescales it, and mirrors the left tooth to the contralateral quadrant. The full surface remains available in the optional tooth atlas. | Licensed external tooth surfaces; neither CT provenance nor independent clinical accuracy has been established. Crop boundaries are **open**, not claimed watertight. |
-| \`babylon-anatomy.js\`: \`crownData\` | Original KlinikLab mathematical procedural shapes; no third-party scan or model. | Four stylized crown classes (incisor/canine/premolar/molar), two arches; quality parameter changes sampling. | Synthetic teaching proxies, with no patient anatomy. |
-| \`babylon-anatomy.js\`: \`gingivaData\` | Original parametric interpolation along 16 cervical sites per arch. | Spline mesh, interdental papillae and stitched end caps. | Synthetic soft-tissue proxy, not a segmentation or measured geometry. |
-| \`babylon-anatomy.js\`: \`jawData\` | Original spline alveolar support geometry. | Closed smooth tube, not derived from CT/CBCT or scans. | Synthetic alveolar proxy, **not** an anatomical mandible/maxilla. |
-| \`dental-appearance.js\` | Original deterministic vertex colours and lighting presets. | Stylized enamel/gingiva gradients. | Not biological or spectral reflectance measurements. |
-| \`assets/draco/*\` | Draco runtime, Apache-2.0 (local LICENSE). | Local decoding dependency. | No anatomy. |
+| `assets/dundee/maxillary_*.glb` (8), `assets/dundee/mandibular_*.glb` (8) | University of Dundee School of Dentistry, CC BY 4.0, via [sameralseedbth-Dental/dental-3d-models commit 4f0ffb6](https://github.com/sameralseedbth-Dental/dental-3d-models/commit/4f0ffb651998a4641ddf45c7632ea236cc164fcb). The [original Dundee collection](https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f) and [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) are credited in `assets/dundee/README.md`. | Bundled binaries are described there as copied without edits; `real-dental-scene.js` clips each mesh to an illustrative crown (47% of the imported height), recenters/rescales it, and mirrors the left tooth to the contralateral quadrant. The full surface remains available in the optional tooth atlas. | Licensed external tooth surfaces; neither CT provenance nor independent clinical accuracy has been established. Crop boundaries are **open**, not claimed watertight. |
+| `babylon-anatomy.js`: `crownData` | Original KlinikLab mathematical procedural shapes; no third-party scan or model. | Four stylized crown classes (incisor/canine/premolar/molar), two arches; quality parameter changes sampling. | Synthetic teaching proxies, with no patient anatomy. |
+| `babylon-anatomy.js`: `gingivaData` | Original parametric interpolation along 16 cervical sites per arch. | Spline mesh, interdental papillae and stitched end caps. | Synthetic soft-tissue proxy, not a segmentation or measured geometry. |
+| `babylon-anatomy.js`: `jawData` | Original spline alveolar support geometry. | Closed smooth tube, not derived from CT/CBCT or scans. | Synthetic alveolar proxy, **not** an anatomical mandible/maxilla. |
+| `dental-appearance.js` | Original deterministic vertex colours and lighting presets. | Stylized enamel/gingiva gradients. | Not biological or spectral reflectance measurements. |
+| `assets/draco/*` | Draco runtime, Apache-2.0 (local LICENSE). | Local decoding dependency. | No anatomy. |
 
-The upstream \`mandible.glb\` is intentionally **excluded** because the original mandible was identified in the existing source note as CC BY-NC, not CC BY. **Do not bundle it.** Verify per-asset author/license and intended use against primary source records before any separate distribution. No unlicensed files were introduced in this workstream.
+The upstream `mandible.glb` is intentionally **excluded** because the original mandible was identified in the existing source note as CC BY-NC, not CC BY. **Do not bundle it.** Verify per-asset author/license and intended use against primary source records before any separate distribution. No unlicensed files were introduced in this workstream.
 
 ## FDI and transformation contract
 
-The eight maxillary files are **21–28** and the eight mandibular files **31–38** (left-sided source set). \`real-dental-scene.js\` reuses them for **11–18** and **41–48** by display-only mirroring. The resulting 32 FDI IDs stay attached to legacy picking, selection and cutting meshes, which are not altered by this workstream. See \`PAIRS\`, \`STYLE\`, \`archPlacement\`, and \`sync\`.
+The eight maxillary files are **21–28** and the eight mandibular files **31–38** (left-sided source set). `real-dental-scene.js` reuses them for **11–18** and **41–48** by display-only mirroring. The resulting 32 FDI IDs stay attached to legacy picking, selection and cutting meshes, which are not altered by this workstream. See `PAIRS`, `STYLE`, `archPlacement`, and `sync`.
 
-For main-scene display, \`cropMesh\` uses a Y-plane at 47% of the source's height (from its upper or lower occlusal side); transformed crown dimensions are normalized to generic style-specific height and width. They are **not calibrated millimetres**, and the resulting arch contacts are illustrative. The full imported tooth models are used only in the atlas. Model hashes/mesh licenses must be independently rechecked against upstream releases if the third-party binaries change.
+For main-scene display, `cropMesh` uses a Y-plane at 47% of the source's height (from its upper or lower occlusal side); transformed crown dimensions are normalized to generic style-specific height and width. They are **not calibrated millimetres**, and the resulting arch contacts are illustrative. The full imported tooth models are used only in the atlas. Model hashes/mesh licenses must be independently rechecked against upstream releases if the third-party binaries change.
 
 ## Surface QA and numerical units
 
-\`KlinikRealMesh.surfaceDistance(A,B)\` calculates the minimum of 3D triangle-pair distances, including edge/face intersection tests. \`KlinikRealMesh.measureArchSurfaces(layer)\` selects up to **48 triangles per displayed crown**, transforms them into world coordinates and reports all **30 adjacent-pair** distances in uncalibrated **KlinikLab scene units (not mm)**. \`KlinikRealTeeth.surfaceDiagnostics\` is populated once when all 32 Dundee-derived crown instances are visible on the desktop.
+`KlinikRealMesh.surfaceDistance(A,B)` calculates the minimum of 3D triangle-pair distances, including edge/face intersection tests. `KlinikRealMesh.measureArchSurfaces(layer)` selects up to **48 triangles per displayed crown**, transforms them into world coordinates and reports all **30 adjacent-pair** distances in uncalibrated **KlinikLab scene units (not mm)**. `KlinikRealTeeth.surfaceDiagnostics` is populated once when all 32 Dundee-derived crown instances are visible on the desktop.
 
-A result of zero with \`intersectsSampledTriangles=true\` means *the sampled facets intersect*, **not** a measured volume penetration depth. A positive sampled distance is an **upper bound** on the true minimum distance (unsampled facets might be closer). A sampled non-contact cannot establish absence of collisions, occlusal adequacy, periodontal attachment or clinical accuracy. The legacy \`archPlacement().diagnostics\` remains an explicitly labeled **bounding ellipse estimate**, not surface data.
+A result of zero with `intersectsSampledTriangles=true` means *the sampled facets intersect*, **not** a measured volume penetration depth. A positive sampled distance is an **upper bound** on the true minimum distance (unsampled facets might be closer). A sampled non-contact cannot establish absence of collisions, occlusal adequacy, periodontal attachment or clinical accuracy. The legacy `archPlacement().diagnostics` remains an explicitly labeled **bounding ellipse estimate**, not surface data.
 
 ## Work still needing clinical or visual verification
 
@@ -36,7 +36,7 @@ A result of zero with \`intersectsSampledTriangles=true\` means *the sampled fac
 
 ## Regression commands
 
-\`\`\`sh
+```sh
 node --test tests/babylon_anatomy.test.cjs tests/phase4_jaw.test.cjs tests/real_scene_qa.cjs
 node --check babylon-anatomy.js
 node --check real-dental-scene.js
@@ -44,6 +44,6 @@ cmp babylon-anatomy.js public/babylon-anatomy.js
 cmp real-dental-scene.js public/real-dental-scene.js
 python3 build_standalone.py
 git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
-\`\`\`
+```
 
 The standalone bundle is generated from public mirrors. It is a collision-prone shared output: coordinate its final merge with the coordinator and other concurrent workstreams.
