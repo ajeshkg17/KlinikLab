@@ -1,13 +1,39 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase3-fdi-final-2026-10-29-05",
+  "jobId": "phase4-jaw-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-studio-fdi-interaction",
+      "name": "01-dundee-no-jaw",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ]
+    },
+    {
+      "name": "02-dundee-jaw",
       "capture": "stage",
       "steps": [
         {
@@ -32,7 +58,208 @@
         },
         {
           "action": "click",
-          "control": "appearance"
+          "control": "jaw"
+        }
+      ]
+    },
+    {
+      "name": "03-dundee-jaw-occlusal",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "jaw"
+        }
+      ]
+    },
+    {
+      "name": "04-dundee-upper-jaw",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "jaw"
+        }
+      ]
+    },
+    {
+      "name": "05-fine-no-jaw",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "detail"
+        }
+      ]
+    },
+    {
+      "name": "06-fine-jaw-oblique",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "detail"
+        },
+        {
+          "action": "click",
+          "control": "jaw"
+        },
+        {
+          "action": "orbit",
+          "dx": 130,
+          "dy": -50
+        }
+      ]
+    },
+    {
+      "name": "07-fine-jaw-occlusal",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "detail"
+        },
+        {
+          "action": "click",
+          "control": "jaw"
+        }
+      ]
+    },
+    {
+      "name": "08-fine-jaw-fdi",
+      "capture": "stage",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "detail"
+        },
+        {
+          "action": "click",
+          "control": "jaw"
         },
         {
           "action": "validateFDI"
