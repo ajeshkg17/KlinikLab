@@ -69,7 +69,7 @@ async function capture(job){
     await page.waitForTimeout(1100);
     for (const step of scene.steps){
      if(step.action==='wait'){await page.waitForTimeout(step.ms)}
-     else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,null,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}await page.waitForTimeout(650)}
+     else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,null,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}if(step.control==='atlasOpen'||step.control==='atlasNext'||step.control==='atlasPrev'){await page.waitForFunction(()=>window.KlinikDundeeAtlas?.ready||window.KlinikDundeeAtlas?.mode==='error',null,{timeout:25000});const atlas=await page.evaluate(()=>({...window.KlinikDundeeAtlas}));if(!atlas.ready)throw Error('Licensed atlas unavailable: '+(atlas.error||'unknown'));}await page.waitForTimeout(650)}
      else if(step.action==='orbit'){
       const canvas=page.locator('#scene');if(await canvas.count()!==1)throw Error('The clinic canvas was not rendered');
       const b=await canvas.first().boundingBox();if(!b)throw Error('Canvas unavailable');
@@ -88,7 +88,7 @@ async function capture(job){
       const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error}:null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     item.ok=true;
    }catch(e){item.errors.push(String(e.message||e).slice(0,500));trace(`Scene ${scene.name}: ${item.errors.at(-1)}`)}
