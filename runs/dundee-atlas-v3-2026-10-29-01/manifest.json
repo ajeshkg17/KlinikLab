@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "jobId": "dundee-atlas-v3-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T13:28:04.726Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-original-procedural",
+      "file": "01-original-procedural.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 111259,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-dundee-molar",
+      "file": "02-dundee-molar.png",
+      "capture": "atlas",
+      "ok": false,
+      "errors": [
+        "Licensed atlas unavailable: Unable to load from assets/dundee/maxillary_first_molar.glb: /meshes/0/primitives/0: Error status: 404  - Unable to load https://cdn.babylonjs.com/v9.33.0/draco_decoder_gltf.wasm"
+      ],
+      "networkFailures": []
+    },
+    {
+      "name": "03-dundee-premolar",
+      "file": "03-dundee-premolar.png",
+      "capture": "atlas",
+      "ok": false,
+      "errors": [
+        "Licensed atlas unavailable: Unable to load from assets/dundee/maxillary_first_molar.glb: /meshes/0/primitives/0: Error status: 404  - Unable to load https://cdn.babylonjs.com/v9.33.0/draco_decoder_gltf.wasm"
+      ],
+      "networkFailures": []
+    },
+    {
+      "name": "04-dundee-canine",
+      "file": "04-dundee-canine.png",
+      "capture": "atlas",
+      "ok": false,
+      "errors": [
+        "Licensed atlas unavailable: Unable to load from assets/dundee/maxillary_first_molar.glb: /meshes/0/primitives/0: Error status: 404  - Unable to load https://cdn.babylonjs.com/v9.33.0/draco_decoder_gltf.wasm"
+      ],
+      "networkFailures": []
+    }
+  ],
+  "successCount": 1,
+  "failureCount": 3
+}
