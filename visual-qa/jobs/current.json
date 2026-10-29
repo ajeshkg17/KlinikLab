@@ -1,182 +1,131 @@
 {
   "schemaVersion": 1,
-  "jobId": "tutorial-acceptance-2026-10-29-01",
+  "jobId": "quest2-vr-preview-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-welcome",
-      "capture": "page",
+      "name": "01-controller-start",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
+        },
+        {
+          "action": "wait",
+          "ms": 1200
         }
       ]
     },
     {
-      "name": "02-scene-controls",
-      "capture": "page",
+      "name": "02-module-select",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "wait",
+          "ms": 600
         }
       ]
     },
     {
-      "name": "03-fdi-navigation",
-      "capture": "page",
+      "name": "03-tooth-controls",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "wait",
+          "ms": 600
         }
       ]
     },
     {
-      "name": "04-anatomy-help",
-      "capture": "page",
+      "name": "04-preparation-safety",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "wait",
+          "ms": 600
         }
       ]
     },
     {
-      "name": "05-go-back",
-      "capture": "page",
+      "name": "05-exit-help",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialBack"
+          "action": "xrGuideNext"
+        },
+        {
+          "action": "xrGuideNext"
+        },
+        {
+          "action": "wait",
+          "ms": 600
         }
       ]
     },
     {
-      "name": "06-final-vr",
-      "capture": "page",
+      "name": "06-dismiss-guide",
+      "capture": "scene",
       "steps": [
         {
-          "action": "click",
-          "control": "tutorial"
+          "action": "xrGuidePreview"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideNext"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
+          "action": "xrGuideClose"
         },
         {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
-        },
-        {
-          "action": "click",
-          "control": "tutorialNext"
-        }
-      ]
-    },
-    {
-      "name": "07-skip",
-      "capture": "page",
-      "steps": [
-        {
-          "action": "click",
-          "control": "tutorial"
-        },
-        {
-          "action": "click",
-          "control": "tutorialSkip"
+          "action": "wait",
+          "ms": 600
         }
       ]
     }
