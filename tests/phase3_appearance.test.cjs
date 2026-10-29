@@ -49,6 +49,14 @@ test('all eight synthetic crown templates and two gingiva templates receive vert
       assert.equal(mesh.vertexData.colors.length,mesh.vertexData.positions.length/3*4);
       assert.equal(mesh.useVertexColors,true);
     }
+    // Actual scene keys carry the tooth index, unlike the short catalogue kind.
+    for(let tooth=1;tooth<=8;tooth++){
+      const style=tooth<=2?1:tooth===3?2:tooth<=5?3:4;
+      const mesh=G.createTemplate(B,{},'crown_'+style+'_'+arch+'_'+tooth);
+      assert(mesh,'must support real per-FDI source kind');
+      assert.equal(mesh.vertexData.colors.length,mesh.vertexData.positions.length/3*4);
+      assert.equal(mesh.metadata.appearanceVersion,1);
+    }
   }
 });
 test('appearance materials are nonmetallic, bounded and revert between two presets',()=>{
