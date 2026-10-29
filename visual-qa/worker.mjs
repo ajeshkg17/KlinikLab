@@ -68,7 +68,7 @@ async function capture(job){
     await page.waitForTimeout(1100);
     for (const step of scene.steps){
      if(step.action==='wait'){await page.waitForTimeout(step.ms)}
-     else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}await page.waitForTimeout(650)}
+     else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,null,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}await page.waitForTimeout(650)}
      else if(step.action==='orbit'){
       const canvas=page.locator('#scene');if(await canvas.count()!==1)throw Error('The clinic canvas was not rendered');
       const b=await canvas.first().boundingBox();if(!b)throw Error('Canvas unavailable');
