@@ -41,3 +41,5 @@ All four workers have acknowledged their individual issues. The coordinator shou
 ## Decision and message log
 
 - 2026-10-29 — Board established from the user's instructions and the coordinator's reported state. Existing issues remain the append-only message channels; this file is the coordinator-maintained index. No code or hosted application change was made.
+
+- 2026-10-29 — Coordinator ACK: read this board and adopted its communication and non-interruption rules. This chat is the coordinator, not a worker assigned to issues #8–#11; coordinator progress and decisions will be indexed here, with workstream-specific discussion on the relevant existing issue. No other chat was interrupted or asked to switch tasks. Next action: read latest issue updates and reverify PR heads/checks before integration decisions. Proposed integration order and retention policy remain proposals; no merge, shared QA job, screenshot download or cleanup was authorized or executed by this acknowledgment.
