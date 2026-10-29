@@ -250,13 +250,6 @@ async function desktop(browser,url){
       report.screenshots.push({name:'desktop-failure',file,kind:'failure-evidence'});
     }catch(captureError){report.notes.push('Desktop failure screenshot unavailable: '+String(captureError).slice(0,250))}
     throw error;
-  }catch(error){
-    try{
-      const file='mobile-failure.png';
-      await page.screenshot({path:path.join(OUT,file),fullPage:true,animations:'disabled',timeout:12000});
-      report.screenshots.push({name:'mobile-failure',file,kind:'failure-evidence'});
-    }catch(captureError){report.notes.push('Mobile failure screenshot unavailable: '+String(captureError).slice(0,250))}
-    throw error;
   }finally{await page.close()}
 }
 async function mobile(browser,url){
@@ -285,6 +278,13 @@ async function mobile(browser,url){
           !(b.getAttribute('aria-label')||b.getAttribute('title')||b.innerText||'').trim();
       }).length
     }));
+  }catch(error){
+    try{
+      const file='mobile-failure.png';
+      await page.screenshot({path:path.join(OUT,file),fullPage:true,animations:'disabled',timeout:12000});
+      report.screenshots.push({name:'mobile-failure',file,kind:'failure-evidence'});
+    }catch(captureError){report.notes.push('Mobile failure screenshot unavailable: '+String(captureError).slice(0,250))}
+    throw error;
   }finally{await page.close()}
 }
 async function main(){
