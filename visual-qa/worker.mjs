@@ -70,6 +70,23 @@ async function capture(job){
     for (const step of scene.steps){
      if(step.action==='wait'){await page.waitForTimeout(step.ms)}
      else if(step.action==='click'){await page.locator(CONTROLS[step.control]).click({timeout:7500});if(step.control==='renderer'){await page.waitForFunction(()=>window.KlinikBabylon?.mode==='babylon'||!!window.KlinikBabylon?.error,null,{timeout:18000});const report=await page.evaluate(()=>({...window.KlinikBabylon}));if(report.mode!=='babylon')throw Error('Babylon preview unavailable: '+(report.error||'unknown'));}if(step.control==='atlasOpen'||step.control==='atlasNext'||step.control==='atlasPrev'){await page.waitForFunction(()=>window.KlinikDundeeAtlas?.ready||window.KlinikDundeeAtlas?.mode==='error',null,{timeout:25000});const atlas=await page.evaluate(()=>({...window.KlinikDundeeAtlas}));if(!atlas.ready)throw Error('Licensed atlas unavailable: '+(atlas.error||'unknown'));}await page.waitForTimeout(650)}
+     else if(step.action==='validateFDI'){
+      // Fixed 32-click regression against the original odontogram controls.
+      // The Babylon canvas must remain pointer-transparent throughout.
+      item.fdiValidation=await page.evaluate(()=>{
+       const ids=[...document.querySelectorAll('#chart [data-tooth]')].map(e=>e.dataset.tooth);
+       const failures=[];
+       for(const id of ids){
+        const button=document.querySelector('#chart [data-tooth="'+id+'"]');
+        button?.click();
+        if(window.kliniklab?.selectedTooth!==id||document.querySelector('#selected-label')?.textContent!=='Selected tooth: '+id)
+         failures.push(id);
+       }
+       return {checked:ids.length,failures,mode:window.KlinikBabylon?.mode};
+      });
+      if(item.fdiValidation.checked!==32||item.fdiValidation.failures.length||item.fdiValidation.mode!=='babylon')
+       throw Error('FDI selection regression: '+JSON.stringify(item.fdiValidation));
+     }
      else if(step.action==='localDemoGLB'){
       // Never accept arbitrary path arguments from the GitHub instruction JSON.
       await page.locator('#dundee-atlas-import').setInputFiles(path.join(REPO,'assets','dundee','maxillary_first_molar.glb'));
@@ -95,7 +112,7 @@ async function capture(job){
       const can=document.querySelector('#scene');
       let webgl=null;
       try{webgl=Boolean(can&&(can.getContext('webgl2')||can.getContext('webgl')))}catch{webgl=false}
-      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
+      return {stage:box('#stage'),scene:box('#scene'),volume:box('#volume-root'),webgl,volumeGPU:!!window.kliniklab?.volLab?.gpu&&!window.kliniklab.volLab.gpu.failed,volumeTriangles:window.kliniklab?.volLab?.mesh?.count||0,viewMode:window.kliniklab?.viewMode||null,babylon:window.KlinikBabylon?{mode:window.KlinikBabylon.mode,ready:window.KlinikBabylon.ready,meshes:window.KlinikBabylon.meshes,frames:window.KlinikBabylon.frames,environment:window.KlinikBabylon.environment,error:window.KlinikBabylon.error,anatomyVersion:window.KlinikBabylon.anatomyVersion,gingivalVertices:window.KlinikBabylon.gingivalVertices,gingivalTriangles:window.KlinikBabylon.gingivalTriangles,archDiagnostics:window.KlinikBabylon.archDiagnostics}:null,realTeeth:window.KlinikRealTeeth?{mode:window.KlinikRealTeeth.mode,ready:window.KlinikRealTeeth.ready,loaded:window.KlinikRealTeeth.loaded,instances:window.KlinikRealTeeth.instances,visibleInstances:window.KlinikRealTeeth.visibleInstances,triangles:window.KlinikRealTeeth.triangles,failures:window.KlinikRealTeeth.failures,error:window.KlinikRealTeeth.error,archDiagnostics:window.KlinikRealTeeth.archDiagnostics}:null,atlas:window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,ready:window.KlinikDundeeAtlas.ready,asset:window.KlinikDundeeAtlas.asset,meshes:window.KlinikDundeeAtlas.meshes,triangles:window.KlinikDundeeAtlas.triangles,error:window.KlinikDundeeAtlas.error}:null};
     });
     item.ok=true;
    }catch(e){item.errors.push(String(e.message||e).slice(0,500));item.atlasDebug=await page.evaluate(()=>window.KlinikDundeeAtlas?{mode:window.KlinikDundeeAtlas.mode,error:window.KlinikDundeeAtlas.error,decoderDiagnostic:window.KlinikDundeeAtlas.decoderDiagnostic}:null).catch(()=>null);trace(`Scene ${scene.name}: ${item.errors.at(-1)}`)}
