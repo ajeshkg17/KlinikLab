@@ -67,8 +67,9 @@
         environment.level=.66;
         this.scene.environmentTexture=environment;
         status.environment='loading';
-        environment.onLoadObservable.addOnce(()=>{status.environment='ready'});
-        environment.onErrorObservable?.addOnce(()=>{status.environment='failed'});
+        const timeout=setTimeout(()=>{if(status.environment==='loading')status.environment='failed'},7000);
+        environment.onLoadObservable.addOnce(()=>{clearTimeout(timeout);status.environment='ready'});
+        environment.onErrorObservable?.addOnce(()=>{clearTimeout(timeout);status.environment='failed'});
       }catch(error){status.environment='failed';}
 
       this.camera=new B.FreeCamera('matchingOriginalCamera',new B.Vector3(0,1,4),this.scene);
@@ -182,6 +183,7 @@
       this.camera.setTarget(new B.Vector3(...source.target));
       this.camera.fov=.87;
       this.camera.minZ=.05;
+      if(status.environment==='loading'&&this.scene.environmentTexture?.isReady?.())status.environment='ready';
       const current=this.canvas.clientWidth+'x'+this.canvas.clientHeight;
       if(current!==this.lastSize){this.lastSize=current;this.engine.resize()}
       const in3D=(this.app.viewMode==='3d'&&!source.xrSession);
