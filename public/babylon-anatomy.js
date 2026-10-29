@@ -263,8 +263,8 @@
       const nx=-tz,nz=tx;
       for(let j=0;j<ring;j++){
         const a=TAU*j/ring;
-        const lateral=Math.cos(a)*(.88*p[2]+.009);
-        const y=base+root*(.149+.111*Math.sin(a));
+        const lateral=Math.cos(a)*(.78*p[2]+.008);
+        const y=base+root*(.075+.042*Math.sin(a));
         positions.push(p[0]+nx*lateral,y,p[1]+nz*lateral);
       }
     }
@@ -274,9 +274,9 @@
       else indices.push(a,c,b,a,d,c);
     }
     const first=positions.length/3;
-    positions.push(centers[0][0],base+root*.149,centers[0][1]);
+    positions.push(centers[0][0],base+root*.075,centers[0][1]);
     const last=positions.length/3;
-    positions.push(centers[15][0],base+root*.149,centers[15][1]);
+    positions.push(centers[15][0],base+root*.075,centers[15][1]);
     for(let j=0;j<ring;j++){
       const n=(j+1)%ring;
       if(upper)indices.push(first,n,j,last,steps*ring+j,steps*ring+n);
