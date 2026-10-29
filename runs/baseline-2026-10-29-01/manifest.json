@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "jobId": "baseline-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T10:05:55.189Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-desktop-overview",
+      "file": "01-desktop-overview.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "bytes": 224735,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "02-3d-teeth",
+      "file": "02-3d-teeth.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 81658,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "03-3d-occlusal",
+      "file": "03-3d-occlusal.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 104578,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "04-3d-orbited",
+      "file": "04-3d-orbited.png",
+      "capture": "stage",
+      "ok": false,
+      "errors": [
+        "The clinic canvas was not rendered"
+      ]
+    },
+    {
+      "name": "05-clinic-room",
+      "file": "05-clinic-room.png",
+      "capture": "stage",
+      "ok": true,
+      "errors": [],
+      "bytes": 124432,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "06-tooth-volume",
+      "file": "06-tooth-volume.png",
+      "capture": "volume",
+      "ok": true,
+      "errors": [],
+      "bytes": 214689,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "volume": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "webgl": false,
+        "viewMode": "volume"
+      }
+    },
+    {
+      "name": "07-tooth-cross-section",
+      "file": "07-tooth-cross-section.png",
+      "capture": "volume",
+      "ok": true,
+      "errors": [],
+      "bytes": 208034,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "volume": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "webgl": false,
+        "viewMode": "volume"
+      }
+    },
+    {
+      "name": "08-tooth-occlusal",
+      "file": "08-tooth-occlusal.png",
+      "capture": "volume",
+      "ok": true,
+      "errors": [],
+      "bytes": 211481,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "volume": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "webgl": false,
+        "viewMode": "volume"
+      }
+    },
+    {
+      "name": "09-endo-case-tooth",
+      "file": "09-endo-case-tooth.png",
+      "capture": "volume",
+      "ok": true,
+      "errors": [],
+      "bytes": 210229,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "volume": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "webgl": false,
+        "viewMode": "volume"
+      }
+    },
+    {
+      "name": "10-synthetic-radiography",
+      "file": "10-synthetic-radiography.png",
+      "capture": "imaging",
+      "ok": true,
+      "errors": [],
+      "bytes": 598466,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    },
+    {
+      "name": "11-scan-workstation",
+      "file": "11-scan-workstation.png",
+      "capture": "imaging",
+      "ok": true,
+      "errors": [],
+      "bytes": 117365,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": false,
+        "viewMode": "3d"
+      }
+    }
+  ],
+  "successCount": 10,
+  "failureCount": 1
+}
