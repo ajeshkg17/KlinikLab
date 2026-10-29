@@ -370,6 +370,7 @@ class DentalScene {
     this.box([0,1.12,-3.55],[.66,.27,1.18],'#c4d2c7');this.box([0,1.0,-2.81],[.53,.18,.62],'#bdcfd0');
     this.cy([1.38,2.82,-3.95],[.07,1.5,.07],'#b5c9c8');this.cy([.72,3.42,-3.82],[.064,1.35,.064],'#b5c9c8',{rot:[0,0,1.05]});this.cy([.10,3.39,-3.69],[.065,.75,.065],'#9fb8b8',{rot:[-.65,0,.35]});this.sphere([-.02,3.11,-3.42],[.33,.13,.33],'#e4ece6');this.cy([-.02,3.055,-3.42],[.24,.065,.24],'#f6e1a8');
     this.roomMeshes=this.meshes.slice();
+    const vrPropsStart=this.meshes.length;
     // Table and pedestal for enlarged, schematic anatomy.
     this.cy([0,.56,-1.88],[.12,1.08,.12],'#acc0c2');this.cy([0,.13,-1.88],[.73,.11,.73],'#9cb6b8');this.box([0,1.08,-1.83],[2.00,.09,1.6],'#ecf1e7');this.box([0,1.025,-1.83],[2.02,.04,1.63],'#93babc');
     this.label('ANATOMY MODEL', [0,1.13,-1.012],[1.23,.17,1],{font:33,color:'#365b60'});
@@ -427,6 +428,8 @@ class DentalScene {
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
     this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
     for(const [i,n]of ['putty','lightbody','heavybody','mediumbody'].entries()){let x=-1.83+i*.19;this.cy([x,1.015,-2.5],[.105,.16,.105],['#e2b88d','#8bb7e2','#aad7a5','#cda6d0'][i],{key:`tool:${n}`,radius:.135});this.cy([x,1.103,-2.5],[.11,.035,.11],'#ebebe0',{key:`tool:${n}`,radius:.09})}
+    this.vrCompactMeshes=this.meshes.slice(vrPropsStart);
+    this.xrComfortScale=.78;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
     this.focusDecor=this.meshes.filter(m=>!this.archMeshes[0].includes(m)&&!this.archMeshes[1].includes(m));
     const vrMeshesStart=this.meshes.length;
     // Interactive XR lesson board - all its buttons are also available via standard HTML.
@@ -449,13 +452,50 @@ class DentalScene {
   getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
-      if(p.key.startsWith('module:')||p.key.startsWith('answer:')){
+      if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
         const faceZ=p.p[2]+p.mesh.s[2]*.5;
         if(Math.abs(d[2])>1e-6){const t=(faceZ-o[2])/d[2];if(t>=0){const x=o[0]+t*d[0],y=o[1]+t*d[1];if(Math.abs(x-p.p[0])<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t}}
       }else r=M3.raySphere(o,d,p.p,p.radius);
       if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
     }return hit}
 
+
+  // Restore desktop transforms and hit targets exactly after the XR session.
+  setXRComfort(active){
+    if(Boolean(active)===this.xrComfort.active)return;
+    if(active){
+      const snapshot=[];
+      const groups=[
+        {meshes:this.vrCompactMeshes,pivot:[0,1.02,-1.83],factor:this.xrComfortScale},
+        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.68}
+      ];
+      for(const group of groups){
+        const members=new Set(group.meshes);
+        for(const mesh of group.meshes){
+          snapshot.push({kind:'mesh',object:mesh,p:mesh.p.slice(),s:mesh.s.slice(),model:mesh.model||null});
+          for(let i=0;i<3;i++){
+            mesh.p[i]=group.pivot[i]+(mesh.p[i]-group.pivot[i])*group.factor;
+            mesh.s[i]*=group.factor;
+          }
+          mesh.model=null;
+        }
+        for(const hit of this.pickables.filter(p=>members.has(p.mesh))){
+          snapshot.push({kind:'pick',object:hit,p:hit.p.slice(),radius:hit.radius});
+          for(let i=0;i<3;i++)hit.p[i]=group.pivot[i]+(hit.p[i]-group.pivot[i])*group.factor;
+          hit.radius*=group.factor;
+        }
+      }
+      this.xrComfortSnapshot=snapshot;
+      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.68};
+    }else{
+      for(const item of this.xrComfortSnapshot||[]){
+        item.object.p=item.p.slice();
+        if(item.kind==='mesh'){item.object.s=item.s.slice();item.object.model=item.model}
+        else item.object.radius=item.radius;
+      }
+      this.xrComfortSnapshot=null;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};
+    }
+  }
   installEvents(){const canvas=this.canvas;let down=null,dragged=false;canvas.addEventListener('pointerdown',e=>{if(this.xrSession)return;down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch};dragged=false;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!down||this.xrSession)return;let dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>5){dragged=true;canvas.classList.add('dragging')}if(dragged){this.yaw=down.yaw+dx*.008;this.pitch=Math.max(-1.2,Math.min(1.2,down.pitch+dy*.006))}});canvas.addEventListener('pointerup',e=>{if(!dragged){const ray=this.desktopRay(e.clientX,e.clientY);if(this.xrPrep?.onDesktopClick(ray)){down=null;canvas.classList.remove('dragging');return;}const hit=this.getRayHit(ray.o,ray.d);if(hit)this.onPick(hit.key)}down=null;canvas.classList.remove('dragging')});canvas.addEventListener('wheel',e=>{e.preventDefault();this.distance=Math.min(7.5,Math.max(1.15,this.distance*Math.exp(e.deltaY*.001)))},{passive:false});window.addEventListener('resize',()=>this.resize());}
   camera(){const y=this.target[1]+this.distance*Math.sin(this.pitch);const h=this.distance*Math.cos(this.pitch),x=this.target[0]+Math.sin(this.yaw)*h,z=this.target[2]+Math.cos(this.yaw)*h;return [x,y,z]}
   view(){return M3.lookAt(this.camera(),this.target)}
@@ -481,9 +521,11 @@ class DentalScene {
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       this.xrSession=session;this.xrRef=ref;
+      this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
-      session.addEventListener('selectstart',e=>{if(this.xrPrep?.onSelectStart(e,e.frame||this.latestFrame))return;const pose=(e.frame||this.latestFrame)?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
-      session.addEventListener('end',()=>{this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();this.xrPrep?.onExit();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      this.xrGuide?.onEnter();
+      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=frame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
+      session.addEventListener('end',()=>{this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){if(session)try{await session.end()}catch{}throw err}
   }
@@ -1513,8 +1555,8 @@ class XRToothPractice {
     this.scene=scene;this.app=app;this.active=false;this.triggers=new Set();this.lastCut=null;this.lastMeshAt=0;
     this.dirty=true;this.currentCase='';this.lastRevision=-1;this.cutCount=0;this.lastHapticAt=0;this.sourceKind='controller-target-ray';
     this.presentation=[];
-    this.toggleButton=scene.box([.65,2.31,-2.09],[.86,.21,.055],'#246b71',{key:'xrprep:toggle',radius:.39});
-    this.toggleText=scene.label('VR TOOTH PREP',[.65,2.32,-2.053],[.82,.125,1],{font:34,color:'#effff8'});
+    this.toggleButton=scene.box([.73,1.85,-1.90],[.64,.14,.055],'#246b71',{key:'xrprep:toggle',radius:.39});
+    this.toggleText=scene.label('VR TOOTH PREP',[.73,1.855,-1.861],[.60,.082,1],{font:34,color:'#effff8'});
     this.toggleButton.hidden=true;this.toggleText.hidden=true;
     this.meshes=materials.map((material)=>{
       const kind='xrvol-'+material;
@@ -1525,7 +1567,7 @@ class XRToothPractice {
     });
     this.tip=scene.sphere([0,-20,0],[.025,.025,.025],'#46ead5',{alpha:.82});
     this.tip.hidden=true;
-    this.info=scene.label('VR PRACTICE | NOT CALIBRATED',[.37,2.63,-1.85],[1.6,.17,1],{font:32,color:'#e7fff1'});
+    this.info=scene.label('VR PRACTICE | NOT CALIBRATED',[.43,2.03,-1.76],[1.10,.12,1],{font:32,color:'#e7fff1'});
     this.info.hidden=true;
   }
   get lab(){return this.app.volLab}
@@ -1580,6 +1622,7 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
+    if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
     this.syncCase();if(this.dirty&&t-this.lastMeshAt>230)this.updateMesh();
     let best=null;
     for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray)continue;
@@ -1611,6 +1654,131 @@ window.addEventListener('DOMContentLoaded',()=>{
  const parent=document.getElementById('ds-quest-result');if(parent){const b=document.createElement('button');b.className='ds-btn secondary';b.id='ds-xr-preview';b.textContent='Preview XR tooth mesh on PC';parent.before(b);b.onclick=()=>{const on=xr.toggle();app.setView('3d');app.scene.mode=on?'teeth':'clinic';app.scene.target=on?[.28,1.42,-1.03]:[0,1.52,-2.6];app.scene.distance=on?1.9:4.4;app.scene.pitch=.16;app.scene.yaw=.12;b.textContent=on?'Hide XR tooth preview':'Preview XR tooth mesh on PC';};}
 });
 })();
+</script>
+<script>
+'use strict';
+/* Quest 2 in-headset tutorial: generated entirely as scene meshes and labels.
+   No DOM overlay, hand-tracking assumption, controller-button indexing, or medical action.
+   WebXR selectstart is the primary trigger; squeezestart (grip) reopens help. */
+(function(root){
+  const PAGES=Object.freeze([
+    {title:'QUEST 2 | GET STARTED',lines:[
+      'Aim either controller at a button.',
+      'Press INDEX TRIGGER to select.',
+      'A visible ray shows your pointer.',
+      'Use NEXT to practise the controls.',
+      'Grip button reopens this guide.'
+    ]},
+    {title:'PICK A TRAINING MODULE',lines:[
+      'Look to the LEFT lesson board.',
+      'Aim at one of the seven modules.',
+      'Press INDEX TRIGGER to choose.',
+      'The status panel shows your task.',
+      'VR menus are smaller for comfort.'
+    ]},
+    {title:'TEETH AND INSTRUMENTS',lines:[
+      'Aim the controller ray at a tooth.',
+      'Press INDEX TRIGGER to select it.',
+      'You can also select instruments.',
+      'Stay within your physical play area.',
+      'No thumbstick movement is added.'
+    ]},
+    {title:'OPTIONAL VR TOOTH PREP',lines:[
+      'Select the VR TOOTH PREP button.',
+      'Aim at the virtual practice tooth.',
+      'Hold TRIGGER to make a simulated cut.',
+      'Release TRIGGER to stop cutting.',
+      'No real depth or force calibration.'
+    ]},
+    {title:'READY TO PRACTISE',lines:[
+      'BACK reviews earlier instructions.',
+      'CLOSE returns to the VR workspace.',
+      'Press either GRIP to reopen help.',
+      'Use the Quest system menu to exit VR.',
+      'Desktop tutorial is separate.'
+    ]}
+  ]);
+  const spec=Object.freeze({panel:{p:[.08,1.56,-1.18],s:[.96,.80,.047]},
+    launcher:{p:[-1.12,1.40,-1.55],s:[.41,.13,.055]},
+    controls:{back:[-.20,1.263,-1.124],next:[.15,1.263,-1.124],close:[.48,1.263,-1.124]}});
+  const state={version:1,active:false,open:false,index:0,pages:PAGES.length,controllerSelects:0,gripOpens:0};
+  class XRControllerGuide{
+    constructor(scene){
+      this.scene=scene;this.state=state;this.meshes=[];this.panelMeshes=[];this.labels=[];
+      const add=(mesh,panel=true)=>{this.meshes.push(mesh);if(panel)this.panelMeshes.push(mesh);mesh.hidden=true;return mesh};
+      add(scene.box(spec.panel.p,spec.panel.s,'#143644'));
+      add(scene.box([.08,1.926,-1.151],[.94,.064,.055],'#258578'));
+      this.title=add(scene.label('QUEST 2 | GET STARTED',[.08,1.856,-1.141],[.87,.089,1],{font:35,bold:true,color:'#e9fff6'}));
+      this.progress=add(scene.label('1 / 5',[.08,1.775,-1.139],[.78,.065,1],{font:30,color:'#90d9ce'}));
+      for(let i=0;i<5;i++){
+        this.labels.push(add(scene.label('',[.08,1.686-i*.083,-1.139],[.875,.078,1],
+          {font:32,color:'#e3f4ef'})));
+      }
+      for(const [key,p] of Object.entries(spec.controls)){
+        const color=key==='next'?'#197e72':'#2b5f68';
+        add(scene.box(p,[.29,.116,.056],color,{key:'guide:'+key}));
+        const label=key==='next'?'NEXT':key==='back'?'BACK':'CLOSE';
+        add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:34,bold:true}));
+      }
+      this.launcher=add(scene.box(spec.launcher.p,spec.launcher.s,'#236f75',{key:'guide:open'}),false);
+      this.launcherLabel=add(scene.label('VR HELP / GRIP',
+        [spec.launcher.p[0],spec.launcher.p[1]+.005,spec.launcher.p[2]+.035],
+        [.37,.080,1],{font:32,color:'#e8fff3'}),false);
+    }
+    render(){
+      const page=PAGES[state.index];if(!page)return;
+      this.scene.replaceLabel(this.title,page.title,32);
+      this.scene.replaceLabel(this.progress,(state.index+1)+' / '+PAGES.length,30);
+      for(let i=0;i<5;i++)this.scene.replaceLabel(this.labels[i],page.lines[i],26);
+      for(const mesh of this.panelMeshes)mesh.hidden=!state.open;
+      this.launcher.hidden=!state.active;
+      this.launcherLabel.hidden=!state.active;
+    }
+    open(){
+      if(!state.active)return false;
+      state.index=0;state.open=true;this.render();return true;
+    }
+    close(){if(!state.open)return false;state.open=false;this.render();return true}
+    next(){if(!state.open)return false;if(state.index===PAGES.length-1)return this.close();state.index++;this.render();return true}
+    back(){if(!state.open||state.index===0)return false;state.index--;this.render();return true}
+    onEnter(){state.active=true;state.controllerSelects=0;state.gripOpens=0;this.open()}
+    onExit(){state.active=false;state.open=false;state.index=0;for(const mesh of this.meshes)mesh.hidden=true}
+    onSqueezeStart(){
+      if(!state.active)return false;
+      state.gripOpens++;
+      if(!state.open)this.open();
+      return true;
+    }
+    onSelectStart(event,frame){
+      if(!state.active)return false;
+      // Invisible panels never receive interaction, but the launcher always does.
+      const pose=frame&&event?.inputSource?.targetRaySpace&&this.scene.xrRef
+        ?frame.getPose(event.inputSource.targetRaySpace,this.scene.xrRef):null;
+      let key=null;
+      if(pose){
+        const q=pose.transform.orientation,p=pose.transform.position;
+        const ray={o:[p.x,p.y,p.z],d:this.scene.rotateByQuat([0,0,-1],q)};
+        key=this.scene.getRayHit(ray.o,ray.d)?.key||null;
+      }
+      if(key==='guide:open'){this.open();state.controllerSelects++;return true}
+      if(!state.open)return false;
+      // Suppress simulated drilling and background selections while the guide is up.
+      state.controllerSelects++;
+      if(key==='guide:next')this.next();
+      else if(key==='guide:back')this.back();
+      else if(key==='guide:close')this.close();
+      return true;
+    }
+  }
+  root.KlinikXRGuide={XRControllerGuide,state,pages:PAGES,spec};
+  if(typeof window!=='undefined'&&typeof document!=='undefined'){
+    window.addEventListener('DOMContentLoaded',()=>{
+      const app=window.kliniklab;
+      if(app?.scene?.gl&&!app.scene.xrGuide)app.scene.xrGuide=new XRControllerGuide(app.scene);
+    });
+  }
+})(typeof window!=='undefined'?window:globalThis);
+
 </script>
 <script>
 'use strict';
