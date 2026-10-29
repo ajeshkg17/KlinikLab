@@ -85,6 +85,11 @@
       disposeScene();
       const token=assetGeneration;
       const B=window.BABYLON;
+      // Babylon 9's versioned decoder URL can 404 on its learning CDN.
+      // Explicitly use the documented, unversioned Draco distribution.
+      const draco={wasmUrl:'https://cdn.babylonjs.com/draco_wasm_wrapper_gltf.js',wasmBinaryUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.wasm',fallbackUrl:'https://cdn.babylonjs.com/draco_decoder_gltf.js'};
+      if(B.DracoDecoder)B.DracoDecoder.DefaultConfiguration=draco;
+      if(B.DracoCompression)B.DracoCompression.Configuration={decoder:draco};
       engine=new B.Engine(canvas,true,{preserveDrawingBuffer:true,stencil:true},true);
       scene=new B.Scene(engine);
       scene.useRightHandedSystem=true;
