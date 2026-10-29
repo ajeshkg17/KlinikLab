@@ -103,7 +103,11 @@ test('red-flag language can suspend scoring but never claims comprehensive safet
  assert.equal(dangerous.score,null);
  assert.equal(dangerous.safetyFlags.length,1);
  assert.equal(api.score('surgery','kollegen','Bei Atemnot nicht abwarten.').safetyFlags.length,0);
- assert.equal(api.score('endo','kollegen','Atemnot abwarten.').safetyFlags.length,0);
+ for(const id of Object.keys(api.cases)){
+  const flagged=api.score(id,'kollegen','Antibiotika sind immer notwendig');
+  assert.equal(flagged.score,null,'score suspended in '+id);
+  assert(flagged.safetyFlags.length>0);
+ }
  assert.match(dangerous.method,/Does not establish/);
 });
 test('both colleague exchanges include patient-friendly technical term explanations',()=>{
