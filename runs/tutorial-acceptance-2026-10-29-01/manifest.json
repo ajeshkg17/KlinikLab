@@ -1,0 +1,667 @@
+{
+  "schemaVersion": 1,
+  "jobId": "tutorial-acceptance-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T18:46:30.217Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-welcome",
+      "file": "01-welcome.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 280302,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 0,
+          "total": 10,
+          "currentId": "welcome"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-scene-controls",
+      "file": "02-scene-controls.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 282516,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 3,
+          "total": 10,
+          "currentId": "views"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "03-fdi-navigation",
+      "file": "03-fdi-navigation.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 283742,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 4,
+          "total": 10,
+          "currentId": "fdi"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "04-anatomy-help",
+      "file": "04-anatomy-help.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 283369,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 6,
+          "total": 10,
+          "currentId": "anatomy"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "05-go-back",
+      "file": "05-go-back.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 280932,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 1,
+          "total": 10,
+          "currentId": "stations"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "06-final-vr",
+      "file": "06-final-vr.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 282944,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": true,
+          "index": 9,
+          "total": 10,
+          "currentId": "vr"
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "07-skip",
+      "file": "07-skip.png",
+      "capture": "page",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 259679,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "archMode": "both",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null,
+          "anatomyVersion": 0,
+          "appearance": "balanced",
+          "appearanceVersion": 0,
+          "vertexColoredTemplates": 0,
+          "jawMeshes": 0,
+          "jawVisible": false,
+          "fineCrownTemplates": 0,
+          "fineCrownVertices": 0,
+          "crownSource": "dundee"
+        },
+        "structure": {
+          "version": 1,
+          "open": false,
+          "focusSelected": false,
+          "selectedFDI": null,
+          "layer": "enamel",
+          "kind": null
+        },
+        "tutorial": {
+          "version": 1,
+          "open": false,
+          "index": 0,
+          "total": 10,
+          "currentId": null
+        },
+        "practice": {
+          "version": 1,
+          "open": false,
+          "started": false,
+          "selectedFDI": null,
+          "questionIndex": 0,
+          "total": 10,
+          "score": 0,
+          "answered": false,
+          "completed": false,
+          "lastCorrect": null
+        },
+        "realTeeth": {
+          "mode": "idle",
+          "ready": false,
+          "loaded": 0,
+          "instances": 0,
+          "visibleInstances": 0,
+          "triangles": 0,
+          "failures": [],
+          "error": null
+        },
+        "atlas": {
+          "mode": "idle",
+          "ready": false,
+          "asset": null,
+          "meshes": 0,
+          "triangles": 0,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 7,
+  "failureCount": 0
+}
