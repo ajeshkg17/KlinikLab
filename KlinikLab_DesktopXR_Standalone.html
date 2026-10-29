@@ -1457,6 +1457,124 @@ window.addEventListener('DOMContentLoaded',()=>window.clinicalJourney=new Journe
  ];
  function criterion(label,pattern,tip){return {label:label,pattern:pattern,tip:tip};}
  const CASES={
+  perio:{
+   title:'Zahn 46 · Zahnfleischbluten und Lockerung',
+   facts:'Fiktiver Lehrfall: Seit Monaten Zahnfleischbluten beim Putzen, Zahn 46 fühlt sich locker an. Etwa zehn Zigaretten täglich. Blutzucker wird hausärztlich kontrolliert, ein HbA1c-Wert liegt nicht vor. Seltene Interdentalreinigung. Im simulierten klinischen Befund entzündliche Zeichen und erhöhte Sondierungswerte, an Zahn 46 Lockerung. Fiktiver Röntgenbefundtext: möglicher horizontaler Knochenverlust, noch nicht quantifiziert. Staging und Grading sind aus diesen Angaben nicht gesichert.',
+   glossary:[['Sondierungstiefe','probing depth'],['Blutung auf Sondieren (BOP)','bleeding on probing'],['Attachmentverlust','loss of periodontal attachment'],['Unterstützende Parodontitistherapie','supportive periodontal care']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie auf Deutsch fünf patientengerechte Fragen zu Symptomen, Mundhygiene, Rauchen, Diabetes und Medikamenten. Behaupten Sie kein gesichertes Stadium.',
+     b2:'Seit wann blutet Ihr Zahnfleisch? Rauchen Sie?',
+     c1:'Sind Vorerkrankungen, insbesondere ein Diabetes mellitus, bekannt und wie ist dieser eingestellt?',
+     model:'Seit wann blutet Ihr Zahnfleisch? Haben Sie bemerkt, dass ein Zahn locker ist? Wie reinigen Sie Ihre Zahnzwischenräume? Rauchen Sie derzeit oder haben Sie früher geraucht? Ist bei Ihnen Diabetes bekannt, und wurde der HbA1c-Wert kontrolliert? Welche Medikamente nehmen Sie ein?',
+     checks:[
+      criterion('Verlauf und Blutung','seit wann|blut','Blutungsverlauf und Dauer erfragen.'),
+      criterion('Lockerung','locker|beweglich','Nach Zahnbeweglichkeit fragen.'),
+      criterion('Mundhygiene','zahzwischen|zahnzwischen|interdental|reinigen|putz','Reinigung und Interdentalpflege erfragen.'),
+      criterion('Rauchen','rauch|zigarett','Tabakexposition erheben.'),
+      criterion('Diabetes / Allgemeinanamnese','diabetes|blutzucker|hba1c|medikament','Diabeteskontrolle und Medikamente erfragen.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie laienverständlich den Verdacht auf eine Zahnfleisch-/Zahnhalteapparaterkrankung, weitere Diagnostik, stufenweises Vorgehen, persönliche Risikofaktoren und informierte Entscheidung.',
+     b2:'Das Zahnfleisch ist entzündet; wir müssen zunächst genauer untersuchen ...',
+     c1:'Für die Einstufung benötigen wir einen vollständigen Parodontalstatus und die Beurteilung des Knochenverlusts.',
+     model:'Ihr Zahnfleisch ist entzündet und möglicherweise ist auch der Zahnhalteapparat betroffen. Wir brauchen einen vollständigen Parodontalstatus, bevor wir ein Stadium festlegen können. Zuerst besprechen wir Mundhygiene und Risikofaktoren wie Rauchen und die Blutzuckerkontrolle. Anschließend kommen je nach Befund eine professionelle Reinigung und eine Behandlung unter dem Zahnfleisch sowie regelmäßige Nachkontrollen infrage. Wir erklären Ihnen Nutzen, Risiken und Alternativen und besprechen Ihre Fragen, bevor Sie entscheiden und einwilligen.',
+     checks:[
+      criterion('Verständliche Verdachtserklärung','zahnfleisch|zahnhalteapparat|entzünd','Verdacht ohne gesicherte Stadieneinteilung erklären.'),
+      criterion('Parodontalstatus','parodontalstatus|untersuch|befund','Vollständige Diagnostik vor Stadieneinteilung erläutern.'),
+      criterion('Hygiene und Risikofaktoren','hygiene|rauch|blutzucker|diabetes','Beeinflussbare Risikofaktoren und Pflege ansprechen.'),
+      criterion('Stufenweise Therapie / Nachsorge','reinig|nachkontroll|therapie|behandl','Mögliches stufenweises Vorgehen und Nachsorge erklären.'),
+      criterion('Risiken, Alternativen und Einwilligung','risik|alternativ|einwillig|fragen|entscheiden','Entscheidung und Einwilligung nach angemessener Aufklärung ansprechen.')
+     ]
+    },
+    brief:{
+     prompt:'Dokumentieren Sie den simulierten Befund zu Zahn 46 mit Anamnese, Untersuchungsdaten, radiologischer Unsicherheit und weiterem Plan; legen Sie kein Stadium oder Grading ohne ausreichende Daten fest.',
+     b2:'Anamnestisch besteht Zahnfleischbluten; Zahn 46 fühlt sich locker an ...',
+     c1:'Bei Verdacht auf Parodontitis ist die Stadien- und Gradzuordnung erst nach vollständiger Befunderhebung möglich ...',
+     model:'Zahn 46: Seit Monaten gingivale Blutung und subjektive Lockerung. Rauchen: ca. zehn Zigaretten täglich; Diabeteskontrolle/HbA1c nicht bekannt. Klinisch entzündliche Veränderungen und erhöhte Sondierungswerte, Zahn 46 mit Lockerung. Radiologischer Befundtext: möglicher horizontaler Knochenverlust, Ausmaß noch unbestimmt. Arbeitsdiagnose: Verdacht auf Parodontitis; Staging und Grading offen. Geplant: vollständiger Parodontalstatus einschließlich Risikoprofil, Aufklärung, indikationsgerechte stufenweise Therapie und Reevaluation.',
+     checks:[
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','FDI-Zahnnummer im Befund verwenden.'),
+      criterion('Anamnese / Risiken','rauch|diabetes|blutung|hba1c','Anamnestische Symptome und Risikofaktoren dokumentieren.'),
+      criterion('Klinischer Befund','sondier|locker|gingival','Klinischen Status nennen.'),
+      criterion('Bildgebung / Unsicherheit','radiolog|röntgen|knochen','Nur einen fiktiven, nicht abschließenden radiologischen Befund angeben.'),
+      criterion('Arbeitsdiagnose / Plan','verdacht|parodontitis|staging|reevalu','Arbeitsdiagnose und weiteren Abklärungsbedarf dokumentieren.')
+     ]
+    },
+    kollegen:{
+     prompt:'Übergeben Sie den Befund professionell mit FDI, relevanten Risikofaktoren, fehlenden Daten und nächstem Schritt. Erklären Sie abschließend den Fachbegriff Parodontitis laienverständlich.',
+     b2:'Bei Zahn 46 besteht eine Lockerung; die Patientin oder der Patient berichtet ...',
+     c1:'Eine Stadien- und Gradzuordnung ist aufgrund des noch unvollständigen Parodontalstatus nicht möglich.',
+     model:'Bei Zahn 46 liegen Lockerung und entzündliche parodontale Befunde vor. Anamnestisch besteht Zahnfleischbluten; die Person raucht und die glykämische Kontrolle ist unklar. Klinisch sind erhöhte Sondierungswerte dokumentiert, radiologisch besteht nur ein fiktiver Hinweis auf möglichen Knochenverlust. Es liegt ein Verdacht auf Parodontitis vor; Staging und Grading sind ohne vollständigen Befund offen. Wir planen einen vollständigen Parodontalstatus, Risikoberatung und stufenweise Therapie mit Reevaluation. Patientenverständlich bedeutet Parodontitis: Erkrankung des Zahnhalteapparats.',
+     checks:[
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','Betroffenen Zahn nennen.'),
+      criterion('Risikoprofil','rauch|diabetes|glykäm|hba1c','Relevante Risikofaktoren übergeben.'),
+      criterion('Klinische / radiologische Befunde','sondier|locker|knochen|radiolog','Klinische und radiologische Befunde anführen.'),
+      criterion('Unsicherheit der Diagnose','verdacht|staging|grading|offen','Nicht gesichertes Stadium und offenen Befund benennen.'),
+      criterion('Stufenweise Planung','parodontalstatus|reevalu|stufenweise|therapie','Nächste diagnostische und therapeutische Schritte nennen.')
+     ]
+    }
+   }
+  },
+  restoration:{
+   title:'Zahn 16 · kariöser Defekt und kurze Kältereaktion',
+   facts:'Fiktiver Lehrfall: Seit etwa drei Wochen Schmerzen beim Kauen rechts oben; Kaltes löst nur kurze Beschwerden aus. Keine Spontan- oder Nachtschmerzen, kein Fieber oder Schwellung. Zahn 16 mit okklusal-approximalem Defekt, frühere Füllung. Kältetest positiv mit kurzer Reaktion; Perkussion und Palpation unauffällig. Fiktiver Bissflügel-Befundtext: approximaler Dentinbefall. Ausdehnung, Pulpanähe und Restaurierbarkeit noch zu beurteilen.',
+   glossary:[['Approximalkaries','decay between adjacent teeth'],['Kälte-Sensibilitätstest','cold sensibility test'],['Kompositrestauration','composite restoration'],['Teilkrone / Onlay','partial crown / onlay']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie patientengerechte Fragen zu Dauer, Auslösern, spontanen Schmerzen, Infektionszeichen und Allgemeinanamnese.',
+     b2:'Tut es beim Kauen oder bei kalten Getränken weh?',
+     c1:'Hält der Schmerz nach Entfernen des Kältereizes an, und treten spontane oder nächtliche Beschwerden auf?',
+     model:'Seit wann haben Sie die Schmerzen? Treten die Beschwerden beim Kauen oder bei Kälte auf? Wie lange hält der Schmerz nach dem Kältereiz an? Haben Sie spontane oder nächtliche Schmerzen? Haben Sie eine Schwellung oder Fieber bemerkt? Nehmen Sie Medikamente ein und bestehen Allergien?',
+     checks:[
+      criterion('Beginn','seit wann|wie lange.{0,30}schmerz','Dauer und Verlauf erfragen.'),
+      criterion('Kauen / Kälte','kauen|kälte|kalt','Auslöser spezifizieren.'),
+      criterion('Schmerzdauer nach Reiz','wie lange hält|nach dem kälte|nach kälte','Persistenz nach dem Kältereiz erfragen.'),
+      criterion('Spontan / Nacht / Warnzeichen','spontan|nachts|fieber|schwell','Spontanschmerz und Infektionszeichen erfragen.'),
+      criterion('Medikamente / Allergien','medikament|allerg','Allgemeinanamnese ergänzen.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie den Verdacht auf Karies mit noch offenem Pulpa- und Restaurierungsbefund. Besprechen Sie bedingte Füllungs- und Teilkronenoptionen und eine informierte Entscheidung.',
+     b2:'An Ihrem Backenzahn sehen wir einen Defekt; wie groß er ist, müssen wir prüfen.',
+     c1:'Je nach Defektausdehnung und Höckerstabilität kommen direkte oder indirekte restaurative Maßnahmen in Betracht.',
+     model:'An Ihrem Backenzahn 16 besteht ein kariöser Defekt. Die genaue Tiefe und die Situation des Zahnnervs müssen wir noch untersuchen. Wenn genügend gesunde Zahnsubstanz erhalten ist, kann eine Kompositfüllung infrage kommen. Bei größerer Schädigung könnte eine Teilkrone oder ein Onlay sinnvoll sein. Wir besprechen die jeweiligen Vorteile, Risiken, Kosten und Alternativen und beantworten Ihre Fragen, bevor Sie entscheiden und einwilligen.',
+     checks:[
+      criterion('Patientengerechte Defekterklärung','karies|kariös|loch|defekt','Die vermutete Erkrankung verständlich erklären.'),
+      criterion('Diagnostische Unsicherheit','prüf|untersuch|tiefe|zahnnerv|pulpa','Offenen Befund und fehlende Gewissheit benennen.'),
+      criterion('Direkte Versorgung','komposit|füllung','Füllung als bedingte Option beschreiben.'),
+      criterion('Indirekte Versorgung','teilkrone|onlay','Teilkronen-/Onlay-Alternative einordnen.'),
+      criterion('Aufklärung / Entscheidung','risik|kosten|alternativ|einwillig|fragen','Risiken, Alternativen und Einwilligung besprechen.')
+     ]
+    },
+    brief:{
+     prompt:'Schreiben Sie einen neutralen Befundtext für Zahn 16. Trennen Sie berichtete Symptome, tatsächlich simulierte Tests und offene Indikationsfragen.',
+     b2:'An Zahn 16 zeigen sich eine Kavitation und eine kurze positive Kältereaktion.',
+     c1:'Die Pulpadiagnose und die restaurative Indikation bleiben bis zur vollständigen Defektbeurteilung offen.',
+     model:'Zahn 16: Seit drei Wochen Beschwerden beim Kauen, kurze Kältereaktion ohne spontane oder nächtliche Schmerzen. Klinisch okklusal-approximale Kavitation bei vorbestehender Füllung; Kältetest positiv mit kurzer abklingender Reaktion, Perkussion unauffällig. Fiktiver Bissflügel-Befundtext: approximale Läsion bis ins Dentin. Pulpanähe, Defektausdehnung und Restaurierbarkeit sind noch zu prüfen. Arbeitsdiagnose: kariöser Dentinbefall mit abklärungsbedürftigem Pulpastatus; Planung nach Befund, Aufklärung und Einwilligung.',
+     checks:[
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahn 16 nach FDI nennen.'),
+      criterion('Schmerzcharakter','kauen|kälte|nachts|spontan','Anamnestische Beschwerden dokumentieren.'),
+      criterion('Klinischer Test','kältetest|perkussion|palpation','Klinische Befunde und Testreaktion anführen.'),
+      criterion('Bildgebung','bissflügel|radiolog|röntgen|dentin','Fiktiven Röntgenbefund kennzeichnen.'),
+      criterion('Offene Indikation','pulpa|prüf|restaurier|arbeitsdiagnose','Unsicherheit und weiteren diagnostischen Bedarf erklären.')
+     ]
+    },
+    kollegen:{
+     prompt:'Übergeben Sie Zahn 16 einschließlich Anamnese, klinischer Befunde, fehlender Gewissheit und möglichen Restaurationen. Erklären Sie den Begriff Approximalkaries patientengerecht.',
+     b2:'Bei Zahn 16 besteht eine kariöse Läsion mit kurzer Kälteempfindlichkeit.',
+     c1:'Aus der isolierten kurzen Kälteantwort lässt sich der Pulpagewebezustand nicht sicher diagnostizieren.',
+     model:'An Zahn 16 besteht eine okklusal-approximale kariöse Läsion mit kurz abklingender Kältereaktion. Der Patient beschreibt vor allem Schmerzen beim Kauen, ohne spontane Nachtschmerzen. Klinisch ist eine Kavitation sichtbar, die Perkussion ist unauffällig; im fiktiven Bissflügel-Befundtext reicht die Läsion bis ins Dentin. Der Pulpastatus und die Restaurierbarkeit sind noch abzuklären. Je nach Defektausdehnung kommen Kompositrestauration oder Teilkrone infrage. Patientenverständlich ist Approximalkaries eine Karies zwischen benachbarten Zähnen.',
+     checks:[
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahnbezeichnung nennen.'),
+      criterion('Beschwerden','kälte|kauen|nachts','Relevante Anamnese übergeben.'),
+      criterion('Untersuchung / Radiologie','perkussion|kältetest|bissflügel|radiolog','Befunde nachvollziehbar mitteilen.'),
+      criterion('Unvollständige Diagnose','pulpa|restaurier|abklär|unsicher','Diagnoseunsicherheit kenntlich machen.'),
+      criterion('Restauration / nächste Schritte','komposit|teilkrone|onlay|füllung','Indikationsabhängige Optionen benennen.')
+     ]
+    }
+   }
+  },
   endo:{
    title:'Zahn 36 · anhaltende Kälteschmerzen',
    facts:'Fiktiver Lehrfall: Seit Wochen Beschwerden links unten, seit gestern Spontan- und Nachtschmerz. Zahn 36 reagiert auf Kälte anhaltend, leichte Perkussionsempfindlichkeit. Fiktiver Röntgenbefundtext: tiefe Karies, kein eindeutig abgrenzbarer apikaler Befund. Allergien nicht bekannt; gelegentlich Schmerzmittel. Restaurierbarkeit und definitive Diagnose noch zu prüfen.',
