@@ -1,29 +1,11 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase6-practice-2026-10-29-01",
+  "jobId": "phase6-practice-final-2026-10-29-02",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
-    {
-      "name": "01-quiz-start",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "tooth26"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "practice"
-        }
-      ]
-    },
     {
       "name": "02-quiz-incorrect",
       "capture": "stage",
@@ -46,31 +28,6 @@
       ]
     },
     {
-      "name": "03-quiz-correct-next",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "tooth36"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "practice"
-        },
-        {
-          "action": "practiceAnswerCorrect"
-        },
-        {
-          "action": "click",
-          "control": "practiceNext"
-        }
-      ]
-    },
-    {
       "name": "04-quiz-complete",
       "capture": "stage",
       "steps": [
@@ -88,53 +45,6 @@
         },
         {
           "action": "practiceComplete"
-        }
-      ]
-    },
-    {
-      "name": "05-quiz-restart",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "tooth24"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "practice"
-        },
-        {
-          "action": "practiceAnswerWrong"
-        },
-        {
-          "action": "click",
-          "control": "practiceRestart"
-        }
-      ]
-    },
-    {
-      "name": "06-quiz-return",
-      "capture": "stage",
-      "steps": [
-        {
-          "action": "click",
-          "control": "tooth26"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "practice"
-        },
-        {
-          "action": "click",
-          "control": "practiceClose"
         }
       ]
     },
