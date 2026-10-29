@@ -263,3 +263,21 @@ test('grip reopening recenters the guide at latest tracked pose, without drift',
  assert.equal(guide.lastViewerPose,null);
  assert.equal(guide.anchored,false);
 });
+
+test('grip recenters an already-open guide without losing the active tutorial page',()=>{
+ const {guide,scene,ctx}=makeGuide(),state=ctx.KlinikXRGuide.state;
+ scene.rotateByQuat=(v,q)=>[-2*q.y*q.w,0,-1+2*q.y*q.y];
+ const pose=(x,y,z,q)=>({transform:{position:{x,y,z},orientation:q}});
+ const q0={x:0,y:0,z:0,w:1},q1={x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2};
+ guide.onEnter();
+ assert(guide.placeForViewer(pose(0,1.6,0,q0)));
+ guide.next();assert.equal(state.index,1);
+ guide.placeForViewer(pose(1,1.6,2,q1)); // tracking continues while open
+ assert(guide.onSqueezeStart());
+ assert.equal(state.index,1);
+ assert.equal(state.open,true);
+ assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9);
+ assert(Math.abs(guide.meshes[0].p[2]-(2-.08))<1e-9);
+ assert(Math.abs(guide.meshes[0].rot[1]-Math.PI/2)<1e-9);
+ guide.onExit();
+});

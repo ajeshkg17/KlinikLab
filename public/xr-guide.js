@@ -145,10 +145,10 @@
     onSqueezeStart(){
       if(!state.active)return false;
       state.gripOpens++;
-      if(!state.open){
-        if(spec.placement.recenterOnHelpReopen)this.recenter();
-        this.open();
-      }
+      // Grip is always a recovery shortcut, even if help is already open
+      // and the learner has turned away from the visible panel.
+      if(spec.placement.recenterOnHelpReopen)this.recenter();
+      if(!state.open)this.open();
       return true;
     }
     onSelectStart(event,frame){
