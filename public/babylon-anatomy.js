@@ -235,7 +235,7 @@
       cervicalSites:points.length,continuous:true,closedEnds:true};
   }
   function createTemplate(B,scene,kind,layout){
-    const match=/^crown_([1-4])_([01])$/.exec(kind);
+    const match=/^crown_([1-4])_([01])(?:_([1-8]))?$/.exec(kind);
     if(!match&&!/^gingiva[01]$/.test(kind))return null;
     const data=match?crownData(Number(match[1]),match[2]==='0'):gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
