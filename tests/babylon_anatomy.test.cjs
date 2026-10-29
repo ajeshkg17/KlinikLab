@@ -74,3 +74,29 @@ test('gingival mesh has no open boundary edges',()=>{
     assert([...edges.values()].every(v=>v===2),'all edges must be shared by two triangles');
   }
 });
+
+test('arch-specific premolar spacing has no large bounding-ellipse gaps or overlap warnings',()=>{
+  const paths=[
+    [[.105,-1.26],[.260,-1.275],[.406,-1.335],[.535,-1.485],[.643,-1.672],[.713,-1.862],[.741,-2.080],[.750,-2.303]],
+    [[.095,-1.292],[.237,-1.305],[.371,-1.363],[.496,-1.504],[.602,-1.685],[.665,-1.879],[.691,-2.091],[.699,-2.307]]
+  ];
+  const source=[];
+  for(let arch=0;arch<2;arch++)for(const q of arch===0?[1,2]:[4,3])
+    for(let tooth=1;tooth<=8;tooth++){
+      const path=paths[arch],sign=q===1||q===4?-1:1;
+      const [x,z]=path[tooth-1],a=path[Math.max(0,tooth-2)],b=path[Math.min(7,tooth)];
+      const theta=Math.atan2(b[1]-a[1],b[0]-a[0]);
+      const width=(tooth===1?.090:tooth===2?.076:tooth===3?.082:tooth<=5?.085:.105)*(arch===0?1:.95);
+      const depth=tooth<=2?.074:tooth===3?.079:tooth<=5?.094:.113;
+      source.push({key:'tooth:'+q+tooth,tag:'crown',p:[sign*x,arch===0?1.759:1.332,z],
+        s:[width,1,depth],rot:[0,sign<0?theta:-theta,0]});
+    }
+  const layout=A.archPlacement(source);
+  assert.deepEqual(layout.diagnostics.largeGaps,[]);
+  assert.deepEqual(layout.diagnostics.possibleOverlaps,[]);
+  for(const t of source){
+    const placed=layout.byId[t.key.slice(6)];
+    assert(Math.hypot(placed.p[0]-t.p[0],placed.p[2]-t.p[2])<.09,
+      'displacements stay inside the legacy picking region');
+  }
+});
