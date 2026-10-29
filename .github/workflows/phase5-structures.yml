@@ -1,0 +1,40 @@
+name: Phase 5 tooth structure explorer
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Phase 2–5 anatomy and interaction regressions
+        run: node --test tests/babylon_anatomy.test.cjs tests/real_scene_qa.cjs tests/phase3_appearance.test.cjs tests/phase4_jaw.test.cjs tests/phase5_structures.test.cjs
+      - name: Check syntax and static file mirrors
+        run: |
+          node --check dental-structures.js
+          node --check babylon-preview.js
+          node --check real-dental-scene.js
+          cmp dental-structures.js public/dental-structures.js
+          cmp babylon-preview.js public/babylon-preview.js
+          cmp real-dental-scene.js public/real-dental-scene.js
+          cmp index.html public/index.html
+      - name: HTTP smoke test for tooth explorer JavaScript
+        run: |
+          node server/server.mjs >/tmp/kliniklab-phase5.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/dental-structures.js -o /tmp/structure.js; then break; fi
+            sleep 1
+          done
+          test -s /tmp/structure.js
+          grep -q KlinikStructureExplorer /tmp/structure.js
+      - name: Verify generated self-contained HTML
+        run: |
+          python3 build_standalone.py
+          git diff --exit-code -- KlinikLab_DesktopXR_Standalone.html
