@@ -50,7 +50,7 @@
      c1:'Bei Verdacht auf Parodontitis ist die Stadien- und Gradzuordnung erst nach vollständiger Befunderhebung möglich ...',
      model:'Zahn 46: Seit Monaten gingivale Blutung und subjektive Lockerung. Rauchen: ca. zehn Zigaretten täglich; Diabeteskontrolle/HbA1c nicht bekannt. Klinisch entzündliche Veränderungen und erhöhte Sondierungswerte, Zahn 46 mit Lockerung. Radiologischer Befundtext: möglicher horizontaler Knochenverlust, Ausmaß noch unbestimmt. Arbeitsdiagnose: Verdacht auf Parodontitis; Staging und Grading offen. Geplant: vollständiger Parodontalstatus einschließlich Risikoprofil, Aufklärung, indikationsgerechte stufenweise Therapie und Reevaluation.',
      checks:[
-      criterion('FDI 46','(?:^|\D)46(?:\D|$)','FDI-Zahnnummer im Befund verwenden.'),
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','FDI-Zahnnummer im Befund verwenden.'),
       criterion('Anamnese / Risiken','rauch|diabetes|blutung|hba1c','Anamnestische Symptome und Risikofaktoren dokumentieren.'),
       criterion('Klinischer Befund','sondier|locker|gingival','Klinischen Status nennen.'),
       criterion('Bildgebung / Unsicherheit','radiolog|röntgen|knochen','Nur einen fiktiven, nicht abschließenden radiologischen Befund angeben.'),
@@ -63,7 +63,7 @@
      c1:'Eine Stadien- und Gradzuordnung ist aufgrund des noch unvollständigen Parodontalstatus nicht möglich.',
      model:'Bei Zahn 46 liegen Lockerung und entzündliche parodontale Befunde vor. Anamnestisch besteht Zahnfleischbluten; die Person raucht und die glykämische Kontrolle ist unklar. Klinisch sind erhöhte Sondierungswerte dokumentiert, radiologisch besteht nur ein fiktiver Hinweis auf möglichen Knochenverlust. Es liegt ein Verdacht auf Parodontitis vor; Staging und Grading sind ohne vollständigen Befund offen. Wir planen einen vollständigen Parodontalstatus, Risikoberatung und stufenweise Therapie mit Reevaluation. Patientenverständlich bedeutet Parodontitis: Erkrankung des Zahnhalteapparats.',
      checks:[
-      criterion('FDI 46','(?:^|\D)46(?:\D|$)','Betroffenen Zahn nennen.'),
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','Betroffenen Zahn nennen.'),
       criterion('Risikoprofil','rauch|diabetes|glykäm|hba1c','Relevante Risikofaktoren übergeben.'),
       criterion('Klinische / radiologische Befunde','sondier|locker|knochen|radiolog','Klinische und radiologische Befunde anführen.'),
       criterion('Unsicherheit der Diagnose','verdacht|staging|grading|offen','Nicht gesichertes Stadium und offenen Befund benennen.'),
@@ -109,7 +109,7 @@
      c1:'Die Pulpadiagnose und die restaurative Indikation bleiben bis zur vollständigen Defektbeurteilung offen.',
      model:'Zahn 16: Seit drei Wochen Beschwerden beim Kauen, kurze Kältereaktion ohne spontane oder nächtliche Schmerzen. Klinisch okklusal-approximale Kavitation bei vorbestehender Füllung; Kältetest positiv mit kurzer abklingender Reaktion, Perkussion unauffällig. Fiktiver Bissflügel-Befundtext: approximale Läsion bis ins Dentin. Pulpanähe, Defektausdehnung und Restaurierbarkeit sind noch zu prüfen. Arbeitsdiagnose: kariöser Dentinbefall mit abklärungsbedürftigem Pulpastatus; Planung nach Befund, Aufklärung und Einwilligung.',
      checks:[
-      criterion('FDI 16','(?:^|\D)16(?:\D|$)','Zahn 16 nach FDI nennen.'),
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahn 16 nach FDI nennen.'),
       criterion('Schmerzcharakter','kauen|kälte|nachts|spontan','Anamnestische Beschwerden dokumentieren.'),
       criterion('Klinischer Test','kältetest|perkussion|palpation','Klinische Befunde und Testreaktion anführen.'),
       criterion('Bildgebung','bissflügel|radiolog|röntgen|dentin','Fiktiven Röntgenbefund kennzeichnen.'),
@@ -122,7 +122,7 @@
      c1:'Aus der isolierten kurzen Kälteantwort lässt sich der Pulpagewebezustand nicht sicher diagnostizieren.',
      model:'An Zahn 16 besteht eine okklusal-approximale kariöse Läsion mit kurz abklingender Kältereaktion. Der Patient beschreibt vor allem Schmerzen beim Kauen, ohne spontane Nachtschmerzen. Klinisch ist eine Kavitation sichtbar, die Perkussion ist unauffällig; im fiktiven Bissflügel-Befundtext reicht die Läsion bis ins Dentin. Der Pulpastatus und die Restaurierbarkeit sind noch abzuklären. Je nach Defektausdehnung kommen Kompositrestauration oder Teilkrone infrage. Patientenverständlich ist Approximalkaries eine Karies zwischen benachbarten Zähnen.',
      checks:[
-      criterion('FDI 16','(?:^|\D)16(?:\D|$)','Zahnbezeichnung nennen.'),
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahnbezeichnung nennen.'),
       criterion('Beschwerden','kälte|kauen|nachts','Relevante Anamnese übergeben.'),
       criterion('Untersuchung / Radiologie','perkussion|kältetest|bissflügel|radiolog','Befunde nachvollziehbar mitteilen.'),
       criterion('Unvollständige Diagnose','pulpa|restaurier|abklär|unsicher','Diagnoseunsicherheit kenntlich machen.'),
