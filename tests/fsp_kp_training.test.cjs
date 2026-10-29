@@ -33,9 +33,9 @@ function setup(withDOM=false){
  vm.runInNewContext(source,{window,document});
  return {api:window.KlinikFSPTraining,window,document,all};
 }
-test('two fictional cases each contain four complete workflows and fixed five-criterion rubrics',()=>{
+test('four fictional cases each contain four complete workflows and fixed five-criterion rubrics',()=>{
  const {api}=setup();
- assert.deepEqual(Object.keys(api.cases).sort(),['endo','surgery']);
+ assert.deepEqual(Object.keys(api.cases).sort(),['endo','perio','restoration','surgery']);
  assert.equal(api.phases.length,4);
  for(const [id,c] of Object.entries(api.cases)){
   assert.match(c.facts,/Fiktiver|fiktiv/);
@@ -140,4 +140,35 @@ test('Escape restores modal state and Tab keyboard focus is contained inside the
  assert(prevented&&last.focused);
  document.listeners.keydown({key:'Escape',preventDefault(){}});
  assert.equal(api.status.open,false);
+});
+
+test('new periodontal and restorative cases preserve FDI, uncertainty and source-specific workflows',()=>{
+ const {api}=setup();
+ const mapping={perio:'46',restoration:'16'};
+ for(const [id,fdi] of Object.entries(mapping)){
+  const item=api.cases[id];
+  assert(item.facts.includes('Zahn '+fdi));
+  assert.match(item.facts,/Fiktiver/);
+  assert.match(item.facts,/noch|nicht|offen/i);
+  const brief=api.taskFor(id,'brief'),handoff=api.taskFor(id,'kollegen');
+  assert(brief.model.includes('Zahn '+fdi));
+  assert(handoff.model.includes('Zahn '+fdi));
+  const exact=api.score(id,'brief',brief.model);
+  assert.equal(exact.score,10);
+  assert.equal(api.score(id,'brief','Zahn '+fdi).score,2);
+ }
+ assert.match(api.taskFor('perio','kollegen').model,/Parodontitis: Erkrankung des Zahnhalteapparats/);
+ assert.match(api.taskFor('restoration','kollegen').model,/Approximalkaries eine Karies zwischen/);
+});
+test('four-case per-workflow scoring is independent and the assessment does not create clinical records',()=>{
+ const {api}=setup();
+ for(const id of Object.keys(api.cases)){
+  for(const phase of api.phases){
+   const exemplar=api.taskFor(id,phase.id).model;
+   const result=api.score(id,phase.id,exemplar);
+   assert.equal(result.criteria.length,5);
+   assert.equal(result.lexicalScore,10);
+   assert.equal(result.safetyFlags.length,0);
+  }
+ }
 });
