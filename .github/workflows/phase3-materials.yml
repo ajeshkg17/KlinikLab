@@ -20,6 +20,21 @@ jobs:
           node --check babylon-preview.js
           node --check babylon-anatomy.js
           node --check real-dental-scene.js
+      - name: HTTP smoke test for desktop appearance script
+        run: |
+          node server/server.mjs > /tmp/kliniklab-server.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8787/dental-appearance.js -o /tmp/kliniklab-appearance.js; then
+              break
+            fi
+            sleep 1
+          done
+          test -s /tmp/kliniklab-appearance.js
+          grep -q KlinikDentalAppearance /tmp/kliniklab-appearance.js
+          curl --fail --silent http://127.0.0.1:8787/ -o /tmp/kliniklab-index.html
+          grep -q 'src="dental-appearance.js"' /tmp/kliniklab-index.html
       - name: Verify static mirror copies
         run: |
           cmp dental-appearance.js public/dental-appearance.js
