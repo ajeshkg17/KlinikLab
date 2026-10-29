@@ -41,7 +41,8 @@ class XRToothPractice {
   }
   finish(){if(!this.lab)return;this.lab.rebuild();this.lastCut=null;this.tip.p=[0,-20,0];this.dirty=true;}
   updateMesh(){if(!this.lab||!window.KlinikVoxelMesher)return false;const scene=this.scene;
-    const result=window.KlinikVoxelMesher.build(this.lab.solid,false,19);
+    // Lower mesh detail while the controller trigger is held to reduce Quest main-thread stalls.
+    const result=window.KlinikVoxelMesher.build(this.lab.solid,false,this.triggers.size?14:19);
     const groups=Object.fromEntries(materials.map(m=>[m,[]]));
     for(const f of result.faces){const group=groups[f.material]||groups.enamel;group.push(...scene.tri(f.p[0],f.p[1],f.p[2]));}
     for(const material of materials){const kind='xrvol-'+material;const old=scene.geom[kind];if(old)scene.gl.deleteBuffer(old.buffer);
@@ -77,7 +78,7 @@ class XRToothPractice {
     if(hit&&hit.distance<contact.distance-.025)return false;
     this.triggers.add(event.inputSource);this.cut(contact,event.inputSource);return true;
   }
-  onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;}
+  onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
     this.syncCase();if(this.dirty&&t-this.lastMeshAt>230)this.updateMesh();
@@ -100,7 +101,7 @@ class XRToothPractice {
     this.lastCut={p:p.slice(),time:performance.now()};this.cutCount++;this.dirty=true;
     if(source&&performance.now()-this.lastHapticAt>260){this.lastHapticAt=performance.now();const actuator=source.gamepad?.hapticActuators?.[0]||source.gamepad?.vibrationActuator;
       try{const result=actuator?.pulse?.(.12,35)||actuator?.playEffect?.('dual-rumble',{duration:35,strongMagnitude:.12,weakMagnitude:.08});result?.catch?.(()=>{});}catch{}}
-    if(this.cutCount%5===0){this.scene.replaceLabel(this.info,`${this.cutCount} cuts · ${tissue} · NOT CALIBRATED`,27);lab.updateMetrics();}
+    if(this.cutCount%5===0)this.scene.replaceLabel(this.info,`${this.cutCount} cuts · ${tissue} · NOT CALIBRATED`,27);
   }
 }
 window.KlinikXRToothPractice=XRToothPractice;
