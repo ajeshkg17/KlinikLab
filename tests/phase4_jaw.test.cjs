@@ -67,3 +67,32 @@ test('Phase 4 jaw templates remain display-only, uncoupled from FDI selection me
  }
  assert.equal(A.createTemplate(B,{},'jaw2',layout),null);
 });
+
+test('jaw and crown-detail controls change display states without WebGL or XR side effects',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const source=fs.readFileSync(path.join(__dirname,'../babylon-preview.js'),'utf8');
+ const children=[];
+ function node(){return {id:'',style:{},attributes:{},listeners:{},
+  setAttribute(k,v){this.attributes[k]=v},addEventListener(k,fn){this.listeners[k]=fn},
+  appendChild(n){children.push(n)}};}
+ const root=node();
+ const document={readyState:'complete',
+   querySelector:q=>q==='#stage-controls .float-title'?root:null,
+   getElementById:id=>children.find(n=>n.id===id)||null,
+   createElement:()=>node()};
+ const ctx={window:{},document,setTimeout:cb=>cb()};
+ vm.runInNewContext(source,ctx);
+ const jaw=document.getElementById('jaw-layer-toggle'),
+   detail=document.getElementById('crown-detail-toggle');
+ assert(jaw&&detail,'separate jaw and geometry toggles');
+ assert.equal(ctx.window.KlinikBabylon.jawVisible,false);
+ assert.equal(ctx.window.KlinikBabylon.crownSource,'dundee');
+ jaw.listeners.click();detail.listeners.click();
+ assert.equal(ctx.window.KlinikBabylon.jawVisible,true);
+ assert.equal(ctx.window.KlinikBabylon.crownSource,'procedural');
+ assert.equal(jaw.attributes['aria-pressed'],'true');
+ assert.equal(detail.attributes['aria-pressed'],'true');
+ jaw.listeners.click();detail.listeners.click();
+ assert.equal(ctx.window.KlinikBabylon.jawVisible,false);
+ assert.equal(ctx.window.KlinikBabylon.crownSource,'dundee');
+});
