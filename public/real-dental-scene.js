@@ -181,9 +181,10 @@
       const mesh=item.realMesh;if(!mesh)continue;
       const source=item.source,original=item.mesh;
       const active=layer.visible&&layer.app.viewMode==='3d'&&!layer.source.xrSession&&!source.hidden;
-      original.isVisible=false;
-      mesh.isVisible=active;
-      if(!active)continue;
+      const useLicensed=layer.crownSource!=='procedural';
+      original.isVisible=active&&!useLicensed;
+      mesh.isVisible=active&&useLicensed;
+      if(!active||!useLicensed)continue;
       visibleInstances++;
       const id=source.key?.split(':')[1]||'';
       // Existing source geometry is mirrored across the midline for contralateral teeth.
