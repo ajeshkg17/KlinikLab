@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase2-gingiva-2026-10-29-01",
+  "jobId": "phase2-acceptance-2026-10-29-02",
   "viewport": {
     "width": 1600,
     "height": 1000
@@ -85,6 +85,130 @@
         {
           "action": "wait",
           "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-lateral",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "orbit",
+          "dx": 300,
+          "dy": 0
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-upper-only",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "06-lower-only",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "07-fdi-selection",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "validateFDI"
         }
       ],
       "capture": "stage"
