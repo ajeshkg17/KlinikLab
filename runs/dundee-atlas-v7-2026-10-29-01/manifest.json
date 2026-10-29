@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "jobId": "dundee-atlas-v7-2026-10-29-01",
+  "origin": "http://127.0.0.1:8787",
+  "utc": "2026-10-29T13:42:53.780Z",
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "headsetTested": false,
+  "clinicalValidation": false,
+  "scenes": [
+    {
+      "name": "01-licensed-model",
+      "file": "01-licensed-model.png",
+      "capture": "atlas",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 96109,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "rendering",
+          "ready": true,
+          "asset": "maxillary_first_molar",
+          "meshes": 1,
+          "triangles": 976,
+          "error": null
+        }
+      }
+    },
+    {
+      "name": "02-local-import",
+      "file": "02-local-import.png",
+      "capture": "atlas",
+      "ok": true,
+      "errors": [],
+      "networkFailures": [],
+      "bytes": 105601,
+      "checks": {
+        "stage": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "scene": {
+          "width": 990,
+          "height": 656,
+          "visible": true
+        },
+        "volume": {
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "webgl": true,
+        "volumeGPU": true,
+        "volumeTriangles": 31148,
+        "viewMode": "3d",
+        "babylon": {
+          "mode": "classic",
+          "ready": false,
+          "meshes": 0,
+          "frames": 0,
+          "environment": "disabled",
+          "error": null
+        },
+        "atlas": {
+          "mode": "rendering",
+          "ready": true,
+          "asset": "local-glb",
+          "meshes": 1,
+          "triangles": 976,
+          "error": null
+        }
+      }
+    }
+  ],
+  "successCount": 2,
+  "failureCount": 0
+}
