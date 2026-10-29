@@ -49,9 +49,9 @@
       if(!Number.isFinite(x)||!Number.isFinite(z)||!Number.isFinite(positions[i*3+1]))
         throw Error('Invalid gingival vertex coordinate');
       const natural=clamp(.995+.013*Math.sin(9*x+4*z),.978,1);
-      colors.push(lerp(.84,.70,shade)*natural,
-                  lerp(.56,.39,shade)*natural,
-                  lerp(.61,.45,shade)*natural,1);
+      colors.push(lerp(.95,.82,shade)*natural,
+                  lerp(.64,.48,shade)*natural,
+                  lerp(.62,.49,shade)*natural,1);
     }
     return colors;
   }
@@ -61,8 +61,8 @@
       {roughness:.28,clearCoat:.40,clearRoughness:.17,sheen:0,emissive:.018}:
       {roughness:.36,clearCoat:.28,clearRoughness:.25,sheen:0,emissive:.025};
     if(kind==='gingiva')return mode==='studio'?
-      {roughness:.57,clearCoat:.06,clearRoughness:.46,sheen:.10,emissive:.009}:
-      {roughness:.68,clearCoat:.03,clearRoughness:.55,sheen:.055,emissive:.014};
+      {roughness:.57,clearCoat:.06,clearRoughness:.46,sheen:.10,emissive:.016}:
+      {roughness:.68,clearCoat:.03,clearRoughness:.55,sheen:.055,emissive:.021};
     return null;
   }
   function applyMaterial(B,material,kind,mode='balanced'){
@@ -72,7 +72,9 @@
     material.environmentIntensity=0; // no unlicensed/remote environment map
     material.backFaceCulling=false;
     material.albedoColor=new B.Color3(1,1,1);
-    material.emissiveColor=new B.Color3(p.emissive,p.emissive,p.emissive);
+    material.emissiveColor=kind==='gingiva'
+      ?new B.Color3(p.emissive*3.25,p.emissive*1.45,p.emissive*1.95)
+      :new B.Color3(p.emissive,p.emissive,p.emissive);
     material.useVertexColors=true;
     if(material.clearCoat){
       material.clearCoat.isEnabled=p.clearCoat>0;
