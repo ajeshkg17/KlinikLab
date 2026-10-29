@@ -1,91 +1,182 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase6-practice-final-2026-10-29-02",
+  "jobId": "tutorial-acceptance-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "02-quiz-incorrect",
-      "capture": "stage",
+      "name": "01-welcome",
+      "capture": "page",
       "steps": [
         {
           "action": "click",
-          "control": "tooth11"
-        },
-        {
-          "action": "click",
-          "control": "structure"
-        },
-        {
-          "action": "click",
-          "control": "practice"
-        },
-        {
-          "action": "practiceAnswerWrong"
+          "control": "tutorial"
         }
       ]
     },
     {
-      "name": "04-quiz-complete",
-      "capture": "stage",
+      "name": "02-scene-controls",
+      "capture": "page",
       "steps": [
         {
           "action": "click",
-          "control": "tooth48"
+          "control": "tutorial"
         },
         {
           "action": "click",
-          "control": "structure"
+          "control": "tutorialNext"
         },
         {
           "action": "click",
-          "control": "practice"
+          "control": "tutorialNext"
         },
         {
-          "action": "practiceComplete"
+          "action": "click",
+          "control": "tutorialNext"
         }
       ]
     },
     {
-      "name": "07-quiz-and-fdi",
-      "capture": "stage",
+      "name": "03-fdi-navigation",
+      "capture": "page",
       "steps": [
         {
           "action": "click",
-          "control": "teeth"
+          "control": "tutorial"
         },
         {
           "action": "click",
-          "control": "renderer"
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
-        },
-        {
-          "action": "wait",
-          "ms": 3000
+          "control": "tutorialNext"
         },
         {
           "action": "click",
-          "control": "tooth26"
+          "control": "tutorialNext"
         },
         {
           "action": "click",
-          "control": "structure"
+          "control": "tutorialNext"
         },
         {
           "action": "click",
-          "control": "practice"
+          "control": "tutorialNext"
+        }
+      ]
+    },
+    {
+      "name": "04-anatomy-help",
+      "capture": "page",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tutorial"
         },
         {
-          "action": "validateFDI"
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        }
+      ]
+    },
+    {
+      "name": "05-go-back",
+      "capture": "page",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tutorial"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialBack"
+        }
+      ]
+    },
+    {
+      "name": "06-final-vr",
+      "capture": "page",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tutorial"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        },
+        {
+          "action": "click",
+          "control": "tutorialNext"
+        }
+      ]
+    },
+    {
+      "name": "07-skip",
+      "capture": "page",
+      "steps": [
+        {
+          "action": "click",
+          "control": "tutorial"
+        },
+        {
+          "action": "click",
+          "control": "tutorialSkip"
         }
       ]
     }
