@@ -1,13 +1,96 @@
 {
   "schemaVersion": 1,
-  "jobId": "phase2-fdi-2026-10-29-05",
+  "jobId": "phase3-materials-2026-10-29-01",
   "viewport": {
     "width": 1600,
     "height": 1000
   },
   "scenes": [
     {
-      "name": "01-all-fdi-selections",
+      "name": "01-balanced-frontal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "02-balanced-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "03-balanced-oblique",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "orbit",
+          "dx": 140,
+          "dy": -65
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "04-studio-frontal",
       "steps": [
         {
           "action": "click",
@@ -30,7 +113,145 @@
           "ms": 3000
         },
         {
-          "action": "validateFDI"
+          "action": "click",
+          "control": "appearance"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "05-studio-occlusal",
+      "steps": [
+        {
+          "action": "click",
+          "control": "occlusal"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "appearance"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "06-studio-oblique",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "orbit",
+          "dx": 140,
+          "dy": -65
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "appearance"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "07-studio-upper",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "appearance"
+        }
+      ],
+      "capture": "stage"
+    },
+    {
+      "name": "08-studio-lower",
+      "steps": [
+        {
+          "action": "click",
+          "control": "teeth"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "arches"
+        },
+        {
+          "action": "click",
+          "control": "renderer"
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "wait",
+          "ms": 3000
+        },
+        {
+          "action": "click",
+          "control": "appearance"
         }
       ],
       "capture": "stage"
