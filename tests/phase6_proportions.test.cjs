@@ -5,7 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'engine.js'),'utf8');
 test('Phase 6 proportional scale applies only to anatomy and all 32 FDI pick targets',()=>{
- assert(source.includes('this.anatomyOverviewScale=.245'));
+ assert(source.includes('this.anatomyOverviewScale=.055'));
  assert(source.includes('this.anatomyPivot=[0,1.545,-1.78]'));
  const section=source.slice(source.indexOf('  rescaleAnatomy(factor){'),source.indexOf('  buildScene(){'));
  assert(section.includes('new Set(this.archMeshes.flat())'));
@@ -18,7 +18,7 @@ test('Phase 6 proportional scale applies only to anatomy and all 32 FDI pick tar
 });
 test('Phase 6 teaching magnification is opt-in and reversible',()=>{
  const part=source.slice(source.indexOf('  setTeachingMagnification(on){'),source.indexOf('  buildScene(){'));
- assert(part.includes('on?2.8:1'));
+ assert(part.includes('on?8:1'));
  assert(part.includes('next/this.anatomyDisplayMagnification'));
  assert(part.includes('this.rescaleAnatomy(relative)'));
  const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
