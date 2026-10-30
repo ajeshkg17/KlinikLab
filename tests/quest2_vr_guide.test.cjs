@@ -86,7 +86,7 @@ test('XR-only comfort resizing preserves model and ray hit positions on exit',()
  assert.equal(JSON.stringify([model,board,hitModel.p,hitBoard.p,hitModel.radius,hitBoard.radius]),original);
 });
 test('real WebXR event routing sends controller input to tutorial before cutting',()=>{
- assert.match(engine,/if\(this\.xrGuide\?\.onSelectStart\(e,frame\)\)return;if\(this\.xrPrep\?\.onSelectStart/);
+ assert.match(engine,/if\(this\.xrGuide\?\.onSelectStart\(e,frame\)\)return;if\(this\.onXRCatalogSelect\(e,frame\)\)return;if\(this\.xrPrep\?\.onSelectStart/);
  assert.match(engine,/session\.addEventListener\('squeezestart'/);
  assert.match(engine,/this\.xrGuide\?\.onEnter\(\)/);
  assert.match(engine,/this\.xrGuide\?\.onExit\(\)/);
