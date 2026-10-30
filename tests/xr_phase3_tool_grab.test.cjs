@@ -11,7 +11,7 @@ const names=['toolGripPose','resetXRTool','resetXRTools','initXRTools','nearestX
 const methods=vm.runInNewContext('({'+names.map((name,i)=>{
  const at=source.indexOf('  '+name+'('), next=i+1<names.length?source.indexOf('  '+names[i+1]+'(',at):end;
  assert(at>=0&&next>at,'method boundaries '+name);
- return source.slice(at,next).trim();
+ return source.slice(at,next).replace(/(?:\\s*\\/\\/[^\\n]*)+\\s*$/,'').trim();
 }).join(',\n')+'})',{M3});
 function fixture(){
  const make=(name,x)=>({name,owner:null,hover:null,meshes:[{p:[x,1,0],s:[.1,.1,.1],rot:[0,0,0],model:null,color:[.2,.3,.4]}]});
