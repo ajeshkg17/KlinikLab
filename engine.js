@@ -231,6 +231,33 @@ class DentalScene {
       this.xrTableTools.push({name,meshes:this.meshes.slice(toolStart),owner:null,home:null,hover:null});
       this.label(name.toUpperCase(),[x,.985,-.28],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
     }
+    // Phase 4: opt-in VR catalog. Tool instances remain unique: spawning restores
+    // an unheld tool to its physical tray slot, never clones a held instrument.
+    const catalogSpecs=[
+      ['mirror','MIRROR','Indirect vision and cheek retraction'],
+      ['probe','PROBE','Explore surfaces and margins gently'],
+      ['suction','SUCTION','Remove fluid from the working field'],
+      ['excavator','EXCAVATOR','Remove softened tooth material'],
+      ['composite','COMPOSITE','Place and shape restorative material']
+    ];
+    this.xrCatalog={open:false,selected:'mirror',specs:catalogSpecs,panels:[],rows:[],status:null};
+    const cat=this.xrCatalog,register=(m,row=false)=>{cat.panels.push(m);m.hidden=true;if(row)cat.rows.push(m);return m};
+    // A narrow tab near the top of the workspace, clear of the tool tray and ?.
+    cat.launcher=this.box([-.60,1.98,-1.02],[.36,.14,.06],'#225e70',{key:'catalog:toggle'});
+    cat.launcherLabel=this.label('TOOLS',[-.60,1.99,-.98],[.32,.10,1],{font:39,bold:true,color:'#f4ffff'});
+    register(this.box([-.60,1.48,-1.03],[.88,.86,.045],'#173b48'));
+    register(this.label('INSTRUMENTS',[-.60,1.84,-.995],[.81,.10,1],{font:38,bold:true}));
+    for(let i=0;i<catalogSpecs.length;i++){
+      const y=1.71-i*.12;
+      register(this.box([-.60,y,-.985],[.81,.105,.04],'#285869',{key:'catalog:tool:'+catalogSpecs[i][0]}),true);
+      register(this.label(catalogSpecs[i][1],[-.60,y,-.952],[.75,.08,1],{font:35}),true);
+    }
+    cat.status=register(this.label('MIRROR: Indirect vision and cheek retraction',[-.60,1.035,-.99],[.84,.10,1],{font:28,color:'#f1efe5'}));
+    for(const [key,x,label] of [['spawn',-.90,'RETURN'],['reset',-.59,'RESET'],['close',-.29,'CLOSE']]){
+      register(this.box([x,.935,-.985],[.27,.115,.05],'#1d7975',{key:'catalog:'+key}));
+      register(this.label(label,[x,.94,-.95],[.25,.075,1],{font:30,bold:true}));
+    }
+    this.setXRCatalogOpen(false);
     // Other procedure items displayed on the side trolley.
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
     this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
@@ -325,7 +352,7 @@ class DentalScene {
   getRayHit(o,d,allow=null){let hit=null;for(const p of this.pickables){if(p.mesh.hidden||(allow&&!allow(p)))continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
-      if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
+      if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')||p.key.startsWith('catalog:')){
         // A tutorial panel can face the headset at any yaw. Intersect the
         // front plane and check its actual rotated rectangular dimensions.
         const yaw=p.mesh.rot?.[1]||0,c=Math.cos(yaw),s=Math.sin(yaw);
@@ -437,12 +464,12 @@ class DentalScene {
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
-      this.setXRComfort(true);this.initXRTools();
+      this.setXRComfort(true);this.initXRTools();this.setXRCatalogOpen(false);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
       const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
-      session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.resetXRTools();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
-      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;this.onXRGripStart(e,frame)});session.addEventListener('squeezeend',e=>{if(this.xrSession===session)this.onXRGripEnd(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
+      session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.resetXRTools();this.setXRCatalogOpen(false);this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
+      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.onXRCatalogSelect(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;this.onXRGripStart(e,frame)});session.addEventListener('squeezeend',e=>{if(this.xrSession===session)this.onXRGripEnd(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){
       if(session){try{await session.end()}catch{}this.handleXREnd(session)}
@@ -463,6 +490,51 @@ class DentalScene {
   // Grip is intentionally separate from trigger/select and dental preparation.
   toolGripPose(frame,source){
     try{return source?.gripSpace&&frame?.getPose?.(source.gripSpace,this.xrRef)||null}catch{return null}
+  }
+  setXRCatalogOpen(open){
+    if(!this.xrCatalog)return false;
+    const cat=this.xrCatalog;cat.open=!!open;
+    for(const m of cat.panels)m.hidden=!cat.open;
+    // Launcher is available throughout the XR session, without covering the tray.
+    cat.launcher.hidden=!this.xrSession;
+    cat.launcherLabel.hidden=!this.xrSession;
+    return true;
+  }
+  onXRCatalogSelect(event,frame){
+    if(!this.xrSession||this.xrGuide?.state?.open)return false;
+    const pose=this.getXRInputPose(frame,event?.inputSource);
+    if(!pose)return false;
+    const p=pose.transform.position,q=pose.transform.orientation;
+    const ray={o:[p.x,p.y,p.z],d:this.rotateByQuat([0,0,-1],q)};
+    const hit=this.getRayHit(ray.o,ray.d,item=>item.key?.startsWith('catalog:'));
+    const key=hit?.key;if(!key)return false;
+    const cat=this.xrCatalog;
+    if(key==='catalog:toggle'){this.setXRCatalogOpen(!cat.open);return true}
+    if(!cat.open)return false;
+    if(key==='catalog:close'){this.setXRCatalogOpen(false);return true}
+    if(key.startsWith('catalog:tool:')){
+      const name=key.slice('catalog:tool:'.length);
+      const spec=cat.specs.find(s=>s[0]===name);if(!spec)return false;
+      cat.selected=name;
+      this.replaceLabel(cat.status,spec[1]+': '+spec[2],28);
+      return true;
+    }
+    if(key==='catalog:reset'){
+      this.resetXRTools();
+      this.replaceLabel(cat.status,'All instruments returned to tray',28);
+      return true;
+    }
+    if(key==='catalog:spawn'){
+      const tool=this.xrTableTools.find(t=>t.name===cat.selected);
+      if(!tool||tool.owner){
+        this.replaceLabel(cat.status,'Release held tool before return',28);
+        return true;
+      }
+      this.resetXRTool(tool);
+      this.replaceLabel(cat.status,cat.selected.toUpperCase()+' ready on table: grip to pick up',28);
+      return true;
+    }
+    return false;
   }
   resetXRTool(tool){
     if(!tool?.home)return;
