@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase8-catalog-depth-20261030-05",
-  "commit": "acc936c674ad01303c0fdbb93df4b7f6350cc7ae",
+  "jobId": "pc-xr-phase8-catalog-depth-20261030-06",
+  "commit": "c725910e1fa870fb816732c0ca82aa80b5ba3545",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
