@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase7-smooth-oblique-cut-20261030-04",
-  "commit": "3ab05869ebd7de4d48981a13122157e6749c4ccb",
+  "jobId": "pc-xr-phase7-occlusal-cut-evidence-20261030-05",
+  "commit": "22b629e5acc5139ec1cc5d5640edaa642fd1d910",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
