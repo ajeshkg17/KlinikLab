@@ -130,7 +130,7 @@ test('XR session cleanup is idempotent and scoped to the active session',()=>{
  const scene={xrSession:session,xrRef:{},latestFrame:{},xrBoardMeshes:[{hidden:false}],
  xrGuide:{onExit(){calls.push('guide')}},xrPrep:{onExit(){calls.push('prep')}},
  setXRComfort(a){assert.equal(a,false);calls.push('comfort')},
- clearControllers(){calls.push('controllers')},scheduleDesktopFrame(){scheduled++},resumeDesktop(){}};
+ clearControllers(){calls.push('controllers')},resetXRTools(){},scheduleDesktopFrame(){scheduled++},resumeDesktop(){}};
  fn.call(scene,{});fn.call(scene,session);fn.call(scene,session);
  assert.deepEqual(calls,['guide','prep','comfort','controllers']);assert.equal(scheduled,1);
  assert.equal(scene.xrSession,null);assert.equal(scene.xrRef,null);assert.equal(scene.latestFrame,null);
@@ -305,7 +305,7 @@ test('XR frame maps independent aim/grip poses by handedness and clears missing 
  let cutFrameCalls=0,placed=0,cleared=0;
  const controllers=side=>({side,parts:Array.from({length:6},()=>({hidden:true,model:null})),ray:{hidden:true,model:null}});
  const scene={gl,xrRef:{},xrControllers:[controllers(-1),controllers(1)],
-  updateXRController:methods.updateXRController,
+  updateXRController:methods.updateXRController,updateXRTools(){},
   controllerMatrix:pose=>[1,0,0,0,0,1,0,0,0,0,1,0,pose.transform.position.x,pose.transform.position.y,pose.transform.position.z,1],
   rotateByQuat:()=>[0,0,-1],rgb:color=>color,
   clearControllers(){cleared++;for(const c of this.xrControllers){c.active=false;c.gripValid=false;c.aimValid=false;for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}},
