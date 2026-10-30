@@ -378,6 +378,7 @@ class DentalScene {
       m.p=[m.p[0]+.29,1.47+(m.p[1]-1.47)*.72+.43,m.p[2]+.39];
       m.s=[m.s[0]*.90,m.s[1]*.78,m.s[2]];
       m.model=null;
+      for(const hit of this.pickables.filter(hit=>hit.mesh===m))hit.p=m.p.slice();
     }
     this.setXRCatalogOpen?.(false);
     // Other procedure items displayed on the side trolley.
