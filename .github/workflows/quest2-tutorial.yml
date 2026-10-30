@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: '22'
       - name: Quest controller tutorial and reversible-scale regressions
-        run: node --test tests/quest2_vr_guide.test.cjs tests/app_tutorial.test.cjs tests/phase6_practice.test.cjs
+        run: node --test tests/vr_controls.test.cjs tests/xr_startup_lifecycle.test.cjs tests/quest2_vr_guide.test.cjs tests/app_tutorial.test.cjs tests/phase6_practice.test.cjs
       - name: JavaScript syntax and source mirror checks
         run: |
           node --check engine.js

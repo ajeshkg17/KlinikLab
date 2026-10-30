@@ -334,18 +334,22 @@ class DentalScene {
     this.xrStarting=true;
     // requestSession must begin INSIDE the click's transient user activation.
     // Do not await a support check or makeXRCompatible before requesting it.
-    let session;
+    let session,ended=false;
     try{
       const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
-      session=await promise;session.addEventListener('end',()=>this.handleXREnd(session));const gl=this.gl;
+      session=await promise;session.addEventListener('end',()=>{ended=true;this.handleXREnd(session)});const gl=this.gl;
       if(gl.makeXRCompatible)await gl.makeXRCompatible();
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
-      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
+      const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
+      session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
+      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(acceptsInput())this.xrGuide?.onSqueezeStart(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){
       if(session){try{await session.end()}catch{}this.handleXREnd(session)}
@@ -362,7 +366,7 @@ class DentalScene {
     requestAnimationFrame(t=>this.resumeDesktop(t));
   }
   resumeDesktop(t){if(!this.xrSession){this.animation(t);requestAnimationFrame(this.resumeDesktop.bind(this))}}
-  xrLoop(t,frame){if(!this.xrSession||frame?.session!==this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  xrLoop(t,frame){const session=this.xrSession;if(!session||frame?.session!==session)return;this.latestFrame=frame;this.xrFrame(t,frame);if(this.xrSession===session)session.requestAnimationFrame(this.xrLoop.bind(this))}
   getXRInputPose(frame,source){
     if(!frame?.getPose||!source?.targetRaySpace||!this.xrRef)return null;
     try{return frame.getPose(source.targetRaySpace,this.xrRef)||null}catch{return null}
@@ -370,7 +374,7 @@ class DentalScene {
   pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
   rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
   clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}}
-  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep?.tip)this.xrPrep.tip.hidden=true;return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;const p=this.getXRInputPose(frame,source);if(!p)continue;used.add(slot);const t=p.transform,c=this.xrControllers[slot];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
+  xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;const p=this.getXRInputPose(frame,source);if(!p)continue;used.add(slot);const t=p.transform,c=this.xrControllers[slot];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
     for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
     this.xrPrep?.onXRFrame(frame,t);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
