@@ -243,6 +243,20 @@ try{
  await grip('left',1);
  await awaitOwner('mirror','left');
  await captureXR('04-left-hand-mirror-pickup.png','Mirror held by left controller');
+ const mirrorVisual=await page.evaluate(({toolName,hand})=>{
+   const scene=window.kliniklab.scene,tool=scene.xrTableTools.find(t=>t.name===toolName);
+   const controller=scene.xrControllers.find(c=>c.handedness===hand);
+   return {owner:tool?.owner,ringHidden:controller?.parts[2]?.hidden,
+     toolVisible:tool?.meshes.every(m=>!m.hidden),
+     inBothEyes:scene.xrVisualDiagnostics?.eyes&&scene.xrVisualDiagnostics.eyes[0]?.samples>120&&scene.xrVisualDiagnostics.eyes[1]?.samples>120};
+ },{toolName:'mirror',hand:'left'});
+ assert.equal(mirrorVisual.owner,'left');
+ assert.equal(mirrorVisual.ringHidden,true,'Oversized controller ring obscures held tool');
+ assert.equal(mirrorVisual.toolVisible,true,'Held tool has hidden geometry');
+ const mirrorCapture=result.captureManifest.at(-1);
+ assert(mirrorCapture.eyeTools?.length===2,'Missing stereo-eye tool evidence');
+ assert(mirrorCapture.eyeTools.every(eye=>eye.find(t=>t.name==='mirror')?.projection.inFrustum),
+   'Held mirror center outside one XR eye');
  const beforeHeld=await toolState('mirror');
  assert(beforeHeld.model?.length===16,'Held mirror lacks model matrix');
  result.checks.push('Left squeeze picks up mirror with a grip-relative model matrix');
@@ -280,6 +294,20 @@ try{
  await grip('right',1);
  await awaitOwner('composite','right');
  await captureXR('06-right-hand-composite-pickup.png','Composite tool held by right controller');
+ const compositeVisual=await page.evaluate(({toolName,hand})=>{
+   const scene=window.kliniklab.scene,tool=scene.xrTableTools.find(t=>t.name===toolName);
+   const controller=scene.xrControllers.find(c=>c.handedness===hand);
+   return {owner:tool?.owner,ringHidden:controller?.parts[2]?.hidden,
+     toolVisible:tool?.meshes.every(m=>!m.hidden),
+     inBothEyes:scene.xrVisualDiagnostics?.eyes&&scene.xrVisualDiagnostics.eyes[0]?.samples>120&&scene.xrVisualDiagnostics.eyes[1]?.samples>120};
+ },{toolName:'composite',hand:'right'});
+ assert.equal(compositeVisual.owner,'right');
+ assert.equal(compositeVisual.ringHidden,true,'Oversized controller ring obscures held tool');
+ assert.equal(compositeVisual.toolVisible,true,'Held tool has hidden geometry');
+ const compositeCapture=result.captureManifest.at(-1);
+ assert(compositeCapture.eyeTools?.length===2,'Missing stereo-eye tool evidence');
+ assert(compositeCapture.eyeTools.every(eye=>eye.find(t=>t.name==='composite')?.projection.inFrustum),
+   'Held composite center outside one XR eye');
  result.checks.push('Right controller picks up a different tray instrument');
  await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.kliniklab.scene.xrTableTools.find(t=>t.name==='composite')?.owner===null,
