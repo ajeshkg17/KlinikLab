@@ -282,52 +282,59 @@ test('grip recenters an already-open guide without losing the active tutorial pa
  guide.onExit();
 });
 
-test('XR frame binds left/right rays by handedness, not input array order, and clears lost poses',()=>{
+test('XR frame maps independent aim/grip poses by handedness and clears missing tracking',()=>{
  const begin=engine.indexOf('  xrFrame(t,frame){');
  const end=engine.lastIndexOf('\n  }\n}');
- assert(begin>0&&end>begin);
- const fn=vm.runInNewContext('({'+engine.slice(begin,end+4)+'}).xrFrame',{
-  M3:{
-   add:(a,b)=>a.map((v,i)=>v+b[i]),
-   mul:(a,k)=>a.map(v=>v*k),
-   cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
-   unit:a=>a.map(v=>v/(Math.hypot(...a)||1))
-  }
- });
- const left={handedness:'left',targetRaySpace:{}};
- const right={handedness:'right',targetRaySpace:{}};
+ const updateStart=engine.indexOf('  updateXRController(slot,source,frame){');
+ const updateEnd=engine.indexOf('\n  replaceLabel(',updateStart);
+ assert(begin>0&&end>begin&&updateStart>0&&updateEnd>updateStart);
+ const M3={
+  add:(a,b)=>a.map((v,i)=>v+b[i]),
+  mul:(a,k)=>a.map(v=>v*k),
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+  unit:a=>a.map(v=>v/(Math.hypot(...a)||1)),
+  trs:(p,rot,scale)=>[scale[0],0,0,0,0,scale[1],0,0,0,0,scale[2],0,...p,1],
+  mm:(a,b)=>b.map((v,i)=>i===12?a[12]+v:i===13?a[13]+v:i===14?a[14]+v:v)
+ };
+ const methods=vm.runInNewContext('({'+engine.slice(updateStart,updateEnd)+','+engine.slice(begin,end+4)+'})',{M3});
+ const left={handedness:'left',gripSpace:{hand:'left',kind:'grip'},targetRaySpace:{hand:'left',kind:'aim'},gamepad:{buttons:[]},profiles:['oculus-touch']};
+ const right={handedness:'right',gripSpace:{hand:'right',kind:'grip'},targetRaySpace:{hand:'right',kind:'aim'},gamepad:{buttons:[]},profiles:['oculus-touch']};
  const baseLayer={framebuffer:{},getViewport:()=>({x:0,y:0,width:100,height:100})};
  const gl={FRAMEBUFFER:1,DEPTH_TEST:2,COLOR_BUFFER_BIT:4,DEPTH_BUFFER_BIT:8,
   bindFramebuffer(){},enable(){},clear(){},viewport(){}};
  let cutFrameCalls=0,placed=0,cleared=0;
- const controllers=()=>({hand:{p:[0,-20,0]},ray:{p:[0,-20,0],model:null}});
+ const controllers=()=>({parts:Array.from({length:6},()=>({hidden:true,model:null})),ray:{hidden:true,model:null}});
  const scene={gl,xrRef:{},xrControllers:[controllers(),controllers()],
-  getXRInputPose:(frame,source)=>source.missing?null:{transform:{position:{
-   x:source===left?-1:1,y:1.5,z:-.25},orientation:{x:0,y:0,z:0,w:1}}},
-  rotateByQuat:()=>[0,0,-1],
-  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}},
+  updateXRController:methods.updateXRController,
+  controllerMatrix:pose=>[1,0,0,0,0,1,0,0,0,0,1,0,pose.transform.position.x,pose.transform.position.y,pose.transform.position.z,1],
+  rotateByQuat:()=>[0,0,-1],rgb:color=>color,
+  clearControllers(){cleared++;for(const c of this.xrControllers){c.active=false;c.gripValid=false;c.aimValid=false;for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}},
   xrGuide:{placeForViewer(){placed++}},
-  xrPrep:{triggers:{clear(){cleared++}},tip:{hidden:false},onXRFrame(){cutFrameCalls++}},
+  xrPrep:{triggers:{clear(){}},tip:{hidden:false},onXRFrame(){cutFrameCalls++}},
   draw(){}};
  const view={transform:{inverse:{matrix:[]}},projectionMatrix:[]};
  const viewerPose={views:[view]};
  const frame=(sources,pose=viewerPose)=>({
-  session:{inputSources:sources,renderState:{baseLayer}},getViewerPose(){return pose}
+  session:{inputSources:sources,renderState:{baseLayer}},
+  getViewerPose(){return pose},
+  getPose(space){const src=space.hand==='left'?left:right;if(src.missing)return null;return {transform:{position:{
+   x:(src===left?-1:1)+(space.kind==='aim'?.20:0),y:1.5,z:-.25},orientation:{x:0,y:0,z:0,w:1}}};}
  });
- fn.call(scene,0,frame([right,left]));
- assert.equal(scene.xrControllers[0].hand.p[0],-1);
- assert.equal(scene.xrControllers[1].hand.p[0],1);
+ methods.xrFrame.call(scene,0,frame([right,left]));
+ assert.equal(scene.xrControllers[0].parts[0].model[12],-1);
+ assert.equal(scene.xrControllers[1].parts[0].model[12],1);
  assert(scene.xrControllers.every(c=>c.ray.model?.length===16));
- fn.call(scene,1,frame([left,right]));
- assert.equal(scene.xrControllers[0].hand.p[0],-1);
- assert.equal(scene.xrControllers[1].hand.p[0],1);
+ assert(scene.xrControllers.every(c=>c.gripValid&&c.aimValid));
+ methods.xrFrame.call(scene,1,frame([left,right]));
+ assert.equal(scene.xrControllers[0].parts[0].model[12],-1);
+ assert.equal(scene.xrControllers[1].parts[0].model[12],1);
  right.missing=true;
- fn.call(scene,2,frame([right,left]));
- assert.equal(scene.xrControllers[1].hand.p[1],-20);
+ methods.xrFrame.call(scene,2,frame([right,left]));
+ assert.equal(scene.xrControllers[1].parts[0].hidden,true);
  assert.equal(scene.xrControllers[1].ray.model,null);
- assert.equal(scene.xrControllers[0].hand.p[0],-1);
- fn.call(scene,3,frame([left,right],null));
- assert(scene.xrControllers.every(c=>c.hand.p[1]===-20));
+ assert.equal(scene.xrControllers[0].parts[0].model[12],-1);
+ methods.xrFrame.call(scene,3,frame([left,right],null));
+ assert(scene.xrControllers.every(c=>c.parts.every(m=>m.hidden)));
  assert.equal(cleared,1);
  assert(scene.xrPrep.tip.hidden);
  assert.equal(cutFrameCalls,3);
