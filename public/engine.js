@@ -512,7 +512,8 @@ class DentalScene {
     this.resetXRTool(tool);return true;
   }
   updateXRTools(frame){
-    for(const tool of this.xrTableTools||[])tool.hover=null;
+    const connected=new Set([...frame.session.inputSources].map(source=>source.handedness));
+    for(const tool of this.xrTableTools||[]){if(tool.owner&&!connected.has(tool.owner))this.resetXRTool(tool);tool.hover=null;}
     for(const source of frame.session.inputSources){
       const hand=source.handedness;
       if(!['left','right'].includes(hand))continue;
