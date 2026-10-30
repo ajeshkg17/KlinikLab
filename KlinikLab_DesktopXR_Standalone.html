@@ -1521,7 +1521,7 @@ class ToothSolid{
  isUpperMolar(){return this.fdi?this.toothClass()==='molar'&&this.isUpper():this.caseKey==='molar'||this.caseKey==='crown'}
  rootCenters(){return this.toothClass()==='premolar'?[[0,-.13],[0,.15]]:this.isAnterior()?[[0,0]]:this.isUpperMolar()?[[-.49,-.33],[.47,-.34],[.02,.41]]:[[-.41,-.10],[.41,-.10]]}
  profile(x,z){const cls=this.toothClass();const a=cls==='incisor'?.70:cls==='canine'?.78:cls==='premolar'?.84:this.isAnterior()?.76:1.00,b=cls==='incisor'?.42:cls==='canine'?.57:cls==='premolar'?.72:this.isAnterior()?.56:.86;return Math.pow(Math.pow(Math.abs(x)/a,4)+Math.pow(Math.abs(z)/b,4),.25)}
- height(x,z){const a=this.isAnterior()?0:.242;
+ height(x,z){if(this.fdi&&this.isLeft())x=-x;const a=this.isAnterior()?0:.242;
    const cusp=(u,w)=>Math.exp(-SQ((x-u)/.32)-SQ((z-w)/.31));
    let h=1.016+a*(cusp(-.53,-.45)+.96*cusp(.53,-.45)+.90*cusp(-.53,.45)+.83*cusp(.53,.45));
    if(!this.isAnterior()){
