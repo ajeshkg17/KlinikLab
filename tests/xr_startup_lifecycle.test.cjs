@@ -20,7 +20,7 @@ for(const boundary of ['graphics','reference-space'])test(`ended XR session cann
  const scene={xrSession:null,xrStarting:false,
   gl:{async makeXRCompatible(){if(boundary==='graphics'){waiting();await pending;}}},
   handleXREnd(s){assert.equal(s,session);},setXRComfort(){comfort++;},
-  focusDecor:[],xrBoardMeshes:[],xrLoop(){}};
+  focusDecor:[],xrBoardMeshes:[],xrLoop(){},initXRTools(){}};
  const result=enter.call(scene);await reached;
  listeners.end();release();
  await assert.rejects(result,/ended during startup/);
@@ -78,7 +78,7 @@ async function inputSession(){
   updateRenderState(){},requestReferenceSpace:async()=>({}),requestAnimationFrame(){}};
  const enter=vm.runInNewContext('({'+engine.slice(start,end)+'}).enterVR',{
   navigator:{xr:{requestSession:async()=>session}},isSecureContext:true,XRWebGLLayer:class {}});
- const scene={xrSession:null,gl:{},focusDecor:[],xrBoardMeshes:[],setXRComfort(){},xrLoop(){},
+ const scene={xrSession:null,gl:{},focusDecor:[],xrBoardMeshes:[],setXRComfort(){},xrLoop(){},initXRTools(){},handleXREnd(){},
   clearControllers(){calls.clear++;},resetXRTools(){},onXRGripStart(){return false},onXRGripEnd(){return false},
   xrGuide:{onEnter(){},onSelectStart(){calls.guide++;return false;},onSqueezeStart(){calls.grip++;}},
   xrPrep:{onEnter(){},triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},
