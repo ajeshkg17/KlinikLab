@@ -135,14 +135,14 @@ class KlinikApp {
   document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>this.setView(b.dataset.view));$('focus').onclick=()=>{this.setView('3d');this.scene?.focusTeeth();$('scene-label').textContent='3D dental anatomy · interactive'};$('room').onclick=()=>{this.setView('3d');this.scene?.focusRoom();$('scene-label').textContent='Clinic orientation · schematic'};$('arches').onclick=()=>{if(!this.scene)return;const mode=this.scene.cycleArches();$('arches').textContent={both:'Both arches',upper:'Upper only',lower:'Lower only'}[mode]};
   const anatomyMagnify=document.createElement('button');
   anatomyMagnify.type='button';anatomyMagnify.id='anatomy-magnification';
-  anatomyMagnify.textContent='Teeth: 1×';anatomyMagnify.title='Toggle explicit educational tooth magnification (8×). Normal anatomy remains at approximately physical scale.';
+  anatomyMagnify.textContent='Teeth: 1×';anatomyMagnify.title='Toggle explicit educational tooth magnification (12×). Normal anatomy remains at approximately physical scale.';
   anatomyMagnify.setAttribute('aria-pressed','false');
   $('arches').insertAdjacentElement('afterend',anatomyMagnify);
   anatomyMagnify.onclick=()=>{
     if(!this.scene)return;
     const enable=this.scene.anatomyDisplayMagnification===1;
     this.scene.setTeachingMagnification(enable);
-    anatomyMagnify.textContent=enable?'Teeth: 8× teaching':'Teeth: 1×';
+    anatomyMagnify.textContent=enable?'Teeth: 12× teaching':'Teeth: 1×';
     anatomyMagnify.setAttribute('aria-pressed',String(enable));
   };
   $('occlusal').onclick=()=>{this.setView('3d');this.scene?.occlusalView();$('arches').textContent={both:'Both arches',upper:'Upper only',lower:'Lower only'}[this.scene.archMode]};$('next').onclick=()=>this.next();$('restart').onclick=()=>this.selectStation(this.stationIndex);$('expert').onclick=()=>{this.expert=!this.expert;this.revealed=false;$('expert').textContent='Expert: '+(this.expert?'ON':'OFF');this.render()};$('help').onclick=()=>{if(!window.KlinikTutorial?.open?.())this.toast('Guided tour unavailable. Please reload KlinikLab.')};$('reset').onclick=()=>{if(confirm('Reset locally stored session progress?')){this.local={complete:[],correct:0};this.save();this.renderNav()}};$('vr').onclick=()=>this.toggleVR()}
