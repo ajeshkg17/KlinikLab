@@ -1,92 +1,26 @@
-# WebXR emulator + Playwright baseline and development phases
+# Reproducible Playwright/IWER Quest 2 emulator harness
 
-## Read before using
-The receiving chat is **Continue Program Development**. Its current work is on `integration/single-chat-validation-2026-10-30`, last reported validated commit `4a563659`, with 114 app tests, 8 QA helper tests, 62 Chromium checks, 16 FSP exercises, no uncaught browser errors or asset failures. These are that chat's reports, not this harness run. Preserve its work and do not start from hosted main.
+**Status:** Phase 3 functional tests completed at integration SHA `891a0a4cf7e7d11fe2c783dc0d487e3d90599cb4` on GitHub Xvfb (14/14 checks), but the hosted screenshot gallery included duplicate frames. Later capture code requests fresh **XR eye framebuffer** pixels. **The new eye-capture path is pending local Windows/Chrome verification.** No physical Quest 2 hardware acceptance has occurred.
 
-The installed Chrome Immersive Web Emulator was activated on http://127.0.0.1:8787/. The local tester observed the VR tutorial, both controller panels, right-controller disconnect/reconnect, VR exit and re-entry. This was a real installed-extension UI check. It was run against **main 428d6b2d8fadd881d74d587bcaff3279da489949**, not the new integration branch.
+This is the pinned Playwright 1.57 / genuine Meta IWER 2.7 `metaQuest2` harness. It runs against a specific integration commit in an isolated local server and Chrome profile. `smoke.mjs` keeps strict 120 valid XR poses, at least 120 actual rendered frames, stereo view/world model stability checks, trigger/squeeze, disconnect/reconnect, exit/reentry, and Phase 3 controller pickup/return interaction checks. Its Phase 3 screenshot checkpoints run only when relevant states are reached. Screenshot readback errors fail instead of being called valid visuals.
 
-## Repeatable Playwright test
-`smoke.mjs` uses Playwright 1.57.0 with Meta IWER 2.7.0 and the genuine `metaQuest2` device profile, injected BEFORE application scripts in an isolated temporary Chrome context. It does not mock navigator.xr or forge session results. It uses IWER's documented `installRuntime({forceInstall:true})` option because normal desktop Chrome exposes navigator.xr but has no connected headset. This override is strictly inside the isolated test context; never add it to a production build or real Quest page.
+## Recommended workflow: owner-PC agent
 
-This harness tests the same emulator runtime family, not the installed extension's toolbar. The installed extension was tested separately as described above. No private user Chrome profile or remote debugging port is required.
+Follow [the single-chat PC XR worker guide](../../visual-qa/README.md) and the bounded [XR job request](../../visual-qa/jobs/xr-current.json). GitHub stores declarative jobs and published results; the owner's PC runs Chrome/IWER and uploads to `visual-feedback`. Job IDs are executed at most once by the local ledger and pinned to the explicitly requested full commit SHA.
 
-### Setup and run
-Copy/cherry-pick **only test-support/webxr-test/** onto the intended integration/test branch; do not replace newer application sources with this main-based tooling branch.
+## Optional manual smoke
 
-Start an isolated copy of the intended build on a free loopback port, with sync/restart automation disabled for that copy. Record its full commit SHA. Example server commands in PowerShell from that isolated checkout:
+At an isolated source checkout, start `PORT=8891 node server/server.mjs` in a separate terminal (PowerShell: set `$env:PORT='8891'`). Install the pinned dependencies:
 
-```powershell
-$env:PORT='8790'
-node server/server.mjs
-```
-
-In another terminal:
 ```powershell
 npm.cmd ci --prefix test-support/webxr-test --no-audit --no-fund
-$env:KLINIKLAB_URL='http://127.0.0.1:8790/'
+$env:KLINIKLAB_URL='http://127.0.0.1:8891/'
+$env:KLINIKLAB_BUILD_SHA=(git rev-parse HEAD)
 node test-support/webxr-test/smoke.mjs
 ```
 
-Requires installed Google Chrome; the script launches headed Chrome via channel:'chrome'. Keep its window usable and avoid concurrent browser/GPU tests. Dependencies are pinned in the lockfile. A cloud runner without installed Chrome needs an explicitly documented alternative launch setup; report inability honestly rather than claiming a local-PC run.
+Environment: `KLINIKLAB_XR_DEADLINE_MS` defaults to 45000, bounded 15000–120000; `KLINIKLAB_XR_GRAPHICS` defaults to native Chrome graphics, optionally `software`; `KLINIKLAB_XR_PERF_THRESHOLD_MS` is advisory, not a functional pass condition.
 
-The script writes output/playwright/webxr-smoke/result.json and local PNG evidence. It exits nonzero on failure and closes its own browser in finally. Do not upload screenshots automatically or download visual-feedback. Add exact build SHA, browser version and run environment to future evidence; this initial script reports origin but does not independently identify the server's Git checkout.
+The harness writes `output/playwright/webxr-smoke/result.json` and PNG screenshots. Do not silently reuse or download earlier evidence. The `visual-feedback` gallery must identify exact SHA, emulator environment and duplicate frames. On WebXR readback limitations, preserve failures and seek local validation; do not claim physical headset performance.
 
-### Baseline result: 30 October 2026
-Tested on this PC, headed Chrome, main 428d6b2d8fadd881d74d587bcaff3279da489949. All six checks passed:
-1. VR button enabled with the Quest 2 profile.
-2. Application entered a real IWER immersive WebXR session.
-3. Both handed input sources and 120 XR frames observed.
-4. selectstart/selectend and squeezestart/squeezeend observed for both hands after emulator input.
-5. Right-controller disconnect/reconnect updated session input sources.
-6. App exited and re-entered VR.
-
-No page errors or failed requests observed. Both controller profiles included oculus-touch-v3, oculus-touch and generic-trigger-squeeze-thumbstick. Stationary emulator viewer position delta was 0 m over 120 samples, with mean interval ~17.7 ms on this PC. These values are NOT Quest 2 frame timings, NOT a test of rendered world/camera stability and NOT proof the user's reported vibration is fixed. Inputs reaching the session do not by themselves prove the correct application action occurred; extend assertions for application behavior as features are implemented.
-
-## Phased work: run one phase at a time
-
-### Phase 0 - Integrated emulator baseline
-Read existing chat and code; preserve current integration work. Incorporate/adapt this harness into the intended integration branch without modifying hosted main. Run real IWER/Playwright checks on that exact build and report revision, setup, commands, results, errors and remaining limits. Add application-level assertions/instrumentation as needed rather than replace the runtime with stubs. Do not proceed to feature phases until this baseline works or a specific blocker is reported.
-
-### Phase 1 - Quest 2 controllers
-Show recognizable left/right Quest 2 Touch controller models in the actual WebXR scene with verified input-profile/button mapping, correct grip/aim alignment and handedness. Use license-compatible models or clearly labelled schematic geometry, not proprietary assets of uncertain provenance. Keep UI rays and tool actions consistent. Test mappings and disconnection/recovery. Do not confuse emulator overlay controller drawings with in-app controller models.
-
-### Phase 2 - VR vibration/stability
-Reproduce the user's vibrating-view issue. Inspect render-loop ownership, duplicate animation loops, repeated camera/reference-space transforms, recentering, timing, tracking recovery and expensive asset work. Measure stationary rendered camera/world transforms over many frames and controlled movement; do not infer stability from screenshots alone or smooth the head pose blindly. Preserve physical motion responsiveness. Use headset evidence where needed and distinguish desktop emulation from hardware performance.
-
-### Phase 3 - Table tool pickup
-Implement a deliberate grip-to-pick-up / release-to-return-or-place flow for distinct table tools. Support either hand, stable held-tool offset, visible hover/selection, switching and no accidental double ownership. Keep trigger actions separate from grip pickup. Test pickup/release/switch/recovery and prevent unintended cutting during UI use, tracking loss or disconnect.
-
-### Phase 4 - Tool catalog
-Create an accessible in-VR catalog listing available instruments with name, purpose and clear selection feedback. Selecting makes the tool available at a table slot or in the chosen hand through a consistent interaction. Keep navigation readable, avoid uncontrolled spawning and provide return/reset controls. Retain desktop access where appropriate. Test catalog-to-table/hand flow, both hands and repeated use.
-
-### Phase 5 - Combined regression and Quest acceptance
-Run the established desktop/mobile tests plus phased XR checks. Verify controller visuals, tool interaction, catalog and stability together on a known revision. Actual Quest 2 acceptance is separate: readability, correct left/right controllers, realistic reach, motion stability, comfort and performance. Report any hardware tests not performed. Prepare a reviewable change; follow existing publishing/merge authorization.
-
-## Phase reporting contract
-At each phase end, report: phase number, branch/full SHA, implemented behavior, test command and results, evidence, remaining issues, and COMPLETE or BLOCKED. Stop and wait for the next phase request. The local coordination chat will request the next phase only when your current turn is finished and you explicitly report completion; never interrupt active work. No deleted worker chats should be contacted.
-
-Sources:
-- https://meta-quest.github.io/immersive-web-emulation-runtime/getting-started.html
-- https://github.com/meta-quest/immersive-web-emulator
-
-### Phase 2 harness hardening (30 October 2026)
-The 120 valid viewer-pose frames, at least 120 app-drawn frames, two rendered eye-view matrices and stationary-world matrix assertions remain **required**. The collector distinguishes callbacks, valid poses, null poses and actual app draw counts. When its bounded deadline expires, it throws `XRCollectionTimeout` with partial callback/pose/app-draw counts, document visibility/focus, session visibility and WebGL context/framebuffer diagnostics. The generated `result.json` contains the failure and a best-effort post-failure snapshot.
-
-Configuration (all optional):
-- `KLINIKLAB_XR_DEADLINE_MS`: 15000–120000; default **45000**. Increasing the budget does not reduce sample counts or convert incomplete runs into passes.
-- `KLINIKLAB_XR_GRAPHICS`: `default` (normal Chrome GPU selection) or explicit `software` (SwiftShader flags); defaults to **default**. Do not set software in normal local tests without a reason.
-- `KLINIKLAB_XR_PERF_THRESHOLD_MS`: 5–1000; default **20**. The comparison is **advisory only**, recorded separately from functional `passed`. It is not a headset FPS target or proof that vibration is fixed.
-
-Example with default graphics:
-```powershell
-$env:KLINIKLAB_URL='http://127.0.0.1:8791/'
-$env:KLINIKLAB_XR_DEADLINE_MS='45000'
-npm.cmd ci --prefix test-support/webxr-test --no-audit --no-fund
-node test-support/webxr-test/smoke.mjs
-```
-Only when intentionally testing software rendering:
-```powershell
-$env:KLINIKLAB_XR_GRAPHICS='software'
-node test-support/webxr-test/smoke.mjs
-```
-Run harness unit tests with `node --test test-support/webxr-test/harness-options.test.mjs`. This work does not modify the application renderer and is not physical Quest 2 acceptance.
+Previous Phase 0/1/2 evidence, including Linux timeout investigations and successful Windows results, remains in Git history and the coordination board. These historical records are useful for unresolved performance/visual differences but are not current run instructions. Phase 4 tool catalog has not begun.
