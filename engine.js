@@ -218,18 +218,18 @@ class DentalScene {
       this.archMeshes[upperIndex]=this.meshes.slice(archStart);
     }
     this.box([0,1.275,-1.8],[1.76,.065,1.16],'#acc8c4');
-    // Practical instrument tray at right (ray/select targets include multiple pieces).
-    this.box([1.64,.97,-1.65],[1.16,.085,.75],'#e5ece6');this.cy([1.64,.53,-1.65],[.075,.85,.075],'#adc6c6');
-    this.box([1.64,1.02,-1.65],[1.06,.014,.64],'#91b0b2');
+    // XR-reachable tray directly ahead, distinct instruments (ray/select targets include multiple pieces).
+    this.box([.09,.97,-1.05],[1.16,.085,.75],'#e5ece6');this.cy([.09,.53,-1.05],[.075,.85,.075],'#adc6c6');
+    this.box([.09,1.02,-1.05],[1.06,.014,.64],'#91b0b2');
     this.xrTableTools=[];
-    const tools=[['mirror',1.24,'#c4d9d6'],['probe',1.44,'#d6e2dd'],['suction',1.64,'#89d5d1'],['excavator',1.84,'#e1c69e'],['composite',2.04,'#c5a8d7']];
-    for(const [name,x,color] of tools){const toolStart=this.meshes.length;this.cy([x,1.08,-1.64],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-1.43],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
-      if(name==='mirror'){this.cy([x,1.085,-1.80],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
-      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-1.85],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
-      if(name==='suction'){this.cy([x,1.11,-1.86],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
-      if(name==='composite'){this.cy([x,1.09,-1.85],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
+    const tools=[['mirror',-.31,'#c4d9d6'],['probe',-.11,'#d6e2dd'],['suction',.09,'#89d5d1'],['excavator',.29,'#e1c69e'],['composite',.49,'#c5a8d7']];
+    for(const [name,x,color] of tools){const toolStart=this.meshes.length;this.cy([x,1.08,-1.04],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-.83],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
+      if(name==='mirror'){this.cy([x,1.085,-1.20],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
+      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-1.25],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
+      if(name==='suction'){this.cy([x,1.11,-1.26],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
+      if(name==='composite'){this.cy([x,1.09,-1.25],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
       this.xrTableTools.push({name,meshes:this.meshes.slice(toolStart),owner:null,home:null,hover:null});
-      this.label(name.toUpperCase(),[x,.985,-1.24],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
+      this.label(name.toUpperCase(),[x,.985,-.64],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
     }
     // Other procedure items displayed on the side trolley.
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
@@ -438,7 +438,7 @@ class DentalScene {
       this.xrGuide?.onEnter();
       const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
       session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.resetXRTools();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
-      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(!this.onXRGripStart(e,frame))this.xrGuide?.onSqueezeStart(e)});session.addEventListener('squeezeend',e=>{if(this.xrSession===session)this.onXRGripEnd(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
+      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;this.onXRGripStart(e,frame)});session.addEventListener('squeezeend',e=>{if(this.xrSession===session)this.onXRGripEnd(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){
       if(session){try{await session.end()}catch{}this.handleXREnd(session)}
