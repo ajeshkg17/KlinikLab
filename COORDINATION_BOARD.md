@@ -2,6 +2,29 @@
 
 This board is a coordination snapshot, not application code. Repository: ajeshkg17/KlinikLab. Last initialized: 2026-10-29. Verify current GitHub issue, pull request and check status before relying on any snapshot below.
 
+## Single-chat continuation — 30 October 2026
+
+**Current directive:** The user retired the prior worker chats and asked for development to
+continue within one conversation. The old multi-chat assignments below are retained as
+historical handoff records; they are not active requests to contact or wake workers.
+Do not schedule worker tasks, run shared-PC screenshot jobs, change hosted main, or
+merge without the usual review and authorization.
+
+GitHub baseline reverified on 30 Oct: `main` at `428d6b2`; all six PRs #12, #13,
+#14, #15, #17 and #18 remain open and unmerged. The source integration preview remains
+`3208102`, with the same six recorded feature heads. Created isolated
+`integration/single-chat-validation-2026-10-30` from that preview;
+its new source-only CI and Chromium DOM smoke scripts do not operate the office PC,
+emulator, physical Quest or screenshot worker, and do not deploy the application.
+The first source CI job passed; its Chromium job did not start the app because the
+GitHub runner switched to unsupported Ubuntu 26.04 for Playwright 1.57.
+Pinned the validation workflow to Ubuntu 24.04 and started another run.
+Review its latest CI result before interpreting the browser gate.
+
+Physical Quest 2, installed Chrome Immersive Web Emulator and independent clinical/
+German-language review remain unverified. Local browser connection was unavailable
+in the receiving conversation. Do not treat GitHub Chromium as XR acceptance.
+
 ## Current coordinator
 
 The user appointed the local chat **Sync GitHub updates to this PC** as coordinator on 2026-10-30. The previous coordinator's automatic continuation schedule has been stopped. Let any already-running turn finish without interruption; its existing branches, PRs and updates remain part of the handoff. Future coordination decisions and worker wakeups belong to this local chat. The local chat's role is coordination; application-code edits and merges are outside this handoff.
