@@ -2507,7 +2507,7 @@ class XRToothPractice {
     const physics=lab.physics,radius=lab.burRadius*CLAMP(.45+physics.speed*physics.load/(.3+resistance*.7),.35,1.20);
     solid.addCut(...p,radius);physics.trace.push({tissue,speed:physics.speed,load:physics.load,tilt:physics.tilt,resistance:+(physics.load*resistance*(1+physics.tilt/85)/(.25+physics.speed*1.2)).toFixed(4),effectiveRadius:+radius.toFixed(4),position:p.slice(),source:source?'WebXR tracked target ray':'desktop XR preview',calibrated:false});
     if(solid.bur.length>200){const removed=solid.bur.length-200;solid.bur.splice(0,removed);physics.trace.splice(0,removed);}
-    lab.strokes++;lab.distance+=last?dist:0;
+    lab.strokes++;lab.distance+=last?dist:0;lab.persistTooth?.();
     this.lastCut={p:p.slice(),time:performance.now()};this.cutCount++;this.dirty=true;
     if(source&&performance.now()-this.lastHapticAt>260){this.lastHapticAt=performance.now();const actuator=source.gamepad?.hapticActuators?.[0]||source.gamepad?.vibrationActuator;
       try{const result=actuator?.pulse?.(.12,35)||actuator?.playEffect?.('dual-rumble',{duration:35,strongMagnitude:.12,weakMagnitude:.08});result?.catch?.(()=>{});}catch{}}
