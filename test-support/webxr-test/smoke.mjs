@@ -183,8 +183,10 @@ try{
  const translated=await toolState('mirror');
  await page.evaluate(()=>{const q=window.__xrTestDevice.controllers.left.quaternion;
    q.set(0,Math.sin(Math.PI/8),0,Math.cos(Math.PI/8));});
- await page.waitForFunction(x=>Math.abs(window.kliniklab.scene.xrTableTools.find(t=>t.name==='mirror')?.meshes[0]?.model?.[0]-x)>0.1,
-   translated.model[0],{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ await page.waitForFunction(previous=>{
+   const current=window.kliniklab.scene.xrTableTools.find(t=>t.name==='mirror')?.meshes[0]?.model;
+   return current?.length===16&&Math.max(...current.map((v,i)=>Math.abs(v-previous[i])))>.1;
+ },translated.model,{timeout:Math.max(15000,config.collectionDeadlineMs)});
  assert.equal((await toolState('mirror')).owner,'left','Rotation invalidated grip ownership');
  result.checks.push('Held tool orientation follows real emulated controller rotation');
  await grip('left',0);
