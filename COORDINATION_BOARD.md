@@ -31,6 +31,23 @@ All four workers have acknowledged their individual issues. The coordinator shou
 - Preserve generated standalone and root/public consistency during future integration; all three feature PRs touch the standalone artifact. Verify results from the final integrated source.
 - No merge, shared test, cleanup or code change is authorized merely by publishing this board.
 
+## Current review and assignments — 30 October 2026
+
+This section is the latest ownership snapshot; older handoff statements and log entries below remain historical evidence. Role assignments do not imply GitHub assignees or notification delivery.
+
+| Workstream / gate | Verified state | Active responsibility / next action |
+|---|---|---|
+| Quest #8 / #13 | Chat 1 re-acknowledged at [06:32 UTC](https://github.com/ajeshkg17/KlinikLab/issues/8#issuecomment-6516565300); head ba2e343 unchanged, open, 7/7 checks pass | Coordinator owns further engineering and #18; worker handoff remains waiting, no new worker task |
+| Anatomy #9 / #15 | Last worker ACK 29 Oct; d5257a5, draft, 7/7 checks pass | Coordinator owns source/integration review; specialist anatomy and valid visual baseline remain pending |
+| FSP/KP #10 / #14 | Last worker ACK 29 Oct; d910d3d, draft, 9/9 checks pass; four cases now present | Coordinator owns code review and four-case acceptance planning; qualified dental/German review has no completed sign-off |
+| QA #11 / #12 | Last worker plan 29 Oct; 98fbfba, draft, 8 passing checks / 1 Chromium failure | Coordinator owns engineering evidence and plan reconciliation; shared acceptance remains held, no worker execution assignment |
+| Duplicate ID #16 / #17 | e363a63, draft fix; not deployed, #16 remains open | Coordinator owns fix/integration; real integrated DOM verification pending; duplicate volume initialization was not the confirmed cause |
+| VR follow-up #18 | 2dec24d, draft; previous observed 7/7 CI, 49 targeted local tests | Coordinator owns capability-check/button race investigation next; preserve worker branch |
+| Combined preview | ed0d7d9; 109 local application tests; source-only rehearsal | Coordinator maintains preview and report; main remains 428d6b2, no deployment |
+| Hardware / content sign-offs | No physical Quest, emulator, clinician or German-language sign-off | Remain unverified; do not assign completed status to mocks or desktop reports |
+
+No new worker work is requested. Do not interrupt active chats. Original workstream issues remain the communication channels. All feature PRs remain unmerged; merge order is still a proposal. QA, screenshot and retention holds remain in force.
+
 ## Current handoff and decisions
 
 - The coordinator reported #13, #14 and #15 unmerged, and QA #12 draft. Verify actual current states and checks.
