@@ -81,5 +81,7 @@ test('Phase 6 examination renders an isolated anatomy pass with framebuffer pixe
  assert(source.includes('const visible=this.anatomyDisplayMagnification>1?this.archMeshes.flat():this.meshes'));
  const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
  assert(smoke.includes('eyeAnatomyPixels:sides.map(v=>v.anatomyPixels)'));
- assert(smoke.includes('eyePixels.every(n=>n>=500)'));
+ assert(smoke.includes('x.inFrustum===x.count'));
+ assert(smoke.includes('b.left>.10&&b.right<.90'));
+ assert(smoke.includes('b.centerX>.34&&b.centerX<.66'));
 });
