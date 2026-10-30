@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {validateXRJob,INTEGRATION_BRANCH,JOB_REF,RESULT_BRANCH} from './xr-job-core.mjs';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabVisualWorker');
 const REPO=path.join(ROOT,'xr-repo'), REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
-const LEDGER=path.join(ROOT,'xr-completed.json'), URL='http://127.0.0.1:8891/';
+const LEDGER=path.join(ROOT,'xr-completed.json'), HEARTBEAT=path.join(ROOT,'xr-heartbeat.json'), EVIDENCE=path.join(ROOT,'xr-evidence'), URL='http://127.0.0.1:8891/';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function git(args,cwd=REPO){
  const p=spawnSync('git',args,{cwd,encoding:'utf8',timeout:120000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}});
@@ -24,7 +24,42 @@ async function init(){
  try{await fs.access(path.join(REPO,'.git'))}catch{git(['clone','--filter=blob:none','--no-checkout',REMOTE,REPO],ROOT)}
  if(git(['remote','get-url','origin'])!==REMOTE)throw Error('Unexpected remote');
 }
-async function ledger(){try{return JSON.parse(await fs.readFile(LEDGER,'utf8'))}catch{return {completed:{}}}}
+async function ledger(){try{return JSON.parse(await fs.readFile(LEDGER,'utf8'))}catch(e){if(e.code==='ENOENT')return {completed:{}};throw e}}
+async function saveLedger(state){const tmp=LEDGER+'.tmp';await fs.writeFile(tmp,JSON.stringify(state,null,2));await fs.rename(tmp,LEDGER)}
+async function heartbeat(status,jobId=null){await fs.writeFile(HEARTBEAT,JSON.stringify({pid:process.pid,at:new Date().toISOString(),status,jobId},null,2))}
+function credential(){
+ // Git Credential Manager is accessed through the user's configured Git helper,
+ // without prompts, printing, writing token files, or modifying git config.
+ const p=spawnSync('git',['-c','credential.interactive=never','credential','fill'],{
+  input:'protocol=https\\nhost=github.com\\n\\n'.replaceAll('\\n','\n'),
+  encoding:'utf8',timeout:15000,env:{...process.env,GIT_TERMINAL_PROMPT:'0',GCM_INTERACTIVE:'never'}});
+ if(p.status!==0)throw Error('Git credential helper unavailable: sign in to GitHub via Git Credential Manager');
+ const fields=Object.fromEntries(p.stdout.split(/\r?\n/).filter(x=>x.includes('=')).map(x=>[x.slice(0,x.indexOf('=')),x.slice(x.indexOf('=')+1)]));
+ if(fields.protocol!=='https'||fields.host!=='github.com'||!fields.password)throw Error('No usable HTTPS github.com credential in Git Credential Manager');
+ return fields.password;
+}
+async function githubApi(token,endpoint,method='GET',data){
+ const r=await fetch('https://api.github.com/repos/ajeshkg17/KlinikLab'+endpoint,{method,headers:{
+  Authorization:'Bearer '+token,Accept:'application/vnd.github+json',
+  'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
+  body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(30000)});
+ if(!r.ok)throw Error('GitHub '+method+' '+endpoint+' returned '+r.status);
+ return r.json();
+}
+async function preflight(){
+ const token=credential();
+ const repo=await githubApi(token,'');
+ if(repo.permissions?.push!==true)throw Error('GitHub credential lacks repository push permission');
+ await githubApi(token,'/git/ref/heads/'+RESULT_BRANCH);
+ return token;
+}
+async function loadEvidence(job){
+ const dir=path.join(EVIDENCE,job.jobId);
+ const result=JSON.parse(await fs.readFile(path.join(dir,'result.json'),'utf8'));
+ const captures=await Promise.all(result.captureManifest.map(async ({file})=>({name:file,bytes:await fs.readFile(path.join(dir,file))})));
+ if(!result.passed||captures.length!==10)throw Error('Incomplete retained evidence');
+ return {result,captures};
+}
 async function fetchJob(){
  git(['fetch','origin',INTEGRATION_BRANCH]);
  const head=git(['rev-parse','FETCH_HEAD']);
@@ -58,25 +93,25 @@ async function execute(job){
   if(!result.passed||result.captureManifest?.length!==10)throw Error('IWER checks or captures incomplete');
   const names=['01-room-table-unobstructed.png','02-both-controller-models.png','03-left-tool-hover.png','04-left-hand-mirror-pickup.png','05-mirror-release-return.png','06-right-hand-composite-pickup.png','07-help-opened-by-question-mark.png','08-help-closed-after-close.png','09-tool-catalog-open.png','10-tool-catalog-closed.png'];
   const captures=await Promise.all(names.map(async name=>({name,bytes:await fs.readFile(path.join(dir,name))})));
+  // Durable staging before the checkout can be deleted. Preserve failed captures
+  // locally too; never depend on the ephemeral worktree for publication retries.
+  const retained=path.join(EVIDENCE,job.jobId);
+  await fs.mkdir(retained,{recursive:true});
+  await fs.copyFile(path.join(dir,'result.json'),path.join(retained,'result.json'));
+  for(const {name,bytes} of captures)await fs.writeFile(path.join(retained,name),bytes);
   return {result,captures};
  }finally{
   if(server){server.kill();await sleep(300)}
+  // Even a failed smoke run can contain diagnostically useful images/logs.
+  const output=path.join(checkout,'output','playwright','webxr-smoke');
+  try{await fs.cp(output,path.join(EVIDENCE,job.jobId,'diagnostics'),{recursive:true,force:true})}catch{}
   git(['worktree','remove','--force',checkout]);
  }
 }
 async function publish(job,{result,captures}){
  // GitHub git-data API: upload only new blobs; never checkout/download old visual-feedback PNGs.
- const auth=spawnSync('gh',['auth','token'],{encoding:'utf8',timeout:15000});
- if(auth.status!==0||!auth.stdout.trim())throw Error('Install GitHub CLI and authorize push access: gh auth login');
- const token=auth.stdout.trim(),base='https://api.github.com/repos/ajeshkg17/KlinikLab';
- async function api(endpoint,method='GET',data){
-  const response=await fetch(base+endpoint,{method,headers:{
-   Authorization:'Bearer '+token,Accept:'application/vnd.github+json',
-   'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'
-  },body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(30000)});
-  if(!response.ok)throw Error('GitHub '+method+' '+endpoint+' returned '+response.status);
-  return response.json();
- }
+ const token=await preflight();
+ const api=(endpoint,method='GET',data)=>githubApi(token,endpoint,method,data);
  const ref=await api('/git/ref/heads/'+RESULT_BRANCH);
  const parent=ref.object.sha,commit=await api('/git/commits/'+parent);
  const prefix='runs/pc-xr-'+job.jobId+'-'+job.commit;
@@ -115,19 +150,56 @@ async function publish(job,{result,captures}){
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
+ let job=null;
  try{
   await init();
-  const job=await fetchJob(),state=await ledger();
-  if(state.completed[job.jobId])return;
-  if(process.argv.includes('--validate')){console.log('Valid XR job',job.jobId,job.commit);return}
-  console.log('Executing once',job.jobId,job.commit);
-  state.completed[job.jobId]={commit:job.commit,status:'started',startedAt:new Date().toISOString()};
-  const tmp=LEDGER+'.tmp';await fs.writeFile(tmp,JSON.stringify(state,null,2));await fs.rename(tmp,LEDGER);
-  try{const data=await execute(job),url=await publish(job,data);
-   state.completed[job.jobId]={url,commit:job.commit,status:'published',finishedAt:new Date().toISOString()};
+  await heartbeat('polling');
+  job=await fetchJob();
+  const state=await ledger(),previous=state.completed[job.jobId];
+  if(previous?.commit&&previous.commit!==job.commit)throw Error('Job ID reused with a different commit');
+  if(process.argv.includes('--validate')){
+   console.log('Valid XR job',job.jobId,job.commit,'state',previous?.status||'new');return;
+  }
+  if(previous?.status==='published'){await heartbeat('published',job.jobId);return}
+  if(previous?.status==='failed'){await heartbeat('failed-needs-new-job',job.jobId);return}
+  // Upload permission must be available BEFORE rendering. No render should
+  // happen when the owner PC cannot publish to the results branch.
+  await preflight();
+  if(previous?.status==='publish-pending'||previous?.status==='rendered'){
+   await heartbeat('publish-pending',job.jobId);
+   const data=await loadEvidence(job);
+   const url=await publish(job,data);
+   state.completed[job.jobId]={commit:job.commit,status:'published',url,publishedAt:new Date().toISOString()};
+   await saveLedger(state);await heartbeat('published',job.jobId);
+   console.log('Published',url);return;
+  }
+  if(previous?.status==='rendering'){
+   // Avoid silently rerunning an interrupted render. Recovery requires a
+   // deliberate new job ID; preserve diagnostics and intermediate files.
+   await heartbeat('interrupted-render-needs-review',job.jobId);return;
+  }
+  state.completed[job.jobId]={commit:job.commit,status:'rendering',startedAt:new Date().toISOString()};
+  await saveLedger(state);await heartbeat('rendering',job.jobId);
+  try{
+   await execute(job);
+   state.completed[job.jobId]={commit:job.commit,status:'rendered',renderedAt:new Date().toISOString()};
+   await saveLedger(state);
+  }catch(error){
+   state.completed[job.jobId]={commit:job.commit,status:'failed',error:String(error.message).slice(0,400)};
+   await saveLedger(state);await heartbeat('failed',job.jobId);throw error;
+  }
+  state.completed[job.jobId].status='publish-pending';
+  await saveLedger(state);await heartbeat('publish-pending',job.jobId);
+  try{
+   const url=await publish(job,await loadEvidence(job));
+   state.completed[job.jobId]={commit:job.commit,status:'published',url,publishedAt:new Date().toISOString()};
+   await saveLedger(state);await heartbeat('published',job.jobId);
    console.log('Published',url);
-  }catch(error){state.completed[job.jobId]={commit:job.commit,status:'failed',error:String(error.message).slice(0,400)};throw error}
-  finally{await fs.writeFile(tmp,JSON.stringify(state,null,2));await fs.rename(tmp,LEDGER)}
+  }catch(error){
+   // Upload failure is not a rendering failure; retry next poll with the
+   // retained result.json and PNGs, without launching another browser.
+   await heartbeat('publish-pending',job.jobId);throw error;
+  }
  }catch(e){console.error('XR worker error',e.message)}
  finally{busy=false}
 }
