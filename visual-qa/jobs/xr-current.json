@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase4-event-sync-20261030-02",
-  "commit": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+  "jobId": "pc-xr-phase5-catalog-layout-20261030-01",
+  "commit": "68c44b4706690489efc48bf4e54753e7e21716fd",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
