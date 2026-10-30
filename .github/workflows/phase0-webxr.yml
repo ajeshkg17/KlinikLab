@@ -20,6 +20,8 @@ jobs:
           node-version: '22'
       - name: Install pinned harness dependencies
         run: npm ci --prefix test-support/webxr-test --no-audit --no-fund
+      - name: Validate bounded collection and graphics configuration
+        run: node --test test-support/webxr-test/harness-options.test.mjs
       - name: Chrome and Xvfb availability
         run: |
           google-chrome --version
