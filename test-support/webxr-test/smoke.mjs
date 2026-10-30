@@ -546,6 +546,27 @@ try{
    assert(evidence.eyeFdiVisiblePixels?.length===2&&evidence.eyeFdiVisiblePixels.every(n=>n>1000),
      'Selected FDI geometry not visibly rasterized in both eyes: '+id+' '+JSON.stringify(evidence.eyeFdiVisiblePixels));
  }
+ // Verify real application-level per-FDI cut isolation, durable browser storage,
+ // and restoration after leaving and reselecting a tooth. Restore clean test
+ // state afterwards; captured images above remain the original untreated shapes.
+ result.fdiPersistence=await page.evaluate(()=>{
+   const lab=window.kliniklab.volLab;
+   const select=id=>{if(!lab.setTooth(id))throw Error('Invalid FDI '+id);return lab.solid.bur.length};
+   select('16');
+   const previous=lab.solid.bur.map(b=>({p:b.p.slice(),r:b.r}));
+   const probe={p:[.12,.58,-.14],r:.07};
+   lab.solid.addCut(...probe.p,probe.r);lab.rebuild();
+   const stored16=JSON.parse(localStorage.getItem('kliniklab-fdi-treatment-v1')||'{}')['16']?.bur?.length;
+   const other11=select('11'),other36=select('36');
+   const restored16=select('16');
+   lab.solid.bur=previous;lab.rebuild();
+   return {stored16,other11,other36,restored16,initialCuts:previous.length};
+ });
+ assert.equal(result.fdiPersistence.stored16,result.fdiPersistence.initialCuts+1);
+ assert.equal(result.fdiPersistence.other11,0);
+ assert.equal(result.fdiPersistence.other36,0);
+ assert.equal(result.fdiPersistence.restored16,result.fdiPersistence.initialCuts+1);
+ result.checks.push('FDI 16 cut survives selection round trip and localStorage while FDI 11 and 36 stay independent');
  assert.notEqual(result.fdiTreatmentStates[0].cuspHeight,result.fdiTreatmentStates[1].cuspHeight);
  assert.notDeepEqual(result.fdiTreatmentStates[3].roots,result.fdiTreatmentStates[4].roots);
  result.checks.push('Six FDI-selected XR volumetric meshes generated with distinct anatomy and locally retained stereo captures');
