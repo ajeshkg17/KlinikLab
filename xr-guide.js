@@ -1,7 +1,7 @@
 'use strict';
 /* Quest 2 in-headset tutorial: generated entirely as scene meshes and labels.
    No DOM overlay, hand-tracking assumption, controller-button indexing, or medical action.
-   WebXR selectstart is the primary trigger; squeezestart (grip) reopens help. */
+   WebXR trigger selects the dedicated ? launcher; grip is reserved for tools. */
 (function(root){
   const PAGES=Object.freeze([
     {title:'QUEST 2 | GET STARTED',lines:[
@@ -9,7 +9,7 @@
       'Press INDEX TRIGGER to select.',
       'A visible ray shows your pointer.',
       'Use NEXT to practise the controls.',
-      'Grip button reopens this guide.'
+      'Use the ? button to reopen help.'
     ]},
     {title:'PICK A TRAINING MODULE',lines:[
       'Look to the LEFT lesson board.',
@@ -35,7 +35,7 @@
     {title:'READY TO PRACTISE',lines:[
       'BACK reviews earlier instructions.',
       'CLOSE returns to the VR workspace.',
-      'Press either GRIP to reopen help.',
+      'Select ? to reopen help.',
       'Use the Quest system menu to exit VR.',
       'Desktop tutorial is separate.'
     ]}
@@ -43,7 +43,7 @@
   const spec=Object.freeze({panel:{p:[.08,1.56,-1.18],s:[.96,.80,.047]},
     placement:{panelYOffsetFromEyes:-.04,anchorOncePerSession:true,faceInitialViewerYaw:true,recenterOnHelpReopen:true},
     font:{title:43,progress:40,body:49,button:43},
-    launcher:{p:[-1.12,1.40,-1.55],s:[.41,.13,.055]},
+    launcher:{p:[.57,1.97,-1.02],s:[.14,.14,.055]},
     controlSize:[.29,.116,.056],
     controls:{back:[-.20,1.263,-1.124],next:[.15,1.263,-1.124],close:[.48,1.263,-1.124]}});
   const state={version:1,active:false,open:false,index:0,pages:PAGES.length,controllerSelects:0,gripOpens:0};
@@ -66,9 +66,9 @@
         add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:spec.font.button,bold:true}));
       }
       this.launcher=add(scene.box(spec.launcher.p,spec.launcher.s,'#236f75',{key:'guide:open'}),false);
-      this.launcherLabel=add(scene.label('VR HELP / GRIP',
+      this.launcherLabel=add(scene.label('?',
         [spec.launcher.p[0],spec.launcher.p[1]+.005,spec.launcher.p[2]+.035],
-        [.37,.080,1],{font:spec.font.button,color:'#e8fff3'}),false);
+        [.12,.12,1],{font:70,bold:true,color:'#e8fff3'}),false);
       // Snapshot the guide's positions AND its ray hit targets. Changes are XR-only.
       this.meshOrigins=this.meshes.map(mesh=>({
         mesh,p:mesh.p.slice(),rot:mesh.rot?.slice()||null
@@ -123,7 +123,7 @@
     open(){
       if(!state.active)return false;
       state.index=0;state.open=true;
-      // Prevent a held trigger from continuing a cut when help opens by grip.
+      // Opening help pauses the simulated cutting trigger.
       this.scene.xrPrep?.triggers?.clear();
       if(this.scene.xrPrep){this.scene.xrPrep.lastCut=null;if(this.scene.xrPrep.tip)this.scene.xrPrep.tip.hidden=true}
       this.render();return true;
@@ -131,7 +131,7 @@
     close(){if(!state.open)return false;state.open=false;this.render();return true}
     next(){if(!state.open)return false;if(state.index===PAGES.length-1)return this.close();state.index++;this.render();return true}
     back(){if(!state.open||state.index===0)return false;state.index--;this.render();return true}
-    onEnter(){state.active=true;state.controllerSelects=0;state.gripOpens=0;this.open()}
+    onEnter(){state.active=true;state.open=false;state.index=0;state.controllerSelects=0;state.gripOpens=0;this.render()}
     onExit(){
       state.active=false;state.open=false;state.index=0;
       for(const item of this.meshOrigins){
@@ -142,15 +142,7 @@
       this.anchored=false;this.lastViewerPose=null;
       for(const mesh of this.meshes)mesh.hidden=true;
     }
-    onSqueezeStart(){
-      if(!state.active)return false;
-      state.gripOpens++;
-      // Grip is always a recovery shortcut, even if help is already open
-      // and the learner has turned away from the visible panel.
-      if(spec.placement.recenterOnHelpReopen)this.recenter();
-      if(!state.open)this.open();
-      return true;
-    }
+    onSqueezeStart(){return false} // Grip never opens help.
     onSelectStart(event,frame){
       if(!state.active)return false;
       // Invisible panels never receive interaction, but the launcher always does.
