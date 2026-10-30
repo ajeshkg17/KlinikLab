@@ -9,9 +9,11 @@ const u=new URL(origin);
 if(!['127.0.0.1','localhost'].includes(u.hostname))throw Error('Use an explicit local test server');
 const out=path.resolve(here,'../../output/playwright/webxr-smoke');
 await mkdir(out,{recursive:true});
-const result={startedAt:new Date().toISOString(),origin,mode:'Playwright + genuine Meta IWER runtime; isolated profile, not the installed extension',profile:'metaQuest2',checks:[],errors:[],failedRequests:[]};
+const options=await import('./harness-options.mjs');
+const config=options.parseHarnessOptions(process.env);
+const result={configuration:config,startedAt:new Date().toISOString(),origin,mode:'Playwright + genuine Meta IWER runtime; isolated profile, not the installed extension',profile:'metaQuest2',checks:[],errors:[],failedRequests:[]};
 const runtime=await readFile(path.join(here,'node_modules/iwer/build/iwer.min.js'),'utf8');
-const browser=await chromium.launch({channel:'chrome',headless:false,args:['--ignore-gpu-blocklist','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-renderer-backgrounding','--disable-background-timer-throttling']});
+const browser=await chromium.launch({channel:'chrome',headless:false,args:options.chromeArgs(config)});
 let page;
 try{
  const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
@@ -31,17 +33,59 @@ try{
  await page.locator('#vr').click();
  await page.waitForFunction(()=>!!window.kliniklab.scene.xrSession&&!!window.__xrTestDevice.activeSession);
  result.checks.push('Application entered an immersive WebXR session');
- result.stationary=await page.evaluate(async()=>{
+ result.stationary=await page.evaluate(async ({deadlineMs})=>{
    const session=window.__xrTestDevice.activeSession,ref=await session.requestReferenceSpace('local-floor');
    window.__xrTestEvents=[];
    for(const type of ['selectstart','selectend','squeezestart','squeezeend'])session.addEventListener(type,e=>window.__xrTestEvents.push({type,hand:e.inputSource.handedness}));
+   const progress={callbacks:0,validPoses:0,nullPoses:0,appDrawsAtStart:window.kliniklab?.scene?.xrVisualDiagnostics?.frames||0,
+     latestFrameTimeMs:null};
+   window.__xrCollectionProgress=progress;
    return await new Promise((resolve,reject)=>{
-     const points=[],times=[];let last=null;const timer=setTimeout(()=>reject(Error('XR frames timed out')),15000);
-     function frame(t,f){const pose=f.getViewerPose(ref);if(pose){const p=pose.transform.position;points.push([p.x,p.y,p.z]);if(last!==null)times.push(t-last);last=t;}
-       if(points.length>=120){clearTimeout(timer);const first=points[0];resolve({samples:points.length,maxPoseDeltaMeters:Math.max(...points.map(p=>Math.hypot(...p.map((v,i)=>v-first[i])))),meanFrameIntervalMs:times.reduce((a,b)=>a+b,0)/times.length,hands:[...session.inputSources].map(s=>s.handedness),profiles:[...session.inputSources].map(s=>s.profiles)});}else session.requestAnimationFrame(frame);
-     }session.requestAnimationFrame(frame);
+     const points=[],times=[];let last=null,done=false;
+     const diagnostic=()=>({
+       ...progress,appDraws:window.kliniklab?.scene?.xrVisualDiagnostics?.frames||0,
+       documentVisibility:document.visibilityState,documentHasFocus:document.hasFocus(),
+       sessionVisibility:session.visibilityState,sessionEnded:session.ended||false,
+       renderer:{webgl:!!window.kliniklab?.scene?.gl,
+         contextLost:window.kliniklab?.scene?.gl?.isContextLost?.()??null,
+         xrFramebuffer:!!session.renderState?.baseLayer?.framebuffer,
+         canvasWidth:window.kliniklab?.scene?.canvas?.width||null,
+         canvasHeight:window.kliniklab?.scene?.canvas?.height||null}
+     });
+     const timer=setTimeout(()=>{
+       if(done)return;done=true;
+       const error=new Error('XR collection deadline reached ('+deadlineMs+'ms): '+JSON.stringify(diagnostic()));
+       error.name='XRCollectionTimeout';reject(error);
+     },deadlineMs);
+     function frame(t,f){
+       if(done)return;
+       progress.callbacks++;progress.latestFrameTimeMs=t;
+       let pose=null;try{pose=f.getViewerPose(ref)}catch(e){progress.lastPoseError=String(e)}
+       if(pose){
+         progress.validPoses++;
+         const p=pose.transform.position;points.push([p.x,p.y,p.z]);
+         if(last!==null)times.push(t-last);last=t;
+       }else progress.nullPoses++;
+       if(points.length>=120){
+         done=true;clearTimeout(timer);
+         const first=points[0];
+         resolve({samples:points.length,callbacks:progress.callbacks,validPoses:progress.validPoses,
+           nullPoses:progress.nullPoses,collectionDeadlineMs:deadlineMs,
+           maxPoseDeltaMeters:Math.max(...points.map(p=>Math.hypot(...p.map((v,i)=>v-first[i])))),
+           meanFrameIntervalMs:times.reduce((a,b)=>a+b,0)/times.length,
+           hands:[...session.inputSources].map(s=>s.handedness),
+           profiles:[...session.inputSources].map(s=>s.profiles),
+           diagnostics:diagnostic()});
+       }else session.requestAnimationFrame(frame);
+     }
+     session.requestAnimationFrame(frame);
    });
- });
+ },{deadlineMs:config.collectionDeadlineMs});
+ result.performance={meanFrameIntervalMs:result.stationary.meanFrameIntervalMs,
+   performanceThresholdMs:config.performanceThresholdMs,
+   withinAdvisoryThreshold:result.stationary.meanFrameIntervalMs<=config.performanceThresholdMs,
+   status:'advisory-only; not hardware validation'};
+
  result.rendered=await page.evaluate(()=>{
    const d=window.kliniklab?.scene?.xrVisualDiagnostics;
    if(!d)return null;
@@ -92,5 +136,14 @@ try{
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  assert.equal(result.errors.length,0,'Uncaught application errors observed');
  result.passed=true;
-}catch(e){result.passed=false;result.failure=e.stack;if(page)await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});process.exitCode=1;}
+}catch(e){result.passed=false;result.failure=e.stack;
+ if(page)result.timeoutDiagnostics=await page.evaluate(()=>({
+   progress:window.__xrCollectionProgress||null,
+   documentVisibility:document.visibilityState,documentHasFocus:document.hasFocus(),
+   sessionVisibility:window.kliniklab?.scene?.xrSession?.visibilityState||null,
+   appDraws:window.kliniklab?.scene?.xrVisualDiagnostics?.frames||0,
+   renderer:{contextLost:window.kliniklab?.scene?.gl?.isContextLost?.()??null,
+     webgl:!!window.kliniklab?.scene?.gl,
+     framebuffer:!!window.kliniklab?.scene?.xrSession?.renderState?.baseLayer?.framebuffer}
+ })).catch(()=>null);if(page)await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});process.exitCode=1;}
 finally{await browser.close();result.finishedAt=new Date().toISOString();await writeFile(path.join(out,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));}
