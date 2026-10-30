@@ -7,8 +7,8 @@ test('Phase 4 catalog contains five named tools and purposes',()=>{
   assert(code.includes("['"+name+"'")&&code.includes(purpose),name);
 });
 test('catalog is opt-in and uses trigger ray before procedure selection',()=>{
- assert.match(code,/this\.setXRCatalogOpen\(false\);/);
- assert.match(code,/if\(this\.onXRCatalogSelect\(e,frame\)\)return/);
+ assert.match(code,/this\.setXRCatalogOpen\?\.\(false\);/);
+ assert.match(code,/if\(this\.onXRCatalogSelect\?\.\(e,frame\)\)return/);
  assert.match(code,/catalog:toggle/);
  assert.match(code,/catalog:close/);
  assert.match(code,/catalog:tool:/);
