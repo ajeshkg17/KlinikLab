@@ -11,7 +11,7 @@ const out=path.resolve(here,'../../output/playwright/webxr-smoke');
 await mkdir(out,{recursive:true});
 const result={startedAt:new Date().toISOString(),origin,mode:'Playwright + genuine Meta IWER runtime; isolated profile, not the installed extension',profile:'metaQuest2',checks:[],errors:[],failedRequests:[]};
 const runtime=await readFile(path.join(here,'node_modules/iwer/build/iwer.min.js'),'utf8');
-const browser=await chromium.launch({channel:'chrome',headless:false,args:['--ignore-gpu-blocklist']});
+const browser=await chromium.launch({channel:'chrome',headless:false,args:['--ignore-gpu-blocklist','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-renderer-backgrounding','--disable-background-timer-throttling']});
 let page;
 try{
  const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
