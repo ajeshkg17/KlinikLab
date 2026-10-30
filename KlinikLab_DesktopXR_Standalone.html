@@ -552,8 +552,8 @@ class DentalScene {
     this.xrCatalog={open:false,selected:'mirror',specs:catalogSpecs,panels:[],rows:[],status:null};
     const cat=this.xrCatalog,register=(m,row=false)=>{cat.panels.push(m);m.hidden=true;if(row)cat.rows.push(m);return m};
     // A narrow tab near the top of the workspace, clear of the tool tray and ?.
-    cat.launcher=this.box([-.60,1.98,-1.02],[.36,.14,.06],'#225e70',{key:'catalog:toggle'});
-    cat.launcherLabel=this.label('TOOLS',[-.60,1.99,-.98],[.32,.10,1],{font:39,bold:true,color:'#f4ffff'});
+    cat.launcher=this.box([-.94,2.15,-1.05],[.32,.12,.06],'#225e70',{key:'catalog:toggle'});
+    cat.launcherLabel=this.label('TOOLS',[-.94,2.16,-1.01],[.29,.085,1],{font:39,bold:true,color:'#f4ffff'});
     register(this.box([-.60,1.47,-1.03],[.88,1.30,.045],'#173b48'));
     register(this.label('INSTRUMENTS',[-.60,1.84,-.995],[.81,.10,1],{font:38,bold:true}));
     for(let i=0;i<catalogSpecs.length;i++){
