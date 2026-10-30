@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase5-compact-touch-20261030-01",
-  "commit": "735a29fc68083f2ce1070c4b3c632fb5021de52d",
+  "jobId": "pc-xr-phase6-molar-cusps-20261030-01",
+  "commit": "91cb28d52389f3e53914ebb7bfc21a95a8f4f242",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
