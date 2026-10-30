@@ -207,8 +207,18 @@ try{
                count:centers.length,inFrustum:centers.length,magnification:1
              }:null;
            }
+           // Project all 4 panel corners and the three true text rectangles,
+           // in the matrices of each captured XR eye. Never infer visibility
+           // from FDI text state alone.
+           const panel=this.xrPrep?.active?this.xrPrep.clinicalUI:[];
+           const eyeClinical=panel?.length?panel.map(m=>{
+             const center=m.p,halfW=m.s[0]/2,halfH=m.s[1]/2;
+             const points=[[-halfW,-halfH],[halfW,-halfH],[halfW,halfH],[-halfW,halfH]]
+               .map(([dx,dy])=>project([center[0]+dx,center[1]+dy,center[2]]));
+             return {corners:points,visible:!m.hidden,kind:m.kind};
+           }):[];
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels,eyeClinical});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -219,7 +229,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),eyeClinical:sides.map(v=>v.eyeClinical),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -246,7 +256,7 @@ try{
    if(!duplicateOf)captureHashes.set(sha256,filename);
    const destination=auxiliary?(result.phase7Captures??=[]):result.captureManifest;
    if(!auxiliary){result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});}
-   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
+   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeClinical:screenshot.eyeClinical,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -561,6 +571,12 @@ try{
    if(id==='16'||id==='36'){
      await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=false});
      await captureXR('phase8-context-fdi-'+id+'.png','Clinical peripheral FDI context for '+id,true);
+     const eyes=result.phase7Captures.at(-1).eyeClinical;
+     assert(eyes?.length===2&&eyes.every(m=>m?.length===5&&m.every((surface,i)=>surface.visible&&surface.corners.every(c=>
+       c.inFrustum&&c.x>-.90&&c.x<.90&&c.y>-.90&&c.y<.90))),
+       'Actual projected clinical panel/text corners exceed stereo margins: '+JSON.stringify(eyes));
+     result.checks.push('All five clinical panel/text surfaces fit both XR eye frusta with margins: FDI '+id);
+
      await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=true});
    }
    const evidence=result.phase7Captures.at(-1);
