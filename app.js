@@ -144,9 +144,22 @@ class KlinikApp {
    if(exiting)await scene.xrSession.end();else await scene.enterVR();
    this.toast(exiting?'VR session ended':'VR session activated');return true;
   }catch(e){this.toast(e?.message||(exiting?'Could not leave VR. Try again.':'Could not open VR. Try again.'));return false;}
-  finally{this.vrBusy=false;btn.disabled=disabled;btn.textContent=label;btn.removeAttribute('aria-busy');}
+  finally{this.vrBusy=false;btn.disabled=scene.xrSession?false:(typeof this.xrCapabilitySupported==='boolean'?!this.xrCapabilitySupported:disabled);btn.textContent=label;btn.removeAttribute('aria-busy');}
  }
- async checkXR(){const btn=$('vr');if(!navigator.xr||!window.isSecureContext){btn.title='Quest VR requires HTTPS and a compatible headset';return}try{const ok=await navigator.xr.isSessionSupported('immersive-vr');btn.disabled=!ok;btn.title=ok?'Enter immersive Quest VR':'VR unavailable in this browser'}catch{btn.disabled=true}}
+ async checkXR(){
+  const btn=$('vr'),scene=this.scene,request=this.xrCapabilityRequest=(this.xrCapabilityRequest||0)+1;
+  const apply=(supported,title)=>{
+   if(this.scene!==scene||this.xrCapabilityRequest!==request)return;
+   this.xrCapabilitySupported=supported;btn.title=title;
+   if(!this.vrBusy)btn.disabled=scene?.xrSession?false:!supported;
+  };
+  if(scene?.xrSession){apply(true,'Leave the active VR session');return;}
+  if(typeof scene?.enterVR!=='function'){apply(false,'Immersive VR requires the WebGL renderer; desktop practice is still available.');return;}
+  if(!window.isSecureContext){apply(false,'VR requires HTTPS; localhost is allowed for development.');return;}
+  if(typeof navigator.xr?.isSessionSupported!=='function'){apply(false,'WebXR capability checks are unavailable in this browser.');return;}
+  try{const ok=!!await navigator.xr.isSessionSupported('immersive-vr');apply(ok,ok?'Enter immersive VR':'Immersive VR is unavailable in this browser/device.');}
+  catch{apply(false,'Could not check VR support. Retry the capability check or reload.');}
+ }
  toast(s){const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>t.classList.remove('show'),2000)}
  renderNav(){for(const [track,container] of [['fsp','fsp-stations'],['kp','kp-stations'],['clinic','clinic-stations']])$(container).innerHTML=STATIONS.map((s,i)=>({s,i})).filter(x=>x.s.track===track).map(({s,i})=>`<button class="station ${i===this.stationIndex?'active':''}" data-station="${i}"><span class="num">${s.icon}</span><span><strong>${esc(s.name)}</strong><small>${esc(s.short)}</small></span><span class="check">${this.local.complete.includes(s.id+'_'+this.caseData.id)?'✓':''}</span></button>`).join('');$('cases').innerHTML=CASES.map((c,i)=>`<button class="case ${i===this.caseIndex?'active':''}" data-case="${i}"><span class="tooth-num">${c.num}</span><span><strong>${esc(c.title)}</strong><small>${esc(c.subtitle)}</small></span></button>`).join('');document.querySelectorAll('[data-station]').forEach(b=>b.onclick=()=>this.selectStation(+b.dataset.station));document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>this.selectCase(+b.dataset.case));$('progress-label').textContent=`${this.local.complete.filter(s=>s.endsWith('_'+this.caseData.id)).length} / 7`;$('progress-fill').style.width=`${100*this.local.complete.filter(s=>s.endsWith('_'+this.caseData.id)).length/7}%`;$('correct-label').textContent=this.local.correct}
  selectCase(index){if(!CASES[index])return;this.caseIndex=index;this.procedure.setCase(this.caseData.archetype||this.caseData.id);this.volLab?.setCase(this.caseData.archetype||this.caseData.id);this.resetStation();this.scene?.select('');this.scene?.setArchMode('both');$('arches').textContent='Both arches';this.scene?.focusTeeth();this.scene?.setCaseTooth?.(this.caseData.num);this.renderNav();this.renderChart();this.render();}

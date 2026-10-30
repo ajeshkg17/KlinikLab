@@ -98,3 +98,23 @@ The second iteration adds automated keyboard interactions for the FDI chart and 
 
 The new audit uncovered a duplicate `vl-title` ID on **both desktop and mobile**. This is an observed issue, not a physical-headset or clinical failure. It has been reported to the feature owner via [issue #16](https://github.com/ajeshkg17/KlinikLab/issues/16). The audit records a failed QA check but continues with the remainder of the suite so further regressions remain visible. Release acceptance requires resolving or explicitly reviewing this blocker; QA must not conceal it by approving a defective screenshot baseline.
 
+
+
+## Coordinator FSP/KP acceptance plan — four-case coverage
+
+Plan only. Shared browser and PC execution remains held until authorized sequential
+integration, confirmed hosted-main synchronization and a single approved job.
+Coordinator owns plan reconciliation; no new worker action is requested.
+
+| Fictional case | Communication tasks to cover | Review boundaries |
+|---|---|---|
+| 36 — endodontic symptoms | Anamnese, Aufklärung, Befund/Arztbrief, Arzt–Arzt | Negation/ambiguous keyword scoring; clinician and language sign-off pending |
+| 48 — pericoronitis | Same four tasks | Known unsafe wording alerts; no comprehensive clinical-safety claim |
+| 46 — periodontal assessment | Same four tasks | Uncertain classification and conditional planning; guideline review pending |
+| 16 — caries/restoration | Same four tasks | Pulpal uncertainty, conditional alternatives and plain-language explanation |
+
+Expected scope is 4 cases × 4 tasks = 16 exercises. Check answer-edit invalidation,
+focus trapping/restoration, keyboard and mobile controls, separate scores, model
+responses and known unsafe/negated statements. Report lexical matching separately
+from clinical interpretation. Existing six-case station checks do not replace these
+new language-studio tasks. Record exact build SHA and unresolved reviewer decisions.
