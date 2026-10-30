@@ -196,6 +196,10 @@ try{
  });
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===2&&window.kliniklab.scene.xrControllers.every(c=>c.active));
  await captureXR('02-both-controller-models.png','Both left/right controller meshes tracked in scene');
+ const toolEyeProjections=result.captureManifest[0].eyeTools;
+ const hiddenCenters=toolEyeProjections.flatMap((tools,index)=>tools.filter(t=>!t.projection.inFrustum).map(t=>'eye '+index+': '+t.name));
+ if(hiddenCenters.length)throw Error('Instrument centers outside both-eye frusta: '+hiddenCenters.join(', '));
+ result.checks.push('All five instrument centers project into both rendered eye frusta; occlusion requires visual review');
  for(const hand of ['left','right'])for(const button of ['trigger','squeeze']){
    await page.evaluate(({hand,button})=>window.__xrTestDevice.controllers[hand].updateButtonValue(button,1),{hand,button});
    await page.waitForTimeout(120);
