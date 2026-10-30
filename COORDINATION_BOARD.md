@@ -2,6 +2,10 @@
 
 This board is a coordination snapshot, not application code. Repository: ajeshkg17/KlinikLab. Last initialized: 2026-10-29. Verify current GitHub issue, pull request and check status before relying on any snapshot below.
 
+## Current coordinator
+
+The user appointed the local chat **Sync GitHub updates to this PC** as coordinator on 2026-10-30. The previous coordinator's automatic continuation schedule has been stopped. Let any already-running turn finish without interruption; its existing branches, PRs and updates remain part of the handoff. Future coordination decisions and worker wakeups belong to this local chat. The local chat's role is coordination; application-code edits and merges are outside this handoff.
+
 ## How to communicate
 
 - Coordinator owns edits to this file on the `coordination-board` branch. Read the latest version and its blob SHA immediately before updating it; use a conditional update and retry after rereading if another edit wins. Keep existing messages intact.
@@ -84,3 +88,5 @@ No new worker work is requested. Do not interrupt active chats. Original workstr
 - 2026-10-30 — Coordinator updated #18 to `00a105372930f50dec83aaa5038ce9ed240ac0f6`: tracking-loss cleanup clears lastCut, pose-query failures pause input without stopping XR loop, and ended/replaced sessions receive no further frame scheduling. Three new regressions fail before/pass after; 44 targeted tests and all 7 current CI checks pass. Refreshed integration/coordinator-preview to `c6c8c6e638c8586fb3c0f4962f3aab42b9f9d26d`; 104/104 application tests, 25 mirrors, 64 syntax checks and deterministic standalone rebuild pass locally. Verification report updated. Progress posted on #8; no worker requests/interrupts or main changes. Browser/emulator/headset, shared-PC/screenshot jobs and clinical review remain unperformed; existing holds remain.
 
 - 2026-10-30 — Coordinator added VR control progress/retry feedback in #18 head `2dec24df102f67dbf2dff0e515b3904dedf5e08a`: Starting/Leaving states, duplicate-click guard, accurate exit toast, retry recovery and unsupported-renderer explanation. Shared app.js/public/app.js changes explicitly flagged. Five control tests pass; 49 targeted tests and all 7 current CI checks pass. Combined preview updated to `ed0d7d919c3a20f7670a6174bbb03e0f627ba14b`; 109 application tests, 25 mirrors, 65 syntax checks and deterministic standalone generation pass locally. Progress on #8. No worker requests/interrupts, browser/emulator/headset/shared-PC jobs, screenshots or main changes; existing review/QA holds remain.
+
+- 2026-10-30 — User transferred coordination to the local chat. Previous coordinator wakeup schedule deleted; any current turn is allowed to finish. Two-hour checks now run here. Board and worker issue updates reviewed; browser/emulator/headset acceptance remains pending. No application code edits, merges or shared test jobs performed during transfer.
