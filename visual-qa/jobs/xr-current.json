@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase6-nearfield-proof-20261030-04",
-  "commit": "aae1579504f807898eb4d06a34621a9b13a2869c",
+  "jobId": "pc-xr-phase6-visible-pixels-20261030-05",
+  "commit": "4605fe68a51b0a3b2da6f13c31c94762c3ad3d6c",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
