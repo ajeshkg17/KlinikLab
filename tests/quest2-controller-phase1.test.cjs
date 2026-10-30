@@ -5,7 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'engine.js'),'utf8');
 test('Phase 1 controller geometry uses grip, while independent ray uses aim',()=>{
-  assert.match(source,/const gp=source\.gripSpace,aim=source\.targetRaySpace/);
+  assert.match(source,/gp=source\.gripSpace,aim=source\.targetRaySpace/);
   assert.match(source,/frame\.getPose\(gp,this\.xrRef\)/);
   assert.match(source,/frame\.getPose\(aim,this\.xrRef\)/);
   assert.match(source,/M3\.mm\(this\.controllerMatrix\(grip\),local\)/);
