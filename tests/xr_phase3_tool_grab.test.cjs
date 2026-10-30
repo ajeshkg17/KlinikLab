@@ -7,7 +7,12 @@ const M3={
  mm:(a,b)=>b.slice(),
  trs:(p,r,s)=>[s[0],0,0,0,0,s[1],0,0,0,0,s[2],0,...p,1]
 };
-const methods=vm.runInNewContext('({'+source.slice(start,end).replace(/\n  (?=[a-zA-Z][a-zA-Z0-9]*\()/g,',\n  ')+'})',{M3});
+const names=['toolGripPose','resetXRTool','resetXRTools','initXRTools','nearestXRTool','onXRGripStart','onXRGripEnd','updateXRTools'];
+const methods=vm.runInNewContext('({'+names.map((name,i)=>{
+ const at=source.indexOf('  '+name+'('), next=i+1<names.length?source.indexOf('  '+names[i+1]+'(',at):end;
+ assert(at>=0&&next>at,'method boundaries '+name);
+ return source.slice(at,next).trim();
+}).join(',\\n')+'})',{M3});
 function fixture(){
  const make=(name,x)=>({name,owner:null,hover:null,meshes:[{p:[x,1,0],s:[.1,.1,.1],rot:[0,0,0],model:null,color:[.2,.3,.4]}]});
  const scene={xrSession:{},xrRef:{},xrTableTools:[make('mirror',0),make('probe',1)],rgb:()=>[0,1,0],
