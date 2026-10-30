@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase6-proportions-detail-20261030-01",
-  "commit": "f2e42bd66eabfd4fafaa60bbed3737a01e4a6c54",
+  "jobId": "pc-xr-phase6-clinical-scale-20261030-02",
+  "commit": "51d070f4be3d3354e30936856db9808061e14b12",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
