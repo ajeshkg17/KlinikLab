@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase6-visible-pixels-20261030-05",
-  "commit": "4605fe68a51b0a3b2da6f13c31c94762c3ad3d6c",
+  "jobId": "pc-xr-phase6-gaze-contained-20261030-06",
+  "commit": "c9d9b015c9d26d9f8bf1bacd5251d1eb0f0f180a",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
