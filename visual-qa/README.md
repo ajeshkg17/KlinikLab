@@ -4,7 +4,7 @@ The only active development coordination is **this chat**. Do not contact or rev
 
 ## XR workflow (Phase 3, before Phase 4)
 
-**Job request:** [jobs/xr-current.json](./jobs/xr-current.json), on the integration branch. Exactly one fixed eight-checkpoint suite `quest2-phase3`, a 40-character integration commit SHA, a unique 4–64-character job ID, graphics `default` or explicit `software`, and a bounded 15–120 s collection deadline. No commands, URLs, arbitrary JavaScript or selectors can be supplied by jobs. The worker fetches the current integration job from GitHub every 10 seconds, verifies the SHA is an ancestor of the integration branch, then creates a **detached worktree at that exact SHA**. It starts its own loopback source server on **port 8891** (never alters ports 8787, 8790 or 8791), installs pinned IWER/Playwright dependencies, and launches fresh-profile desktop Chrome. It never reuses the owner's signed-in Chrome profile.
+**Job request:** [jobs/xr-current.json](./jobs/xr-current.json), on the integration branch. Exactly one fixed ten-checkpoint suite `quest2-phase3`, a 40-character integration commit SHA, a unique 4–64-character job ID, graphics `default` or explicit `software`, and a bounded 15–120 s collection deadline. No commands, URLs, arbitrary JavaScript or selectors can be supplied by jobs. The worker fetches the current integration job from GitHub every 10 seconds, verifies the SHA is an ancestor of the integration branch, then creates a **detached worktree at that exact SHA**. It starts its own loopback source server on **port 8891** (never alters ports 8787, 8790 or 8791), installs pinned IWER/Playwright dependencies, and launches fresh-profile desktop Chrome. It never reuses the owner's signed-in Chrome profile.
 
 ### Local startup (PowerShell; owner-PC monitoring chat may run these)
 
@@ -47,3 +47,11 @@ Current local request: `pc-xr-held-tool-clearance-20261030-02`, pinned to `abf63
 The local IWER acceptance must inspect **both eyes** for: five clearly distinguishable table tools in the initial view, both controller cues, hover, each held working end unobstructed, left/right grip ownership, proper return, help hidden on entry/re-entry, explicit `?` opening, closing, and no grip-initiated help. The script asserts tool-center stereo frustum inclusion, ring suppression, and a fresh XR framebuffer for screenshots; it cannot automatically prove human-recognizable tips, physical ergonomics or controller ease of reach. A human should review the new gallery before accepting the appearance.
 
 Do not rerun the previous job ID after a failure: the worker tracks IDs as at-most-once and requires a new declarative request for an explicit retry.
+
+### Phase 4 catalog (30 October 2026)
+
+The in-VR `TOOLS` tab opens a five-instrument catalog. Left and right controller trigger rays can select a named item and read its purpose. Selection is highlighted. `RETURN` restores the currently selected **unheld** tool to its own table home location (it does not duplicate or teleport a held instrument); `RESET` releases/restores all tools; `CLOSE` hides the panel. Normal grip/squeeze picks a reachable table instrument, and release returns it to the tray. The existing top `?` tutorial remains opt-in and grip-independent. The catalog is closed on entry and does not replace the visible central instrument tray.
+
+PC test request `pc-xr-phase4-catalog-20261030-01` pins `286834f6fced58c17d7a92e37e0fa776751cf79e`. It extends the eight known-good stereo checkpoints with `09-tool-catalog-open.png` and `10-tool-catalog-closed.png`, checks left/right synthetic ray selection, controlled return, reset, close, and preserves earlier tool/guide checks. Synthetic rays do not constitute physical Touch controller acceptance. The fixed catalog does **not** provide unlimited duplicate instances or procedural treatment mechanics; its controlled spawn action reactivates an existing unique tray tool.
+
+PC local run: `node .\\visual-qa\\xr-worker.mjs --validate`, then `node .\\visual-qa\\xr-worker.mjs --once` in the updated integration checkout. Do not use an old processed job ID. Routine hosted XR rendering remains disabled.
