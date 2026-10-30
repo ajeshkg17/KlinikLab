@@ -1,0 +1,60 @@
+name: Phase 0 isolated IWER Quest 2 baseline
+on:
+  push:
+    branches: [integration/single-chat-validation-2026-10-30]
+    paths:
+      - 'test-support/webxr-test/**'
+      - '.github/workflows/phase0-webxr.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  webxr:
+    name: Genuine IWER runtime in headed Chrome / Xvfb
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned harness dependencies
+        run: npm ci --prefix test-support/webxr-test --no-audit --no-fund
+      - name: Chrome and Xvfb availability
+        run: |
+          google-chrome --version
+          command -v xvfb-run
+          node --version
+          git rev-parse HEAD
+      - name: Start isolated source-build server and execute real IWER runtime
+        env:
+          PORT: '8790'
+          KLINIKLAB_URL: http://127.0.0.1:8790/
+        shell: bash
+        run: |
+          set -euo pipefail
+          node server/server.mjs > /tmp/kliniklab-phase0-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8790/api/health > /dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then cat /tmp/kliniklab-phase0-server.log; exit 1; fi
+          xvfb-run -a -s '-screen 0 1600x1000x24' node test-support/webxr-test/smoke.mjs
+      - name: Publish exact revision and evidence limits
+        if: always()
+        shell: bash
+        run: |
+          echo "Build: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Execution: GitHub-hosted Ubuntu 24.04, headed Google Chrome via Xvfb, Meta IWER 2.7.0 + Playwright 1.57.0, isolated localhost 8790." >> "$GITHUB_STEP_SUMMARY"
+          echo "This is not the owner's Windows Chrome extension, a physical Quest 2, or a vibration/stability acceptance test." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase0-webxr-evidence
+          path: |
+            output/playwright/webxr-smoke/result.json
+            output/playwright/webxr-smoke/*.png
+          if-no-files-found: warn
