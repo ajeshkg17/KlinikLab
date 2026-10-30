@@ -19,6 +19,7 @@ test('Phase7 FDI classifier distinguishes jaw, side and all tooth groups',()=>{
  assert.notEqual(incisor.height(0,0),canine.height(0,0));
  assert.notEqual(premolar.height(0,0),upper.height(0,0));
  assert.notEqual(upper.height(.72,0),lower.height(.72,0));
+ assert.notEqual(new ToothSolid('molar','16').height(.53,-.45),new ToothSolid('molar','26').height(.53,-.45),'opposite sides have mirrored cusp asymmetry');
  assert.notDeepEqual(upper.rootCenters(),lower.rootCenters());
 });
 test('Phase7 explicit FDI switch has independent records, and no invalid tooth IDs',()=>{
@@ -33,6 +34,11 @@ test('Phase7 explicit FDI switch has independent records, and no invalid tooth I
  assert(sub.includes('this.rebuild()'));
  assert(sub.includes("if(!/^[1-4][1-8]$/.test(String(fdi)))return false"));
  assert(app.includes('this.volLab?.setTooth(id)'));
+ assert(app.includes('this.scene?.xrPrep?.syncCase?.()'));
+ const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
+ for(const id of ['11','13','14','16','36','46'])assert(smoke.includes("'phase7-fdi-'"),id);
+ assert(smoke.includes('result.fdiTreatmentStates.push(state)'));
+ assert(smoke.includes('phase7Captures'));
  assert(src.includes("localStorage.setItem('kliniklab-fdi-treatment-v1'"));
  assert(cls.includes("this.toothClass()==='premolar'"));
 });
