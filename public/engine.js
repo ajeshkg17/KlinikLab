@@ -229,11 +229,11 @@ class DentalScene {
   // Anchor the teaching arch once in the actual viewer's forward gaze.
   // Never chase head movement every frame: that would be uncomfortable.
   placeTeachingAnatomy(pose){
-    if(!this.teachingPlacementPending||this.anatomyDisplayMagnification!==8)return;
+    if(!this.teachingPlacementPending||this.anatomyDisplayMagnification!==12)return;
     const p=pose.transform.position,q=pose.transform.orientation;
     const forward=this.rotateByQuat([0,0,-1],q);
     const up=this.rotateByQuat([0,1,0],q);
-    const target=[p.x,p.y,p.z].map((v,i)=>v+1.27*forward[i]+.025*up[i]);
+    const target=[p.x,p.y,p.z].map((v,i)=>v+.98*forward[i]+.025*up[i]);
     const before=this.anatomyWorldBounds();
     const delta=target.map((v,i)=>v-before.center[i]);
     this.translateAnatomy(delta);
@@ -244,7 +244,7 @@ class DentalScene {
   // Explicit 8x teaching enlargement is independent of the physical-scale
   // anatomy. Restore the exact original world transforms on exit.
   setTeachingMagnification(on){
-    const next=on?8:1;
+    const next=on?12:1;
     if(this.anatomyDisplayMagnification===next)return;
     const relative=next/this.anatomyDisplayMagnification;
     if(on){
