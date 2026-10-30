@@ -219,17 +219,17 @@ class DentalScene {
     }
     this.box([0,1.275,-1.8],[1.76,.065,1.16],'#acc8c4');
     // XR-reachable tray directly ahead, distinct instruments (ray/select targets include multiple pieces).
-    this.box([.09,.97,-1.05],[1.16,.085,.75],'#e5ece6');this.cy([.09,.53,-1.05],[.075,.85,.075],'#adc6c6');
-    this.box([.09,1.02,-1.05],[1.06,.014,.64],'#91b0b2');
+    this.box([.09,.97,-.69],[1.16,.085,.75],'#e5ece6');this.cy([.09,.53,-.69],[.075,.85,.075],'#adc6c6');
+    this.box([.09,1.02,-.69],[1.06,.014,.64],'#91b0b2');
     this.xrTableTools=[];
     const tools=[['mirror',-.31,'#c4d9d6'],['probe',-.11,'#d6e2dd'],['suction',.09,'#89d5d1'],['excavator',.29,'#e1c69e'],['composite',.49,'#c5a8d7']];
-    for(const [name,x,color] of tools){const toolStart=this.meshes.length;this.cy([x,1.08,-1.04],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-.83],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
-      if(name==='mirror'){this.cy([x,1.085,-1.20],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
-      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-1.25],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
-      if(name==='suction'){this.cy([x,1.11,-1.26],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
-      if(name==='composite'){this.cy([x,1.09,-1.25],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
+    for(const [name,x,color] of tools){const toolStart=this.meshes.length;this.cy([x,1.08,-.68],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-.47],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
+      if(name==='mirror'){this.cy([x,1.085,-.84],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
+      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-.89],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
+      if(name==='suction'){this.cy([x,1.11,-.90],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
+      if(name==='composite'){this.cy([x,1.09,-.89],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
       this.xrTableTools.push({name,meshes:this.meshes.slice(toolStart),owner:null,home:null,hover:null});
-      this.label(name.toUpperCase(),[x,.985,-.64],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
+      this.label(name.toUpperCase(),[x,.985,-.28],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
     }
     // Other procedure items displayed on the side trolley.
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
