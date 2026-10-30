@@ -18,7 +18,7 @@ test('Phase 6 proportional scale applies only to anatomy and all 32 FDI pick tar
 });
 test('Phase 6 teaching magnification is opt-in and reversible',()=>{
  const part=source.slice(source.indexOf('  setTeachingMagnification(on){'),source.indexOf('  buildScene(){'));
- assert(part.includes('on?8:1'));
+ assert(part.includes('on?12:1'));
  assert(part.includes('next/this.anatomyDisplayMagnification'));
  assert(part.includes('this.rescaleAnatomy(relative)'));
  const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
@@ -53,7 +53,7 @@ test('Phase 6 numeric transform preserves FDI targets, instrument homes and reve
  assert.equal(pick.key,'tooth:11');
  assert.deepEqual(tool.home[0].p,orig.tool,'XR tool untouched');
  scene.setTeachingMagnification(true);
- assert(Math.abs(crown.s[0]-.09*.055*8)<1e-9);
+ assert(Math.abs(crown.s[0]-.09*.055*12)<1e-9);
  scene.setTeachingMagnification(false);
  assert(Math.abs(crown.s[0]-.09*.055)<1e-9);
  scene.rescaleAnatomy(1/.055);
