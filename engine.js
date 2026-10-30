@@ -224,6 +224,14 @@ class DentalScene {
       }
       this.archMeshes[upperIndex]=this.meshes.slice(archStart);
     }
+    // The legacy teaching arch was roughly 1.5 m wide. Shrink the complete
+    // anatomy as a single rigid, uniformly scaled group (including FDI hit
+    // spheres and gingiva) around a fixed laboratory-model origin. Dental
+    // dimensions are educational approximations, not patient measurements.
+    this.anatomyOverviewScale=.245;
+    this.anatomyPivot=[0,1.545,-1.78];
+    this.anatomyDisplayMagnification=1;
+    this.rescaleAnatomy(this.anatomyOverviewScale);
     this.box([0,1.275,-1.8],[1.76,.065,1.16],'#acc8c4');
     // XR-reachable tray directly ahead, distinct instruments (ray/select targets include multiple pieces).
     this.box([.09,.97,-.69],[1.16,.085,.75],'#e5ece6');this.cy([.09,.53,-.69],[.075,.85,.075],'#adc6c6');
@@ -427,6 +435,35 @@ class DentalScene {
     }return hit}
 
 
+  // Scale only dental anatomy. Tool tray, XR controllers and room remain at
+  // physical world size. The gum is a world-coordinate mesh, so its mesh
+  // translation differs from the origin-relative tooth crowns.
+  rescaleAnatomy(factor){
+    if(!(factor>0&&Number.isFinite(factor)))throw Error('Invalid anatomy factor');
+    const pivot=this.anatomyPivot||[0,1.545,-1.78];
+    const transform=p=>p.map((v,i)=>pivot[i]+(v-pivot[i])*factor);
+    const members=new Set(this.archMeshes.flat());
+    for(const m of members){
+      m.p=m.kind.startsWith('gingiva')
+        ?m.p.map((v,i)=>pivot[i]*(1-factor)+v*factor)
+        :transform(m.p);
+      m.s=m.s.map(v=>v*factor);
+      m.model=null;
+    }
+    for(const pick of this.pickables.filter(p=>members.has(p.mesh))){
+      pick.p=transform(pick.p);pick.radius*=factor;
+    }
+    for(const t of Object.values(this.teeth))t.pos=transform(t.pos);
+  }
+  // Explicit teaching magnification is reversible and separate from normal
+  // arch dimensions. It must not change FDI identity or instrument geometry.
+  setTeachingMagnification(on){
+    const next=on?2.8:1;
+    if(this.anatomyDisplayMagnification===next)return;
+    const relative=next/this.anatomyDisplayMagnification;
+    this.rescaleAnatomy(relative);
+    this.anatomyDisplayMagnification=next;
+  }
   // Restore desktop transforms and hit targets exactly after the XR session.
   setXRComfort(active){
     if(Boolean(active)===this.xrComfort.active)return;
