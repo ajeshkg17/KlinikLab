@@ -135,6 +135,13 @@ try{
            const ctx=canvas.getContext('2d'),image=ctx.createImageData(w,h);
            for(let row=0;row<h;row++)image.data.set(pixels.subarray(row*w*4,(row+1)*w*4),(h-1-row)*w*4);
            ctx.putImageData(image,0,0);
+           // Count warm crown/gingival pixels from the ACTUAL XR framebuffer,
+           // not projected geometric bounds. Dark empty/room pixels cannot pass.
+           let anatomyPixels=0;
+           for(let k=0;k<pixels.length;k+=4){
+             const r=pixels[k],g=pixels[k+1],b=pixels[k+2];
+             if(r>75&&r>g*1.07&&r>b*1.15)anatomyPixels++;
+           }
            // Project all five tool centers into the *actual submitted* eye matrices.
            const project=point=>{
              const mul=(m,v)=>[0,1,2,3].map(r=>m[r]*v[0]+m[r+4]*v[1]+m[r+8]*v[2]+m[r+12]*v[3]);
@@ -160,7 +167,7 @@ try{
              count:vertices.length,magnification:this.anatomyDisplayMagnification
            }:null;
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -171,7 +178,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -196,7 +203,7 @@ try{
    const duplicateOf=captureHashes.get(sha256)||null;
    await writeFile(path.join(out,filename),png);
    if(!duplicateOf)captureHashes.set(sha256,filename);
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -320,6 +327,10 @@ try{
    &&window.kliniklab.scene.archMeshes.flat().some(m=>m.tag==='crown'&&m.s[0]>.025));
  await captureXR('05-mirror-release-return.png','Anatomy close-up: near-field explicit 8x teaching examination');
  const detailAnatomy=result.captureManifest.at(-1).eyeAnatomy;
+ const eyePixels=result.captureManifest.at(-1).eyeAnatomyPixels;
+ assert(eyePixels?.length===2&&eyePixels.every(n=>n>=500),
+   'Actual XR framebuffer lacks visible crown/gingival pixels in both eyes: '+JSON.stringify(eyePixels));
+ result.checks.push('Both freshly rendered XR eye framebuffers contain >=500 warm dental-surface pixels');
  assert(detailAnatomy?.length===2&&detailAnatomy.every((x,i)=>x&&x.count>=8
    &&x.magnification===8&&x.width>.16&&x.height>.12
    &&x.width>overviewAnatomy[i].width*2),
