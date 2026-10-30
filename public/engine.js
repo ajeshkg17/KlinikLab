@@ -251,7 +251,67 @@ class DentalScene {
     for(const m of this.xrBoardMeshes)m.hidden=true;
     this.buildXRControllers();
   }
-  buildXRControllers(){this.xrControllers=[];for(let i=0;i<2;i++){const hand=this.sphere([0,-20,0],[.055,.09,.07],i?'#80dec9':'#d1e7e8');const ray=this.cy([0,-20,0],[.008,1.5,.008],'#8fe9d6',{alpha:.56});this.xrControllers.push({hand,ray})}}
+  // Original, schematic Quest 2 Touch silhouettes, not Meta-owned 3D assets.
+  // Local geometry is anchored to gripSpace; the independent laser uses targetRaySpace.
+  buildXRControllers(){
+    this.xrControllers=[];
+    for(const handedness of ['left','right']){
+      const side=handedness==='left'?-1:1;
+      const parts=[
+        this.cy([0,-20,0],[.039,.125,.044],'#303b49',{finish:.4}),
+        this.sphere([0,-20,0],[.055,.040,.061],'#b5bcc6'),
+        this.tor([0,-20,0],[.108,.110,.108],'#c2c8cf'),
+        this.box([0,-20,0],[.027,.035,.041],'#3b4e5f'),
+        this.cy([0,-20,0],[.023,.025,.023],'#252c39'),
+        this.sphere([0,-20,0],[.014,.014,.014],handedness==='left'?'#5caaf4':'#f49d7a')
+      ];
+      const ray=this.cy([0,-20,0],[.008,1.5,.008],handedness==='left'?'#76baff':'#80dec9',{alpha:.56});
+      this.xrControllers.push({handedness,side,parts,ray,active:false,gripValid:false,aimValid:false,buttons:{trigger:false,grip:false,thumbstick:false,primary:false,secondary:false},profiles:[]});
+    }
+  }
+  controllerMatrix(pose){
+    const {position:p,orientation:q}=pose.transform;
+    const x=q.x,y=q.y,z=q.z,w=q.w;
+    return [1-2*(y*y+z*z),2*(x*y+z*w),2*(x*z-y*w),0,
+      2*(x*y-z*w),1-2*(x*x+z*z),2*(y*z+x*w),0,
+      2*(x*z+y*w),2*(y*z-x*w),1-2*(x*x+y*y),0,p.x,p.y,p.z,1];
+  }
+  updateXRController(slot,source,frame){
+    const c=this.xrControllers[slot],gp=source.gripSpace,aim=source.targetRaySpace;
+    let grip=null,rayPose=null;
+    try{if(gp)grip=frame.getPose(gp,this.xrRef);if(aim)rayPose=frame.getPose(aim,this.xrRef)}catch{}
+    c.active=true;c.profiles=Array.from(source.profiles||[]);
+    c.gripValid=!!grip;c.aimValid=!!rayPose;
+    const buttons=source.gamepad?.buttons||[];
+    const pressed=i=>!!buttons[i]?.pressed;
+    c.buttons={trigger:pressed(0),grip:pressed(1),thumbstick:pressed(3),primary:pressed(4),secondary:pressed(5)};
+    // Left/right mirrored handle, cap, tracking ring, grip/trigger, thumbstick, face button.
+    const layouts=[
+      {p:[0,-.046,.022],s:[.075,.155,.080],rot:[-.21,0,0]},
+      {p:[0,.030,-.005],s:[.083,.047,.083]},
+      {p:[0,.071,-.006],s:[.120,.113,.120],rot:[Math.PI/2,0,0]},
+      {p:[side*.032,-.016,-.037],s:[.029,.045,.042]},
+      {p:[side*.032,.056,-.043],s:[.030,.028,.030]},
+      {p:[-side*.030,.053,-.047],s:[.022,.022,.022]}
+    ];
+    for(let i=0;i<c.parts.length;i++){
+      const m=c.parts[i],layout=layouts[i];
+      m.hidden=!grip;
+      if(grip){
+        const local=M3.trs(layout.p,layout.rot||[0,0,0],layout.s);
+        m.model=M3.mm(this.controllerMatrix(grip),local);
+        if(i===3)m.color=this.rgb(c.buttons.trigger?'#75d6ff':'#3b4e5f');
+        if(i===4)m.color=this.rgb(c.buttons.thumbstick?'#75d6ff':'#252c39');
+      }else m.model=null;
+    }
+    if(!rayPose){c.ray.hidden=true;c.ray.model=null;return}
+    c.ray.hidden=false;
+    const t=rayPose.transform,point=[t.position.x,t.position.y,t.position.z];
+    const dir=this.rotateByQuat([0,0,-1],t.orientation),center=M3.add(point,M3.mul(dir,.75));
+    const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir));
+    const zAxis=M3.unit(M3.cross(xAxis,dir)),e=.006,L=1.5;
+    c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1];
+  }
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
@@ -373,9 +433,9 @@ class DentalScene {
   }
   pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
   rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
-  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}}
-  xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;const p=this.getXRInputPose(frame,source);if(!p)continue;used.add(slot);const t=p.transform,c=this.xrControllers[slot];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
-    for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
+  clearControllers(){for(const c of this.xrControllers){c.active=false;c.gripValid=false;c.aimValid=false;c.profiles=[];c.buttons={trigger:false,grip:false,thumbstick:false,primary:false,secondary:false};for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}}
+  xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;used.add(slot);this.updateXRController(slot,source,frame);}
+    for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){const c=this.xrControllers[i];c.active=false;c.gripValid=false;c.aimValid=false;for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}
     this.xrPrep?.onXRFrame(frame,t);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
   }
