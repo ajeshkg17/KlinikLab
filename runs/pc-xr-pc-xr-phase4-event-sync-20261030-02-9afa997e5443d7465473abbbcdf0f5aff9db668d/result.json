@@ -1,0 +1,1628 @@
+{
+  "configuration": {
+    "collectionDeadlineMs": 60000,
+    "performanceThresholdMs": 20,
+    "graphicsMode": "default"
+  },
+  "startedAt": "2026-10-30T14:53:56.070Z",
+  "origin": "http://127.0.0.1:8891/",
+  "mode": "Playwright + genuine Meta IWER runtime; isolated profile, not the installed extension",
+  "profile": "metaQuest2",
+  "checks": [
+    "VR button enabled with real IWER Quest 2 profile",
+    "Application entered an immersive WebXR session",
+    "Rendered stereo matrices and stationary world mesh sampled for at least 120 app frames",
+    "Both left/right input sources present and 120 XR frames received",
+    "All five instrument centers project into both rendered eye frusta; occlusion requires visual review",
+    "Frame-synchronized IWER trigger/grip start/end events reached the XR session for each hand",
+    "Right controller disconnect/reconnect changed XR input sources",
+    "Left controller obtains visible tool hover feedback",
+    "Left squeeze picks up mirror with a grip-relative model matrix",
+    "Index trigger cannot release or reassign a grip-held tool",
+    "Held mirror rejects second-hand ownership",
+    "Held tool follows translated grip with stable 6DoF transform",
+    "Held tool orientation follows real emulated controller rotation",
+    "Grip release returns mirror to tray",
+    "Right controller picks up a different tray instrument",
+    "Controller disconnect safely returns held instrument",
+    "Application exited and re-entered VR",
+    "Six distinct newly rendered XR-eye screenshots (composition still requires visual review)",
+    "Help starts closed and ? opens via left-hand controller ray",
+    "Right-hand close ray works; gripping cannot reopen help",
+    "Phase 4 catalog launches, exposes purposes, and accepts left/right tool selections",
+    "Phase 4 controlled tray spawn, reset, close do not clone instruments"
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "initial": {
+    "device": true,
+    "app": true,
+    "scene": true,
+    "xr": true,
+    "supported": true,
+    "title": "Enter immersive VR",
+    "secure": true
+  },
+  "stationary": {
+    "samples": 120,
+    "callbacks": 120,
+    "validPoses": 120,
+    "nullPoses": 0,
+    "collectionDeadlineMs": 60000,
+    "maxPoseDeltaMeters": 0,
+    "meanFrameIntervalMs": 17.78823529572046,
+    "hands": [
+      "left",
+      "right"
+    ],
+    "profiles": [
+      [
+        "oculus-touch-v3",
+        "oculus-touch",
+        "generic-trigger-squeeze-thumbstick"
+      ],
+      [
+        "oculus-touch-v3",
+        "oculus-touch",
+        "generic-trigger-squeeze-thumbstick"
+      ]
+    ],
+    "diagnostics": {
+      "callbacks": 120,
+      "validPoses": 120,
+      "nullPoses": 0,
+      "appDrawsAtStart": 1,
+      "latestFrameTimeMs": 3731.300000190735,
+      "appDraws": 121,
+      "documentVisibility": "visible",
+      "documentHasFocus": true,
+      "sessionVisibility": "visible",
+      "sessionEnded": false,
+      "renderer": {
+        "webgl": true,
+        "contextLost": false,
+        "xrFramebuffer": false,
+        "canvasWidth": 1440,
+        "canvasHeight": 1000
+      }
+    }
+  },
+  "performance": {
+    "meanFrameIntervalMs": 17.78823529572046,
+    "performanceThresholdMs": 20,
+    "withinAdvisoryThreshold": true,
+    "status": "advisory-only; not hardware validation"
+  },
+  "rendered": {
+    "frames": 121,
+    "referenceSpace": "same XRReferenceSpace throughout session",
+    "eyes": {
+      "0": {
+        "samples": 121,
+        "maxStep": 0,
+        "maxFromFirst": 0,
+        "first": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0.03150000050663948,
+          -1.600000023841858,
+          0,
+          1
+        ],
+        "last": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0.03150000050663948,
+          -1.600000023841858,
+          0,
+          1
+        ]
+      },
+      "1": {
+        "samples": 121,
+        "maxStep": 0,
+        "maxFromFirst": 0,
+        "first": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          -0.03150000050663948,
+          -1.600000023841858,
+          0,
+          1
+        ],
+        "last": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          -0.03150000050663948,
+          -1.600000023841858,
+          0,
+          1
+        ]
+      }
+    },
+    "world": {
+      "samples": 121,
+      "maxStep": 0,
+      "maxFromFirst": 0,
+      "first": [
+        7,
+        0,
+        0,
+        0,
+        0,
+        0.12,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        -0.06,
+        -2.6,
+        1
+      ],
+      "last": [
+        7,
+        0,
+        0,
+        0,
+        0,
+        0.12,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        -0.06,
+        -2.6,
+        1
+      ]
+    },
+    "desktopLoopCount": 7,
+    "stationaryStability": {
+      "maxEyeMatrixElementDelta": 0,
+      "maxWorldMatrixElementDelta": 0
+    }
+  },
+  "captureManifest": [
+    {
+      "file": "01-room-table-unobstructed.png",
+      "label": "Room/table with both tracked controllers disconnected",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 123,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "dcd8898ddc88008600388aa1e761aca8471956ae51122a5853a9d7626960ae94",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "02-both-controller-models.png",
+      "label": "Both left/right controller meshes tracked in scene",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 127,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "c92f9fc4884b453e313a0ffea2958a44b68fdd1fe7fbf137450e295a8e6452ca",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "03-left-tool-hover.png",
+      "label": "Left grip near mirror with hover feedback",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 159,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "8bea42a83d3d3d6774df35f69f4be5622afd1dc44a9c7d28cb05b7924f5b2e4f",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "04-left-hand-mirror-pickup.png",
+      "label": "Mirror held by left controller",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 166,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": "left",
+            "hover": null,
+            "projection": {
+              "x": -0.3400564722366099,
+              "y": -0.36332150094370325,
+              "z": 0.8138430611793991,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": "left",
+            "hover": null,
+            "projection": {
+              "x": -0.4215794932513759,
+              "y": -0.36332150094370325,
+              "z": 0.8138430611793991,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "a8fc9c9987ec55f1ec70382222da8be8b70e2b11b0877749c782c6498ab0071e",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "05-mirror-release-return.png",
+      "label": "Mirror returned to instrument tray after grip release",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 189,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "e8324bb5c4bae6192d03db4d73f67c7ac21ad480b1991a0607cec777c0fb4b1c",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "06-right-hand-composite-pickup.png",
+      "label": "Composite tool held by right controller",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 197,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": "right",
+            "hover": null,
+            "projection": {
+              "x": 0.603259400665902,
+              "y": -0.3633215022801478,
+              "z": 0.8138430469226895,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": "right",
+            "hover": null,
+            "projection": {
+              "x": 0.5217363734144493,
+              "y": -0.3633215022801478,
+              "z": 0.8138430469226895,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "75ee077197605d6a5eeeed4eae39737fd279c4a1ba3279ecaad4b5a0f9dc530b",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "07-help-opened-by-question-mark.png",
+      "label": "? help opened with left-hand synthetic ray selection",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 1,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "d77fb269890512e4d7cc074e9dc4c76d837dca3e7f2ceda1e0f804c8b1e9228f",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "08-help-closed-after-close.png",
+      "label": "Help panel closed by right-hand synthetic ray selection",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 3,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "705a4b73b94e68585a2f84c3890003400ea514c86b9fe61deb69c88599b87914",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "09-tool-catalog-open.png",
+      "label": "Phase 4 in-VR named tool catalog opened by controller ray",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 7,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "e2df3ca39ffaf1c6b4933a49e52356556a115bf93f20d63769d20fa91138647e",
+      "duplicateOf": null,
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    },
+    {
+      "file": "10-tool-catalog-closed.png",
+      "label": "Phase 4 workspace after controlled return, reset and close",
+      "kind": "Meta IWER Quest 2 emulator, WebGL XR eye framebuffer",
+      "captureFrame": 10,
+      "width": 1440,
+      "height": 1000,
+      "eyes": 2,
+      "eyeTools": [
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.31305822238753744,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.08083243631948898,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.15139334974855947,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.3836191358166079,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.6158449218846564,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ],
+        [
+          {
+            "name": "mirror",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": -0.4068417144234128,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "probe",
+            "owner": null,
+            "hover": "left",
+            "projection": {
+              "x": -0.17461592835536432,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "suction",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.05760985771268413,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "excavator",
+            "owner": null,
+            "hover": null,
+            "projection": {
+              "x": 0.2898356437807326,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          },
+          {
+            "name": "composite",
+            "owner": null,
+            "hover": "right",
+            "projection": {
+              "x": 0.522061429848781,
+              "y": -0.5714898433460427,
+              "z": 0.7858163243576901,
+              "inFrustum": true
+            }
+          }
+        ]
+      ],
+      "sha256": "705a4b73b94e68585a2f84c3890003400ea514c86b9fe61deb69c88599b87914",
+      "duplicateOf": "08-help-closed-after-close.png",
+      "testedRevision": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+      "origin": "http://127.0.0.1:8891/"
+    }
+  ],
+  "inputEvents": [
+    {
+      "type": "selectstart",
+      "hand": "left"
+    },
+    {
+      "type": "selectend",
+      "hand": "left"
+    },
+    {
+      "type": "squeezestart",
+      "hand": "left"
+    },
+    {
+      "type": "squeezeend",
+      "hand": "left"
+    },
+    {
+      "type": "selectstart",
+      "hand": "right"
+    },
+    {
+      "type": "selectend",
+      "hand": "right"
+    },
+    {
+      "type": "squeezestart",
+      "hand": "right"
+    },
+    {
+      "type": "squeezeend",
+      "hand": "right"
+    }
+  ],
+  "help": {
+    "opened": true,
+    "closing": {
+      "closed": true,
+      "gripDoesNotReopen": true
+    }
+  },
+  "catalog": {
+    "opened": {
+      "open": true,
+      "selected": "composite",
+      "visible": true
+    },
+    "return": {
+      "trayReturn": true,
+      "allReset": true,
+      "closed": true
+    }
+  },
+  "passed": true,
+  "finishedAt": "2026-10-30T14:54:04.354Z",
+  "jobId": "pc-xr-phase4-event-sync-20261030-02",
+  "testedCommit": "9afa997e5443d7465473abbbcdf0f5aff9db668d",
+  "location": "owner-PC IWER emulator, not a physical headset",
+  "captureHashes": [
+    {
+      "file": "01-room-table-unobstructed.png",
+      "sha256": "dcd8898ddc88008600388aa1e761aca8471956ae51122a5853a9d7626960ae94"
+    },
+    {
+      "file": "02-both-controller-models.png",
+      "sha256": "c92f9fc4884b453e313a0ffea2958a44b68fdd1fe7fbf137450e295a8e6452ca"
+    },
+    {
+      "file": "03-left-tool-hover.png",
+      "sha256": "8bea42a83d3d3d6774df35f69f4be5622afd1dc44a9c7d28cb05b7924f5b2e4f"
+    },
+    {
+      "file": "04-left-hand-mirror-pickup.png",
+      "sha256": "a8fc9c9987ec55f1ec70382222da8be8b70e2b11b0877749c782c6498ab0071e"
+    },
+    {
+      "file": "05-mirror-release-return.png",
+      "sha256": "e8324bb5c4bae6192d03db4d73f67c7ac21ad480b1991a0607cec777c0fb4b1c"
+    },
+    {
+      "file": "06-right-hand-composite-pickup.png",
+      "sha256": "75ee077197605d6a5eeeed4eae39737fd279c4a1ba3279ecaad4b5a0f9dc530b"
+    },
+    {
+      "file": "07-help-opened-by-question-mark.png",
+      "sha256": "d77fb269890512e4d7cc074e9dc4c76d837dca3e7f2ceda1e0f804c8b1e9228f"
+    },
+    {
+      "file": "08-help-closed-after-close.png",
+      "sha256": "705a4b73b94e68585a2f84c3890003400ea514c86b9fe61deb69c88599b87914"
+    },
+    {
+      "file": "09-tool-catalog-open.png",
+      "sha256": "e2df3ca39ffaf1c6b4933a49e52356556a115bf93f20d63769d20fa91138647e"
+    },
+    {
+      "file": "10-tool-catalog-closed.png",
+      "sha256": "705a4b73b94e68585a2f84c3890003400ea514c86b9fe61deb69c88599b87914"
+    }
+  ],
+  "duplicates": [
+    {
+      "file": "10-tool-catalog-closed.png",
+      "sameAs": "08-help-closed-after-close.png"
+    }
+  ]
+}
