@@ -149,10 +149,15 @@ class DentalScene {
       const {p,t}=points[i],p0=points[Math.max(0,i-1)].p,p1=points[Math.min(points.length-1,i+1)].p;
       const tangent=M3.unit([p1[0]-p0[0],0,p1[2]-p0[2]]),lat=M3.unit([-tangent[2],0,tangent[0]]);
       const a=j*2*Math.PI/sides;
-      const papilla=Math.pow(Math.abs(Math.sin(Math.PI*t)),3)*.012;
-      const taper=.95+.05*Math.cos(2*Math.PI*t);
+      // Raise interdental papillae toward the corresponding crowns (down
+      // on the maxilla, up on the mandible), while narrowing the collar near
+      // the cervical mid-face. This remains a synthetic gingival illustration.
+      const interdental=Math.pow(Math.abs(Math.sin(Math.PI*t)),3);
+      const taper=.84+.16*interdental;
       const side=Math.cos(a),surface=Math.sin(a);
-      return [p[0]+lat[0]*side*wide*taper,y+surface*thick+papilla*surface,p[2]+lat[2]*side*wide*taper];
+      const crownward=y>1.5?-1:1;
+      const papilla=crownward*.012*interdental*(.55+.45*Math.abs(surface));
+      return [p[0]+lat[0]*side*wide*taper,y+surface*thick+papilla,p[2]+lat[2]*side*wide*taper];
     };
     for(let i=0;i<points.length-1;i++)for(let j=0;j<sides;j++){
       const A=section(i,j),B=section(i,j+1),C=section(i+1,j+1),D=section(i+1,j);
