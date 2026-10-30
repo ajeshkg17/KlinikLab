@@ -71,3 +71,39 @@ test('trigger events while XR is obscured cannot perform the initial cut',()=>{
   assert.equal(lab.triggers.size,0);assert.equal(cuts(),0);assert(lab.tip.hidden);
  }
 });
+
+async function inputSession(){
+ const handlers={},calls={guide:0,grip:0,press:0,release:0,clear:0};
+ const session={visibilityState:'visible',addEventListener(n,fn){handlers[n]=fn;},
+  updateRenderState(){},requestReferenceSpace:async()=>({}),requestAnimationFrame(){}};
+ const enter=vm.runInNewContext('({'+engine.slice(start,end)+'}).enterVR',{
+  navigator:{xr:{requestSession:async()=>session}},isSecureContext:true,XRWebGLLayer:class {}});
+ const scene={xrSession:null,gl:{},focusDecor:[],xrBoardMeshes:[],setXRComfort(){},xrLoop(){},
+  clearControllers(){calls.clear++;},
+  xrGuide:{onEnter(){},onSelectStart(){calls.guide++;return false;},onSqueezeStart(){calls.grip++;}},
+  xrPrep:{onEnter(){},triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},
+   onSelectStart(){calls.press++;return true;},onSelectEnd(){calls.release++;}}};
+ await enter.call(scene);return {handlers,calls,session,scene};
+}
+test('old session events cannot affect a replacement session',async()=>{
+ const {handlers,calls,scene}=await inputSession();scene.xrSession={};
+ handlers.selectstart({});handlers.squeezestart({});handlers.selectend({});handlers.visibilitychange();
+ assert.deepEqual(calls,{guide:0,grip:0,press:0,release:0,clear:0});
+ assert.equal(scene.xrPrep.triggers.size,1);
+});
+test('visibility change immediately pauses input even without another XR frame',async()=>{
+ const {handlers,calls,session,scene}=await inputSession();
+ session.visibilityState='visible-blurred';handlers.visibilitychange();
+ assert.equal(calls.clear,1);assert.equal(scene.xrPrep.triggers.size,0);
+ assert.equal(scene.xrPrep.lastCut,null);assert(scene.xrPrep.tip.hidden);
+ handlers.selectstart({});handlers.squeezestart({});handlers.selectend({});
+ assert.equal(calls.guide,0);assert.equal(calls.press,0);assert.equal(calls.grip,0);
+ assert.equal(calls.release,1,'release remains accepted for the active session');
+ session.visibilityState='visible';handlers.visibilitychange();handlers.selectstart({});
+ assert.equal(calls.guide,1);assert.equal(calls.press,1);assert.equal(scene.xrPrep.triggers.size,0);
+});
+test('input events reject a frame belonging to another session',async()=>{
+ const {handlers,calls,session}=await inputSession();
+ handlers.selectstart({frame:{session:{}}});assert.equal(calls.press,0);
+ handlers.selectstart({frame:{session}});assert.equal(calls.guide,1);assert.equal(calls.press,1);
+});

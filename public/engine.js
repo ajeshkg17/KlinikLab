@@ -347,7 +347,9 @@ class DentalScene {
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
-      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
+      const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
+      session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
+      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(acceptsInput())this.xrGuide?.onSqueezeStart(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
     }catch(err){
       if(session){try{await session.end()}catch{}this.handleXREnd(session)}
