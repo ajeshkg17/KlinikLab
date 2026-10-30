@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-projection-manifest-20261030-03",
-  "commit": "f39e1e9418121ab00deb77c839f1c88a97839e9f",
+  "jobId": "pc-xr-phase4-catalog-20261030-01",
+  "commit": "9b1f1dc0f9200e5845496fd439dbf1ed834e095b",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
@@ -13,6 +13,8 @@
     "right-pickup",
     "release-return",
     "help-open",
-    "help-closed"
+    "help-closed",
+    "catalog-open",
+    "catalog-closed"
   ]
 }
