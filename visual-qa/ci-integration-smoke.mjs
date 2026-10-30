@@ -102,6 +102,43 @@ async function runBrowser(origin){
     check('Unique DOM IDs, including video and volume headings',ids.length===0,ids.join(','));
     check('Local JS and CSS loaded',localFailures.length===0,localFailures.join('; '));
     check('No uncaught browser page errors',pageErrors.length===0,pageErrors.join('; '));
+    // Separate narrow viewport verifies the actual FSP panel and navigation,
+    // not merely a desktop layout shrunk for display.
+    const mobile=await browser.newPage({
+      viewport:{width:390,height:844},isMobile:true,hasTouch:true
+    });
+    mobile.on('pageerror',e=>pageErrors.push('mobile: '+e.message));
+    await mobile.goto(origin+'/index.html',{waitUntil:'domcontentloaded',timeout:30000});
+    await mobile.locator('#fsp-kp-open').waitFor({state:'attached',timeout:15000});
+    const mobileTrigger=await mobile.locator('#fsp-kp-open').evaluate(el=>{
+      const box=el.getBoundingClientRect(),css=getComputedStyle(el);
+      return {visible:box.width>0&&box.height>0&&css.display!=='none',
+        width:box.width,height:box.height};
+    });
+    check('Mobile FSP entry is visible and has a usable target',
+      mobileTrigger.visible&&mobileTrigger.width>=32&&mobileTrigger.height>=32,
+      JSON.stringify(mobileTrigger));
+    await mobile.locator('#fsp-kp-open').click({timeout:6000});
+    check('Mobile FSP dialog opens',await mobile.locator('#fsp-kp-overlay [role="dialog"]').isVisible());
+    for(const [caseId,fdi] of [['endo','36'],['surgery','48'],['perio','46'],['restoration','16']]){
+      await mobile.locator('#fsp-kp-overlay button[data-fsp="case"][data-id="'+caseId+'"]').click();
+      const active=await mobile.evaluate(()=>window.KlinikFSPTraining.status.caseId);
+      check('Mobile case '+caseId,active===caseId);
+      await mobile.locator('#fsp-kp-overlay button[data-fsp="phase"][data-id="brief"]').click();
+      await mobile.locator('#fsp-answer').fill('Zahn '+fdi);
+      await mobile.locator('#fsp-kp-overlay button[data-fsp="submit"]').click();
+      check('Mobile '+caseId+' answer and feedback',
+        await mobile.locator('#fsp-kp-overlay .fsp-feedback').isVisible());
+    }
+    const viewport=await mobile.evaluate(()=>({
+      width:innerWidth,documentWidth:document.documentElement.scrollWidth,
+      overlayWidth:document.getElementById('fsp-kp-overlay').scrollWidth
+    }));
+    check('Mobile no document horizontal overflow',viewport.documentWidth<=viewport.width+2,
+      JSON.stringify(viewport));
+    await mobile.locator('#fsp-kp-overlay button[data-fsp="close"]').click();
+    check('Mobile FSP closes',await mobile.locator('#fsp-kp-overlay').isHidden());
+    await mobile.close();
     console.log(JSON.stringify({commit:process.env.GITHUB_SHA||'local',
       browser:browser.version(),origin,checks:results.length,exercises:completed,
       localFailures,pageErrors,physicalQuest2:false,immersiveWebEmulator:false,
