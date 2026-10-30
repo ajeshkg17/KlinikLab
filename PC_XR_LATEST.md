@@ -1,3 +1,3 @@
 # Latest owner-PC XR test
 
-[Browse pc-xr-phase6-nearfield-proof-20261030-04](./runs/pc-xr-pc-xr-phase6-nearfield-proof-20261030-04-aae1579504f807898eb4d06a34621a9b13a2869c/README.md)
+[Browse pc-xr-phase6-visible-pixels-20261030-05](./runs/pc-xr-pc-xr-phase6-visible-pixels-20261030-05-4605fe68a51b0a3b2da6f13c31c94762c3ad3d6c/README.md)
