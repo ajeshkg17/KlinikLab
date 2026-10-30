@@ -393,6 +393,16 @@ class DentalScene {
     if(this.anatomyDisplayMagnification===next)return;
     const relative=next/this.anatomyDisplayMagnification;
     this.rescaleAnatomy(relative);
+    // Teaching geometry is presented as a near-field examination object;
+    // scaling the distant room arch alone leaves it visually microscopic.
+    // All mesh and FDI hit positions translate together. Restore on exit.
+    const offset=[0,-.08,.94],sign=on?1:-1;
+    const members=new Set(this.archMeshes.flat());
+    for(const m of members)for(let i=0;i<3;i++)m.p[i]+=offset[i]*sign;
+    for(const hit of this.pickables.filter(p=>members.has(p.mesh)))
+      for(let i=0;i<3;i++)hit.p[i]+=offset[i]*sign;
+    for(const t of Object.values(this.teeth))
+      for(let i=0;i<3;i++)t.pos[i]+=offset[i]*sign;
     this.anatomyDisplayMagnification=next;
   }
   buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
