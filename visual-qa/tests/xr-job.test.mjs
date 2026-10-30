@@ -12,7 +12,7 @@ test('worker authorizes GCM before rendering and stages evidence durably',()=>{
  assert.match(code,/await preflight\(\);[\s\S]*?await execute\(job\)/);
  assert.match(code,/await fs\.copyFile\(path\.join\(dir,'result\.json'\)/);
  assert.match(code,/await fs\.writeFile\(path\.join\(retained,name\),bytes\)/);
- assert.match(code,/status:'publish-pending'/);
+ assert.match(code,/status='publish-pending'/);
  assert.match(code,/const data=await loadEvidence\(job\)/);
  assert.match(code,/HEARTBEAT/);
 });
