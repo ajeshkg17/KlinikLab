@@ -170,7 +170,7 @@ try{
            // actual model transform, then project with submitted XR matrices.
            // Do not discard clipped points when calculating outer bounds.
            let anatomyBounds=null;
-           if(this.anatomyDisplayMagnification===8){
+           if(this.anatomyDisplayMagnification===12){
              let minPx=Infinity,minPy=Infinity,maxPx=-Infinity,maxPy=-Infinity;
              let count=0,inFrustum=0,behind=0;
              for(const m of this.archMeshes.flat().filter(m=>!m.hidden)){
@@ -364,11 +364,11 @@ try{
  await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(true));
  await page.waitForFunction(()=>{
    const s=window.kliniklab.scene;
-   return s.anatomyDisplayMagnification===8&&!s.teachingPlacementPending
+   return s.anatomyDisplayMagnification===12&&!s.teachingPlacementPending
      &&s.teachingPlacementInfo?.bounds?.vertices>1000
      &&s.archMeshes.flat().some(m=>m.tag==='crown'&&m.s[0]>.025);
  },null,{timeout:Math.max(15000,config.collectionDeadlineMs)});
- await captureXR('05-mirror-release-return.png','Anatomy close-up: near-field explicit 8x teaching examination');
+ await captureXR('05-mirror-release-return.png','Anatomy close-up: near-field explicit 12x teaching examination');
  const detailAnatomy=result.captureManifest.at(-1).eyeAnatomy;
  const raster=result.captureManifest.at(-1).eyeAnatomyRaster;
  const examinationPlacement=await page.evaluate(()=>{
@@ -380,7 +380,7 @@ try{
    };
  });
  result.anatomyExamination={placement:examinationPlacement,projected:detailAnatomy,raster};
- assert.equal(examinationPlacement.mode,8);
+ assert.equal(examinationPlacement.mode,12);
  assert.equal(examinationPlacement.pending,false,'XR teaching placement was never committed');
  assert.equal(examinationPlacement.fdiIds.length,32);
  assert(detailAnatomy?.length===2&&detailAnatomy.every(x=>
