@@ -298,7 +298,11 @@ try{
  result.checks.push('Held tool orientation follows real emulated controller rotation');
  await grip('left',0);
  await awaitOwner('mirror',null);
- await captureXR('05-mirror-release-return.png','Mirror returned to instrument tray after grip release');
+ // Phase 6 close-up is a real rendered XR eye frame in explicit teaching
+ // magnification, not a resized illustration or a reused room screenshot.
+ await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(true));
+ await captureXR('05-mirror-release-return.png','Anatomy close-up: explicit 2.8x teaching magnification after mirror release');
+ await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(false));
  assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
  result.checks.push('Grip release returns mirror to tray');
  await moveController('right','composite');
