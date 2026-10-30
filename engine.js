@@ -282,6 +282,51 @@ class DentalScene {
   }
   // Original, schematic Quest 2 Touch silhouettes, not Meta-owned 3D assets.
   // Local geometry is anchored to gripSpace; the independent laser uses targetRaySpace.
+  setXRCatalogOpen(open){
+    if(!this.xrCatalog)return false;
+    const cat=this.xrCatalog;cat.open=!!open;
+    for(const m of cat.panels)m.hidden=!cat.open;
+    // Launcher is available throughout the XR session, without covering the tray.
+    cat.launcher.hidden=!this.xrSession;
+    cat.launcherLabel.hidden=!this.xrSession;
+    return true;
+  }
+  onXRCatalogSelect(event,frame){
+    if(!this.xrSession||this.xrGuide?.state?.open)return false;
+    const pose=this.getXRInputPose(frame,event?.inputSource);
+    if(!pose)return false;
+    const p=pose.transform.position,q=pose.transform.orientation;
+    const ray={o:[p.x,p.y,p.z],d:this.rotateByQuat([0,0,-1],q)};
+    const hit=this.getRayHit(ray.o,ray.d,item=>item.key?.startsWith('catalog:'));
+    const key=hit?.key;if(!key)return false;
+    const cat=this.xrCatalog;
+    if(key==='catalog:toggle'){this.setXRCatalogOpen(!cat.open);return true}
+    if(!cat.open)return false;
+    if(key==='catalog:close'){this.setXRCatalogOpen?.(false);return true}
+    if(key.startsWith('catalog:tool:')){
+      const name=key.slice('catalog:tool:'.length);
+      const spec=cat.specs.find(s=>s[0]===name);if(!spec)return false;
+      cat.selected=name;
+      this.replaceLabel(cat.status,spec[1]+': '+spec[2],28);
+      return true;
+    }
+    if(key==='catalog:reset'){
+      this.resetXRTools();
+      this.replaceLabel(cat.status,'All instruments returned to tray',28);
+      return true;
+    }
+    if(key==='catalog:spawn'){
+      const tool=this.xrTableTools.find(t=>t.name===cat.selected);
+      if(!tool||tool.owner){
+        this.replaceLabel(cat.status,'Release held tool before return',28);
+        return true;
+      }
+      this.resetXRTool(tool);
+      this.replaceLabel(cat.status,cat.selected.toUpperCase()+' ready on table: grip to pick up',28);
+      return true;
+    }
+    return false;
+  }
   buildXRControllers(){
     this.xrControllers=[];
     for(const handedness of ['left','right']){
@@ -489,51 +534,6 @@ class DentalScene {
   resumeDesktop(){this.scheduleDesktopFrame()}
   xrLoop(t,frame){const session=this.xrSession;if(!session||frame?.session!==session)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrFrameCount++;if(this.xrSession===session)session.requestAnimationFrame(this.xrLoop.bind(this))}
   // Grip is intentionally separate from trigger/select and dental preparation.
-  setXRCatalogOpen(open){
-    if(!this.xrCatalog)return false;
-    const cat=this.xrCatalog;cat.open=!!open;
-    for(const m of cat.panels)m.hidden=!cat.open;
-    // Launcher is available throughout the XR session, without covering the tray.
-    cat.launcher.hidden=!this.xrSession;
-    cat.launcherLabel.hidden=!this.xrSession;
-    return true;
-  }
-  onXRCatalogSelect(event,frame){
-    if(!this.xrSession||this.xrGuide?.state?.open)return false;
-    const pose=this.getXRInputPose(frame,event?.inputSource);
-    if(!pose)return false;
-    const p=pose.transform.position,q=pose.transform.orientation;
-    const ray={o:[p.x,p.y,p.z],d:this.rotateByQuat([0,0,-1],q)};
-    const hit=this.getRayHit(ray.o,ray.d,item=>item.key?.startsWith('catalog:'));
-    const key=hit?.key;if(!key)return false;
-    const cat=this.xrCatalog;
-    if(key==='catalog:toggle'){this.setXRCatalogOpen(!cat.open);return true}
-    if(!cat.open)return false;
-    if(key==='catalog:close'){this.setXRCatalogOpen?.(false);return true}
-    if(key.startsWith('catalog:tool:')){
-      const name=key.slice('catalog:tool:'.length);
-      const spec=cat.specs.find(s=>s[0]===name);if(!spec)return false;
-      cat.selected=name;
-      this.replaceLabel(cat.status,spec[1]+': '+spec[2],28);
-      return true;
-    }
-    if(key==='catalog:reset'){
-      this.resetXRTools();
-      this.replaceLabel(cat.status,'All instruments returned to tray',28);
-      return true;
-    }
-    if(key==='catalog:spawn'){
-      const tool=this.xrTableTools.find(t=>t.name===cat.selected);
-      if(!tool||tool.owner){
-        this.replaceLabel(cat.status,'Release held tool before return',28);
-        return true;
-      }
-      this.resetXRTool(tool);
-      this.replaceLabel(cat.status,cat.selected.toUpperCase()+' ready on table: grip to pick up',28);
-      return true;
-    }
-    return false;
-  }
   toolGripPose(frame,source){
     try{return source?.gripSpace&&frame?.getPose?.(source.gripSpace,this.xrRef)||null}catch{return null}
   }
