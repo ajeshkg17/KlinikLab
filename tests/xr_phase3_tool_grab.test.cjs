@@ -47,3 +47,23 @@ test('hover is visual-only, lost grip tracking and disconnect return tools',()=>
  assert.equal(scene.xrTableTools[0].owner,null);
  assert.equal(scene.xrTableTools[0].meshes[0].model,null);
 });
+
+test('held instruments move forward of the ring and preserve handed offsets',()=>{
+ const {scene,left,right,frame}=fixture();
+ scene.onXRGripStart({inputSource:left},frame);
+ scene.onXRGripStart({inputSource:right},frame);
+ const a=scene.xrTableTools[0].localModels[0],b=scene.xrTableTools[1].localModels[0];
+ assert(Math.abs(a[12]+.025)<1e-9,'left instrument must offset toward pinch');
+ assert(Math.abs(b[12]-.025)<1e-9,'right instrument must offset toward pinch');
+ assert(Math.abs(a[14]+.25)<1e-9,'left working shaft must project forward from controller');
+ assert(Math.abs(b[14]+.25)<1e-9,'right working shaft must project forward from controller');
+ scene.updateXRTools(frame);
+ assert.equal(scene.xrTableTools[0].meshes[0].model[14],-.25);
+ scene.onXRGripEnd({inputSource:left});
+ assert.equal(scene.xrTableTools[0].meshes[0].model,null,'release restores home geometry');
+});
+test('controller tracking ring is suppressed only while holding',()=>{
+ assert.match(source,/holding&&i===2/);
+ assert.match(source,/holding&&i===0\?layout\.s\.map\(v=>v\*\.78\)/);
+ assert.match(source,/tool\.owner===c\.handedness/);
+});
