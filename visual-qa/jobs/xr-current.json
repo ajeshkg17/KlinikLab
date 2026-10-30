@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase5-catalog-layout-20261030-01",
-  "commit": "68c44b4706690489efc48bf4e54753e7e21716fd",
+  "jobId": "pc-xr-phase5-compact-touch-20261030-01",
+  "commit": "735a29fc68083f2ce1070c4b3c632fb5021de52d",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
