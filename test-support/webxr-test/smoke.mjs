@@ -357,6 +357,47 @@ try{
  result.help.closing=closing;
  await captureXR('08-help-closed-after-close.png','Help panel closed by right-hand synthetic ray selection');
  result.checks.push('Right-hand close ray works; gripping cannot reopen help');
+
+ // Phase 4 catalog functional checks use synthetic tracked rays, with the
+ // real IWER session and renderer running. This is not physical controller proof.
+ const catalogOpen=await page.evaluate(()=>{
+   const scene=window.kliniklab.scene,cat=scene.xrCatalog;
+   if(!cat||cat.open||cat.panels.some(m=>!m.hidden))throw Error('Catalog must begin closed');
+   const select=(key,hand='left')=>{
+     const hit=scene.pickables.find(p=>p.key===key);
+     if(!hit||hit.mesh.hidden)throw Error('Catalog target not visible: '+key);
+     const p=hit.p,source={handedness:hand,targetRaySpace:{}};
+     const frame={getPose(){return {transform:{position:{x:p[0],y:p[1],z:p[2]+.55},orientation:{x:0,y:0,z:0,w:1}}}}};
+     return scene.onXRCatalogSelect({inputSource:source},frame);
+   };
+   if(!select('catalog:toggle')||!cat.open)throw Error('Catalog launcher failed');
+   if(!select('catalog:tool:mirror')||cat.selected!=='mirror')throw Error('Mirror entry failed');
+   if(!select('catalog:tool:composite','right')||cat.selected!=='composite')throw Error('Right controller entry failed');
+   return {open:true,selected:cat.selected,visible:cat.panels.every(m=>!m.hidden)};
+ });
+ result.catalog={opened:catalogOpen};
+ await captureXR('09-tool-catalog-open.png','Phase 4 in-VR named tool catalog opened by controller ray');
+ result.checks.push('Phase 4 catalog launches, exposes purposes, and accepts left/right tool selections');
+ const catalogReturn=await page.evaluate(()=>{
+   const scene=window.kliniklab.scene,cat=scene.xrCatalog;
+   const select=key=>{
+     const h=scene.pickables.find(p=>p.key===key);
+     if(!h||h.mesh.hidden)throw Error('Hidden catalog action '+key);
+     const p=h.p;
+     return scene.onXRCatalogSelect({inputSource:{handedness:'right',targetRaySpace:{}}},{
+       getPose(){return {transform:{position:{x:p[0],y:p[1],z:p[2]+.55},orientation:{x:0,y:0,z:0,w:1}}}}
+     });
+   };
+   const selected=scene.xrTableTools.find(t=>t.name==='composite');
+   if(selected.owner)throw Error('Composite must be unheld before spawn');
+   if(!select('catalog:spawn')||selected.owner)throw Error('Controlled tray spawn failed');
+   if(!select('catalog:reset')||scene.xrTableTools.some(t=>t.owner))throw Error('Catalog reset failed');
+   if(!select('catalog:close')||cat.open||cat.panels.some(m=>!m.hidden))throw Error('Catalog close failed');
+   return {trayReturn:true,allReset:true,closed:true};
+ });
+ result.catalog.return=catalogReturn;
+ await captureXR('10-tool-catalog-closed.png','Phase 4 workspace after controlled return, reset and close');
+ result.checks.push('Phase 4 controlled tray spawn, reset, close do not clone instruments');
  await page.evaluate(()=>window.__xrTestDevice.activeSession.end());
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  assert.equal(result.errors.length,0,'Uncaught application errors observed');
