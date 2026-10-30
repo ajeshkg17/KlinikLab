@@ -13,10 +13,12 @@ test('Phase 5 retains complete catalog, help and bilateral tool regressions',()=
 });
 test('catalog purpose/control vertical clearance and tray isolation',()=>{
  const catalog=src.slice(src.indexOf('this.xrCatalog={'),src.indexOf('this.setXRCatalogOpen?.(false);'));
- assert(catalog.includes("[-.60,1.075,-.99],[.79,.085,1]"),'dedicated purpose line');
+ assert(catalog.includes("[-.60,1.075,-.99],[.79,.145,1]"),'two-line purpose has dedicated taller surface');
+ assert(catalog.includes('this.replaceCatalogPurpose(cat.status,catalogSpecs[0][2]);'),'initial purpose must use wrapped texture');
+ assert(src.includes('ctx.measureText(next).width>570'),'purpose wrapping must be width-aware');
  assert(catalog.includes("[x,.87,-.985],[.27,.115,.05]"),'control row moved unexpectedly');
- const purposeBottom=1.075-.085/2,controlTop=.87+.115/2;
- assert(purposeBottom-controlTop>=.1,'purpose text and action buttons too close');
+ const purposeBottom=1.075-.145/2,controlTop=.87+.115/2;
+ assert(purposeBottom-controlTop>=.06,'purpose surface and action controls must have physical separation');
  assert(catalog.includes("['spawn',-.90,'RETURN']"));
 });
 
