@@ -60,7 +60,7 @@ test('render-matrix diagnostics detect per-eye and stationary-world drift',()=>{
  const scene={
   gl:{FRAMEBUFFER:1,DEPTH_TEST:2,COLOR_BUFFER_BIT:4,DEPTH_BUFFER_BIT:8,
    bindFramebuffer(){},enable(){},clear(){},viewport(){}},
-  xrRef:{},meshes:[{model}],xrControllers:[],
+  xrRef:{},meshes:[{model}],xrControllers:[],updateXRTools(){},
   xrGuide:{placeForViewer(){}},xrPrep:{onXRFrame(){}},
   draw(view){this.drawn.push([...view])},drawn:[]
  };
