@@ -55,8 +55,8 @@ async function execute(job){
    KLINIKLAB_XR_GRAPHICS:job.graphics,KLINIKLAB_XR_DEADLINE_MS:String(job.deadlineMs)});
   const dir=path.join(checkout,'output','playwright','webxr-smoke');
   const result=JSON.parse(await fs.readFile(path.join(dir,'result.json'),'utf8'));
-  if(!result.passed||result.captureManifest?.length!==8)throw Error('IWER checks or captures incomplete');
-  const names=['01-room-table-unobstructed.png','02-both-controller-models.png','03-left-tool-hover.png','04-left-hand-mirror-pickup.png','05-mirror-release-return.png','06-right-hand-composite-pickup.png','07-help-opened-by-question-mark.png','08-help-closed-after-close.png'];
+  if(!result.passed||result.captureManifest?.length!==10)throw Error('IWER checks or captures incomplete');
+  const names=['01-room-table-unobstructed.png','02-both-controller-models.png','03-left-tool-hover.png','04-left-hand-mirror-pickup.png','05-mirror-release-return.png','06-right-hand-composite-pickup.png','07-help-opened-by-question-mark.png','08-help-closed-after-close.png','09-tool-catalog-open.png','10-tool-catalog-closed.png'];
   const captures=await Promise.all(names.map(async name=>({name,bytes:await fs.readFile(path.join(dir,name))})));
   return {result,captures};
  }finally{
