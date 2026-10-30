@@ -548,6 +548,13 @@ try{
    assert.equal(clinical.toothClass,state.toothClass);
    result.phase8ClinicalUI??=[];
    result.phase8ClinicalUI.push(clinical);
+   const panels=await page.evaluate(()=>{
+     const p=window.kliniklab.scene.xrPrep;
+     return p.clinicalUI.map(m=>({p:m.p.slice(),s:m.s.slice(),hidden:m.hidden}));
+   });
+   assert(panels.every(m=>!m.hidden),'Clinical panel has hidden glyphs');
+   result.phase8PanelGeometry??=[];result.phase8PanelGeometry.push({id,panels});
+
    await captureXR('phase7-fdi-'+id+'.png','Phase 7 isolated XR treatment tooth FDI '+id,true);
    // The peripheral context is normally visible in real XR procedure mode.
    // Capture it with the full room without modifying the established arch view.
@@ -560,6 +567,15 @@ try{
    assert(evidence.eyeFdiVisiblePixels?.length===2&&evidence.eyeFdiVisiblePixels.every(n=>n>1000),
      'Selected FDI geometry not visibly rasterized in both eyes: '+id+' '+JSON.stringify(evidence.eyeFdiVisiblePixels));
  }
+ // In-frame panel/glyph occlusion review with existing room, catalog and help.
+ // Baseline XR scene render must remain unchanged in its ten standard captures.
+ await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=false});
+ await captureXR('phase8-panel-workspace.png','FDI clinical panel within XR treatment workspace',true);
+ await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(true)});
+ await captureXR('phase8-panel-catalog-open.png','FDI panel with tools catalog open for collision review',true);
+ await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(false);s.xrGuide?.open?.()});
+ await captureXR('phase8-panel-help-open.png','FDI panel with help open for collision review',true);
+ await page.evaluate(()=>{const s=window.kliniklab.scene;s.xrGuide?.close?.();s.xrFdiEvidence=true});
  // Phase7 additional retained evidence: oblique crown/root view, visible
  // cut and return-to-same-FDI image. Do not alter the ten baseline captures.
  await page.evaluate(()=>{
