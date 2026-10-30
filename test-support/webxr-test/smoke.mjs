@@ -3,6 +3,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 const here=path.dirname(fileURLToPath(import.meta.url));
 const origin=process.env.KLINIKLAB_URL||'http://127.0.0.1:8787/';
 const u=new URL(origin);
@@ -113,6 +114,7 @@ try{
  assert.deepEqual([...result.stationary.hands].sort(),['left','right']);
  result.checks.push('Both left/right input sources present and 120 XR frames received');
  result.captureManifest=[];
+ const captureHashes=new Map();
  const captureXR=async(filename,label)=>{
    // Capture only after a fresh rendered XR eye, not a potentially stale desktop viewport.
    const screenshot=await page.evaluate(async()=>{
@@ -151,11 +153,24 @@ try{
      });
    });
    if(!screenshot.dataURL)throw Error('Fresh XR-eye screenshot failed: '+screenshot.error);
-   await writeFile(path.join(out,filename),Buffer.from(screenshot.dataURL.split(',')[1],'base64'));
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   const png=Buffer.from(screenshot.dataURL.split(',')[1],'base64');
+   const sha256=createHash('sha256').update(png).digest('hex');
+   const duplicateOf=captureHashes.get(sha256)||null;
+   await writeFile(path.join(out,filename),png);
+   if(!duplicateOf)captureHashes.set(sha256,filename);
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
- await captureXR('01-room-table-unobstructed.png','XR room and instrument table, baseline');
- await captureXR('02-both-controller-models.png','XR scene with both controller models (presence inferred from renderer; visual quality not yet reviewed)');
+ await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
+ await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
+ await captureXR('01-room-table-unobstructed.png','Room/table with both tracked controllers disconnected');
+ await page.evaluate(()=>{
+   const d=window.__xrTestDevice;
+   d.controllers.left.position.set(-.24,1.26,-.85);
+   d.controllers.right.position.set(.24,1.26,-.85);
+   d.controllers.left.connected=true;d.controllers.right.connected=true;
+ });
+ await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===2&&window.kliniklab.scene.xrControllers.every(c=>c.active));
+ await captureXR('02-both-controller-models.png','Both left/right controller meshes tracked in scene');
  for(const hand of ['left','right'])for(const button of ['trigger','squeeze']){
    await page.evaluate(({hand,button})=>window.__xrTestDevice.controllers[hand].updateButtonValue(button,1),{hand,button});
    await page.waitForTimeout(120);
@@ -249,6 +264,9 @@ try{
  await page.locator('#vr').click();
  await page.waitForFunction(()=>!!window.kliniklab.scene.xrSession&&!!window.__xrTestDevice.activeSession);
  result.checks.push('Application exited and re-entered VR');
+ const duplicates=result.captureManifest.filter(x=>x.duplicateOf);
+ if(duplicates.length)throw Error('XR screenshot states were pixel-identical: '+JSON.stringify(duplicates.map(x=>({file:x.file,sameAs:x.duplicateOf}))));
+ result.checks.push('Six distinct newly rendered XR-eye screenshots (composition still requires visual review)');
  await page.evaluate(()=>window.__xrTestDevice.activeSession.end());
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  assert.equal(result.errors.length,0,'Uncaught application errors observed');
