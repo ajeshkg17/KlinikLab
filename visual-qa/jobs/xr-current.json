@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase8-catalog-action-clear-20261030-04",
-  "commit": "c7d9df9bbaafc3e500fb9e900bf793d3787185c3",
+  "jobId": "pc-xr-phase8-catalog-depth-20261030-05",
+  "commit": "acc936c674ad01303c0fdbb93df4b7f6350cc7ae",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
