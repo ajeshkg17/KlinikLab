@@ -146,8 +146,21 @@ try{
              const m=t.meshes[0],p=m.model?[m.model[12],m.model[13],m.model[14]]:m.p;
              return {name:t.name,owner:t.owner,hover:t.hover,projection:project(p)};
            });
+           // Project actual crown mesh bounds in each submitted stereo eye.
+           const crowns=this.archMeshes.flat().filter(m=>m.tag==='crown'&&!m.hidden);
+           const vertices=crowns.flatMap(m=>{
+             const points=[];
+             for(const dx of [-1,1])for(const dy of [0,1])for(const dz of [-1,1])
+               points.push(project([m.p[0]+dx*m.s[0],m.p[1]+dy*(m.kind.includes('_0_')?-1:1)*.17*m.s[1],m.p[2]+dz*m.s[2]]));
+             return points;
+           }).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.inFrustum);
+           const anatomyBounds=vertices.length?{
+             width:Math.max(...vertices.map(p=>p.x))-Math.min(...vertices.map(p=>p.x)),
+             height:Math.max(...vertices.map(p=>p.y))-Math.min(...vertices.map(p=>p.y)),
+             count:vertices.length,magnification:this.anatomyDisplayMagnification
+           }:null;
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -158,7 +171,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -183,11 +196,13 @@ try{
    const duplicateOf=captureHashes.get(sha256)||null;
    await writeFile(path.join(out,filename),png);
    if(!duplicateOf)captureHashes.set(sha256,filename);
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
  await captureXR('01-room-table-unobstructed.png','Room/table with both tracked controllers disconnected');
+ const overviewAnatomy=result.captureManifest.at(-1).eyeAnatomy;
+ assert(overviewAnatomy?.length===2&&overviewAnatomy.every(x=>x&&x.count>=8),'Overview crowns must be projected in both XR eyes');
  await page.evaluate(()=>{
    const d=window.__xrTestDevice;
    d.controllers.left.position.set(-.24,1.26,-.85);
@@ -301,7 +316,15 @@ try{
  // Phase 6 close-up is a real rendered XR eye frame in explicit teaching
  // magnification, not a resized illustration or a reused room screenshot.
  await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(true));
- await captureXR('05-mirror-release-return.png','Anatomy close-up: explicit 8x teaching magnification after mirror release');
+ await page.waitForFunction(()=>window.kliniklab.scene.anatomyDisplayMagnification===8
+   &&window.kliniklab.scene.archMeshes.flat().some(m=>m.tag==='crown'&&m.s[0]>.025));
+ await captureXR('05-mirror-release-return.png','Anatomy close-up: near-field explicit 8x teaching examination');
+ const detailAnatomy=result.captureManifest.at(-1).eyeAnatomy;
+ assert(detailAnatomy?.length===2&&detailAnatomy.every((x,i)=>x&&x.count>=8
+   &&x.magnification===8&&x.width>.16&&x.height>.12
+   &&x.width>overviewAnatomy[i].width*2),
+   'Rendered near-field anatomy must occupy significant visible area in BOTH stereo eyes');
+ result.checks.push('Both rendered eyes show >=2x projected arch width and useful close-up bounds');
  await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(false));
  assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
  result.checks.push('Grip release returns mirror to tray');
