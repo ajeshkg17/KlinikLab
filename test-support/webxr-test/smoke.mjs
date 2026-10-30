@@ -42,6 +42,21 @@ try{
      }session.requestAnimationFrame(frame);
    });
  });
+ result.rendered=await page.evaluate(()=>{
+   const d=window.kliniklab?.scene?.xrVisualDiagnostics;
+   if(!d)return null;
+   const compact=stat=>stat?{samples:stat.samples,maxStep:stat.maxStep,maxFromFirst:stat.maxFromFirst,
+     first:stat.first,last:stat.last}:null;
+   return {frames:d.frames,referenceSpace:d.referenceSpace,
+     eyes:Object.fromEntries(Object.entries(d.eyes).map(([i,stat])=>[i,compact(stat)])),
+     world:compact(d.world),desktopLoopCount:window.kliniklab.scene.desktopLoopCount};
+ });
+ assert(result.rendered?.frames>=120,'Fewer than 120 app-rendered XR frames; headset input is not proof of draw delivery');
+ assert(Object.values(result.rendered.eyes).length>=2,'Stereo eye matrices were not submitted');
+ for(const eye of Object.values(result.rendered.eyes))
+   assert(eye.samples>=120,'Missing actual drawn eye frames');
+ assert(result.rendered.world?.samples>=120,'Fixed world model not sampled each rendered frame');
+ result.checks.push('Rendered stereo matrices and stationary world mesh sampled for at least 120 app frames');
  assert.deepEqual([...result.stationary.hands].sort(),['left','right']);
  result.checks.push('Both left/right input sources present and 120 XR frames received');
  await page.screenshot({path:path.join(out,'vr-baseline.png')});
