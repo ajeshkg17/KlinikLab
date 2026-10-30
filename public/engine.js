@@ -191,26 +191,76 @@ class DentalScene {
     }
     for(const t of Object.values(this.teeth))t.pos=transform(t.pos);
   }
-  // Explicit teaching magnification is reversible and separate from normal
-  // arch dimensions. It must not change FDI identity or instrument geometry.
+  // Translate dental meshes and all corresponding FDI targets in lockstep.
+  // A translation does not change normal-scale dimensions or XR tool homes.
+  translateAnatomy(delta){
+    const members=new Set(this.archMeshes.flat());
+    for(const m of members){
+      for(let i=0;i<3;i++)m.p[i]+=delta[i];
+      m.model=null;
+    }
+    for(const hit of this.pickables.filter(p=>members.has(p.mesh)))
+      for(let i=0;i<3;i++)hit.p[i]+=delta[i];
+    for(const tooth of Object.values(this.teeth))
+      for(let i=0;i<3;i++)tooth.pos[i]+=delta[i];
+  }
+  // Compute the REAL world bounds of all post-transform mesh vertices,
+  // including world-coordinate gingiva, not an inferred arch centre.
+  anatomyWorldBounds(){
+    const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
+    let vertices=0;
+    for(const mesh of this.archMeshes.flat()){
+      if(mesh.hidden)continue;
+      const data=this.geom[mesh.kind]?.cpu;
+      if(!data)continue;
+      const m=mesh.model||M3.trs(mesh.p,mesh.rot,mesh.s);
+      for(let i=0;i<data.length;i+=8){
+        const x=data[i],y=data[i+1],z=data[i+2];
+        for(let k=0;k<3;k++){
+          const v=m[k]*x+m[4+k]*y+m[8+k]*z+m[12+k];
+          lo[k]=Math.min(lo[k],v);hi[k]=Math.max(hi[k],v);
+        }
+        vertices++;
+      }
+    }
+    if(!vertices)throw Error('No anatomy vertices for XR examination placement');
+    return {min:lo,max:hi,center:lo.map((v,i)=>(v+hi[i])/2),vertices};
+  }
+  // Anchor the teaching arch once in the actual viewer's forward gaze.
+  // Never chase head movement every frame: that would be uncomfortable.
+  placeTeachingAnatomy(pose){
+    if(!this.teachingPlacementPending||this.anatomyDisplayMagnification!==8)return;
+    const p=pose.transform.position,q=pose.transform.orientation;
+    const forward=this.rotateByQuat([0,0,-1],q);
+    const up=this.rotateByQuat([0,1,0],q);
+    const target=[p.x,p.y,p.z].map((v,i)=>v+1.27*forward[i]+.025*up[i]);
+    const before=this.anatomyWorldBounds();
+    const delta=target.map((v,i)=>v-before.center[i]);
+    this.translateAnatomy(delta);
+    this.teachingPlacementOffset=delta;
+    this.teachingPlacementInfo={target,delta,bounds:this.anatomyWorldBounds(),mode:'viewer-gaze-anchored'};
+    this.teachingPlacementPending=false;
+  }
+  // Explicit 8x teaching enlargement is independent of the physical-scale
+  // anatomy. Restore the exact original world transforms on exit.
   setTeachingMagnification(on){
     const next=on?8:1;
     if(this.anatomyDisplayMagnification===next)return;
     const relative=next/this.anatomyDisplayMagnification;
-    // Undo near-field translation BEFORE inverse scaling on exit.
-    if(on)this.rescaleAnatomy(relative);
-    // Teaching geometry is presented as a near-field examination object;
-    // scaling the distant room arch alone leaves it visually microscopic.
-    // All mesh and FDI hit positions translate together. Restore on exit.
-    const offset=[0,-.08,.94],sign=on?1:-1;
-    const members=new Set(this.archMeshes.flat());
-    for(const m of members)for(let i=0;i<3;i++)m.p[i]+=offset[i]*sign;
-    for(const hit of this.pickables.filter(p=>members.has(p.mesh)))
-      for(let i=0;i<3;i++)hit.p[i]+=offset[i]*sign;
-    for(const t of Object.values(this.teeth))
-      for(let i=0;i<3;i++)t.pos[i]+=offset[i]*sign;
-    if(!on)this.rescaleAnatomy(relative);
-    this.anatomyDisplayMagnification=next;
+    if(on){
+      this.rescaleAnatomy(relative);
+      this.anatomyDisplayMagnification=next;
+      this.teachingPlacementOffset=[0,0,0];
+      this.teachingPlacementPending=!!this.xrSession;
+      this.teachingPlacementInfo=null;
+    }else{
+      if(this.teachingPlacementOffset)this.translateAnatomy(this.teachingPlacementOffset.map(v=>-v));
+      this.rescaleAnatomy(relative);
+      this.anatomyDisplayMagnification=next;
+      this.teachingPlacementPending=false;
+      this.teachingPlacementOffset=[0,0,0];
+      this.teachingPlacementInfo=null;
+    }
   }
   buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
     // Environment: room, floor, side cabinetry, architectural framing.
@@ -695,7 +745,7 @@ class DentalScene {
   pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
   rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
   clearControllers(){for(const c of this.xrControllers){c.active=false;c.gripValid=false;c.aimValid=false;c.profiles=[];c.buttons={trigger:false,grip:false,thumbstick:false,primary:false,secondary:false};for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}}
-  xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.xrGuide?.placeForViewer(pose);this.updateXRTools(frame);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;used.add(slot);this.updateXRController(slot,source,frame);}
+  xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.placeTeachingAnatomy(pose);this.xrGuide?.placeForViewer(pose);this.updateXRTools(frame);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;used.add(slot);this.updateXRController(slot,source,frame);}
     for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){const c=this.xrControllers[i];c.active=false;c.gripValid=false;c.aimValid=false;for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}
     this.xrPrep?.onXRFrame(frame,t);
     // Phase 2: measure matrices actually submitted to rendering, separate from input pose.
