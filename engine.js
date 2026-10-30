@@ -197,7 +197,8 @@ class DentalScene {
     const next=on?8:1;
     if(this.anatomyDisplayMagnification===next)return;
     const relative=next/this.anatomyDisplayMagnification;
-    this.rescaleAnatomy(relative);
+    // Undo near-field translation BEFORE inverse scaling on exit.
+    if(on)this.rescaleAnatomy(relative);
     // Teaching geometry is presented as a near-field examination object;
     // scaling the distant room arch alone leaves it visually microscopic.
     // All mesh and FDI hit positions translate together. Restore on exit.
@@ -208,6 +209,7 @@ class DentalScene {
       for(let i=0;i<3;i++)hit.p[i]+=offset[i]*sign;
     for(const t of Object.values(this.teeth))
       for(let i=0;i<3;i++)t.pos[i]+=offset[i]*sign;
+    if(!on)this.rescaleAnatomy(relative);
     this.anatomyDisplayMagnification=next;
   }
   buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
