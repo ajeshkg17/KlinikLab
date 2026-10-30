@@ -440,7 +440,7 @@ class DentalScene {
     // A narrow tab near the top of the workspace, clear of the tool tray and ?.
     cat.launcher=this.box([-.60,1.98,-1.02],[.36,.14,.06],'#225e70',{key:'catalog:toggle'});
     cat.launcherLabel=this.label('TOOLS',[-.60,1.99,-.98],[.32,.10,1],{font:39,bold:true,color:'#f4ffff'});
-    register(this.box([-.60,1.48,-1.03],[.88,.86,.045],'#173b48'));
+    register(this.box([-.60,1.41,-1.03],[.88,1.10,.045],'#173b48'));
     register(this.label('INSTRUMENTS',[-.60,1.84,-.995],[.81,.10,1],{font:38,bold:true}));
     for(let i=0;i<catalogSpecs.length;i++){
       const y=1.71-i*.12;
@@ -481,6 +481,10 @@ class DentalScene {
     if(!this.xrCatalog)return false;
     const cat=this.xrCatalog;cat.open=!!open;
     for(const m of cat.panels)m.hidden=!cat.open;
+    for(const m of cat.rows){
+      if(m.key?.startsWith('catalog:tool:'))
+        m.color=this.rgb(m.key==='catalog:tool:'+cat.selected?'#22998e':'#285869');
+    }
     // Launcher is available throughout the XR session, without covering the tray.
     cat.launcher.hidden=!this.xrSession;
     cat.launcherLabel.hidden=!this.xrSession;
@@ -502,6 +506,7 @@ class DentalScene {
       const name=key.slice('catalog:tool:'.length);
       const spec=cat.specs.find(s=>s[0]===name);if(!spec)return false;
       cat.selected=name;
+      this.setXRCatalogOpen(true);
       this.replaceLabel(cat.status,spec[1]+': '+spec[2],28);
       return true;
     }
