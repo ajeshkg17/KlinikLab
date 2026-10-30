@@ -30,11 +30,11 @@ class XRToothPractice {
     this.info.hidden=true;
     // Peripheral clinical context, deliberately outside the central treatment
     // field. Help remains available only through the existing ? launcher.
-    this.clinicalPanel=scene.box([-.94,1.63,-1.55],[.79,.43,.035],'#17313a');
-    this.clinicalAccent=scene.box([-.94,1.82,-1.525],[.79,.025,.015],'#439f95');
-    this.clinicalTitle=scene.label('FDI --',[ -.94,1.724,-1.516],[.72,.105,1],{font:42,color:'#f0f4ec'});
-    this.clinicalDetail=scene.label('Select a tooth',[ -.94,1.612,-1.516],[.72,.072,1],{font:29,color:'#a9cfca'});
-    this.clinicalStatus=scene.label('EDUCATIONAL · UNCALIBRATED',[ -.94,1.505,-1.516],[.72,.055,1],{font:22,color:'#d1b7a0'});
+    this.clinicalPanel=scene.box([-.43,1.64,-1.22],[.58,.49,.035],'#17313a');
+    this.clinicalAccent=scene.box([-.43,1.865,-1.195],[.58,.018,.015],'#439f95');
+    this.clinicalTitle=scene.label('FDI --',[-.43,1.748,-1.186],[.51,.092,1],{font:42,color:'#f0f4ec'});
+    this.clinicalDetail=scene.label('Select a tooth',[-.43,1.636,-1.186],[.51,.079,1],{font:29,color:'#a9cfca'});
+    this.clinicalStatus=scene.label('EDUCATIONAL · UNCALIBRATED',[-.43,1.527,-1.186],[.51,.068,1],{font:22,color:'#d1b7a0'});
     this.clinicalUI=[this.clinicalPanel,this.clinicalAccent,this.clinicalTitle,this.clinicalDetail,this.clinicalStatus];
     for(const m of this.clinicalUI)m.hidden=true;
   }
@@ -49,8 +49,8 @@ class XRToothPractice {
     const side=solid.isLeft?.()?'LEFT':'RIGHT';
     const cuts=solid.bur?.length||0;
     this.scene.replaceLabel(this.clinicalTitle,'FDI '+id,43);
-    this.scene.replaceLabel(this.clinicalDetail,jaw+' '+side+' · '+cls.toUpperCase(),26);
-    this.scene.replaceLabel(this.clinicalStatus,cuts+' CUTS · EDUCATIONAL',23);
+    this.scene.replaceLabel(this.clinicalDetail,jaw+' '+side+' '+cls.toUpperCase(),34);
+    this.scene.replaceLabel(this.clinicalStatus,cuts+' CUTS · DEMO ONLY',29);
     this.clinicalState={fdi:String(id),jaw,side,toothClass:cls,cuts,helpOnDemand:true};
   }
   syncCase(){const lab=this.lab;if(!lab)return;this.refreshClinicalUI();const next=lab.caseKey;if(next!==this.currentCase){this.currentCase=next;this.dirty=true;this.cutCount=0;this.lastCut=null;}
