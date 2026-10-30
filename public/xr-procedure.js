@@ -28,14 +28,35 @@ class XRToothPractice {
     this.tip.hidden=true;
     this.info=scene.label('VR PRACTICE | NOT CALIBRATED',[.43,2.03,-1.76],[1.10,.12,1],{font:32,color:'#e7fff1'});
     this.info.hidden=true;
+    // Peripheral clinical context, deliberately outside the central treatment
+    // field. Help remains available only through the existing ? launcher.
+    this.clinicalPanel=scene.box([-.94,1.63,-1.55],[.79,.43,.035],'#17313a');
+    this.clinicalAccent=scene.box([-.94,1.82,-1.525],[.79,.025,.015],'#439f95');
+    this.clinicalTitle=scene.label('FDI --',[ -.94,1.724,-1.516],[.72,.105,1],{font:42,color:'#f0f4ec'});
+    this.clinicalDetail=scene.label('Select a tooth',[ -.94,1.612,-1.516],[.72,.072,1],{font:29,color:'#a9cfca'});
+    this.clinicalStatus=scene.label('EDUCATIONAL · UNCALIBRATED',[ -.94,1.505,-1.516],[.72,.055,1],{font:22,color:'#d1b7a0'});
+    this.clinicalUI=[this.clinicalPanel,this.clinicalAccent,this.clinicalTitle,this.clinicalDetail,this.clinicalStatus];
+    for(const m of this.clinicalUI)m.hidden=true;
   }
   get lab(){return this.app.volLab}
   onEnter(){this.toggleButton.hidden=false;this.toggleText.hidden=false;this.syncCase();if(this.active)this.showActive(true)}
-  onExit(){this.triggers.clear();this.toggleButton.hidden=true;this.toggleText.hidden=true;this.showActive(false);this.active=false;this.finish();}
-  syncCase(){const lab=this.lab;if(!lab)return;const next=lab.caseKey;if(next!==this.currentCase){this.currentCase=next;this.dirty=true;this.cutCount=0;this.lastCut=null;}
+  onExit(){for(const m of this.clinicalUI)m.hidden=true;this.triggers.clear();this.toggleButton.hidden=true;this.toggleText.hidden=true;this.showActive(false);this.active=false;this.finish();}
+  refreshClinicalUI(){
+    const lab=this.lab;if(!lab)return;
+    const id=lab.fdiTooth||this.app.selectedTooth||this.app.caseData?.num||'--';
+    const solid=lab.solid,cls=solid.toothClass?.()||'tooth';
+    const jaw=solid.isUpper?.()?'UPPER':'LOWER';
+    const side=solid.isLeft?.()?'LEFT':'RIGHT';
+    const cuts=solid.bur?.length||0;
+    this.scene.replaceLabel(this.clinicalTitle,'FDI '+id,43);
+    this.scene.replaceLabel(this.clinicalDetail,jaw+' '+side+' · '+cls.toUpperCase(),26);
+    this.scene.replaceLabel(this.clinicalStatus,cuts+' CUTS · EDUCATIONAL',23);
+    this.clinicalState={fdi:String(id),jaw,side,toothClass:cls,cuts,helpOnDemand:true};
+  }
+  syncCase(){const lab=this.lab;if(!lab)return;this.refreshClinicalUI();const next=lab.caseKey;if(next!==this.currentCase){this.currentCase=next;this.dirty=true;this.cutCount=0;this.lastCut=null;}
     if(this.lastRevision!==lab.revision){this.lastRevision=lab.revision;this.dirty=true;if(!lab.solid.bur.length){this.cutCount=0;this.lastCut=null;}}}
   toggle(){this.syncCase();this.active=!this.active;this.triggers.clear();this.showActive(this.active);if(!this.active)this.finish();return this.active}
-  showActive(show){this.scene.geom.xrvol_enamel;this.tip.hidden=!show;this.info.hidden=!show;for(const m of this.meshes)m.hidden=!show;
+  showActive(show){for(const m of this.clinicalUI)m.hidden=!show;this.refreshClinicalUI();this.scene.geom.xrvol_enamel;this.tip.hidden=!show;this.info.hidden=!show;for(const m of this.meshes)m.hidden=!show;
     this.toggleButton.color=this.scene.rgb(show?'#189783':'#246b71');
     if(show){this.updateMesh();this.scene.replaceLabel(this.info,'XR PREP · 6DoF ray · trigger to cut',25);}
   }
@@ -126,7 +147,7 @@ class XRToothPractice {
     const physics=lab.physics,radius=lab.burRadius*CLAMP(.45+physics.speed*physics.load/(.3+resistance*.7),.35,1.20);
     solid.addCut(...p,radius);physics.trace.push({tissue,speed:physics.speed,load:physics.load,tilt:physics.tilt,resistance:+(physics.load*resistance*(1+physics.tilt/85)/(.25+physics.speed*1.2)).toFixed(4),effectiveRadius:+radius.toFixed(4),position:p.slice(),source:source?'WebXR tracked target ray':'desktop XR preview',calibrated:false});
     if(solid.bur.length>200){const removed=solid.bur.length-200;solid.bur.splice(0,removed);physics.trace.splice(0,removed);}
-    lab.strokes++;lab.distance+=last?dist:0;lab.persistTooth?.();
+    lab.strokes++;lab.distance+=last?dist:0;lab.persistTooth?.();this.refreshClinicalUI();
     this.lastCut={p:p.slice(),time:performance.now()};this.cutCount++;this.dirty=true;
     if(source&&performance.now()-this.lastHapticAt>260){this.lastHapticAt=performance.now();const actuator=source.gamepad?.hapticActuators?.[0]||source.gamepad?.vibrationActuator;
       try{const result=actuator?.pulse?.(.12,35)||actuator?.playEffect?.('dual-rumble',{duration:35,strongMagnitude:.12,weakMagnitude:.08});result?.catch?.(()=>{});}catch{}}
