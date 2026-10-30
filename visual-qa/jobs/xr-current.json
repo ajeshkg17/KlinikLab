@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-held-tool-clearance-20261030-02",
-  "commit": "abf634a1a31ae246a885e9f1998293c40ea3d2db",
+  "jobId": "pc-xr-projection-manifest-20261030-03",
+  "commit": "f39e1e9418121ab00deb77c839f1c88a97839e9f",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
