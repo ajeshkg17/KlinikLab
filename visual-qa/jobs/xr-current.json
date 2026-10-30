@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase7-occlusal-cut-evidence-20261030-05",
-  "commit": "22b629e5acc5139ec1cc5d5640edaa642fd1d910",
+  "jobId": "pc-xr-phase8-clinical-context-20261030-01",
+  "commit": "8b91a938cbe980c9d16ccaaf4d65ced320133462",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
