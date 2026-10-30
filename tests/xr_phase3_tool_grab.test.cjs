@@ -12,7 +12,7 @@ const methods=vm.runInNewContext('({'+names.map((name,i)=>{
  const at=source.indexOf('  '+name+'('), next=i+1<names.length?source.indexOf('  '+names[i+1]+'(',at):end;
  assert(at>=0&&next>at,'method boundaries '+name);
  return source.slice(at,next).trim();
-}).join(',\\n')+'})',{M3});
+}).join(',\n')+'})',{M3});
 function fixture(){
  const make=(name,x)=>({name,owner:null,hover:null,meshes:[{p:[x,1,0],s:[.1,.1,.1],rot:[0,0,0],model:null,color:[.2,.3,.4]}]});
  const scene={xrSession:{},xrRef:{},xrTableTools:[make('mirror',0),make('probe',1)],rgb:()=>[0,1,0],
