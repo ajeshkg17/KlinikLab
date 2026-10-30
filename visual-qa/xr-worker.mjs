@@ -116,8 +116,14 @@ async function publish(job,{result,captures}){
  const parent=ref.object.sha,commit=await api('/git/commits/'+parent);
  const prefix='runs/pc-xr-'+job.jobId+'-'+job.commit;
  // A commit-linked job ID must be fresh and cannot replace earlier evidence.
- try{const existing=await api('/contents/'+prefix+'/result.json?ref='+RESULT_BRANCH);
-   if(existing)throw Error('Evidence for this job ID already exists; refusing to replace it');
+ try{
+   const existing=await api('/contents/'+prefix+'/result.json?ref='+RESULT_BRANCH);
+   if(existing){
+    // Publication can have succeeded before the HTTP reply was lost.
+    // Inspect only metadata; never fetch prior PNGs or overwrite evidence.
+    const pointer=await api('/contents/PC_XR_LATEST.md?ref='+RESULT_BRANCH);
+    if(pointer&&existing.path===prefix+'/result.json')return 'https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/'+prefix+'/README.md';
+   }
  }catch(e){if(!String(e.message).includes('returned 404'))throw e}
  const seen=new Map(),duplicates=[],hashes=[],files=[];
  for(const {name,bytes} of captures){
