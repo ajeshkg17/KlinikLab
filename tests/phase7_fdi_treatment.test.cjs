@@ -1,0 +1,42 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const src=fs.readFileSync(path.join(root,'volumetric-lab.js'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+test('Phase7 FDI classifier distinguishes jaw, side and all tooth groups',()=>{
+ const cls=src.slice(src.indexOf('class ToothSolid{'),src.indexOf('window.KlinikLabVolumeModels='));
+ const ToothSolid=vm.runInNewContext('(function(){const CASES={molar:{procedure:"restoration"}};const SQ=x=>x*x;const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));const smoothMin=(a,b,k)=>Math.min(a,b);'+cls+';return ToothSolid})()');
+ const samples={'11':'incisor','23':'canine','34':'premolar','46':'molar','17':'molar','31':'incisor'};
+ for(const [id,type] of Object.entries(samples))assert.equal(new ToothSolid('molar',id).toothClass(),type,id);
+ assert.equal(new ToothSolid('molar','16').isUpper(),true);
+ assert.equal(new ToothSolid('molar','36').isUpper(),false);
+ assert.equal(new ToothSolid('molar','23').isLeft(),true);
+ assert.equal(new ToothSolid('molar','13').isLeft(),false);
+ const incisor=new ToothSolid('molar','11'),canine=new ToothSolid('molar','13'),premolar=new ToothSolid('molar','14'),upper=new ToothSolid('molar','16'),lower=new ToothSolid('molar','36');
+ assert.notEqual(incisor.height(0,0),canine.height(0,0));
+ assert.notEqual(premolar.height(0,0),upper.height(0,0));
+ assert.notEqual(upper.height(.72,0),lower.height(.72,0));
+ assert.notDeepEqual(upper.rootCenters(),lower.rootCenters());
+});
+test('Phase7 explicit FDI switch has independent records, and no invalid tooth IDs',()=>{
+ const sub=src.slice(src.indexOf(' persistTooth(){'),src.indexOf(' setCase(key){'));
+ const wrapper=vm.runInNewContext('(class Store {'+sub+'})',{localStorage:{setItem(){}}});
+ const x=new wrapper();
+ x.fdiRecords={};x.fdiTooth='16';x.caseKey='molar';x.solid={bur:[{p:[.1,.2,.3],r:.1}]};x.strokes=2;x.distance=3;
+ x.persistTooth();assert.equal(x.fdiRecords['16'].bur.length,1);
+ const cls=src.slice(src.indexOf('class ToothSolid{'),src.indexOf('window.KlinikLabVolumeModels='));
+ assert(sub.includes('new ToothSolid(this.caseKey,fdi)'));
+ assert(sub.includes('this.fdiRecords[fdi]'));
+ assert(sub.includes('this.rebuild()'));
+ assert(sub.includes("if(!/^[1-4][1-8]$/.test(String(fdi)))return false"));
+ assert(app.includes('this.volLab?.setTooth(id)'));
+ assert(src.includes("localStorage.setItem('kliniklab-fdi-treatment-v1'"));
+ assert(cls.includes("this.toothClass()==='premolar'"));
+});
+test('Phase7 source mirrors',()=>{
+ assert.equal(src,fs.readFileSync(path.join(root,'public/volumetric-lab.js'),'utf8'));
+ assert.equal(app,fs.readFileSync(path.join(root,'public/app.js'),'utf8'));
+});
