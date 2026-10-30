@@ -625,7 +625,7 @@ class DentalScene {
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
-      this.xrSession=session;this.xrRef=ref;
+      this.xrSession=session;this.xrRef=ref;this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
@@ -659,6 +659,22 @@ class DentalScene {
   xrFrame(t,frame){const gl=this.gl;let pose;try{pose=frame.getViewerPose(this.xrRef)}catch{pose=null}if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;used.add(slot);this.updateXRController(slot,source,frame);}
     for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){const c=this.xrControllers[i];c.active=false;c.gripValid=false;c.aimValid=false;for(const m of c.parts){m.hidden=true;m.model=null;}c.ray.hidden=true;c.ray.model=null;}
     this.xrPrep?.onXRFrame(frame,t);
+    // Phase 2: measure matrices actually submitted to rendering, separate from input pose.
+    // A fixed world mesh is sampled after tutorial/controller updates; no pose smoothing.
+    if(!this.xrVisualDiagnostics)this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
+    const diag=this.xrVisualDiagnostics;
+    const track=(stat,matrix)=>{
+      if(!matrix||matrix.length!==16)return;
+      const value=Array.from(matrix);
+      if(!stat.first)stat.first=value;
+      if(stat.last)stat.maxStep=Math.max(stat.maxStep||0,...value.map((v,i)=>Math.abs(v-stat.last[i])));
+      stat.maxFromFirst=Math.max(stat.maxFromFirst||0,...value.map((v,i)=>Math.abs(v-stat.first[i])));
+      stat.last=value;stat.samples=(stat.samples||0)+1;
+    };
+    const fixed=this.meshes[0];
+    if(fixed)track(diag.world,fixed.model||M3.trs(fixed.p,fixed.rot,fixed.s));
+    diag.frames++;
+    for(const [index,view] of pose.views.entries())track(diag.eyes[index]||(diag.eyes[index]={}),view.transform.inverse.matrix);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
   }
 }
