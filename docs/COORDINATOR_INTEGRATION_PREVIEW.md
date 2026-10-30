@@ -13,7 +13,7 @@ reviewing the original PRs. No worker branches or main were changed.
 | FSP/KP | #14 | d910d3d3aba8c618d4e7545954de06dd84d75100 |
 | Existing QA engineering checks | #12 | 98fbfbaa3769799961770b37163ec7039fe27f2d |
 | Video heading fix | #17 | e363a631909e3301db13353d8b3fa6c383823429 |
-| XR lifecycle recovery | #18 | 00a105372930f50dec83aaa5038ce9ed240ac0f6 |
+| XR lifecycle recovery | #18 | 2dec24df102f67dbf2dff0e515b3904dedf5e08a |
 
 Base: main at 428d6b2d8fadd881d74d587bcaff3279da489949.
 
@@ -24,10 +24,10 @@ not used as build evidence. The coordinator fixes include their focused tests.
 
 ## Observed isolated checks
 
-- All application Node suites: 104 passed, zero failed.
+- All application Node suites: 109 passed, zero failed.
 - Existing visual-worker/helper unit tests: 8 passed, zero failed; no worker jobs executed.
 - Existing scenario logic: all six cases and 42 case/station templates passed.
-- Static checks: 25 byte-identical frontend mirrors and 64 JavaScript syntax checks.
+- Static checks: 25 byte-identical frontend mirrors and 65 JavaScript syntax checks.
 - Local transient HTTP smoke: 22 referenced assets, two binary assets and restricted-path checks passed.
 - Standalone regeneration: verified separately using scripts/qa_gate.py bundle.
 
