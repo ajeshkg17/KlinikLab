@@ -2456,12 +2456,25 @@ class XRToothPractice {
     this.scene.replaceLabel(this.clinicalStatus,cuts+' CUTS · DEMO ONLY',29);
     this.clinicalState={fdi:String(id),jaw,side,toothClass:cls,cuts,helpOnDemand:true};
   }
+  // Explicit modal ownership: the active workspace yields its anatomy, tooltip
+  // and context to help/catalog. Restoration never edits the FDI solid or cuts.
+  syncModalVisibility(){
+    const modal=this.scene.xrGuide?.state?.open?'help':this.scene.xrCatalog?.open?'catalog':null;
+    const workspace=this.active&&!modal;
+    for(const m of this.clinicalUI)m.hidden=!workspace;
+    for(const m of this.meshes)m.hidden=!workspace;
+    this.info.hidden=!workspace;
+    if(!workspace)this.tip.hidden=true;
+    this.modalOwner=modal||'treatment';
+    if(modal)this.triggers.clear();
+    return workspace;
+  }
   syncCase(){const lab=this.lab;if(!lab)return;this.refreshClinicalUI();const next=lab.caseKey;if(next!==this.currentCase){this.currentCase=next;this.dirty=true;this.cutCount=0;this.lastCut=null;}
     if(this.lastRevision!==lab.revision){this.lastRevision=lab.revision;this.dirty=true;if(!lab.solid.bur.length){this.cutCount=0;this.lastCut=null;}}}
   toggle(){this.syncCase();this.active=!this.active;this.triggers.clear();this.showActive(this.active);if(!this.active)this.finish();return this.active}
   showActive(show){for(const m of this.clinicalUI)m.hidden=!show;this.refreshClinicalUI();this.scene.geom.xrvol_enamel;this.tip.hidden=!show;this.info.hidden=!show;for(const m of this.meshes)m.hidden=!show;
     this.toggleButton.color=this.scene.rgb(show?'#189783':'#246b71');
-    if(show){this.updateMesh();this.scene.replaceLabel(this.info,'XR PREP · 6DoF ray · trigger to cut',25);}
+    if(show){this.updateMesh();this.scene.replaceLabel(this.info,'XR PREP · 6DoF ray · trigger to cut',25);}this.syncModalVisibility();
   }
   finish(){if(!this.lab)return;this.lab.rebuild();this.lastCut=null;this.tip.p=[0,-20,0];this.dirty=true;}
   updateMesh(){if(!this.lab||!window.KlinikVoxelMesher)return false;const scene=this.scene;
@@ -2530,6 +2543,7 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
+    this.syncModalVisibility();
     if(frame.session.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return;}
     if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
     const connected=new Set(frame.session.inputSources);
