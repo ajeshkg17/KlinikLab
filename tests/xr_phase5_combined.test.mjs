@@ -13,9 +13,9 @@ test('Phase 5 retains complete catalog, help and bilateral tool regressions',()=
 });
 test('catalog purpose/control vertical clearance and tray isolation',()=>{
  const catalog=src.slice(src.indexOf('this.xrCatalog={'),src.indexOf('this.setXRCatalogOpen?.(false);'));
- assert(catalog.includes("[-.60,1.105,-.99],[.79,.085,1]"),'dedicated purpose line');
- assert(catalog.includes("[x,.935,-.985],[.27,.115,.05]"),'control row moved unexpectedly');
- const purposeBottom=1.105-.085/2,controlTop=.935+.115/2;
+ assert(catalog.includes("[-.60,1.075,-.99],[.79,.085,1]"),'dedicated purpose line');
+ assert(catalog.includes("[x,.87,-.985],[.27,.115,.05]"),'control row moved unexpectedly');
+ const purposeBottom=1.075-.085/2,controlTop=.87+.115/2;
  assert(purposeBottom-controlTop>=.1,'purpose text and action buttons too close');
  assert(catalog.includes("['spawn',-.90,'RETURN']"));
 });
