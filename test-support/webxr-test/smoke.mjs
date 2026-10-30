@@ -157,6 +157,11 @@ try{
  const beforeHeld=await toolState('mirror');
  assert(beforeHeld.model?.length===16,'Held mirror lacks model matrix');
  result.checks.push('Left squeeze picks up mirror with a grip-relative model matrix');
+ await page.evaluate(()=>window.__xrTestDevice.controllers.left.updateButtonValue('trigger',1));
+ await page.waitForTimeout(300);
+ assert.equal((await toolState('mirror')).owner,'left','Index trigger changed tool ownership');
+ await page.evaluate(()=>window.__xrTestDevice.controllers.left.updateButtonValue('trigger',0));
+ result.checks.push('Index trigger cannot release or reassign a grip-held tool');
  // Another controller cannot take the same held instrument.
  await moveController('right','mirror');
  await grip('right',1);await page.waitForTimeout(300);
@@ -167,6 +172,13 @@ try{
  await page.waitForFunction(x=>Math.abs(window.kliniklab.scene.xrTableTools.find(t=>t.name==='mirror')?.meshes[0]?.model?.[12]-x)>0.10,
    beforeHeld.model[12],{timeout:Math.max(15000,config.collectionDeadlineMs)});
  result.checks.push('Held tool follows translated grip with stable 6DoF transform');
+ const translated=await toolState('mirror');
+ await page.evaluate(()=>{const q=window.__xrTestDevice.controllers.left.quaternion;
+   q.set(0,Math.sin(Math.PI/8),0,Math.cos(Math.PI/8));});
+ await page.waitForFunction(x=>Math.abs(window.kliniklab.scene.xrTableTools.find(t=>t.name==='mirror')?.meshes[0]?.model?.[0]-x)>0.1,
+   translated.model[0],{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ assert.equal((await toolState('mirror')).owner,'left','Rotation invalidated grip ownership');
+ result.checks.push('Held tool orientation follows real emulated controller rotation');
  await grip('left',0);
  await awaitOwner('mirror',null);
  assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
