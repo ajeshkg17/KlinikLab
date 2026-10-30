@@ -112,7 +112,13 @@ try{
  result.checks.push('Rendered stereo matrices and stationary world mesh sampled for at least 120 app frames');
  assert.deepEqual([...result.stationary.hands].sort(),['left','right']);
  result.checks.push('Both left/right input sources present and 120 XR frames received');
- await page.screenshot({path:path.join(out,'vr-baseline.png')});
+ result.captureManifest=[];
+ const captureXR=async(filename,label)=>{
+   await page.screenshot({path:path.join(out,filename),animations:'disabled'});
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, desktop Chrome',testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+ };
+ await captureXR('01-room-table-unobstructed.png','XR room and instrument table, baseline');
+ await captureXR('02-both-controller-models.png','XR scene with both controller models (presence inferred from renderer; visual quality not yet reviewed)');
  for(const hand of ['left','right'])for(const button of ['trigger','squeeze']){
    await page.evaluate(({hand,button})=>window.__xrTestDevice.controllers[hand].updateButtonValue(button,1),{hand,button});
    await page.waitForTimeout(120);
@@ -151,9 +157,11 @@ try{
    {name,hand},{timeout:Math.max(15000,config.collectionDeadlineMs)});
  await moveController('left','mirror');
  await awaitHover('mirror','left');
+ await captureXR('03-left-tool-hover.png','Left grip near mirror with hover feedback');
  result.checks.push('Left controller obtains visible tool hover feedback');
  await grip('left',1);
  await awaitOwner('mirror','left');
+ await captureXR('04-left-hand-mirror-pickup.png','Mirror held by left controller');
  const beforeHeld=await toolState('mirror');
  assert(beforeHeld.model?.length===16,'Held mirror lacks model matrix');
  result.checks.push('Left squeeze picks up mirror with a grip-relative model matrix');
@@ -181,12 +189,14 @@ try{
  result.checks.push('Held tool orientation follows real emulated controller rotation');
  await grip('left',0);
  await awaitOwner('mirror',null);
+ await captureXR('05-mirror-release-return.png','Mirror returned to instrument tray after grip release');
  assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
  result.checks.push('Grip release returns mirror to tray');
  await moveController('right','composite');
  await awaitHover('composite','right');
  await grip('right',1);
  await awaitOwner('composite','right');
+ await captureXR('06-right-hand-composite-pickup.png','Composite tool held by right controller');
  result.checks.push('Right controller picks up a different tray instrument');
  await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.kliniklab.scene.xrTableTools.find(t=>t.name==='composite')?.owner===null,
