@@ -217,8 +217,22 @@ try{
                .map(([dx,dy])=>project([center[0]+dx,center[1]+dy,center[2]]));
              return {corners:points,visible:!m.hidden,kind:m.kind};
            }):[];
+           // Measure full catalog and action-rectangle projections using the
+           // same matrices actually submitted to each rendered eye. Geometry
+           // alone cannot establish glyph occlusion: pixel review remains required.
+           const catalog=this.xrCatalog;
+           const catalogSurfaces=catalog?.open?[
+             {name:'panel',mesh:catalog.panels[0]},
+             ...['spawn','reset','close'].map(name=>({
+               name,mesh:catalog.panels.find(m=>this.pickables.some(p=>p.mesh===m&&p.key==='catalog:'+name))
+             }))
+           ].map(({name,mesh})=>({
+             name,corners:mesh?[
+               [-1,-1],[1,-1],[1,1],[-1,1]
+             ].map(([sx,sy])=>project([mesh.p[0]+sx*mesh.s[0]/2,mesh.p[1]+sy*mesh.s[1]/2,mesh.p[2]+mesh.s[2]/2])):[]
+           })):[];
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels,eyeClinical});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels,eyeClinical,catalogSurfaces});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -229,7 +243,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),eyeClinical:sides.map(v=>v.eyeClinical),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),eyeClinical:sides.map(v=>v.eyeClinical),eyeCatalog:sides.map(v=>v.catalogSurfaces),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -256,7 +270,7 @@ try{
    if(!duplicateOf)captureHashes.set(sha256,filename);
    const destination=auxiliary?(result.phase7Captures??=[]):result.captureManifest;
    if(!auxiliary){result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});}
-   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeClinical:screenshot.eyeClinical,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
+   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeClinical:screenshot.eyeClinical,eyeCatalog:screenshot.eyeCatalog,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -589,6 +603,11 @@ try{
  await captureXR('phase8-panel-workspace.png','FDI clinical panel within XR treatment workspace',true);
  await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(true)});
  await captureXR('phase8-panel-catalog-open.png','FDI panel with tools catalog open for collision review',true);
+ const catalogEyes=result.phase7Captures.at(-1).eyeCatalog;
+ assert(catalogEyes?.length===2&&catalogEyes.every(eye=>eye.length===4&&eye.every(item=>item.corners.length===4&&item.corners.every(c=>
+   c.inFrustum&&c.x>-.87&&c.x<.87&&c.y>-.88&&c.y<.88))),
+   'Catalog panel or action corners clipped in an actual XR eye: '+JSON.stringify(catalogEyes));
+ result.checks.push('Complete catalog and all three action rectangles fit both rendered XR eye frusta with margins');
  const catalogGeometry=await page.evaluate(()=>{
    const sc=window.kliniklab.scene,cat=sc.xrCatalog;
    const controls=['spawn','reset','close'].map(key=>{
