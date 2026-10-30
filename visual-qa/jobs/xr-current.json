@@ -11,6 +11,8 @@
     "left-hover",
     "left-pickup",
     "right-pickup",
-    "release-return"
+    "release-return",
+    "help-open",
+    "help-closed"
   ]
 }
