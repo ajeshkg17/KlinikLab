@@ -29,7 +29,7 @@ test('five native XR teaching pages explain tracked trigger, grip and limitation
  assert.equal(ctx.KlinikXRGuide.pages.length,5);
  const content=ctx.KlinikXRGuide.pages.flatMap(p=>p.lines).join(' ');
  assert.match(content,/INDEX TRIGGER/);
- assert.match(content,/GRIP/);
+ assert.match(content,/\?/);
  assert.match(content,/Release TRIGGER/);
  assert.match(content,/Quest system menu/);
  assert.match(content,/No real depth or force calibration/);
@@ -40,23 +40,25 @@ test('controller select routes to VR help, while help blocks teeth and drill sel
  assert(hits.has('guide:next')&&hits.has('guide:back')&&hits.has('guide:close')&&hits.has('guide:open'));
  assert(guide.meshes.every(m=>m.hidden));
  guide.onEnter();
- assert.equal(s.active,true);assert.equal(s.open,true);assert.equal(s.index,0);
- assert.equal(hit('tooth:16'),true);assert.equal(s.index,0); // blocked beneath tutorial
+ assert.equal(s.active,true);assert.equal(s.open,false);assert.equal(s.index,0);
+ assert.equal(guide.launcher.hidden,false);
+ assert.equal(hit('tooth:16'),false);assert.equal(s.index,0); // workspace remains available
+ assert.equal(hit('guide:open'),true);assert.equal(s.open,true);
  assert.equal(hit('guide:next'),true);assert.equal(s.index,1);
  assert.equal(hit('guide:back'),true);assert.equal(s.index,0);
  assert.equal(guide.back(),false);
  assert.equal(hit('guide:close'),true);assert.equal(s.open,false);
  assert.equal(hit('tooth:16'),false); // ordinary tooth selection may resume
  assert.equal(hit('guide:open'),true);assert.equal(s.open,true);
- assert.equal(s.controllerSelects,5);
+ assert.equal(s.controllerSelects,6);
  guide.onExit();assert(!s.active&&!s.open);
  assert(guide.meshes.every(m=>m.hidden));
 });
-test('Quest grip reopens the tutorial without a joystick or button-index assumption',()=>{
+test('grip cannot reopen tutorial; explicit ? trigger is required',()=>{
  const {guide,ctx}=makeGuide(),state=ctx.KlinikXRGuide.state;
  guide.onEnter();guide.close();
- assert.equal(guide.onSqueezeStart(),true);
- assert(state.open);assert.equal(state.index,0);assert.equal(state.gripOpens,1);
+ assert.equal(guide.onSqueezeStart(),false);
+ assert.equal(state.open,false);assert.equal(state.gripOpens,0);
  guide.onExit();assert.equal(guide.onSqueezeStart(),false);
 });
 test('XR-only comfort resizing preserves model and ray hit positions on exit',()=>{
@@ -102,7 +104,7 @@ test('script served before Quest preparation initializes and standalone bundler 
 });
 
 test('guide ray ignores closer tooth targets and no-pose selects are safe',()=>{
- const {guide,scene,ctx}=makeGuide();guide.onEnter();
+ const {guide,scene,ctx}=makeGuide();guide.onEnter();guide.open();
  let filtered=false;scene.getRayHit=(o,d,allow)=>{filtered=!!allow&&allow({key:'guide:next'})&&!allow({key:'tooth:16'});return filtered?{key:'guide:next'}:{key:'tooth:16'}};
  const event={inputSource:{targetRaySpace:{}}},frame={getPose:()=>({transform:{position:{x:0,y:1.5,z:0},orientation:{x:0,y:0,z:0,w:1}}})};
  assert.equal(guide.onSelectStart(event,frame),true);assert(filtered);
@@ -136,11 +138,11 @@ test('XR session cleanup is idempotent and scoped to the active session',()=>{
  assert.equal(scene.xrSession,null);assert.equal(scene.xrRef,null);assert.equal(scene.latestFrame,null);
  assert(scene.xrBoardMeshes[0].hidden);
 });
-test('opening VR help with grip clears held cutting input immediately',()=>{
+test('explicit help opening pauses held cutting input, never grip',()=>{
  const {guide,scene}=makeGuide();let cleared=0;
  scene.xrPrep={triggers:{clear(){cleared++}},lastCut:{time:1},tip:{hidden:false}};
- guide.onEnter();guide.close();assert.equal(guide.onSqueezeStart(),true);
- assert.equal(cleared,2);assert.equal(scene.xrPrep.lastCut,null);
+ guide.onEnter();assert.equal(guide.onSqueezeStart(),false);assert.equal(cleared,0);guide.open();
+ assert.equal(cleared,1);assert.equal(scene.xrPrep.lastCut,null);
  assert(scene.xrPrep.tip.hidden);guide.onExit();
 });
 
@@ -160,7 +162,7 @@ test('headset-relative guide placement follows initial seated/standing eye and r
  const target=scene.pickables.find(h=>h.key==='guide:next');
  const originalTarget=hits[scene.pickables.indexOf(target)];
  assert(Math.abs(target.p[1]-(originalTarget[1]+1.18-.04-1.56))<1e-9);
- assert.equal(state.open,true);
+ assert.equal(state.open,false);
  guide.onExit();
  assert.deepEqual(guide.meshes.map(m=>m.p),origins);
  assert.deepEqual(scene.pickables.map(h=>h.p),hits);
@@ -242,46 +244,17 @@ test('rotated guide rectangle accepts front ray, rejects side rays, and keeps fl
  assert.equal(fn.call(scene,[0,1,0],[0,0,-1])?.key,'module:1');
 });
 
-test('grip reopening recenters the guide at latest tracked pose, without drift',()=>{
- const {guide,scene}=makeGuide();
- scene.rotateByQuat=(v,q)=>[-2*q.y*q.w,0,-1+2*q.y*q.y];
- const identity={x:0,y:0,z:0,w:1};
- const quarter={x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2};
- guide.onEnter();
- assert(guide.placeForViewer({transform:{position:{x:0,y:1.6,z:0},orientation:identity}}));
- guide.close();
- // The next valid frame still updates the last pose even though the panel stays fixed.
- assert.equal(guide.placeForViewer({transform:{position:{x:1,y:1.2,z:2},orientation:quarter}}),false);
- assert(guide.onSqueezeStart());
- assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9);
- assert(Math.abs(guide.meshes[0].p[2]-(2-.08))<1e-9);
- assert(Math.abs(guide.meshes[0].rot[1]-Math.PI/2)<1e-9);
- guide.close();
- assert(guide.onSqueezeStart());
- assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9); // no accumulated transform
- guide.onExit();
- assert.equal(guide.lastViewerPose,null);
- assert.equal(guide.anchored,false);
+test('help is closed on entry and re-entry, grip never changes it',()=>{
+ const {guide,ctx,hit}=makeGuide(),state=ctx.KlinikXRGuide.state;
+ for(let i=0;i<2;i++){
+   guide.onEnter();assert.equal(state.open,false);
+   assert.equal(guide.launcher.hidden,false);
+   assert.equal(guide.onSqueezeStart(),false);assert.equal(state.open,false);
+   assert.equal(hit('guide:open'),true);assert.equal(state.open,true);
+   assert.equal(hit('guide:close'),true);assert.equal(state.open,false);
+   guide.onExit();
+ }
 });
-
-test('grip recenters an already-open guide without losing the active tutorial page',()=>{
- const {guide,scene,ctx}=makeGuide(),state=ctx.KlinikXRGuide.state;
- scene.rotateByQuat=(v,q)=>[-2*q.y*q.w,0,-1+2*q.y*q.y];
- const pose=(x,y,z,q)=>({transform:{position:{x,y,z},orientation:q}});
- const q0={x:0,y:0,z:0,w:1},q1={x:0,y:Math.SQRT1_2,z:0,w:Math.SQRT1_2};
- guide.onEnter();
- assert(guide.placeForViewer(pose(0,1.6,0,q0)));
- guide.next();assert.equal(state.index,1);
- guide.placeForViewer(pose(1,1.6,2,q1)); // tracking continues while open
- assert(guide.onSqueezeStart());
- assert.equal(state.index,1);
- assert.equal(state.open,true);
- assert(Math.abs(guide.meshes[0].p[0]-(1-1.18))<1e-9);
- assert(Math.abs(guide.meshes[0].p[2]-(2-.08))<1e-9);
- assert(Math.abs(guide.meshes[0].rot[1]-Math.PI/2)<1e-9);
- guide.onExit();
-});
-
 test('XR frame maps independent aim/grip poses by handedness and clears missing tracking',()=>{
  const begin=engine.indexOf('  xrFrame(t,frame){');
  const end=engine.lastIndexOf('\n  }\n}');
