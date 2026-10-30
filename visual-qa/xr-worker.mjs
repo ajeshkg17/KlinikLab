@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {validateXRJob,INTEGRATION_BRANCH,JOB_REF,RESULT_BRANCH} from './xr-job-core.mjs';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabVisualWorker');
 const REPO=path.join(ROOT,'xr-repo'), REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
-const LEDGER=path.join(ROOT,'xr-completed.json'), URL='http://127.0.0.1:8791/';
+const LEDGER=path.join(ROOT,'xr-completed.json'), URL='http://127.0.0.1:8891/';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function git(args,cwd=REPO){
  const p=spawnSync('git',args,{cwd,encoding:'utf8',timeout:120000,env:{...process.env,GIT_TERMINAL_PROMPT:'0'}});
@@ -40,14 +40,15 @@ async function execute(job){
  let server;
  try{
   await run('npm.cmd',['ci','--prefix','test-support/webxr-test','--no-audit','--no-fund'],checkout);
-  server=spawn(process.execPath,['server/server.mjs'],{cwd:checkout,stdio:'ignore',env:{...process.env,PORT:'8791'}});
+  try{await fetch(URL+'api/health',{signal:AbortSignal.timeout(900)});throw Error('Dedicated port 8891 already in use; refusing to test wrong checkout')}catch(e){if(e.message.includes('already in use'))throw e}
+  server=spawn(process.execPath,['server/server.mjs'],{cwd:checkout,stdio:'ignore',env:{...process.env,PORT:'8891'}});
   let ready=false;
   for(let i=0;i<80;i++){
    if(server.exitCode!==null)break;
    try{const r=await fetch(URL+'api/health',{signal:AbortSignal.timeout(1000)});if(r.ok){ready=true;break}}catch{}
    await sleep(500);
   }
-  if(!ready)throw Error('Dedicated port 8791 unavailable; no existing server was changed');
+  if(!ready)throw Error('Dedicated port 8891 unavailable; no existing server was changed');
   await run(process.execPath,['test-support/webxr-test/smoke.mjs'],checkout,{
    KLINIKLAB_URL:URL,KLINIKLAB_BUILD_SHA:job.commit,
    KLINIKLAB_XR_GRAPHICS:job.graphics,KLINIKLAB_XR_DEADLINE_MS:String(job.deadlineMs)});
@@ -100,11 +101,14 @@ async function tick(){
   const job=await fetchJob(),state=await ledger();
   if(state.completed[job.jobId])return;
   if(process.argv.includes('--validate')){console.log('Valid XR job',job.jobId,job.commit);return}
-  console.log('Executing',job.jobId,job.commit);
-  const data=await execute(job),url=await publish(job,data);
-  state.completed[job.jobId]={url,commit:job.commit,finishedAt:new Date().toISOString()};
+  console.log('Executing once',job.jobId,job.commit);
+  state.completed[job.jobId]={commit:job.commit,status:'started',startedAt:new Date().toISOString()};
   const tmp=LEDGER+'.tmp';await fs.writeFile(tmp,JSON.stringify(state,null,2));await fs.rename(tmp,LEDGER);
-  console.log('Published',url);
+  try{const data=await execute(job),url=await publish(job,data);
+   state.completed[job.jobId]={url,commit:job.commit,status:'published',finishedAt:new Date().toISOString()};
+   console.log('Published',url);
+  }catch(error){state.completed[job.jobId]={commit:job.commit,status:'failed',error:String(error.message).slice(0,400)};throw error}
+  finally{await fs.writeFile(tmp,JSON.stringify(state,null,2));await fs.rename(tmp,LEDGER)}
  }catch(e){console.error('XR worker error',e.message)}
  finally{busy=false}
 }
