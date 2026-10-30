@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "jobId": "pc-xr-phase3-20261030-01",
-  "commit": "6b2a4e05dc1e4bd3dceac59d105396fff1287f01",
+  "commit": "16fff5fdf44600bda609a942144b15d01542e7ff",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
