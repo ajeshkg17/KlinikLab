@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-help-workspace-20261030-01",
-  "commit": "aa3767485fc02fb67914d8eaf3d64978ec91eb52",
+  "jobId": "pc-xr-held-tool-clearance-20261030-02",
+  "commit": "f9c0994ba610feee47869d4b16c8f972ac6f3884",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
