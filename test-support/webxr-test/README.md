@@ -68,3 +68,25 @@ At each phase end, report: phase number, branch/full SHA, implemented behavior, 
 Sources:
 - https://meta-quest.github.io/immersive-web-emulation-runtime/getting-started.html
 - https://github.com/meta-quest/immersive-web-emulator
+
+### Phase 2 harness hardening (30 October 2026)
+The 120 valid viewer-pose frames, at least 120 app-drawn frames, two rendered eye-view matrices and stationary-world matrix assertions remain **required**. The collector distinguishes callbacks, valid poses, null poses and actual app draw counts. When its bounded deadline expires, it throws `XRCollectionTimeout` with partial callback/pose/app-draw counts, document visibility/focus, session visibility and WebGL context/framebuffer diagnostics. The generated `result.json` contains the failure and a best-effort post-failure snapshot.
+
+Configuration (all optional):
+- `KLINIKLAB_XR_DEADLINE_MS`: 15000–120000; default **45000**. Increasing the budget does not reduce sample counts or convert incomplete runs into passes.
+- `KLINIKLAB_XR_GRAPHICS`: `default` (normal Chrome GPU selection) or explicit `software` (SwiftShader flags); defaults to **default**. Do not set software in normal local tests without a reason.
+- `KLINIKLAB_XR_PERF_THRESHOLD_MS`: 5–1000; default **20**. The comparison is **advisory only**, recorded separately from functional `passed`. It is not a headset FPS target or proof that vibration is fixed.
+
+Example with default graphics:
+```powershell
+$env:KLINIKLAB_URL='http://127.0.0.1:8791/'
+$env:KLINIKLAB_XR_DEADLINE_MS='45000'
+npm.cmd ci --prefix test-support/webxr-test --no-audit --no-fund
+node test-support/webxr-test/smoke.mjs
+```
+Only when intentionally testing software rendering:
+```powershell
+$env:KLINIKLAB_XR_GRAPHICS='software'
+node test-support/webxr-test/smoke.mjs
+```
+Run harness unit tests with `node --test test-support/webxr-test/harness-options.test.mjs`. This work does not modify the application renderer and is not physical Quest 2 acceptance.
