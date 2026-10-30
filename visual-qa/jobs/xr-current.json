@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase7-navigation-20261030-03",
-  "commit": "0166e298c4764860e0505ac7e54adc843b97e0fd",
+  "jobId": "pc-xr-phase7-smooth-oblique-cut-20261030-04",
+  "commit": "3ab05869ebd7de4d48981a13122157e6749c4ccb",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
