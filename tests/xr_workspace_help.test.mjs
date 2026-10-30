@@ -40,3 +40,13 @@ test('capture manifest preserves complete per-eye projection data before visibil
  assert(source.includes("eye.find(t=>t.name==='mirror')?.projection.inFrustum"));
  assert(source.includes("eye.find(t=>t.name==='composite')?.projection.inFrustum"));
 });
+
+test('IWER button transitions await new matching XR event acknowledgements, never fixed pulses',()=>{
+ const source=fs.readFileSync(new URL('../test-support/webxr-test/smoke.mjs',import.meta.url),'utf8');
+ assert.match(source,/const driveInput=async\(hand,button,pressure\)=>/);
+ assert.match(source,/filter\(e=>e.hand===hand&&e.type===type\)\.length>baseline/);
+ assert.match(source,/const grip=async\(hand,pressure\)=>driveInput\(hand,'squeeze',pressure\)/);
+ assert.match(source,/await driveInput\('left','trigger',1\)/);
+ assert.match(source,/await driveInput\('left','trigger',0\)/);
+ assert.doesNotMatch(source,/page\.waitForTimeout\((?:120|300)\)/);
+});
