@@ -1,43 +1,36 @@
-# KlinikLab local visual-feedback worker
+# KlinikLab — single-chat visual QA and owner-PC XR worker
 
-This is a local **Playwright screenshot agent**, not a remote shell. It watches a JSON file in the existing `main` branch and publishes screenshot images to a separate `visual-feedback` branch in the **same public GitHub repository**. It uses a new Chrome browser profile (no saved accounts) to inspect only `http://127.0.0.1:8787/`. No command execution, arbitrary JS, arbitrary links, form typing or API calls are accepted from jobs.
+The only active development coordination is **this chat**. Do not contact or revive deleted worker chats. GitHub hosts code, bounded JSON test requests, and uploaded results. **Routine browser/XR rendering runs on the owner's PC, not on GitHub-hosted runners.** GitHub's integration workflow retains source/unit/static/build checks. Historical CI screenshots and previous gallery files remain in Git history; they are not current visual acceptance evidence.
 
-## Install on `officegopi` (normal PowerShell)
+## XR workflow (Phase 3, before Phase 4)
 
-From your existing KlinikLab checkout directory, run:
+**Job request:** [jobs/xr-current.json](./jobs/xr-current.json), on the integration branch. Exactly one fixed six-checkpoint suite `quest2-phase3`, a 40-character integration commit SHA, a unique 4–64-character job ID, graphics `default` or explicit `software`, and a bounded 15–120 s collection deadline. No commands, URLs, arbitrary JavaScript or selectors can be supplied by jobs. The worker fetches the current integration job from GitHub every 10 seconds, verifies the SHA is an ancestor of the integration branch, then creates a **detached worktree at that exact SHA**. It starts its own loopback source server on **port 8891** (never alters ports 8787, 8790 or 8791), installs pinned IWER/Playwright dependencies, and launches fresh-profile desktop Chrome. It never reuses the owner's signed-in Chrome profile.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\visual-qa\setup.ps1
-```
-
-You need Windows Chrome, Git, Node.js 20+, and GitHub **push** authorization in that account (`gh auth login` if Git Credential Manager isn't already authenticated). No Tailscale Funnel is needed. The existing 10-second GitHub auto-pull remains unchanged.
-
-When installed, start it in a **separate terminal** from the website server:
+### Local startup (PowerShell; owner-PC monitoring chat may run these)
 
 ```powershell
-node .\visual-qa\worker.mjs
+git fetch origin integration/single-chat-validation-2026-10-30
+git switch integration/single-chat-validation-2026-10-30
+git pull --ff-only
+node --version
+git --version
+node --test .\visual-qa\tests\xr-job.test.mjs
+node .\visual-qa\xr-worker.mjs --validate
+node .\visual-qa\xr-worker.mjs --watch
 ```
 
-It checks the local `visual-qa/jobs/current.json` every 10 seconds. For the first run, it launches Chrome and creates PNG screenshots, then commits them to [visual-feedback](https://github.com/ajeshkg17/KlinikLab/tree/visual-feedback). A result will be available at `visual-feedback/runs/baseline-2026-10-29-01/manifest.json` and sibling PNG files. Keep the terminal running for subsequent jobs. `node .\visual-qa\worker.mjs --once` runs one job and exits.
+Requirements: Node.js 22+, installed Google Chrome, Git, network access and GitHub push permission to `visual-feedback`. Keep the watcher terminal open. No Windows service restart is required. Do not run the legacy `worker.mjs` simultaneously unless the old desktop screenshot workflow is intentionally needed.
 
-The worker's **own** Git clone is stored outside OneDrive at `%LOCALAPPDATA%\KlinikLabVisualWorker\results-git`. This prevents screenshot commits from restarting the local server's main-branch sync loop. A successfully uploaded job is marked completed in `%LOCALAPPDATA%\KlinikLabVisualWorker\processed.json`. To run more screenshots, change the `jobId` and `scenes` in `current.json` on GitHub `main`; do not just change an old scene with the same job ID.
+The watcher has a separate repository and state under `%LOCALAPPDATA%\KlinikLabVisualWorker`. `xr-completed.json` records each job ID **before** rendering starts and marks it published/failed afterward. Failed jobs are not retried automatically; issue a new unique job ID for an intentional retry. An upload failure may leave a failed record; inspect logs and the branch before reissuing a new job. **The worker does not download old screenshot results**: it fetches only the source/code and the remote result-branch tree required to publish new results.
 
-## Why a second Git branch?
+Published results: [PC XR latest gallery](https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/PC_XR_LATEST.md), with separate commit-named subdirectories, PNGs, SHA-256 hashes, result.json and README. The **historical hosted emulator gallery** is [PHASE3_LATEST](https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/PHASE3_LATEST.md); it contains known duplicate frames and must not be mistaken for PC output.
 
-Your existing sync pulls `main` and restarts the server. Publishing images to `main` would cause a new pull and unnecessary restart, which could break the screenshot job. A separate branch avoids that. It is still the same GitHub repository, and you can view all the PNGs online.
+### Visual capture and limits
 
-## Safety and limitations
+The revised WebXR harness captures a **fresh XR eye framebuffer after a new application draw** rather than a stale Chrome page screenshot. This code path is pending owner-PC verification. A blocked WebGL framebuffer readback produces a failed job instead of silently relabeling a viewport screenshot. State checks still require the original 120 real IWER viewer poses, 120 submitted app frames, eye/world stability and actual tool-grip actions. The published SHA-256 hashes flag identical images; **pixel differences alone do not establish that every requested object is visibly well framed**. Inspect the gallery before declaring image-level acceptance. IWER is not a physical Quest 2 headset, and does not verify comfort, haptics or performance.
 
-- **Your repository is public. Every screenshot uploaded to `visual-feedback` is public.** Use fictional cases only; do not photograph a real patient chart, identity, credentials or private files.
-- Screenshots are captured from an isolated new browser context; jobs only allow a fixed list of KlinikLab UI controls, fixed local hostname/port, fixed viewport limits, and at most 14 scenes.
-- Worker operations require the current Windows user's GitHub push credentials. Do **not** paste tokens into chat or save access tokens in JSON files.
-- Chrome is launched visibly (`headless:false`) for a better chance of GPU-accelerated rendering; do not lock the session or minimize the worker browser during captures. These are **desktop** Playwright screenshots, not actual Quest 2 headset frames or haptic validation.
-- Because server auto-restart may occur after a `main` update, the worker waits for localhost to respond before testing.
-- Worker runs only while its PowerShell window remains open; it is not installed as a background service or scheduled task.
-- A failed Git push leaves output in `%LOCALAPPDATA%\KlinikLabVisualWorker\pending` and prints a warning. Test by opening the `visual-feedback` branch; no report of successful upload should be assumed without seeing it there.
+### Legacy desktop visual worker
 
-## Designing future jobs
+`visual-qa/worker.mjs`, `worker-core.mjs`, `setup.ps1` and `jobs/current.json` are retained **only** for reproducible desktop visual comparisons (old 8787 workflow). They are not the current XR development workflow; do not start them by default. This avoids deleting still-relevant desktop test coverage or historical evidence. Their legacy setup instructions are superseded by this document for XR tasks.
 
-Edit `visual-qa/jobs/current.json` and increase the **jobId**. Every scene starts from a fresh browser page and may include a short sequence of approved actions. Valid `capture` choices are `page`, `stage`, `scene`, `tooth`, `volume`, `radiograph`, and `imaging`. Valid `action` choices: `click` (with fixed control IDs in `worker-core.mjs`), `orbit` (bounded mouse drag), and `wait` (100–3000ms). There are no arbitrary selector/script/URL parameters.
-
-Tests: `npm --prefix visual-qa test` (from the checkout root). Job validation: `node visual-qa/worker.mjs --validate`.
+Run source/helper checks without a browser using `node --test visual-qa/tests/*.test.mjs`. No patient data or secrets may be included in public screenshot uploads.
