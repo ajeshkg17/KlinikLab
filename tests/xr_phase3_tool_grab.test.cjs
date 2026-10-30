@@ -7,7 +7,7 @@ const M3={
  mm:(a,b)=>b.slice(),
  trs:(p,r,s)=>[s[0],0,0,0,0,s[1],0,0,0,0,s[2],0,...p,1]
 };
-const methods=vm.runInNewContext('({'+source.slice(start,end)+'})',{M3});
+const methods=vm.runInNewContext('({'+source.slice(start,end).replace(/\n  (?=[a-zA-Z][a-zA-Z0-9]*\()/g,',\n  ')+'})',{M3});
 function fixture(){
  const make=(name,x)=>({name,owner:null,hover:null,meshes:[{p:[x,1,0],s:[.1,.1,.1],rot:[0,0,0],model:null,color:[.2,.3,.4]}]});
  const scene={xrSession:{},xrRef:{},xrTableTools:[make('mirror',0),make('probe',1)],rgb:()=>[0,1,0],
@@ -37,7 +37,7 @@ test('hover is visual-only, lost grip tracking and disconnect return tools',()=>
  scene.onXRGripStart({inputSource:left},frame);
  frame.session.inputSources=[right];
  scene.updateXRTools(frame);
- assert.equal(scene.xrTableTools[0].owner,'left'); // disconnection recovery handled below via owner cleanup
+ assert.equal(scene.xrTableTools[0].owner,null); // disconnected owner returns immediately
  scene.resetXRTools();
  assert.equal(scene.xrTableTools[0].owner,null);
  assert.equal(scene.xrTableTools[0].meshes[0].model,null);
