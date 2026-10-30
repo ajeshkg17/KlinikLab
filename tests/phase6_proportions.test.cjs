@@ -42,7 +42,7 @@ test('Phase 6 numeric transform preserves FDI targets, instrument homes and reve
  const tool={name:'mirror',home:[{p:[-.31,1.08,-.68]}]};
  const scene={archMeshes:[[gum,crown],[]],pickables:[pick],teeth:{11:{pos:[...crown.p]}},
    xrTableTools:[tool],anatomyPivot:[0,1.545,-1.78],anatomyDisplayMagnification:1,
-   rescaleAnatomy:methods.rescaleAnatomy,setTeachingMagnification:methods.setTeachingMagnification};
+   rescaleAnatomy:methods.rescaleAnatomy,translateAnatomy:methods.translateAnatomy,setTeachingMagnification:methods.setTeachingMagnification};
  const orig={p:[...crown.p],s:[...crown.s],pick:[...pick.p],radius:pick.radius,
    gum:[...gum.p],tool:[...tool.home[0].p]};
  scene.rescaleAnatomy(.055);
