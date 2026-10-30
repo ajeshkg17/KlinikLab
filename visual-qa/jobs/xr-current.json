@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase8-clinical-context-20261030-01",
-  "commit": "8b91a938cbe980c9d16ccaaf4d65ced320133462",
+  "jobId": "pc-xr-phase8-panel-stereo-margins-20261030-02",
+  "commit": "75d911c2762b06d9d753a746544476df970299fe",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
