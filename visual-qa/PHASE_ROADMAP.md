@@ -22,6 +22,10 @@ Preserve existing anatomy/room infrastructure, VR entry and stereo rendering, ce
 
 **Visual acceptance:** Exact-commit owner-PC stereo comparisons of full mouth, anterior and posterior/upper and lower examples, with anatomical references; qualified anatomical review logged separately and pending until performed.
 
+**Phase 6 evidence update (2026-10-30):** Owner-PC job `pc-xr-phase6-gaze-large-20261030-07` at `2f445a27d4d7ac2d9906a0750ba850eeff8397b9` passed 25/25 emulator checks. The monitor independently reviewed both actual stereo PNG halves: complete upper/lower arches are centered, margins are clear, and individual crowns and gingival contours are visible. This closes the *specific framing/visibility* gate only. Procedural shapes remain simplified; expert dental-anatomy assessment, professional realism, occlusal fidelity and physical Quest 2 acceptance remain **pending**.
+
+**Phase 7 incremental status (2026-10-30):** FDI 11/13/14/16/36/46 now drive differentiated procedural treatment solids with separate browser-local per-FDI cut records. Owner-PC job01 `pc-xr-phase7-fdi-saved-state-20261030-01` at `e25046ebe34412972a5d523555095dc8dd5b3359` passed 26/26 checks, ten standard captures, and six locally retained stereo FDI diagnostic images. Monitor must inspect those exact local images to assess readability and anatomy. A subsequent job02 separately exercises an actual preparation-cut selection round trip and persistence. These are educational surrogates, not clinical anatomy verification. The optional capture diagnostics are locally retained and not in the ten-image published gallery; do not claim published six-image proof until worker schema is upgraded.
+
 ## Phase 7 — selected-tooth fidelity and persistent treatment state
 **Deliverables:** Enlarged treatment tooth changes to the selected **FDI tooth**, its arch/side and distinctive morphology. Keep per-FDI preparation/restoration state persistent across overview, magnified detail, navigation and re-selection. Explicit magnification applies to detail only, without deforming normal whole-mouth dimensions.
 
