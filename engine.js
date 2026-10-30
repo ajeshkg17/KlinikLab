@@ -186,7 +186,7 @@ class DentalScene {
   // Explicit teaching magnification is reversible and separate from normal
   // arch dimensions. It must not change FDI identity or instrument geometry.
   setTeachingMagnification(on){
-    const next=on?2.8:1;
+    const next=on?8:1;
     if(this.anatomyDisplayMagnification===next)return;
     const relative=next/this.anatomyDisplayMagnification;
     this.rescaleAnatomy(relative);
@@ -257,7 +257,7 @@ class DentalScene {
     // anatomy as a single rigid, uniformly scaled group (including FDI hit
     // spheres and gingiva) around a fixed laboratory-model origin. Dental
     // dimensions are educational approximations, not patient measurements.
-    this.anatomyOverviewScale=.245;
+    this.anatomyOverviewScale=.055;
     this.anatomyPivot=[0,1.545,-1.78];
     this.anatomyDisplayMagnification=1;
     this.rescaleAnatomy(this.anatomyOverviewScale);
