@@ -52,3 +52,15 @@ test('Phase7 case navigation preserves selected FDI and procedure trace',()=>{
  assert(src.includes('trace:(this.physics?.trace||[]).slice(-260)'));
  assert(src.includes('this.physics.trace=Array.isArray(saved.trace)?saved.trace.slice(-260):[]'));
 });
+
+test('Phase7 smooth normal field and oblique before/after diagnostic are present',()=>{
+ const xr=fs.readFileSync(path.join(root,'xr-procedure.js'),'utf8');
+ assert(xr.includes("this.surfaceNormalMode='implicit-field-gradient'"));
+ assert(xr.includes('const normalCache=new Map()'));
+ assert(xr.includes('solid.field(...plus,false)-solid.field(...minus,false)'));
+ assert(xr.includes('for(const p of f.p)group.push(...p,...normal(p),0,0)'));
+ assert(!xr.includes('group.push(...scene.tri(f.p[0],f.p[1],f.p[2]))'));
+ assert.equal(xr,fs.readFileSync(path.join(root,'public/xr-procedure.js'),'utf8'));
+ const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
+ for(const name of ['phase7-fdi-16-oblique.png','phase7-fdi-16-after-cut.png','phase7-fdi-16-switchback.png'])assert(smoke.includes(name));
+});
