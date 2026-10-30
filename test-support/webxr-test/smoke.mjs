@@ -138,6 +138,8 @@ try{
            // Examination-only image is dark except for dental surfaces.
            // Measure the TRUE raster footprint in each eye (top-origin bounds),
            // including centroid and margins. Clipped fragments must fail.
+           let fdiVisiblePixels=0;
+           for(let px=0;px<pixels.length;px+=4)if(pixels[px]+pixels[px+1]+pixels[px+2]>210)fdiVisiblePixels++;
            let anatomyPixels=0,sumX=0,sumY=0;
            let minX=w,minY=h,maxX=-1,maxY=-1;
            for(let k=0;k<pixels.length;k+=4){
@@ -206,7 +208,7 @@ try{
              }:null;
            }
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -217,7 +219,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -244,7 +246,7 @@ try{
    if(!duplicateOf)captureHashes.set(sha256,filename);
    const destination=auxiliary?(result.phase7Captures??=[]):result.captureManifest;
    if(!auxiliary){result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});}
-   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
+   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -540,6 +542,9 @@ try{
    assert(state.meshTriangles>100,'Selected FDI tooth generated no XR triangles');
    result.fdiTreatmentStates.push(state);
    await captureXR('phase7-fdi-'+id+'.png','Phase 7 isolated XR treatment tooth FDI '+id,true);
+   const evidence=result.phase7Captures.at(-1);
+   assert(evidence.eyeFdiVisiblePixels?.length===2&&evidence.eyeFdiVisiblePixels.every(n=>n>1000),
+     'Selected FDI geometry not visibly rasterized in both eyes: '+id+' '+JSON.stringify(evidence.eyeFdiVisiblePixels));
  }
  assert.notEqual(result.fdiTreatmentStates[0].cuspHeight,result.fdiTreatmentStates[1].cuspHeight);
  assert.notDeepEqual(result.fdiTreatmentStates[3].roots,result.fdiTreatmentStates[4].roots);
