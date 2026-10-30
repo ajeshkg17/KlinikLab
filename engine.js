@@ -241,7 +241,7 @@ class DentalScene {
     this.teachingPlacementInfo={target,delta,bounds:this.anatomyWorldBounds(),mode:'viewer-gaze-anchored'};
     this.teachingPlacementPending=false;
   }
-  // Explicit 8x teaching enlargement is independent of the physical-scale
+  // Explicit 12x teaching enlargement is independent of the physical-scale
   // anatomy. Restore the exact original world transforms on exit.
   setTeachingMagnification(on){
     const next=on?12:1;
