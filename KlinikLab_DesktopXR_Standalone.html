@@ -529,13 +529,15 @@ class DentalScene {
     this.xrStarting=true;
     // requestSession must begin INSIDE the click's transient user activation.
     // Do not await a support check or makeXRCompatible before requesting it.
-    let session;
+    let session,ended=false;
     try{
       const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
-      session=await promise;session.addEventListener('end',()=>this.handleXREnd(session));const gl=this.gl;
+      session=await promise;session.addEventListener('end',()=>{ended=true;this.handleXREnd(session)});const gl=this.gl;
       if(gl.makeXRCompatible)await gl.makeXRCompatible();
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
