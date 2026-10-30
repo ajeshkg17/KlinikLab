@@ -107,3 +107,30 @@ test('input events reject a frame belonging to another session',async()=>{
  handlers.selectstart({frame:{session:{}}});assert.equal(calls.press,0);
  handlers.selectstart({frame:{session}});assert.equal(calls.guide,1);assert.equal(calls.press,1);
 });
+
+const frameMethod=vm.runInNewContext('({'+engine.slice(engine.indexOf('  xrFrame(t,frame){'),engine.lastIndexOf('\n}'))+'}).xrFrame');
+const loopMethod=vm.runInNewContext('({'+engine.slice(engine.indexOf('  xrLoop(t,frame){'),engine.indexOf('  getXRInputPose(frame,source){'))+'}).xrLoop');
+for(const mode of ['null','throw'])test(`viewer pose ${mode} clears cutting state and permits tracking recovery`,()=>{
+ let cleared=0,practiceFrames=0,scheduled=0;
+ const layer={framebuffer:{}};
+ const session={inputSources:[],renderState:{baseLayer:layer},requestAnimationFrame(){scheduled++;}};
+ const scene={xrSession:session,xrRef:{},xrControllers:[],
+  gl:{bindFramebuffer(){},enable(){},clear(){}},
+  clearControllers(){cleared++;},xrPrep:{triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},onXRFrame(){practiceFrames++;}},
+  xrFrame:frameMethod,xrLoop:loopMethod};
+ const lost={session,getViewerPose(){if(mode==='throw')throw Error('tracking unavailable');return null;}};
+ assert.doesNotThrow(()=>loopMethod.call(scene,1000,lost));
+ assert.equal(cleared,1);assert.equal(scene.xrPrep.triggers.size,0);
+ assert.equal(scene.xrPrep.lastCut,null);assert(scene.xrPrep.tip.hidden);
+ assert.equal(practiceFrames,0);assert.equal(scheduled,1);
+ const recovered={session,getViewerPose:()=>({views:[]})};
+ loopMethod.call(scene,2000,recovered);
+ assert.equal(practiceFrames,1);assert.equal(scheduled,2);assert.equal(scene.xrPrep.triggers.size,0);
+});
+test('frame processing cannot schedule another frame for a session that ended or was replaced',()=>{
+ for(const replacement of [null,{}]){
+  let scheduled=0;const session={requestAnimationFrame(){scheduled++;}};
+  const scene={xrSession:session,xrFrame(){this.xrSession=replacement;},xrLoop:loopMethod};
+  assert.doesNotThrow(()=>loopMethod.call(scene,1000,{session}));assert.equal(scheduled,0);
+ }
+});
