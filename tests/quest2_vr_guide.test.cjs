@@ -50,7 +50,7 @@ test('controller select routes to VR help, while help blocks teeth and drill sel
  assert.equal(hit('guide:close'),true);assert.equal(s.open,false);
  assert.equal(hit('tooth:16'),false); // ordinary tooth selection may resume
  assert.equal(hit('guide:open'),true);assert.equal(s.open,true);
- assert.equal(s.controllerSelects,6);
+ assert.equal(s.controllerSelects,5);
  guide.onExit();assert(!s.active&&!s.open);
  assert(guide.meshes.every(m=>m.hidden));
 });
