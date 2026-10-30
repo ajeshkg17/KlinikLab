@@ -46,3 +46,9 @@ test('Phase7 source mirrors',()=>{
  assert.equal(src,fs.readFileSync(path.join(root,'public/volumetric-lab.js'),'utf8'));
  assert.equal(app,fs.readFileSync(path.join(root,'public/app.js'),'utf8'));
 });
+
+test('Phase7 case navigation preserves selected FDI and procedure trace',()=>{
+ assert(src.includes("this.persistTooth();const selected=this.fdiTooth;this.caseKey=key;if(selected){this.fdiTooth=null;this.setTooth(selected)"));
+ assert(src.includes('trace:(this.physics?.trace||[]).slice(-260)'));
+ assert(src.includes('this.physics.trace=Array.isArray(saved.trace)?saved.trace.slice(-260):[]'));
+});
