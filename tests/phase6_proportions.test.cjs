@@ -31,3 +31,37 @@ test('Phase 6 sources and generated standalone stay identical',()=>{
  const standalone=fs.readFileSync(path.join(root,'KlinikLab_DesktopXR_Standalone.html'),'utf8');
  assert(standalone.includes(source.replaceAll('</script>','<\\/script>')));
 });
+
+test('Phase 6 numeric transform preserves FDI targets, instrument homes and reversibility',()=>{
+ const vm=require('node:vm');
+ const fragment=source.slice(source.indexOf('  rescaleAnatomy(factor){'),source.indexOf('  buildScene(){'));
+ const methods=vm.runInNewContext('({'+fragment+'})');
+ const crown={kind:'crown_1_0_1',p:[.5,1.759,-1.26],s:[.09,1,.074],model:null};
+ const gum={kind:'gingiva0',p:[0,0,0],s:[1,1,1],model:null};
+ const pick={mesh:crown,key:'tooth:11',p:[.5,1.679,-1.26],radius:.13};
+ const tool={name:'mirror',home:[{p:[-.31,1.08,-.68]}]};
+ const scene={archMeshes:[[gum,crown],[]],pickables:[pick],teeth:{11:{pos:[...crown.p]}},
+   xrTableTools:[tool],anatomyPivot:[0,1.545,-1.78],anatomyDisplayMagnification:1,
+   rescaleAnatomy:methods.rescaleAnatomy,setTeachingMagnification:methods.setTeachingMagnification};
+ const orig={p:[...crown.p],s:[...crown.s],pick:[...pick.p],radius:pick.radius,
+   gum:[...gum.p],tool:[...tool.home[0].p]};
+ scene.rescaleAnatomy(.055);
+ const width=2*crown.s[0];
+ assert(Math.abs(width-.0099)<1e-9,'central-incisor width near 9.9 mm');
+ assert(Math.abs(crown.p[0]-.0275)<1e-9,'arch positions scaled around centre');
+ assert(Math.abs(pick.p[0]-.0275)<1e-9,'FDI pick volume follows the same transform');
+ assert.equal(pick.key,'tooth:11');
+ assert.deepEqual(tool.home[0].p,orig.tool,'XR tool untouched');
+ scene.setTeachingMagnification(true);
+ assert(Math.abs(crown.s[0]-.09*.055*8)<1e-9);
+ scene.setTeachingMagnification(false);
+ assert(Math.abs(crown.s[0]-.09*.055)<1e-9);
+ scene.rescaleAnatomy(1/.055);
+ for(let k=0;k<3;k++){
+   assert(Math.abs(crown.p[k]-orig.p[k])<1e-9);
+   assert(Math.abs(crown.s[k]-orig.s[k])<1e-9);
+   assert(Math.abs(pick.p[k]-orig.pick[k])<1e-9);
+   assert(Math.abs(gum.p[k]-orig.gum[k])<1e-9);
+ }
+ assert(Math.abs(pick.radius-orig.radius)<1e-9);
+});
