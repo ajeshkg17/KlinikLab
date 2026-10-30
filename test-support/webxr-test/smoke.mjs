@@ -56,6 +56,15 @@ try{
  for(const eye of Object.values(result.rendered.eyes))
    assert(eye.samples>=120,'Missing actual drawn eye frames');
  assert(result.rendered.world?.samples>=120,'Fixed world model not sampled each rendered frame');
+ // With a stationary emulator, the actual submitted stereo views and unchanged world
+ // geometry must also remain stationary. No filtering or forced camera freezing.
+ if(result.stationary.maxPoseDeltaMeters<1e-7){
+   const maxEyeDrift=Math.max(...Object.values(result.rendered.eyes).map(eye=>eye.maxFromFirst||0));
+   const maxWorldDrift=result.rendered.world.maxFromFirst||0;
+   result.rendered.stationaryStability={maxEyeMatrixElementDelta:maxEyeDrift,maxWorldMatrixElementDelta:maxWorldDrift};
+   assert(maxEyeDrift<=1e-5,'Rendered eye matrices drift despite stationary source pose: '+maxEyeDrift);
+   assert(maxWorldDrift<=1e-5,'Fixed world geometry drifts during XR frames: '+maxWorldDrift);
+ }
  result.checks.push('Rendered stereo matrices and stationary world mesh sampled for at least 120 app frames');
  assert.deepEqual([...result.stationary.hands].sort(),['left','right']);
  result.checks.push('Both left/right input sources present and 120 XR frames received');
