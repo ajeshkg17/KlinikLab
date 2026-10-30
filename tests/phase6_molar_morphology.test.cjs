@@ -10,7 +10,10 @@ test('Phase 6 molars distinguish maxillary and mandibular occlusal cusp patterns
   assert(crown.includes('const cusps=upper'),'occlusal relief must branch by jaw');
   const upper=crown.match(/\?\s*(\[\[-\.47,-\.43,.061\].*\])\s*\n\s*:\s*(\[\[-\.51,-\.44,.065\].*\]);/);
   assert(upper,'expected jaw-specific cusp control points');
-  const maxillary=JSON.parse(upper[1]),mandibular=JSON.parse(upper[2]);
+  // JavaScript permits leading-dot numeric literals; JSON does not.
+  const numbers=s=>s.match(/-?(?:\d+\.?\d*|\.\d+)/g).map(Number);
+  const triples=s=>{const a=numbers(s);assert.equal(a.length%3,0);return Array.from({length:a.length/3},(_,i)=>a.slice(3*i,3*i+3));};
+  const maxillary=triples(upper[1]),mandibular=triples(upper[2]);
   assert.equal(maxillary.length,4);
   assert.equal(mandibular.length,5);
   for(const cusp of [...maxillary,...mandibular]){
