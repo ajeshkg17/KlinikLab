@@ -127,6 +127,62 @@ try{
  await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=true;});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===2);
  result.checks.push('Right controller disconnect/reconnect changed XR input sources');
+ // Phase 3: drive genuine IWER controller transforms and squeeze input (not a mock XRSession).
+ const moveController=async(hand,name)=>{
+   await page.evaluate(({hand,name})=>{
+     const tool=window.kliniklab.scene.xrTableTools.find(t=>t.name===name);
+     assertTool(tool,name);
+     window.__xrTestDevice.controllers[hand].position.set(...tool.home[0].p);
+     function assertTool(value,label){if(!value?.home)throw Error('Missing VR tool: '+label)}
+   },{hand,name});
+ };
+ const grip=async(hand,pressure)=>page.evaluate(({hand,pressure})=>
+   window.__xrTestDevice.controllers[hand].updateButtonValue('squeeze',pressure),{hand,pressure});
+ const toolState=async name=>page.evaluate(name=>{
+   const t=window.kliniklab.scene.xrTableTools.find(t=>t.name===name);
+   return {owner:t?.owner||null,hover:t?.hover||null,
+     model:t?.meshes?.[0]?.model?.slice()||null,home:t?.home?.[0]?.p?.slice()||null};
+ },name);
+ const awaitHover=async(name,hand)=>page.waitForFunction(({name,hand})=>
+   window.kliniklab.scene.xrTableTools.find(t=>t.name===name)?.hover===hand,
+   {name,hand},{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ const awaitOwner=async(name,hand)=>page.waitForFunction(({name,hand})=>
+   (window.kliniklab.scene.xrTableTools.find(t=>t.name===name)?.owner||null)===hand,
+   {name,hand},{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ await moveController('left','mirror');
+ await awaitHover('mirror','left');
+ result.checks.push('Left controller obtains visible tool hover feedback');
+ await grip('left',1);
+ await awaitOwner('mirror','left');
+ const beforeHeld=await toolState('mirror');
+ assert(beforeHeld.model?.length===16,'Held mirror lacks model matrix');
+ result.checks.push('Left squeeze picks up mirror with a grip-relative model matrix');
+ // Another controller cannot take the same held instrument.
+ await moveController('right','mirror');
+ await grip('right',1);await page.waitForTimeout(300);
+ assert.equal((await toolState('mirror')).owner,'left','Tool acquired by two hands');
+ await grip('right',0);
+ result.checks.push('Held mirror rejects second-hand ownership');
+ await page.evaluate(()=>{const c=window.__xrTestDevice.controllers.left;c.position.x+=.20;});
+ await page.waitForFunction(x=>Math.abs(window.kliniklab.scene.xrTableTools.find(t=>t.name==='mirror')?.meshes[0]?.model?.[12]-x)>0.10,
+   beforeHeld.model[12],{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ result.checks.push('Held tool follows translated grip with stable 6DoF transform');
+ await grip('left',0);
+ await awaitOwner('mirror',null);
+ assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
+ result.checks.push('Grip release returns mirror to tray');
+ await moveController('right','composite');
+ await awaitHover('composite','right');
+ await grip('right',1);
+ await awaitOwner('composite','right');
+ result.checks.push('Right controller picks up a different tray instrument');
+ await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=false});
+ await page.waitForFunction(()=>window.kliniklab.scene.xrTableTools.find(t=>t.name==='composite')?.owner===null,
+   {timeout:Math.max(15000,config.collectionDeadlineMs)});
+ assert.equal((await toolState('composite')).model,null,'Lost controller left a floating tool');
+ await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=true});
+ result.checks.push('Controller disconnect safely returns held instrument');
+
  await page.evaluate(()=>window.__xrTestDevice.activeSession.end());
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  await page.locator('#vr').click();
