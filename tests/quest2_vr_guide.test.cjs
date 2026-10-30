@@ -122,15 +122,15 @@ test('XR pose helper returns null for missing or throwing controller poses',()=>
  assert.equal(fn.call(scene,{getPose(){return 123}},{targetRaySpace:space}),123);
 });
 test('XR session cleanup is idempotent and scoped to the active session',()=>{
- const start=engine.indexOf('  handleXREnd(session){'),end=engine.indexOf('  resumeDesktop(t){',start);
+ const start=engine.indexOf('  handleXREnd(session){'),end=engine.indexOf('  resumeDesktop(){',start);
  assert(start>0&&end>start);
  let scheduled=0;
- const fn=vm.runInNewContext('({'+engine.slice(start,end)+'}).handleXREnd',{requestAnimationFrame:()=>{scheduled++}});
+ const fn=vm.runInNewContext('({'+engine.slice(start,end)+'}).handleXREnd');
  const session={},calls=[];
  const scene={xrSession:session,xrRef:{},latestFrame:{},xrBoardMeshes:[{hidden:false}],
  xrGuide:{onExit(){calls.push('guide')}},xrPrep:{onExit(){calls.push('prep')}},
  setXRComfort(a){assert.equal(a,false);calls.push('comfort')},
- clearControllers(){calls.push('controllers')},resumeDesktop(){}};
+ clearControllers(){calls.push('controllers')},scheduleDesktopFrame(){scheduled++},resumeDesktop(){}};
  fn.call(scene,{});fn.call(scene,session);fn.call(scene,session);
  assert.deepEqual(calls,['guide','prep','comfort','controllers']);assert.equal(scheduled,1);
  assert.equal(scene.xrSession,null);assert.equal(scene.xrRef,null);assert.equal(scene.latestFrame,null);
