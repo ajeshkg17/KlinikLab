@@ -65,3 +65,14 @@ test('Phase 6 numeric transform preserves FDI targets, instrument homes and reve
  }
  assert(Math.abs(pick.radius-orig.radius)<1e-9);
 });
+
+test('Phase 6 contours and crownward papilla orientation remain distinct by jaw',()=>{
+ const gum=source.slice(source.indexOf('  gingivaData(positions,y,'),source.indexOf('  makeTexture(canvas)'));
+ assert(gum.includes('const crownward=y>1.5?-1:1'));
+ assert(gum.includes('const taper=.84+.16*interdental'));
+ assert(gum.includes('papilla=crownward*.012*interdental'));
+ const crown=source.slice(source.indexOf('  crownData(style,upper,individual=0){'),source.indexOf('  // Thin, scalloped gingival collars'));
+ assert(crown.includes('(upper?.058:.060)*peak(x,z,0,-.43'));
+ assert(crown.includes('(upper?.047:.029)*peak(x,z,0,.43'));
+ assert(source.includes('upper?1:i<=2?.68:.95'),'lower incisor narrowing missing');
+});
