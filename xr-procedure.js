@@ -42,9 +42,31 @@ class XRToothPractice {
   finish(){if(!this.lab)return;this.lab.rebuild();this.lastCut=null;this.tip.p=[0,-20,0];this.dirty=true;}
   updateMesh(){if(!this.lab||!window.KlinikVoxelMesher)return false;const scene=this.scene;
     // Lower mesh detail while the controller trigger is held to reduce Quest main-thread stalls.
-    const result=window.KlinikVoxelMesher.build(this.lab.solid,false,this.triggers.size?14:19);
+    const solid=this.lab.solid;
+    const result=window.KlinikVoxelMesher.build(solid,false,this.triggers.size?14:24);
     const groups=Object.fromEntries(materials.map(m=>[m,[]]));
-    for(const f of result.faces){const group=groups[f.material]||groups.enamel;group.push(...scene.tri(f.p[0],f.p[1],f.p[2]));}
+    // Marching tetrahedra returns a faceted triangle soup. Previous code
+    // recomputed one flat normal for each triangle, creating the conspicuous
+    // checkerboard lighting across a nominally smooth enamel surface.
+    // Sample the signed-field gradient at shared positions instead: identical
+    // coordinates get identical outward normals regardless of triangle split.
+    const normalCache=new Map(),h=.018;
+    const normal=p=>{
+      const key=p.map(v=>Math.round(v*10000)).join(',');
+      if(normalCache.has(key))return normalCache.get(key);
+      const d=[0,1,2].map(i=>{
+        const plus=p.slice(),minus=p.slice();plus[i]+=h;minus[i]-=h;
+        return solid.field(...plus,false)-solid.field(...minus,false);
+      });
+      const length=Math.hypot(...d)||1;
+      const n=d.map(v=>v/length);normalCache.set(key,n);return n;
+    };
+    for(const f of result.faces){
+      const group=groups[f.material]||groups.enamel;
+      for(const p of f.p)group.push(...p,...normal(p),0,0);
+    }
+    this.surfaceNormalMode='implicit-field-gradient';
+    this.surfaceNormalCount=normalCache.size;
     for(const material of materials){const kind='xrvol-'+material;const old=scene.geom[kind];if(old)scene.gl.deleteBuffer(old.buffer);
       scene.geom[kind]=scene.geometry(groups[material]);}
     this.dirty=false;this.lastRevision=this.lab.revision;this.lastMeshAt=performance.now();this.visibleTriangles=result.count;return true;
