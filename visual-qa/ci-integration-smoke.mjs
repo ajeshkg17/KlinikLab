@@ -118,6 +118,19 @@ async function runBrowser(origin){
     check('Mobile FSP entry is visible and has a usable target',
       mobileTrigger.visible&&mobileTrigger.width>=32&&mobileTrigger.height>=32,
       JSON.stringify(mobileTrigger));
+    const hit=await mobile.locator('#fsp-kp-open').evaluate(el=>{
+      const rect=el.getBoundingClientRect(),css=getComputedStyle(el);
+      const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+      const top=document.elementFromPoint(x,y);
+      return {rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
+        viewport:{width:innerWidth,height:innerHeight},position:css.position,
+        zIndex:css.zIndex,topId:top?.id||null,topTag:top?.tagName||null,
+        hit:top===el||el.contains(top),disabled:el.disabled};
+    });
+    check('Mobile entry unobscured and within viewport',
+      hit.hit&&hit.rect.x>=0&&hit.rect.y>=0&&
+      hit.rect.x+hit.rect.width<=hit.viewport.width+2&&
+      hit.rect.y+hit.rect.height<=hit.viewport.height+2,JSON.stringify(hit));
     await mobile.locator('#fsp-kp-open').click({timeout:6000});
     check('Mobile FSP dialog opens',await mobile.locator('#fsp-kp-overlay [role="dialog"]').isVisible());
     for(const [caseId,fdi] of [['endo','36'],['surgery','48'],['perio','46'],['restoration','16']]){
