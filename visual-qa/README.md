@@ -55,3 +55,23 @@ The in-VR `TOOLS` tab opens a five-instrument catalog. Left and right controller
 PC test request `pc-xr-phase4-catalog-20261030-01` pins `286834f6fced58c17d7a92e37e0fa776751cf79e`. It extends the eight known-good stereo checkpoints with `09-tool-catalog-open.png` and `10-tool-catalog-closed.png`, checks left/right synthetic ray selection, controlled return, reset, close, and preserves earlier tool/guide checks. Synthetic rays do not constitute physical Touch controller acceptance. The fixed catalog does **not** provide unlimited duplicate instances or procedural treatment mechanics; its controlled spawn action reactivates an existing unique tray tool.
 
 PC local run: `node .\\visual-qa\\xr-worker.mjs --validate`, then `node .\\visual-qa\\xr-worker.mjs --once` in the updated integration checkout. Do not use an old processed job ID. Routine hosted XR rendering remains disabled.
+
+### Reliable Windows owner-PC watcher setup
+
+The XR watcher is **not assumed to be running** just because a test request exists. Install Node.js 22+, Git for Windows with **Git Credential Manager**, Google Chrome, and the repository checkout. A GitHub CLI (`gh`) installation is **not required**. Sign in using the Git Credential Manager flow in a regular interactive terminal (for example `git ls-remote https://github.com/ajeshkg17/KlinikLab.git HEAD`); ensure the credential has write access to the `visual-feedback` branch. The watcher does not print or store the credential and performs a no-prompt GitHub API write-permission preflight before starting Chrome. Do not paste access tokens into commands or logs.
+
+Run from an updated integration checkout in an ordinary PowerShell terminal:
+
+```powershell
+git fetch origin integration/single-chat-validation-2026-10-30
+git switch integration/single-chat-validation-2026-10-30
+git pull --ff-only
+node .\visual-qa\xr-worker.mjs --validate
+node .\visual-qa\xr-worker.mjs --watch
+```
+
+The **running process** and the freshly updated `$env:LOCALAPPDATA\KlinikLabVisualWorker\xr-heartbeat.json` file are evidence of activity (not evidence of successful upload). `xr-completed.json` tracks `rendering`, `rendered`, `publish-pending`, `published`, and `failed`. Completed PNGs and `result.json` are retained in `xr-evidence\<jobId>` before the checkout is removed; diagnostic output is kept separately. A publication error leaves `publish-pending` and the watcher retries upload on its next poll **without rerendering**. An interrupted render is not automatically replayed. No earlier screenshot collection is checked out or downloaded.
+
+For automatic startup after this has been verified interactively, create a Windows Task Scheduler task running `node.exe` with arguments `C:\path\to\KlinikLab\visual-qa\xr-worker.mjs --watch`, using the same signed-in Windows user and appropriate working directory. Set **Run only when user is logged on** for interactive/headed Chrome, and enable the task; do not reuse the previously disabled task without checking its executable and arguments. Check heartbeat freshness and the running `node.exe` command line after login. No automatic task is created by the repository.
+
+A `published` ledger entry alone is not definitive verification: confirm `PC_XR_LATEST.md` and the job-specific `README.md` on `visual-feedback` before asserting a gallery exists.
