@@ -546,6 +546,44 @@ try{
    assert(evidence.eyeFdiVisiblePixels?.length===2&&evidence.eyeFdiVisiblePixels.every(n=>n>1000),
      'Selected FDI geometry not visibly rasterized in both eyes: '+id+' '+JSON.stringify(evidence.eyeFdiVisiblePixels));
  }
+ // Phase7 additional retained evidence: oblique crown/root view, visible
+ // cut and return-to-same-FDI image. Do not alter the ten baseline captures.
+ await page.evaluate(()=>{
+   const sc=window.kliniklab.scene;
+   for(const m of sc.xrPrep.meshes)m.rot=[-.46,.38,0];
+ });
+ await captureXR('phase7-fdi-16-oblique.png','FDI16 oblique view showing occlusal surface and root branches',true);
+ await page.evaluate(()=>{
+   const app=window.kliniklab,lab=app.volLab;
+   lab.setTooth('16');
+   lab.solid.addCut(.12,.84,-.14,.19);
+   lab.rebuild();
+   app.scene.xrPrep.updateMesh();
+ });
+ await captureXR('phase7-fdi-16-after-cut.png','FDI16 oblique view after visible preparation',true);
+ await page.evaluate(()=>{
+   const app=window.kliniklab;
+   app.volLab.setTooth('36');
+   app.scene.xrPrep.updateMesh();
+   app.volLab.setTooth('16');
+   app.scene.xrPrep.updateMesh();
+ });
+ await captureXR('phase7-fdi-16-switchback.png','FDI16 after switching to FDI36 and returning, cut retained',true);
+ result.phase7BeforeAfter=await page.evaluate(()=>({
+   fdi:window.kliniklab.volLab.fdiTooth,
+   cuts:window.kliniklab.volLab.solid.bur.length,
+   normals:window.kliniklab.scene.xrPrep.surfaceNormalMode,
+   uniqueVertexNormals:window.kliniklab.scene.xrPrep.surfaceNormalCount
+ }));
+ assert.equal(result.phase7BeforeAfter.fdi,'16');
+ assert(result.phase7BeforeAfter.cuts>=1);
+ assert.equal(result.phase7BeforeAfter.normals,'implicit-field-gradient');
+ await page.evaluate(()=>{
+   const sc=window.kliniklab.scene;
+   for(const m of sc.xrPrep.meshes)m.rot=[0,0,0];
+ });
+ result.checks.push('Oblique FDI16 before/after and switch-back diagnostic captures preserve cuts and smooth-field normals');
+
  // Verify real application-level per-FDI cut isolation, durable browser storage,
  // and restoration after leaving and reselecting a tooth. Restore clean test
  // state afterwards; captured images above remain the original untreated shapes.
