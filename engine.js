@@ -111,8 +111,11 @@ class DentalScene {
         relief-=.010*peak(x,z,0,0,.64,.075); // transverse groove
         if(!upper)relief-=.008*peak(x,z,.49,-.10,.16,.17); // distal groove
       }else if(style===3){
-        relief+=.058*peak(x,z,-.43,.06,.36,.32)+.042*peak(x,z,.40,-.04,.34,.32);
-        relief-=.027*peak(x,z,0,0,.10,.53);
+        // Buccal/lingual peaks (local depth axis) and a central fissure.
+        // Lower lingual cusp is deliberately smaller than its upper counterpart.
+        relief+=(upper?.058:.060)*peak(x,z,0,-.43,.43,.32)
+          +(upper?.047:.029)*peak(x,z,0,.43,.43,.34);
+        relief-=.020*peak(x,z,0,0,.58,.095);
       }else if(style===2){
         relief+=.073*peak(x,z,-.05,0,.45,.53)-.009*peak(x,z,.60,0,.27,.30);
       }else{
@@ -236,7 +239,7 @@ class DentalScene {
           const [xx,z]=path[i-1],id=String(q)+i,style=i<=2?1:i===3?2:i<=5?3:4;
           const at=path[Math.max(0,i-2)],bt=path[Math.min(7,i)],dx=bt[0]-at[0],dz=bt[1]-at[1];
           const orientation=sign<0?Math.atan2(dz,dx):-Math.atan2(dz,dx);
-          const width=(i===1?.090:i===2?.076:i===3?.082:i<=5?.085:.105)*(upper?1:.95);
+          const width=(i===1?.090:i===2?.076:i===3?.082:i<=5?.085:.105)*(upper?1:i<=2?.68:.95);
           const depth=(i<=2?.074:i===3?.079:i<=5?.094:.113);
           const pos=[sign*xx,base,z];const key='crown_'+style+'_'+upperIndex+'_'+i;
           if(!this.geom[key])this.geom[key]=this.geometry(this.crownData(style,upper,i));
