@@ -278,6 +278,7 @@ class DentalScene {
   }
   updateXRController(slot,source,frame){
     const c=this.xrControllers[slot],gp=source.gripSpace,aim=source.targetRaySpace;
+    const side=c.side;
     let grip=null,rayPose=null;
     try{if(gp)grip=frame.getPose(gp,this.xrRef);if(aim)rayPose=frame.getPose(aim,this.xrRef)}catch{}
     c.active=true;c.profiles=Array.from(source.profiles||[]);
