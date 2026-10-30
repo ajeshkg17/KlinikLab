@@ -603,7 +603,7 @@ try{
  });
  assert(catalogGeometry.controls.every(c=>!c.hidden&&c.labelVisible&&c.p[1]>1.27),
    'Catalog action row obstructed or invisible: '+JSON.stringify(catalogGeometry));
- assert(catalogGeometry.controls.every(c=>c.p[2]>-.85),
+ assert(catalogGeometry.controls.every(c=>c.p[2]>-.78),
    'Catalog controls must be forward of tray: '+JSON.stringify(catalogGeometry));
  result.phase8CatalogGeometry=catalogGeometry;
  result.checks.push('All three catalog actions and labels elevated in front of instrument tray');
