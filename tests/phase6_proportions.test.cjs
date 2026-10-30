@@ -78,7 +78,7 @@ test('Phase 6 contours and crownward papilla orientation remain distinct by jaw'
 });
 
 test('Phase 6 examination renders an isolated anatomy pass with framebuffer pixel evidence',()=>{
- assert(source.includes('const visible=this.anatomyDisplayMagnification>1?this.archMeshes.flat():this.meshes'));
+ assert(source.includes('const visible=this.xrFdiEvidence?this.meshes.filter(m=>m.kind.startsWith('xrvol-')):this.anatomyDisplayMagnification>1?this.archMeshes.flat():this.meshes'));
  const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
  assert(smoke.includes('eyeAnatomyPixels:sides.map(v=>v.anatomyPixels)'));
  assert(smoke.includes('x.inFrustum===x.count'));
