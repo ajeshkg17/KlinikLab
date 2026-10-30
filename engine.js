@@ -464,8 +464,9 @@ class DentalScene {
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
-      this.setXRComfort(true);this.initXRTools();this.setXRCatalogOpen(false);
+      this.setXRComfort(true);this.initXRTools();
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
+      this.setXRCatalogOpen(false);
       this.xrGuide?.onEnter();
       const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
       session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.resetXRTools();this.setXRCatalogOpen(false);this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
