@@ -1672,7 +1672,7 @@ class ProceduralVolumeLab{
  // No patient data are stored here. Malformed/blocked storage is ignored.
  persistTooth(){
   if(!this.fdiTooth||!this.solid)return;
-  this.fdiRecords[this.fdiTooth]={bur:this.solid.bur.map(b=>({p:b.p.slice(),r:b.r})),strokes:this.strokes,distance:this.distance};
+  this.fdiRecords[this.fdiTooth]={bur:this.solid.bur.map(b=>({p:b.p.slice(),r:b.r})),strokes:this.strokes,distance:this.distance,trace:(this.physics?.trace||[]).slice(-260)};
   try{localStorage.setItem('kliniklab-fdi-treatment-v1',JSON.stringify(this.fdiRecords))}catch{}
  }
  setTooth(fdi){
@@ -1682,11 +1682,11 @@ class ProceduralVolumeLab{
   this.fdiTooth=fdi;
   this.solid=new ToothSolid(this.caseKey,fdi);
   const saved=this.fdiRecords[fdi];
-  if(saved){this.solid.bur=(saved.bur||[]).filter(b=>Array.isArray(b.p)&&b.p.length===3&&b.p.every(Number.isFinite)&&Number.isFinite(b.r)&&b.r>0).slice(0,260).map(b=>({p:b.p.slice(),r:b.r}));this.strokes=saved.strokes||0;this.distance=saved.distance||0}
-  else{this.strokes=0;this.distance=0}
+  if(saved){this.solid.bur=(saved.bur||[]).filter(b=>Array.isArray(b.p)&&b.p.length===3&&b.p.every(Number.isFinite)&&Number.isFinite(b.r)&&b.r>0).slice(0,260).map(b=>({p:b.p.slice(),r:b.r}));this.strokes=saved.strokes||0;this.distance=saved.distance||0;if(this.physics)this.physics.trace=Array.isArray(saved.trace)?saved.trace.slice(-260):[]}
+  else{this.strokes=0;this.distance=0;if(this.physics)this.physics.trace=[]}
   this.rebuild();return true;
  }
- setCase(key){key=mapping[key]||'molar';if(key===this.caseKey)return;this.persistTooth();this.caseKey=key;this.solid=new ToothSolid(key,this.fdiTooth);this.reset();}
+ setCase(key){key=mapping[key]||'molar';if(key===this.caseKey)return;this.persistTooth();const selected=this.fdiTooth;this.caseKey=key;if(selected){this.fdiTooth=null;this.setTooth(selected)}else{this.solid=new ToothSolid(key);this.reset()}}
  setMode(mode){if(mode==='drill'){this.topView(true);}this.mode=mode;$('vl-orbit').classList.toggle('is-on',mode==='orbit');$('vl-drill').classList.toggle('is-on',mode==='drill');this.status=mode==='drill'?'Zeiger ziehen → sphärischen Fräser am gewählten Niveau führen':'Mit Maus/Touch drehen · Scrollen zum Zoomen';this.render()}
  topView(quiet=false){this.yaw=0;this.pitch=1.52;this.render();if(!quiet)this.status='Okklusale Ansicht · Präparieren für Materialabtrag wählen'}
  toggleSection(){this.section=!this.section;$('vl-section').classList.toggle('is-on',this.section);$('vl-slice-frame').hidden=!this.section;if(this.section){this.yaw=0;this.pitch=.08;}else{this.yaw=-.48;this.pitch=.32;}this.rebuild();}
