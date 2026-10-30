@@ -1,3 +1,3 @@
 # Latest owner-PC XR test
 
-[Browse pc-xr-phase8-clinical-context-20261030-01](./runs/pc-xr-pc-xr-phase8-clinical-context-20261030-01-8b91a938cbe980c9d16ccaaf4d65ced320133462/README.md)
+[Browse pc-xr-phase8-panel-stereo-margins-20261030-02](./runs/pc-xr-pc-xr-phase8-panel-stereo-margins-20261030-02-75d911c2762b06d9d753a746544476df970299fe/README.md)
