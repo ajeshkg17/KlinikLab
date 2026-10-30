@@ -9,9 +9,10 @@ The only active development coordination is **this chat**. Do not contact or rev
 ### Local startup (PowerShell; owner-PC monitoring chat may run these)
 
 ```powershell
+# Run from a Git checkout of KlinikLab; do not switch the service's active branch.
 git fetch origin integration/single-chat-validation-2026-10-30
-git switch integration/single-chat-validation-2026-10-30
-git pull --ff-only
+git worktree add --detach "$env:USERPROFILE\\KlinikLab-XR-Agent" origin/integration/single-chat-validation-2026-10-30
+Set-Location "$env:USERPROFILE\\KlinikLab-XR-Agent"
 node --version
 git --version
 node --test .\visual-qa\tests\xr-job.test.mjs
