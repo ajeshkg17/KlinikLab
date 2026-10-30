@@ -589,6 +589,25 @@ try{
  await captureXR('phase8-panel-workspace.png','FDI clinical panel within XR treatment workspace',true);
  await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(true)});
  await captureXR('phase8-panel-catalog-open.png','FDI panel with tools catalog open for collision review',true);
+ const catalogGeometry=await page.evaluate(()=>{
+   const sc=window.kliniklab.scene,cat=sc.xrCatalog;
+   const controls=['spawn','reset','close'].map(key=>{
+     const mesh=cat.panels.find(m=>sc.pickables.some(p=>p.mesh===m&&p.key==='catalog:'+key));
+     if(!mesh)throw Error('Missing actionable catalog control '+key);
+     const label=cat.panels.find(m=>Math.abs(m.p[0]-mesh.p[0])<.001&&m!==mesh&&m.s[2]>0);
+     return {key,p:mesh.p.slice(),size:mesh.s.slice(),hidden:mesh.hidden,labelVisible:!!label&&!label.hidden};
+   });
+   const panel=cat.panels[0];
+   return {panel:{p:panel.p.slice(),size:panel.s.slice()},controls,
+     trayHeight:1.03,foregroundOffset:panel.p[2]+1.03};
+ });
+ assert(catalogGeometry.controls.every(c=>!c.hidden&&c.labelVisible&&c.p[1]>1.27),
+   'Catalog action row obstructed or invisible: '+JSON.stringify(catalogGeometry));
+ assert(catalogGeometry.controls.every(c=>c.p[2]>-.85),
+   'Catalog controls must be forward of tray: '+JSON.stringify(catalogGeometry));
+ result.phase8CatalogGeometry=catalogGeometry;
+ result.checks.push('All three catalog actions and labels elevated in front of instrument tray');
+
  const catalogOwner=await page.evaluate(()=>{
    const s=window.kliniklab.scene,p=s.xrPrep;p.syncModalVisibility();
    return {owner:p.modalOwner,contextHidden:p.clinicalUI.every(m=>m.hidden),toothHidden:p.meshes.every(m=>m.hidden),catalogShown:s.xrCatalog.panels.some(m=>!m.hidden)};
