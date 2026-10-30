@@ -245,14 +245,14 @@ class DentalScene {
     // A narrow tab near the top of the workspace, clear of the tool tray and ?.
     cat.launcher=this.box([-.60,1.98,-1.02],[.36,.14,.06],'#225e70',{key:'catalog:toggle'});
     cat.launcherLabel=this.label('TOOLS',[-.60,1.99,-.98],[.32,.10,1],{font:39,bold:true,color:'#f4ffff'});
-    register(this.box([-.60,1.41,-1.03],[.88,1.10,.045],'#173b48'));
+    register(this.box([-.60,1.49,-1.03],[.88,1.14,.045],'#173b48'));
     register(this.label('INSTRUMENTS',[-.60,1.84,-.995],[.81,.10,1],{font:38,bold:true}));
     for(let i=0;i<catalogSpecs.length;i++){
       const y=1.71-i*.12;
       register(this.box([-.60,y,-.985],[.81,.105,.04],'#285869',{key:'catalog:tool:'+catalogSpecs[i][0]}),true);
       register(this.label(catalogSpecs[i][1],[-.60,y,-.952],[.75,.08,1],{font:35}),true);
     }
-    cat.status=register(this.label('MIRROR: Indirect vision and cheek retraction',[-.60,1.035,-.99],[.84,.10,1],{font:28,color:'#f1efe5'}));
+    cat.status=register(this.label('Indirect vision and cheek retraction',[-.60,1.105,-.99],[.79,.085,1],{font:25,color:'#f1efe5'}));
     for(const [key,x,label] of [['spawn',-.90,'RETURN'],['reset',-.59,'RESET'],['close',-.29,'CLOSE']]){
       register(this.box([x,.935,-.985],[.27,.115,.05],'#1d7975',{key:'catalog:'+key}));
       register(this.label(label,[x,.94,-.95],[.25,.075,1],{font:30,bold:true}));
@@ -312,7 +312,7 @@ class DentalScene {
       const spec=cat.specs.find(s=>s[0]===name);if(!spec)return false;
       cat.selected=name;
       this.setXRCatalogOpen(true);
-      this.replaceLabel(cat.status,spec[1]+': '+spec[2],28);
+      this.replaceLabel(cat.status,spec[2],25);
       return true;
     }
     if(key==='catalog:reset'){
