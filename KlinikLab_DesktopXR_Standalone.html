@@ -2552,7 +2552,7 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
-    this.syncModalVisibility();
+    this.syncModalVisibility?.();
     if(frame.session.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return;}
     if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
     const connected=new Set(frame.session.inputSources);
