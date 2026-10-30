@@ -115,7 +115,7 @@ try{
  result.checks.push('Both left/right input sources present and 120 XR frames received');
  result.captureManifest=[];
  const captureHashes=new Map();
- const captureXR=async(filename,label)=>{
+ const captureXR=async(filename,label,auxiliary=false)=>{
    // Capture only after a fresh rendered XR eye, not a potentially stale desktop viewport.
    const screenshot=await page.evaluate(async()=>{
      const scene=window.kliniklab?.scene;
@@ -242,7 +242,7 @@ try{
    const duplicateOf=captureHashes.get(sha256)||null;
    await writeFile(path.join(out,filename),png);
    if(!duplicateOf)captureHashes.set(sha256,filename);
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   (auxiliary?(result.phase7Captures??=[]):result.captureManifest).push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -511,6 +511,38 @@ try{
  result.catalog.return=catalogReturn;
  await captureXR('10-tool-catalog-closed.png','Phase 4 workspace after controlled return, reset and close');
  result.checks.push('Phase 4 controlled tray spawn, reset, close do not clone instruments');
+ // Phase 7 diagnostic captures are locally retained by the owner-PC worker.
+ // Keep the 10 required interaction captures unchanged until the worker's
+ // publication schema is updated for additional named screenshots.
+ const fdiEvidence=await page.evaluate(()=>{
+   const scene=window.kliniklab.scene,app=window.kliniklab;
+   if(!scene.xrPrep||!app.volLab)throw Error('XR volumetric practice unavailable');
+   if(!scene.xrPrep.active)scene.xrPrep.toggle();
+   scene.xrFdiEvidence=true;
+   return {enabled:scene.xrFdiEvidence,practiceActive:scene.xrPrep.active};
+ });
+ assert(fdiEvidence.enabled&&fdiEvidence.practiceActive);
+ result.fdiTreatmentStates=[];
+ for(const id of ['11','13','14','16','36','46']){
+   const state=await page.evaluate(id=>{
+     const app=window.kliniklab,s=app.scene;
+     if(!app.volLab.setTooth(id))throw Error('FDI treatment switch failed: '+id);
+     s.xrPrep.syncCase();
+     if(!s.xrPrep.updateMesh())throw Error('FDI XR mesh update failed: '+id);
+     const solid=app.volLab.solid;
+     return {id,toothClass:solid.toothClass(),upper:solid.isUpper(),left:solid.isLeft(),
+       roots:solid.rootCenters(),cuspHeight:solid.height(.45,.15),
+       savedCuts:solid.bur.length,meshTriangles:s.xrPrep.visibleTriangles,
+       revision:app.volLab.revision};
+   },id);
+   assert(state.meshTriangles>100,'Selected FDI tooth generated no XR triangles');
+   result.fdiTreatmentStates.push(state);
+   await captureXR('phase7-fdi-'+id+'.png','Phase 7 isolated XR treatment tooth FDI '+id,true);
+ }
+ assert.notEqual(result.fdiTreatmentStates[0].cuspHeight,result.fdiTreatmentStates[1].cuspHeight);
+ assert.notDeepEqual(result.fdiTreatmentStates[3].roots,result.fdiTreatmentStates[4].roots);
+ result.checks.push('Six FDI-selected XR volumetric meshes generated with distinct anatomy and locally retained stereo captures');
+ await page.evaluate(()=>{const s=window.kliniklab.scene;s.xrFdiEvidence=false;if(s.xrPrep.active)s.xrPrep.toggle()});
  await page.evaluate(()=>window.__xrTestDevice.activeSession.end());
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  assert.equal(result.errors.length,0,'Uncaught application errors observed');
