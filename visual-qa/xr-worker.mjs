@@ -69,7 +69,7 @@ async function fetchJob(){
  return j;
 }
 async function execute(job){
- const checkout=path.join(ROOT,'xr-'+job.jobId);
+ const checkout=path.join(ROOT,'w',job.commit.slice(0,12));
  await fs.rm(checkout,{recursive:true,force:true});
  git(['worktree','prune']);
  git(['worktree','add','--detach',checkout,job.commit]);
@@ -105,7 +105,16 @@ async function execute(job){
   // Even a failed smoke run can contain diagnostically useful images/logs.
   const output=path.join(checkout,'output','playwright','webxr-smoke');
   try{await fs.cp(output,path.join(EVIDENCE,job.jobId,'diagnostics'),{recursive:true,force:true})}catch{}
-  git(['worktree','remove','--force',checkout]);
+  // Cleanup is best effort once rendered evidence is durably staged. Windows
+  // dependency paths may exceed MAX_PATH; never turn successful rendering
+  // into a failed job or suppress publication because of cleanup.
+  try{git(['worktree','remove','--force',checkout]);}
+  catch(error){
+   const diagnostics=path.join(EVIDENCE,job.jobId,'cleanup-error.txt');
+   await fs.mkdir(path.dirname(diagnostics),{recursive:true});
+   await fs.writeFile(diagnostics,new Date().toISOString()+' '+String(error.message||error)+'\\n');
+   console.error('Nonfatal worktree cleanup error; retained evidence remains publishable:',String(error.message||error).slice(0,240));
+  }
  }
 }
 async function publish(job,{result,captures}){
