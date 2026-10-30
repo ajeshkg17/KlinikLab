@@ -7,7 +7,7 @@ on:
       - '.github/workflows/phase0-webxr.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   webxr:
     name: Genuine IWER runtime in headed Chrome / Xvfb
@@ -32,6 +32,7 @@ jobs:
         env:
           PORT: '8790'
           KLINIKLAB_URL: http://127.0.0.1:8790/
+          KLINIKLAB_BUILD_SHA: ${{ github.sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -45,6 +46,36 @@ jobs:
           done
           if [ "$ready" -ne 1 ]; then cat /tmp/kliniklab-phase0-server.log; exit 1; fi
           xvfb-run -a -s '-screen 0 1600x1000x24' node test-support/webxr-test/smoke.mjs
+      - name: Publish successful emulator screenshots to visual-feedback
+        if: success()
+        shell: bash
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -f output/playwright/webxr-smoke/result.json
+          node -e "const r=require('./output/playwright/webxr-smoke/result.json');if(!r.passed||!Array.isArray(r.captureManifest)||r.captureManifest.length!==6)process.exit(1)"
+          git fetch origin visual-feedback
+          tmpdir="$(mktemp -d)"
+          git worktree add --detach "$tmpdir" origin/visual-feedback
+          target="runs/phase3-iwer-${BUILD_SHA}"
+          mkdir -p "$tmpdir/$target"
+          cp output/playwright/webxr-smoke/0*.png "$tmpdir/$target/"
+          BUILD_SHA="$BUILD_SHA" TARGET="$target" OUTPUT_DIR="$tmpdir" node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const result=JSON.parse(fs.readFileSync('output/playwright/webxr-smoke/result.json','utf8'));
+          const sha=process.env.BUILD_SHA,folder=process.env.TARGET,root=process.env.OUTPUT_DIR;
+          const lines=['# Phase 3 IWER emulator screenshots','','Tested integration commit: `'+sha+'`','','**Environment:** Meta IWER Quest 2 profile in desktop Chrome under GitHub-hosted Xvfb. Not a physical Quest 2 photograph or verified headset view.','',...result.captureManifest.map(c=>'- **'+c.label+'**: [open image](./'+c.file+')'),'',...result.captureManifest.map(c=>'### '+c.label+'\n\n![IWER emulator screenshot](./'+c.file+')\n')];
+          fs.writeFileSync(root+'/'+folder+'/README.md',lines.join('\n'));
+          fs.writeFileSync(root+'/'+folder+'/result.json',JSON.stringify(result,null,2));
+          fs.writeFileSync(root+'/PHASE3_LATEST.md','# Latest Phase 3 emulator captures\n\n[Browse six screenshot captures for '+sha+'](./'+folder+'/README.md)\n');
+          NODE
+          cd "$tmpdir"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target" PHASE3_LATEST.md
+          git commit -m "visual-qa: publish Phase 3 IWER captures for ${BUILD_SHA}"
+          git push origin HEAD:visual-feedback
       - name: Publish exact revision and evidence limits
         if: always()
         shell: bash
