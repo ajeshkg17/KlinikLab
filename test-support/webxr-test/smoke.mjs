@@ -589,9 +589,34 @@ try{
  await captureXR('phase8-panel-workspace.png','FDI clinical panel within XR treatment workspace',true);
  await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(true)});
  await captureXR('phase8-panel-catalog-open.png','FDI panel with tools catalog open for collision review',true);
+ const catalogOwner=await page.evaluate(()=>{
+   const s=window.kliniklab.scene,p=s.xrPrep;p.syncModalVisibility();
+   return {owner:p.modalOwner,contextHidden:p.clinicalUI.every(m=>m.hidden),toothHidden:p.meshes.every(m=>m.hidden),catalogShown:s.xrCatalog.panels.some(m=>!m.hidden)};
+ });
+ assert.equal(catalogOwner.owner,'catalog');
+ assert(catalogOwner.contextHidden&&catalogOwner.toothHidden&&catalogOwner.catalogShown,
+ 'Catalog modal not visually isolated: '+JSON.stringify(catalogOwner));
+ result.checks.push('Catalog modal owns viewport; treatment and FDI context hidden');
+
  await page.evaluate(()=>{const s=window.kliniklab.scene;s.setXRCatalogOpen(false);s.xrGuide?.open?.()});
  await captureXR('phase8-panel-help-open.png','FDI panel with help open for collision review',true);
- await page.evaluate(()=>{const s=window.kliniklab.scene;s.xrGuide?.close?.();s.xrFdiEvidence=true});
+ const helpOwner=await page.evaluate(()=>{
+   const s=window.kliniklab.scene,p=s.xrPrep;p.syncModalVisibility();
+   return {owner:p.modalOwner,contextHidden:p.clinicalUI.every(m=>m.hidden),toothHidden:p.meshes.every(m=>m.hidden),helpOpen:s.xrGuide.state.open};
+ });
+ assert.equal(helpOwner.owner,'help');
+ assert(helpOwner.contextHidden&&helpOwner.toothHidden&&helpOwner.helpOpen,
+ 'Help modal occluded by treatment: '+JSON.stringify(helpOwner));
+ result.checks.push('Help modal owns viewport; tooth hidden and guide controls exposed');
+
+ await page.evaluate(()=>{const s=window.kliniklab.scene;s.xrGuide?.close?.();s.xrFdiEvidence=true;s.xrPrep.syncModalVisibility()});
+ const restored=await page.evaluate(()=>{
+   const p=window.kliniklab.scene.xrPrep;
+   return {owner:p.modalOwner,visibleContext:p.clinicalUI.every(m=>!m.hidden),visibleTeeth:p.meshes.every(m=>!m.hidden)};
+ });
+ assert(restored.owner==='treatment'&&restored.visibleContext&&restored.visibleTeeth,
+   'Closing help did not restore treatment: '+JSON.stringify(restored));
+ result.checks.push('Closing modals restores treatment mesh and FDI UI without loss of saved state');
  // Phase7 additional retained evidence: oblique crown/root view, visible
  // cut and return-to-same-FDI image. Do not alter the ten baseline captures.
  await page.evaluate(()=>{
