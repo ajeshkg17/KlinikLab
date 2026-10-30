@@ -367,12 +367,12 @@ class DentalScene {
     c.buttons={trigger:pressed(0),grip:pressed(1),thumbstick:pressed(3),primary:pressed(4),secondary:pressed(5)};
     // Left/right mirrored handle, cap, tracking ring, grip/trigger, thumbstick, face button.
     const layouts=[
-      {p:[0,-.046,.022],s:[.075,.155,.080],rot:[-.21,0,0]},
-      {p:[0,.030,-.005],s:[.083,.047,.083]},
-      {p:[0,.071,-.006],s:[.120,.113,.120],rot:[Math.PI/2,0,0]},
-      {p:[side*.032,-.016,-.037],s:[.029,.045,.042]},
-      {p:[side*.032,.056,-.043],s:[.030,.028,.030]},
-      {p:[-side*.030,.053,-.047],s:[.022,.022,.022]}
+      {p:[0,-.046,.018],s:[.050,.120,.056],rot:[-.21,0,0]},
+      {p:[0,.024,-.007],s:[.064,.035,.065]},
+      {p:[0,.054,-.010],s:[.083,.075,.080],rot:[Math.PI/2,0,0]},
+      {p:[side*.026,-.018,-.031],s:[.022,.033,.029]},
+      {p:[side*.026,.043,-.034],s:[.021,.019,.021]},
+      {p:[-side*.025,.043,-.035],s:[.016,.016,.016]}
     ];
     for(let i=0;i<c.parts.length;i++){
       const m=c.parts[i],layout=layouts[i];
