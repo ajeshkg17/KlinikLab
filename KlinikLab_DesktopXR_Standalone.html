@@ -494,9 +494,13 @@ class DentalScene {
     ];
     for(let i=0;i<c.parts.length;i++){
       const m=c.parts[i],layout=layouts[i];
-      m.hidden=!grip;
+      const holding=(this.xrTableTools||[]).some(tool=>tool.owner===c.handedness);
+      // Hide the oversized tracking ring while carrying a tool: keep the
+      // grip silhouette and buttons for handedness/interaction feedback.
+      m.hidden=!grip||(holding&&i===2);
       if(grip){
-        const local=M3.trs(layout.p,layout.rot||[0,0,0],layout.s);
+        const shape=holding&&i===0?layout.s.map(v=>v*.78):layout.s;
+        const local=M3.trs(layout.p,layout.rot||[0,0,0],shape);
         m.model=M3.mm(this.controllerMatrix(grip),local);
         if(i===3)m.color=this.rgb(c.buttons.trigger?'#75d6ff':'#3b4e5f');
         if(i===4)m.color=this.rgb(c.buttons.thumbstick?'#75d6ff':'#252c39');
@@ -694,10 +698,17 @@ class DentalScene {
     const tool=this.nearestXRTool(point);
     if(!tool)return false;
     tool.owner=hand;tool.hover=null;
-    // Store world-space offset at pickup, then transform each frame by current grip orientation.
-    // This prevents snapping while retaining natural six-degree-of-freedom motion.
-    const grip=this.controllerMatrix(pose),inverse=M3.inverse(grip);
-    tool.localModels=tool.meshes.map(m=>M3.mm(inverse,m.model||M3.trs(m.p,m.rot,m.s)));
+    // A dental instrument sits in the pinch grip with its working end extending
+    // forward along controller -Z. The handle begins ahead of the controller ring,
+    // rather than retaining the tray's world-space offset inside the controller.
+    // Store immutable grip-local models once: subsequent frames are pure 6DoF.
+    const anchor=tool.home[0].p;
+    const side=hand==='left'?-1:1;
+    const gripOffset=[side*.025,-.025,-.25];
+    tool.localModels=tool.home.map(h=>{
+      const relative=h.p.map((v,i)=>v-anchor[i]+gripOffset[i]);
+      return M3.trs(relative,h.rot,h.s);
+    });
     return true;
   }
   onXRGripEnd(event){
