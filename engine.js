@@ -163,6 +163,35 @@ class DentalScene {
   add(kind,p,s,c,opts={}){const m={kind,p:p.slice(),s:s.slice(),rot:opts.rot||[0,0,0],color:this.rgb(c),alpha:opts.alpha??1,tex:opts.tex||null,unlit:!!opts.unlit,finish:opts.finish??0,key:opts.key||null,tag:opts.tag||'',hidden:false};this.meshes.push(m);if(m.key)this.pickables.push({key:m.key,p:m.p.slice(),radius:opts.radius||Math.max(...s)*.7,kind,mesh:m});return m}
   rgb(h){if(Array.isArray(h))return h;const x=parseInt(h.replace('#',''),16);return [(x>>16&255)/255,(x>>8&255)/255,(x&255)/255]}
   box(p,s,c,o={}){return this.add('box',p,s,c,o)}sphere(p,s,c,o={}){return this.add('sphere',p,s,c,o)}cy(p,s,c,o={}){return this.add('cylinder',p,s,c,o)}tor(p,s,c,o={}){return this.add('torus',p,s,c,o)}label(text,p,s,o={}){return this.add('quad',p,s,'#ffffff',{...o,unlit:true,tex:this.makeLabel(text,o)})}
+  // Scale only dental anatomy. Tool tray, XR controllers and room remain at
+  // physical world size. The gum is a world-coordinate mesh, so its mesh
+  // translation differs from the origin-relative tooth crowns.
+  rescaleAnatomy(factor){
+    if(!(factor>0&&Number.isFinite(factor)))throw Error('Invalid anatomy factor');
+    const pivot=this.anatomyPivot||[0,1.545,-1.78];
+    const transform=p=>p.map((v,i)=>pivot[i]+(v-pivot[i])*factor);
+    const members=new Set(this.archMeshes.flat());
+    for(const m of members){
+      m.p=m.kind.startsWith('gingiva')
+        ?m.p.map((v,i)=>pivot[i]*(1-factor)+v*factor)
+        :transform(m.p);
+      m.s=m.s.map(v=>v*factor);
+      m.model=null;
+    }
+    for(const pick of this.pickables.filter(p=>members.has(p.mesh))){
+      pick.p=transform(pick.p);pick.radius*=factor;
+    }
+    for(const t of Object.values(this.teeth))t.pos=transform(t.pos);
+  }
+  // Explicit teaching magnification is reversible and separate from normal
+  // arch dimensions. It must not change FDI identity or instrument geometry.
+  setTeachingMagnification(on){
+    const next=on?2.8:1;
+    if(this.anatomyDisplayMagnification===next)return;
+    const relative=next/this.anatomyDisplayMagnification;
+    this.rescaleAnatomy(relative);
+    this.anatomyDisplayMagnification=next;
+  }
   buildScene(){const C={floor:'#547078',wall:'#88a6ad',accent:'#4c8f92',white:'#e3ece8',steel:'#a6c0c5',chair:'#2b7d7d',dark:'#183b49',wood:'#87685e',gum:'#ba7682',tooth:'#f5e8c9',crown:'#f2e0b7'};
     // Environment: room, floor, side cabinetry, architectural framing.
     this.box([0,-.06,-2.6],[7,.12,8],'#627b82');this.box([0,2.52,-6.1],[7,5,.12],'#88a3aa');this.leftWall=this.box([-3.6,2,-2.6],[.1,4.4,7.8],'#728d95');this.rightWall=this.box([3.6,2,-2.6],[.1,4.4,7.8],'#809ba1');
@@ -435,35 +464,6 @@ class DentalScene {
     }return hit}
 
 
-  // Scale only dental anatomy. Tool tray, XR controllers and room remain at
-  // physical world size. The gum is a world-coordinate mesh, so its mesh
-  // translation differs from the origin-relative tooth crowns.
-  rescaleAnatomy(factor){
-    if(!(factor>0&&Number.isFinite(factor)))throw Error('Invalid anatomy factor');
-    const pivot=this.anatomyPivot||[0,1.545,-1.78];
-    const transform=p=>p.map((v,i)=>pivot[i]+(v-pivot[i])*factor);
-    const members=new Set(this.archMeshes.flat());
-    for(const m of members){
-      m.p=m.kind.startsWith('gingiva')
-        ?m.p.map((v,i)=>pivot[i]*(1-factor)+v*factor)
-        :transform(m.p);
-      m.s=m.s.map(v=>v*factor);
-      m.model=null;
-    }
-    for(const pick of this.pickables.filter(p=>members.has(p.mesh))){
-      pick.p=transform(pick.p);pick.radius*=factor;
-    }
-    for(const t of Object.values(this.teeth))t.pos=transform(t.pos);
-  }
-  // Explicit teaching magnification is reversible and separate from normal
-  // arch dimensions. It must not change FDI identity or instrument geometry.
-  setTeachingMagnification(on){
-    const next=on?2.8:1;
-    if(this.anatomyDisplayMagnification===next)return;
-    const relative=next/this.anatomyDisplayMagnification;
-    this.rescaleAnatomy(relative);
-    this.anatomyDisplayMagnification=next;
-  }
   // Restore desktop transforms and hit targets exactly after the XR session.
   setXRComfort(active){
     if(Boolean(active)===this.xrComfort.active)return;
