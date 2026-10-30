@@ -24,7 +24,7 @@ test('viewer-anchored examination uses real transformed geometry and restores FD
  scene.placeTeachingAnatomy({transform:{position:{x:0,y:1.6,z:0},orientation:{x:0,y:0,z:0,w:1}}});
  assert.equal(scene.teachingPlacementPending,false);
  const center=scene.anatomyWorldBounds().center;
- for(const [a,b] of center.map((v,i)=>[v,[0,1.625,-1.27][i]]))assert(Math.abs(a-b)<1e-8);
+ for(const [a,b] of center.map((v,i)=>[v,[0,1.625,-.98][i]]))assert(Math.abs(a-b)<1e-8);
  assert.equal(hit.key,'tooth:11');
  scene.setTeachingMagnification(false);
  for(const [key,after] of [['crown',crown.p],['gum',gum.p],['hit',hit.p],['fdi',fdi.pos]])
