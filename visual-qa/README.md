@@ -31,6 +31,6 @@ The revised WebXR harness captures a **fresh XR eye framebuffer after a new appl
 
 ### Legacy desktop visual worker
 
-`visual-qa/worker.mjs`, `worker-core.mjs`, `setup.ps1` and `jobs/current.json` are retained **only** for reproducible desktop visual comparisons (old 8787 workflow). They are not the current XR development workflow; do not start them by default. This avoids deleting still-relevant desktop test coverage or historical evidence. Their legacy setup instructions are superseded by this document for XR tasks.
+`visual-qa/worker.mjs`, `worker-core.mjs` and `jobs/current.json` are retained **only** for reproducible desktop visual comparisons (old 8787 workflow). They are not the current XR development workflow; do not start them by default. This avoids deleting still-relevant desktop test coverage or historical evidence. The superseded desktop-only `setup.ps1` installer was removed from the current branch (still available in Git history); this document replaces its XR setup instructions.
 
 Run source/helper checks without a browser using `node --test visual-qa/tests/*.test.mjs`. No patient data or secrets may be included in public screenshot uploads.
