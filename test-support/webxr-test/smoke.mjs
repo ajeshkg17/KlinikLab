@@ -200,15 +200,29 @@ try{
  const hiddenCenters=toolEyeProjections.flatMap((tools,index)=>tools.filter(t=>!t.projection.inFrustum).map(t=>'eye '+index+': '+t.name));
  if(hiddenCenters.length)throw Error('Instrument centers outside both-eye frusta: '+hiddenCenters.join(', '));
  result.checks.push('All five instrument centers project into both rendered eye frusta; occlusion requires visual review');
+ // IWER dispatches inputs on XR animation frames. On a slow machine one
+ // frame can take >400 ms: never release a button until the matching XR event
+ // has actually been observed. Require a *new* event for every transition.
+ const inputTimeoutMs=Math.max(15000,config.collectionDeadlineMs);
+ const buttonEvent=button=>button==='trigger'?'select':'squeeze';
+ const driveInput=async(hand,button,pressure)=>{
+   const type=buttonEvent(button)+(pressure?'start':'end');
+   const baseline=await page.evaluate(({hand,type})=>
+     (window.__xrTestEvents||[]).filter(e=>e.hand===hand&&e.type===type).length,{hand,type});
+   await page.evaluate(({hand,button,pressure})=>
+     window.__xrTestDevice.controllers[hand].updateButtonValue(button,pressure),{hand,button,pressure});
+   await page.waitForFunction(({hand,type,baseline})=>
+     (window.__xrTestEvents||[]).filter(e=>e.hand===hand&&e.type===type).length>baseline,
+     {hand,type,baseline},{timeout:inputTimeoutMs,polling:50});
+   return {hand,button,pressure,type,baseline};
+ };
  for(const hand of ['left','right'])for(const button of ['trigger','squeeze']){
-   await page.evaluate(({hand,button})=>window.__xrTestDevice.controllers[hand].updateButtonValue(button,1),{hand,button});
-   await page.waitForTimeout(120);
-   await page.evaluate(({hand,button})=>window.__xrTestDevice.controllers[hand].updateButtonValue(button,0),{hand,button});
-   await page.waitForTimeout(120);
+   await driveInput(hand,button,1);
+   await driveInput(hand,button,0);
  }
  result.inputEvents=await page.evaluate(()=>window.__xrTestEvents);
  for(const hand of ['left','right'])for(const type of ['selectstart','selectend','squeezestart','squeezeend'])assert(result.inputEvents.some(e=>e.hand===hand&&e.type===type),`${hand} ${type} missing`);
- result.checks.push('Real IWER trigger/grip events reached the XR session for each hand');
+ result.checks.push('Frame-synchronized IWER trigger/grip start/end events reached the XR session for each hand');
  await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=false;});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===1);
  await page.evaluate(()=>{window.__xrTestDevice.controllers.right.connected=true;});
@@ -223,8 +237,7 @@ try{
      function assertTool(value,label){if(!value?.home)throw Error('Missing VR tool: '+label)}
    },{hand,name});
  };
- const grip=async(hand,pressure)=>page.evaluate(({hand,pressure})=>
-   window.__xrTestDevice.controllers[hand].updateButtonValue('squeeze',pressure),{hand,pressure});
+ const grip=async(hand,pressure)=>driveInput(hand,'squeeze',pressure);
  const toolState=async name=>page.evaluate(name=>{
    const t=window.kliniklab.scene.xrTableTools.find(t=>t.name===name);
    return {owner:t?.owner||null,hover:t?.hover||null,
@@ -260,14 +273,13 @@ try{
  const beforeHeld=await toolState('mirror');
  assert(beforeHeld.model?.length===16,'Held mirror lacks model matrix');
  result.checks.push('Left squeeze picks up mirror with a grip-relative model matrix');
- await page.evaluate(()=>window.__xrTestDevice.controllers.left.updateButtonValue('trigger',1));
- await page.waitForTimeout(300);
+ await driveInput('left','trigger',1);
  assert.equal((await toolState('mirror')).owner,'left','Index trigger changed tool ownership');
- await page.evaluate(()=>window.__xrTestDevice.controllers.left.updateButtonValue('trigger',0));
+ await driveInput('left','trigger',0);
  result.checks.push('Index trigger cannot release or reassign a grip-held tool');
  // Another controller cannot take the same held instrument.
  await moveController('right','mirror');
- await grip('right',1);await page.waitForTimeout(300);
+ await grip('right',1);
  assert.equal((await toolState('mirror')).owner,'left','Tool acquired by two hands');
  await grip('right',0);
  result.checks.push('Held mirror rejects second-hand ownership');
