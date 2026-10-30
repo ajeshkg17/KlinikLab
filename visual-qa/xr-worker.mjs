@@ -35,11 +35,12 @@ async function fetchJob(){
 }
 async function execute(job){
  const checkout=path.join(ROOT,'xr-'+job.jobId);
+ await fs.rm(checkout,{recursive:true,force:true});
  git(['worktree','prune']);
  git(['worktree','add','--detach',checkout,job.commit]);
  let server;
  try{
-  await run('npm.cmd',['ci','--prefix','test-support/webxr-test','--no-audit','--no-fund'],checkout);
+  await run(process.platform==='win32'?'cmd.exe':'npm',process.platform==='win32'?['/d','/s','/c','npm.cmd','ci','--prefix','test-support/webxr-test','--no-audit','--no-fund']:['ci','--prefix','test-support/webxr-test','--no-audit','--no-fund'],checkout);
   try{await fetch(URL+'api/health',{signal:AbortSignal.timeout(900)});throw Error('Dedicated port 8891 already in use; refusing to test wrong checkout')}catch(e){if(e.message.includes('already in use'))throw e}
   server=spawn(process.execPath,['server/server.mjs'],{cwd:checkout,stdio:'ignore',env:{...process.env,PORT:'8891'}});
   let ready=false;
