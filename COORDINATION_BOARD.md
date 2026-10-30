@@ -18,8 +18,17 @@ its new source-only CI and Chromium DOM smoke scripts do not operate the office 
 emulator, physical Quest or screenshot worker, and do not deploy the application.
 The first source CI job passed; its Chromium job did not start the app because the
 GitHub runner switched to unsupported Ubuntu 26.04 for Playwright 1.57.
-Pinned the validation workflow to Ubuntu 24.04 and started another run.
-Review its latest CI result before interpreting the browser gate.
+Pinned the validation workflow to Ubuntu 24.04. **Fresh successful run**
+[41022747499](https://github.com/ajeshkg17/KlinikLab/actions/runs/41022747499)
+on commit `2bf5d849135494bd9a02d3767e81f337f879cdc2` completed both
+jobs: 114/114 application Node tests, 8/8 helper tests, 25 root/public
+mirrors, 66 JS syntax checks, 22 HTTP assets and two binaries, and
+byte-identical regenerated standalone. Isolated real Chromium 143 executed
+49/49 checks successfully, including all 16 fictional FSP/KP exercises,
+32-FDI selection, video/volume heading coexistence, score invalidation
+and focus restoration. Zero local asset failures or uncaught page errors;
+no screenshots were created. This **does not** validate a Quest headset,
+the local Chrome emulator, clinical accuracy or hosted main.
 
 Physical Quest 2, installed Chrome Immersive Web Emulator and independent clinical/
 German-language review remain unverified. Local browser connection was unavailable
