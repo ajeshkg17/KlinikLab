@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "jobId": "pc-xr-phase3-20261030-01",
+  "commit": "a7c6271f09e1b9b0cb3b6c010cf1150886b24a68",
+  "suite": "quest2-phase3",
+  "graphics": "default",
+  "deadlineMs": 60000,
+  "captures": [
+    "room-table",
+    "both-controllers",
+    "left-hover",
+    "left-pickup",
+    "right-pickup",
+    "release-return"
+  ]
+}
