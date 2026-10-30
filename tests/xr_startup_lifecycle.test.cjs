@@ -79,7 +79,7 @@ async function inputSession(){
  const enter=vm.runInNewContext('({'+engine.slice(start,end)+'}).enterVR',{
   navigator:{xr:{requestSession:async()=>session}},isSecureContext:true,XRWebGLLayer:class {}});
  const scene={xrSession:null,gl:{},focusDecor:[],xrBoardMeshes:[],setXRComfort(){},xrLoop(){},
-  clearControllers(){calls.clear++;},
+  clearControllers(){calls.clear++;},resetXRTools(){},onXRGripStart(){return false},onXRGripEnd(){return false},
   xrGuide:{onEnter(){},onSelectStart(){calls.guide++;return false;},onSqueezeStart(){calls.grip++;}},
   xrPrep:{onEnter(){},triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},
    onSelectStart(){calls.press++;return true;},onSelectEnd(){calls.release++;}}};
@@ -109,14 +109,14 @@ test('input events reject a frame belonging to another session',async()=>{
 });
 
 const frameMethod=vm.runInNewContext('({'+engine.slice(engine.indexOf('  xrFrame(t,frame){'),engine.lastIndexOf('\n}'))+'}).xrFrame');
-const loopMethod=vm.runInNewContext('({'+engine.slice(engine.indexOf('  xrLoop(t,frame){'),engine.indexOf('  getXRInputPose(frame,source){'))+'}).xrLoop');
+const loopMethod=vm.runInNewContext('({'+engine.slice(engine.indexOf('  xrLoop(t,frame){'),engine.indexOf('  toolGripPose(frame,source){'))+'}).xrLoop');
 for(const mode of ['null','throw'])test(`viewer pose ${mode} clears cutting state and permits tracking recovery`,()=>{
  let cleared=0,practiceFrames=0,scheduled=0;
  const layer={framebuffer:{}};
  const session={inputSources:[],renderState:{baseLayer:layer},requestAnimationFrame(){scheduled++;}};
  const scene={xrSession:session,xrRef:{},xrControllers:[],
   gl:{bindFramebuffer(){},enable(){},clear(){}},
-  clearControllers(){cleared++;},xrPrep:{triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},onXRFrame(){practiceFrames++;}},
+  clearControllers(){cleared++;},resetXRTools(){},updateXRTools(){},xrPrep:{triggers:new Set([{}]),lastCut:{time:1},tip:{hidden:false},onXRFrame(){practiceFrames++;}},
   xrFrame:frameMethod,xrLoop:loopMethod};
  const lost={session,getViewerPose(){if(mode==='throw')throw Error('tracking unavailable');return null;}};
  assert.doesNotThrow(()=>loopMethod.call(scene,1000,lost));
