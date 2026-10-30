@@ -570,7 +570,7 @@ class DentalScene {
     // instrument tray and the entire panel stays inside binocular margins.
     // Transform the panel + every label/control together, preserving hit-boxes.
     for(const m of cat.panels){
-      m.p=[m.p[0]+.29,1.47+(m.p[1]-1.47)*.72+.43,m.p[2]+.39];
+      m.p=[m.p[0]+.29,1.47+(m.p[1]-1.47)*.72+.43,m.p[2]+.57];
       m.s=[m.s[0]*.90,m.s[1]*.78,m.s[2]];
       m.model=null;
       for(const hit of this.pickables.filter(hit=>hit.mesh===m))hit.p=m.p.slice();
