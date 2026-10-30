@@ -541,7 +541,21 @@ try{
    },id);
    assert(state.meshTriangles>100,'Selected FDI tooth generated no XR triangles');
    result.fdiTreatmentStates.push(state);
+   const clinical=await page.evaluate(()=>window.kliniklab.scene.xrPrep.clinicalState);
+   assert.equal(clinical.fdi,id,'Phase8 selected-FDI context stale');
+   assert.equal(clinical.jaw,state.upper?'UPPER':'LOWER');
+   assert.equal(clinical.side,state.left?'LEFT':'RIGHT');
+   assert.equal(clinical.toothClass,state.toothClass);
+   result.phase8ClinicalUI??=[];
+   result.phase8ClinicalUI.push(clinical);
    await captureXR('phase7-fdi-'+id+'.png','Phase 7 isolated XR treatment tooth FDI '+id,true);
+   // The peripheral context is normally visible in real XR procedure mode.
+   // Capture it with the full room without modifying the established arch view.
+   if(id==='16'||id==='36'){
+     await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=false});
+     await captureXR('phase8-context-fdi-'+id+'.png','Clinical peripheral FDI context for '+id,true);
+     await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=true});
+   }
    const evidence=result.phase7Captures.at(-1);
    assert(evidence.eyeFdiVisiblePixels?.length===2&&evidence.eyeFdiVisiblePixels.every(n=>n>1000),
      'Selected FDI geometry not visibly rasterized in both eyes: '+id+' '+JSON.stringify(evidence.eyeFdiVisiblePixels));
