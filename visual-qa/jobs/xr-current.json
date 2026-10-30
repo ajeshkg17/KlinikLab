@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase8-panel-stereo-margins-20261030-02",
-  "commit": "75d911c2762b06d9d753a746544476df970299fe",
+  "jobId": "pc-xr-phase8-modal-ownership-20261030-03",
+  "commit": "52c1f080f35470b89fcfbf7a59ec41059b5a864c",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
