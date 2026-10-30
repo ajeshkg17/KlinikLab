@@ -264,9 +264,42 @@ try{
  await page.locator('#vr').click();
  await page.waitForFunction(()=>!!window.kliniklab.scene.xrSession&&!!window.__xrTestDevice.activeSession);
  result.checks.push('Application exited and re-entered VR');
+ assert.equal(await page.evaluate(()=>window.kliniklab.scene.xrGuide.state.open),false,'Help should stay closed on re-entry');
  const duplicates=result.captureManifest.filter(x=>x.duplicateOf);
  if(duplicates.length)throw Error('XR screenshot states were pixel-identical: '+JSON.stringify(duplicates.map(x=>({file:x.file,sameAs:x.duplicateOf}))));
  result.checks.push('Six distinct newly rendered XR-eye screenshots (composition still requires visual review)');
+
+ // Selection through the guide's actual ray/pick hit path in the active IWER session.
+ const help=await page.evaluate(()=>{
+   const scene=window.kliniklab.scene,guide=scene.xrGuide;
+   if(guide.state.open)throw Error('Help is unexpectedly open');
+   const select=(key,hand)=>{
+     const target=scene.pickables.find(hit=>hit.key===key);
+     if(!target||target.mesh.hidden)throw Error('Invisible help target '+key);
+     const p=target.p;
+     return guide.onSelectStart({inputSource:{handedness:hand,targetRaySpace:{}}},{
+       getPose(){return {transform:{position:{x:p[0],y:p[1],z:p[2]+.5},orientation:{x:0,y:0,z:0,w:1}}}}
+     });
+   };
+   if(!select('guide:open','left')||!guide.state.open)throw Error('Left ray failed to open ?');
+   return {opened:true};
+ });
+ result.help=help;
+ await captureXR('07-help-opened-by-question-mark.png','? help opened with left-hand synthetic ray selection');
+ result.checks.push('Help starts closed and ? opens via left-hand controller ray');
+ const closing=await page.evaluate(()=>{
+   const scene=window.kliniklab.scene,guide=scene.xrGuide,hit=scene.pickables.find(p=>p.key==='guide:close');
+   if(!hit||hit.mesh.hidden)throw Error('Close not visible');
+   const p=hit.p;
+   const consumed=guide.onSelectStart({inputSource:{handedness:'right',targetRaySpace:{}}},{
+     getPose(){return {transform:{position:{x:p[0],y:p[1],z:p[2]+.5},orientation:{x:0,y:0,z:0,w:1}}}}
+   });
+   if(!consumed||guide.state.open||guide.onSqueezeStart())throw Error('Help close or grip isolation failed');
+   return {closed:true,gripDoesNotReopen:true};
+ });
+ result.help.closing=closing;
+ await captureXR('08-help-closed-after-close.png','Help panel closed by right-hand synthetic ray selection');
+ result.checks.push('Right-hand close ray works; gripping cannot reopen help');
  await page.evaluate(()=>window.__xrTestDevice.activeSession.end());
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  assert.equal(result.errors.length,0,'Uncaught application errors observed');
