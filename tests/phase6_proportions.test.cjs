@@ -7,7 +7,7 @@ const source=fs.readFileSync(path.join(root,'engine.js'),'utf8');
 test('Phase 6 proportional scale applies only to anatomy and all 32 FDI pick targets',()=>{
  assert(source.includes('this.anatomyOverviewScale=.245'));
  assert(source.includes('this.anatomyPivot=[0,1.545,-1.78]'));
- const section=source.slice(source.indexOf('  rescaleAnatomy(factor){'),source.indexOf('  // Restore desktop transforms'));
+ const section=source.slice(source.indexOf('  rescaleAnatomy(factor){'),source.indexOf('  buildScene(){'));
  assert(section.includes('new Set(this.archMeshes.flat())'));
  assert(section.includes('this.pickables.filter(p=>members.has(p.mesh))'));
  assert(section.includes('pick.radius*=factor'));
@@ -17,7 +17,7 @@ test('Phase 6 proportional scale applies only to anatomy and all 32 FDI pick tar
  assert(source.indexOf('this.rescaleAnatomy(this.anatomyOverviewScale)')<source.indexOf("this.box([.09,.97,-.69]"));
 });
 test('Phase 6 teaching magnification is opt-in and reversible',()=>{
- const part=source.slice(source.indexOf('  setTeachingMagnification(on){'),source.indexOf('  // Restore desktop transforms'));
+ const part=source.slice(source.indexOf('  setTeachingMagnification(on){'),source.indexOf('  buildScene(){'));
  assert(part.includes('on?2.8:1'));
  assert(part.includes('next/this.anatomyDisplayMagnification'));
  assert(part.includes('this.rescaleAnatomy(relative)'));
