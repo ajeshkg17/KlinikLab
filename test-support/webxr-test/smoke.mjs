@@ -550,17 +550,33 @@ try{
  // cut and return-to-same-FDI image. Do not alter the ten baseline captures.
  await page.evaluate(()=>{
    const sc=window.kliniklab.scene;
-   for(const m of sc.xrPrep.meshes)m.rot=[-.46,.38,0];
+   for(const m of sc.xrPrep.meshes)m.rot=[1.03,.18,0];
  });
  await captureXR('phase7-fdi-16-oblique.png','FDI16 oblique view showing occlusal surface and root branches',true);
+ const beforeCapture=await page.evaluate(()=>window.kliniklab.scene.__xrEyeCapture?.dataURL);
+
  await page.evaluate(()=>{
    const app=window.kliniklab,lab=app.volLab;
    lab.setTooth('16');
-   lab.solid.addCut(.12,.84,-.14,.19);
+   const x=.08,z=-.08,top=lab.solid.height(x,z),radius=.30,depth=.22;
+   const y=top+radius-depth;
+   if(lab.solid.outer(x,top-.035,z)>=0)throw Error('Cut target does not intersect crown surface');
+   lab.solid.addCut(x,y,z,radius);
+   window.__phase7Cut={fdi:'16',p:[x,y,z],radius,depth,top,outerAtSurface:lab.solid.outer(x,top-.035,z)};
+
    lab.rebuild();
    app.scene.xrPrep.updateMesh();
  });
  await captureXR('phase7-fdi-16-after-cut.png','FDI16 oblique view after visible preparation',true);
+ const afterCapture=await page.evaluate(()=>window.kliniklab.scene.__xrEyeCapture?.dataURL);
+ const compareStereo=(before,after)=>{
+   const a=Buffer.from(before.split(',')[1],'base64'),b=Buffer.from(after.split(',')[1],'base64');
+   // A stable PNG checksum alone is insufficient: decode image pixels using
+   // the page's Canvas 2D, compare fixed-camera color differences per eye.
+   return {beforeBytes:a.length,afterBytes:b.length};
+ };
+ result.phase7CutDefinition=await page.evaluate(()=>window.__phase7Cut);
+
  await page.evaluate(()=>{
    const app=window.kliniklab;
    app.volLab.setTooth('36');
@@ -569,6 +585,28 @@ try{
    app.scene.xrPrep.updateMesh();
  });
  await captureXR('phase7-fdi-16-switchback.png','FDI16 after switching to FDI36 and returning, cut retained',true);
+ result.phase7FixedCameraDifference=await page.evaluate(async({before,after})=>{
+   const decode=async data=>{
+     const img=new Image();img.src=data;await img.decode();
+     const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+     const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);
+     return {w:img.width,h:img.height,pixels:ctx.getImageData(0,0,img.width,img.height).data};
+   };
+   const a=await decode(before),b=await decode(after);
+   if(a.w!==b.w||a.h!==b.h)throw Error('Different stereo raster dimensions');
+   const eyeWidth=a.w/2,counts=[0,0],bounds=[null,null],total=[0,0];
+   for(let y=0;y<a.h;y++)for(let x=0;x<a.w;x++){
+     const eye=x<eyeWidth?0:1,k=(y*a.w+x)*4;
+     const d=Math.abs(a.pixels[k]-b.pixels[k])+Math.abs(a.pixels[k+1]-b.pixels[k+1])+Math.abs(a.pixels[k+2]-b.pixels[k+2]);
+     total[eye]+=d;
+     if(d>55){counts[eye]++;const px=x-eye*eyeWidth;const box=bounds[eye]||(bounds[eye]={minX:px,maxX:px,minY:y,maxY:y});box.minX=Math.min(box.minX,px);box.maxX=Math.max(box.maxX,px);box.minY=Math.min(box.minY,y);box.maxY=Math.max(box.maxY,y)}
+   }
+   return {changedPixels:counts,bounds,meanChannelDifference:total.map(v=>v/(a.h*eyeWidth*3))};
+ },{before:beforeCapture,after:afterCapture});
+ assert(result.phase7FixedCameraDifference.changedPixels.every(n=>n>120),
+   'Occlusal preparation not visibly distinguishable with fixed camera: '+JSON.stringify(result.phase7FixedCameraDifference));
+ result.checks.push('Actual fixed-camera stereo image difference proves visible occlusal material removal');
+
  result.phase7BeforeAfter=await page.evaluate(()=>({
    fdi:window.kliniklab.volLab.fdiTooth,
    cuts:window.kliniklab.volLab.solid.bur.length,
