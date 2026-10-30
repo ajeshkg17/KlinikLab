@@ -42,6 +42,8 @@ Preserve existing anatomy/room infrastructure, VR entry and stereo rendering, ce
 
 **Visual acceptance:** Owner-PC stereo captures in overview, detail, catalog and help states checking legibility, clipping, hierarchy and focus; practical user review recorded separately.
 
+**Phase 8 first increment (2026-10-30):** A restrained dark-teal peripheral XR treatment context now presents the live selected FDI ID, jaw, quadrant side, tooth class and saved cut count, while leaving the existing help-on-demand and tool/grip interactions intact. Source tests passed at exact revision `8b91a938cbe980c9d16ccaaf4d65ced320133462`; the owner-PC `pc-xr-phase8-clinical-context-20261030-01` request adds two locally retained full-workspace stereo UI captures for FDI16 and FDI36, without changing the worker's ten-image published manifest. **Pixel-level text legibility, depth conflicts, and panel placement remain to be reviewed by the monitor.** Phase7 cavity and switch-back are pixel-reviewed visually accepted as educational demonstrations, not clinical geometry validation. Open backlog: cervical jagged seam, near-eye diagnostic margins, 21 ms-class emulator profiling, anatomy accuracy and physical Quest2/ADB validation.
+
 ## Phase 9 — clinical scene, materials and lighting
 **Deliverables:** Focused and credible treatment workspace; plausible instrument proportions and silhouettes, softer shading, enamel/gingiva surface distinction, contact and depth cues. Remove cartoon/decorative distractions; retain just enough room context for orientation. Tune for Quest rendering performance and comfort without sacrificing essential readable details.
 
