@@ -114,8 +114,45 @@ try{
  result.checks.push('Both left/right input sources present and 120 XR frames received');
  result.captureManifest=[];
  const captureXR=async(filename,label)=>{
-   await page.screenshot({path:path.join(out,filename),animations:'disabled'});
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, desktop Chrome',testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   // Capture only after a fresh rendered XR eye, not a potentially stale desktop viewport.
+   const screenshot=await page.evaluate(async()=>{
+     const scene=window.kliniklab?.scene;
+     if(!scene?.xrSession||!scene.draw)throw Error('No live XR scene for capture');
+     if(!scene.__xrEyeCaptureInstalled){
+       const original=scene.draw;
+       scene.draw=function(view,proj){
+         original.call(this,view,proj);
+         if(!this.__xrEyeCapturePending)return;
+         this.__xrEyeCapturePending=false;
+         try{
+           const gl=this.gl,vp=gl.getParameter(gl.VIEWPORT),[x,y,w,h]=vp;
+           if(w<20||h<20)throw Error('Invalid XR eye viewport');
+           const pixels=new Uint8Array(w*h*4);
+           gl.readPixels(x,y,w,h,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+           if(gl.getError()!==gl.NO_ERROR)throw Error('XR framebuffer readPixels unavailable');
+           const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+           const ctx=canvas.getContext('2d'),image=ctx.createImageData(w,h);
+           for(let row=0;row<h;row++)image.data.set(pixels.subarray(row*w*4,(row+1)*w*4),(h-1-row)*w*4);
+           ctx.putImageData(image,0,0);
+           this.__xrEyeCapture={dataURL:canvas.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,width:w,height:h,source:'XR eye framebuffer readPixels'};
+         }catch(e){this.__xrEyeCapture={error:String(e),frame:this.xrVisualDiagnostics?.frames||0,source:'framebuffer readback failed'}}
+       };
+       scene.__xrEyeCaptureInstalled=true;
+     }
+     const before=scene.xrVisualDiagnostics?.frames||0;
+     scene.__xrEyeCapture=null;scene.__xrEyeCapturePending=true;
+     return await new Promise((resolve,reject)=>{
+       const started=Date.now(),timeout=12000;
+       function poll(){
+         if(scene.__xrEyeCapture&&scene.__xrEyeCapture.frame>before)return resolve(scene.__xrEyeCapture);
+         if(Date.now()-started>timeout)return reject(Error('No new XR eye frame within '+timeout+'ms'));
+         setTimeout(poll,50);
+       }poll();
+     });
+   });
+   if(!screenshot.dataURL)throw Error('Fresh XR-eye screenshot failed: '+screenshot.error);
+   await writeFile(path.join(out,filename),Buffer.from(screenshot.dataURL.split(',')[1],'base64'));
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
  await captureXR('01-room-table-unobstructed.png','XR room and instrument table, baseline');
  await captureXR('02-both-controller-models.png','XR scene with both controller models (presence inferred from renderer; visual quality not yet reviewed)');
