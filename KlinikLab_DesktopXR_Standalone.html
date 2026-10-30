@@ -566,6 +566,14 @@ class DentalScene {
       register(this.box([x,.87,-.985],[.27,.115,.05],'#1d7975',{key:'catalog:'+key}));
       register(this.label(label,[x,.875,-.95],[.25,.075,1],{font:30,bold:true}));
     }
+    // Compact raised foreground catalog: all three actions stay above the
+    // instrument tray and the entire panel stays inside binocular margins.
+    // Transform the panel + every label/control together, preserving hit-boxes.
+    for(const m of cat.panels){
+      m.p=[m.p[0]+.29,1.47+(m.p[1]-1.47)*.72+.43,m.p[2]+.39];
+      m.s=[m.s[0]*.90,m.s[1]*.78,m.s[2]];
+      m.model=null;
+    }
     this.setXRCatalogOpen?.(false);
     // Other procedure items displayed on the side trolley.
     this.box([1.55,.51,-1.65],[1.1,.09,.65],'#799b9d');
