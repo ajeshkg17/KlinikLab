@@ -18,11 +18,14 @@ const mapping={molar:'molar',restoration:'molar',endo:'endo',anterior:'anterior'
 const V3={add:(a,b)=>a.map((q,i)=>q+b[i]),sub:(a,b)=>a.map((q,i)=>q-b[i]),dot:(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],norm:a=>Math.hypot(...a)};
 function smoothMin(a,b,k){const h=clamp(.5+.5*(b-a)/k,0,1);return b*(1-h)+a*h-k*h*(1-h)}
 class ToothSolid{
- constructor(caseKey){this.caseKey=caseKey;this.mode=CASES[caseKey]?.procedure||'restoration';this.bur=[];this.crownDepth=1.13;this.rootLength=1.52}
- isAnterior(){return this.caseKey==='anterior'}
- isUpperMolar(){return this.caseKey==='molar'||this.caseKey==='crown'}
- rootCenters(){return this.isAnterior()?[[0,0]]:this.isUpperMolar()?[[-.49,-.33],[.47,-.34],[.02,.41]]:[[-.41,-.10],[.41,-.10]]}
- profile(x,z){const a=this.isAnterior()?.76:1.00,b=this.isAnterior()?.56:.86;return Math.pow(Math.pow(Math.abs(x)/a,4)+Math.pow(Math.abs(z)/b,4),.25)}
+ constructor(caseKey,fdi=null){this.caseKey=caseKey;this.fdi=/^[1-4][1-8]$/.test(String(fdi))?String(fdi):null;this.mode=CASES[caseKey]?.procedure||'restoration';this.bur=[];this.crownDepth=1.13;this.rootLength=1.52}
+ toothClass(){const n=Number(this.fdi?.[1]);return !n?null:n<=2?'incisor':n===3?'canine':n<=5?'premolar':'molar'}
+ isUpper(){return this.fdi?Number(this.fdi[0])<=2:this.isUpperMolar()}
+ isLeft(){return this.fdi?['2','3'].includes(this.fdi[0]):false}
+ isAnterior(){return this.fdi?this.toothClass()==='incisor'||this.toothClass()==='canine':this.caseKey==='anterior'}
+ isUpperMolar(){return this.fdi?this.toothClass()==='molar'&&this.isUpper():this.caseKey==='molar'||this.caseKey==='crown'}
+ rootCenters(){return this.toothClass()==='premolar'?[[0,-.13],[0,.15]]:this.isAnterior()?[[0,0]]:this.isUpperMolar()?[[-.49,-.33],[.47,-.34],[.02,.41]]:[[-.41,-.10],[.41,-.10]]}
+ profile(x,z){const cls=this.toothClass();const a=cls==='incisor'?.70:cls==='canine'?.78:cls==='premolar'?.84:this.isAnterior()?.76:1.00,b=cls==='incisor'?.42:cls==='canine'?.57:cls==='premolar'?.72:this.isAnterior()?.56:.86;return Math.pow(Math.pow(Math.abs(x)/a,4)+Math.pow(Math.abs(z)/b,4),.25)}
  height(x,z){const a=this.isAnterior()?0:.242;
    const cusp=(u,w)=>Math.exp(-SQ((x-u)/.32)-SQ((z-w)/.31));
    let h=1.016+a*(cusp(-.53,-.45)+.96*cusp(.53,-.45)+.90*cusp(-.53,.45)+.83*cusp(.53,.45));
@@ -31,7 +34,9 @@ class ToothSolid{
      h-=.059*Math.exp(-SQ(x/.075)-SQ(z/.70)); // central fissure
      h-=.034*Math.exp(-SQ(x/.68)-SQ(z/.082)); // intersecting groove
    }
-   if(this.isAnterior())h=.99+.024*Math.cos(x*3.0)-.022*SQ(z/.55);
+   if(this.isAnterior())h=this.toothClass()==='canine'?.89+.18*Math.exp(-SQ(x/.32)-SQ(z/.36)):.99+.024*Math.cos(x*3.0)-.022*SQ(z/.55);
+   if(this.toothClass()==='premolar')h=1.02+.23*Math.exp(-SQ(x/.41)-SQ((z+.38)/.32))+.14*Math.exp(-SQ(x/.41)-SQ((z-.39)/.34));
+   if(this.toothClass()==='molar'&&!this.isUpper())h+=.09*Math.exp(-SQ((x-.72)/.28)-SQ(z/.30));
    return h;
  }
  crown(x,y,z,inner=0){const r=this.profile(x,z);const vertical=clamp((y+.20)/1.44,0,1);const bulge=.79+.24*Math.sin(vertical*Math.PI*.88);const p=(r/bulge-1+inner);const top=y-this.height(x,z)+inner*.65;
@@ -149,7 +154,7 @@ class VolumeMeshWebGL{
  }
 }
 class ProceduralVolumeLab{
- constructor(host,app){this.host=host;this.app=app;this.caseKey='molar';this.solid=new ToothSolid('molar');this.mesh=null;this.section=false;this.yaw=-.42;this.pitch=.35;this.zoom=1.0;this.mode='orbit';this.depth=.93;this.burRadius=.125;this.strokes=0;this.distance=0;this.demoRunning=false;this.demoTick=0;this.history=[];this.physics={speed:.65,load:.45,tilt:0,trace:[],model:'normalized-surrogate-v1',calibrated:false};this.active=false;this.previewPoint=null;this.lastPointer=null;this.status='Bereit';this.init();this.reset();}
+ constructor(host,app){this.host=host;this.app=app;this.caseKey='molar';this.fdiTooth=null;this.fdiRecords={};try{this.fdiRecords=JSON.parse(localStorage.getItem('kliniklab-fdi-treatment-v1')||'{}')||{}}catch{}this.solid=new ToothSolid('molar');this.mesh=null;this.section=false;this.yaw=-.42;this.pitch=.35;this.zoom=1.0;this.mode='orbit';this.depth=.93;this.burRadius=.125;this.strokes=0;this.distance=0;this.demoRunning=false;this.demoTick=0;this.history=[];this.physics={speed:.65,load:.45,tilt:0,trace:[],model:'normalized-surrogate-v1',calibrated:false};this.active=false;this.previewPoint=null;this.lastPointer=null;this.status='Bereit';this.init();this.reset();}
  init(){this.host.innerHTML=`<div class="vl-inner">
  <div class="vl-topline"><div><span class="vl-eyebrow">KP PRAKTISCH · 3D VOLUME ENGINE</span><h2 id="vl-title">16 · MOD / Komposit</h2><div class="vl-sub" id="vl-sub">Originales 3D-Zahnmodell · modellhafte Anatomie</div></div><div class="vl-top-actions"><button id="vl-back" class="vl-chip">← Klinik</button><button id="vl-section" class="vl-chip" title="Open an anatomical cross section">◒ Schnittbild</button><button id="vl-reset" class="vl-chip" title="Restore the uncut tooth">↺ Neustart</button></div></div>
  <div class="vl-viewport"><canvas id="vl-canvas" width="900" height="640" aria-label="Rotatable three-dimensional tooth with editable enamel dentin and pulp layers" tabindex="0"></canvas><canvas id="vl-gpu" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none"></canvas><div class="vl-legend"><span><i style="background:#f2e9d5"></i> Schmelz</span><span><i style="background:#e0b572"></i> Dentin</span><span><i style="background:#b64a58"></i> Pulpa</span><span><i style="background:#a17b63"></i> Wurzel</span></div><div id="vl-pointer" class="vl-bur-indicator" aria-hidden="true"></div><div id="vl-slice-frame" class="vl-slice-frame" hidden><span>ORIGINALER SCHNITT · z = 0</span><canvas id="vl-slice" width="180" height="220" aria-label="Computed layer-by-layer longitudinal tooth section"></canvas></div><div id="vl-render-message" class="vl-render-message">3D-VOLUMEN · Drehen zum Inspizieren</div></div>
@@ -168,7 +173,25 @@ class ProceduralVolumeLab{
   this.canvas.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){this.yaw+=(e.key==='ArrowLeft'?-1:1)*.12;this.render()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){this.pitch=clamp(this.pitch+(e.key==='ArrowUp'?-1:1)*.12,-1.28,1.28);this.render()}});
   new ResizeObserver(()=>{if(this.active)this.render()}).observe(this.host);
  }
- setCase(key){key=mapping[key]||'molar';if(key===this.caseKey)return;this.caseKey=key;this.solid=new ToothSolid(key);this.reset();}
+ // Each FDI tooth has an independent durable normalized teaching record.
+ // No patient data are stored here. Malformed/blocked storage is ignored.
+ persistTooth(){
+  if(!this.fdiTooth||!this.solid)return;
+  this.fdiRecords[this.fdiTooth]={bur:this.solid.bur.map(b=>({p:b.p.slice(),r:b.r})),strokes:this.strokes,distance:this.distance};
+  try{localStorage.setItem('kliniklab-fdi-treatment-v1',JSON.stringify(this.fdiRecords))}catch{}
+ }
+ setTooth(fdi){
+  if(!/^[1-4][1-8]$/.test(String(fdi)))return false;
+  fdi=String(fdi);if(this.fdiTooth===fdi)return true;
+  this.persistTooth();
+  this.fdiTooth=fdi;
+  this.solid=new ToothSolid(this.caseKey,fdi);
+  const saved=this.fdiRecords[fdi];
+  if(saved){this.solid.bur=(saved.bur||[]).filter(b=>Array.isArray(b.p)&&b.p.length===3&&b.p.every(Number.isFinite)&&Number.isFinite(b.r)&&b.r>0).slice(0,260).map(b=>({p:b.p.slice(),r:b.r}));this.strokes=saved.strokes||0;this.distance=saved.distance||0}
+  else{this.strokes=0;this.distance=0}
+  this.rebuild();return true;
+ }
+ setCase(key){key=mapping[key]||'molar';if(key===this.caseKey)return;this.persistTooth();this.caseKey=key;this.solid=new ToothSolid(key,this.fdiTooth);this.reset();}
  setMode(mode){if(mode==='drill'){this.topView(true);}this.mode=mode;$('vl-orbit').classList.toggle('is-on',mode==='orbit');$('vl-drill').classList.toggle('is-on',mode==='drill');this.status=mode==='drill'?'Zeiger ziehen → sphärischen Fräser am gewählten Niveau führen':'Mit Maus/Touch drehen · Scrollen zum Zoomen';this.render()}
  topView(quiet=false){this.yaw=0;this.pitch=1.52;this.render();if(!quiet)this.status='Okklusale Ansicht · Präparieren für Materialabtrag wählen'}
  toggleSection(){this.section=!this.section;$('vl-section').classList.toggle('is-on',this.section);$('vl-slice-frame').hidden=!this.section;if(this.section){this.yaw=0;this.pitch=.08;}else{this.yaw=-.48;this.pitch=.32;}this.rebuild();}
@@ -177,7 +200,7 @@ class ProceduralVolumeLab{
  exportReport(){const metrics=this.measures();const data={project:'KlinikLab – volumetric procedure lab',case:this.caseKey,procedure:CASES[this.caseKey].name,createdAt:new Date().toISOString(),geometry:{method:'sampled implicit solid; marching tetrahedra',meshTriangles:this.mesh?.count||0,units:'normalized, not calibrated',clinicallyReviewed:false},metrics,virtualBurPhysics:{parameters:{speed:this.physics.speed,load:this.physics.load,tilt:this.physics.tilt},trace:this.physics.trace,units:'arbitrary/uncalibrated',measurementsFromRealHardware:false},burPath:this.solid.bur.map(v=>({x:+v.p[0].toFixed(3),y:+v.p[1].toFixed(3),z:+v.p[2].toFixed(3),radius:+v.r.toFixed(3)})),limitations:['Does not measure forces, RPM, bur angulation, haptics, anatomy-specific clinical depth or infection control','Model has not been validated by a licensed dentist','For endodontics, modeled pulp chamber access is expected, not automatically a complication']};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`KlinikLab_${this.caseKey}_3D_training_report.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);this.status='Trainingsbericht exportiert';}
  undo(){if(this.solid.bur.length){this.solid.bur.pop();this.physics.trace.pop();this.strokes=Math.max(0,this.strokes-1);this.rebuild();}}
- rebuild(fullDetail=false){this.revision=(this.revision||0)+1;
+ rebuild(fullDetail=false){this.persistTooth();this.revision=(this.revision||0)+1;
   const moving=this.mode==='drill'&&this.solid.bur.length>0&&!fullDetail;
   this.mesh=VoxelMesher.build(this.solid,this.section,moving?27:35);
   if(this.gpu){this.solid.section=this.section;this.gpu.update(this.mesh,this.solid);}this.updateMetrics();if(this.section)this.drawSectionSlice();if(this.active)this.render()}
