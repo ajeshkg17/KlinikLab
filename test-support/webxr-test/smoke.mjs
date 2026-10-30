@@ -135,13 +135,26 @@ try{
            const ctx=canvas.getContext('2d'),image=ctx.createImageData(w,h);
            for(let row=0;row<h;row++)image.data.set(pixels.subarray(row*w*4,(row+1)*w*4),(h-1-row)*w*4);
            ctx.putImageData(image,0,0);
-           // Count warm crown/gingival pixels from the ACTUAL XR framebuffer,
-           // not projected geometric bounds. Dark empty/room pixels cannot pass.
-           let anatomyPixels=0;
+           // Examination-only image is dark except for dental surfaces.
+           // Measure the TRUE raster footprint in each eye (top-origin bounds),
+           // including centroid and margins. Clipped fragments must fail.
+           let anatomyPixels=0,sumX=0,sumY=0;
+           let minX=w,minY=h,maxX=-1,maxY=-1;
            for(let k=0;k<pixels.length;k+=4){
              const r=pixels[k],g=pixels[k+1],b=pixels[k+2];
-             if(r>75&&r>g*1.07&&r>b*1.15)anatomyPixels++;
+             if(r>48&&r+g+b>145&&r>b*1.02){
+               const n=k/4,x=n%w,y=h-1-Math.floor(n/w);
+               anatomyPixels++;sumX+=x;sumY+=y;
+               minX=Math.min(minX,x);maxX=Math.max(maxX,x);
+               minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+             }
            }
+           const rasterBounds=anatomyPixels?{
+             count:anatomyPixels,
+             left:minX/w,right:maxX/w,top:minY/h,bottom:maxY/h,
+             width:(maxX-minX+1)/w,height:(maxY-minY+1)/h,
+             centerX:sumX/anatomyPixels/w,centerY:sumY/anatomyPixels/h
+           }:null;
            // Project all five tool centers into the *actual submitted* eye matrices.
            const project=point=>{
              const mul=(m,v)=>[0,1,2,3].map(r=>m[r]*v[0]+m[r+4]*v[1]+m[r+8]*v[2]+m[r+12]*v[3]);
@@ -153,21 +166,47 @@ try{
              const m=t.meshes[0],p=m.model?[m.model[12],m.model[13],m.model[14]]:m.p;
              return {name:t.name,owner:t.owner,hover:t.hover,projection:project(p)};
            });
-           // Project actual crown mesh bounds in each submitted stereo eye.
-           const crowns=this.archMeshes.flat().filter(m=>m.tag==='crown'&&!m.hidden);
-           const vertices=crowns.flatMap(m=>{
-             const points=[];
-             for(const dx of [-1,1])for(const dy of [0,1])for(const dz of [-1,1])
-               points.push(project([m.p[0]+dx*m.s[0],m.p[1]+dy*(m.kind.includes('_0_')?-1:1)*.17*m.s[1],m.p[2]+dz*m.s[2]]));
-             return points;
-           }).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.inFrustum);
-           const anatomyBounds=vertices.length?{
-             width:Math.max(...vertices.map(p=>p.x))-Math.min(...vertices.map(p=>p.x)),
-             height:Math.max(...vertices.map(p=>p.y))-Math.min(...vertices.map(p=>p.y)),
-             count:vertices.length,magnification:this.anatomyDisplayMagnification
-           }:null;
+           // When enlarged, inspect EVERY original CPU vertex AFTER its
+           // actual model transform, then project with submitted XR matrices.
+           // Do not discard clipped points when calculating outer bounds.
+           let anatomyBounds=null;
+           if(this.anatomyDisplayMagnification===8){
+             let minPx=Infinity,minPy=Infinity,maxPx=-Infinity,maxPy=-Infinity;
+             let count=0,inFrustum=0,behind=0;
+             for(const m of this.archMeshes.flat().filter(m=>!m.hidden)){
+               const data=this.geom[m.kind]?.cpu;if(!data)continue;
+               const a=m.rot?.[1]||0,c=Math.cos(a),sn=Math.sin(a);
+               const M=m.model;
+               for(let j=0;j<data.length;j+=8){
+                 const x=data[j],y=data[j+1],z=data[j+2];
+                 const world=M?
+                   [M[0]*x+M[4]*y+M[8]*z+M[12],M[1]*x+M[5]*y+M[9]*z+M[13],M[2]*x+M[6]*y+M[10]*z+M[14]]:
+                   [m.p[0]+c*m.s[0]*x+sn*m.s[2]*z,
+                    m.p[1]+m.s[1]*y,
+                    m.p[2]-sn*m.s[0]*x+c*m.s[2]*z];
+                 const pr=project(world);count++;
+                 if(!Number.isFinite(pr.x)||!Number.isFinite(pr.y)){behind++;continue}
+                 if(pr.inFrustum)inFrustum++;
+                 minPx=Math.min(minPx,pr.x);maxPx=Math.max(maxPx,pr.x);
+                 minPy=Math.min(minPy,pr.y);maxPy=Math.max(maxPy,pr.y);
+               }
+             }
+             anatomyBounds=count?{
+               width:maxPx-minPx,height:maxPy-minPy,
+               minX:minPx,maxX:maxPx,minY:minPy,maxY:maxPy,
+               count,inFrustum,behind,magnification:this.anatomyDisplayMagnification
+             }:null;
+           }else{
+             const centers=this.archMeshes.flat().filter(m=>m.tag==='crown'&&!m.hidden)
+               .map(m=>project(m.p)).filter(p=>p.inFrustum);
+             anatomyBounds=centers.length?{
+               width:Math.max(...centers.map(p=>p.x))-Math.min(...centers.map(p=>p.x)),
+               height:Math.max(...centers.map(p=>p.y))-Math.min(...centers.map(p=>p.y)),
+               count:centers.length,inFrustum:centers.length,magnification:1
+             }:null;
+           }
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -178,7 +217,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -203,7 +242,7 @@ try{
    const duplicateOf=captureHashes.get(sha256)||null;
    await writeFile(path.join(out,filename),png);
    if(!duplicateOf)captureHashes.set(sha256,filename);
-   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
+   result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
@@ -323,19 +362,43 @@ try{
  // Phase 6 close-up is a real rendered XR eye frame in explicit teaching
  // magnification, not a resized illustration or a reused room screenshot.
  await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(true));
- await page.waitForFunction(()=>window.kliniklab.scene.anatomyDisplayMagnification===8
-   &&window.kliniklab.scene.archMeshes.flat().some(m=>m.tag==='crown'&&m.s[0]>.025));
+ await page.waitForFunction(()=>{
+   const s=window.kliniklab.scene;
+   return s.anatomyDisplayMagnification===8&&!s.teachingPlacementPending
+     &&s.teachingPlacementInfo?.bounds?.vertices>1000
+     &&s.archMeshes.flat().some(m=>m.tag==='crown'&&m.s[0]>.025);
+ },null,{timeout:Math.max(15000,config.collectionDeadlineMs)});
  await captureXR('05-mirror-release-return.png','Anatomy close-up: near-field explicit 8x teaching examination');
  const detailAnatomy=result.captureManifest.at(-1).eyeAnatomy;
- const eyePixels=result.captureManifest.at(-1).eyeAnatomyPixels;
- assert(eyePixels?.length===2&&eyePixels.every(n=>n>=500),
-   'Actual XR framebuffer lacks visible crown/gingival pixels in both eyes: '+JSON.stringify(eyePixels));
- result.checks.push('Both freshly rendered XR eye framebuffers contain >=500 warm dental-surface pixels');
- assert(detailAnatomy?.length===2&&detailAnatomy.every((x,i)=>x&&x.count>=8
-   &&x.magnification===8&&x.width>.16&&x.height>.12
-   &&x.width>overviewAnatomy[i].width*2),
-   'Rendered near-field anatomy must occupy significant visible area in BOTH stereo eyes');
- result.checks.push('Both rendered eyes show >=2x projected arch width and useful close-up bounds');
+ const raster=result.captureManifest.at(-1).eyeAnatomyRaster;
+ const examinationPlacement=await page.evaluate(()=>{
+   const s=window.kliniklab.scene;return {
+     mode:s.anatomyDisplayMagnification,pending:s.teachingPlacementPending,
+     info:s.teachingPlacementInfo,
+     fdiIds:Object.keys(s.teeth).sort(),
+     numberOfPickTargets:s.pickables.filter(p=>p.key?.startsWith('tooth:')).length
+   };
+ });
+ result.anatomyExamination={placement:examinationPlacement,projected:detailAnatomy,raster};
+ assert.equal(examinationPlacement.mode,8);
+ assert.equal(examinationPlacement.pending,false,'XR teaching placement was never committed');
+ assert.equal(examinationPlacement.fdiIds.length,32);
+ assert(detailAnatomy?.length===2&&detailAnatomy.every(x=>
+   x?.count>10000&&x.inFrustum===x.count&&x.behind===0
+   &&x.minX>-.80&&x.maxX<.80&&x.minY>-.78&&x.maxY<.78
+   &&x.width>.24&&x.height>.15),
+   'Post-model-transform XR vertices clipped or not centered in both eyes: '+JSON.stringify(detailAnatomy));
+ result.checks.push('All real post-transform dental vertices fully inside both stereo eye margins');
+ assert(raster?.length===2&&raster.every(b=>
+   b&&b.count>5000&&b.left>.10&&b.right<.90
+   &&b.top>.10&&b.bottom<.90
+   &&b.width>.20&&b.height>.14
+   &&b.centerX>.34&&b.centerX<.66&&b.centerY>.32&&b.centerY<.68),
+   'Rendered dental pixels are clipped, too small or off-center: '+JSON.stringify(raster));
+ result.checks.push('Actual dental raster is centered, contained and substantial in both stereo eyes');
+ assert(detailAnatomy.every((x,i)=>x.width>overviewAnatomy[i].width*2),
+   'Teaching scale did not enlarge the arch over normal overview');
+ result.checks.push('Enlarged complete dental arch spans both eyes versus normal-scale overview');
  await page.evaluate(()=>window.kliniklab.scene.setTeachingMagnification(false));
  assert.equal((await toolState('mirror')).model,null,'Released tool retained floating transform');
  result.checks.push('Grip release returns mirror to tray');
