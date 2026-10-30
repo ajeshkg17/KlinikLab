@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase7-fdi-saved-state-20261030-01",
-  "commit": "e25046ebe34412972a5d523555095dc8dd5b3359",
+  "jobId": "pc-xr-phase7-fdi-persistence-20261030-02",
+  "commit": "f37f2a481d57892a5e216f8b56d319acb1bb5c5c",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
