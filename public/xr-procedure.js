@@ -66,9 +66,12 @@ class XRToothPractice {
       if(solid.field(p[0],p[1],p[2],false)<=0)return {p,world:this.modelToWorld(p),distance:t};
     }return null;
   }
-  rayForFrame(frame,source){if(!source.targetRaySpace)return null;const pose=frame.getPose(source.targetRaySpace,this.scene.xrRef);return pose?this.poseRay(pose):null;}
+  rayForFrame(frame,source){if(!frame?.getPose||!source?.targetRaySpace||!this.scene.xrRef)return null;
+    try{const pose=frame.getPose(source.targetRaySpace,this.scene.xrRef);return pose?this.poseRay(pose):null}catch{return null}
+  }
   onSelectStart(event,frame){
-    const ray=frame&&this.rayForFrame(frame,event.inputSource);if(!ray)return false;
+    if(frame?.session?.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return true;}
+    const ray=this.rayForFrame(frame,event?.inputSource);if(!ray)return false;
     const hit=this.scene.getRayHit(ray.o,ray.d);
     if(hit?.key==='xrprep:toggle'){this.toggle();return true}
     if(!this.active)return false;
@@ -81,10 +84,13 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
+    if(frame.session.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return;}
     if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
+    const connected=new Set(frame.session.inputSources);
+    for(const source of this.triggers)if(!connected.has(source))this.triggers.delete(source);
     this.syncCase();if(this.dirty&&t-this.lastMeshAt>230)this.updateMesh();
     let best=null;
-    for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray)continue;
+    for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray){this.triggers.delete(source);continue;}
       const hit=this.traceSurface(ray.o,ray.d);if(hit){const obstacle=this.scene.getRayHit(ray.o,ray.d);if(obstacle&&obstacle.distance<hit.distance-.025)continue;if(!best)best=hit;
         if(this.triggers.has(source)&&t-(this.lastCut?.time||0)>125){this.cut(hit,source);}
       }}

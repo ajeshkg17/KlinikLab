@@ -255,6 +255,9 @@
       this.canvas.style.display=in3D?'block':'none';
       if(!in3D){
         for(const m of this.jawMeshes)m.isVisible=false;
+        // Keep actual licensed visibility counters and mesh flags in sync when
+        // switching to 2D or XR. The original render/picking canvas is untouched.
+        window.KlinikRealMesh?.sync(this);
         return;
       }
       for(let arch=0;arch<this.jawMeshes.length;arch++){
@@ -306,7 +309,11 @@
       });
     }
     enable(){this.visible=true;this.canvas.style.display='block';this.engine.resize();status.mode='babylon';status.ready=true;status.error=null;this.startRealTeeth()}
-    disable(){this.visible=false;this.canvas.style.display='none';status.mode='classic'}
+    disable(){
+      this.visible=false;this.canvas.style.display='none';status.mode='classic';
+      // The optional display no longer draws any licensed teeth.
+      if(window.KlinikRealTeeth)window.KlinikRealTeeth.visibleInstances=0;
+    }
   }
 
   function init(){

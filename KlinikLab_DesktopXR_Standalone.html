@@ -429,7 +429,8 @@ class DentalScene {
     this.box([-1.54,.9,-2.5],[.89,.08,.68],'#b5cccc');this.cy([-1.54,.45,-2.5],[.1,.84,.1],'#aec7c6');
     for(const [i,n]of ['putty','lightbody','heavybody','mediumbody'].entries()){let x=-1.83+i*.19;this.cy([x,1.015,-2.5],[.105,.16,.105],['#e2b88d','#8bb7e2','#aad7a5','#cda6d0'][i],{key:`tool:${n}`,radius:.135});this.cy([x,1.103,-2.5],[.11,.035,.11],'#ebebe0',{key:`tool:${n}`,radius:.09})}
     this.vrCompactMeshes=this.meshes.slice(vrPropsStart);
-    this.xrComfortScale=.78;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
+    this.xrComfortConfig={furniture:{scale:.78,pivot:[0,1.02,-1.83]},lessonBoard:{scale:.68,pivot:[-1.66,1.51,-2.13]}};
+    this.xrComfortScale=this.xrComfortConfig.furniture.scale;this.xrComfort={active:false,scale:1,objects:0,lessonScale:1};this.xrComfortSnapshot=null;
     this.focusDecor=this.meshes.filter(m=>!this.archMeshes[0].includes(m)&&!this.archMeshes[1].includes(m));
     const vrMeshesStart=this.meshes.length;
     // Interactive XR lesson board - all its buttons are also available via standard HTML.
@@ -449,12 +450,22 @@ class DentalScene {
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
-  getRayHit(o,d){let hit=null;for(const p of this.pickables){if(p.mesh.hidden)continue;let r=null;
+  getRayHit(o,d,allow=null){let hit=null;for(const p of this.pickables){if(p.mesh.hidden||(allow&&!allow(p)))continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
       if(p.key.startsWith('module:')||p.key.startsWith('answer:')||p.key.startsWith('guide:')){
-        const faceZ=p.p[2]+p.mesh.s[2]*.5;
-        if(Math.abs(d[2])>1e-6){const t=(faceZ-o[2])/d[2];if(t>=0){const x=o[0]+t*d[0],y=o[1]+t*d[1];if(Math.abs(x-p.p[0])<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t}}
+        // A tutorial panel can face the headset at any yaw. Intersect the
+        // front plane and check its actual rotated rectangular dimensions.
+        const yaw=p.mesh.rot?.[1]||0,c=Math.cos(yaw),s=Math.sin(yaw);
+        const denom=d[0]*s+d[2]*c;
+        if(Math.abs(denom)>1e-6){
+          const t=((p.p[0]-o[0])*s+(p.p[2]-o[2])*c+p.mesh.s[2]*.5)/denom;
+          if(t>=0){
+            const dx=o[0]+t*d[0]-p.p[0],dz=o[2]+t*d[2]-p.p[2];
+            const localX=c*dx-s*dz,y=o[1]+t*d[1];
+            if(Math.abs(localX)<=p.mesh.s[0]*.5&&Math.abs(y-p.p[1])<=p.mesh.s[1]*.5)r=t;
+          }
+        }
       }else r=M3.raySphere(o,d,p.p,p.radius);
       if(r!==null&&(!hit||r<hit.distance))hit={key:p.key,distance:r,point:M3.add(o,M3.mul(d,r))}
     }return hit}
@@ -465,9 +476,10 @@ class DentalScene {
     if(Boolean(active)===this.xrComfort.active)return;
     if(active){
       const snapshot=[];
+      const layout=this.xrComfortConfig||{furniture:{scale:this.xrComfortScale,pivot:[0,1.02,-1.83]},lessonBoard:{scale:.68,pivot:[-1.66,1.51,-2.13]}};
       const groups=[
-        {meshes:this.vrCompactMeshes,pivot:[0,1.02,-1.83],factor:this.xrComfortScale},
-        {meshes:this.xrBoardMeshes,pivot:[-1.66,1.51,-2.13],factor:.68}
+        {meshes:this.vrCompactMeshes,pivot:layout.furniture.pivot,factor:layout.furniture.scale},
+        {meshes:this.xrBoardMeshes,pivot:layout.lessonBoard.pivot,factor:layout.lessonBoard.scale}
       ];
       for(const group of groups){
         const members=new Set(group.meshes);
@@ -486,7 +498,7 @@ class DentalScene {
         }
       }
       this.xrComfortSnapshot=snapshot;
-      this.xrComfort={active:true,scale:this.xrComfortScale,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:.68};
+      this.xrComfort={active:true,scale:groups[0].factor,objects:snapshot.filter(v=>v.kind==='mesh').length,lessonScale:groups[1].factor};
     }else{
       for(const item of this.xrComfortSnapshot||[]){
         item.object.p=item.p.slice();
@@ -510,32 +522,55 @@ class DentalScene {
   draw(view,proj){const gl=this.gl,L=this.loc;gl.uniformMatrix4fv(L.uView,false,new Float32Array(view));gl.uniformMatrix4fv(L.uProj,false,new Float32Array(proj));const opaque=this.meshes.filter(m=>!m.hidden&&m.alpha>=1),transparent=this.meshes.filter(m=>!m.hidden&&m.alpha<1);for(const m of [...opaque,...transparent]){if(m.alpha<1){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false)}else{gl.disable(gl.BLEND);gl.depthMask(true)}const g=this.geom[m.kind];gl.bindBuffer(gl.ARRAY_BUFFER,g.buffer);for(const [a,k] of [[this.attr.pos,0],[this.attr.normal,3],[this.attr.uv,6]]){gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,k===6?2:3,gl.FLOAT,false,32,k*4)}const model=m.model||M3.trs(m.p,m.rot,m.s);gl.uniformMatrix4fv(L.uModel,false,new Float32Array(model));const inv=M3.inverse(model);gl.uniformMatrix3fv(L.uNormal,false,new Float32Array([inv[0],inv[4],inv[8],inv[1],inv[5],inv[9],inv[2],inv[6],inv[10]]));gl.uniform3fv(L.uColor,m.color);gl.uniform1f(L.uAlpha,m.alpha);gl.uniform1f(L.uTextured,m.tex?1:0);gl.uniform1f(L.uUnlit,m.unlit?1:0);gl.uniform1f(L.uFinish,m.finish);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,m.tex||this.whiteTex);gl.uniform1i(L.uTexture,0);gl.drawArrays(gl.TRIANGLES,0,g.count)}gl.disable(gl.BLEND);gl.depthMask(true)}
   loop(){this.gl.enable(this.gl.DEPTH_TEST);this.gl.clearColor(.038,.09,.13,1);let prev=0;const tick=(time,frame)=>{if(frame&&this.xrSession){this.xrFrame(time,frame)}else{this.resize();const eye=this.camera();for(const m of this.focusDecor)m.hidden=this.mode==='teeth';if(this.mode!=='teeth'){this.leftWall.hidden=eye[0]<-3.5;this.rightWall.hidden=eye[0]>3.5;}const gl=this.gl;gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);this.draw(this.view(),M3.perspective(.87,this.canvas.width/this.canvas.height,.05,100))}this.frameCount++};this.animation=tick;const animate=(t)=>{if(!this.xrSession){tick(t);requestAnimationFrame(animate)}};requestAnimationFrame(animate)}
   async enterVR(){
-    if(!navigator.xr?.requestSession)throw Error('Immersive VR unavailable. Open the HTTPS page in Meta Quest Browser.');
+    if(this.xrSession)return this.xrSession;
+    if(this.xrStarting)throw Error('A VR session is already starting; finish the headset prompt before trying again.');
+    if(typeof isSecureContext!=='undefined'&&!isSecureContext)throw Error('Quest VR requires HTTPS (localhost is allowed for development). Open the secure page in Meta Quest Browser.');
+    if(!navigator.xr?.requestSession)throw Error('Immersive VR is unavailable on this browser/device. Use Meta Quest Browser on a compatible headset.');
+    this.xrStarting=true;
     // requestSession must begin INSIDE the click's transient user activation.
     // Do not await a support check or makeXRCompatible before requesting it.
-    const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
-    let session;
+    let session,ended=false;
     try{
-      session=await promise;const gl=this.gl;
+      const promise=navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
+      session=await promise;session.addEventListener('end',()=>{ended=true;this.handleXREnd(session)});const gl=this.gl;
       if(gl.makeXRCompatible)await gl.makeXRCompatible();
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl,{antialias:true,alpha:false,depth:true})});
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
+      if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;
       this.setXRComfort(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.xrGuide?.onEnter();
-      session.addEventListener('selectstart',e=>{const frame=e.frame||this.latestFrame;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=frame?.getPose(e.inputSource.targetRaySpace,this.xrRef);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>this.xrGuide?.onSqueezeStart(e));session.addEventListener('selectend',e=>this.xrPrep?.onSelectEnd(e));this.xrPrep?.onEnter();
-      session.addEventListener('end',()=>{this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();for(const m of this.xrBoardMeshes)m.hidden=true;requestAnimationFrame(t=>this.resumeDesktop(t))});
+      const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
+      session.addEventListener('visibilitychange',()=>{if(this.xrSession!==session||session.visibilityState==='visible')return;this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep){this.xrPrep.lastCut=null;if(this.xrPrep.tip)this.xrPrep.tip.hidden=true;}});
+      session.addEventListener('selectstart',e=>{if(!acceptsInput())return;const frame=e.frame||this.latestFrame;if(frame?.session&&frame.session!==session)return;if(this.xrGuide?.onSelectStart(e,frame))return;if(this.xrPrep?.onSelectStart(e,frame))return;const pose=this.getXRInputPose(frame,e.inputSource);if(pose)this.pickXR(pose)});session.addEventListener('squeezestart',e=>{if(acceptsInput())this.xrGuide?.onSqueezeStart(e)});session.addEventListener('selectend',e=>{if(this.xrSession===session)this.xrPrep?.onSelectEnd(e)});this.xrPrep?.onEnter();
       session.requestAnimationFrame(this.xrLoop.bind(this));return session;
-    }catch(err){if(session)try{await session.end()}catch{}throw err}
+    }catch(err){
+      if(session){try{await session.end()}catch{}this.handleXREnd(session)}
+      if(err?.name==='NotAllowedError'||err?.name==='SecurityError')throw Error('Quest VR permission was denied or blocked. Use the Enter VR button in Meta Quest Browser.');
+      if(err?.name==='NotSupportedError')throw Error('Immersive VR is not supported by this headset/browser.');
+      throw err;
+    }finally{this.xrStarting=false}
+  }
+  handleXREnd(session){
+    if(this.xrSession!==session)return;
+    this.xrGuide?.onExit();this.xrPrep?.onExit();this.setXRComfort(false);
+    this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();
+    for(const m of this.xrBoardMeshes)m.hidden=true;
+    requestAnimationFrame(t=>this.resumeDesktop(t));
   }
   resumeDesktop(t){if(!this.xrSession){this.animation(t);requestAnimationFrame(this.resumeDesktop.bind(this))}}
-  xrLoop(t,frame){if(!this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  xrLoop(t,frame){if(!this.xrSession||frame?.session!==this.xrSession)return;this.latestFrame=frame;this.xrFrame(t,frame);this.xrSession.requestAnimationFrame(this.xrLoop.bind(this))}
+  getXRInputPose(frame,source){
+    if(!frame?.getPose||!source?.targetRaySpace||!this.xrRef)return null;
+    try{return frame.getPose(source.targetRaySpace,this.xrRef)||null}catch{return null}
+  }
   pickXR(pose){const q=pose.transform.orientation,p=pose.transform.position;const origin=[p.x,p.y,p.z],dir=this.rotateByQuat([0,0,-1],q),hit=this.getRayHit(origin,dir);if(hit)this.onPick(hit.key)}
   rotateByQuat(v,q){const u=[q.x,q.y,q.z],t=M3.mul(M3.cross(u,v),2);return M3.add(v,M3.add(M3.mul(t,q.w),M3.cross(u,t)))}
-  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0]}}
-  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose)return;let n=0;for(const source of frame.session.inputSources){if(n>=this.xrControllers.length)break;const p=frame.getPose(source.targetRaySpace,this.xrRef);if(!p)continue;const t=p.transform,c=this.xrControllers[n++];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
-    for(let i=n;i<2;i++){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
+  clearControllers(){for(const c of this.xrControllers){c.hand.p=[0,-20,0];c.ray.p=[0,-20,0];c.ray.model=null}}
+  xrFrame(t,frame){const gl=this.gl,pose=frame.getViewerPose(this.xrRef);if(!pose){this.clearControllers();this.xrPrep?.triggers?.clear();if(this.xrPrep?.tip)this.xrPrep.tip.hidden=true;return}this.xrGuide?.placeForViewer(pose);const used=new Set();for(const source of frame.session.inputSources){const slot=source.handedness==='left'?0:source.handedness==='right'?1:[0,1].find(i=>!used.has(i));if(slot===undefined||used.has(slot))continue;const p=this.getXRInputPose(frame,source);if(!p)continue;used.add(slot);const t=p.transform,c=this.xrControllers[slot];c.hand.p=[t.position.x,t.position.y,t.position.z];const dir=this.rotateByQuat([0,0,-1],t.orientation);const center=M3.add(c.hand.p,M3.mul(dir,.75));c.ray.p=center;const xAxis=M3.unit(M3.cross(Math.abs(dir[2])>.95?[0,1,0]:[0,0,1],dir)),zAxis=M3.unit(M3.cross(xAxis,dir));const e=.006,L=1.5;c.ray.model=[xAxis[0]*e,xAxis[1]*e,xAxis[2]*e,0,dir[0]*L,dir[1]*L,dir[2]*L,0,zAxis[0]*e,zAxis[1]*e,zAxis[2]*e,0,center[0],center[1],center[2],1]}
+    for(let i=0;i<this.xrControllers.length;i++)if(!used.has(i)){this.xrControllers[i].hand.p=[0,-20,0];this.xrControllers[i].ray.p=[0,-20,0];this.xrControllers[i].ray.model=null}
     this.xrPrep?.onXRFrame(frame,t);
     const layer=frame.session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.enable(gl.DEPTH_TEST);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);for(const view of pose.views){const vp=layer.getViewport(view);gl.viewport(vp.x,vp.y,vp.width,vp.height);this.draw(view.transform.inverse.matrix,view.projectionMatrix)}
   }
@@ -973,7 +1008,7 @@ function app(){return window.kliniklab}
 function data(){return catalog[app()?.caseData?.archetype||app()?.caseData?.id||'molar']||catalog.molar}
 function open(){current=data();stage=0;playing=false;const m=document.getElementById('vl-overlay');m.hidden=false;document.body.classList.add('vl-open');document.getElementById('vl-close').focus();draw()}
 function close(){const m=document.getElementById('vl-overlay');m.hidden=true;document.body.classList.remove('vl-open');document.getElementById('vl-media').innerHTML='';playing=false}
-function draw(){const d=current||data();document.getElementById('vl-title').textContent=d.title;document.getElementById('vl-summary').textContent=d.meta;
+function draw(){const d=current||data();document.getElementById('vl-video-title').textContent=d.title;document.getElementById('vl-summary').textContent=d.meta;
  document.getElementById('vl-clip-list').innerHTML=d.videos.map((v,i)=>`<button class="vl-clip ${i===stage?'selected':''}" data-vl-video="${i}" aria-pressed="${i===stage?'true':'false'}"><span class="vl-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(v.name)}</b><small>${esc(v.creator)} · ${esc(v.type)}</small></span></button>`).join('');
  // Every citation/credit and video link stays visible whether embedding works or not.
  const v=d.videos[Math.min(stage,d.videos.length-1)];
@@ -1022,7 +1057,7 @@ function inject(){if(document.getElementById('vl-overlay'))return;
  `;document.head.appendChild(st);
  const button=document.createElement('button');button.id='vl-trigger';button.className='btn tiny';button.textContent='▶ Procedure videos';button.title='Clinician videos and animations for the current case';document.querySelector('.header-right').insertBefore(button,document.getElementById('help'));
  const stageButton=document.createElement('button');stageButton.id='vl-stage-trigger';stageButton.textContent='▶ Videos';stageButton.title='Case-specific animation and demonstration';document.querySelector('.stage-controls').appendChild(stageButton);
- document.body.insertAdjacentHTML('beforeend',`<div id="vl-overlay" hidden><section id="vl-panel" role="dialog" aria-modal="true" aria-labelledby="vl-title"><header id="vl-head"><div><small>WATCH · REASON · PRACTISE</small><h2 id="vl-title">Procedure reference library</h2></div><button id="vl-close" aria-label="Close video guide">✕ Close</button></header><div id="vl-inner"><div><p id="vl-summary"></p><div class="vl-video" id="vl-media"></div><div class="vl-clip-list" id="vl-clip-list"></div><a id="vl-video-link" target="_blank" rel="noopener noreferrer" class="vl-action" href="#">Open selected video on YouTube ↗</a><p class="vl-help">YouTube content belongs to its creator. Clips are external references, not copied 3D assets. Embedding needs an internet connection and may be unavailable in some browsers.</p></div><div id="vl-right"><h3>What to observe before you practise</h3><div id="vl-checks"></div><p id="vl-vocab"></p><p id="vl-goal"></p></div></div><footer id="vl-foot"><small>Clinical study companion · not an official FSP/KP syllabus or evaluation</small><button class="vl-action primary" id="vl-practise">Practice this case →</button></footer></section></div>`);
+ document.body.insertAdjacentHTML('beforeend',`<div id="vl-overlay" hidden><section id="vl-panel" role="dialog" aria-modal="true" aria-labelledby="vl-video-title"><header id="vl-head"><div><small>WATCH · REASON · PRACTISE</small><h2 id="vl-video-title">Procedure reference library</h2></div><button id="vl-close" aria-label="Close video guide">✕ Close</button></header><div id="vl-inner"><div><p id="vl-summary"></p><div class="vl-video" id="vl-media"></div><div class="vl-clip-list" id="vl-clip-list"></div><a id="vl-video-link" target="_blank" rel="noopener noreferrer" class="vl-action" href="#">Open selected video on YouTube ↗</a><p class="vl-help">YouTube content belongs to its creator. Clips are external references, not copied 3D assets. Embedding needs an internet connection and may be unavailable in some browsers.</p></div><div id="vl-right"><h3>What to observe before you practise</h3><div id="vl-checks"></div><p id="vl-vocab"></p><p id="vl-goal"></p></div></div><footer id="vl-foot"><small>Clinical study companion · not an official FSP/KP syllabus or evaluation</small><button class="vl-action primary" id="vl-practise">Practice this case →</button></footer></section></div>`);
  button.onclick=open;stageButton.onclick=open;document.getElementById('vl-close').onclick=close;document.getElementById('vl-overlay').addEventListener('click',e=>{if(e.target.id==='vl-overlay')close()});
  document.getElementById('vl-practise').onclick=()=>{close();if(app())app().selectStation(4);document.querySelector('.right')?.scrollIntoView({behavior:'smooth',block:'start'});};
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('vl-overlay').hidden){e.stopPropagation();close()}});
@@ -1442,6 +1477,384 @@ window.addEventListener('DOMContentLoaded',()=>window.clinicalJourney=new Journe
 })();
 
 </script><script>
+/* KlinikLab FSP/KP language studio — fictional formative cases, pending clinician review.
+ * Rule-based keyword coverage, NOT language certification or clinical correctness.
+ * Content references and review items: docs/fsp-kp-content-review.md
+ * No browser storage, network calls, real patient data, or interference with existing scores.
+ */
+(function(root){
+ 'use strict';
+ const PHASES=[
+  {id:'anamnese',name:'Anamnese',audience:'Patientengespräch'},
+  {id:'aufklaerung',name:'Aufklärung',audience:'Patientengespräch · zusätzliche Übung'},
+  {id:'brief',name:'Befund / Arztbrief',audience:'Schriftliche Dokumentation'},
+  {id:'kollegen',name:'Arzt-Arzt',audience:'Kollegengespräch'}
+ ];
+ function criterion(label,pattern,tip){return {label:label,pattern:pattern,tip:tip};}
+ const CASES={
+  perio:{
+   title:'Zahn 46 · Zahnfleischbluten und Lockerung',
+   facts:'Fiktiver Lehrfall: Seit Monaten Zahnfleischbluten beim Putzen, Zahn 46 fühlt sich locker an. Etwa zehn Zigaretten täglich. Blutzucker wird hausärztlich kontrolliert, ein HbA1c-Wert liegt nicht vor. Seltene Interdentalreinigung. Im simulierten klinischen Befund entzündliche Zeichen und erhöhte Sondierungswerte, an Zahn 46 Lockerung. Fiktiver Röntgenbefundtext: möglicher horizontaler Knochenverlust, noch nicht quantifiziert. Staging und Grading sind aus diesen Angaben nicht gesichert.',
+   glossary:[['Sondierungstiefe','probing depth'],['Blutung auf Sondieren (BOP)','bleeding on probing'],['Attachmentverlust','loss of periodontal attachment'],['Unterstützende Parodontitistherapie','supportive periodontal care']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie auf Deutsch fünf patientengerechte Fragen zu Symptomen, Mundhygiene, Rauchen, Diabetes und Medikamenten. Behaupten Sie kein gesichertes Stadium.',
+     b2:'Seit wann blutet Ihr Zahnfleisch? Rauchen Sie?',
+     c1:'Sind Vorerkrankungen, insbesondere ein Diabetes mellitus, bekannt und wie ist dieser eingestellt?',
+     model:'Seit wann blutet Ihr Zahnfleisch? Haben Sie bemerkt, dass ein Zahn locker ist? Wie reinigen Sie Ihre Zahnzwischenräume? Rauchen Sie derzeit oder haben Sie früher geraucht? Ist bei Ihnen Diabetes bekannt, und wurde der HbA1c-Wert kontrolliert? Welche Medikamente nehmen Sie ein?',
+     checks:[
+      criterion('Verlauf und Blutung','seit wann|blut','Blutungsverlauf und Dauer erfragen.'),
+      criterion('Lockerung','locker|beweglich','Nach Zahnbeweglichkeit fragen.'),
+      criterion('Mundhygiene','zahzwischen|zahnzwischen|interdental|reinigen|putz','Reinigung und Interdentalpflege erfragen.'),
+      criterion('Rauchen','rauch|zigarett','Tabakexposition erheben.'),
+      criterion('Diabetes / Allgemeinanamnese','diabetes|blutzucker|hba1c|medikament','Diabeteskontrolle und Medikamente erfragen.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie laienverständlich den Verdacht auf eine Zahnfleisch-/Zahnhalteapparaterkrankung, weitere Diagnostik, stufenweises Vorgehen, persönliche Risikofaktoren und informierte Entscheidung.',
+     b2:'Das Zahnfleisch ist entzündet; wir müssen zunächst genauer untersuchen ...',
+     c1:'Für die Einstufung benötigen wir einen vollständigen Parodontalstatus und die Beurteilung des Knochenverlusts.',
+     model:'Ihr Zahnfleisch ist entzündet und möglicherweise ist auch der Zahnhalteapparat betroffen. Wir brauchen einen vollständigen Parodontalstatus, bevor wir ein Stadium festlegen können. Zuerst besprechen wir Mundhygiene und Risikofaktoren wie Rauchen und die Blutzuckerkontrolle. Anschließend kommen je nach Befund eine professionelle Reinigung und eine Behandlung unter dem Zahnfleisch sowie regelmäßige Nachkontrollen infrage. Wir erklären Ihnen Nutzen, Risiken und Alternativen und besprechen Ihre Fragen, bevor Sie entscheiden und einwilligen.',
+     checks:[
+      criterion('Verständliche Verdachtserklärung','zahnfleisch|zahnhalteapparat|entzünd','Verdacht ohne gesicherte Stadieneinteilung erklären.'),
+      criterion('Parodontalstatus','parodontalstatus|untersuch|befund','Vollständige Diagnostik vor Stadieneinteilung erläutern.'),
+      criterion('Hygiene und Risikofaktoren','hygiene|rauch|blutzucker|diabetes','Beeinflussbare Risikofaktoren und Pflege ansprechen.'),
+      criterion('Stufenweise Therapie / Nachsorge','reinig|nachkontroll|therapie|behandl','Mögliches stufenweises Vorgehen und Nachsorge erklären.'),
+      criterion('Risiken, Alternativen und Einwilligung','risik|alternativ|einwillig|fragen|entscheiden','Entscheidung und Einwilligung nach angemessener Aufklärung ansprechen.')
+     ]
+    },
+    brief:{
+     prompt:'Dokumentieren Sie den simulierten Befund zu Zahn 46 mit Anamnese, Untersuchungsdaten, radiologischer Unsicherheit und weiterem Plan; legen Sie kein Stadium oder Grading ohne ausreichende Daten fest.',
+     b2:'Anamnestisch besteht Zahnfleischbluten; Zahn 46 fühlt sich locker an ...',
+     c1:'Bei Verdacht auf Parodontitis ist die Stadien- und Gradzuordnung erst nach vollständiger Befunderhebung möglich ...',
+     model:'Zahn 46: Seit Monaten gingivale Blutung und subjektive Lockerung. Rauchen: ca. zehn Zigaretten täglich; Diabeteskontrolle/HbA1c nicht bekannt. Klinisch entzündliche Veränderungen und erhöhte Sondierungswerte, Zahn 46 mit Lockerung. Radiologischer Befundtext: möglicher horizontaler Knochenverlust, Ausmaß noch unbestimmt. Arbeitsdiagnose: Verdacht auf Parodontitis; Staging und Grading offen. Geplant: vollständiger Parodontalstatus einschließlich Risikoprofil, Aufklärung, indikationsgerechte stufenweise Therapie und Reevaluation.',
+     checks:[
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','FDI-Zahnnummer im Befund verwenden.'),
+      criterion('Anamnese / Risiken','rauch|diabetes|blutung|hba1c','Anamnestische Symptome und Risikofaktoren dokumentieren.'),
+      criterion('Klinischer Befund','sondier|locker|gingival','Klinischen Status nennen.'),
+      criterion('Bildgebung / Unsicherheit','radiolog|röntgen|knochen','Nur einen fiktiven, nicht abschließenden radiologischen Befund angeben.'),
+      criterion('Arbeitsdiagnose / Plan','verdacht|parodontitis|staging|reevalu','Arbeitsdiagnose und weiteren Abklärungsbedarf dokumentieren.')
+     ]
+    },
+    kollegen:{
+     prompt:'Übergeben Sie den Befund professionell mit FDI, relevanten Risikofaktoren, fehlenden Daten und nächstem Schritt. Erklären Sie abschließend den Fachbegriff Parodontitis laienverständlich.',
+     b2:'Bei Zahn 46 besteht eine Lockerung; die Patientin oder der Patient berichtet ...',
+     c1:'Eine Stadien- und Gradzuordnung ist aufgrund des noch unvollständigen Parodontalstatus nicht möglich.',
+     model:'Bei Zahn 46 liegen Lockerung und entzündliche parodontale Befunde vor. Anamnestisch besteht Zahnfleischbluten; die Person raucht und die glykämische Kontrolle ist unklar. Klinisch sind erhöhte Sondierungswerte dokumentiert, radiologisch besteht nur ein fiktiver Hinweis auf möglichen Knochenverlust. Es liegt ein Verdacht auf Parodontitis vor; Staging und Grading sind ohne vollständigen Befund offen. Wir planen einen vollständigen Parodontalstatus, Risikoberatung und stufenweise Therapie mit Reevaluation. Patientenverständlich bedeutet Parodontitis: Erkrankung des Zahnhalteapparats.',
+     checks:[
+      criterion('FDI 46','(?:^|\\D)46(?:\\D|$)','Betroffenen Zahn nennen.'),
+      criterion('Risikoprofil','rauch|diabetes|glykäm|hba1c','Relevante Risikofaktoren übergeben.'),
+      criterion('Klinische / radiologische Befunde','sondier|locker|knochen|radiolog','Klinische und radiologische Befunde anführen.'),
+      criterion('Unsicherheit der Diagnose','verdacht|staging|grading|offen','Nicht gesichertes Stadium und offenen Befund benennen.'),
+      criterion('Stufenweise Planung','parodontalstatus|reevalu|stufenweise|therapie','Nächste diagnostische und therapeutische Schritte nennen.')
+     ]
+    }
+   }
+  },
+  restoration:{
+   title:'Zahn 16 · kariöser Defekt und kurze Kältereaktion',
+   facts:'Fiktiver Lehrfall: Seit etwa drei Wochen Schmerzen beim Kauen rechts oben; Kaltes löst nur kurze Beschwerden aus. Keine Spontan- oder Nachtschmerzen, kein Fieber oder Schwellung. Zahn 16 mit okklusal-approximalem Defekt, frühere Füllung. Kältetest positiv mit kurzer Reaktion; Perkussion und Palpation unauffällig. Fiktiver Bissflügel-Befundtext: approximaler Dentinbefall. Ausdehnung, Pulpanähe und Restaurierbarkeit noch zu beurteilen.',
+   glossary:[['Approximalkaries','decay between adjacent teeth'],['Kälte-Sensibilitätstest','cold sensibility test'],['Kompositrestauration','composite restoration'],['Teilkrone / Onlay','partial crown / onlay']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie patientengerechte Fragen zu Dauer, Auslösern, spontanen Schmerzen, Infektionszeichen und Allgemeinanamnese.',
+     b2:'Tut es beim Kauen oder bei kalten Getränken weh?',
+     c1:'Hält der Schmerz nach Entfernen des Kältereizes an, und treten spontane oder nächtliche Beschwerden auf?',
+     model:'Seit wann haben Sie die Schmerzen? Treten die Beschwerden beim Kauen oder bei Kälte auf? Wie lange hält der Schmerz nach dem Kältereiz an? Haben Sie spontane oder nächtliche Schmerzen? Haben Sie eine Schwellung oder Fieber bemerkt? Nehmen Sie Medikamente ein und bestehen Allergien?',
+     checks:[
+      criterion('Beginn','seit wann|wie lange.{0,30}schmerz','Dauer und Verlauf erfragen.'),
+      criterion('Kauen / Kälte','kauen|kälte|kalt','Auslöser spezifizieren.'),
+      criterion('Schmerzdauer nach Reiz','wie lange hält|nach dem kälte|nach kälte','Persistenz nach dem Kältereiz erfragen.'),
+      criterion('Spontan / Nacht / Warnzeichen','spontan|nachts|fieber|schwell','Spontanschmerz und Infektionszeichen erfragen.'),
+      criterion('Medikamente / Allergien','medikament|allerg','Allgemeinanamnese ergänzen.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie den Verdacht auf Karies mit noch offenem Pulpa- und Restaurierungsbefund. Besprechen Sie bedingte Füllungs- und Teilkronenoptionen und eine informierte Entscheidung.',
+     b2:'An Ihrem Backenzahn sehen wir einen Defekt; wie groß er ist, müssen wir prüfen.',
+     c1:'Je nach Defektausdehnung und Höckerstabilität kommen direkte oder indirekte restaurative Maßnahmen in Betracht.',
+     model:'An Ihrem Backenzahn 16 besteht ein kariöser Defekt. Die genaue Tiefe und die Situation des Zahnnervs müssen wir noch untersuchen. Wenn genügend gesunde Zahnsubstanz erhalten ist, kann eine Kompositfüllung infrage kommen. Bei größerer Schädigung könnte eine Teilkrone oder ein Onlay sinnvoll sein. Wir besprechen die jeweiligen Vorteile, Risiken, Kosten und Alternativen und beantworten Ihre Fragen, bevor Sie entscheiden und einwilligen.',
+     checks:[
+      criterion('Patientengerechte Defekterklärung','karies|kariös|loch|defekt','Die vermutete Erkrankung verständlich erklären.'),
+      criterion('Diagnostische Unsicherheit','prüf|untersuch|tiefe|zahnnerv|pulpa','Offenen Befund und fehlende Gewissheit benennen.'),
+      criterion('Direkte Versorgung','komposit|füllung','Füllung als bedingte Option beschreiben.'),
+      criterion('Indirekte Versorgung','teilkrone|onlay','Teilkronen-/Onlay-Alternative einordnen.'),
+      criterion('Aufklärung / Entscheidung','risik|kosten|alternativ|einwillig|fragen','Risiken, Alternativen und Einwilligung besprechen.')
+     ]
+    },
+    brief:{
+     prompt:'Schreiben Sie einen neutralen Befundtext für Zahn 16. Trennen Sie berichtete Symptome, tatsächlich simulierte Tests und offene Indikationsfragen.',
+     b2:'An Zahn 16 zeigen sich eine Kavitation und eine kurze positive Kältereaktion.',
+     c1:'Die Pulpadiagnose und die restaurative Indikation bleiben bis zur vollständigen Defektbeurteilung offen.',
+     model:'Zahn 16: Seit drei Wochen Beschwerden beim Kauen, kurze Kältereaktion ohne spontane oder nächtliche Schmerzen. Klinisch okklusal-approximale Kavitation bei vorbestehender Füllung; Kältetest positiv mit kurzer abklingender Reaktion, Perkussion unauffällig. Fiktiver Bissflügel-Befundtext: approximale Läsion bis ins Dentin. Pulpanähe, Defektausdehnung und Restaurierbarkeit sind noch zu prüfen. Arbeitsdiagnose: kariöser Dentinbefall mit abklärungsbedürftigem Pulpastatus; Planung nach Befund, Aufklärung und Einwilligung.',
+     checks:[
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahn 16 nach FDI nennen.'),
+      criterion('Schmerzcharakter','kauen|kälte|nachts|spontan','Anamnestische Beschwerden dokumentieren.'),
+      criterion('Klinischer Test','kältetest|perkussion|palpation','Klinische Befunde und Testreaktion anführen.'),
+      criterion('Bildgebung','bissflügel|radiolog|röntgen|dentin','Fiktiven Röntgenbefund kennzeichnen.'),
+      criterion('Offene Indikation','pulpa|prüf|restaurier|arbeitsdiagnose','Unsicherheit und weiteren diagnostischen Bedarf erklären.')
+     ]
+    },
+    kollegen:{
+     prompt:'Übergeben Sie Zahn 16 einschließlich Anamnese, klinischer Befunde, fehlender Gewissheit und möglichen Restaurationen. Erklären Sie den Begriff Approximalkaries patientengerecht.',
+     b2:'Bei Zahn 16 besteht eine kariöse Läsion mit kurzer Kälteempfindlichkeit.',
+     c1:'Aus der isolierten kurzen Kälteantwort lässt sich der Pulpagewebezustand nicht sicher diagnostizieren.',
+     model:'An Zahn 16 besteht eine okklusal-approximale kariöse Läsion mit kurz abklingender Kältereaktion. Der Patient beschreibt vor allem Schmerzen beim Kauen, ohne spontane Nachtschmerzen. Klinisch ist eine Kavitation sichtbar, die Perkussion ist unauffällig; im fiktiven Bissflügel-Befundtext reicht die Läsion bis ins Dentin. Der Pulpastatus und die Restaurierbarkeit sind noch abzuklären. Je nach Defektausdehnung kommen Kompositrestauration oder Teilkrone infrage. Patientenverständlich ist Approximalkaries eine Karies zwischen benachbarten Zähnen.',
+     checks:[
+      criterion('FDI 16','(?:^|\\D)16(?:\\D|$)','Zahnbezeichnung nennen.'),
+      criterion('Beschwerden','kälte|kauen|nachts','Relevante Anamnese übergeben.'),
+      criterion('Untersuchung / Radiologie','perkussion|kältetest|bissflügel|radiolog','Befunde nachvollziehbar mitteilen.'),
+      criterion('Unvollständige Diagnose','pulpa|restaurier|abklär|unsicher','Diagnoseunsicherheit kenntlich machen.'),
+      criterion('Restauration / nächste Schritte','komposit|teilkrone|onlay|füllung','Indikationsabhängige Optionen benennen.')
+     ]
+    }
+   }
+  },
+  endo:{
+   title:'Zahn 36 · anhaltende Kälteschmerzen',
+   facts:'Fiktiver Lehrfall: Seit Wochen Beschwerden links unten, seit gestern Spontan- und Nachtschmerz. Zahn 36 reagiert auf Kälte anhaltend, leichte Perkussionsempfindlichkeit. Fiktiver Röntgenbefundtext: tiefe Karies, kein eindeutig abgrenzbarer apikaler Befund. Allergien nicht bekannt; gelegentlich Schmerzmittel. Restaurierbarkeit und definitive Diagnose noch zu prüfen.',
+   glossary:[['anhaltende Kältereaktion','lingering response to cold'],['Perkussionsempfindlichkeit','tenderness on percussion'],['Verdachtsdiagnose','working diagnosis'],['Erhaltungswürdigkeit','restorability']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie patientengerechte Anamnesefragen mit der Höflichkeitsform Sie. Erfragen Sie noch nicht einfach die Musterdiagnose.',
+     b2:'Könnten Sie mir bitte sagen, seit wann ...?',
+     c1:'Treten die Beschwerden spontan oder ausschließlich reizabhängig auf?',
+     model:'Seit wann haben Sie die Beschwerden? Wie lange hält der Schmerz nach Kälte an? Haben Sie auch nachts oder ohne Reiz Schmerzen? Haben Sie Fieber oder eine Schwellung bemerkt? Nehmen Sie Medikamente ein, und sind Allergien bekannt?',
+     checks:[
+      criterion('Zeitlicher Beginn','seit wann|wann.{0,30}begonn|wie lange.{0,25}beschwerd','Nach Beginn und Verlauf fragen.'),
+      criterion('Kälteantwort','kälte|kalt','Art und Dauer der Kälteantwort erfragen.'),
+      criterion('Spontan- oder Nachtschmerz','nachts|spontan|ohne reiz','Spontane und nächtliche Schmerzen erfragen.'),
+      criterion('Warnzeichen','fieber|schwell|schluckbeschwerd','Mögliche Warnzeichen abklären.'),
+      criterion('Medikamente und Allergien','medikament|allerg','Relevante Allgemeinanamnese erheben.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie der Patientin/dem Patienten in verständlichem Deutsch die Verdachtsdiagnose, mögliche Wege sowie die Notwendigkeit einer individuellen Risiko- und Einwilligungsbesprechung.',
+     b2:'Die bisherigen Untersuchungen deuten darauf hin, dass ...',
+     c1:'Nach Abklärung der Erhaltungswürdigkeit kommen folgende Alternativen in Betracht ...',
+     model:'Die bisherigen Befunde sprechen für eine Entzündung im Zahninneren. Wir müssen die Diagnose und die Erhaltungswürdigkeit noch absichern. Eine mögliche Behandlung ist die Wurzelkanalbehandlung; als Alternative kann je nach Befund eine Entfernung des Zahns besprochen werden. Über Ablauf, Risiken, Prognose und Kosten sprechen wir vor Ihrer Entscheidung. Welche Fragen haben Sie? Erst danach dokumentieren wir Ihre Einwilligung.',
+     checks:[
+      criterion('Patientenverständliche Erklärung','entzünd|zahninner|zahnnerv|pulpa','Die vermutete Erkrankung verständlich erklären.'),
+      criterion('Wurzelkanalbehandlung','wurzelkanal|endodont','Eine mögliche zahnerhaltende Option erwähnen.'),
+      criterion('Alternative','alternativ|entfern|extraktion','Alternativen ohne automatische Festlegung ansprechen.'),
+      criterion('Risiken und Prognose','risik|prognos|komplikation','Risiken und Prognose individualisiert besprechen.'),
+      criterion('Fragen / Einwilligung','einwillig|einverstanden|fragen|entscheiden','Rückfragen und informierte Entscheidung ermöglichen.')
+     ]
+    },
+    brief:{
+     prompt:'Schreiben Sie einen knappen, fachsprachlichen Befund-/Arztbrief. Nutzen Sie ausschließlich die vorgegebenen fiktiven Befunde; benennen Sie Unsicherheit.',
+     b2:'Bei Zahn 36 bestehen ... Die Untersuchung zeigte ...',
+     c1:'Anamnestisch ...; klinisch ...; radiologisch ...; als Arbeitsdiagnose ...',
+     model:'Zahn 36: Anamnestisch seit Wochen Kälteempfindlichkeit, seit gestern Spontan- und Nachtschmerz. Klinisch anhaltende Kälteantwort und leichte Perkussionsempfindlichkeit. Radiologisch laut fiktivem Befundtext tiefe Karies ohne sicheren apikalen Befund. Arbeitsdiagnose: V. a. symptomatische irreversible Pulpitis. Restaurierbarkeit und Indikation für eine endodontische Behandlung sind weiter zu prüfen; Optionen, Risiken und Einwilligung vor Behandlung besprechen.',
+     checks:[
+      criterion('FDI-Zahnnummer','(?:^|\\D)36(?:\\D|$)','Den betroffenen Zahn nach FDI nennen.'),
+      criterion('Symptomverlauf','nachts|spontan|seit gestern|seit wochen','Beschwerden und zeitlichen Verlauf beschreiben.'),
+      criterion('Klinischer Test','perkussion|kälteantwort|kältetest|sensibil','Konkrete klinische Untersuchungsbefunde notieren.'),
+      criterion('Radiologischer Befund','röntgen|radiolog|apikal','Bildgebung nur als fiktiven Befundtext darstellen.'),
+      criterion('Arbeitsdiagnose / Unsicherheit','pulpitis|verdacht|v. a.','Arbeitsdiagnose als solche kennzeichnen.')
+     ]
+    },
+    kollegen:{
+     prompt:'Übergeben Sie den Fall in präziser zahnärztlicher Fachsprache an eine Kollegin/einen Kollegen. Nennen Sie Diagnoseunsicherheit und weiteres Vorgehen. Erklären Sie anschließend den Begriff Pulpitis für eine Patientin oder einen Patienten.',
+     b2:'Es handelt sich um einen Fall an Zahn ...',
+     c1:'In Zusammenschau von Anamnese, Sensibilitätstest und radiologischem Befund besteht der Verdacht ...',
+     model:'Bei Zahn 36 bestehen seit gestern spontane und nächtliche Schmerzen. Der Kältetest zeigt eine verlängerte Reizantwort, die Perkussion ist leicht empfindlich. Es besteht der Verdacht auf eine symptomatische irreversible Pulpitis. Die Restaurierbarkeit und definitive Diagnose sind noch abzuklären. Bei gesicherter Indikation wäre eine endodontische Behandlung unter Aufklärung und Einwilligung zu besprechen. Patientengerecht bedeutet Pulpitis: Entzündung im Zahninneren.',
+     checks:[
+      criterion('FDI-Zahnnummer','(?:^|\\D)36(?:\\D|$)','Zahnbezeichnung präzise nennen.'),
+      criterion('Anamnestischer Verlauf','nachts|spontan|kälte','Leitsymptome kurz zusammenfassen.'),
+      criterion('Befund / Test','perkussion|kältetest|sensibil|reizantwort','Relevante Untersuchungen benennen.'),
+      criterion('Arbeitsdiagnose','pulpitis|verdacht','Arbeitsdiagnose samt Unsicherheit mitteilen.'),
+      criterion('Plan / Bedingung','endodont|wurzelkanal|restaurier|erhaltungs','Indikation und geplantes weiteres Vorgehen erwähnen.')
+     ]
+    }
+   }
+  },
+  surgery:{
+   title:'Zahn 48 · lokale Perikoronitis',
+   facts:'Fiktiver Lehrfall: Seit drei Tagen Schmerzen am Zahnfleisch hinten rechts unten, früher schon einmal ähnliche Beschwerden. Zahn 48 ist teilweise durchgebrochen; gereiztes Operculum. Im Fall kein Fieber, keine Dysphagie, keine Atemnot, kein Trismus. Keine bekannten Allergien oder Dauermedikamente. Keine reale Röntgenaufnahme verfügbar.',
+   glossary:[['Perikoronitis','inflammation around a partly erupted tooth'],['Operculum','gum flap covering part of a tooth'],['Trismus','restricted mouth opening'],['Dysphagie','difficulty swallowing']],
+   tasks:{
+    anamnese:{
+     prompt:'Formulieren Sie Anamnesefragen zu Beschwerden und gefährlichen Ausbreitungszeichen. Nehmen Sie eine mögliche akute Infektion ernst.',
+     b2:'Können Sie den Mund normal öffnen?',
+     c1:'Bestehen Dysphagie, Atembeschwerden oder eine progrediente Schwellung?',
+     model:'Seit wann haben Sie die Schmerzen? Haben Sie Fieber oder eine Schwellung bemerkt? Können Sie den Mund normal öffnen, und haben Sie Probleme beim Schlucken oder Atmen? Nehmen Sie Medikamente und haben Sie Allergien? Sind solche Beschwerden früher schon einmal aufgetreten?',
+     checks:[
+      criterion('Beginn / Dauer','seit wann|wie lang|wann.{0,20}beginn','Dauer und Verlauf erfragen.'),
+      criterion('Fieber / Schwellung','fieber|schwell','Systemische und lokale Ausbreitung prüfen.'),
+      criterion('Atemweg / Schlucken / Mundöffnung','atmen|atemnot|schluck|mund öffn|mundöffnung|trismus','Akute Gefährdung priorisieren.'),
+      criterion('Medikamente / Allergien','medikament|allerg','Risiken aus der Allgemeinanamnese erheben.'),
+      criterion('Rezidiv','früher|wiederhol|schon einmal|erneut','Vorangegangene Episoden erfragen.')
+     ]
+    },
+    aufklaerung:{
+     prompt:'Erklären Sie die lokale Entzündung, das zunächst mögliche lokale Vorgehen, spätere Optionen sowie Warnzeichen. Stellen Sie keine pauschale Antibiotikaindikation.',
+     b2:'Das Zahnfleisch um Ihren hinteren Zahn ist entzündet ...',
+     c1:'Bei Ausbreitungszeichen wäre eine umgehende notfallmäßige Abklärung erforderlich.',
+     model:'Das Zahnfleisch um den teilweise durchgebrochenen Weisheitszahn ist entzündet. Bei Ihrem heutigen Befund können zunächst lokale Maßnahmen und eine geeignete Mundhygiene helfen; Antibiotika sind ohne entsprechende Zeichen nicht automatisch notwendig. Wenn die Entzündung wiederkehrt, kann nach Untersuchung eine Entfernung des Zahns als Alternative besprochen werden. Bei Fieber, zunehmender Schwellung, Schluck- oder Atemproblemen ist sofortige Hilfe wichtig. Wir besprechen Risiken und beantworten Ihre Fragen, bevor Sie einwilligen.',
+     checks:[
+      criterion('Lokale Erkrankung erklären','zahnfleisch|entzünd|perikoronitis','Laienverständliche Erklärung geben.'),
+      criterion('Lokales Vorgehen','lokal|spül|hygiene|reinig','Lokale Maßnahmen als erste Möglichkeit ansprechen.'),
+      criterion('Antibiotika nicht pauschal','antibiotik','Indikationsabhängigkeit erklären; Stichwortprüfung kann Negation nicht erkennen.'),
+      criterion('Warnzeichen / Notfall','atem|schluck|fieber|schwell|notfall','Warnzeichen und erforderliche Eskalation erläutern.'),
+      criterion('Optionen / Einwilligung','entfern|extraktion|einwillig|fragen|alternativ','Spätere Optionen und Einwilligung besprechen.')
+     ]
+    },
+    brief:{
+     prompt:'Dokumentieren Sie die fiktive Vorstellung mit klinischem Befund, fehlenden Ausbreitungszeichen, Arbeitsdiagnose und Plan. Keine reale Bildinterpretation behaupten.',
+     b2:'Bei Zahn 48 zeigt sich ...',
+     c1:'Aktuell keine klinischen Hinweise auf systemische Ausbreitung im beschriebenen Übungsfall ...',
+     model:'Zahn 48: Seit drei Tagen lokale Beschwerden retromolar rechts, rezidivierend. Teilweise durchgebrochener Zahn mit gereiztem Operculum; im simulierten Befund keine Dysphagie, kein Trismus, kein Fieber. Arbeitsdiagnose: lokale Perikoronitis ohne berichtete systemische Ausbreitungszeichen. Zunächst lokale Akutmaßnahmen, Hygieneberatung und Reevaluation; bei Rezidiven Prüfung einer Extraktionsindikation. Keine reale Röntgenaufnahme vorliegend.',
+     checks:[
+      criterion('FDI-Zahnnummer','(?:^|\\D)48(?:\\D|$)','FDI-Nummer dokumentieren.'),
+      criterion('Lokaler Befund','operculum|teilweise durchgebroch|teilretin','Lokalen Untersuchungsbefund nennen.'),
+      criterion('Ausbreitungszeichen','fieber|trismus|dysphag|schluck|atem','Gefahrenzeichen samt Negativbefund dokumentieren.'),
+      criterion('Arbeitsdiagnose','perikoronitis|entzünd','Arbeitsdiagnose klar kennzeichnen.'),
+      criterion('Lokale Maßnahme / Verlauf','lokal|hygiene|kontroll|reevalu','Initialplan und Kontrolle festhalten.')
+     ]
+    },
+    kollegen:{
+     prompt:'Geben Sie den Fall an eine Kollegin/einen Kollegen weiter. Trennen Sie aktuelle Befunde, Gefährdungsprüfung und Therapieplan. Erklären Sie anschließend den Fachbegriff Dysphagie allgemeinverständlich.',
+     b2:'Am Zahn 48 zeigt sich eine lokale Entzündung ...',
+     c1:'Im gegenwärtigen Fall bestehen keine berichteten systemischen Ausbreitungszeichen; bei Änderung sofortige Reevaluation ...',
+     model:'An Zahn 48 besteht bei teilweise durchgebrochenem Weisheitszahn ein entzündetes Operculum mit rezidivierenden Beschwerden. Aktuell sind Fieber, Trismus, Dysphagie und Atemnot im fiktiven Fall verneint. Die Arbeitsdiagnose ist eine lokale Perikoronitis. Vorrangig sind lokale Maßnahmen und Verlaufskontrolle; bei Rezidiv ist die Extraktionsindikation zu prüfen. Warnzeichen erfordern eine umgehende erneute Beurteilung. Für Patientinnen und Patienten bedeutet Dysphagie: Schwierigkeiten beim Schlucken.',
+     checks:[
+      criterion('FDI-Zahnnummer','(?:^|\\D)48(?:\\D|$)','Betroffenen Zahn nennen.'),
+      criterion('Lokaler Befund','operculum|teilweise durchgebroch|teilretin','Klinischen Befund übergeben.'),
+      criterion('Gefährdungsprüfung','trismus|fieber|dysphag|atemnot','Ausbreitungszeichen beurteilen.'),
+      criterion('Arbeitsdiagnose','perikoronitis','Fachdiagnose nennen.'),
+      criterion('Plan / Reevaluation','lokal|kontroll|reevalu|extraktion','Indikationsabhängiges Vorgehen erläutern.')
+     ]
+    }
+   }
+  }
+ };
+ function taskFor(caseId,phaseId){
+  const item=Object.prototype.hasOwnProperty.call(CASES,caseId)?CASES[caseId]:null;
+  const task=item&&Object.prototype.hasOwnProperty.call(item.tasks,phaseId)?item.tasks[phaseId]:null;
+  if(!task)throw new RangeError('Unknown fictional case or training phase');
+  return task;
+ }
+ /* Selected phrases trigger a caution, not an overall clinical quality verdict. */
+ function safetyReview(caseId,answer){
+  if(!Object.prototype.hasOwnProperty.call(CASES,caseId)||!answer)return [];
+  const flags=[];
+  const clauses=answer.toLocaleLowerCase('de-DE').split(/[.!?;\n]+/);
+  for(const clause of clauses){
+   if(/\b(?:antibiotika\s+sind\s+(?:immer|grundsätzlich|routinemäßig)\s+(?:notwendig|erforderlich|indiziert)|(?:immer|routinemäßig|grundsätzlich)\s+antibiotika\s+(?:geben|verordnen|verschreiben)|antibiotika\s+bei\s+jeder\s+perikoronitis)\b/iu.test(clause)&&
+      !/\b(?:nicht|keine|niemals)\s+(?:immer|grundsätzlich|routinemäßig)\b/iu.test(clause)){
+    flags.push('Pauschale Antibiotikagabe ohne fallbezogene Indikation ist nicht gerechtfertigt. Bitte fachlich prüfen.');
+   }
+   if(/\b(?:atemnot|schluckbeschwerden|dysphagie)\b.{0,65}\b(?:abwarten|zu\s+hause\s+bleiben|keine\s+hilfe\s+holen)\b/iu.test(clause)&&
+      !/\b(?:nicht|niemals|keinesfalls)\s+abwarten\b/iu.test(clause)){
+    flags.push('Atem- oder relevante Schluckprobleme dürfen nicht mit Abwarten bagatellisiert werden. Bitte dringend fachlich prüfen.');
+   }
+  }
+  return [...new Set(flags)];
+ }
+ function score(caseId,phaseId,value){
+  const task=taskFor(caseId,phaseId);
+  const answer=typeof value==='string'?value.normalize('NFKC').trim():'';
+  const results=task.checks.map(function(x){
+   return {label:x.label,matched:answer.length>0&&new RegExp(x.pattern,'iu').test(answer),tip:x.tip};
+  });
+  const safetyFlags=safetyReview(caseId,answer);
+  const lexicalScore=results.filter(x=>x.matched).length*2;
+  return {caseId:caseId,phaseId:phaseId,score:safetyFlags.length?null:lexicalScore,
+   lexicalScore:lexicalScore,max:10,blank:answer.length===0,safetyFlags:safetyFlags,criteria:results,
+   method:'Formative German keyword coverage only; selected explicit safety phrases can suspend the score. Does not establish diagnosis, overall clinical accuracy, negation handling, grammar, fluency, or certification.'};
+ }
+ const status={caseId:'endo',phaseId:'anamnese',answers:{},results:{},showModel:false,showGlossary:false,open:false};
+ let panel=null,trigger=null,returnFocus=null;
+ const escapeHTML=function(value){return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+ const key=function(){return status.caseId+'|'+status.phaseId;};
+ function render(){
+  if(!panel)return;
+  const previous=typeof document!=='undefined'?document.activeElement:null;
+  const focusKey=previous&&panel.contains&&panel.contains(previous)?
+   {action:previous.getAttribute('data-fsp'),id:previous.getAttribute('data-id'),textarea:previous.id==='fsp-answer'}:null;
+  const item=CASES[status.caseId],task=taskFor(status.caseId,status.phaseId),result=status.results[key()];
+  let html='<div class="fsp-shell" role="dialog" aria-modal="true" aria-label="FSP und KP Deutschtraining">';
+  html+='<header class="fsp-header"><div><strong>✚ FSP/KP Sprachtraining</strong><p>Fiktive Fälle · lokale formative Übung · klinische Prüfung ausstehend</p></div><button type="button" data-fsp="close" aria-label="Training schließen">✕ Schließen</button></header>';
+  html+='<p class="fsp-notice">Schleswig-Holstein FSP: Patientengespräch → handschriftlicher Arztbrief → kollegiales Gespräch. Aufklärung ist hier ein zusätzlicher Teil des Patientengesprächs, kein vierter offizieller Prüfungsteil. Andere Länder können abweichen. Keine staatliche Prüfung, keine Zertifizierung.</p>';
+  html+='<div class="fsp-grid"><aside class="fsp-sidebar"><b>Übungsfälle</b>';
+  Object.keys(CASES).forEach(function(id){html+='<button type="button" data-fsp="case" data-id="'+id+'" aria-pressed="'+(id===status.caseId)+'">'+escapeHTML(CASES[id].title)+'</button>';});
+  html+='<p class="fsp-muted">Sämtliche Angaben sind erfunden; keine realen Patientenakten oder Röntgenbilder.</p></aside><main class="fsp-main">';
+  html+='<h2>'+escapeHTML(item.title)+'</h2><p class="fsp-facts">'+escapeHTML(item.facts)+'</p><nav class="fsp-steps" aria-label="Sprachübungen">';
+  PHASES.forEach(function(p){const r=status.results[status.caseId+'|'+p.id];const done=!!r&&r.score===10;html+='<button type="button" data-fsp="phase" data-id="'+p.id+'" aria-current="'+(p.id===status.phaseId?'step':'false')+'">'+escapeHTML(p.name)+(done?' ✓':r?' •':'')+'</button>';});
+  html+='</nav><div class="fsp-task"><span class="fsp-kicker">'+escapeHTML(PHASES.find(x=>x.id===status.phaseId).audience)+' · B2/C1</span>';
+  html+='<h3>'+escapeHTML(PHASES.find(x=>x.id===status.phaseId).name)+'</h3><p>'+escapeHTML(task.prompt)+'</p>';
+  html+='<p class="fsp-scaffold"><strong>B2:</strong> '+escapeHTML(task.b2)+'<br><strong>C1:</strong> '+escapeHTML(task.c1)+'</p>';
+  html+='<label for="fsp-answer"><strong>Ihre deutsche Antwort</strong></label><textarea id="fsp-answer" rows="6" maxlength="6000" spellcheck="true" placeholder="Formulieren Sie Ihre eigene Antwort auf Deutsch ...">'+escapeHTML(status.answers[key()]||'')+'</textarea>';
+  html+='<div class="fsp-actions"><button type="button" data-fsp="submit">Formativ prüfen</button><button type="button" data-fsp="glossary" aria-expanded="'+status.showGlossary+'">Deutsch–Englisch Glossar</button><button type="button" data-fsp="retry">Erneut üben</button></div>';
+  if(status.showGlossary){html+='<dl class="fsp-glossary">'+item.glossary.map(x=>'<div><dt>'+escapeHTML(x[0])+'</dt><dd>'+escapeHTML(x[1])+'</dd></div>').join('')+'</dl>';}
+  if(result){
+   html+='<section class="fsp-feedback" aria-live="polite"><h4>'+(result.safetyFlags.length?'Sicherheitswarnung · Punktwert ausgesetzt':'Rubrik: '+result.score+' / '+result.max+' Punkte')+'</h4>';
+   if(result.safetyFlags.length)html+='<div role="alert" class="fsp-warning"><b>Bitte prüfen lassen:</b><ul>'+result.safetyFlags.map(x=>'<li>'+escapeHTML(x)+'</li>').join('')+'</ul>Die Begriffsdeckung ('+result.lexicalScore+' / 10) ist keine klinische Bewertung.</div>';
+   html+='<p>Nur Schlüsselbegriff-Abdeckung (je 2 Punkte). Einzelne gefährliche Aussagen lösen Warnungen aus. Die Rubrik prüft weder Grammatik, klinische Richtigkeit, alle Negationen noch flüssiges Sprechen.</p>';
+   if(result.blank)html+='<p role="alert">Keine Eingabe erkannt. Bitte einen deutschen Antworttext eintragen.</p>';
+   html+='<ul>'+result.criteria.map(x=>'<li><b>'+(x.matched?'✓ ':'○ ')+escapeHTML(x.label)+'</b> — '+escapeHTML(x.matched?'Stichwort erkannt. Keine inhaltliche Validierung.':x.tip)+'</li>').join('')+'</ul>';
+   if(result.score===null||result.score<result.max)html+='<p class="fsp-revise">Wiederholen Sie die nicht erkannten Begriffe und lassen Sie die medizinische Richtigkeit fachlich beurteilen.</p>';
+   html+='<button type="button" data-fsp="model" aria-expanded="'+status.showModel+'">'+(status.showModel?'Musterantwort ausblenden':'Musterantwort anzeigen')+'</button>';
+   if(status.showModel)html+='<blockquote>'+escapeHTML(task.model)+'</blockquote>';
+   html+='</section>';
+  }else html+='<p class="fsp-muted">Musterantwort und Kriterien erscheinen nach Abgabe. Freitext verlässt Ihren Browser nicht; es gibt keine automatische Speicherung.</p>';
+  const remaining=PHASES.filter(p=>{const r=status.results[status.caseId+'|'+p.id];return !r||r.score!==10;});
+  html+='<p class="fsp-muted">Wiederholen: '+(remaining.length?remaining.map(x=>escapeHTML(x.name)).join(', '):'Alle Schlüsselbegriff-Rubriken abgedeckt (keine fachliche Freigabe)')+'</p>';
+  html+='</div></main></div><footer class="fsp-footer">Quellen: <a href="https://www.zahnaerzte-sh.de/zahnaerzte/praxisservice/beruflicher-nachwuchs/auslaendische-berufsqualifikationen/fachsprachpruefung/" target="_blank" rel="noopener">ZÄK SH – FSP</a> · <a href="https://sdcepdentalprescribing.nhs.scot/guidance/bacterial-infections/acute-periodontal-conditions/" target="_blank" rel="noopener">SDCEP</a>. Medizinische Inhalte: fachliche Endprüfung ausstehend.</footer></div>';
+  panel.innerHTML=html;
+  if(focusKey){
+   const all=Array.from(panel.querySelectorAll('[data-fsp]'));
+   const matching=all.find(x=>x.getAttribute('data-fsp')===focusKey.action&&x.getAttribute('data-id')===focusKey.id);
+   const follow=focusKey.textarea?panel.querySelector('#fsp-answer'):matching||panel.querySelector('#fsp-answer')||panel.querySelector('[data-fsp="close"]');
+   if(follow&&follow.focus)follow.focus();
+  }
+ }
+ function open(){if(!panel)return false;returnFocus=typeof document!=='undefined'?document.activeElement:null;status.open=true;panel.hidden=false;document.body.classList.add('fsp-open');render();panel.querySelector('[data-fsp="close"]').focus();return true;}
+ function close(){if(!panel)return false;status.open=false;panel.hidden=true;document.body.classList.remove('fsp-open');if(returnFocus&&typeof returnFocus.focus==='function')returnFocus.focus();else if(trigger)trigger.focus();return true;}
+ function mount(){
+  if(!document.getElementById||panel)return;
+  const anchor=document.getElementById('journey-open');if(!anchor||!anchor.parentNode)return;
+  trigger=document.createElement('button');trigger.id='fsp-kp-open';trigger.type='button';trigger.className=anchor.className;
+  trigger.textContent='FSP/KP Deutsch';trigger.title='Strukturierte fiktive deutsche Zahnarzt-Kommunikation üben';
+  trigger.addEventListener('click',open);anchor.parentNode.insertBefore(trigger,anchor.nextSibling);
+  const style=document.createElement('style');style.textContent='.fsp-open{overflow:hidden}#fsp-kp-overlay[hidden]{display:none!important}#fsp-kp-overlay{position:fixed;inset:0;z-index:1100;background:rgba(6,26,33,.75);padding:clamp(8px,2vw,24px);overflow:auto}#fsp-kp-overlay .fsp-shell{background:#f5faf8;color:#18323b;max-width:1050px;min-height:min(680px,94vh);margin:auto;border-radius:14px;overflow:hidden;font:14px/1.5 system-ui,sans-serif}#fsp-kp-overlay .fsp-header{background:#143e48;color:white;padding:14px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center}#fsp-kp-overlay .fsp-header p{margin:2px 0 0;font-size:12px}#fsp-kp-overlay button{cursor:pointer;border:1px solid #9bbab5;border-radius:7px;padding:8px 11px;background:white;color:#173a42}#fsp-kp-overlay button[aria-current="step"],#fsp-kp-overlay button[aria-pressed="true"]{background:#d3f4eb;border-color:#007e79;font-weight:700}#fsp-kp-overlay button:focus-visible,#fsp-kp-overlay textarea:focus-visible{outline:3px solid #00a68f;outline-offset:2px}#fsp-kp-overlay .fsp-notice{margin:13px 20px;background:#e2f2f2;padding:12px;border-radius:9px;font-size:12px}#fsp-kp-overlay .fsp-grid{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:18px;padding:10px 20px}#fsp-kp-overlay .fsp-sidebar{display:flex;flex-direction:column;align-items:stretch;gap:9px}#fsp-kp-overlay .fsp-main{min-width:0}#fsp-kp-overlay h2{margin:0 0 5px;font-size:19px}#fsp-kp-overlay .fsp-facts{border-left:3px solid #6faeaa;padding:9px;background:white}#fsp-kp-overlay .fsp-steps,#fsp-kp-overlay .fsp-actions{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}#fsp-kp-overlay .fsp-task{background:white;border-radius:9px;padding:16px}#fsp-kp-overlay .fsp-task h3{margin:5px 0;font-size:18px}#fsp-kp-overlay .fsp-kicker,#fsp-kp-overlay .fsp-muted{font-size:12px;color:#596b70}#fsp-kp-overlay .fsp-scaffold{padding:9px;background:#edf5f4}#fsp-kp-overlay textarea{display:block;width:100%;min-height:130px;max-width:100%;padding:10px;border-radius:7px;border:1px solid #72959a}#fsp-kp-overlay .fsp-feedback{padding:12px;background:#eef8f6;border-radius:9px}#fsp-kp-overlay .fsp-warning{padding:10px;background:#fff1e8;border-left:4px solid #a44f1c}#fsp-kp-overlay .fsp-feedback ul{padding-left:22px}#fsp-kp-overlay .fsp-feedback li{margin:7px 0}#fsp-kp-overlay .fsp-glossary{display:grid;gap:5px}#fsp-kp-overlay .fsp-glossary div{display:flex;gap:12px}#fsp-kp-overlay .fsp-glossary dt{font-weight:700}#fsp-kp-overlay .fsp-glossary dd{margin:0}#fsp-kp-overlay .fsp-footer{padding:15px 20px;font-size:11px;color:#536b72}#fsp-kp-overlay a{color:#05665f}@media(max-width:650px){#fsp-kp-overlay .fsp-grid{grid-template-columns:1fr}#fsp-kp-overlay .fsp-sidebar{flex-direction:row;flex-wrap:wrap}#fsp-kp-overlay .fsp-header{align-items:flex-start}#fsp-kp-open{font-size:11px}}';
+  document.head.appendChild(style);
+  panel=document.createElement('section');panel.id='fsp-kp-overlay';panel.hidden=true;panel.setAttribute('aria-label','FSP/KP language training');document.body.appendChild(panel);
+  panel.addEventListener('input',function(e){if(e.target&&e.target.id==='fsp-answer'){const k=key();if(status.answers[k]!==e.target.value){delete status.results[k];status.showModel=false;const old=panel.querySelector('.fsp-feedback');if(old)old.hidden=true;}status.answers[k]=e.target.value;}});
+  panel.addEventListener('click',function(e){
+   const button=e.target.closest('button[data-fsp]');if(!button)return;
+   const action=button.getAttribute('data-fsp'),id=button.getAttribute('data-id');
+   if(action==='close'){close();return;}
+   if(action==='case'){status.caseId=id;status.phaseId='anamnese';status.showModel=false;render();return;}
+   if(action==='phase'){status.phaseId=id;status.showModel=false;render();return;}
+   if(action==='glossary'){status.showGlossary=!status.showGlossary;render();return;}
+   if(action==='submit'){status.answers[key()]=panel.querySelector('#fsp-answer').value;status.results[key()]=score(status.caseId,status.phaseId,status.answers[key()]);status.showModel=false;render();return;}
+   if(action==='model'){status.showModel=!status.showModel;render();return;}
+   if(action==='retry'){delete status.results[key()];status.showModel=false;render();panel.querySelector('#fsp-answer').focus();}
+  });
+  document.addEventListener('keydown',function(e){
+   if(!status.open)return;
+   if(e.key==='Escape'){e.preventDefault();close();return;}
+   if(e.key!=='Tab')return;
+   const focusable=Array.from(panel.querySelectorAll('button:not([disabled]),a[href],textarea,[tabindex]:not([tabindex="-1"])'));
+   if(!focusable.length)return;
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(e.shiftKey&&(document.activeElement===first||!panel.contains(document.activeElement))){
+    e.preventDefault();last.focus();
+   }else if(!e.shiftKey&&(document.activeElement===last||!panel.contains(document.activeElement))){
+    e.preventDefault();first.focus();
+   }
+  });
+ }
+ root.KlinikFSPTraining={version:2,cases:CASES,phases:PHASES,score:score,safetyReview:safetyReview,taskFor:taskFor,status:status,open:open,close:close,mount:mount};
+ if(typeof document!=='undefined'){
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
+  else mount();
+ }
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
 /* KlinikLab desktop research suite v1.0. No scan or radiograph is declared clinically validated.
  * Viewer operates on local data without network requests. No identifying images are sent to AI. */
 'use strict';
@@ -1607,9 +2020,12 @@ class XRToothPractice {
       if(solid.field(p[0],p[1],p[2],false)<=0)return {p,world:this.modelToWorld(p),distance:t};
     }return null;
   }
-  rayForFrame(frame,source){if(!source.targetRaySpace)return null;const pose=frame.getPose(source.targetRaySpace,this.scene.xrRef);return pose?this.poseRay(pose):null;}
+  rayForFrame(frame,source){if(!frame?.getPose||!source?.targetRaySpace||!this.scene.xrRef)return null;
+    try{const pose=frame.getPose(source.targetRaySpace,this.scene.xrRef);return pose?this.poseRay(pose):null}catch{return null}
+  }
   onSelectStart(event,frame){
-    const ray=frame&&this.rayForFrame(frame,event.inputSource);if(!ray)return false;
+    if(frame?.session?.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return true;}
+    const ray=this.rayForFrame(frame,event?.inputSource);if(!ray)return false;
     const hit=this.scene.getRayHit(ray.o,ray.d);
     if(hit?.key==='xrprep:toggle'){this.toggle();return true}
     if(!this.active)return false;
@@ -1622,10 +2038,13 @@ class XRToothPractice {
   onSelectEnd(e){this.triggers.delete(e.inputSource);this.lastCut=null;this.dirty=true;}
   onDesktopClick(ray){if(!this.active||this.scene.xrSession)return false;const c=this.traceSurface(ray.o,ray.d);if(!c)return false;const hit=this.scene.getRayHit(ray.o,ray.d);if(hit&&hit.distance<c.distance-.025)return false;this.cut(c,null);this.updateMesh();return true}
   onXRFrame(frame,t){if(!this.active)return;
+    if(frame.session.visibilityState&&frame.session.visibilityState!=='visible'){this.triggers.clear();this.lastCut=null;this.tip.hidden=true;return;}
     if(this.scene.xrGuide?.state?.open){this.triggers.clear();this.tip.hidden=true;return;}
+    const connected=new Set(frame.session.inputSources);
+    for(const source of this.triggers)if(!connected.has(source))this.triggers.delete(source);
     this.syncCase();if(this.dirty&&t-this.lastMeshAt>230)this.updateMesh();
     let best=null;
-    for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray)continue;
+    for(const source of frame.session.inputSources){const ray=this.rayForFrame(frame,source);if(!ray){this.triggers.delete(source);continue;}
       const hit=this.traceSurface(ray.o,ray.d);if(hit){const obstacle=this.scene.getRayHit(ray.o,ray.d);if(obstacle&&obstacle.distance<hit.distance-.025)continue;if(!best)best=hit;
         if(this.triggers.has(source)&&t-(this.lastCut?.time||0)>125){this.cut(hit,source);}
       }}
@@ -1654,6 +2073,7 @@ window.addEventListener('DOMContentLoaded',()=>{
  const parent=document.getElementById('ds-quest-result');if(parent){const b=document.createElement('button');b.className='ds-btn secondary';b.id='ds-xr-preview';b.textContent='Preview XR tooth mesh on PC';parent.before(b);b.onclick=()=>{const on=xr.toggle();app.setView('3d');app.scene.mode=on?'teeth':'clinic';app.scene.target=on?[.28,1.42,-1.03]:[0,1.52,-2.6];app.scene.distance=on?1.9:4.4;app.scene.pitch=.16;app.scene.yaw=.12;b.textContent=on?'Hide XR tooth preview':'Preview XR tooth mesh on PC';};}
 });
 })();
+
 </script>
 <script>
 'use strict';
@@ -1699,7 +2119,10 @@ window.addEventListener('DOMContentLoaded',()=>{
     ]}
   ]);
   const spec=Object.freeze({panel:{p:[.08,1.56,-1.18],s:[.96,.80,.047]},
+    placement:{panelYOffsetFromEyes:-.04,anchorOncePerSession:true,faceInitialViewerYaw:true,recenterOnHelpReopen:true},
+    font:{title:43,progress:40,body:49,button:43},
     launcher:{p:[-1.12,1.40,-1.55],s:[.41,.13,.055]},
+    controlSize:[.29,.116,.056],
     controls:{back:[-.20,1.263,-1.124],next:[.15,1.263,-1.124],close:[.48,1.263,-1.124]}});
   const state={version:1,active:false,open:false,index:0,pages:PAGES.length,controllerSelects:0,gripOpens:0};
   class XRControllerGuide{
@@ -1708,59 +2131,121 @@ window.addEventListener('DOMContentLoaded',()=>{
       const add=(mesh,panel=true)=>{this.meshes.push(mesh);if(panel)this.panelMeshes.push(mesh);mesh.hidden=true;return mesh};
       add(scene.box(spec.panel.p,spec.panel.s,'#143644'));
       add(scene.box([.08,1.926,-1.151],[.94,.064,.055],'#258578'));
-      this.title=add(scene.label('QUEST 2 | GET STARTED',[.08,1.856,-1.141],[.87,.089,1],{font:43,bold:true,color:'#e9fff6'}));
+      this.title=add(scene.label('QUEST 2 | GET STARTED',[.08,1.856,-1.141],[.87,.089,1],{font:spec.font.title,bold:true,color:'#e9fff6'}));
       this.progress=add(scene.label('1 / 5',[.08,1.775,-1.139],[.78,.065,1],{font:30,color:'#90d9ce'}));
       for(let i=0;i<5;i++){
         this.labels.push(add(scene.label('',[.08,1.686-i*.083,-1.139],[.875,.078,1],
-          {font:49,color:'#e3f4ef'})));
+          {font:spec.font.body,color:'#e3f4ef'})));
       }
       for(const [key,p] of Object.entries(spec.controls)){
         const color=key==='next'?'#197e72':'#2b5f68';
-        add(scene.box(p,[.29,.116,.056],color,{key:'guide:'+key}));
+        add(scene.box(p,spec.controlSize,color,{key:'guide:'+key}));
         const label=key==='next'?'NEXT':key==='back'?'BACK':'CLOSE';
-        add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:43,bold:true}));
+        add(scene.label(label,[p[0],p[1]+.003,p[2]+.038],[.255,.073,1],{font:spec.font.button,bold:true}));
       }
       this.launcher=add(scene.box(spec.launcher.p,spec.launcher.s,'#236f75',{key:'guide:open'}),false);
       this.launcherLabel=add(scene.label('VR HELP / GRIP',
         [spec.launcher.p[0],spec.launcher.p[1]+.005,spec.launcher.p[2]+.035],
-        [.37,.080,1],{font:43,color:'#e8fff3'}),false);
+        [.37,.080,1],{font:spec.font.button,color:'#e8fff3'}),false);
+      // Snapshot the guide's positions AND its ray hit targets. Changes are XR-only.
+      this.meshOrigins=this.meshes.map(mesh=>({
+        mesh,p:mesh.p.slice(),rot:mesh.rot?.slice()||null
+      }));
+      const guideMeshes=new Set(this.meshes);
+      this.hitOrigins=(scene.pickables||[]).filter(hit=>guideMeshes.has(hit.mesh))
+        .map(hit=>({hit,p:hit.p.slice()}));
+      this.anchored=false;this.lastViewerPose=null;
+    }
+    placeForViewer(pose){
+      if(!state.active)return false;
+      const p=pose?.transform?.position,q=pose?.transform?.orientation;
+      if(!p||![p.x,p.y,p.z].every(Number.isFinite))return false;
+      if(q&&![q.x,q.y,q.z,q.w].every(Number.isFinite))return false;
+      // Preserve a plain transform snapshot, not a live XRFrame reference.
+      this.lastViewerPose={transform:{position:{x:p.x,y:p.y,z:p.z},
+        orientation:q?{x:q.x,y:q.y,z:q.z,w:q.w}:null}};
+      if(this.anchored)return false;
+      // Only yaw matters: preserve upright text even when the user looks up/down.
+      const forward=q&&this.scene.rotateByQuat?this.scene.rotateByQuat([0,0,-1],q):[0,0,-1];
+      if(!forward||![forward[0],forward[2]].every(Number.isFinite))return false;
+      const horizontal=Math.hypot(forward[0],forward[2]);
+      if(horizontal<.05)return false; // unstable yaw while looking vertically
+      const yaw=spec.placement.faceInitialViewerYaw
+        ?Math.atan2(-forward[0],-forward[2]):0;
+      const c=Math.cos(yaw),s=Math.sin(yaw);
+      const place=base=>[p.x+c*base[0]+s*base[2],
+        base[1]+p.y+spec.placement.panelYOffsetFromEyes-spec.panel.p[1],
+        p.z-s*base[0]+c*base[2]];
+      for(const item of this.meshOrigins){
+        item.mesh.p=place(item.p);
+        item.mesh.rot=(item.rot||[0,0,0]).slice();
+        item.mesh.rot[1]+=yaw;
+      }
+      for(const item of this.hitOrigins)item.hit.p=place(item.p);
+      this.anchored=true;return true;
+    }
+    recenter(){
+      if(!state.active)return false;
+      this.anchored=false;
+      return this.placeForViewer(this.lastViewerPose);
     }
     render(){
       const page=PAGES[state.index];if(!page)return;
-      this.scene.replaceLabel(this.title,page.title,43);
-      this.scene.replaceLabel(this.progress,(state.index+1)+' / '+PAGES.length,40);
-      for(let i=0;i<5;i++)this.scene.replaceLabel(this.labels[i],page.lines[i],49);
+      this.scene.replaceLabel(this.title,page.title,spec.font.title);
+      this.scene.replaceLabel(this.progress,(state.index+1)+' / '+PAGES.length,spec.font.progress);
+      for(let i=0;i<5;i++)this.scene.replaceLabel(this.labels[i],page.lines[i],spec.font.body);
       for(const mesh of this.panelMeshes)mesh.hidden=!state.open;
       this.launcher.hidden=!state.active;
       this.launcherLabel.hidden=!state.active;
     }
     open(){
       if(!state.active)return false;
-      state.index=0;state.open=true;this.render();return true;
+      state.index=0;state.open=true;
+      // Prevent a held trigger from continuing a cut when help opens by grip.
+      this.scene.xrPrep?.triggers?.clear();
+      if(this.scene.xrPrep){this.scene.xrPrep.lastCut=null;if(this.scene.xrPrep.tip)this.scene.xrPrep.tip.hidden=true}
+      this.render();return true;
     }
     close(){if(!state.open)return false;state.open=false;this.render();return true}
     next(){if(!state.open)return false;if(state.index===PAGES.length-1)return this.close();state.index++;this.render();return true}
     back(){if(!state.open||state.index===0)return false;state.index--;this.render();return true}
     onEnter(){state.active=true;state.controllerSelects=0;state.gripOpens=0;this.open()}
-    onExit(){state.active=false;state.open=false;state.index=0;for(const mesh of this.meshes)mesh.hidden=true}
+    onExit(){
+      state.active=false;state.open=false;state.index=0;
+      for(const item of this.meshOrigins){
+        item.mesh.p=item.p.slice();
+        item.mesh.rot=item.rot?item.rot.slice():undefined;
+      }
+      for(const item of this.hitOrigins)item.hit.p=item.p.slice();
+      this.anchored=false;this.lastViewerPose=null;
+      for(const mesh of this.meshes)mesh.hidden=true;
+    }
     onSqueezeStart(){
       if(!state.active)return false;
       state.gripOpens++;
+      // Grip is always a recovery shortcut, even if help is already open
+      // and the learner has turned away from the visible panel.
+      if(spec.placement.recenterOnHelpReopen)this.recenter();
       if(!state.open)this.open();
       return true;
     }
     onSelectStart(event,frame){
       if(!state.active)return false;
       // Invisible panels never receive interaction, but the launcher always does.
-      const pose=frame&&event?.inputSource?.targetRaySpace&&this.scene.xrRef
-        ?frame.getPose(event.inputSource.targetRaySpace,this.scene.xrRef):null;
+      let pose=null;
+      if(frame?.getPose&&event?.inputSource?.targetRaySpace&&this.scene.xrRef){
+        try{pose=frame.getPose(event.inputSource.targetRaySpace,this.scene.xrRef)}catch{pose=null}
+      }
       let key=null;
       if(pose){
         const q=pose.transform.orientation,p=pose.transform.position;
         const ray={o:[p.x,p.y,p.z],d:this.scene.rotateByQuat([0,0,-1],q)};
-        key=this.scene.getRayHit(ray.o,ray.d)?.key||null;
+        key=this.scene.getRayHit(ray.o,ray.d,p=>p.key?.startsWith('guide:'))?.key||null;
       }
-      if(key==='guide:open'){this.open();state.controllerSelects++;return true}
+      if(key==='guide:open'){
+        if(spec.placement.recenterOnHelpReopen)this.recenter();
+        this.open();state.controllerSelects++;return true;
+      }
       if(!state.open)return false;
       // Suppress simulated drilling and background selections while the guide is up.
       state.controllerSelects++;
@@ -1791,8 +2276,29 @@ window.addEventListener('DOMContentLoaded',()=>{
   const smooth=(x)=>x*x*(3-2*x);
   const gauss=(x,z,cx,cz,sx,sz)=>Math.exp(-((x-cx)**2/(sx*sx)+(z-cz)**2/(sz*sz)));
   const sizes={1:0.164,2:0.186,3:0.169,4:0.160};
+
+  // Schematic permanent-molar classes, not scans or second/third-molar templates.
+  const MOLAR_CUSPS=Object.freeze({
+    maxillary:Object.freeze([[-.46,-.43,.0160],[.45,-.43,.0142],[-.46,.46,.0180],[.46,.46,.0128]]),
+    mandibular:Object.freeze([[-.60,-.44,.0138],[-.03,-.50,.0162],[.55,-.38,.0127],[-.44,.45,.0155],[.45,.44,.0145]])
+  });
+  function molarCusps(upper){return MOLAR_CUSPS[upper?'maxillary':'mandibular'].map(c=>c.slice())}
+  function molarRelief(upper,x,z,r){
+    const cusps=MOLAR_CUSPS[upper?'maxillary':'mandibular'];
+    let elevation=0;
+    for(const [cx,cz,amp] of cusps)
+      elevation+=amp*gauss(x,z,cx,cz,upper?.33:.29,upper?.31:.30);
+    // Stylized fissures and central fossa. No claim of clinical measurements.
+    const fossa=-.0061*gauss(x,z,0,0,.31,.30);
+    const centralGroove=-.0023*Math.exp(-((z/.085)**2))*Math.exp(-((x/.68)**2));
+    const transverseGroove=-.0019*Math.exp(-((x/.090)**2))*Math.exp(-((z/.66)**2));
+    const distalBranch=upper?0:-.0011*gauss(x,z,.52,-.07,.20,.15);
+    const edge=1-smooth(clamp((r-.69)/.31,0,1));
+    return elevation+fossa+centralGroove+transverseGroove+distalBranch+.0025*edge;
+  }
   function crownData(style,upper,quality=1){
     style=Number(style);if(!sizes[style])throw Error('Unsupported crown type');
+    if(!Number.isInteger(quality)||quality<0||quality>2)throw Error('Crown quality must be 0, 1 or 2');
     const fine=quality>=2,seg=fine?112:quality<1?32:72, heightRings=fine?36:quality<1?10:24,radialRings=fine?32:quality<1?9:20;
     const d=upper?-1:1,height=sizes[style],pos=[],indices=[];
     const s=(a,p)=>{const c=Math.cos(a),t=Math.sin(a),e=2/p;return [Math.sign(c)*Math.abs(c)**e,Math.sign(t)*Math.abs(t)**e]};
@@ -1814,14 +2320,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         const fissure=-.006*Math.exp(-((z/.095)**2))*Math.exp(-((x/.64)**2));
         return cusp+fissure-.0017*(1-r*r);
       }
-      // Four rounded cusp ridges and a Y-like fissure network.
-      let cusp=0;
-      for(const [cx,cz,amp] of [[-.49,-.47,.016],[.47,-.47,.015],[-.46,.47,.0135],[.45,.44,.0155]])
-        cusp+=amp*gauss(x,z,cx,cz,.34,.31);
-      const fossa=-.0065*gauss(x,z,0,0,.38,.35);
-      const groove=-.0025*Math.exp(-((x/.095)**2))*Math.exp(-((z/.65)**2))
-                  -.002*Math.exp(-((z/.09)**2))*Math.exp(-((x/.66)**2));
-      return cusp+fossa+groove+.0025*edge;
+      return molarRelief(upper,x,z,r);
     }
     const vertex=(x,y,z)=>{pos.push(x,y,z);return pos.length/3-1};
     const side=[];
@@ -1882,7 +2381,8 @@ window.addEventListener('DOMContentLoaded',()=>{
       normals[i]/=l;normals[i+1]/=l;normals[i+2]/=l;
     }
     // For review/QA, the mesh reports the same source-independent crown geometry.
-    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper};
+    return {positions:pos,indices,normals,vertices:pos.length/3,triangles:indices.length/3,style,upper,
+      quality,occlusalCusps:style===4?MOLAR_CUSPS[upper?'maxillary':'mandibular'].length:null};
   }
   // Phase 2 is a display-only placement correction. It must never mutate the
   // source WebGL picking targets, WebXR geometry, or FDI identifiers.
@@ -2080,11 +2580,11 @@ window.addEventListener('DOMContentLoaded',()=>{
     return {positions,indices,normals,vertices:positions.length/3,triangles:indices.length/3,
       upper,closedEnds:true,synthetic:true,structuralLayer:'alveolar-proxy',cervicalSites:16};
   }
-  function createTemplate(B,scene,kind,layout){
+  function createTemplate(B,scene,kind,layout,options={}){
     const match=/^crown_([1-4])_([01])(?:_([1-8]))?$/.exec(kind);
     const bone=/^jaw[01]$/.test(kind);
     if(!match&&!bone&&!/^gingiva[01]$/.test(kind))return null;
-    const data=match?crownData(Number(match[1]),match[2]==='0',2):
+    const data=match?crownData(Number(match[1]),match[2]==='0',options.crownQuality??2):
       bone?jawData(kind==='jaw0',layout?.arches?.[kind==='jaw0'?0:1]):
       gingivaData(kind==='gingiva0',layout?.arches?.[kind==='gingiva0'?0:1]);
     const template=new B.Mesh('anatomical:'+kind,scene),v=new B.VertexData();
@@ -2098,10 +2598,14 @@ window.addEventListener('DOMContentLoaded',()=>{
     v.applyToMesh(template,true);
     template.useVertexColors=!!v.colors;
     template.isVisible=false;template.isPickable=false;
-    template.metadata={synthetic:true,anatomyVersion:6,vertices:data.vertices,triangles:data.triangles,cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0,structuralLayer:data.structuralLayer||null};
+    template.metadata={synthetic:true,anatomyVersion:7,vertices:data.vertices,triangles:data.triangles,
+      crownQuality:data.quality??null,occlusalCusps:data.occlusalCusps??null,
+      cervicalSites:data.cervicalSites||0,appearanceVersion:root.KlinikDentalAppearance?.version||0,
+      structuralLayer:data.structuralLayer||null};
     return template;
   }
-  root.KlinikBabylonAnatomy={crownData,gingivaData,jawData,archPlacement,createTemplate,version:6,notes:'Educational procedural tooth morphology; not an anatomical scan'};
+  root.KlinikBabylonAnatomy={crownData,molarCusps,molarRelief,gingivaData,jawData,archPlacement,createTemplate,
+    version:7,notes:'Educational procedural tooth morphology; molar classes simplified, not anatomical scans'};
 })(typeof window!=='undefined'?window:globalThis);
 </script>
 <script>
@@ -2644,7 +3148,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   ]);
   const HEIGHTS=[0,.167,.181,.166,.153];
   const STYLE=Object.freeze([0,1,1,2,3,3,4,4,4]);
-  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,visibleInstances:0,triangles:0,failures:[],error:null,
+  const state={mode:'idle',ready:false,loaded:0,expected:16,instances:0,visibleInstances:0,triangles:0,surfaceDiagnostics:null,failures:[],error:null,
     source:'University of Dundee, School of Dentistry (CC BY 4.0)',surfaceOnly:true,webxr:false};
   root.KlinikRealTeeth=state;
 
@@ -2726,7 +3230,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   async function replace(layer){
     if(state.mode==='loading'||state.mode==='ready')return;
-    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;state.vertexColoredInstances=0;
+    state.mode='loading';state.ready=false;state.error=null;state.failures=[];state.loaded=0;state.instances=0;state.triangles=0;state.vertexColoredInstances=0;state.surfaceDiagnostics=null;
     const B=layer.B;
     try{
       await loadScript(LOADER,()=>!!B.GLTFFileLoader);
@@ -2799,8 +3303,184 @@ window.addEventListener('DOMContentLoaded',()=>{
       if(!state.ready)state.error='None of the bundled Dundee crowns could be loaded.';
     }catch(error){state.mode='error';state.error=String(error.message||error).slice(0,180);}
   }
+
+  // Mesh proximity is a sampled desktop QA metric in uncalibrated scene units.
+  // It never changes FDI positions, drillable geometry, or hit-testing.
+  const CONTACT_EDGES=[[0,1],[1,2],[2,0]];
+  const subtract=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const squared=v=>dot(v,v);
+  const clip01=x=>Math.max(0,Math.min(1,x));
+  function pointSegmentSquared(p,a,b){
+    const v=subtract(b,a),len=squared(v);
+    const t=len>1e-15?clip01(dot(subtract(p,a),v)/len):0;
+    return squared(subtract(p,a.map((x,i)=>x+t*v[i])));
+  }
+  function pointTriangleSquared(p,t){
+    const [a,b,c]=t,ab=subtract(b,a),ac=subtract(c,a),n=cross(ab,ac),n2=squared(n);
+    if(n2>1e-15){
+      const projection=subtract(p,n.map(x=>dot(subtract(p,a),n)/n2*x));
+      const v=subtract(projection,a);
+      const d00=dot(ab,ab),d01=dot(ab,ac),d11=dot(ac,ac);
+      const d20=dot(v,ab),d21=dot(v,ac),det=d00*d11-d01*d01;
+      if(det>1e-15){
+        const u=(d11*d20-d01*d21)/det,w=(d00*d21-d01*d20)/det;
+        if(u>=-1e-10&&w>=-1e-10&&u+w<=1+1e-10)return squared(subtract(p,projection));
+      }
+    }
+    return Math.min(...CONTACT_EDGES.map(([i,j])=>pointSegmentSquared(p,t[i],t[j])));
+  }
+  function segmentSegmentSquared(p,q,r,s){
+    const u=subtract(q,p),v=subtract(s,r),w=subtract(p,r);
+    let best=Math.min(pointSegmentSquared(p,r,s),pointSegmentSquared(q,r,s),
+      pointSegmentSquared(r,p,q),pointSegmentSquared(s,p,q));
+    const a=dot(u,u),b=dot(u,v),c=dot(v,v),d=dot(u,w),e=dot(v,w),den=a*c-b*b;
+    if(den>1e-15){
+      const x=(b*e-c*d)/den,y=(a*e-b*d)/den;
+      if(x>=0&&x<=1&&y>=0&&y<=1)
+        best=Math.min(best,squared(subtract(p.map((z,i)=>z+x*u[i]),r.map((z,i)=>z+y*v[i]))));
+    }
+    return best;
+  }
+  function segmentHitsTriangle(p,q,t){
+    const direction=subtract(q,p),edge1=subtract(t[1],t[0]),edge2=subtract(t[2],t[0]);
+    const h=cross(direction,edge2),det=dot(edge1,h);
+    if(Math.abs(det)<1e-12)return false;
+    const f=1/det,s=subtract(p,t[0]),u=f*dot(s,h);
+    if(u<-1e-10||u>1+1e-10)return false;
+    const qv=cross(s,edge1),v=f*dot(direction,qv),fraction=f*dot(edge2,qv);
+    return v>=-1e-10&&u+v<=1+1e-10&&fraction>=-1e-10&&fraction<=1+1e-10;
+  }
+  function triangleBounds(t){
+    return [0,1,2].map(k=>[Math.min(t[0][k],t[1][k],t[2][k]),
+      Math.max(t[0][k],t[1][k],t[2][k])]);
+  }
+  function boxesDistanceSquared(a,b){
+    let d=0;
+    for(let i=0;i<3;i++){
+      const gap=Math.max(0,a[i][0]-b[i][1],b[i][0]-a[i][1]);
+      d+=gap*gap;
+    }
+    return d;
+  }
+  function surfaceDistance(trianglesA,trianglesB){
+    for(const triangles of [trianglesA,trianglesB]){
+      if(!Array.isArray(triangles)||!triangles.length)throw Error('Surface triangles required');
+      for(const t of triangles){
+        if(!Array.isArray(t)||t.length!==3||t.some(p=>!Array.isArray(p)||p.length!==3||!p.every(Number.isFinite)))
+          throw Error('Surface triangle coordinates must be finite xyz triples');
+      }
+    }
+    const boundsA=trianglesA.map(triangleBounds),boundsB=trianglesB.map(triangleBounds);
+    let best=Infinity,intersection=false,comparisons=0;
+    for(let i=0;i<trianglesA.length&&best>0;i++)for(let j=0;j<trianglesB.length;j++){
+      if(boxesDistanceSquared(boundsA[i],boundsB[j])>best)continue;
+      const a=trianglesA[i],b=trianglesB[j];comparisons++;
+      for(const [x,y] of CONTACT_EDGES){
+        if(segmentHitsTriangle(a[x],a[y],b)||segmentHitsTriangle(b[x],b[y],a)){
+          best=0;intersection=true;break;
+        }
+      }
+      if(intersection)break;
+      for(const p of a)best=Math.min(best,pointTriangleSquared(p,b));
+      for(const p of b)best=Math.min(best,pointTriangleSquared(p,a));
+      for(const [u,v] of CONTACT_EDGES)for(const [x,y] of CONTACT_EDGES)
+        best=Math.min(best,segmentSegmentSquared(a[u],a[v],b[x],b[y]));
+    }
+    return {distance:Math.sqrt(best),intersectsSampledTriangles:intersection,
+      sampledTrianglesA:trianglesA.length,sampledTrianglesB:trianglesB.length,
+      comparedTrianglePairs:comparisons,units:'KlinikLab scene units (not mm)',
+      limitations:'Deterministic subsampled surfaces; minimum is an upper bound on true separation. Intersection is not penetration depth.'};
+  }
+  function sampledMeshTriangles(mesh,B,maxTriangles=48){
+    const vertices=mesh?.getVerticesData?.(B.VertexBuffer.PositionKind),indices=mesh?.getIndices?.();
+    if(!vertices||!indices||indices.length<3)return null;
+    const world=mesh.computeWorldMatrix(true),triangles=[],total=Math.floor(indices.length/3);
+    const stride=Math.max(1,Math.ceil(total/maxTriangles));
+    for(let i=0;i<total;i+=stride){
+      const triangle=[];
+      for(let j=0;j<3;j++){
+        const k=indices[i*3+j],source=B.Vector3.FromArray(vertices,k*3);
+        const p=B.Vector3.TransformCoordinates(source,world);
+        triangle.push([p.x,p.y,p.z]);
+      }
+      triangles.push(triangle);
+    }
+    return triangles;
+  }
+
+  // Exact projected world-space Y extrema of the displayed crown's vertices.
+  // This is only a 1D projection, not tooth collision/occlusal contact.
+  function meshYBounds(mesh,B){
+    const positions=mesh?.getVerticesData?.(B.VertexBuffer.PositionKind);
+    if(!positions||positions.length<9||positions.length%3) return null;
+    const matrix=mesh.computeWorldMatrix(true);
+    let min=Infinity,max=-Infinity;
+    for(let i=0;i<positions.length;i+=3){
+      const v=B.Vector3.FromArray(positions,i);
+      const y=B.Vector3.TransformCoordinates(v,matrix).y;
+      if(!Number.isFinite(y))throw Error('Nonfinite world-space tooth vertex');
+      min=Math.min(min,y);max=Math.max(max,y);
+    }
+    return {min,max};
+  }
+  function opposingFDIPairs(){
+    const pairs=[];
+    for(const [upper,lower] of [['1','4'],['2','3']])
+      for(let n=1;n<=8;n++)pairs.push([upper+n,lower+n]);
+    return pairs;
+  }
+  function measureArchSurfaces(layer){
+    const byId=Object.create(null),cache=Object.create(null),pairs=[];
+    for(const item of layer.items||[]){
+      const id=/^tooth:([1-4][1-8])$/.exec(item.source?.key||'')?.[1];
+      if(id&&item.realMesh)byId[id]=item.realMesh;
+    }
+    for(const arch of layer.anatomyLayout?.arches||[])for(let i=0;i+1<arch.length;i++){
+      const first=arch[i].id,second=arch[i+1].id;
+      if(!cache[first]&&byId[first])cache[first]=sampledMeshTriangles(byId[first],layer.B);
+      if(!cache[second]&&byId[second])cache[second]=sampledMeshTriangles(byId[second],layer.B);
+      const a=cache[first],b=cache[second],pair=first+'-'+second;
+      if(!a||!b){pairs.push({pair,status:'unavailable'});continue;}
+      const measurement=surfaceDistance(a,b);
+      pairs.push({pair,distance:Number(measurement.distance.toFixed(6)),
+        intersectsSampledTriangles:measurement.intersectsSampledTriangles,
+        status:measurement.intersectsSampledTriangles?'sampled facet intersection':
+          measurement.distance<=.008?'near in sample':'no near contact observed in sample',
+        sampledTriangles:[a.length,b.length]});
+    }
+    const verticalBounds=Object.create(null),opposingPairs=[];
+    for(const [first,second] of opposingFDIPairs()){
+      const pair=first+'-'+second;
+      if(!cache[first]&&byId[first])cache[first]=sampledMeshTriangles(byId[first],layer.B);
+      if(!cache[second]&&byId[second])cache[second]=sampledMeshTriangles(byId[second],layer.B);
+      const a=cache[first],b=cache[second];
+      if(!a||!b){opposingPairs.push({pair,status:'unavailable'});continue;}
+      if(!verticalBounds[first])verticalBounds[first]=meshYBounds(byId[first],layer.B);
+      if(!verticalBounds[second])verticalBounds[second]=meshYBounds(byId[second],layer.B);
+      const upper=verticalBounds[first],lower=verticalBounds[second];
+      if(!upper||!lower){opposingPairs.push({pair,status:'no vertex bounds'});continue;}
+      const gap=upper.min-lower.max,measurement=surfaceDistance(a,b);
+      opposingPairs.push({
+        pair,
+        projectedVerticalClearance:Number(gap.toFixed(6)),
+        sampledSurfaceDistance:Number(measurement.distance.toFixed(6)),
+        intersectsSampledTriangles:measurement.intersectsSampledTriangles,
+        status:measurement.intersectsSampledTriangles?'sampled facet intersection':
+          gap>.008?'vertical projection separated':
+          gap<-.008?'vertical projections overlap (not necessarily contact)':
+          'near vertically (not necessarily contact)',
+        sampledTriangles:[a.length,b.length]});
+    }
+    return {pairs,opposingPairs,teethMeasured:Object.keys(cache).length,units:'KlinikLab scene units (not mm)',
+      contactThreshold:.008,source:'licensed Dundee crown display meshes, cropped and normalized',
+      method:'3D sampled triangle-triangle proximity (48 triangles per crown maximum) with full-vertex vertical projection extrema for opposing FDI pairs',
+      limitations:'Projected vertical clearance = minimum upper world Y minus maximum lower world Y; negative can reflect lateral separation despite Y overlap. No calibrated bite registration, complete contact analysis, penetration depth or clinical occlusion. Open cropped surfaces are not solid teeth.'};
+  }
+
   function sync(layer){
-    if(!state.ready)return;
+    if(!state.ready){state.visibleInstances=0;return;}
     const B=layer.B;
     let visibleInstances=0;
     for(const item of layer.items){
@@ -2830,8 +3510,13 @@ window.addEventListener('DOMContentLoaded',()=>{
       }
     }
     state.visibleInstances=visibleInstances;
+    // Run once on the fully visible desktop licensed arch; never inside XR.
+    if(visibleInstances===32&&!state.surfaceDiagnostics&&layer.crownSource!=='procedural'){
+      try{state.surfaceDiagnostics=measureArchSurfaces(layer)}
+      catch(error){state.surfaceDiagnostics={error:String(error.message||error),units:'scene units'}}
+    }
   }
-  root.KlinikRealMesh={filename,parseKind,sliceTriangle,cropMesh,replace,sync,state};
+  root.KlinikRealMesh={filename,parseKind,sliceTriangle,cropMesh,surfaceDistance,measureArchSurfaces,replace,sync,state};
 })(typeof window!=='undefined'?window:globalThis);
 </script>
 <script>
@@ -3092,6 +3777,9 @@ window.addEventListener('DOMContentLoaded',()=>{
       this.canvas.style.display=in3D?'block':'none';
       if(!in3D){
         for(const m of this.jawMeshes)m.isVisible=false;
+        // Keep actual licensed visibility counters and mesh flags in sync when
+        // switching to 2D or XR. The original render/picking canvas is untouched.
+        window.KlinikRealMesh?.sync(this);
         return;
       }
       for(let arch=0;arch<this.jawMeshes.length;arch++){
@@ -3143,7 +3831,11 @@ window.addEventListener('DOMContentLoaded',()=>{
       });
     }
     enable(){this.visible=true;this.canvas.style.display='block';this.engine.resize();status.mode='babylon';status.ready=true;status.error=null;this.startRealTeeth()}
-    disable(){this.visible=false;this.canvas.style.display='none';status.mode='classic'}
+    disable(){
+      this.visible=false;this.canvas.style.display='none';status.mode='classic';
+      // The optional display no longer draws any licensed teeth.
+      if(window.KlinikRealTeeth)window.KlinikRealTeeth.visibleInstances=0;
+    }
   }
 
   function init(){
@@ -3403,7 +4095,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     style.textContent=`#dundee-atlas[hidden]{display:none!important}#dundee-atlas{position:fixed;inset:0;z-index:1900;background:#07151edb;display:grid;place-items:center;padding:20px;box-sizing:border-box}#dundee-atlas-dialog{display:flex;flex-direction:column;gap:10px;width:min(1050px,97vw);height:min(860px,94vh);box-sizing:border-box;padding:18px;border:1px solid #456875;border-radius:16px;background:#102b39;color:#e9f8f7;box-shadow:0 24px 70px #0009;font:14px system-ui}#dundee-atlas-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#dundee-atlas-toolbar select,#dundee-atlas-toolbar button{border:1px solid #567989;border-radius:8px;background:#1f4754;color:#efffff;padding:9px 10px;font:600 13px system-ui;cursor:pointer}#dundee-atlas-toolbar select{flex:1;min-width:180px}#dundee-atlas-canvas{display:block;width:100%;height:100%;min-height:260px;outline:none;touch-action:none;border-radius:12px;background:#0a1c29}#dundee-atlas-vp{flex:1;min-height:260px;overflow:hidden}#dundee-atlas small{font-size:12px;line-height:1.5;color:#c3d3d9}#dundee-atlas a{color:#7bdbec}#dundee-atlas-status{min-height:18px}`;
     document.head.appendChild(style);
     modal=document.createElement('div');modal.id='dundee-atlas';modal.hidden=true;
-    modal.innerHTML=`<section id="dundee-atlas-dialog" role="dialog" aria-modal="true" aria-label="Licensed 3D dental anatomy"><div style="display:flex;justify-content:space-between;gap:15px;align-items:center"><div><strong style="font-size:20px">Anatomical tooth atlas</strong><div style="font-size:12px;color:#a9c6cd">CT-informed source models · Babylon.js WebGL · Educational viewer only</div></div><button type="button" id="dundee-atlas-close" style="background:#295563;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer">Close ✕</button></div><div id="dundee-atlas-toolbar"><button type="button" id="dundee-atlas-prev" aria-label="Previous tooth">◀</button><select id="dundee-atlas-select" aria-label="Choose tooth model"></select><button type="button" id="dundee-atlas-next" aria-label="Next tooth">Next tooth ▶</button><button type="button" id="dundee-atlas-flip" title="Turn the tooth upside down">↕ Flip</button><button type="button" id="dundee-atlas-import-trigger" title="Load a high-resolution GLB from this computer without uploading">Import GLB…</button><input id="dundee-atlas-import" type="file" accept=".glb,model/gltf-binary" style="display:none" /></div><div id="dundee-atlas-vp"><canvas id="dundee-atlas-canvas" aria-label="Interactive imported tooth model; drag to rotate and scroll to zoom"></canvas></div><div id="dundee-atlas-status" role="status">Choose a tooth to load its licensed model.</div><small>3D models © University of Dundee, School of Dentistry · CC BY 4.0 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">license</a> · Repacked GLB files from <a href="https://github.com/sameralseedbth-Dental/dental-3d-models" target="_blank" rel="noopener">dental-3d-models</a> · <a id="dundee-atlas-source" target="_blank" rel="noopener">Original Dundee model ↗</a>. Bundled GLBs are decimated surfaces; import your properly licensed high-resolution GLB locally for more detail. Local files stay in this browser and retain their own licenses. None of these meshes are clinical scans for diagnosis or drillable enamel/dentin/pulp volumes.</small></section>`;
+    modal.innerHTML=`<section id="dundee-atlas-dialog" role="dialog" aria-modal="true" aria-label="Licensed 3D dental anatomy"><div style="display:flex;justify-content:space-between;gap:15px;align-items:center"><div><strong style="font-size:20px">Anatomical tooth atlas</strong><div style="font-size:12px;color:#a9c6cd">Licensed Dundee surface models · Babylon.js WebGL · Educational viewer only</div></div><button type="button" id="dundee-atlas-close" style="background:#295563;color:white;border:0;border-radius:8px;padding:11px;cursor:pointer">Close ✕</button></div><div id="dundee-atlas-toolbar"><button type="button" id="dundee-atlas-prev" aria-label="Previous tooth">◀</button><select id="dundee-atlas-select" aria-label="Choose tooth model"></select><button type="button" id="dundee-atlas-next" aria-label="Next tooth">Next tooth ▶</button><button type="button" id="dundee-atlas-flip" title="Turn the tooth upside down">↕ Flip</button><button type="button" id="dundee-atlas-import-trigger" title="Load a high-resolution GLB from this computer without uploading">Import GLB…</button><input id="dundee-atlas-import" type="file" accept=".glb,model/gltf-binary" style="display:none" /></div><div id="dundee-atlas-vp"><canvas id="dundee-atlas-canvas" aria-label="Interactive imported tooth model; drag to rotate and scroll to zoom"></canvas></div><div id="dundee-atlas-status" role="status">Choose a tooth to load its licensed model.</div><small>3D models © University of Dundee, School of Dentistry · CC BY 4.0 · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">license</a> · Repacked GLB files from <a href="https://github.com/sameralseedbth-Dental/dental-3d-models" target="_blank" rel="noopener">dental-3d-models</a> · <a id="dundee-atlas-source" target="_blank" rel="noopener">Original Dundee model ↗</a>. Bundled GLBs are decimated surfaces; import your properly licensed high-resolution GLB locally for more detail. Local files stay in this browser and retain their own licenses. None of these meshes are clinical scans for diagnosis or drillable enamel/dentin/pulp volumes.</small></section>`;
     document.body.appendChild(modal);
     canvas=document.getElementById('dundee-atlas-canvas');
     const selectNode=document.getElementById('dundee-atlas-select');
