@@ -28,3 +28,15 @@ test('XR evidence samples stereo eye framebuffers and fresh frame ID',()=>{
  assert.match(source,/07-help-opened-by-question-mark\.png/);
  assert.match(source,/08-help-closed-after-close\.png/);
 });
+
+test('capture manifest preserves complete per-eye projection data before visibility checks',()=>{
+ const source=fs.readFileSync(new URL('../test-support/webxr-test/smoke.mjs',import.meta.url),'utf8');
+ const push=source.match(/result\.captureManifest\.push\(\{([^}]+)\}\)/);
+ assert(push,'capture manifest push is missing');
+ for(const field of ['eyeTools:screenshot.eyeTools','eyes:screenshot.eyes','captureFrame:screenshot.frame','sha256','duplicateOf'])
+   assert(push[1].includes(field),'missing capture provenance field: '+field);
+ assert(source.includes('result.captureManifest[0].eyeTools'));
+ assert(source.includes('hiddenCenters.length'));
+ assert(source.includes("eye.find(t=>t.name==='mirror')?.projection.inFrustum"));
+ assert(source.includes("eye.find(t=>t.name==='composite')?.projection.inFrustum"));
+});
