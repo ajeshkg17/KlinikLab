@@ -303,8 +303,8 @@ test('XR frame maps independent aim/grip poses by handedness and clears missing 
  const gl={FRAMEBUFFER:1,DEPTH_TEST:2,COLOR_BUFFER_BIT:4,DEPTH_BUFFER_BIT:8,
   bindFramebuffer(){},enable(){},clear(){},viewport(){}};
  let cutFrameCalls=0,placed=0,cleared=0;
- const controllers=()=>({parts:Array.from({length:6},()=>({hidden:true,model:null})),ray:{hidden:true,model:null}});
- const scene={gl,xrRef:{},xrControllers:[controllers(),controllers()],
+ const controllers=side=>({side,parts:Array.from({length:6},()=>({hidden:true,model:null})),ray:{hidden:true,model:null}});
+ const scene={gl,xrRef:{},xrControllers:[controllers(-1),controllers(1)],
   updateXRController:methods.updateXRController,
   controllerMatrix:pose=>[1,0,0,0,0,1,0,0,0,0,1,0,pose.transform.position.x,pose.transform.position.y,pose.transform.position.z,1],
   rotateByQuat:()=>[0,0,-1],rgb:color=>color,
