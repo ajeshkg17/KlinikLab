@@ -476,7 +476,7 @@ class DentalScene {
       stat.maxFromFirst=Math.max(stat.maxFromFirst||0,...value.map((v,i)=>Math.abs(v-stat.first[i])));
       stat.last=value;stat.samples=(stat.samples||0)+1;
     };
-    const fixed=this.meshes[0];
+    const fixed=this.meshes?.[0];
     if(fixed)track(diag.world,fixed.model||M3.trs(fixed.p,fixed.rot,fixed.s));
     diag.frames++;
     for(const [index,view] of pose.views.entries())track(diag.eyes[index]||(diag.eyes[index]={}),view.transform.inverse.matrix);
