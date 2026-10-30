@@ -21,7 +21,7 @@ function run(cmd,args,cwd,env={}){
 }
 async function init(){
  await fs.mkdir(ROOT,{recursive:true});
- try{await fs.access(path.join(REPO,'.git'))}catch{git(['clone','--no-checkout',REMOTE,REPO],ROOT)}
+ try{await fs.access(path.join(REPO,'.git'))}catch{git(['clone','--filter=blob:none','--no-checkout',REMOTE,REPO],ROOT)}
  if(git(['remote','get-url','origin'])!==REMOTE)throw Error('Unexpected remote');
 }
 async function ledger(){try{return JSON.parse(await fs.readFile(LEDGER,'utf8'))}catch{return {completed:{}}}}
@@ -65,35 +65,53 @@ async function execute(job){
  }
 }
 async function publish(job,{result,captures}){
- git(['fetch','origin',RESULT_BRANCH]);
- const wt=path.join(ROOT,'publish-'+job.jobId);
- git(['worktree','prune']);
- git(['worktree','add','--detach',wt,'origin/'+RESULT_BRANCH]);
- try{
-  const folder='runs/pc-xr-'+job.jobId+'-'+job.commit,dir=path.join(wt,folder);
-  try{await fs.access(dir);throw Error('Output already published; will not overwrite')}catch(e){if(e.code!=='ENOENT')throw e}
-  await fs.mkdir(dir,{recursive:true});
-  const seen=new Map(),duplicates=[],hashes=[];
-  for(const {name,bytes} of captures){
-   await fs.writeFile(path.join(dir,name),bytes);
-   const hash=createHash('sha256').update(bytes).digest('hex');
-   if(seen.has(hash))duplicates.push({file:name,sameAs:seen.get(hash)});
-   else seen.set(hash,name);
-   hashes.push({file:name,sha256:hash});
-  }
-  await fs.writeFile(path.join(dir,'result.json'),JSON.stringify({...result,jobId:job.jobId,testedCommit:job.commit,captureHashes:hashes,duplicates},null,2));
-  const notes=['# PC WebXR screenshot gallery','','Job: '+job.jobId,'Tested commit: '+job.commit,'','Meta IWER Quest2 emulator in isolated desktop Chrome, NOT physical headset evidence. Browser viewport frames may not show an actual per-eye XR framebuffer.','',duplicates.length?'Duplicate images: '+JSON.stringify(duplicates):'No byte-identical captures; composition still requires visual review.',''];
-  for(const {name} of captures)notes.push('## '+name,'','!['+name+'](./'+name+')','');
-  await fs.writeFile(path.join(dir,'README.md'),notes.join('\n'));
-  await fs.writeFile(path.join(wt,'PC_XR_LATEST.md'),'# Latest PC WebXR run\n\n[Open gallery](./'+folder+'/README.md)\n');
-  git(['config','user.name','KlinikLab PC XR Worker'],wt);
-  git(['config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],wt);
-  git(['add','--',folder,'PC_XR_LATEST.md'],wt);
-  git(['commit','-m','PC XR screenshots '+job.jobId],wt);
-  git(['push','origin','HEAD:'+RESULT_BRANCH],wt);
-  return 'https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/'+folder+'/README.md';
- }finally{git(['worktree','remove','--force',wt])}
+ // GitHub git-data API: upload only new blobs; never checkout/download old visual-feedback PNGs.
+ const auth=spawnSync('gh',['auth','token'],{encoding:'utf8',timeout:15000});
+ if(auth.status!==0||!auth.stdout.trim())throw Error('Install GitHub CLI and authorize push access: gh auth login');
+ const token=auth.stdout.trim(),base='https://api.github.com/repos/ajeshkg17/KlinikLab';
+ async function api(endpoint,method='GET',data){
+  const response=await fetch(base+endpoint,{method,headers:{
+   Authorization:'Bearer '+token,Accept:'application/vnd.github+json',
+   'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'
+  },body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(30000)});
+  if(!response.ok)throw Error('GitHub '+method+' '+endpoint+' returned '+response.status);
+  return response.json();
+ }
+ const ref=await api('/git/ref/heads/'+RESULT_BRANCH);
+ const parent=ref.object.sha,commit=await api('/git/commits/'+parent);
+ const prefix='runs/pc-xr-'+job.jobId+'-'+job.commit;
+ // A commit-linked job ID must be fresh and cannot replace earlier evidence.
+ try{const existing=await api('/contents/'+prefix+'/result.json?ref='+RESULT_BRANCH);
+   if(existing)throw Error('Evidence for this job ID already exists; refusing to replace it');
+ }catch(e){if(!String(e.message).includes('returned 404'))throw e}
+ const seen=new Map(),duplicates=[],hashes=[],files=[];
+ for(const {name,bytes} of captures){
+  const checksum=createHash('sha256').update(bytes).digest('hex');
+  if(seen.has(checksum))duplicates.push({file:name,sameAs:seen.get(checksum)});else seen.set(checksum,name);
+  hashes.push({file:name,sha256:checksum});
+  files.push({path:prefix+'/'+name,contents:bytes,encoding:'base64'});
+ }
+ const report={...result,jobId:job.jobId,testedCommit:job.commit,
+  location:'owner-PC IWER emulator, not a physical headset',captureHashes:hashes,duplicates};
+ files.push({path:prefix+'/result.json',contents:Buffer.from(JSON.stringify(report,null,2)),encoding:'base64'});
+ const index=['# Owner-PC XR evidence','', 'Job: '+job.jobId,
+  'Tested commit: '+job.commit,'','Meta IWER Quest2 in desktop Chrome; not physical headset evidence.',
+  'Captured from a newly rendered XR eye frame when framebuffer readback is supported.',
+  duplicates.length?'Duplicate frames: '+JSON.stringify(duplicates):'No byte-identical images; framing still needs human review.',''];
+ for(const {name} of captures)index.push('## '+name,'','!['+name+'](./'+name+')','');
+ files.push({path:prefix+'/README.md',contents:Buffer.from(index.join('\n')),encoding:'base64'});
+ files.push({path:'PC_XR_LATEST.md',contents:Buffer.from('# Latest owner-PC XR test\n\n[Browse '+job.jobId+'](./'+prefix+'/README.md)\n'),encoding:'base64'});
+ const treeItems=[];
+ for(const file of files){
+  const blob=await api('/git/blobs','POST',{content:file.contents.toString('base64'),encoding:'base64'});
+  treeItems.push({path:file.path,mode:'100644',type:'blob',sha:blob.sha});
+ }
+ const tree=await api('/git/trees','POST',{base_tree:commit.tree.sha,tree:treeItems});
+ const newCommit=await api('/git/commits','POST',{message:'PC XR '+job.jobId+' at '+job.commit,tree:tree.sha,parents:[parent]});
+ await api('/git/refs/heads/'+RESULT_BRANCH,'PATCH',{sha:newCommit.sha,force:false});
+ return 'https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/'+prefix+'/README.md';
 }
+
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
