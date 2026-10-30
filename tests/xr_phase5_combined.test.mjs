@@ -19,3 +19,18 @@ test('catalog purpose/control vertical clearance and tray isolation',()=>{
  assert(purposeBottom-controlTop>=.1,'purpose text and action buttons too close');
  assert(catalog.includes("['spawn',-.90,'RETURN']"));
 });
+
+test('compact Touch-like silhouettes preserve two-hand pose attachment and working-tip clearance',()=>{
+ const method=src.slice(src.indexOf('  updateXRController(slot,source,frame){'),src.indexOf('  replaceLabel(mesh',src.indexOf('  updateXRController(slot,source,frame){')));
+ assert(method.includes('source.gripSpace')&&method.includes('source.targetRaySpace'));
+ assert(method.includes('this.controllerMatrix(grip)'));
+ assert(method.includes('holding&&i===2'),'tracking ring must remain hidden while holding');
+ assert(method.includes('c.ray.model'),'independent aim ray must remain');
+ const grip=method.match(/\{p:\[0,-\.046,\.018\],s:\[([^\]]+)\]/);
+ const ring=method.match(/\{p:\[0,\.054,-\.010\],s:\[([^\]]+)\]/);
+ assert(grip&&ring,'expected compact grip and ring dimensions');
+ const gripDims=grip[1].split(',').map(Number),ringDims=ring[1].split(',').map(Number);
+ assert(gripDims.every(x=>x<=.12),'grip must remain compact');
+ assert(ringDims.every(x=>x<=.083),'ring must remain compact');
+ assert(src.includes('gripOffset=[side*.025,-.025,-.25]'),'working-end clearance must remain');
+});
