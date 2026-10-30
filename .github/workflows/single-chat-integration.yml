@@ -1,0 +1,61 @@
+name: Isolated combined-build validation
+
+on:
+  push:
+    branches: [integration/single-chat-validation-2026-10-30]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: single-chat-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-validation:
+    name: Node regressions and reproducible build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Application and XR mocked regressions
+        run: node --test tests/*.test.cjs tests/*.test.mjs tests/real_scene_qa.cjs
+      - name: Scenario matrix and visual worker helpers (no worker execution)
+        run: |
+          node tests/qa_logic.js
+          node --test visual-qa/tests/*.test.mjs
+      - name: Static, localhost assets, and twice-regenerated standalone
+        run: python3 scripts/qa_gate.py all
+      - name: Evidence limits
+        if: always()
+        run: |
+          echo "Source/mock tests only, not clinician or Quest 2 validation." >> "$GITHUB_STEP_SUMMARY"
+
+  isolated-chromium:
+    name: Chromium DOM integration without screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: source-validation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright dependency
+        run: npm install --prefix visual-qa --no-audit --no-fund
+      - name: Install isolated CI Chromium
+        working-directory: visual-qa
+        run: npx playwright install --with-deps chromium
+      - name: Verify FDI selection, all 16 FSP exercises, heading fix and page errors
+        run: node visual-qa/ci-integration-smoke.mjs
+      - name: Evidence limits
+        if: always()
+        run: |
+          echo "Real CI Chromium DOM interactions only; no screenshots, emulator, physical Quest 2, office PC, or clinical approval." >> "$GITHUB_STEP_SUMMARY"
