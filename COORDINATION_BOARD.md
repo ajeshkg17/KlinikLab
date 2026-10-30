@@ -27,6 +27,8 @@ All four workers have acknowledged their individual issues. The coordinator shou
 
 ## Shared rules
 
+- User limit (2026-10-30): at most **two active workers** at any time. Check live status before each sequential assignment; unclear status occupies a slot. Never interrupt a running chat. Queue additional workers until capacity is available.
+
 - Feature work may proceed independently on the assigned branches; workers do not self-merge or edit the hosted main checkout.
 - Integrate reviewed work one PR at a time. The coordinator proposed #13 → #15 → #14; this is a proposal, not a user-approved merge order.
 - Do not run shared-PC tests or screenshot jobs concurrently. QA integrated acceptance is held until feature integration, synchronized main, and a coordinator-approved single job are confirmed. Isolated branch checks may run independently.
@@ -93,3 +95,5 @@ No new worker work is requested. Do not interrupt active chats. Original workstr
 
 - 2026-10-30 — Reviewed all four issue threads and PR discussions/heads/checks. New worker evidence: Chat 1 ACK at 06:32 UTC, branch unchanged; no newer anatomy/FSP/QA worker reports found. Feature checks #13 7/7, #15 7/7, #14 9/9 pass; #12 8 pass/1 Chromium fail remains on original QA branch. Refreshed current role assignments and posted passive status comments on #8/#9/#10/#11/#16; coordinator owns next engineering, workers retain waiting handoffs, no new worker tasks or interruptions. #16 remains coordinator-owned, implementation present in #17/preview but real DOM verification pending.
 - 2026-10-30 — Continued code work in #18 head `5db573751d26b2ab9cfcee226042110d772a2b8c`: renderer/security-aware capability checks, stale-result protection, pending-button guard and active-session exit availability. Five new regressions fail before/pass after; 54 targeted tests and 7/7 current CI pass. Combined preview `32081021249eae2cc9cfef8d72885ca0d1e2319d`: 114 application tests, 25 mirrors, 65 syntax checks and deterministic standalone pass. Updated existing QA document with four FSP cases × four tasks as plan only. No shared acceptance tests created/executed, browser/emulator/headset/PC jobs, screenshots, main merges or cleanup. User merge decisions and clinical/hardware/QA gates remain pending.
+
+- 2026-10-30 — Quest VR and anatomy continuation requests delivered. FSP/KP and QA requests were blocked by approval review after the user set a two-worker limit; these remain queued. Two-hour local coordination schedule updated to enforce capacity before every send.
