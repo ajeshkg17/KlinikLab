@@ -4,3 +4,15 @@ test('bounded ten-state XR request validates and preserves exact commit',()=>{co
 test('reject arbitrary actions and custom URLs',()=>{for(const extra of [{command:'rm -rf /'},{url:'https://elsewhere.test'},{script:'alert(1)'}])assert.throws(()=>validateXRJob({...valid,...extra}))});
 test('require unique safe IDs and exact 40-character hexadecimal commits',()=>{for(const x of ['../unsafe','too short','id'])assert.throws(()=>validateXRJob({...valid,jobId:x}));assert.throws(()=>validateXRJob({...valid,commit:'main'}))});
 test('reject omitted/extra scenes, timeouts and unknown suites',()=>{assert.throws(()=>validateXRJob({...valid,captures:['room-table']}));assert.throws(()=>validateXRJob({...valid,deadlineMs:130000}));assert.throws(()=>validateXRJob({...valid,suite:'shell'}))});
+
+test('worker authorizes GCM before rendering and stages evidence durably',()=>{
+ const code=fs.readFileSync(new URL('../xr-worker.mjs',import.meta.url),'utf8');
+ assert.match(code,/credential','fill'/);
+ assert.doesNotMatch(code,/spawnSync\('gh'/);
+ assert.match(code,/await preflight\(\);[\s\S]*?await execute\(job\)/);
+ assert.match(code,/await fs\.copyFile\(path\.join\(dir,'result\.json'\)/);
+ assert.match(code,/await fs\.writeFile\(path\.join\(retained,name\),bytes\)/);
+ assert.match(code,/status:'publish-pending'/);
+ assert.match(code,/const data=await loadEvidence\(job\)/);
+ assert.match(code,/HEARTBEAT/);
+});
