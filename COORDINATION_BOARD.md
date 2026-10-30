@@ -1,3 +1,5 @@
+> **Archived coordination history — 30 October 2026.** KlinikLab development now takes place in a single chat. Former multi-worker assignments, handoffs and periodic instructions below are historical records only; do not contact or restart deleted workers. Current test jobs and PC XR setup: [visual-qa README](https://github.com/ajeshkg17/KlinikLab/blob/integration/single-chat-validation-2026-10-30/visual-qa/README.md). Routine GitHub CI is source/unit/static only; browser XR runs from bounded owner-PC jobs. No physical headset acceptance is claimed.
+
 # KlinikLab coordination board
 
 This board is a coordination snapshot, not application code. Repository: ajeshkg17/KlinikLab. Last initialized: 2026-10-29. Verify current GitHub issue, pull request and check status before relying on any snapshot below.
