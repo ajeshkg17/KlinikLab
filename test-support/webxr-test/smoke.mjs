@@ -125,7 +125,6 @@ try{
        scene.draw=function(view,proj){
          original.call(this,view,proj);
          if(!this.__xrEyeCapturePending)return;
-         this.__xrEyeCapturePending=false;
          try{
            const gl=this.gl,vp=gl.getParameter(gl.VIEWPORT),[x,y,w,h]=vp;
            if(w<20||h<20)throw Error('Invalid XR eye viewport');
@@ -136,13 +135,39 @@ try{
            const ctx=canvas.getContext('2d'),image=ctx.createImageData(w,h);
            for(let row=0;row<h;row++)image.data.set(pixels.subarray(row*w*4,(row+1)*w*4),(h-1-row)*w*4);
            ctx.putImageData(image,0,0);
-           this.__xrEyeCapture={dataURL:canvas.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,width:w,height:h,source:'XR eye framebuffer readPixels'};
-         }catch(e){this.__xrEyeCapture={error:String(e),frame:this.xrVisualDiagnostics?.frames||0,source:'framebuffer readback failed'}}
+           // Project all five tool centers into the *actual submitted* eye matrices.
+           const project=point=>{
+             const mul=(m,v)=>[0,1,2,3].map(r=>m[r]*v[0]+m[r+4]*v[1]+m[r+8]*v[2]+m[r+12]*v[3]);
+             const clip=mul(proj,mul(view,[...point,1]));
+             return {x:clip[0]/clip[3],y:clip[1]/clip[3],z:clip[2]/clip[3],
+               inFrustum:clip[3]>0&&Math.abs(clip[0])<=clip[3]&&Math.abs(clip[1])<=clip[3]&&Math.abs(clip[2])<=clip[3]};
+           };
+           const tools=(this.xrTableTools||[]).map(t=>{
+             const m=t.meshes[0],p=m.model?[m.model[12],m.model[13],m.model[14]]:m.p;
+             return {name:t.name,owner:t.owner,hover:t.hover,projection:project(p)};
+           });
+           if(!this.__xrEyeParts)this.__xrEyeParts=[];
+           this.__xrEyeParts.push({canvas,tools});
+           if(this.__xrEyeParts.length>=2){
+             const sides=this.__xrEyeParts.slice(0,2);
+             const combined=document.createElement('canvas');
+             combined.width=sides[0].canvas.width+sides[1].canvas.width;
+             combined.height=Math.max(sides[0].canvas.height,sides[1].canvas.height);
+             const out=combined.getContext('2d');
+             out.drawImage(sides[0].canvas,0,0);
+             out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
+             this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
+             this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),
+               source:'two fresh WebXR eye framebuffers read through WebGL'};
+           }
+         }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
+           error:String(e),frame:this.xrVisualDiagnostics?.frames||0,source:'XR framebuffer readback failed'}}
        };
        scene.__xrEyeCaptureInstalled=true;
      }
      const before=scene.xrVisualDiagnostics?.frames||0;
-     scene.__xrEyeCapture=null;scene.__xrEyeCapturePending=true;
+     scene.__xrEyeCapture=null;scene.__xrEyeParts=[];scene.__xrEyeCapturePending=true;
      return await new Promise((resolve,reject)=>{
        const started=Date.now(),timeout=12000;
        function poll(){
