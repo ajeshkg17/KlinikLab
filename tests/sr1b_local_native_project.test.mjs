@@ -212,6 +212,40 @@ test('UE5.8.4 imported MaterialInstanceConstant uses explicit base overrides, no
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
 
+test('UE5.8 saved-level reload matches actor label VALUES, inventories real classes/components, and fails closed',t=>{
+ const validation=read('visual-qa/sr1b_reload_contract.py');
+ for(const token of [
+  'from sr1b_reload_contract import validate_loaded_actor_inventory',
+  'def editor_actor_inventory():',
+  'unreal.get_editor_subsystem(unreal.EditorActorSubsystem)',
+  'subsystem.get_all_level_actors()',
+  'unreal.EditorLevelLibrary.get_all_level_actors()',
+  "'actorLabel': str(actor.get_actor_label())",
+  "'actorClass': str(actor.get_class().get_name())",
+  "'componentClasses': []",
+  "'componentTags': [str(x) for x in",
+  "'sectionVisible': bool(comp.is_mesh_section_visible(0))",
+  "'materialPath': None",
+  "diagnostics['beforeReload'] = editor_actor_inventory()",
+  "diagnostics['afterReload'] = editor_actor_inventory()",
+  "report['nativeActorReloadDiagnostics']"
+ ])assert(importer.includes(token),token);
+ assert(validation.includes('for state, label in expected_actors.items()'),
+  'both requested native tooth labels must be matched by VALUES');
+ assert(validation.includes("row['actorLabel'] == label"),
+  'must compare ACTUAL UE labels against expected actor label VALUES');
+ assert(!importer.includes("a.get_actor_label() in expected_actors"),
+  'the exact owner-PC failure compared labels to before/after keys');
+ assert(validation.includes("comp.get('componentClass') != 'ProceduralMeshComponent'"));
+ assert(validation.includes("material_name != token"));
+ assert(validation.includes("len(comps) != len(expected_tissues)"));
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_reload_contract_test.py')],
+  {encoding:'utf8',timeout:30000});
+ if(p.error?.code==='ENOENT'){t.skip('Python unavailable');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
 test('PowerShell clinical collector parse check on systems equipped with PowerShell',t=>{
  const script=path.join(root,'visual-qa/sr1b-run-local-kliniklab.ps1').replace(/'/g,"''");
  const command=`$null=$tokens=$errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('${script}',[ref]$tokens,[ref]$errors)|Out-Null; if($errors.Count -gt 0){$errors|ForEach-Object {Write-Error $_.Message};exit 2}`;
