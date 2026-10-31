@@ -238,13 +238,16 @@ class ClassDescriptor:
 
 
 class FakeNativeComponent:
-    def __init__(self,tissue):
+    def __init__(self,tissue,state):
         self.tissue=tissue
+        self.state=state
     def get_name(self): return 'KL_Section_'+self.tissue
     def get_class(self): return ClassDescriptor('ProceduralMeshComponent')
     def get_editor_property(self,key):
-        if key != 'component_tags': raise RuntimeError('Unexpected component property')
-        return ['KL_TISSUE_'+self.tissue.upper()]
+        if key=='component_tags':return ['KL_TISSUE_'+self.tissue.upper()]
+        if key=='hidden_in_game':return False
+        raise RuntimeError('Unexpected component property')
+    def is_visible(self):return True
     def get_num_sections(self): return 1
     def is_mesh_section_visible(self,index): return index==0
     def get_material(self,index):
@@ -261,7 +264,7 @@ class FakeNativeActor:
     def __init__(self,state,label):
         self.state=state
         self.label=label
-        self.comps=[FakeNativeComponent(t) for t in contract.MATERIALS]
+        self.comps=[FakeNativeComponent(t,state) for t in contract.MATERIALS]
     def get_actor_label(self): return self.label
     def get_class(self): return ClassDescriptor('Actor')
     def get_name(self): return 'Actor_'+self.state
