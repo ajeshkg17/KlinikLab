@@ -1,3 +1,40 @@
+## CURRENT: job04 and recovered Win32 CreateDesktopW / Windows PowerShell JSON contract (31 October 2026)
+
+This section overrides the older job01/job02/job03 foreground F12 instructions below. The current unique pending job is **pc-godot-fdi16-20261031-job04**, schema **4**, with exact functional source SHA **f4d4d4151851a08342def08d9f2e461f5f5e7109**. New desktopApiContract is **raw-utf16-createdesktopw-bom-safe-recovery**, so old schema-v3 watchers must reject the new job. No owner Godot render, original PNG or RTX 5060 process evidence has yet passed.
+
+**Confirmed Win32 87 root:** Real hosted Windows smoke tests reproduced CreateDesktopW Win32 87 with the original managed-string P/Invoke, with full and minimal access masks and shorter names. The SAME Windows smoke test **succeeded with a raw UTF-16 LPCWSTR pointer** (Marshal.StringToHGlobalUni) to CreateDesktopW, reserved arguments NULL, no desktop switching and 0xC3 minimal rights. Production now uses this exact successful call and frees the unmanaged name pointer. It also checks the current process WinSta0 and fails closed on any other error. Passing this OS desktop-creation test does NOT establish Godot Vulkan raster or process GPU proof.
+
+**PowerShell JSON:** Windows PowerShell 5.1 Set-Content -Encoding UTF8 emits a BOM; Node JSON.parse failed on that original report and left job02/job03 ledgers executing. The newer collector writes owner and GPU counter JSON using UTF8Encoding(false), while the watcher tolerates an initial BOM when reading historical reports, original source JSON, ledger, GitHub job, and publication result. Malformed JSON is never accepted.
+
+**Old evidence / no rerun:** Job01 remains published EVIDENCE_INCOMPLETE. Job02 and job03 were attempted and their original worktrees/evidence must remain untouched. The new watcher has an explicit **--recover-incomplete** mode, restricted to those two old IDs and their exact source SHA: it reads original reports (including BOM), writes a missing terminal diagnostic once without overwriting original files, publishes EVIDENCE_INCOMPLETE to visual-feedback, and updates the ledger. It NEVER invokes Godot, exporter, capture, or a prior worktree. Run this first, then validate and run the fresh job04 separately.
+
+**Owner PC commands:** first stop any previous Godot watcher and ensure KLINIKLAB_GODOT_EXE points to the actual Godot 4.7.2 Windows GUI executable. Replace SHA placeholder below only with the new full integration commit SHA supplied after the current Windows tests pass.
+
+    $ErrorActionPreference='Stop'
+    $repo='C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
+    $sha='<NEW_FULL_INTEGRATION_SHA_FROM_CHAT>'
+    if (-not (Test-Path -LiteralPath $env:KLINIKLAB_GODOT_EXE)) { throw 'Godot executable missing' }
+    git -C $repo fetch origin integration/single-chat-validation-2026-10-30
+    if ($LASTEXITCODE -ne 0) { throw 'Fetch failed' }
+    $stamp=[DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+    $watcherDir="C:\klab-godot-watcher-$($sha.Substring(0,8))-$stamp"
+    git -C $repo worktree add --detach $watcherDir $sha
+    if ($LASTEXITCODE -ne 0) { throw 'Watcher worktree failed' }
+    Push-Location $watcherDir
+    try {
+      node --test .\tests\sr1c_windows_private_desktop_bom.test.mjs .\tests\sr1c_godot_private_desktop.test.mjs
+      if ($LASTEXITCODE -ne 0) { throw 'No-foreground and BOM regressions failed' }
+      node .\visual-qa\godot-worker.mjs --recover-incomplete
+      if ($LASTEXITCODE -ne 0) { throw 'Old-job diagnostics recovery failed; preserve originals' }
+      node .\visual-qa\godot-worker.mjs --validate
+      if ($LASTEXITCODE -ne 0) { throw 'Job04 validation failed' }
+      node .\visual-qa\godot-worker.mjs --once
+    } finally { Pop-Location }
+
+The Godot process must stay entirely on a separate **unswitched WinSta0 desktop**: no foreground activation, Project Manager/editor, manual F12 or headless dummy rendering. It must report native Forward+ Vulkan NVIDIA RTX 5060, produce an original image, preserve 14,856 BEFORE /14,936 AFTER source triangles and five tissue surfaces per tooth, and register nonzero 3D engine utilization tied to the Godot PID. A missing/invalid counter or blank GPU image is an incomplete result, never a pass. Quest streaming remains deferred. Original XR worker and job queue untouched.
+
+---
+
 ## NEW binding owner instruction (31 October 2026): background-only Godot job03, no foreground activation
 
 **Highest-priority replacement for all F12/game-window instructions further down this historical document.** User has prohibited any Godot Project Manager, editor, or game coming to the active desktop foreground. The active GitHub request is **`pc-godot-fdi16-20261031-job03`**, schema **3**, source pinned **`f4d4d4151851a08342def08d9f2e461f5f5e7109`**, with `backgroundContract=private-winsta0-vulkan-autocapture-no-foreground` and `capture=native-background-before-after`. A prior schema-v2 watcher **rejects** this job. **Job01** is published EVIDENCE_INCOMPLETE and **job02** has owner-PC local prepared evidence with no accepted render; do not alter, delete, reuse, or rerender either ID. The existing XR watcher and XR queue are untouched.
