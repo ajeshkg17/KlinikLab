@@ -60,6 +60,9 @@ if($Mode -eq 'Build'){
  }
  $umap=Join-Path $projectDir 'Content\Maps\L_KlinikLab_FDI16.umap'
  if(-not (Test-Path -LiteralPath $umap -PathType Leaf)){throw 'No native UE .umap saved on disk'}
+ if($report.renderPath -ne 'NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS'){
+  throw 'Refusing to hash/accept a lossy StaticMesh as a native dental render'
+ }
  $meshFiles=@(Get-ChildItem -LiteralPath (Join-Path $projectDir 'Content\KlinikLab\NativeMeshes') -Filter '*.uasset' -File -ErrorAction SilentlyContinue)
  $source=Get-Content -LiteralPath (Join-Path $exportDir 'kliniklab-export-manifest.json') -Raw|ConvertFrom-Json
  $sectionRows=@($report.importedMaterialSections.before.PSObject.Properties.Value)+@($report.importedMaterialSections.after.PSObject.Properties.Value)
@@ -69,9 +72,26 @@ if($Mode -eq 'Build'){
   $expected=[int]$source.sceneStates.$state.triangles
   $actual=[int](($rows|Measure-Object -Property triangleCount -Sum).Sum)
   $expectedSectionCount+=$rows.Count
-  if($actual -ne $expected -or [int]$report.importedTrianglesLOD0.$state -ne $expected){
-   throw "Aggregate native LOD0 triangle parity failed for $state"
+  # The imported StaticMesh LOD is known to discard valid source faces
+  # (10320 -> 6724 or 6721). It is DIAGNOSTIC ONLY, never the clinical renderer.
+  # The selected UE renderer uses source-exact ProceduralMeshComponent indices.
+  $nativeSubmitted=[int]$report.nativeProceduralSourceTrianglesSubmitted.$state
+  if($actual -ne $expected -or $nativeSubmitted -ne $expected -or
+     -not [bool]$report.sourceTopologyAcceptedInProceduralInput){
+   throw "Native procedural source topology parity failed for $state"
   }
+  $procGroups=@($report.nativeProceduralSections.$state.PSObject.Properties.Value)
+  if($procGroups.Count -ne $rows.Count){throw "Procedural section group count incorrect: $state"}
+  foreach($proc in $procGroups){
+   if([int]$proc.proceduralIndicesSubmitted -ne 3*[int]$proc.sourceTriangles -or
+      [int]$proc.proceduralTrianglesSubmitted -ne [int]$proc.sourceTriangles -or
+      [int]$proc.sectionCountAfterUpload -ne 1 -or
+      -not [bool]$proc.sectionVisibleAfterUpload){
+    throw "Native source-exact procedural section submission incomplete: $state"
+   }
+  }
+  $reloaded=@($report.nativeProceduralReloadedSections.$state.PSObject.Properties.Value)
+  if($reloaded.Count -ne $rows.Count){throw "Native persisted procedural sections not verified: $state"}
  }
  if($expectedSectionCount -lt 2 -or $sectionRows.Count -ne $expectedSectionCount){
   throw 'Invalid native multi-material section report'
