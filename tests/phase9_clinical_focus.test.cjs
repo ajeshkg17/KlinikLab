@@ -7,7 +7,7 @@ const root=path.resolve(__dirname,'..');
 const engine=fs.readFileSync(path.join(root,'engine.js'),'utf8');
 const prep=fs.readFileSync(path.join(root,'xr-procedure.js'),'utf8');
 const start=engine.indexOf('  setXRClinicalFocus(active){');
-const end=engine.indexOf('  // Restore desktop transforms',start);
+const end=engine.indexOf('  getRayHit(o,d,allow=null){',start);
 assert(start>0&&end>start,'dedicated clinical focus method');
 const setFocus=vm.runInNewContext('({'+engine.slice(start,end)+'}).setXRClinicalFocus');
 test('Phase9 clinical view suppresses only cartoon patient props, never tray or chair',()=>{

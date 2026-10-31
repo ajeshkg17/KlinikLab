@@ -773,6 +773,16 @@ class DentalScene {
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
+  // Keep the schematic patient as room orientation only. Active XR tooth
+  // preparation uses the anatomical model as its only patient representation.
+  // This toggle is reversible, does not move geometry or alter pick targets.
+  setXRClinicalFocus(active){
+    const focused=Boolean(active&&this.xrSession);
+    if(focused===!!this.xrClinicalFocusActive)return focused;
+    for(const m of this.xrPatientMeshes||[])m.hidden=focused;
+    this.xrClinicalFocusActive=focused;
+    return focused;
+  }
   getRayHit(o,d,allow=null){let hit=null;for(const p of this.pickables){if(p.mesh.hidden||(allow&&!allow(p)))continue;let r=null;
       // In-world lesson controls are true rectangular targets; overlapping selection
       // spheres would otherwise make adjacent menu buttons select the wrong lesson.
@@ -794,16 +804,6 @@ class DentalScene {
     }return hit}
 
 
-  // Keep the schematic patient as room orientation only. Active XR tooth
-  // preparation uses the anatomical model as its only patient representation.
-  // This toggle is reversible, does not move geometry or alter pick targets.
-  setXRClinicalFocus(active){
-    const focused=Boolean(active&&this.xrSession);
-    if(focused===!!this.xrClinicalFocusActive)return focused;
-    for(const m of this.xrPatientMeshes||[])m.hidden=focused;
-    this.xrClinicalFocusActive=focused;
-    return focused;
-  }
   // Restore desktop transforms and hit targets exactly after the XR session.
   setXRComfort(active){
     if(Boolean(active)===this.xrComfort.active)return;
