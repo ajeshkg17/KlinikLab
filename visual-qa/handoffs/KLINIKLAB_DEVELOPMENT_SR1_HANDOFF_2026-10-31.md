@@ -15,7 +15,7 @@ No false acceptance from GitHub CI, source vertex counts, unloaded scene, self-r
 
 ## 2. Current status: SR1B NOT ACCEPTED
 
-**Implemented in repository:** a source-pinned OBJ/MTL export from the real production KlinikLab \`volumetric-lab.js\` ToothSolid('molar','16') and VoxelMesher; an isolated UE5.8 D3D12 project; Unreal Python native importer/level script; a new direct-source ProceduralMeshComponent path; Windows Build/Open/Collect runner, hashes and native log/PNG/PID GPU counter collector; tests and roadmap/runbook.
+**Implemented in repository:** a source-pinned OBJ/MTL export from the real production KlinikLab `volumetric-lab.js` ToothSolid('molar','16') and VoxelMesher; an isolated UE5.8 D3D12 project; Unreal Python native importer/level script; a new direct-source ProceduralMeshComponent path; Windows Build/Open/Collect runner, hashes and native log/PNG/PID GPU counter collector; tests and roadmap/runbook.
 
 **Not yet observed:** a successful owner-PC Stage 1 run on commit 0f27a7e..., any saved and independently reviewed native clinical Unreal image, persisted procedural triangle-index byte readback, process-specific NVIDIA GPU 3D activity during rendering, any native KlinikLab frame encoded or streamed, physical Quest 2 operation, or dental professional signoff.
 
@@ -34,7 +34,7 @@ No false acceptance from GitHub CI, source vertex counts, unloaded scene, self-r
 
 **Reason for new route:** UE5.8.4 repeatedly removed valid faces when compiling a StaticMesh render LOD (10,320 source -> 6,724 / 6,721). The correction does NOT lower expected topology counts.
 
-**Selected native rendering method:** the isolated \`visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject\` explicitly enables the **ProceduralMeshComponent** plugin. \`visual-qa/sr1b-unreal-build-clinical-level.py\` imports the OBJ to source-identify the five \`KL_\` materials and record *lossy imported StaticMesh LODs only as diagnostics*. It separately reads the SHA-verified original OBJ triangle stream via \`sr1b_topology_source.py\`, creates exact per-face position/normal/index buffers with \`sr1b_procedural_buffers.py\`, and attempts to attach one native material-specific procedural mesh section for each of enamel, dentin, pulp, cementum and caries to **each** of two labeled native tooth actors. It preserves original face winding and uses two-sided tissue materials because the marching-tetrahedra source has inconsistent winding.
+**Selected native rendering method:** the isolated `visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject` explicitly enables the **ProceduralMeshComponent** plugin. `visual-qa/sr1b-unreal-build-clinical-level.py` imports the OBJ to source-identify the five `KL_` materials and record *lossy imported StaticMesh LODs only as diagnostics*. It separately reads the SHA-verified original OBJ triangle stream via `sr1b_topology_source.py`, creates exact per-face position/normal/index buffers with `sr1b_procedural_buffers.py`, and attempts to attach one native material-specific procedural mesh section for each of enamel, dentin, pulp, cementum and caries to **each** of two labeled native tooth actors. It preserves original face winding and uses two-sided tissue materials because the marching-tetrahedra source has inconsistent winding.
 
 **Expected source submission contract:**
 | Tissue | BEFORE | AFTER simulated cut |
@@ -46,17 +46,17 @@ No false acceptance from GitHub CI, source vertex counts, unloaded scene, self-r
 | Caries | 112 | 111 |
 | **Total source triangles** | **14,856** | **14,936** |
 
-Each source triangle contributes **3 indices**. Report \`renderPath\` must be \`NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS\`. \`nativeProceduralSourceTrianglesSubmitted\` must be 14,856 before / 14,936 after. \`nativeProceduralSections\` must include five correctly named tissue sections per tooth; the saved level must reload with both actors and all sections/materials present, recorded in \`nativeProceduralReloadedSections\`. The old \`importedTrianglesLOD0\` counts remain **diagnostic only** and are not substituted into procedural face acceptance.
+Each source triangle contributes **3 indices**. Report `renderPath` must be `NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS`. `nativeProceduralSourceTrianglesSubmitted` must be 14,856 before / 14,936 after. `nativeProceduralSections` must include five correctly named tissue sections per tooth; the saved level must reload with both actors and all sections/materials present, recorded in `nativeProceduralReloadedSections`. The old `importedTrianglesLOD0` counts remain **diagnostic only** and are not substituted into procedural face acceptance.
 
-**Unproven beyond source submission:** even successful level save/reload with section count and visible flag does not prove exact byte-for-byte persistence of the raw procedural triangle indices. The script explicitly records \`savedProceduralTriangleIndexReadbackVerified=false\`. Actual native viewport pixels, geometry continuity, before/after cut differences and GPU engine attribution still need review.
+**Unproven beyond source submission:** even successful level save/reload with section count and visible flag does not prove exact byte-for-byte persistence of the raw procedural triangle indices. The script explicitly records `savedProceduralTriangleIndexReadbackVerified=false`. Actual native viewport pixels, geometry continuity, before/after cut differences and GPU engine attribution still need review.
 
 **Tests at exact SHA:** GitHub Actions run 41226730861 completed SUCCESS with **240 Node regression tests passed**, 0 failures/skips, plus **14 additional checks passed**. Source/mock tests include the actual 10,320 -> 6,724/6,721 StaticMesh loss fixture, strict original material/face counts, source OBJ rejection of malformed/degenerate faces, procedural buffers with 3 indices per source face and mocked native components. CI does **not** run the owner's UE5.8.4 editor or dedicated RTX 5060.
 
 ## 5. EXACT next owner-PC Stage 1 - new, separate run; do not reuse 57801f1c
 
-The next action is **Build ONLY**, not Quest, not Pixel Streaming and not a reused capture. Run from Windows PowerShell, with Node and UE5.8.4 installed. Adjust the \`$repo\` path ONLY if the actual local Git checkout differs. Preserve old failed evidence directories.
+The next action is **Build ONLY**, not Quest, not Pixel Streaming and not a reused capture. Run from Windows PowerShell, with Node and UE5.8.4 installed. Adjust the `$repo` path ONLY if the actual local Git checkout differs. Preserve old failed evidence directories.
 
-\`\`\`powershell
+```powershell
 $repo = 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
 $sha = '0f27a7e0e7179ef30a507e8bc0251749d6bbbad1'
 git -C $repo fetch origin integration/single-chat-validation-2026-10-30
@@ -75,33 +75,33 @@ try {
     nativeProceduralSections, nativeProceduralReloadedSections, savedProceduralTriangleIndexReadbackVerified, errors | Format-List
 } finally { Pop-Location }
 Write-Host "Immutable SR1B run: $run"
-\`\`\`
+```
 
-**If Build fails:** retain the entire unique evidence folder untouched. Read \`unreal-clinical-level-build.json\` -> \`errors\` and traceback, and collect the original Unreal \`Project\Saved\Logs\` log. Return the exact new run path and exception; never disable per-tissue strictness, replace clinical procedural buffers with the lossy StaticMeshes, or use diagnostic screenshot as accepted evidence. This next Stage 1 is expected to expose any UE5.8.4 Python ProceduralMeshComponent API/serialization constraints.
+**If Build fails:** retain the entire unique evidence folder untouched. Read `unreal-clinical-level-build.json` -> `errors` and traceback, and collect the original Unreal `Project\Saved\Logs` log. Return the exact new run path and exception; never disable per-tissue strictness, replace clinical procedural buffers with the lossy StaticMeshes, or use diagnostic screenshot as accepted evidence. This next Stage 1 is expected to expose any UE5.8.4 Python ProceduralMeshComponent API/serialization constraints.
 
-**Only if Stage 1 succeeds** with \`status=NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE\` and correct source submission/reload: open the SAME run in the native Unreal editor with the SAME pinned worktree:
-\`\`\`powershell
+**Only if Stage 1 succeeds** with `status=NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE` and correct source submission/reload: open the SAME run in the native Unreal editor with the SAME pinned worktree:
+```powershell
 & "$worktree\visual-qa\sr1b-run-local-kliniklab.ps1" -Mode Open -ExpectedSha $sha -EvidenceDir $run
-\`\`\`
+```
 Frame BOTH native FDI16 tooth actors in Lit mode; verify visibly distinct before/cut shape, labels and tissues; take genuine **Unreal HighResShot 1920x1080**. Then, only while the actual editor remains running/rendering, run:
-\`\`\`powershell
+```powershell
 & "$worktree\visual-qa\sr1b-run-local-kliniklab.ps1" -Mode Collect -ExpectedSha $sha -EvidenceDir $run
-\`\`\`
-Collector must retain original PNG and log SHA-256, exact project/PID, D3D12 selected RTX 5060, real Windows \`GPU Engine(*)\Utilization Percentage\` **engtype_3d** nonzero samples tied to that editor PID, and acknowledge that GPU engine LUID -> physical GPU mapping requires corroboration. The development assistant must personally inspect original PNG pixels, not infer success from PNG signature/hash, metadata, source counts or a watcher declaration. Without all applicable evidence, record **SR1B NOT_ACCEPTED**.
+```
+Collector must retain original PNG and log SHA-256, exact project/PID, D3D12 selected RTX 5060, real Windows `GPU Engine(*)\Utilization Percentage` **engtype_3d** nonzero samples tied to that editor PID, and acknowledge that GPU engine LUID -> physical GPU mapping requires corroboration. The development assistant must personally inspect original PNG pixels, not infer success from PNG signature/hash, metadata, source counts or a watcher declaration. Without all applicable evidence, record **SR1B NOT_ACCEPTED**.
 
 ## 6. Other project tracks and guardrails
 
-Current application \`server/server.mjs\` is a local Node API/file server, not a dedicated GPU simulation server. \`engine.js\`, \`xr-procedure.js\`, \`volumetric-lab.js\` are browser WebGL/WebXR and browser-side procedural geometry. Legacy Meta IWER/Playwright XR screenshots reflect Chrome-rendered emulation, NOT native Unreal/remote Quest video; processed IDs must never be rerun. User wants direct original pixel review, immutable evidence, exact SHAs and unique run IDs. The earlier browser FDI16 job10 did produce distinct before/after eye images, but short WebM decoding/accepted real procedure video remained unproven. The Dundee left-maxillary-molar third-party candidate is not cleared for right FDI16 redistribution, so the native SR1B slice uses only original production schematic geometry.
+Current application `server/server.mjs` is a local Node API/file server, not a dedicated GPU simulation server. `engine.js`, `xr-procedure.js`, `volumetric-lab.js` are browser WebGL/WebXR and browser-side procedural geometry. Legacy Meta IWER/Playwright XR screenshots reflect Chrome-rendered emulation, NOT native Unreal/remote Quest video; processed IDs must never be rerun. User wants direct original pixel review, immutable evidence, exact SHAs and unique run IDs. The earlier browser FDI16 job10 did produce distinct before/after eye images, but short WebM decoding/accepted real procedure video remained unproven. The Dundee left-maxillary-molar third-party candidate is not cleared for right FDI16 redistribution, so the native SR1B slice uses only original production schematic geometry.
 
 Sources to read in a replacement chat:
-- Roadmap: \`visual-qa/PHASE_ROADMAP.md\` - current priority override wins over older Quest-first prose.
-- Current native runbook: \`visual-qa/SR1B_LOCAL_KLINIKLAB_RENDER.md\`.
-- UE project: \`visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject\`.
-- Exporter: \`visual-qa/sr1-local-kliniklab-export.mjs\`; importer: \`visual-qa/sr1b-unreal-build-clinical-level.py\`.
-- Exact source face validator and procedural buffers: \`visual-qa/sr1b_topology_source.py\`, \`visual-qa/sr1b_procedural_buffers.py\`; five-tissue contract: \`visual-qa/sr1b_section_contract.py\`.
-- Windows orchestrator: \`visual-qa/sr1b-run-local-kliniklab.ps1\`.
-- Focused tests: \`tests/sr1b_procedural_buffers_test.py\`, \`tests/sr1b_topology_source_test.py\`, \`tests/sr1b_section_contract_test.py\`, \`tests/sr1b_local_native_project.test.mjs\`, \`tests/sr1b_local_kliniklab_export.test.mjs\`.
-- Architecture destination (future, not current): \`visual-qa/SERVER_RENDERING_ARCHITECTURE.md\`.
+- Roadmap: `visual-qa/PHASE_ROADMAP.md` - current priority override wins over older Quest-first prose.
+- Current native runbook: `visual-qa/SR1B_LOCAL_KLINIKLAB_RENDER.md`.
+- UE project: `visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject`.
+- Exporter: `visual-qa/sr1-local-kliniklab-export.mjs`; importer: `visual-qa/sr1b-unreal-build-clinical-level.py`.
+- Exact source face validator and procedural buffers: `visual-qa/sr1b_topology_source.py`, `visual-qa/sr1b_procedural_buffers.py`; five-tissue contract: `visual-qa/sr1b_section_contract.py`.
+- Windows orchestrator: `visual-qa/sr1b-run-local-kliniklab.ps1`.
+- Focused tests: `tests/sr1b_procedural_buffers_test.py`, `tests/sr1b_topology_source_test.py`, `tests/sr1b_section_contract_test.py`, `tests/sr1b_local_native_project.test.mjs`, `tests/sr1b_local_kliniklab_export.test.mjs`.
+- Architecture destination (future, not current): `visual-qa/SERVER_RENDERING_ARCHITECTURE.md`.
 - Previous blank GPU logs and failed clinical runs are different evidence classes; retain all originals, not in Git.
 
 ## 7. Replacement-chat resume and handoff provenance
@@ -112,4 +112,4 @@ Sources to read in a replacement chat:
 4. Never misidentify diagnostic viewport, static source MeshDescription, separate FFmpeg NVENC, browser/IWER images, documentation PDF, or green CI as completed local native clinical rendering.
 5. This Markdown and the PDF at the same base path are documentation mirrors, not a signed experimental result. Future material handoff edits must update and verify BOTH. The actual GitHub publication commit SHA should be obtained from the repository and stated outside the self-referential handoff.
 
-**Artifact base path:** \`visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31\` (both .md and .pdf).
+**Artifact base path:** `visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31` (both .md and .pdf).
