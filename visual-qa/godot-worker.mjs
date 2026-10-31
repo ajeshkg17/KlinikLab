@@ -457,6 +457,37 @@ async function recoverRawJob07({diagnoseOnly=false}={}){
  }
 }
 
+/** Explicit, post-publication stale lease archival; never delete the lock.
+ * Job07 must be published as recovered incomplete and old watcher process dead.
+ */
+async function retireArchivedJob07StaleLease(){
+ if(process.platform!=='win32')throw Error('Owner Windows PC only');
+ const status=await readGodotWorkerLease(ROOT);
+ if(!status.exists||status.malformed||status.processAlive!==false ||
+    status.jobPoller!=='visual-qa/godot-worker.mjs')
+  throw Error('Refusing lease retirement without complete dead-owner evidence');
+ const state=await readLedger(),prior=state.completed?.[JOB07_ID];
+ if(!prior||prior.commit!==JOB07_SOURCE||prior.status!=='published'||
+    prior.recoveryOnly!==true || prior.result?.reexecuted!==false ||
+    prior.result?.gpuProcessCorroborated!==false ||
+    !String(prior.url||'').includes('/runs/pc-godot-'+JOB07_ID+'-'))
+  throw Error('Job07 not safely published with GPU-INCOMPLETE recovery-only identity');
+ const ps="(Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher' -ErrorAction Stop).State.ToString()";
+ const t=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',ps],
+  {encoding:'utf8',timeout:20000,windowsHide:true,env:cleanWindowsPowerShellEnv(process.env)});
+ if(t.status!==0||!['Ready','Disabled'].includes(String(t.stdout||'').trim()))
+  throw Error('Original Scheduled Task is not verified stopped (Ready/Disabled): '+String(t.stdout||t.stderr).trim().slice(0,140));
+ const from=path.join(ROOT,'godot-worker-active.lock');
+ const dest=path.join(ROOT,'godot-worker-active.lock.job07-archived-'+status.pid);
+ try{await fs.access(dest);throw Error('Preserved archive already exists; no double retirement')}
+ catch(e){if(e.code!=='ENOENT')throw e}
+ const check=await readGodotWorkerLease(ROOT);
+ if(check.pid!==status.pid||check.processAlive!==false)throw Error('Watcher ownership changed during audit');
+ await fs.rename(from,dest); // preserve byte-for-byte original stale lock
+ console.log('Original dead watcher lease ARCHIVED, not deleted:',dest,
+  '; job07 remains immutable EVIDENCE_INCOMPLETE. New watcher may be separately installed.');
+}
+
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
@@ -503,10 +534,12 @@ function textLog(...x){console.log(...x)}
 // --validate is read-only/preflight, never captures, and does not take the
 // rendering lease. --once, --watch and repair mutually exclude one another.
 const args=process.argv.slice(2);
-const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--diagnose-job07','--archive-job07'].filter(x=>args.includes(x));
+const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--diagnose-job07','--archive-job07','--retire-archived-job07-lock'].filter(x=>args.includes(x));
 if(modes.length>1)throw Error('Select only one approved Godot worker mode');
 if(args.some(x=>!modes.includes(x)))throw Error('Unknown Godot worker argument');
-if(modes.includes('--diagnose-job07')){
+if(modes.includes('--retire-archived-job07-lock')){
+ await retireArchivedJob07StaleLease();
+}else if(modes.includes('--diagnose-job07')){
  await recoverRawJob07({diagnoseOnly:true});
 }else if(modes.includes('--archive-job07')){
  await recoverRawJob07({diagnoseOnly:false});
