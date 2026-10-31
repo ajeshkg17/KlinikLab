@@ -68,8 +68,22 @@ class FakeLibrary:
     @staticmethod
     def get_associated_object(handle):return handle
 
+class FakeVector:
+    def __init__(self,x,y,z):self.x=x;self.y=y;self.z=z
+
 class FakeUnreal:
     Actor=FakeActor
+    class SystemLibrary:
+        @staticmethod
+        def get_component_bounds(comp):
+            pts=comp.section[0]
+            coords=[[float(p[i])+float(comp.world_location[i])
+                     for p in pts] for i in range(3)]
+            lo=[min(a) for a in coords]
+            hi=[max(a) for a in coords]
+            origin=FakeVector(*[(lo[i]+hi[i])/2 for i in range(3)])
+            extent=FakeVector(*[(hi[i]-lo[i])/2 for i in range(3)])
+            return origin,extent,1.0
     class ProceduralMeshComponent(FakeComponent):pass
     class AddNewSubobjectParams:
         def __init__(self,**kw):self.kw=kw
