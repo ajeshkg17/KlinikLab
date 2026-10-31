@@ -84,6 +84,17 @@ def report_mesh_source_build(mesh):
     require(not any(result['buildSettingsAfter'].values()),
             'Unreal did not retain explicit topology-preserving LOD build flags: ' + mesh.get_name())
     result['renderLOD0After'] = int(mesh.get_num_triangles(0))
+    require(bool(unreal.EditorAssetLibrary.save_loaded_asset(mesh)),
+            'Failed to save native imported StaticMesh after topology-preserving LOD rebuild: ' + mesh.get_name())
+    saved_settings = subsystem.get_lod_build_settings(mesh, 0)
+    result['savedBuildSettings'] = {
+        key: bool(saved_settings.get_editor_property(key)) for key in flags
+    }
+    result['renderLOD0Saved'] = int(mesh.get_num_triangles(0))
+    require(not any(result['savedBuildSettings'].values()),
+            'Topology-preserving build policy not retained in saved native StaticMesh: ' + mesh.get_name())
+    require(result['renderLOD0Saved'] == result['renderLOD0After'],
+            'Saved native StaticMesh render triangle count differs from rebuilt LOD: ' + mesh.get_name())
     src_tri = result['sourceMeshDescriptionTriangles']
     if src_tri is None:
         result['potentialLossStage'] = 'SOURCE_MESHDESCRIPTION_UNAVAILABLE'
