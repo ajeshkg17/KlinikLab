@@ -1,3 +1,5 @@
+> **PAUSED HISTORICAL UE5.8.4 EXPLORATION (31 October 2026):** The owner has switched to **Godot 4.7.2** for the next source-derived native local KlinikLab render. This SR1B Unreal guide is retained only to document original failed runs and diagnostic screenshots, **not as the next PC instruction or an accepted visual/GPU gate**. Read [SR1C_GODOT_LOCAL_CLINICAL_RENDER.md](./SR1C_GODOT_LOCAL_CLINICAL_RENDER.md) and the newest [PHASE_ROADMAP.md](./PHASE_ROADMAP.md) first. Unity Hub without a completed Unity Editor installation is a backup option; Quest/streaming remains deferred.
+
 # SR1B — FIRST local native Unreal render of KlinikLab clinical app content
 
 **Priority (31 October 2026): LOCAL KLINIKLAB ON OWNER RTX 5060 FIRST. Pixel Streaming 2, WebRTC, Quest 2 and other network work are blocked until this local gate is independently accepted.**
