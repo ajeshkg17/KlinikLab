@@ -15,3 +15,6 @@ patient-data/
 *.stl
 *.obj
 qa_screens/
+
+# Local-only Unreal/Quest SR1 evidence and hardware logs
+visual-qa/evidence-local/

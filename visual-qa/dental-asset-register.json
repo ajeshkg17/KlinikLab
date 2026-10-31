@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "purpose": "high-detail provenance-tracked online dental assets for FUTURE UE server rendering",
+  "approvedAssets": [],
+  "candidates": [
+    {
+      "id": "dundee-maxillary-first-molar-left",
+      "assetType": "surface-only tooth model",
+      "title": "Maxillary First Molar (Left)",
+      "creator": "University of Dundee, School of Dentistry",
+      "sourceUrl": "https://sketchfab.com/3d-models/maxillary-first-molar-e719a474ef7e4bd7abec508f85f1e984",
+      "repositoryMirrorUrl": "https://github.com/sameralseedbth-Dental/dental-3d-models",
+      "sourceLicenseLabel": "Creative Commons Attribution (CC BY), as displayed on upstream listing",
+      "exactLicenseVersionVerified": false,
+      "licenseSnapshotSha256": null,
+      "originalDownloadSha256": null,
+      "ueImportedFileSha256": null,
+      "redistributionApprovedForThisDerivative": false,
+      "attribution": "Model by University of Dundee, School of Dentistry (CC BY), subject to final asset-specific verification",
+      "transformations": "Existing KlinikLab GLBs reported as third-party repacked; UE conversion not yet done",
+      "geometry": {
+        "location": "upper left first molar; not FDI16 right without documented mirror/validation",
+        "sourceTriangleCountApprox": 28500,
+        "metersPerUnit": null,
+        "scaleValidated": false
+      },
+      "material": {
+        "textureProvenanceVerified": false,
+        "availablePBRMaps": [],
+        "photorealQualityAccepted": false
+      },
+      "clinical": {
+        "status": "NOT_REVIEWED",
+        "qualifiedReviewer": null
+      },
+      "status": "CANDIDATE — NOT APPROVED OR USED IN UE"
+    }
+  ],
+  "requirements": [
+    "Exact original license and retained proof",
+    "commercial/modification/redistribution permissions",
+    "per-file SHA256",
+    "no patient data",
+    "UE units/scale",
+    "PBR map/texture rights",
+    "high-resolution quality inspection",
+    "qualified anatomy reviewer"
+  ],
+  "policy": "Do not download/import candidates into a shipped build until all asset verification fields are satisfied. No low quality fallback.",
+  "sourcesCheckedOn": "2026-10-31"
+}

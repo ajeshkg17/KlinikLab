@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "kind": "SR1 UE5 Pixel Streaming 2 VR Quest 2 physical feasibility",
+  "status": "NOT_RUN",
+  "engine": {
+    "name": "Unreal Engine 5",
+    "version": null,
+    "build": null,
+    "pixelStreamingPlugin": "Pixel Streaming 2",
+    "experimentalVR": true,
+    "infrastructureRef": null
+  },
+  "server": {
+    "sourceCommit": null,
+    "gpuModel": null,
+    "vramMiB": null,
+    "driver": null,
+    "gpuProcessTrace": null,
+    "encoder": "hardware H.264",
+    "hardwareEncodeVerified": false,
+    "softwareFallbackAllowed": false,
+    "qualityTier": "high/detail required",
+    "qualityFallbackAllowed": false
+  },
+  "network": {
+    "sharedRouter": "Wi-Fi 7 router",
+    "questNegotiatedLink": null,
+    "securityVerified": false,
+    "icePath": null,
+    "rttMs": null,
+    "jitterMs": null,
+    "packetLossPercent": null
+  },
+  "headset": {
+    "model": "Meta Quest 2",
+    "browserVersion": null,
+    "firmwareVersion": null,
+    "webxrMediaLayerVerified": false,
+    "realStereo6DoFVerified": false,
+    "handednessCorrect": false,
+    "controllerRoundTripVerified": false,
+    "videoDecoderHardwareVerified": false
+  },
+  "performance": {
+    "sourceResolution": null,
+    "decodedResolution": null,
+    "displayRefreshHz": null,
+    "p50PoseToDisplayMs": null,
+    "p95PoseToDisplayMs": null,
+    "p99PoseToDisplayMs": null,
+    "staleFramePercent": null,
+    "tenMinuteSessionPassed": false
+  },
+  "evidence": {
+    "leftEye": null,
+    "rightEye": null,
+    "poseInputLog": null,
+    "decodedStreamTrace": null,
+    "gpuTrace": null,
+    "videoStats": null,
+    "sha256Manifest": null
+  },
+  "clinical": {
+    "dentalAssetsMigrated": false,
+    "dentistReviewed": false
+  },
+  "acceptance": {
+    "hardwareGate": false,
+    "secureTransportGate": false,
+    "stereoGate": false,
+    "interactionGate": false,
+    "latencyGate": false,
+    "qualityGate": false,
+    "physicalHeadsetGate": false,
+    "decision": "NOT_ASSESSED"
+  }
+}
