@@ -14,6 +14,9 @@ on:
       - 'visual-qa/sr1c-build-godot-local.ps1'
       - 'visual-qa/jobs/godot-current.json'
       - 'tests/sr1c_godot_pc_watcher.test.mjs'
+      - 'tests/sr1c_windows_private_desktop_bom.test.mjs'
+      - 'tests/sr1c_windows_private_desktop_smoke.ps1'
+      - 'visual-qa/godot-json.mjs'
       - 'tests/sr1c_windows_psmodulepath.test.mjs'
       - 'visual-qa/godot-powershell-environment.mjs'
       - '.github/workflows/sr1c-godot-pc-watcher-syntax.yml'
@@ -37,6 +40,7 @@ jobs:
           node --check visual-qa/godot-worker.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
+          node --test tests/sr1c_windows_private_desktop_bom.test.mjs
       - name: Simulate inherited pwsh 7 PSModulePath and prove Windows PowerShell 5.1 SHA256 -File works
         shell: pwsh
         run: |
@@ -66,6 +70,11 @@ jobs:
         run: |
           & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -Command '. .\visual-qa\sr1c-private-desktop.ps1; if (-not ("KlinikLab.PrivateDesktop" -as [type])) { throw "Win32 P/Invoke helper did not compile" }; Write-Host "Private desktop PInvoke class compiled"'
           if ($LASTEXITCODE -ne 0) { throw 'Private desktop helper compilation failed' }
+      - name: Try REAL WinSta0 desktop creation using minimal rights, never switch or launch Godot
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1c_windows_private_desktop_smoke.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Windows private desktop CreateDesktopW smoke failure' }
       - name: Evidence boundary
         shell: pwsh
         if: always()
