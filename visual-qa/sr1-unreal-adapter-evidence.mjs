@@ -20,6 +20,7 @@ const features=new Set(['d3d12featurelevel','featurelevel','feature','dxgifeatur
 function validMetadataField(field){
  const part=field.trim().toLowerCase();
  if(/^\d+(?:\.\d+)?\s*(?:gb|gib|mb|mib)\s+(?:vram|memory)$/.test(part))return true;
+ if(/^(?:d3d12\s+)?feature\s*level\s+\d+_\d+$/.test(part))return true;
  const match=part.match(/^([a-z][a-z0-9 _-]*?)\s*[:=]\s*(.+)$/);
  if(!match)return false;
  const key=match[1].replace(/[\s_-]/g,''),value=match[2].trim();
