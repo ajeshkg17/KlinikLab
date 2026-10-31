@@ -793,9 +793,10 @@ class DentalScene {
   replaceLabel(mesh,text,size=31){const canvas=document.createElement('canvas');canvas.width=600;canvas.height=105;const ctx=canvas.getContext('2d');ctx.fillStyle='#def7ef';ctx.font=`700 ${size}px system-ui`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillText(text.slice(0,56),300,52,566);this.updateTexture(mesh.tex,canvas)}
   setVRState(info){this.replaceLabel(this.liveTitle,info.title||'KLINIKLAB');this.replaceLabel(this.liveStep,info.step||'Choose a lesson',28);for(let i=0;i<7;i++)this.menuButtons[i].color=this.rgb(i===info.module?'#2b9984':'#265064');const answers=info.answers||[];for(let i=0;i<4;i++){const m=this.answerMeshes[i];m.hidden=i>=answers.length;const t=this.meshes.find(x=>x.tag===`answerlabel:${i}`);if(t){t.hidden=m.hidden;if(!m.hidden)this.replaceLabel(t,`${i+1}. ${answers[i]}`,45)}}}
   select(key){this.selectedKey=key;const col=this.rgb('#90ffee');for(const p of this.pickables){if(p.key.startsWith('tooth:') && p.mesh.tag==='crown'){const is=p.key===key;p.mesh.color=this.rgb(is?'#b9fff0':['#eee8da','#f3ebdb','#eee5d4','#f0e8d7'][Number(p.mesh.kind.split('_')[1])-1]||'#eee8da')}}}
-  // Keep the schematic patient as room orientation only. Active XR tooth
-  // preparation uses the anatomical model as its only patient representation.
-  // This toggle is reversible, does not move geometry or alter pick targets.
+  // Keep cartoon patient props for desktop orientation only. Hide them
+  // throughout immersive XR (including idle/help/catalog states), without
+  // touching chair, instruments, dental geometry or hit targets. Restore on
+  // session exit; active treatment is an independent visibility condition.
   setXRClinicalFocus(active){
     const focused=Boolean(active&&this.xrSession);
     if(focused===!!this.xrClinicalFocusActive)return focused;
@@ -920,7 +921,7 @@ class DentalScene {
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
-      this.setXRComfort(true);this.initXRTools();
+      this.setXRComfort(true);this.initXRTools();this.setXRClinicalFocus?.(true);
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
       this.setXRCatalogOpen?.(false);
       this.xrGuide?.onEnter();
@@ -939,6 +940,7 @@ class DentalScene {
     if(this.xrSession!==session)return;
     this.xrGuide?.onExit();this.xrPrep?.onExit();this.resetXRTools();this.setXRComfort(false);
     this.xrSession=null;this.xrRef=null;this.latestFrame=null;this.clearControllers();
+    this.setXRClinicalFocus?.(false);
     for(const m of this.xrBoardMeshes)m.hidden=true;
     this.scheduleDesktopFrame();
   }
@@ -2604,7 +2606,7 @@ class XRToothPractice {
     for(const m of this.meshes)m.hidden=!workspace;
     this.info.hidden=!workspace;
     if(!workspace)this.tip.hidden=true;
-    this.scene.setXRClinicalFocus?.(this.active);
+    this.scene.setXRClinicalFocus?.(this.active||!!this.scene.xrSession);
     this.modalOwner=modal||'treatment';
     if(modal)this.triggers.clear();
     return workspace;

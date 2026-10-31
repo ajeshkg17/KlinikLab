@@ -66,7 +66,7 @@ class XRToothPractice {
     for(const m of this.meshes)m.hidden=!workspace;
     this.info.hidden=!workspace;
     if(!workspace)this.tip.hidden=true;
-    this.scene.setXRClinicalFocus?.(this.active);
+    this.scene.setXRClinicalFocus?.(this.active||!!this.scene.xrSession);
     this.modalOwner=modal||'treatment';
     if(modal)this.triggers.clear();
     return workspace;
