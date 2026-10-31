@@ -1,3 +1,5 @@
+# Engine decision override — 31 October 2026: Godot 4.7.2 native local render FIRST; Unreal paused
+
 # Job06 native clinic workspace / corrected GPU PDH — prepared, NOT owner-PC accepted (31 October 2026)
 
 **Job05 remains immutable EVIDENCE_INCOMPLETE.** Godot PID 12472 rendered two original 1600×900 images through Vulkan Forward+ on the reported RTX 5060 with a 42.011 s orbit, but its single `Get-Counter -ErrorAction Stop` GPU Engine wildcard query failed on an invalid performance row; **zero valid Godot-PID 3D periods were accepted**. An external `-ErrorAction Continue` probe is not during-render proof. Do not reinterpret job05 as GPU accepted.
@@ -9,8 +11,6 @@
 **Status:** SOURCE IMPLEMENTED / WINDOWS CI AND OWNER-PC EXECUTION PENDING. No job06 published PC render, RTX-PID acceptance, streaming, Quest or independent clinical approval is claimed. Next after measured native scene evidence: source-derived multi-case models, real application state/actions and tool interactions, UI/workflow parity, and only then streaming/physical Quest gates. Read `SR1C_GODOT_PC_WATCHER.md`.
 
 ---
-
-# Engine decision override — 31 October 2026: Godot 4.7.2 native local render FIRST; Unreal paused
 
 > **Job05 source-exact Godot local GPU verification (31 Oct 2026):** The immutable job04 original 1600x900 Godot Vulkan RTX5060 image was independently inspected: TWO schematic teeth are visibly rendered, but the simulated-cut difference is not clearly exposed. Job04 remains EVIDENCE_INCOMPLETE: GPU PID 8852 had only two independent positive 3D time periods, despite 54 counter rows, and no independent Windows DXGI LUID match. NEW owner job05 pc-godot-fdi16-20261031-job05 (schema 5; original functional SHA f4d4d4151851a08342def08d9f2e461f5f5e7109) performs a 42s no-foreground private-desktop camera orbit and separately hashes frontal and elevated/occlusal native screenshots; ONE persistent Windows PDH query samples approximately 1Hz for 34 collection periods and counts distinct Godot-PID positive 3D sample times. Independent native DXGI IDXGIAdapter1.GetDesc1 must identify RTX5060 vendor ID 0x10DE and match the exact GPU Engine LUID in >=3 positive periods. Any failed/missing source surface, image, time, GPU counter or LUID remains EVIDENCE_INCOMPLETE. Source BEFORE 14,856 / AFTER 14,936 triangles and five tissue groups each remain unchanged; old jobs and XR worker untouched. See [job05 Godot PC runbook](./SR1C_GODOT_PC_WATCHER.md). Quest deferred.
 
