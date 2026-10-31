@@ -7,6 +7,9 @@ on:
       - 'visual-qa/godot-worker.mjs'
       - 'visual-qa/godot-job-core.mjs'
       - 'visual-qa/sr1c-capture-godot-pc.ps1'
+      - 'visual-qa/sr1c-capture-godot-background-pc.ps1'
+      - 'visual-qa/sr1c-private-desktop.ps1'
+      - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-build-godot-local.ps1'
       - 'visual-qa/jobs/godot-current.json'
       - 'tests/sr1c_godot_pc_watcher.test.mjs'
@@ -43,7 +46,9 @@ jobs:
         run: |
           $paths = @(
             'visual-qa/sr1c-build-godot-local.ps1',
-            'visual-qa/sr1c-capture-godot-pc.ps1'
+            'visual-qa/sr1c-capture-godot-pc.ps1',
+            'visual-qa/sr1c-capture-godot-background-pc.ps1',
+            'visual-qa/sr1c-private-desktop.ps1'
           )
           foreach ($p in $paths) {
             $errors = $null
@@ -54,6 +59,11 @@ jobs:
             }
             Write-Host "PowerShell syntax accepted: $p"
           }
+      - name: Compile real WinPS private desktop Win32 P/Invoke helper (NO desktop switch/process launch)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -Command '. .\visual-qa\sr1c-private-desktop.ps1; if (-not ("KlinikLab.PrivateDesktop" -as [type])) { throw "Win32 P/Invoke helper did not compile" }; Write-Host "Private desktop PInvoke class compiled"'
+          if ($LASTEXITCODE -ne 0) { throw 'Private desktop helper compilation failed' }
       - name: Evidence boundary
         shell: pwsh
         if: always()
