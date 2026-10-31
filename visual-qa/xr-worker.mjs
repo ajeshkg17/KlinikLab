@@ -75,7 +75,8 @@ async function loadProcedure(dir,job,result){
   }
   files.push({name:sub+'/'+name,bytes});
  }
- const optional=['video/video-check.json','video/actual-app-playwright.webm'];
+ const optional=['video/video-check.json','video/actual-app-playwright.webm',
+   'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm'];
  for(const name of optional){
   try{const bytes=await fs.readFile(path.join(dir,sub,name));files.push({name:sub+'/'+name,bytes})}
   catch(e){if(e.code!=='ENOENT')throw e}
@@ -205,8 +206,10 @@ async function publish(job,{result,captures,procedure}){
    '','[Inspect original manifest](./procedure/'+procedure.id+'/procedure-manifest.json)','');
   for(const step of procedure.manifest.steps)index.push('### Step '+step.n+' — '+step.label,'',
    '!['+step.label+'](./procedure/'+procedure.id+'/'+step.file+')','');
+  if(procedure.files.some(f=>f.name.endsWith('/actual-app-stereo-steps.webm')))
+   index.push('[Short real-XR six-step WebM (Playwright-controlled recording) — decoder/clinical review pending](./procedure/'+procedure.id+'/video/actual-app-stereo-steps.webm)','');
   if(procedure.files.some(f=>f.name.endsWith('/actual-app-playwright.webm')))
-   index.push('[Playwright recorded stereo-step video — playback review pending](./procedure/'+procedure.id+'/video/actual-app-playwright.webm)','');
+   index.push('[Full Playwright browser viewport recording (includes test setup; playback review pending)](./procedure/'+procedure.id+'/video/actual-app-playwright.webm)','');
  }
  files.push({path:prefix+'/README.md',contents:Buffer.from(index.join('\n')),encoding:'base64'});
  files.push({path:'PC_XR_LATEST.md',contents:Buffer.from('# Latest owner-PC XR test\n\n[Browse '+job.jobId+'](./'+prefix+'/README.md)\n'),encoding:'base64'});

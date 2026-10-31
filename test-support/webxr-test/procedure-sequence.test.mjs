@@ -26,6 +26,10 @@ test('procedure storyboard has six ordered distinct real-app FDI16 evidence chec
   'sha256:createHash','record.eyes===2'])if(!src.includes(required))
   assert.fail('Missing evidence contract: '+required);
  assert(src.includes("KLINIKLAB_PROCEDURE_CAPTURE"));
+ assert(src.includes('new MediaRecorder(stream'));
+ assert(src.includes("actual-app-stereo-steps.webm"));
+ assert(src.includes('frameSource'));
+ assert(src.includes('continuousHandMotion:false'));
 });
 test('default XR ten-checkpoint and existing gallery remain independent of optional procedure',()=>{
  const smoke=fs.readFileSync(new URL('./smoke.mjs',import.meta.url),'utf8');
@@ -36,6 +40,7 @@ test('default XR ten-checkpoint and existing gallery remain independent of optio
  assert(worker.includes("if(!result.passed||captures.length!==10)"));
  assert(worker.includes('if(job.procedureCapture){'));
  assert(worker.includes("'procedure-manifest.json','storyboard.md'"));
+ assert(worker.includes("'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm'"));
  const job=JSON.parse(fs.readFileSync(new URL('../../visual-qa/jobs/xr-current.json',import.meta.url),'utf8'));
  assert.equal(job.procedureCapture,undefined,'do not change processed job06');
 });
