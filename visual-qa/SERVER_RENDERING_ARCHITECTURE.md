@@ -1,5 +1,8 @@
 # KlinikLab — LAN GPU renderer, stereo streaming and remote-input architecture
 
+> **Binding sequence (31 October 2026):** Build and independently validate a native **LOCAL** KlinikLab FDI16 clinical source-derived Unreal render on the owner GPU **before** beginning the LAN server transport/Pixel Streaming/Quest receiver work. This document is an architecture destination, not current implementation status. First local gate and workstation commands: [SR1B_LOCAL_KLINIKLAB_RENDER.md](./SR1B_LOCAL_KLINIKLAB_RENDER.md). Blank Unreal smoke evidence does not close this gate.
+
+
 **Status (31 October 2026): design and feasibility assessment only. No server-side GPU frames, streaming transport, headset decoder, or remote XR control endpoint has been implemented or validated.** This is the requested architecture target and does NOT describe the current application. Do not mislabel the existing Playwright/IWER screenshots as server-rendered evidence.
 
 ## 1. Evidence-backed audit of the current implementation
