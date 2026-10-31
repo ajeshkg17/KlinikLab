@@ -41,7 +41,60 @@ def spawn(actor_type, x, y, z, label, rot=None):
     actor.set_actor_label(label)
     return actor
 
-def import_native_obj(path, name, expected_counts, expected_total):
+def report_mesh_source_build(mesh):
+    """Instrument translator/source vs LOD0 render triangles and strict build settings.
+
+    UE's imported render LOD can differ from source MeshDescription because of
+    mesh build optimization/welding/removal. Never suppress that discrepancy.
+    """
+    result = {
+        'assetPath': mesh.get_path_name(),
+        'renderLOD0Before': int(mesh.get_num_triangles(0)),
+        'sourceMeshDescriptionTriangles': None,
+        'renderLOD0After': None,
+        'buildSettingsBefore': {},
+        'buildSettingsAfter': {},
+        'potentialLossStage': 'UNKNOWN'
+    }
+    try:
+        src = mesh.get_mesh_description(0)
+        if src is not None:
+            result['sourceMeshDescriptionTriangles'] = int(src.get_triangle_count())
+    except Exception as e:
+        result['sourceDescriptionQueryError'] = str(e)
+    subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+    require(subsystem is not None, 'StaticMeshEditorSubsystem unavailable; cannot validate build policy')
+    settings = subsystem.get_lod_build_settings(mesh, 0)
+    flags = ('remove_degenerates', 'use_mikk_t_space',
+             'generate_lightmap_u_vs', 'build_reversed_index_buffer')
+    result['buildSettingsBefore'] = {
+        key: bool(settings.get_editor_property(key)) for key in flags
+    }
+    # This is a controlled causal test, not an excuse to accept lossy geometry:
+    # remove_degenerates=False avoids Unreals default welded triangle deletion.
+    # Mikk/UV/reversed-buffer generation are disabled only for this native
+    # source-verified topology diagnostic. Explicit polygon parity still required.
+    for flag in flags:
+        settings.set_editor_property(flag, False)
+    subsystem.set_lod_build_settings(mesh, 0, settings)
+    effective = subsystem.get_lod_build_settings(mesh, 0)
+    result['buildSettingsAfter'] = {
+        key: bool(effective.get_editor_property(key)) for key in flags
+    }
+    require(not any(result['buildSettingsAfter'].values()),
+            'Unreal did not retain explicit topology-preserving LOD build flags: ' + mesh.get_name())
+    result['renderLOD0After'] = int(mesh.get_num_triangles(0))
+    src_tri = result['sourceMeshDescriptionTriangles']
+    if src_tri is None:
+        result['potentialLossStage'] = 'SOURCE_MESHDESCRIPTION_UNAVAILABLE'
+    elif src_tri != result['renderLOD0After']:
+        result['potentialLossStage'] = 'SOURCE_VS_RENDER_BUILD_DISAGREE'
+    else:
+        result['potentialLossStage'] = 'SOURCE_AND_RENDER_MATCH_POST_REBUILD'
+    return result
+
+
+def import_native_obj(path, name, expected_counts, expected_total, diagnostics):
     """Preserve each tissue group when UE imports multi-material OBJ as N meshes."""
     task = unreal.AssetImportTask()
     for key, value in {
@@ -61,11 +114,15 @@ def import_native_obj(path, name, expected_counts, expected_total):
     for mesh in meshes:
         require(mesh.get_num_lods() >= 1,
                 'Imported native mesh has no LOD: ' + mesh.get_name())
+        diag = report_mesh_source_build(mesh)
+        diagnostics.append(diag)
         material_entries = list(mesh.get_editor_property('static_materials'))
         row = {
             'assetName': mesh.get_name(),
             'assetPath': mesh.get_path_name(),
             'triangleCount': int(mesh.get_num_triangles(0)),
+            'sourceMeshDescriptionTriangles': diag['sourceMeshDescriptionTriangles'],
+            'importRenderTrianglesBeforeRebuild': diag['renderLOD0Before'],
             'materialSlots': [str(slot.get_editor_property('material_slot_name'))
                               for slot in material_entries],
             'materialInterfaces': [
@@ -169,6 +226,7 @@ def main():
         'importedMeshes': [],
         'importedTrianglesLOD0': {},
         'importedMaterialSections': {},
+        'importStageDiagnostics': {'before': [], 'after': []},
         'actorHierarchy': {},
         'actorLabels': [],
         'actualNativeViewportScreenshot': False,
@@ -193,11 +251,13 @@ def main():
         before, before_rows = import_native_obj(
             folder / MODEL_NAMES[0], 'KL_FDI16_Before',
             manifest['sceneStates']['before']['byMaterial'],
-            manifest['sceneStates']['before']['triangles'])
+            manifest['sceneStates']['before']['triangles'],
+            report['importStageDiagnostics']['before'])
         after, after_rows = import_native_obj(
             folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut',
             manifest['sceneStates']['after']['byMaterial'],
-            manifest['sceneStates']['after']['triangles'])
+            manifest['sceneStates']['after']['triangles'],
+            report['importStageDiagnostics']['after'])
         report['importedMaterialSections'] = {'before': before_rows,
                                               'after': after_rows}
         report['importedMeshes'] = [
