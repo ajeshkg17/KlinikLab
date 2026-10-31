@@ -371,6 +371,36 @@ async function recoverIncompleteAttempts(){
   console.log('Preserved/recovered original incomplete Godot attempt:',id,url);
  }
 }
+async function auditInterruptedOwnerWatcher(){
+ const data={};
+ for(const [key,file] of [['ledger',LEDGER],['ledgerTmp',LEDGER+'.tmp'],['watcherLog',path.join(ROOT,'godot-watcher-stdout.log')]]){
+  try{
+   const st=await fs.stat(file);
+   const entry={exists:true,byteLength:st.size,modifiedUTC:st.mtime.toISOString()};
+   if(key==='watcherLog'){
+    const f=await fs.open(file,'r');
+    try{
+     const length=Math.min(3500,st.size),b=Buffer.alloc(length);
+     if(length)await f.read(b,0,length,st.size-length);
+     entry.tailRedacted=b.toString('utf8')
+      .replace(/(?:github_pat_[A-Za-z0-9_]+|gh[opusr]_[A-Za-z0-9]+)/g,'[REDACTED_CREDENTIAL]')
+      .replace(/Bearer\\s+[^\\s]+/gi,'Bearer [REDACTED]')
+      .slice(-1800);
+    }finally{await f.close()}
+   }else if(st.size<10_000_000){
+    entry.sha256=createHash('sha256').update(await fs.readFile(file)).digest('hex');
+   }
+   data[key]=entry;
+  }catch(e){data[key]=e.code==='ENOENT'?{exists:false}:{readError:String(e.message)}}
+ }
+ const query="Get-ScheduledTaskInfo -TaskName 'KlinikLab-Godot-PC-Watcher' -ErrorAction Stop | Select-Object LastRunTime,LastTaskResult,NextRunTime,NumberOfMissedRuns | ConvertTo-Json -Compress";
+ const p=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',query],
+  {encoding:'utf8',timeout:20000,windowsHide:true,env:cleanWindowsPowerShellEnv(process.env)});
+ data.scheduledTaskLastRun=(p.status===0?String(p.stdout).trim().slice(0,1200):
+  {readError:String(p.stderr||p.error).slice(0,300)});
+ return data;
+}
+
 /** Forensic-only job07 publication: DOES NOT call execute(), capture or Godot.
  * Never clears the stale watcher lease. Separate exclusive recovery file is
  * retained on abnormal exit to prevent duplicate/ambiguous publication.
@@ -389,8 +419,9 @@ async function recoverRawJob07({diagnoseOnly=false}={}){
  if(prev && (prev.commit!==JOB07_SOURCE||
     !['executing','publish-pending'].includes(prev.status)))
   throw Error('Existing job07 ledger conflict/terminal state; require investigation, not overwrite');
+ const localAudit=await auditInterruptedOwnerWatcher();
  const recovery={
-  ...original,ledgerEntryAbsentAtInspection:!prev,
+  ...original,localAudit,ledgerEntryAbsentAtInspection:!prev,
   existingLedgerState:prev?.status||null,
   staleWatcherPid:lock.pid,staleWatcherStartedUTC:lock.startedAt,
   inspectedUTC:new Date().toISOString(),
