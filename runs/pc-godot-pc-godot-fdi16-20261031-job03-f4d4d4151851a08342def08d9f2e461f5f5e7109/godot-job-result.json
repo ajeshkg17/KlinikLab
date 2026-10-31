@@ -1,0 +1,20 @@
+{
+  "jobId": "pc-godot-fdi16-20261031-job03",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1c-fdi16-before-after",
+  "executedOn": "owner Windows PC (archived original attempt)",
+  "generatedAt": "2026-10-31T21:33:46.344Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "imageExists": false,
+  "sourceMeshVerified": false,
+  "gpuProcessCorroborated": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "recoveryOnly": true,
+  "reexecuted": false,
+  "errors": [],
+  "blockers": [
+    "Historical job already executed and ledger stuck executing; this is recovery-only, NO rerender",
+    "Private desktop Godot process exception: CreateDesktop failed: 87"
+  ]
+}

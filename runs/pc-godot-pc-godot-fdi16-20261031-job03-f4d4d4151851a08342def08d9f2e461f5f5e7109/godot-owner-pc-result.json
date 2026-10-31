@@ -1,0 +1,43 @@
+﻿{
+    "schemaVersion":  2,
+    "status":  "EVIDENCE_INCOMPLETE",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\appdata\\local\\microsoft\\winget\\packages\\godotengine.godotengine_microsoft.winget.source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job03-f4d4d41518\\Project\\project.godot",
+    "privateDesktopCreated":  false,
+    "userDesktopActivationRequested":  false,
+    "headlessUsed":  false,
+    "godotPid":  null,
+    "godotStartedUTC":  null,
+    "nativeSourceSubmissionVerified":  false,
+    "nativeImagePresent":  false,
+    "nativeScreenshotFile":  null,
+    "imageSHA256":  null,
+    "imageWidth":  null,
+    "imageHeight":  null,
+    "nativePixelReviewAccepted":  false,
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "renderingMethod":  null,
+    "renderingDriver":  null,
+    "videoAdapterName":  null,
+    "videoAdapterVendor":  null,
+    "backgroundCaptureStatus":  null,
+    "process3DSampleCount":  0,
+    "process3DPositiveSamples":  0,
+    "process3DMaxUtilizationPercent":  null,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "rendererLogNvidiaRtx5060":  false,
+    "gpuAdapterLuidMatchedToNvidia":  false,
+    "godotProcessGPUCorroborated":  false,
+    "blockers":  [
+                     "Private desktop Godot process exception: CreateDesktop failed: 87"
+                 ],
+    "limitations":  [
+                        "Independent original PNG pixel review remains required",
+                        "Windows GPU 3D PID utilization plus Godot Vulkan adapter identity does not itself map a DXGI LUID"
+                    ]
+}
