@@ -117,7 +117,7 @@ test('Five Unreal imported tissue assets form distinct attached clinical tooth a
  assert(!importer.includes('merge_static_mesh_actors'),'merging without verified material preservation is not allowed');
  assert(runner.includes('KLINIKLAB_SR1B_SCRIPT_DIR'));
  assert(runner.includes('Missing native section uasset'));
- assert(runner.includes('Aggregate native LOD0 triangle parity failed'));
+ assert(runner.includes('Native procedural source topology parity failed'));
  assert(runner.split('\\n').length<300,'PowerShell duplicate body detected');
  assert.equal((runner.match(/^if\(\$Mode -eq 'Collect'\)/gm)||[]).length,1);
 });
@@ -174,7 +174,7 @@ test('UE5.8 production faces bypass destructive StaticMesh render LOD using nati
   'sourceTopologyAcceptedInProceduralInput',
   'savedProceduralTriangleIndexReadbackVerified',
   'verify_reloaded_procedural_scene(',
-  'staticMeshRenderLOD0Triangles_DIAGNOSTIC_ONLY'
+  'staticRenderLOD0Triangles_DIAGNOSTIC_ONLY'
  ])assert(importer.includes(token),token);
  assert(runner.includes('Native procedural source topology parity failed'));
  assert(runner.includes('nativeProceduralSourceTrianglesSubmitted'));
