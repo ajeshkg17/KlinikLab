@@ -39,3 +39,15 @@ The script verifies the real installed \`Engine\Build\Build.version\` is **5.8**
 ## Evidence boundary and next UE5 Pixel Streaming 2 gate
 
 This is **workstation local Unreal Editor GPU rendering** only. It does **not** prove a dedicated-GPU **server-side stream**, hardware encoding by the Unreal process, correct stereo projection, headset decoding, secure WebRTC, or clinical anatomy. Epic's [Unreal command-line documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/command-line-arguments-in-unreal-engine), [Project Browser guidance](https://dev.epicgames.com/documentation/en-us/unreal-engine/creating-a-new-project-in-unreal-engine), and [HighResShot instructions](https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine) describe these native UE paths. Once verified, create **a separate proper Virtual Reality template project**, enable Pixel Streaming 2, disable OpenXR for Epic's experimental VR-stream workflow, compile VRPawn and then perform the secure Quest 2 protocol tests documented in \`SR1_UE5_PS2_VR_PROTOTYPE.md\`. Never treat IWER or browser-generated frames as evidence for this step.
+
+## New actual UE58_RenderSmokeTest project (2026-10-31 workstation report)
+
+The owner PC now has `C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest`. Its blank project reportedly loads OpenWorld, initializes D3D12/path-tracing shader pipelines and remains responsive. This is stronger than mere installation, but it is **still not a captured rendered viewport or a verified dedicated GPU**. Use the following non-invasive attach command rather than launching another editor:
+
+```powershell
+$sha=(git rev-parse HEAD).Trim()
+$run="visual-qa/evidence-local/ue58-attach-$([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))"
+.\visual-qa\sr1-check-existing-unreal.ps1 -ProjectDirectory 'C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest' -ExpectedSha $sha -GpuIndex 0 -EvidenceDir $run
+```
+
+First, in the running Unreal Editor, take a genuine native screenshot of the **visible lit OpenWorld scene** using `HighResShot 1920x1080` (or High Resolution Screenshot tool). The attach script searches for one `.uproject`, does not start a new editor, copies latest `Saved\Logs\*.log` and `Saved\Screenshots\Windows\*.png`, computes their hashes, checks whether a running editor command line names that project, and separately runs the exact-source NVIDIA/NVENC preflight (not Unreal encoding). It writes `unreal-attach-report.json` and native originals to a **new ignored** evidence directory. If no screenshot, clear D3D12 selected-adapter evidence or NVENC is present, the report remains **EVIDENCE_INCOMPLETE**. If no GPU is NVIDIA or FFmpeg NVENC is unavailable, **fail closed**, not a CPU or low-quality fallback. Process GPU-engine attribution and personal pixel review still need actual workstation evidence. Nothing here claims Pixel Streaming, VRPawn, or physical Quest 2 validation.
