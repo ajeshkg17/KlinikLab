@@ -274,6 +274,14 @@ try{
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
+ // Check the LIVE IWER scene after XR startup has reset focusDecor visibility.
+ await page.waitForFunction(()=>{
+   const s=window.kliniklab?.scene;
+   return !!s?.xrSession&&s.xrPatientMeshes?.length===6
+     &&s.xrPatientMeshes.every(m=>m.hidden)
+     &&s.xrClinicalFocusActive===true;
+ },null,{timeout:Math.max(15000,config.collectionDeadlineMs)});
+ result.checks.push('All six cartoon patient props hidden in idle immersive XR after room initialization');
  await captureXR('01-room-table-unobstructed.png','Room/table with both tracked controllers disconnected');
  const overviewAnatomy=result.captureManifest.at(-1).eyeAnatomy;
  assert(overviewAnatomy?.length===2&&overviewAnatomy.every(x=>x&&x.count>=8),'Overview crowns must be projected in both XR eyes');
@@ -461,6 +469,8 @@ try{
  await page.waitForFunction(()=>!window.kliniklab.scene.xrSession);
  await page.locator('#vr').click();
  await page.waitForFunction(()=>!!window.kliniklab.scene.xrSession&&!!window.__xrTestDevice.activeSession);
+ assert.equal(await page.evaluate(()=>window.kliniklab.scene.xrPatientMeshes.every(m=>m.hidden)),true,
+   'Cartoon patient reappeared after XR re-entry');
  result.checks.push('Application exited and re-entered VR');
  assert.equal(await page.evaluate(()=>window.kliniklab.scene.xrGuide.state.open),false,'Help should stay closed on re-entry');
  const duplicates=result.captureManifest.filter(x=>x.duplicateOf);

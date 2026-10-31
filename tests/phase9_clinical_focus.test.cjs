@@ -34,7 +34,13 @@ test('XR session focus stays active through help/catalog and restores only after
  const sync=prep.slice(prep.indexOf('  syncModalVisibility(){'),prep.indexOf('  syncCase(){'));
  assert(sync.includes('this.scene.setXRClinicalFocus?.(this.active||!!this.scene.xrSession)'),'focus persists through entire immersive session, independent of modal owner');
  assert(sync.includes("this.modalOwner=modal||'treatment'"));
- assert(engine.includes('this.setXRComfort(true);this.initXRTools();this.setXRClinicalFocus?.(true);'),'XR entry must hide cartoon face');
+ const xrStartup=engine.slice(engine.indexOf('this.xrSession=session;'),engine.indexOf('const acceptsInput='));
+ assert(xrStartup.includes('this.setXRClinicalFocus?.(true);'),'XR entry must hide cartoon face');
+ assert(xrStartup.indexOf('for(const m of this.focusDecor)m.hidden=false')<xrStartup.indexOf('this.setXRClinicalFocus?.(true);'),
+   'Clinical exclusion must run AFTER generic focusDecor visibility reset');
+ const smoke=fs.readFileSync(path.join(root,'test-support/webxr-test/smoke.mjs'),'utf8');
+ assert(smoke.includes('s.xrPatientMeshes.every(m=>m.hidden)'),'XR framebuffer smoke must require hidden cartoon patient');
+ assert(smoke.includes('Cartoon patient reappeared after XR re-entry'),'XR re-entry must be verified');
  assert(engine.includes('this.setXRClinicalFocus?.(false);'),'XR end must restore desktop face');
  const focusTarget={xrPatientMeshes:Array.from({length:6},()=>({hidden:false})),xrSession:{},xrClinicalFocusActive:false,setXRClinicalFocus:setFocus};
  // Model actual entry -> idle modal -> procedure off -> session end sequence.

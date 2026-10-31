@@ -921,8 +921,11 @@ class DentalScene {
       let ref;try{ref=await session.requestReferenceSpace('local-floor')}catch{ref=await session.requestReferenceSpace('local')}
       if(ended)throw Error('VR session ended during startup. Use Enter VR to try again.');
       this.xrSession=session;this.xrRef=ref;this.xrVisualDiagnostics={frames:0,eyes:{},world:{},referenceSpace:'same XRReferenceSpace throughout session'};
-      this.setXRComfort(true);this.initXRTools();this.setXRClinicalFocus?.(true);
+      this.setXRComfort(true);this.initXRTools();
       for(const m of this.focusDecor)m.hidden=false;for(const m of this.xrBoardMeshes)m.hidden=false;
+      // General room reset above includes the six patient meshes. Apply the
+      // XR-only visual exclusion LAST or it will be silently overwritten.
+      this.setXRClinicalFocus?.(true);
       this.setXRCatalogOpen?.(false);
       this.xrGuide?.onEnter();
       const acceptsInput=()=>this.xrSession===session&&(!session.visibilityState||session.visibilityState==='visible');
