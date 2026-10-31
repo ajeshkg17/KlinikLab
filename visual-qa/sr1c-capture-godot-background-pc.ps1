@@ -48,7 +48,14 @@ $report=[ordered]@{
  videoAdapterName=$null;videoAdapterVendor=$null
  backgroundCaptureStatus=$null
  process3DSampleCount=0;process3DPositiveSamples=0;process3DMaxUtilizationPercent=$null
+ process3DDistinctSamplePeriods=0;process3DPositiveDistinctPeriods=0
+ process3DPositiveRtx5060DistinctPeriods=0
+ persistentPDHQueryUsed=$false
  originalGpuCounterSampleFile='godot-gpu-3d-counters.json'
+ dxgiAdapters=@();rtx5060DxgiLuid=$null;positiveGodotEngineLuids=@()
+ nativeAngledScreenshotFile=$null;angledImageSHA256=$null
+ nativeAngledImagePresent=$false
+ orbitDurationSeconds=$null
  rendererLogNvidiaRtx5060=$false
  gpuAdapterLuidMatchedToNvidia=$false
  godotProcessGPUCorroborated=$false
@@ -86,6 +93,11 @@ function Read-StrictSource {
  }catch{Block ('Native source validation exception: '+$_.Exception.Message)}
 }
 . $launcher
+# WinPS 5.1 dynamically compiles typed DXGI COM interface for independent LUID.
+# Fail closed before launching Godot if this native evidence dependency fails.
+$dxgiSource=Join-Path $PSScriptRoot 'sr1c-dxgi-luid.cs'
+if(-not (Test-Path -LiteralPath $dxgiSource)){throw 'No native DXGI LUID source helper'}
+Add-Type -Path $dxgiSource -ErrorAction Stop
 $session=$null
 try{
  $log=Join-Path $captures 'godot-native-background.log'
@@ -96,38 +108,74 @@ try{
  $report.godotStartedUTC=$proc.StartTime.ToUniversalTime().ToString('o')
  # No foreground focus, no game/editor activation and no manual F12.
  # Capture script itself uses RenderingServer.frame_post_draw and records true adapter.
+ # One Get-Counter invocation keeps ONE native Windows PDH query open across
+ # 34 ~1s data collections. Job04 reopened the full wildcard query each
+ # iteration, yielding 54 ROWS but only TWO distinct collection timestamps.
+ # Never count multiple GPU engine rows at one timestamp as independent proof.
  $counterData=@();$samplingErrors=@()
- for($i=0;$i -lt 23;$i++){
-  Start-Sleep -Seconds 1
-  $proc=Get-Process -Id $session.Pid -ErrorAction SilentlyContinue
-  if(-not $proc){break}
-  try{
-   $batch=Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -MaxSamples 1 -ErrorAction Stop
-   foreach($c in @($batch.CounterSamples)){
+ $report.persistentPDHQueryUsed=$true
+ try{
+  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' `
+   -SampleInterval 1 -MaxSamples 34 -ErrorAction Stop)
+  $period=0
+  foreach($snapshot in $snapshots){
+   $period++
+   $stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')
+   foreach($c in @($snapshot.CounterSamples)){
     if($c.Path -match ('(?i)pid_'+$session.Pid+'_') -and $c.Path -match '(?i)engtype_3d'){
      $v=[double]$c.CookedValue
      $finite=(-not [double]::IsNaN($v)) -and (-not [double]::IsInfinity($v))
      $counterData+= [PSCustomObject]@{
-      utc=[DateTime]::UtcNow.ToString('o')
+      utc=$stamp;collectionIndex=$period;godotPid=[int]$session.Pid
       counterPath=[string]$c.Path
+      engineLuid=[KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$c.Path)
       utilizationPercent=$v
       finite=[bool]$finite
      }
     }
    }
-  }catch{$samplingErrors+=($_.Exception.Message)}
- }
+  }
+ }catch{$samplingErrors+=($_.Exception.Message)}
  $counterOutput=Join-Path $captures $report.originalGpuCounterSampleFile
- $counterJson=@($counterData)|ConvertTo-Json -Depth 6
+ $counterJson=ConvertTo-Json -InputObject @($counterData) -Depth 7
  [IO.File]::WriteAllText($counterOutput, ($counterJson + [Environment]::NewLine),
   (New-Object System.Text.UTF8Encoding($false)))
  $validSamples=@($counterData|Where-Object{$_.finite -and $_.utilizationPercent -ge 0 -and $_.utilizationPercent -le 100})
  $positive=@($validSamples|Where-Object{$_.utilizationPercent -gt 0.05})
  $report.process3DSampleCount=$validSamples.Count
  $report.process3DPositiveSamples=$positive.Count
- if($validSamples.Count){$report.process3DMaxUtilizationPercent=[double](($validSamples|Measure-Object -Property utilizationPercent -Maximum).Maximum)}
- if($samplingErrors.Count){Block ('Windows GPU Engine counter errors: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
- if($positive.Count -lt 3){Block 'Not enough nonzero valid Godot-PID GPU Engine 3D counter samples (require >=3)'}
+ $report.process3DDistinctSamplePeriods=@($validSamples|Select-Object -ExpandProperty collectionIndex -Unique).Count
+ $report.process3DPositiveDistinctPeriods=@($positive|Select-Object -ExpandProperty collectionIndex -Unique).Count
+ $report.positiveGodotEngineLuids=@($positive|Select-Object -ExpandProperty engineLuid -Unique)
+ if($validSamples.Count){
+  $report.process3DMaxUtilizationPercent=[double](($validSamples|Measure-Object -Property utilizationPercent -Maximum).Maximum)
+ }
+ if($samplingErrors.Count){Block ('Persistent Windows PDH query failure: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
+ if($report.process3DPositiveDistinctPeriods -lt 3){
+  Block 'Insufficient independent positive Godot-PID GPU 3D PDH COLLECTION PERIODS (require >=3)'
+ }
+ # Independent adapter identification through native DXGI. Explicit LUID
+ # equality is REQUIRED, not a GPU device-name string or aggregate nvidia-smi.
+ try{
+  $adapterRows=@([KlinikLab.DxgiEvidence]::Enumerate())
+  $report.dxgiAdapters=@($adapterRows)
+  $nvidia=@($adapterRows|Where-Object{
+   $_.vendorId -eq 4318 -and $_.name -match '(?i)RTX\s*5060'
+  })
+  if($nvidia.Count -ne 1){
+   Block "DXGI enumerated $($nvidia.Count) distinct NVIDIA RTX 5060 adapters, required exactly 1"
+  }else{
+   $report.rtx5060DxgiLuid=[string]$nvidia[0].luid
+   $matched=@($positive|Where-Object{$_.engineLuid -eq $report.rtx5060DxgiLuid})
+   $report.process3DPositiveRtx5060DistinctPeriods=@(
+    $matched|Select-Object -ExpandProperty collectionIndex -Unique
+   ).Count
+   $report.gpuAdapterLuidMatchedToNvidia=($report.process3DPositiveRtx5060DistinctPeriods -ge 3)
+   if(-not $report.gpuAdapterLuidMatchedToNvidia){
+    Block 'Fewer than three independent Godot-PID GPU 3D periods match the RTX 5060 DXGI LUID'
+   }
+  }
+ }catch{Block ('Native DXGI GetDesc1 LUID map failed: '+$_.Exception.Message)}
  $nativeSource=Join-Path $captures 'native-source-submission.json'
  Read-StrictSource -Path $nativeSource
  $background=Join-Path $captures 'godot-background-capture.json'
@@ -141,7 +189,7 @@ try{
   if($capture.headlessUsed -ne $false -or $capture.userDesktopActivationRequested -ne $false){
    Block 'Godot background capture incorrectly marked headless or desktop activation'
   }
-  if($capture.status -ne 'BACKGROUND_VULKAN_FRAME_CAPTURED_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW'){
+  if($capture.status -ne 'BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW'){
    Block ('Godot background capture blocked: '+[string]$capture.reason)
   }
   if($capture.renderingMethod -ne 'forward_plus' -or $capture.renderingDriver -ne 'vulkan' -or
@@ -150,7 +198,7 @@ try{
    Block 'Godot did not report real native Vulkan rendering on the NVIDIA RTX 5060'
   }else{$report.rendererLogNvidiaRtx5060=$true}
   $name=[string]$capture.imageFile
-  if($name -match '^godot-native-fdi16-[0-9]+\.png$'){
+  if($name -match '^godot-native-fdi16-frontal-[0-9]+\.png{
    $shot=Join-Path $captures $name
    if(Test-Path -LiteralPath $shot){
     $binary=[IO.File]::ReadAllBytes($shot)
@@ -167,9 +215,143 @@ try{
     }
    }
   }
+  # A second original native GPU readback is mandatory for source cut QA.
+  $angleName=[string]$capture.angledImageFile
+  if($angleName -match '^godot-native-fdi16-occlusal-[0-9]+\.png
+ }else{Block 'No original Godot background capture report returned'}
+ $report.godotProcessGPUCorroborated=(
+  $report.rendererLogNvidiaRtx5060 -and
+  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
+  $report.gpuAdapterLuidMatchedToNvidia
+ )
+ if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
+} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
+finally {
+ if($session){Stop-KLPrivateDesktopGodot -Session $session}
+ $report.blockers=@($report.blockers|Select-Object -Unique)
+ if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
+  $report.nativeImagePresent -and $report.nativeAngledImagePresent -and
+  $report.godotProcessGPUCorroborated -and $report.gpuAdapterLuidMatchedToNvidia -and
+  $report.blockers.Count -eq 0){
+  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
+ }
+ $reportJson=$report|ConvertTo-Json -Depth 12
+ [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ Write-Host "Native background Godot evidence: $reportPath"
+ Write-Host "Native background Godot status: $($report.status)"
+}
+){
+   $angledShot=Join-Path $captures $angleName
+   if(Test-Path -LiteralPath $angledShot){
+    $angledBytes=[IO.File]::ReadAllBytes($angledShot)
+    if($angledBytes.Length -gt 10000 -and [BitConverter]::ToString($angledBytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+     $sha=(Get-FileHash -LiteralPath $angledShot -Algorithm SHA256).Hash.ToLowerInvariant()
+     if($sha -eq [string]$capture.angledImageSHA256){
+      $report.nativeAngledImagePresent=$true
+      $report.nativeAngledScreenshotFile=$angleName
+      $report.angledImageSHA256=$sha
+     }
+    }
+   }
+  }
+  $report.orbitDurationSeconds=[double]$capture.orbitDurationSeconds
+  if($report.orbitDurationSeconds -lt 40 -or $report.orbitDurationSeconds -gt 45){
+   Block 'Native Godot continuous orbit did not complete required 40-45 seconds'
+  }
+  if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal native Godot GPU PNG'}
   if(-not $report.nativeImagePresent){Block 'No valid original private-desktop GPU PNG'}
  }else{Block 'No original Godot background capture report returned'}
- $report.godotProcessGPUCorroborated=($report.rendererLogNvidiaRtx5060 -and $positive.Count -ge 3)
+ $report.godotProcessGPUCorroborated=(
+  $report.rendererLogNvidiaRtx5060 -and
+  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
+  $report.gpuAdapterLuidMatchedToNvidia
+ )
+ if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
+} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
+finally {
+ if($session){Stop-KLPrivateDesktopGodot -Session $session}
+ $report.blockers=@($report.blockers|Select-Object -Unique)
+ if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
+  $report.nativeImagePresent -and $report.godotProcessGPUCorroborated -and
+  $report.blockers.Count -eq 0){
+  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
+ }
+ $reportJson=$report|ConvertTo-Json -Depth 12
+ [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ Write-Host "Native background Godot evidence: $reportPath"
+ Write-Host "Native background Godot status: $($report.status)"
+}
+){
+   $shot=Join-Path $captures $name
+   if(Test-Path -LiteralPath $shot){
+    $binary=[IO.File]::ReadAllBytes($shot)
+    if($binary.Length -gt 10000 -and [BitConverter]::ToString($binary,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+     $report.nativeImagePresent=$true
+     $report.nativeScreenshotFile=$name
+     $report.imageSHA256=(Get-FileHash -LiteralPath $shot -Algorithm SHA256).Hash.ToLowerInvariant()
+     $report.imageWidth=[int]$capture.imageWidth
+     $report.imageHeight=[int]$capture.imageHeight
+     if($report.imageWidth -lt 1280 -or $report.imageHeight -lt 720){
+      $report.nativeImagePresent=$false
+      Block 'Reported screenshot size below required dimensions'
+     }
+    }
+   }
+  }
+  # A second original native GPU readback is mandatory for source cut QA.
+  $angleName=[string]$capture.angledImageFile
+  if($angleName -match '^godot-native-fdi16-occlusal-[0-9]+\.png
+ }else{Block 'No original Godot background capture report returned'}
+ $report.godotProcessGPUCorroborated=(
+  $report.rendererLogNvidiaRtx5060 -and
+  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
+  $report.gpuAdapterLuidMatchedToNvidia
+ )
+ if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
+} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
+finally {
+ if($session){Stop-KLPrivateDesktopGodot -Session $session}
+ $report.blockers=@($report.blockers|Select-Object -Unique)
+ if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
+  $report.nativeImagePresent -and $report.nativeAngledImagePresent -and
+  $report.godotProcessGPUCorroborated -and $report.gpuAdapterLuidMatchedToNvidia -and
+  $report.blockers.Count -eq 0){
+  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
+ }
+ $reportJson=$report|ConvertTo-Json -Depth 12
+ [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ Write-Host "Native background Godot evidence: $reportPath"
+ Write-Host "Native background Godot status: $($report.status)"
+}
+){
+   $angledShot=Join-Path $captures $angleName
+   if(Test-Path -LiteralPath $angledShot){
+    $angledBytes=[IO.File]::ReadAllBytes($angledShot)
+    if($angledBytes.Length -gt 10000 -and [BitConverter]::ToString($angledBytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+     $sha=(Get-FileHash -LiteralPath $angledShot -Algorithm SHA256).Hash.ToLowerInvariant()
+     if($sha -eq [string]$capture.angledImageSHA256){
+      $report.nativeAngledImagePresent=$true
+      $report.nativeAngledScreenshotFile=$angleName
+      $report.angledImageSHA256=$sha
+     }
+    }
+   }
+  }
+  $report.orbitDurationSeconds=[double]$capture.orbitDurationSeconds
+  if($report.orbitDurationSeconds -lt 40 -or $report.orbitDurationSeconds -gt 45){
+   Block 'Native Godot continuous orbit did not complete required 40-45 seconds'
+  }
+  if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal native Godot GPU PNG'}
+  if(-not $report.nativeImagePresent){Block 'No valid original private-desktop GPU PNG'}
+ }else{Block 'No original Godot background capture report returned'}
+ $report.godotProcessGPUCorroborated=(
+  $report.rendererLogNvidiaRtx5060 -and
+  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
+  $report.gpuAdapterLuidMatchedToNvidia
+ )
  if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
 } catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
 finally {
