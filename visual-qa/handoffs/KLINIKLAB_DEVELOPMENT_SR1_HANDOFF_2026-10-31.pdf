@@ -1,824 +1,326 @@
 %PDF-1.4
-%‚„œ”
+% ASCII, searchable, deterministic
 1 0 obj
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Count 7 /Kids [7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R] >>
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
 endobj
 4 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
 endobj
 6 0 obj
-<< /Length 7183 >>
+<< /Length 6780 >>
 stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.08 0.22 0.31 rg
-BT /F2 16.4 Tf 1 0 0 1 53 766.0 Tm (KlinikLab - Development and SR1 Replacement-Chat) Tj ET
-0.08 0.22 0.31 rg
-BT /F2 16.4 Tf 1 0 0 1 53 743.0 Tm (Handoff) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 720.0 Tm (Snapshot: 31 October 2026, Europe/Berlin. Evidence-first document; do not interpret plans as) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 708.6 Tm (completed work.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 697.2 Tm (Authoritative repository: https://github.com/ajeshkg17/KlinikLab) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 685.8 Tm (Active integration branch: integration/single-chat-validation-2026-10-30) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 674.4 Tm (Source snapshot immediately before this handoff publication:) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 663.0 Tm (3cd4f90a923c8667b0351845612df5437700535d) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 651.6 Tm (Handoff publication commit: the successor commit containing this Markdown and PDF. Obtain its exact) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 640.2 Tm (SHA from the branch, not from this self-referential PDF.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 628.8 Tm (Authoritative documents: visual-qa/PHASE_ROADMAP.md and visual-qa/SERVER_RENDERING_ARCHITECTURE.md.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 617.4 Tm (Read their current versions before taking action.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 592.0 Tm (1. Why the project exists) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 575.2 Tm (KlinikLab is a research/development platform for dental education, procedural training, dental) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 563.2 Tm (anatomy and exam preparation \(including FSP/KP contexts\), with desktop and experimental XR) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 551.2 Tm (interaction. The long-term target is credible clinical-education visuals, interactive FDI tooth) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 539.2 Tm (selection and instrument workflows, a server-owned tooth/procedure simulation, high-quality) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 527.2 Tm (detailed materials, and Meta Quest 2 viewing/interaction. The current application is a) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 515.2 Tm (functioning browser/WebGL/WebXR prototype, not a clinically certified device or a production) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 503.2 Tm (remote-rendered headset service. Its technical and clinical acceptance gates must be kept) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 491.2 Tm (separate.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 465.2 Tm (2. User's non-negotiable instructions) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 448.4 Tm (- Continue autonomous development in this single ChatGPT conversation when possible. Use) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 436.2 Tm (existing context and source docs; do not routinely ask the user to repeat earlier decisions or) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 424.0 Tm (redirect them to another assistant. Coordinate source using the integration branch and) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 411.8 Tm (source-verified GitHub tools.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 399.6 Tm (- The target has a dedicated workstation/server GPU rendering the dental scene, authoritative) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 387.4 Tm (tooth/cut/tool state and stereo frames, plus a hardware video encoder. Quest/browser becomes) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 375.2 Tm (tracking and controller input plus video decode/display/compositor. Do not run clinical scene) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 363.0 Tm (meshes/shaders/simulation on viewer in this target. Headset decoding/compositor remains) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 350.8 Tm (inherently device-side.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 338.6 Tm (- No CPU rendering, integrated GPU, software encoder or automatic low-quality asset/detail) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 326.4 Tm (fallback in the target streaming mode. If hardware/latency gates fail, report NO-GO and) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 314.2 Tm (resolve hardware/transport rather than silently lowering clinical visual fidelity.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 302.0 Tm (- The workstation PC and Quest 2 are on the same Wi-Fi 7 router. This does not prove the Quest) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 289.8 Tm (radio negotiated Wi-Fi 7 or any actual latency, throughput or comfort.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 277.6 Tm (- Unreal Engine 5 Pixel Streaming 2 VR is the first candidate, with Epic's VR feature) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 265.4 Tm (explicitly experimental. Prove secure, low-latency, perspective-correct 6DoF stereo on a) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 253.2 Tm (physical Quest 2 with a *small prototype* before migrating KlinikLab. Evaluate a native Quest) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 241.0 Tm (streaming receiver only if browser presentation cannot meet requirements.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 228.8 Tm (- Photorealistic online dental assets must have provenance, rights and redistribution terms) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 216.6 Tm (recorded. The existing Dundee School of Dentistry *left* maxillary first molar is only a) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 204.4 Tm (license/provenance candidate, not automatically valid right-side FDI16 anatomy or an approved) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 192.2 Tm (shipped asset. Qualified dental expert review is mandatory before claiming clinical) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 180.0 Tm (correctness.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 167.8 Tm (- Keep generated image design concepts clearly separate from source-generated XR frame) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 155.6 Tm (evidence. User wants a genuine Playwright-captured in-app procedure sequence/video, not) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 143.4 Tm (substitute AI-drawn steps; label any simulated dental technique illustrative until clinically) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 131.2 Tm (reviewed.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 119.0 Tm (- Preserve failed job IDs and evidence. Never re-run a processed XR job ID. The owner-PC) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 106.8 Tm (watcher maintains current browser/IWER regression pipeline; development chat personally) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 94.6 Tm (inspects actual stereo PNG pixels and video where available. CI is source/build verification) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 82.4 Tm (only.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 1/7) Tj ET
+BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1B LOCAL NATIVE RENDER FIRST) Tj ET
+0.55 w 48 755 m 564 755 l S
+BT /F2 13 Tf 48 727.00 Td (KlinikLab - Durable Next-Chat Handoff: Local Unreal Clinical) Tj ET
+BT /F2 13 Tf 48 709.00 Td (Render First) Tj ET
+BT /F1 8.4 Tf 48 691.00 Td () Tj ET
+BT /F1 8.4 Tf 48 684.00 Td (Snapshot: 31 October 2026, Europe/Berlin. Evidence-first; no background task or future delivery is) Tj ET
+BT /F1 8.4 Tf 48 672.90 Td (implied.) Tj ET
+BT /F1 8.4 Tf 48 661.80 Td (Repository: https://github.com/ajeshkg17/KlinikLab) Tj ET
+BT /F1 8.4 Tf 48 650.70 Td (Integration branch: integration/single-chat-validation-2026-10-30) Tj ET
+BT /F1 8.4 Tf 48 639.60 Td (Exact functional source SHA for the NEXT owner-PC attempt: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 8.4 Tf 48 628.50 Td (Source CI for that SHA: https://github.com/ajeshkg17/KlinikLab/actions/runs/41226730861) Tj ET
+BT /F1 8.4 Tf 48 617.40 Td (This Markdown/PDF publication adds a documentation commit after 0f27a7e... Do not confuse that) Tj ET
+BT /F1 8.4 Tf 48 606.30 Td (documentation commit with the tested native renderer code. For the next owner-PC test, use the) Tj ET
+BT /F1 8.4 Tf 48 595.20 Td (complete exact 40-character source SHA above, not the moving branch tip.) Tj ET
+BT /F1 8.4 Tf 48 584.10 Td () Tj ET
+BT /F2 10.5 Tf 48 577.10 Td (1. Binding order: LOCAL KLINIKLAB UNREAL, THEN QUEST) Tj ET
+BT /F1 8.4 Tf 48 562.10 Td () Tj ET
+BT /F1 8.4 Tf 48 555.10 Td (The user explicitly corrected the development order. FIRST produce an identifiable source-derived) Tj ET
+BT /F1 8.4 Tf 48 544.00 Td (KlinikLab clinical education scene in the native Unreal Engine 5.8.4 editor on the owner Windows) Tj ET
+BT /F1 8.4 Tf 48 532.90 Td (NVIDIA RTX 5060 workstation. Obtain a fresh genuine Unreal HighResShot, personally inspect its) Tj ET
+BT /F1 8.4 Tf 48 521.80 Td (original image pixels, and corroborate the specific UnrealEditor process's D3D12 NVIDIA adapter) Tj ET
+BT /F1 8.4 Tf 48 510.70 Td (selection and GPU 3D-engine work. ONLY AFTER the local native clinical content and process-specific) Tj ET
+BT /F1 8.4 Tf 48 499.60 Td (GPU gate is independently accepted may development begin on Pixel Streaming 2, WebRTC/LAN,) Tj ET
+BT /F1 8.4 Tf 48 488.50 Td (security/pairing, Quest 2 receiver, headset stereo, or controller return.) Tj ET
+BT /F1 8.4 Tf 48 477.40 Td () Tj ET
+BT /F1 8.4 Tf 48 470.40 Td (No false acceptance from GitHub CI, source vertex counts, unloaded scene, self-reported metadata,) Tj ET
+BT /F1 8.4 Tf 48 459.30 Td (blank-project evidence, FFmpeg NVENC alone, Chrome WebGL/IWER, a diagnostic viewport, or a mock) Tj ET
+BT /F1 8.4 Tf 48 448.20 Td (Unreal Python test. Do not claim clinically calibrated anatomy; the FDI16 tooth is an original,) Tj ET
+BT /F1 8.4 Tf 48 437.10 Td (*schematic educational* implicit-solid model, not a patient scan.) Tj ET
+BT /F1 8.4 Tf 48 426.00 Td () Tj ET
+BT /F2 10.5 Tf 48 419.00 Td (2. Current status: SR1B NOT ACCEPTED) Tj ET
+BT /F1 8.4 Tf 48 404.00 Td () Tj ET
+BT /F1 8.4 Tf 48 397.00 Td (Implemented in repository: a source-pinned OBJ/MTL export from the real production KlinikLab) Tj ET
+BT /F1 8.4 Tf 48 385.90 Td (volumetric-lab.js ToothSolid\('molar','16'\) and VoxelMesher; an isolated UE5.8 D3D12 project; Unreal) Tj ET
+BT /F1 8.4 Tf 48 374.80 Td (Python native importer/level script; a new direct-source ProceduralMeshComponent path; Windows) Tj ET
+BT /F1 8.4 Tf 48 363.70 Td (Build/Open/Collect runner, hashes and native log/PNG/PID GPU counter collector; tests and) Tj ET
+BT /F1 8.4 Tf 48 352.60 Td (roadmap/runbook.) Tj ET
+BT /F1 8.4 Tf 48 341.50 Td () Tj ET
+BT /F1 8.4 Tf 48 334.50 Td (Not yet observed: a successful owner-PC Stage 1 run on commit 0f27a7e..., any saved and independently) Tj ET
+BT /F1 8.4 Tf 48 323.40 Td (reviewed native clinical Unreal image, persisted procedural triangle-index byte readback,) Tj ET
+BT /F1 8.4 Tf 48 312.30 Td (process-specific NVIDIA GPU 3D activity during rendering, any native KlinikLab frame encoded or) Tj ET
+BT /F1 8.4 Tf 48 301.20 Td (streamed, physical Quest 2 operation, or dental professional signoff.) Tj ET
+BT /F1 8.4 Tf 48 290.10 Td () Tj ET
+BT /F1 8.4 Tf 48 283.10 Td (New untested runtime risk: Unreal Python editor support for dynamically creating persistent) Tj ET
+BT /F1 8.4 Tf 48 272.00 Td (ProceduralMeshComponent subobjects through SubobjectDataSubsystem, the precise UE5.8 Python signature) Tj ET
+BT /F1 8.4 Tf 48 260.90 Td (of create_mesh_section_linear_color, material binding, serialization, saved-level reload, and pixel) Tj ET
+BT /F1 8.4 Tf 48 249.80 Td (appearance. The new source/mocked regression cannot establish these on the owner GPU. If Stage 1) Tj ET
+BT /F1 8.4 Tf 48 238.70 Td (fails, preserve the original error and fix only the actual failed contract without relaxing input) Tj ET
+BT /F1 8.4 Tf 48 227.60 Td (topology.) Tj ET
+BT /F1 8.4 Tf 48 216.50 Td () Tj ET
+BT /F2 10.5 Tf 48 209.50 Td (3. Precise failure chronology \(all original evidence stays unchanged\)) Tj ET
+BT /F1 8.4 Tf 48 194.50 Td () Tj ET
+BT /F1 8.05 Tf 48 187.50 Td (- Blank UE5.8 SR1 evidence, NOT KlinikLab: a read-only original native log SHA-256) Tj ET
+BT /F1 8.05 Tf 48 177.30 Td (3923f2e115a651597893e3d95c9d5c9a0755cf8c4a0a00ac322b2a75c9596e67 was reanalysed at adapter parser) Tj ET
+BT /F1 8.05 Tf 48 167.10 Td (cd75663d7f32c678104ce508594552c083b3218e. Owner PC observed classification) Tj ET
+BT /F1 8.05 Tf 48 156.90 Td (D3D12_INDEX_MAPPED_TO_MATCHING_NVIDIA_GPU, chosen D3D12 adapter 0, RTX 5060, no adapter blockers.) Tj ET
+BT /F1 8.05 Tf 48 146.70 Td (Supplemental derived JSON SHA-256 a1ca8d73ba0b2d57a9c666925257877059537dc89a41d7aaf2ed6d55c43cd65c.) Tj ET
+BT /F1 8.05 Tf 48 136.50 Td (Original collector report was not overwritten and its other evidence limitations persist. No actual) Tj ET
+BT /F1 8.05 Tf 48 126.30 Td (clinical GPU raster or stream proven.) Tj ET
+BT /F1 8.05 Tf 48 116.10 Td (- First clinical source export and OBJ grouping failure, c23c85a7956a284546509a1b3a5fc8ede6c94594:) Tj ET
+BT /F1 8.05 Tf 48 105.90 Td (C:\\klab-sr1b-clinical-c23c85a7-20261031-1650. Export succeeded: 14,856 before, 14,936 after; imported) Tj ET
+BT /F1 8.05 Tf 48 95.70 Td (Unreal OBJ split into five StaticMeshes/materials, contrary to the original one-StaticMesh assertion. No) Tj ET
+BT /F1 8.05 Tf 48 85.50 Td (level or accepted clinical screenshot.) Tj ET
+BT /F1 8.05 Tf 48 75.30 Td (- Five-tissue assembly fix failure, 54e3e06bc253d75a1136fed81243050db4a8e495:) Tj ET
+BT /F1 8.05 Tf 48 65.10 Td (C:\\klab-sr1b-clinical-54e3e06b-20261031-1700. Native material interfaces were correctly identified, but) Tj ET
+0.4 w 48 47 m 564 47 l S
+BT /F1 7.8 Tf 48 33 Td (Source code SHA: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 7.8 Tf 473 33 Td (Page 1 of 4) Tj ET
 endstream
 endobj
 7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 6 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
 endobj
 8 0 obj
-<< /Length 7033 >>
+<< /Length 7213 >>
 stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 774.0 Tm (- Never state that mere Unreal installation, GPU shader pipeline initialization, valid file) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 761.8 Tm (hashes or browser/IWER screenshots prove workstation GPU raster, Pixel Streaming 2, a server) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 749.6 Tm (render, hardware encoding, Quest 2 or dental expert validation.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 723.4 Tm (3. GitHub state, branch, important commit history) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 706.6 Tm (Canonical repository: ajeshkg17/KlinikLab. Active development:) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 694.6 Tm (integration/single-chat-validation-2026-10-30; gallery/results: visual-feedback branch. Current) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 682.6 Tm (job pointer: visual-qa/jobs/xr-current.json. The job was left at) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 670.6 Tm (pc-xr-procedure-fdi16-20261031-10, pinned to exact 49f921f0a09983ac27d89d8df0c5dec67c9fb5f5,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 658.6 Tm (not moved for SR1 work.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 646.6 Tm (Recent exact commits leading into this handoff:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 634.6 Tm (- 3cd4f90a923c8667b0351845612df5437700535d - fix attach-script source tests and include Unreal) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 622.4 Tm (Editor WindowsEditor screenshots.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 610.2 Tm (- eac51b4dc7908b32ad5def5cfb92e57dfa9fe9ee - report external blank UE58 project and add) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 598.0 Tm (attach-to-existing-project workstation collector, roadmap and architecture status.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 585.8 Tm (- 0955b6b265e941fc54bfda7d49d174674ca0d10d - previous non-VR UE5.8 smoke scaffold and D3D12) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 573.6 Tm (workstation launch check.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 561.4 Tm (- 49794f9b0e6b238b297e05b8695865688a4f1e72 - record UE5.8 installation files and add minimal) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 549.2 Tm (.uproject descriptor.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 537.0 Tm (- b530c6d006d962e481dfaab739fee0ba6edda6a9 - cross-check exact source, dedicated NVIDIA) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 524.8 Tm (GPU/NVENC and reject identical stereo evidence.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 512.6 Tm (- 70ba8f45fd1f445b38a5d1847c22169197ffced8 - add SR1 offline evidence integrity tool, only) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 500.4 Tm (ready for human review.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 488.2 Tm (- 7bef499cf95052d0a2814458bbda705acbda58b4 - fail-closed NVIDIA/NVENC preflight, experimental) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 476.0 Tm (UE5 Pixel Streaming 2 VR guide and asset register.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 463.8 Tm (- 165a20f11613be64b98fe3465e797cb1eb28a715 - inspect published browser/IWER procedure job10) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 451.6 Tm (screenshots and explicitly reject video decoding.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 439.4 Tm (- a5ad60c4d33e152c225970d8e25f28571b54f717 and 513ee43e1bafb57f2c6811adf872b47b18c76707 -) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 427.2 Tm (user-required dedicated GPU / high-detail target direction.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 415.0 Tm (- f1ca0fb4ea564ee7d9407831ccacce6000ca50e5 - code-path audit demonstrating current render) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 402.8 Tm (location and LAN SR0-SR6 architecture plan.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 390.6 Tm (Check git log or GitHub commits for any new successor commits; avoid guessing at current HEAD.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 364.6 Tm (4. Current rendering architecture: what is actually running) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 347.8 Tm (server/server.mjs is a Node HTTP file/API server, including /api/health and optional /api/ai.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 335.8 Tm (It normally binds loopback 127.0.0.1; a LAN proxy/tunnel may serve it remotely, but it has no) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 323.8 Tm (checked-in GPU renderer, stereo encoder or remote controller simulation.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 311.8 Tm (engine.js / public/engine.js execute in browser, acquire webgl2/WebGL context, build) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 299.8 Tm (shaders/meshes and call gl.drawArrays. For XR they use) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 287.8 Tm (navigator.xr.requestSession\('immersive-vr'\), XRWebGLLayer and per-eye browser GPU framebuffers.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 275.8 Tm (volumetric-lab.js and xr-procedure.js perform browser-side tooth meshing/cutting and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 263.8 Tm (interaction. Owner-PC test-support/webxr-test/smoke.mjs uses Meta IWER on Chrome and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 251.8 Tm (gl.readPixels to capture XR eyes. These are owner-PC browser-rendered images; running server) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 239.8 Tm (process elsewhere does not make them server frames.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 227.8 Tm (Target architecture remains unimplemented: authoritative dental simulation and GPU stereo) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 215.8 Tm (rendering on workstation, hardware encode, encrypted low-latency WebRTC media, controller) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 203.8 Tm (pose/trigger/grip event uplink to server, authenticated HTTPS/WSS signaling, input ACKs,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 191.8 Tm (IDs/timestamps and measured latency, Quest browser or native receiver providing) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 179.8 Tm (tracking/decoding/compositing. Physical Quest 2 browser stereo VR might be insufficient due to) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 167.8 Tm (projection/reprojection API limitations, so SR1 must decide before migration.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 141.8 Tm (5. SR0-SR6 gate status \(read roadmap for complete acceptance) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 125.0 Tm (language\)) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 108.2 Tm (SR0 - render-location audit: Source-level audit and negative regression tests completed. Actual) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 96.8 Tm (deployed server GPU/Quest runtime trace absent.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 2/7) Tj ET
+BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1B LOCAL NATIVE RENDER FIRST) Tj ET
+0.55 w 48 755 m 564 755 l S
+BT /F1 8.05 Tf 48 727.00 Td (before enamel source 10,320 -> UE render LOD0 6,724; cementum source 4,105 -> UE LOD0 3,116. Strict) Tj ET
+BT /F1 8.05 Tf 48 716.80 Td (face-parity gate blocked level creation; no clinical screenshot accepted.) Tj ET
+BT /F1 8.05 Tf 48 706.60 Td (- Conservative and direct StaticMesh reconstruction failure, exact source) Tj ET
+BT /F1 8.05 Tf 48 696.40 Td (57801f1c7f84cc8e561cac8fc99045cb14d8f6b5: detached worktree) Tj ET
+BT /F1 8.05 Tf 48 686.20 Td (C:\\klab-sr1b-worktree-57801f1c-20261031-174525; evidence folder) Tj ET
+BT /F1 8.05 Tf 48 676.00 Td (C:\\klab-sr1b-clinical-57801f1c-20261031-174525. Owner PC Unreal 5.8.4's imported *source MeshDescription*) Tj ET
+BT /F1 8.05 Tf 48 665.80 Td (retained 10,320 enamel triangles, but native *render LOD0* remained 6,724 after disabling degenerate) Tj ET
+BT /F1 8.05 Tf 48 655.60 Td (removal and relevant build options. Direct StaticMeshDescription reconstruction then produced just 6,721) Tj ET
+BT /F1 8.05 Tf 48 645.40 Td (rendered triangles and failed with exact error: "Direct native StaticMesh build still removed source OBJ) Tj ET
+BT /F1 8.05 Tf 48 635.20 Td (triangles: enamel, source=10320, native=6721". The original detailed traceback/report is) Tj ET
+BT /F1 8.05 Tf 48 625.00 Td (C:\\klab-sr1b-clinical-57801f1c-20261031-174525\\unreal-clinical-level-build.json. No native clinical) Tj ET
+BT /F1 8.05 Tf 48 614.80 Td (level/screenshot or GPU trace completed. Never edit/reuse/rename this evidence.) Tj ET
+BT /F1 8.05 Tf 48 604.60 Td (- Source geometry audit: original OBJ before: enamel 10,320, dentin 112, pulp 207, cementum 4,105, caries) Tj ET
+BT /F1 8.05 Tf 48 594.40 Td (112; after: enamel 10,308, dentin 205, pulp 207, cementum 4,105, caries 111. Totals 14,856 / 14,936.) Tj ET
+BT /F1 8.05 Tf 48 584.20 Td (Exact source audit found zero zero-area faces and zero exact duplicate unordered faces, with only two) Tj ET
+BT /F1 8.05 Tf 48 574.00 Td (triangles below 1e-6 cm^2 doubled area in each of enamel and cementum. Thus thousands of missing UE) Tj ET
+BT /F1 8.05 Tf 48 563.80 Td (rendered faces are NOT explained by thousands of exactly degenerate source triangles. The precise) Tj ET
+BT /F1 8.05 Tf 48 553.60 Td (internal Unreal optimization/welding/precision mechanism is not independently determined.) Tj ET
+BT /F1 8.05 Tf 48 543.40 Td (- Diagnostic screenshot LIMIT: any earlier diagnostic viewport/blank-project screenshot is not an) Tj ET
+BT /F1 8.05 Tf 48 533.20 Td (accepted image of a completed, source-provenanced clinical FDI16 native Unreal scene. It does not) Tj ET
+BT /F1 8.05 Tf 48 523.00 Td (establish five material groups, visible before/after cut, preservation of native procedural buffers, the) Tj ET
+BT /F1 8.05 Tf 48 512.80 Td (correct Unreal process GPU activity, or clinical correctness. The source/pixel acceptance gate is still) Tj ET
+BT /F1 8.05 Tf 48 502.60 Td (open; the user explicitly disallowed treating the diagnostic viewport as accepted.) Tj ET
+BT /F1 8.4 Tf 48 492.40 Td () Tj ET
+BT /F2 10.5 Tf 48 485.40 Td (4. Latest source correction at exact 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 8.4 Tf 48 470.40 Td () Tj ET
+BT /F1 8.4 Tf 48 463.40 Td (Reason for new route: UE5.8.4 repeatedly removed valid faces when compiling a StaticMesh render LOD) Tj ET
+BT /F1 8.4 Tf 48 452.30 Td (\(10,320 source -> 6,724 / 6,721\). The correction does NOT lower expected topology counts.) Tj ET
+BT /F1 8.4 Tf 48 441.20 Td () Tj ET
+BT /F1 8.4 Tf 48 434.20 Td (Selected native rendering method: the isolated) Tj ET
+BT /F1 8.4 Tf 48 423.10 Td (visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject explicitly enables the) Tj ET
+BT /F1 8.4 Tf 48 412.00 Td (ProceduralMeshComponent plugin. visual-qa/sr1b-unreal-build-clinical-level.py imports the OBJ to) Tj ET
+BT /F1 8.4 Tf 48 400.90 Td (source-identify the five KL_ materials and record *lossy imported StaticMesh LODs only as) Tj ET
+BT /F1 8.4 Tf 48 389.80 Td (diagnostics*. It separately reads the SHA-verified original OBJ triangle stream via) Tj ET
+BT /F1 8.4 Tf 48 378.70 Td (sr1b_topology_source.py, creates exact per-face position/normal/index buffers with) Tj ET
+BT /F1 8.4 Tf 48 367.60 Td (sr1b_procedural_buffers.py, and attempts to attach one native material-specific procedural mesh) Tj ET
+BT /F1 8.4 Tf 48 356.50 Td (section for each of enamel, dentin, pulp, cementum and caries to each of two labeled native tooth) Tj ET
+BT /F1 8.4 Tf 48 345.40 Td (actors. It preserves original face winding and uses two-sided tissue materials because the) Tj ET
+BT /F1 8.4 Tf 48 334.30 Td (marching-tetrahedra source has inconsistent winding.) Tj ET
+BT /F1 8.4 Tf 48 323.20 Td () Tj ET
+BT /F1 8.4 Tf 48 316.20 Td (Expected source submission contract:) Tj ET
+BT /F1 8.05 Tf 48 305.10 Td (| Tissue | BEFORE | AFTER simulated cut |) Tj ET
+BT /F1 8.05 Tf 48 294.90 Td (| --- | ---: | ---: |) Tj ET
+BT /F1 8.05 Tf 48 284.70 Td (| Enamel | 10,320 | 10,308 |) Tj ET
+BT /F1 8.05 Tf 48 274.50 Td (| Dentin | 112 | 205 |) Tj ET
+BT /F1 8.05 Tf 48 264.30 Td (| Pulp | 207 | 207 |) Tj ET
+BT /F1 8.05 Tf 48 254.10 Td (| Cementum | 4,105 | 4,105 |) Tj ET
+BT /F1 8.05 Tf 48 243.90 Td (| Caries | 112 | 111 |) Tj ET
+BT /F1 8.05 Tf 48 233.70 Td (| Total source triangles | 14,856 | 14,936 |) Tj ET
+BT /F1 8.4 Tf 48 223.50 Td () Tj ET
+BT /F1 8.4 Tf 48 216.50 Td (Each source triangle contributes 3 indices. Report renderPath must be) Tj ET
+BT /F1 8.4 Tf 48 205.40 Td (NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS. nativeProceduralSourceTrianglesSubmitted must be) Tj ET
+BT /F1 8.4 Tf 48 194.30 Td (14,856 before / 14,936 after. nativeProceduralSections must include five correctly named tissue) Tj ET
+BT /F1 8.4 Tf 48 183.20 Td (sections per tooth; the saved level must reload with both actors and all sections/materials present,) Tj ET
+BT /F1 8.4 Tf 48 172.10 Td (recorded in nativeProceduralReloadedSections. The old importedTrianglesLOD0 counts remain diagnostic) Tj ET
+BT /F1 8.4 Tf 48 161.00 Td (only and are not substituted into procedural face acceptance.) Tj ET
+BT /F1 8.4 Tf 48 149.90 Td () Tj ET
+BT /F1 8.4 Tf 48 142.90 Td (Unproven beyond source submission: even successful level save/reload with section count and visible) Tj ET
+BT /F1 8.4 Tf 48 131.80 Td (flag does not prove exact byte-for-byte persistence of the raw procedural triangle indices. The) Tj ET
+BT /F1 8.4 Tf 48 120.70 Td (script explicitly records savedProceduralTriangleIndexReadbackVerified=false. Actual native viewport) Tj ET
+BT /F1 8.4 Tf 48 109.60 Td (pixels, geometry continuity, before/after cut differences and GPU engine attribution still need) Tj ET
+BT /F1 8.4 Tf 48 98.50 Td (review.) Tj ET
+BT /F1 8.4 Tf 48 87.40 Td () Tj ET
+BT /F1 8.4 Tf 48 80.40 Td (Tests at exact SHA: GitHub Actions run 41226730861 completed SUCCESS with 240 Node regression tests) Tj ET
+BT /F1 8.4 Tf 48 69.30 Td (passed, 0 failures/skips, plus 14 additional checks passed. Source/mock tests include the actual) Tj ET
+0.4 w 48 47 m 564 47 l S
+BT /F1 7.8 Tf 48 33 Td (Source code SHA: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 7.8 Tf 473 33 Td (Page 2 of 4) Tj ET
 endstream
 endobj
 9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 8 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 10 0 R >>
 endobj
 10 0 obj
-<< /Length 7949 >>
+<< /Length 6178 >>
 stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 774.0 Tm (SR1 - feasibility and tiny UE5 PS2 VR prototype: Active. Dedicated GPU/NVENC source-only preflight) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 762.6 Tm (tool exists; offline evidence validator exists; Unreal installation and blank project have been) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 751.2 Tm (reported on owner PC, but a trustworthy native viewport screenshot, selected GPU identity,) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 739.8 Tm (workstation-run NVENC, actual UE host render trace, installed Pixel Streaming 2 prototype, Quest) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 728.4 Tm (receiver, encrypted stream and measured latency are all pending. No automatic success.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 717.0 Tm (SR2 - server simulation + dedicated GPU renderer + photorealistic licensed assets: Not implemented.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 705.6 Tm (No accepted Unreal-rendered KlinikLab anatomy. Asset register is candidate/provenance data only.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 694.2 Tm (SR3 - hardware encode/WebRTC stereo stream/Quest presentation: Not implemented or verified.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 682.8 Tm (SR4 - authoritative controller/head pose and event uplink with server cuts/tools: Not implemented or) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 671.4 Tm (verified.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 660.0 Tm (SR5 - actual Quest 2 p50/p95/p99 latency, stereo correctness, safety/comfort/reconnect tests: Not) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 648.6 Tm (performed. Example p95 <50 ms and 72 Hz are proposed thresholds, not achieved measurements.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 637.2 Tm (SR6 - migration/release with fail-closed explicit server mode and separate legacy regression: Not) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 625.8 Tm (implemented. Do not silently fallback to current browser renderer when a remote stream is requested.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 614.4 Tm (The source-backed constraints apply at *every* gate: dedicated GPU/hardware encode; no CPU,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 602.4 Tm (integrated-GPU or quality fallback; secure LAN pairing; no unapproved patient data or) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 590.4 Tm (unlicensed dental assets.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 564.4 Tm (6. Unreal workstation: observed facts versus pending proof) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 547.6 Tm (Earlier 2026-10-31 ~14:23 observation: UE_5.8 ToolComplete marker; populated Engine, FeaturePacks,) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 536.2 Tm (Templates; UnrealEditor.exe present, length 513,464 bytes. At that inspection, no coworker-workspace) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 524.8 Tm (.uproject and no running editor were detected. These are installation observations only.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 513.4 Tm (New later 2026-10-31 observation from user: Blank UE 5.8 project at:) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 502.0 Tm (C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal Projects\\UE58_RenderSmokeTest.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 490.0 Tm (Native Unreal log reportedly shows built-in OpenWorld loading, D3D12 and path-tracing shader) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 478.0 Tm (pipeline initialization; editor remains responsive. Therefore a separate blank project and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 466.0 Tm (running/editor-loaded context are reported, superseding the earlier 'no project/no process') Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 454.0 Tm (state. This is not a KlinikLab Unreal scene or Pixel Streaming render. No genuine native) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 442.0 Tm (screenshot or confirmed dedicated GPU adapter/NVENC evidence has been independently inspected) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 430.0 Tm (in this chat.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 418.0 Tm (No direct Windows workstation command execution or GUI access from this GitHub-only development) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 406.0 Tm (chat was available. Never imply the new check was run on that PC.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 394.0 Tm (Prior source-only scaffold: visual-qa/ue5_8-gpu-probe/KlinikLab_SR1_GPUProbe.uproject; a) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 382.0 Tm (minimal non-VR descriptor, not the external blank project or an installed Pixel Streaming VR) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 370.0 Tm (template.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 358.0 Tm (Next concrete workstation step: use visual-qa/sr1-check-existing-unreal.ps1 \(commit 3cd4f90...\)) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 346.6 Tm (against the existing blank directory; discover its exact single .uproject rather than guessing) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 335.2 Tm (filename; take native visible OpenWorld viewport screenshot from the editor via High Resolution) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 323.8 Tm (Screenshot / HighResShot 1920x1080. Then run the attached collector with exact Git SHA and a new) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 312.4 Tm (unique ignored visual-qa/evidence-local/... directory; it checks UE Build.version and) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 301.0 Tm (process-to-project command line, retains original native Unreal log and original PNG with hashes,) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 289.6 Tm (records selected D3D12 adapter evidence and runs the actual dedicated NVIDIA H.264 NVENC hardware) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 278.2 Tm (preflight. If adapter, native picture, process identity or encoder cannot be verified, report) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 266.8 Tm (incomplete and preserve diagnostics. Any valid files must be independently reviewed for real) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 255.4 Tm (rendered pixels and GPU engine attribution.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 244.0 Tm (Recommended PowerShell from the checked-out repo root:) Tj ET
-0.14 0.22 0.3 rg
-BT /F3 8 Tf 1 0 0 1 53 227.0 Tm ($sha=\(git rev-parse HEAD\).Trim\(\)) Tj ET
-0.14 0.22 0.3 rg
-BT /F3 8 Tf 1 0 0 1 53 214.8 Tm ($run="visual-qa/evidence-local/ue58-attach-$\([DateTime]::UtcNow.ToString\('yyyyMMdd-HHmmss'\)\)") Tj ET
-0.14 0.22 0.3 rg
-BT /F3 8 Tf 1 0 0 1 53 202.6 Tm (.\\visual-qa\\sr1-check-existing-unreal.ps1 -ProjectDirectory) Tj ET
-0.14 0.22 0.3 rg
-BT /F3 8 Tf 1 0 0 1 53 191.4 Tm ('C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal Projects\\UE58_RenderSmokeTest' -ExpectedSha $sha -GpuIndex) Tj ET
-0.14 0.22 0.3 rg
-BT /F3 8 Tf 1 0 0 1 53 180.2 Tm (0 -EvidenceDir $run) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 165.0 Tm (The default engine root is C:\\Program Files\\Epic Games\\UE_5.8; override -EngineRoot if) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 153.0 Tm (installed elsewhere. Node.js, NVIDIA driver, nvidia-smi and a real FFmpeg build with h264_nvenc) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 141.0 Tm (must be available. A live editor log with shader compilation alone is *insufficient* to claim) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 129.0 Tm (GPU raster. The collector does not launch a second editor and cannot approve physical GPU work) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 117.0 Tm (by itself.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 3/7) Tj ET
+BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1B LOCAL NATIVE RENDER FIRST) Tj ET
+0.55 w 48 755 m 564 755 l S
+BT /F1 8.4 Tf 48 727.00 Td (10,320 -> 6,724/6,721 StaticMesh loss fixture, strict original material/face counts, source OBJ) Tj ET
+BT /F1 8.4 Tf 48 715.90 Td (rejection of malformed/degenerate faces, procedural buffers with 3 indices per source face and mocked) Tj ET
+BT /F1 8.4 Tf 48 704.80 Td (native components. CI does not run the owner's UE5.8.4 editor or dedicated RTX 5060.) Tj ET
+BT /F1 8.4 Tf 48 693.70 Td () Tj ET
+BT /F2 10.5 Tf 48 686.70 Td (5. EXACT next owner-PC Stage 1 - new, separate run; do not reuse 57801f1c) Tj ET
+BT /F1 8.4 Tf 48 671.70 Td () Tj ET
+BT /F1 8.4 Tf 48 664.70 Td (The next action is Build ONLY, not Quest, not Pixel Streaming and not a reused capture. Run from) Tj ET
+BT /F1 8.4 Tf 48 653.60 Td (Windows PowerShell, with Node and UE5.8.4 installed. Adjust the $repo path ONLY if the actual local) Tj ET
+BT /F1 8.4 Tf 48 642.50 Td (Git checkout differs. Preserve old failed evidence directories.) Tj ET
+BT /F1 8.4 Tf 48 631.40 Td () Tj ET
+BT /F1 7.5 Tf 48 624.40 Td (```powershell) Tj ET
+BT /F1 8.4 Tf 48 614.60 Td ($repo = 'C:\\Users\\ajesh\\OneDrive\\study and learn\\coworker\\KlinikLab') Tj ET
+BT /F1 8.4 Tf 48 603.50 Td ($sha = '0f27a7e0e7179ef30a507e8bc0251749d6bbbad1') Tj ET
+BT /F1 8.4 Tf 48 592.40 Td (git -C $repo fetch origin integration/single-chat-validation-2026-10-30) Tj ET
+BT /F1 8.4 Tf 48 581.30 Td (if \($LASTEXITCODE -ne 0\) { throw 'Git fetch failed' }) Tj ET
+BT /F1 8.4 Tf 48 570.20 Td ($stamp = [DateTime]::UtcNow.ToString\('yyyyMMdd-HHmmss'\)) Tj ET
+BT /F1 8.4 Tf 48 559.10 Td ($worktree = "C:\\klab-sr1b-worktree-$\($sha.Substring\(0,8\)\)-$stamp") Tj ET
+BT /F1 8.4 Tf 48 548.00 Td ($run = "C:\\klab-sr1b-clinical-$\($sha.Substring\(0,8\)\)-$stamp") Tj ET
+BT /F1 8.4 Tf 48 536.90 Td (git -C $repo worktree add --detach $worktree $sha) Tj ET
+BT /F1 8.4 Tf 48 525.80 Td (if \($LASTEXITCODE -ne 0\) { throw 'Worktree creation failed' }) Tj ET
+BT /F1 8.4 Tf 48 514.70 Td (Push-Location $worktree) Tj ET
+BT /F1 8.4 Tf 48 503.60 Td (try {) Tj ET
+BT /F1 8.05 Tf 48 492.50 Td (  & .\\visual-qa\\sr1b-run-local-kliniklab.ps1 -Mode Build -ExpectedSha $sha -EvidenceDir $run) Tj ET
+BT /F1 8.05 Tf 48 482.30 Td (  if \($LASTEXITCODE -ne 0\) { throw "Native clinical Build failed: $run" }) Tj ET
+BT /F1 8.05 Tf 48 472.10 Td (  $report = Get-Content \(Join-Path $run 'unreal-clinical-level-build.json'\) -Raw | ConvertFrom-Json) Tj ET
+BT /F1 8.05 Tf 48 461.90 Td (  $report | Select-Object status, renderPath, nativeProceduralSourceTrianglesSubmitted,) Tj ET
+BT /F1 8.05 Tf 48 451.70 Td (    nativeProceduralSections, nativeProceduralReloadedSections,) Tj ET
+BT /F1 8.05 Tf 48 441.50 Td (savedProceduralTriangleIndexReadbackVerified, errors | Format-List) Tj ET
+BT /F1 8.4 Tf 48 431.30 Td (} finally { Pop-Location }) Tj ET
+BT /F1 8.4 Tf 48 420.20 Td (Write-Host "Immutable SR1B run: $run") Tj ET
+BT /F1 7.5 Tf 48 409.10 Td (```) Tj ET
+BT /F1 8.4 Tf 48 399.30 Td () Tj ET
+BT /F1 8.4 Tf 48 392.30 Td (If Build fails: retain the entire unique evidence folder untouched. Read) Tj ET
+BT /F1 8.4 Tf 48 381.20 Td (unreal-clinical-level-build.json -> errors and traceback, and collect the original Unreal) Tj ET
+BT /F1 8.4 Tf 48 370.10 Td (Project\\Saved\\Logs log. Return the exact new run path and exception; never disable per-tissue) Tj ET
+BT /F1 8.4 Tf 48 359.00 Td (strictness, replace clinical procedural buffers with the lossy StaticMeshes, or use diagnostic) Tj ET
+BT /F1 8.4 Tf 48 347.90 Td (screenshot as accepted evidence. This next Stage 1 is expected to expose any UE5.8.4 Python) Tj ET
+BT /F1 8.4 Tf 48 336.80 Td (ProceduralMeshComponent API/serialization constraints.) Tj ET
+BT /F1 8.4 Tf 48 325.70 Td () Tj ET
+BT /F1 8.4 Tf 48 318.70 Td (Only if Stage 1 succeeds with status=NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE and correct) Tj ET
+BT /F1 8.4 Tf 48 307.60 Td (source submission/reload: open the SAME run in the native Unreal editor with the SAME pinned) Tj ET
+BT /F1 8.4 Tf 48 296.50 Td (worktree:) Tj ET
+BT /F1 7.5 Tf 48 285.40 Td (```powershell) Tj ET
+BT /F1 8.4 Tf 48 275.60 Td (& "$worktree\\visual-qa\\sr1b-run-local-kliniklab.ps1" -Mode Open -ExpectedSha $sha -EvidenceDir $run) Tj ET
+BT /F1 7.5 Tf 48 264.50 Td (```) Tj ET
+BT /F1 8.4 Tf 48 254.70 Td (Frame BOTH native FDI16 tooth actors in Lit mode; verify visibly distinct before/cut shape, labels) Tj ET
+BT /F1 8.4 Tf 48 243.60 Td (and tissues; take genuine Unreal HighResShot 1920x1080. Then, only while the actual editor remains) Tj ET
+BT /F1 8.4 Tf 48 232.50 Td (running/rendering, run:) Tj ET
+BT /F1 7.5 Tf 48 221.40 Td (```powershell) Tj ET
+BT /F1 8.4 Tf 48 211.60 Td (& "$worktree\\visual-qa\\sr1b-run-local-kliniklab.ps1" -Mode Collect -ExpectedSha $sha -EvidenceDir) Tj ET
+BT /F1 8.4 Tf 48 200.50 Td ($run) Tj ET
+BT /F1 7.5 Tf 48 189.40 Td (```) Tj ET
+BT /F1 8.4 Tf 48 179.60 Td (Collector must retain original PNG and log SHA-256, exact project/PID, D3D12 selected RTX 5060, real) Tj ET
+BT /F1 8.4 Tf 48 168.50 Td (Windows GPU Engine\(*\)\\Utilization Percentage engtype_3d nonzero samples tied to that editor PID, and) Tj ET
+BT /F1 8.4 Tf 48 157.40 Td (acknowledge that GPU engine LUID -> physical GPU mapping requires corroboration. The development) Tj ET
+BT /F1 8.4 Tf 48 146.30 Td (assistant must personally inspect original PNG pixels, not infer success from PNG signature/hash,) Tj ET
+BT /F1 8.4 Tf 48 135.20 Td (metadata, source counts or a watcher declaration. Without all applicable evidence, record SR1B) Tj ET
+BT /F1 8.4 Tf 48 124.10 Td (NOT_ACCEPTED.) Tj ET
+BT /F1 8.4 Tf 48 113.00 Td () Tj ET
+BT /F2 10.5 Tf 48 106.00 Td (6. Other project tracks and guardrails) Tj ET
+BT /F1 8.4 Tf 48 91.00 Td () Tj ET
+BT /F1 8.4 Tf 48 84.00 Td (Current application server/server.mjs is a local Node API/file server, not a dedicated GPU simulation) Tj ET
+BT /F1 8.4 Tf 48 72.90 Td (server. engine.js, xr-procedure.js, volumetric-lab.js are browser WebGL/WebXR and browser-side) Tj ET
+0.4 w 48 47 m 564 47 l S
+BT /F1 7.8 Tf 48 33 Td (Source code SHA: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 7.8 Tf 473 33 Td (Page 3 of 4) Tj ET
 endstream
 endobj
 11 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 10 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 12 0 R >>
 endobj
 12 0 obj
-<< /Length 7272 >>
+<< /Length 5057 >>
 stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 764.0 Tm (7. UE5 Pixel Streaming 2 VR small feasibility prototype -) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 747.2 Tm (planned, not built) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 730.4 Tm (See visual-qa/SR1_UE5_PS2_VR_PROTOTYPE.md. After verifying local editor + real dedicated) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 718.4 Tm (GPU/NVENC, create a separate actual UE5 VR template project, select exact installed engine) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 706.4 Tm (version and matching Epic PixelStreamingInfrastructure version; enable Pixel Streaming 2 and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 694.4 Tm (follow Epic's experimental VR workflow, which documents disabling OpenXR in server VR template.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 682.4 Tm (First render a generic scene with explicit LEFT/RIGHT eye identity, depth-separated boxes and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 670.4 Tm (hand/controller markers. Do not port dental meshes before stereo/controls are proven.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 658.4 Tm (Serve Quest-facing frontend with trusted HTTPS; protect signaling and use encrypted media/data.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 646.4 Tm (Record real physical Quest 2 browser release, negotiated Wi-Fi connection, full 6DoF parallax) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 634.4 Tm (during head movement, controller trigger/grip return path, distinct per-eye decoded frames,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 622.4 Tm (network jitter/loss, server GPU/render/encoder process metrics, actual video latency and human) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 610.4 Tm (comfort. A flat 360 video or PC-only IWER run is NOT enough.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 598.4 Tm (visual-qa/SR1_PROTOTYPE_RESULT_TEMPLATE.json defaults all acceptance fields to false;) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 586.4 Tm (visual-qa/sr1-evidence-gate.mjs checks locally collected hashes and internal agreement with the) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 574.4 Tm (preflight but cannot authenticate fabricated internally consistent data or grant go-live) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 562.4 Tm (approval.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 536.4 Tm (8. Legacy XR worker and FDI16 procedure evidence) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 519.6 Tm (Owner-PC watcher runs a single immutable, exact-commit pinned Playwright/Meta IWER request from) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 507.6 Tm (visual-qa/jobs/xr-current.json, on a detached worktree; standard ten checkpoints, optional six) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 495.6 Tm (FDI16 true XR eye screenshots and video sidecars. It must preserve failed output/ledger and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 483.6 Tm (never reuse a processed ID. visual-feedback/PC_XR_LATEST.md currently points to) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 471.6 Tm (pc-xr-procedure-fdi16-20261031-10 source 49f921f0a09983ac27d89d8df0c5dec67c9fb5f5.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 459.6 Tm (Job10 published genuine browser-rendered stereo frames 01-select-fdi16.png to) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 447.6 Tm (06-switchback.png. Development chat personally inspected all six stereo pixel images and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 435.6 Tm (independently checked all six SHA-256 hashes. FDI16 educational saved cut increased from 0 to) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 423.6 Tm (1, original mesh changed, and identical-pose before/after changed pixels were [1233 left, 1197) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 411.6 Tm (right] \(RGB L1 >55\); post-cut remained after FDI16->36->16 switch. The simulated cavity is) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 399.6 Tm (visible. This is a source/GPU-in-browser educational visual pass, *not* a dentist performing a) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 387.6 Tm (real procedure, not clinical validation and not server-rendered Quest video.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 375.6 Tm (Known defects: wide procedure images have clipped peripheral text; 02/04/06 show a dark) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 363.6 Tm (isolated model, not a continuous operator motion sequence. Short actual-app-stereo-steps.webm) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 351.6 Tm (was 52,329 bytes but failed browser decode with decoded:false, no derived preview and no) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 339.6 Tm (nonblank/distinct-stage verification. Full-session viewport WebM 1,848,615 bytes existed but) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 327.6 Tm (independent playback was not established. Do not call either video an accepted procedure movie.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 315.6 Tm (No qualified dentist signed off.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 303.6 Tm (Gallery:) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 291.6 Tm (visual-feedback/runs/pc-xr-pc-xr-procedure-fdi16-20261031-10-49f921f0a09983ac27d89d8df0c5dec67-) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 279.6 Tm (c9fb5f5/.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 267.6 Tm (Clinical review acceptance and pending signoff: visual-qa/PROCEDURE_REVIEW_RUBRIC.md. Keep) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 255.6 Tm (browser/IWER regression labels distinct from future UE5 workstation server-render acceptance.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 229.6 Tm (9. Never rerun processed IDs; failure/repair chronology) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 212.8 Tm (Exact failed IDs to preserve, never rerun:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 201.4 Tm (- pc-xr-phase8-catalog-readable-20261031-02: stereo catalog panel/action clipping failure at) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 189.2 Tm (smoke.mjs around line 607. Fixed with geometry/frustum changes; later unique job03 passed.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 177.0 Tm (- pc-xr-procedure-fdi16-20261031-07: live target-ray never intersected FDI16, 18-second) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 164.8 Tm (timeout; only two storyboard frames and partial full WebM. Fixed by probing targetRaySpace) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 152.6 Tm (inside active XRFrame and calibrating controller origin/orientation.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 140.4 Tm (- pc-xr-procedure-fdi16-20261031-08: ray intersection and cut counter passed but before/after) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 128.2 Tm (pixels were [0,0]; four partial frames/1.33 MB viewport WebM not accepted. Fixed with) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 116.0 Tm (mesh/visibility/camera diagnostics, supported model bur radius and oblique viewer.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 4/7) Tj ET
+BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1B LOCAL NATIVE RENDER FIRST) Tj ET
+0.55 w 48 755 m 564 755 l S
+BT /F1 8.4 Tf 48 727.00 Td (procedural geometry. Legacy Meta IWER/Playwright XR screenshots reflect Chrome-rendered emulation,) Tj ET
+BT /F1 8.4 Tf 48 715.90 Td (NOT native Unreal/remote Quest video; processed IDs must never be rerun. User wants direct original) Tj ET
+BT /F1 8.4 Tf 48 704.80 Td (pixel review, immutable evidence, exact SHAs and unique run IDs. The earlier browser FDI16 job10 did) Tj ET
+BT /F1 8.4 Tf 48 693.70 Td (produce distinct before/after eye images, but short WebM decoding/accepted real procedure video) Tj ET
+BT /F1 8.4 Tf 48 682.60 Td (remained unproven. The Dundee left-maxillary-molar third-party candidate is not cleared for right) Tj ET
+BT /F1 8.4 Tf 48 671.50 Td (FDI16 redistribution, so the native SR1B slice uses only original production schematic geometry.) Tj ET
+BT /F1 8.4 Tf 48 660.40 Td () Tj ET
+BT /F1 8.4 Tf 48 653.40 Td (Sources to read in a replacement chat:) Tj ET
+BT /F1 8.05 Tf 48 642.30 Td (- Roadmap: visual-qa/PHASE_ROADMAP.md - current priority override wins over older Quest-first prose.) Tj ET
+BT /F1 8.05 Tf 48 632.10 Td (- Current native runbook: visual-qa/SR1B_LOCAL_KLINIKLAB_RENDER.md.) Tj ET
+BT /F1 8.05 Tf 48 621.90 Td (- UE project: visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject.) Tj ET
+BT /F1 8.05 Tf 48 611.70 Td (- Exporter: visual-qa/sr1-local-kliniklab-export.mjs; importer:) Tj ET
+BT /F1 8.05 Tf 48 601.50 Td (visual-qa/sr1b-unreal-build-clinical-level.py.) Tj ET
+BT /F1 8.05 Tf 48 591.30 Td (- Exact source face validator and procedural buffers: visual-qa/sr1b_topology_source.py,) Tj ET
+BT /F1 8.05 Tf 48 581.10 Td (visual-qa/sr1b_procedural_buffers.py; five-tissue contract: visual-qa/sr1b_section_contract.py.) Tj ET
+BT /F1 8.05 Tf 48 570.90 Td (- Windows orchestrator: visual-qa/sr1b-run-local-kliniklab.ps1.) Tj ET
+BT /F1 8.05 Tf 48 560.70 Td (- Focused tests: tests/sr1b_procedural_buffers_test.py, tests/sr1b_topology_source_test.py,) Tj ET
+BT /F1 8.05 Tf 48 550.50 Td (tests/sr1b_section_contract_test.py, tests/sr1b_local_native_project.test.mjs,) Tj ET
+BT /F1 8.05 Tf 48 540.30 Td (tests/sr1b_local_kliniklab_export.test.mjs.) Tj ET
+BT /F1 8.05 Tf 48 530.10 Td (- Architecture destination \(future, not current\): visual-qa/SERVER_RENDERING_ARCHITECTURE.md.) Tj ET
+BT /F1 8.05 Tf 48 519.90 Td (- Previous blank GPU logs and failed clinical runs are different evidence classes; retain all originals,) Tj ET
+BT /F1 8.05 Tf 48 509.70 Td (not in Git.) Tj ET
+BT /F1 8.4 Tf 48 499.50 Td () Tj ET
+BT /F2 10.5 Tf 48 492.50 Td (7. Replacement-chat resume and handoff provenance) Tj ET
+BT /F1 8.4 Tf 48 477.50 Td () Tj ET
+BT /F1 8.4 Tf 48 470.50 Td (1. Fetch branch HEAD and read THIS paired handoff + roadmap + current SR1B runbook. The pinned) Tj ET
+BT /F1 8.4 Tf 48 459.40 Td (functional test SHA remains 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1 unless new functionality was) Tj ET
+BT /F1 8.4 Tf 48 448.30 Td (explicitly committed and revalidated; publishing a handoff is NOT such a functional update.) Tj ET
+BT /F1 8.4 Tf 48 437.20 Td (2. The only immediate physical step is a fresh owner-PC SR1B Stage 1 build of the exact) Tj ET
+BT /F1 8.4 Tf 48 426.10 Td (ProceduralMeshComponent path at that SHA. Inspect the actual report; if it fails, fix the observed) Tj ET
+BT /F1 8.4 Tf 48 415.00 Td (UE5.8 Python/runtime incompatibility, rerun source tests and use yet another unique local run. Do not) Tj ET
+BT /F1 8.4 Tf 48 403.90 Td (ask the user to repeat known paths or earlier observations.) Tj ET
+BT /F1 8.4 Tf 48 392.80 Td (3. On successful build, capture and personally review a genuine native clinical Unreal frame and) Tj ET
+BT /F1 8.4 Tf 48 381.70 Td (actual editor-PID GPU engine data; mark the gate passed only after the appropriate independent) Tj ET
+BT /F1 8.4 Tf 48 370.60 Td (evidence. Do not begin Pixel Streaming or Quest until then.) Tj ET
+BT /F1 8.4 Tf 48 359.50 Td (4. Never misidentify diagnostic viewport, static source MeshDescription, separate FFmpeg NVENC,) Tj ET
+BT /F1 8.4 Tf 48 348.40 Td (browser/IWER images, documentation PDF, or green CI as completed local native clinical rendering.) Tj ET
+BT /F1 8.4 Tf 48 337.30 Td (5. This Markdown and the PDF at the same base path are documentation mirrors, not a signed) Tj ET
+BT /F1 8.4 Tf 48 326.20 Td (experimental result. Future material handoff edits must update and verify BOTH. The actual GitHub) Tj ET
+BT /F1 8.4 Tf 48 315.10 Td (publication commit SHA should be obtained from the repository and stated outside the self-referential) Tj ET
+BT /F1 8.4 Tf 48 304.00 Td (handoff.) Tj ET
+BT /F1 8.4 Tf 48 292.90 Td () Tj ET
+BT /F1 8.4 Tf 48 285.90 Td (Artifact base path: visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31 \(both .md and) Tj ET
+BT /F1 8.4 Tf 48 274.80 Td (.pdf\).) Tj ET
+BT /F1 8.4 Tf 48 263.70 Td () Tj ET
+0.4 w 48 47 m 564 47 l S
+BT /F1 7.8 Tf 48 33 Td (Source code SHA: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET
+BT /F1 7.8 Tf 473 33 Td (Page 4 of 4) Tj ET
 endstream
 endobj
 13 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 12 0 R >>
-endobj
-14 0 obj
-<< /Length 7225 >>
-stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 774.0 Tm (Other historical IDs must not be reused even if they were functionally successful or visually) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 762.6 Tm (rejected: pc-xr-phase9-clinical-focus-20261031-05 passed functional checks but left cartoon patient) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 751.2 Tm (visible; pc-xr-phase9-room-focus-20261031-06 corrected and passed,) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 739.8 Tm (pc-xr-phase9-controllers-lighting-20261031-04 passed; pc-xr-procedure-fdi16-20261031-09 was a) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 728.4 Tm (distinct previously published request and must not be reused regardless of final watcher state;) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 717.0 Tm (pc-xr-procedure-fdi16-20261031-10 completed screenshot gate. Owner-PC ledger and GitHub history are) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 705.6 Tm (authoritative for exact individual statuses.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 694.2 Tm (When any regression fails, inspect the existing ledger, original images and stack trace,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 682.2 Tm (correct real source/assumption, and create a fresh unique ID and exact 40-char pinned source.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 670.2 Tm (Never rerender under an old job ID or substitute generated imagery.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 644.2 Tm (10. Evidence taxonomy: do not conflate) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 627.4 Tm (- GitHub CI source tests: Node/unit/build/schema/static validation in hosted runners; cannot) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 615.2 Tm (prove workstation GPU, NVENC, UE viewport, Quest browser or dental accuracy. Snapshot after) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 603.0 Tm (attach script: commit 3cd4f90... had green GitHub CI; verify successor commit in new chat.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 590.8 Tm (- Owner-PC IWER: genuine local Chrome WebGL/WebXR framebuffer images under emulated Quest) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 578.6 Tm (poses, not a physical headset and not LAN server rendering. Job10 six original screenshot) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 566.4 Tm (hashes and pixel inspection are usable as legacy dental-program regression.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 554.2 Tm (- UE 5.8 file installation / responsive blank editor: reported local observations; no selected) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 542.0 Tm (adapter or native pixel frame has yet been verified in chat.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 529.8 Tm (- Native Unreal GPU render proof: needs original native UE screenshot visibly depicting lit) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 517.6 Tm (OpenWorld/scene plus actual UE process's D3D12 selected dedicated GPU trace and a separately) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 505.4 Tm (matched NVIDIA hardware preflight. Screenshot + adapter log still require human pixel/process) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 493.2 Tm (review.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 481.0 Tm (- Actual Pixel Streaming 2 render + encode: requires dedicated UE host GPU/encoder attribution) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 468.8 Tm (and stream stats in an actual running session; NOT yet built.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 456.6 Tm (- Physical Quest 2 stereo + interactive latency: requires real headset, secure local pairing,) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 444.4 Tm (decoder, 6DoF perspective, control round-trip and p50/p95/p99 measurements; NOT tested.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 432.2 Tm (- Clinical validation: a named qualified dentist checks FDI anatomy, technique and educational) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 420.0 Tm (claims, recorded in review rubric; NOT obtained.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 407.8 Tm (- AI-generated concepts: allowed only as clearly labeled design references, never app) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 395.6 Tm (evidence.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 383.4 Tm (- PDF/Markdown handoff: documentation only. This handoff cannot substitute any of the above) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 371.2 Tm (measurements.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 345.0 Tm (11. Principal technical files and direct navigation) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 328.2 Tm (- Roadmap:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 316.0 Tm (https://github.com/ajeshkg17/KlinikLab/blob/integration/single-chat-validation-2026-10-30/vis-) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 303.8 Tm (ual-qa/PHASE_ROADMAP.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 291.6 Tm (- LAN architecture:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 279.4 Tm (https://github.com/ajeshkg17/KlinikLab/blob/integration/single-chat-validation-2026-10-30/vis-) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 267.2 Tm (ual-qa/SERVER_RENDERING_ARCHITECTURE.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 255.0 Tm (- UE existing-project collector: visual-qa/sr1-check-existing-unreal.ps1) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 242.8 Tm (- Workstation instructions: visual-qa/SR1_UE5_8_WORKSTATION_GPU_CHECK.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 230.6 Tm (- Earlier repository-only smoke scaffold:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 218.4 Tm (visual-qa/ue5_8-gpu-probe/KlinikLab_SR1_GPUProbe.uproject) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 206.2 Tm (- Dedicated GPU/NVENC gate: visual-qa/sr1-dedicated-gpu-preflight.mjs) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 194.0 Tm (- Experimental UE5 VR prototype: visual-qa/SR1_UE5_PS2_VR_PROTOTYPE.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 181.8 Tm (- Future evidence schema: visual-qa/SR1_PROTOTYPE_RESULT_TEMPLATE.json) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 169.6 Tm (- Offline bundle check: visual-qa/sr1-evidence-gate.mjs) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 157.4 Tm (- Asset license/provenance: visual-qa/dental-asset-register.json) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 145.2 Tm (- Remote receiver read-only capability probe: visual-qa/lan-stream-viewer-probe.mjs) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 133.0 Tm (- XR job pointer: visual-qa/jobs/xr-current.json) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 120.8 Tm (- Worker operation: visual-qa/xr-worker.mjs and visual-qa/README.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 108.6 Tm (- Actual XR procedure harness: test-support/webxr-test/procedure-sequence.mjs) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 96.4 Tm (- XR procedure capture instructions: test-support/webxr-test/PROCEDURE_CAPTURE.md) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 5/7) Tj ET
-endstream
-endobj
-15 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 14 0 R >>
-endobj
-16 0 obj
-<< /Length 7345 >>
-stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 774.0 Tm (- Browser-owned renderer: engine.js, public/engine.js; mesh/cut: volumetric-lab.js,) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 761.8 Tm (xr-procedure.js) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 749.6 Tm (- Clinic dental review: visual-qa/PROCEDURE_REVIEW_RUBRIC.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 737.4 Tm (- Latest gallery index:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 725.2 Tm (https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/PC_XR_LATEST.md) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 713.0 Tm (- Experimental Epic VR feature documentation:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 700.8 Tm (https://dev.epicgames.com/documentation/unreal-engine/experimental-pixel-streaming-features) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 688.6 Tm (- Epic Pixel Streaming infrastructure:) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 676.4 Tm (https://github.com/EpicGames/PixelStreamingInfrastructure) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 664.2 Tm (- Unreal local UE project: C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 652.0 Tm (Projects\\UE58_RenderSmokeTest) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 639.8 Tm (- Ignored workstation evidence: visual-qa/evidence-local/. Never commit private logs,) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 627.6 Tm (passwords, pairing credentials or patient data.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 601.4 Tm (12. Active blockers and prioritized work) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 584.6 Tm (P0 - workstation native evidence: Confirm exact UE5.8 engine root, sync latest repo, take original) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 573.2 Tm (HighResShot of the visibly rendered OpenWorld project, then run attach collector with new unique) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 561.8 Tm (evidence directory. Check NVIDIA model/driver and actual FFmpeg h264_nvenc execution; compare) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 550.4 Tm (process command line/project, D3D12 selected adapter, screenshot bytes/hash and pixel content. Do) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 539.0 Tm (not claim GPU verified until this is done.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 527.6 Tm (P1 - actual UE5 Pixel Streaming 2 VR prototype: After P0, create actual UE5 VR template; match Epic) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 516.2 Tm (infrastructure versions; enable experimental PS2 VR pathway per current docs; test secure local) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 504.8 Tm (video+pose/trigger round trip on physical Quest 2. No KlinikLab dental migration until a documented) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 493.4 Tm (GO decision.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 482.0 Tm (P2 - photographically plausible licensed anatomy/material assets: retain source/attribution/usage) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 470.6 Tm (licenses, hashes and dental expert review. Do not silently lower detail for latency.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 459.2 Tm (P3 - existing app's optional short WebM decoder failure: diagnose real browser recording/codec) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 447.8 Tm (pipeline separately; preserve six verified app-eye PNGs; no fabricated video.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 436.4 Tm (P4 - unclipped periphery in wide XR screenshots and clinic realism: code change, fresh unique) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 425.0 Tm (owner-PC job and direct pixel review; these remain a *legacy browser* track.) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 413.6 Tm (P5 - remote SR2-SR6 only after real Quest feasibility: implement dedicated server GPU scene,) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 402.2 Tm (synchronized per-eye encoding, secure WebRTC and authoritative controller actions with measured) Tj ET
-0.2 0.28 0.32 rg
-BT /F1 8.6 Tf 1 0 0 1 53 390.8 Tm (latency/comfort; maintain explicit no-fallback mode.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 365.4 Tm (13. Short exact resume checklist for replacement chat) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 348.6 Tm (1. Open this handoff and read current visual-qa/PHASE_ROADMAP.md and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 336.6 Tm (visual-qa/SERVER_RENDERING_ARCHITECTURE.md from integration/single-chat-validation-2026-10-30.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 324.6 Tm (Fetch branch HEAD and inspect git log/commit statuses, do not treat snapshot SHA as eternally) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 312.6 Tm (current.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 300.6 Tm (2. Confirm owner PC Unreal observation only: external UE58_RenderSmokeTest blank OpenWorld) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 288.6 Tm (loads D3D12 pipelines and editor is responsive; no accepted native screenshot, GPU/NVENC, Quest) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 276.6 Tm (or PS2 stream yet.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 264.6 Tm (3. Do not launch a second blank editor. Use visual-qa/sr1-check-existing-unreal.ps1 on Windows) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 252.6 Tm (with actual -ProjectDirectory and -EngineRoot; ensure native HighResShot 1920x1080 was) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 240.6 Tm (captured, run exact-source NVIDIA/NVENC preflight and collect native log/screenshot/process) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 228.6 Tm (information into a fresh ignored evidence directory.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 216.6 Tm (4. Inspect actual screenshot pixels and actual RHI GPU adapter selection; distinguish evidence) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 204.6 Tm (file hashes from genuine physical proof; if blocked, record precise missing command output/path) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 192.6 Tm (rather than asking general repeated questions. Never claim Unreal server rendering or Pixel) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 180.6 Tm (Streaming until demonstrated.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 168.6 Tm (5. Only after P0, build a separate true UE5 VR template + experimental Pixel Streaming 2) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 156.6 Tm (prototype, pair Quest 2 via HTTPS and test perspective-correct real 6DoF stereo and returned) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 144.6 Tm (controller input with measurements.) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 132.6 Tm (6. Preserve existing browser/IWER job pointer and gallery; never reuse job07/job08/job09/job10) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 120.6 Tm (or other processed IDs. CI ? hardware/clinical signoff. Continue one bounded change at a time) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 108.6 Tm (and record tests, hardware limitations and acceptance status.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 6/7) Tj ET
-endstream
-endobj
-17 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 16 0 R >>
-endobj
-18 0 obj
-<< /Length 3085 >>
-stream
-0.12 0.29 0.38 rg
-BT /F2 9.5 Tf 1 0 0 1 50 805 Tm (KLINIKLAB  /  SR1 REPLACEMENT-CHAT HANDOFF  /  2026-10-31) Tj ET
-0.8 0.85 0.86 RG 0.6 w 49 795 m 546 795 l S
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 774.0 Tm (7. Keep this Markdown editable beside the PDF at) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 762.0 Tm (visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31. Update both together after) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 750.0 Tm (material changes.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 724.0 Tm (14. Handoff provenance and caveat) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 707.2 Tm (This text consolidates authoritative current repository roadmap/architecture, GitHub branch and) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 695.2 Tm (commit history, published IWER evidence and the user's current owner-PC observations as of 31) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 683.2 Tm (October 2026. It is not a new workstation inspection, clinical review, remote-stream test or) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 671.2 Tm (measured GPU benchmark. All status assertions explicitly distinguish code/source reports,) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 659.2 Tm (personally reviewed browser images, user-reported local Unreal logs, and unperformed hardware) Tj ET
-0.13 0.2 0.23 rg
-BT /F1 9 Tf 1 0 0 1 53 647.2 Tm (gates.) Tj ET
-0.06 0.28 0.35 rg
-BT /F2 12 Tf 1 0 0 1 53 621.2 Tm (15. Post-publication developments from this same chat) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 604.4 Tm (- 3c21561067d5cc48622504318b3cd541a469cbbf: first matching editable Markdown/PDF handoff) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 592.2 Tm (publication. The handoff document is a snapshot; never use its own commit as proof that work) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 580.0 Tm (completed later.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 567.8 Tm (- 9152aa44719a9822b994543d4db5308082347c4b: harden the external Unreal-project collector so) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 555.6 Tm (native logs and native screenshots predating the currently matched UnrealEditor process cannot) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 543.4 Tm (be accepted as current workstation evidence. This is GitHub source CI only. At that commit 202) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 531.2 Tm (Node tests and 14 additional build checks passed. No local Windows PowerShell/UE/GPU run was) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 519.0 Tm (conducted here.) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 506.8 Tm (- The handoff is subsequently updated to normalize copy/paste Windows paths. The actual) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 494.6 Tm (current integration HEAD is always obtained from GitHub, not inferred from this document's) Tj ET
-0.12 0.2 0.24 rg
-BT /F1 9 Tf 1 0 0 1 53 482.4 Tm (self-referential publication.) Tj ET
-0.45 0.54 0.57 rg
-BT /F1 8 Tf 1 0 0 1 53 38 Tm (Editable source: the companion Markdown file) Tj ET
-BT /F1 8 Tf 1 0 0 1 477 38 Tm (Page 7/7) Tj ET
-endstream
-endobj
-19 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 18 0 R >>
+<< /Title (KlinikLab durable SR1B next-chat handoff) /Author (KlinikLab development) /Creator (KlinikLab deterministic Markdown handoff generator) /Subject (Paired with the same-base-name Markdown source at committed Git revision) >>
 endobj
 xref
-0 20
+0 14
 0000000000 65535 f 
-0000000015 00000 n 
-0000000064 00000 n 
-0000000162 00000 n 
-0000000232 00000 n 
-0000000307 00000 n 
-0000000375 00000 n 
-0000007609 00000 n 
-0000007755 00000 n 
-0000014839 00000 n 
-0000014985 00000 n 
-0000022986 00000 n 
-0000023134 00000 n 
-0000030458 00000 n 
-0000030606 00000 n 
-0000037883 00000 n 
-0000038031 00000 n 
-0000045428 00000 n 
-0000045576 00000 n 
-0000048713 00000 n 
+0000000044 00000 n 
+0000000093 00000 n 
+0000000169 00000 n 
+0000000264 00000 n 
+0000000364 00000 n 
+0000000500 00000 n 
+0000007331 00000 n 
+0000007467 00000 n 
+0000014731 00000 n 
+0000014868 00000 n 
+0000021098 00000 n 
+0000021236 00000 n 
+0000026345 00000 n 
 trailer
-<< /Size 20 /Root 1 0 R >>
+<< /Size 14 /Root 1 0 R /Info 13 0 R >>
 startxref
-48861
+26595
 %%EOF
