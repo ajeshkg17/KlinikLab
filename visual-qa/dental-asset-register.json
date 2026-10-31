@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "purpose": "high-detail provenance-tracked online dental assets for FUTURE UE server rendering",
+  "purpose": "provenance-tracked external dental asset candidates for future engine-agnostic native clinical rendering; Godot bakeoff import alone is not license or clinical approval",
   "approvedAssets": [],
   "candidates": [
     {
@@ -47,5 +47,12 @@
     "qualified anatomy reviewer"
   ],
   "policy": "Do not download/import candidates into a shipped build until all asset verification fields are satisfied. No low quality fallback.",
-  "sourcesCheckedOn": "2026-10-31"
+  "sourcesCheckedOn": "2026-10-31",
+  "engineDecision20261031": {
+    "nativeFirst": "Godot 4.7.2",
+    "unreal": "paused exploratory, not accepted",
+    "unity": "Hub installed; Editor not confirmed",
+    "dundeeFbxGodotStatus": "owner-reported headless import in external sandbox only, no accepted native rendered pixels",
+    "relabelAsFdi16Approved": false
+  }
 }
