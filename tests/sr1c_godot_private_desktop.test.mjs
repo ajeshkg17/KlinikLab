@@ -59,13 +59,18 @@ test('Automated original Godot GPU capture fails closed and verifies both tissue
   '3 * int(record.get("sourceTriangles", -1))',
   'await RenderingServer.frame_post_draw',
   'get_texture()','get_image()','image.save_png(output)',
-  'BACKGROUND_VULKAN_FRAME_CAPTURED_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW',
+  'BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW',
   'pixelReviewed":false','gpuProcessVerified":false',
   'headlessUsed":false','userDesktopActivationRequested":false',
-  'await create_timer(16.0).timeout'
+  'while Time.get_ticks_msec() - start_msec < 42000'
  ])assert(gd.includes(text),'Missing native GPU contract '+text);
  for(const text of [
   'EVIDENCE_INCOMPLETE','privateDesktopCreated=$false','headlessUsed=$false',
+  'process3DPositiveRtx5060DistinctPeriods','process3DPositiveDistinctPeriods',
+  'gpuAdapterLuidMatchedToNvidia','sr1c-dxgi-luid.cs',
+  "-SampleInterval 1 -MaxSamples 34", "DXGI GetDesc1 LUID map failed",
+  'nativeAngledScreenshotFile', 'nativeAngledImagePresent',
+
   'userDesktopActivationRequested=$false',
   'sourceGitSHA=$ExpectedSha','nativeSourceSubmissionVerified=$false',
   'nativePixelReviewAccepted=$false','godotPid=$null',
