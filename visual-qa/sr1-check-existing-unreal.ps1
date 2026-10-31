@@ -31,11 +31,14 @@ $report=[ordered]@{
  engineFilePresent=$false
  editorProcesses=@()
  projectProcessMatched=$false
+ matchedProcessStartedUTC=$null
  projectLogFound=$false
+ nativeLogFreshForProcess=$false
  logSHA256=$null
  selectedAdapterEvidenceFound=$false
  selectedAdapterText=@()
  nativeScreenshotFound=$false
+ nativeScreenshotFreshForProcess=$false
  screenshotSHA256=$null
  screenshotSizeBytes=$null
  dedicatedGPUPreflightPassed=$false
@@ -92,13 +95,21 @@ try {
  # Match any real interactive UnrealEditor processes to the actual project.
  # A process may run without a project command line; do not infer project ownership.
  $procs=@(Get-CimInstance Win32_Process -Filter "Name = 'UnrealEditor.exe'" -ErrorAction SilentlyContinue)
+ $activeStart=$null
  foreach($proc in $procs){
   $cmd=[string]$proc.CommandLine
   $matchesProject=$cmd.IndexOf($project.Name,[StringComparison]::OrdinalIgnoreCase) -ge 0 -or
    $cmd.IndexOf($projectRoot,[StringComparison]::OrdinalIgnoreCase) -ge 0
   $report.editorProcesses+=@([ordered]@{pid=[int]$proc.ProcessId;projectMatched=$matchesProject})
-  if($matchesProject){$report.projectProcessMatched=$true}
+  if($matchesProject){
+   $report.projectProcessMatched=$true
+   if($proc.CreationDate){
+    $started=([DateTime]$proc.CreationDate).ToUniversalTime()
+    if($null -eq $activeStart -or $started -gt $activeStart){$activeStart=$started}
+   }
+  }
  }
+ if($null -ne $activeStart){$report.matchedProcessStartedUTC=$activeStart.ToString('o')}
  if($procs.Count -eq 0){Block 'No running UnrealEditor.exe process observed on workstation'}
  if(-not $report.projectProcessMatched){Block 'No UnrealEditor.exe process conclusively matched this project; log/screenshot may be historical'}
  # Evidence from actual UE native project, not from browser Playwright.
@@ -107,6 +118,11 @@ try {
   Sort-Object LastWriteTimeUtc -Descending)
  if($logs.Count){
   $log=$logs[0]
+  if($null -eq $activeStart){
+   Block 'Unreal log cannot be attributed to a running project process; do not accept as current GPU evidence'
+  }elseif($log.LastWriteTimeUtc -lt $activeStart){
+   Block 'Unreal log predates the matched UnrealEditor process; do not accept stale native GPU evidence'
+  }else{$report.nativeLogFreshForProcess=$true}
   Copy-Item -LiteralPath $log.FullName -Destination (Join-Path $out 'unreal-native-latest.log') -ErrorAction Stop
   $logFile=Join-Path $out 'unreal-native-latest.log'
   $report.logSHA256=(Get-FileHash -LiteralPath $logFile -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -127,6 +143,11 @@ try {
  $shots=@($shots|Sort-Object LastWriteTimeUtc -Descending)
  if($shots.Count){
   $shot=$shots[0]
+  if($null -eq $activeStart){
+   Block 'Unreal screenshot cannot be tied to an active project process'
+  }elseif($shot.LastWriteTimeUtc -lt $activeStart){
+   Block 'Native Unreal screenshot predates current project process; take a fresh HighResShot'
+  }else{$report.nativeScreenshotFreshForProcess=$true}
   $destination=Join-Path $out 'unreal-native-viewport.png'
   Copy-Item -LiteralPath $shot.FullName -Destination $destination -ErrorAction Stop
   $report.nativeScreenshotFound=$true

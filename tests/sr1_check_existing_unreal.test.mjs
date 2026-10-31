@@ -18,6 +18,14 @@ test('Actual GPU NVENC preflight is source-pinned and no fallback is permitted',
  }
  assert(!p.includes('libx264'));assert(!p.includes('-nullrhi'));
 });
+test('Stale Unreal log/screenshot cannot pass process-to-project attribution',()=>{
+ assert(p.includes('matchedProcessStartedUTC'));
+ assert(p.includes('nativeLogFreshForProcess'));
+ assert(p.includes('nativeScreenshotFreshForProcess'));
+ assert(p.includes('LastWriteTimeUtc -lt $activeStart'));
+ assert(p.includes('screenshot predates current project process'));
+ assert(p.includes('log predates the matched UnrealEditor process'));
+});
 test('Native screenshot and GPU identity remain explicitly unreviewed',()=>{
  assert(p.includes('unreal-native-viewport.png'));
  assert(p.includes('unreal-native-latest.log'));
