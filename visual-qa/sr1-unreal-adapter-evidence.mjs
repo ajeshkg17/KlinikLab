@@ -7,8 +7,44 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 function gpuName(value){
- return String(value || '').trim().replace(/\s*\((?:VendorId|DeviceId|0x)[^)]*\).*$/i,'')
-  .replace(/\s+/g,' ').toLowerCase();
+ return String(value || '').normalize('NFKC').replace(/\u00a0/g,' ')
+  .replace(/\s+/g,' ').trim().toLowerCase();
+}
+// Unreal may append structured RHI metadata after the model name. Never drop
+// arbitrary trailing words: "RTX 5060 Laptop GPU Ti" is a different GPU.
+const metadataStart=/^(?:vendor(?:id)?|device(?:id)?|subsys(?:tem)?(?:id)?|revision|luid|memory|vram|driver|feature(?:level)?|d3d\d*|dxgi|pci|dedicated|uma|shader|supports?|sm\d+|\d+(?:\.\d+)?\s*(?:gb|gib|mb|mib)(?:\s+(?:vram|memory))?|0x[0-9a-f]+)/i;
+function gpuDescriptorComparison(raw,expectedName){
+ const description=String(raw||'').trim().replace(/^(?:Adapter\s+Name|Name)\s*:\s*/i,'');
+ const expected=gpuName(expectedName), observed=gpuName(description);
+ if(!expected)return {raw:description,normalizedGPU:observed,result:'MISSING_EXPECTED_GPU'};
+ if(observed===expected)return {raw:description,normalizedGPU:observed,result:'EXACT_MATCH'};
+ if(!observed.startsWith(expected))
+  return {raw:description,normalizedGPU:observed,result:'DIFFERENT_GPU'};
+ let rest=observed.slice(expected.length);
+ // Full model-name boundary: never treat extra model tokens as harmless suffix.
+ const metadataParts=[];
+ while(rest.length){
+); // annotations must be delimited
+  if(!group)break;
+  const open=rest.match(/^\s*([([])/);
+  if(open){
+   const close=open[1]==='('?')':']';
+   const start=open[0].length, end=rest.indexOf(close,start);
+   if(end<0)break;
+   const body=rest.slice(start,end).trim();
+   if(!metadataStart.test(body))break;
+   metadataParts.push(body);
+   rest=rest.slice(end+1);
+   continue;
+  }
+  const field=rest.match(/^\s*[,;\-]\s*([^,;()\[\]]+)/);
+  if(!field||!metadataStart.test(field[1].trim()))break;
+  metadataParts.push(field[1].trim());
+  rest=rest.slice(field[0].length);
+ }
+ if(metadataParts.length&&rest.trim()==='')
+  return {raw:description,normalizedGPU:expected,result:'MATCH_WITH_STRUCTURED_METADATA',metadata:metadataParts};
+ return {raw:description,normalizedGPU:observed,result:'UNRECOGNIZED_SUFFIX'};
 }
 function records(log,regex){
  return String(log).split(/\r?\n/).flatMap(line=>{
@@ -33,12 +69,18 @@ export function assessAdapterEvidence(log,{expectedGpuName}={}){
  const ids=[...new Set(choice.map(x=>Number(x.match[1])))];
  const csvNames=[...new Set(csv.map(x=>gpuName(x.match[1])))];
  const expected=gpuName(expectedGpuName);
+ const indexedAdapterChecks=enumerated.map(x=>({
+  adapterId:Number(x.match[1]),
+  ...gpuDescriptorComparison(x.match[2],expectedGpuName)
+ }));
+ const rhiNameChecks=named.map(x=>gpuDescriptorComparison(x.match[1],expectedGpuName));
  const result={
   evidenceFound:false,classification:'INSUFFICIENT_EVIDENCE',
   chosenAdapterId:ids.length===1?ids[0]:null,
   reportedGPU:csvNames.length===1?csv[0].match[1].trim():null,
   adapterIndexMappedToGPU:false,
   expectedPreflightGPU:expectedGpuName || null,
+  indexedAdapterChecks,rhiNameChecks,
   evidenceLines:[...new Set([...choice,...csv,...enumerated,...named].map(x=>x.line))].slice(0,30),
   blockers:[],warnings:[]
  };
@@ -47,14 +89,21 @@ export function assessAdapterEvidence(log,{expectedGpuName}={}){
  if(ids.length!==1)block(ids.length===0?'No chosen D3D12 adapter id in native log':'Conflicting chosen D3D12 adapter ids');
  if(csvNames.length!==1)block(csvNames.length===0?'No LogCsvProfiler gpu metadata in native log':'Conflicting CSV GPU identities in native log');
  if(csvNames.length===1&&expected&&csvNames[0]!==expected)block('Unreal CSV GPU does not match NVIDIA/NVENC preflight GPU');
- if(named.some(x=>gpuName(x.match[1])!==expected))
+ const matchingResult=x=>x.result==='EXACT_MATCH'||x.result==='MATCH_WITH_STRUCTURED_METADATA';
+ if(rhiNameChecks.some(x=>x.result==='DIFFERENT_GPU'))
   block('Named active LogRHI adapter conflicts with preflight GPU');
- if(ids.length===1&&enumerated.length){
-  const selected=enumerated.filter(x=>Number(x.match[1])===ids[0]);
+ if(rhiNameChecks.some(x=>!matchingResult(x)&&x.result!=='DIFFERENT_GPU'))
+  block('Named LogRHI adapter has ambiguous/unrecognized descriptive suffix');
+ if(ids.length===1&&indexedAdapterChecks.length){
+  const selected=indexedAdapterChecks.filter(x=>x.adapterId===ids[0]);
   if(selected.length===0)block('D3D12 enumerated adapters do not map the chosen id');
-  else if(selected.some(x=>gpuName(x.match[2])!==expected))
-   block('Chosen D3D12 indexed adapter name conflicts with preflight GPU');
-  else result.adapterIndexMappedToGPU=true;
+  else{
+   if(selected.some(x=>x.result==='DIFFERENT_GPU'))
+    block('Chosen D3D12 indexed adapter name conflicts with preflight GPU');
+   if(selected.some(x=>!matchingResult(x)&&x.result!=='DIFFERENT_GPU'))
+    block('Chosen D3D12 indexed adapter descriptor ambiguous; inspect raw adapter name and suffix');
+   if(selected.every(matchingResult))result.adapterIndexMappedToGPU=true;
+  }
  }
  if(result.blockers.length===0){
   result.evidenceFound=true;
