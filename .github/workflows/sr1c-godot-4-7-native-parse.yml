@@ -7,6 +7,8 @@ on:
       - 'visual-qa/godot-local-clinical/**'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
+      - 'visual-qa/sr1d-godot-case-workflow.gd'
+      - 'visual-qa/sr1d-export-native-cases.mjs'
       - 'visual-qa/sr1c-build-godot-local.ps1'
       - 'visual-qa/sr1-local-kliniklab-export.mjs'
       - '.github/workflows/sr1c-godot-4-7-native-parse.yml'
@@ -31,11 +33,12 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/godot-source-project/source"
           cp visual-qa/godot-local-clinical/project.godot visual-qa/godot-local-clinical/main.tscn visual-qa/godot-local-clinical/main.gd "$RUNNER_TEMP/godot-source-project/"
-          cp visual-qa/sr1c-godot-background-capture.gd visual-qa/sr1c-godot-clinic-overview.gd "$RUNNER_TEMP/godot-source-project/"
+          cp visual-qa/sr1c-godot-background-capture.gd visual-qa/sr1c-godot-clinic-overview.gd visual-qa/sr1d-godot-case-workflow.gd "$RUNNER_TEMP/godot-source-project/"
           node visual-qa/sr1-local-kliniklab-export.mjs "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/source-obj"
           cp "$RUNNER_TEMP/source-obj/"* "$RUNNER_TEMP/godot-source-project/source/"
           printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/godot-source-project/source/expected-sha.txt"
-          printf '%s\n' 'clinic-overview' > "$RUNNER_TEMP/godot-source-project/source/scene-mode.txt"
+          printf '%s\n' 'clinic-cases' > "$RUNNER_TEMP/godot-source-project/source/scene-mode.txt"
+          node visual-qa/sr1d-export-native-cases.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/godot-source-project/source/kliniklab-native-cases.json"
           echo "$RUNNER_TEMP" > "$RUNNER_TEMP/godot-source-project/source/capture-path.txt"
       - name: Download official 4.7.2 Linux editor
         run: |
@@ -62,6 +65,11 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/godot-source-project" --check-only --script res://sr1c-godot-clinic-overview.gd > "$RUNNER_TEMP/clinic-parse.log" 2>&1 || { cat "$RUNNER_TEMP/clinic-parse.log"; exit 1; }
           cat "$RUNNER_TEMP/clinic-parse.log"
+      - name: Parse native case/station workflow (not rendering)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/godot-source-project" --check-only --script res://sr1d-godot-case-workflow.gd > "$RUNNER_TEMP/workflow-parse.log" 2>&1 || { cat "$RUNNER_TEMP/workflow-parse.log"; exit 1; }
+          cat "$RUNNER_TEMP/workflow-parse.log"
       - name: Explicit evidence limits
         if: always()
         run: |
