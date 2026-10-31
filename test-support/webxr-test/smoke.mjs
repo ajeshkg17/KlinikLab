@@ -1,9 +1,10 @@
 import {chromium} from 'playwright';
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {runProcedureCapture,validateProcedureConfig} from './procedure-sequence.mjs';
 const here=path.dirname(fileURLToPath(import.meta.url));
 const origin=process.env.KLINIKLAB_URL||'http://127.0.0.1:8787/';
 const u=new URL(origin);
@@ -12,12 +13,15 @@ const out=path.resolve(here,'../../output/playwright/webxr-smoke');
 await mkdir(out,{recursive:true});
 const options=await import('./harness-options.mjs');
 const config=options.parseHarnessOptions(process.env);
+const procedureConfig=validateProcedureConfig(process.env);
 const result={configuration:config,startedAt:new Date().toISOString(),origin,mode:'Playwright + genuine Meta IWER runtime; isolated profile, not the installed extension',profile:'metaQuest2',checks:[],errors:[],failedRequests:[]};
 const runtime=await readFile(path.join(here,'node_modules/iwer/build/iwer.min.js'),'utf8');
 const browser=await chromium.launch({channel:'chrome',headless:false,args:options.chromeArgs(config)});
-let page;
+let page,context;
 try{
- const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
+ context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block',
+  ...(procedureConfig?{recordVideo:{dir:path.join(out,'procedure-video-temp'),size:{width:1440,height:1000}}}:{})
+ });
  await context.addInitScript({content:runtime+`;(() => {
    window.__xrTestDevice=new IWER.XRDevice(IWER.metaQuest2);
    window.__xrTestDevice.installRuntime({forceInstall:true});
@@ -697,6 +701,12 @@ try{
  assert(restored.owner==='treatment'&&restored.visibleContext&&restored.visibleTeeth,
    'Closing help did not restore treatment: '+JSON.stringify(restored));
  result.checks.push('Closing modals restores treatment mesh and FDI UI without loss of saved state');
+ // The default ten XR gallery captures have completed. Procedure mode is
+ // optional and uses separately named local evidence only.
+ if(procedureConfig){
+  await runProcedureCapture({page,captureXR,result,out,config:procedureConfig});
+  result.checks.push('Optional genuine XR FDI16 preparation produced six stereo storyboard frames');
+ }
  // Phase7 additional retained evidence: oblique crown/root view, visible
  // cut and return-to-same-FDI image. Do not alter the ten baseline captures.
  await page.evaluate(()=>{
@@ -812,4 +822,28 @@ try{
      webgl:!!window.kliniklab?.scene?.gl,
      framebuffer:!!window.kliniklab?.scene?.xrSession?.renderState?.baseLayer?.framebuffer}
  })).catch(()=>null);if(page)await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});process.exitCode=1;}
-finally{await browser.close();result.finishedAt=new Date().toISOString();await writeFile(path.join(out,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));}
+finally{
+ if(procedureConfig&&page?.video()){
+  try{
+   const videoDir=path.join(out,'procedure',procedureConfig.id,'video');
+   await mkdir(videoDir,{recursive:true});
+   const saved=path.join(videoDir,'actual-app-playwright.webm');
+   await context.close();
+   await page.video().saveAs(saved);
+   const info=await stat(saved);
+   const videoCheck={exists:true,bytes:info.size,capture:'Playwright viewport of sequential true stereo XR framebuffer stills',
+    continuousMotion:false,decoded:false,nonblankVerified:false,
+    status:'PENDING VIDEO DECODE AND HUMAN CONTENT REVIEW'};
+   await writeFile(path.join(videoDir,'video-check.json'),JSON.stringify(videoCheck,null,2)+'\n');
+   result.procedureEvidence??={runId:procedureConfig.id};
+   result.procedureEvidence.video={file:'procedure/'+procedureConfig.id+'/video/actual-app-playwright.webm',...videoCheck};
+  }catch(e){
+   result.procedureEvidence??={runId:procedureConfig.id};
+   result.procedureEvidence.video={status:'VIDEO FAILED; XR screenshots independent',error:String(e.message)};
+  }
+ }
+ await browser.close();
+ result.finishedAt=new Date().toISOString();
+ await writeFile(path.join(out,'result.json'),JSON.stringify(result,null,2));
+ console.log(JSON.stringify(result,null,2));
+}
