@@ -109,7 +109,7 @@ test('Five Unreal imported tissue assets form distinct attached clinical tooth a
   "manifest['sceneStates']['before']['byMaterial']",
   "manifest['sceneStates']['after']['byMaterial']",
   "report['importedTrianglesLOD0']",
-  "sum(row['triangleCount'] for row in before_rows.values())",
+  "sum(item['proceduralTrianglesSubmitted'] for item in groups.values())",
   'get_editor_property(\'static_materials\')',
   "get_editor_property('material_interface')"
  ])assert(importer.includes(token),token);
