@@ -1,0 +1,13 @@
+{
+  "capture": "Playwright-controlled MediaRecorder from six ACTUAL XR binocular rendered framebuffers",
+  "type": "video/webm;codecs=vp8",
+  "bytes": 52329,
+  "sha256": "88b11abaa5f537c7148ecfe24d3a569d85bc415adadb936e7f73c4c9dd1a1470",
+  "continuousHandMotion": false,
+  "frameSource": "genuine-IWER-app",
+  "decoded": false,
+  "nonblankFrameVerified": false,
+  "distinctStagesVerified": false,
+  "error": "video decode failed",
+  "status": "VIDEO VALIDATION FAILED; DO NOT ACCEPT"
+}

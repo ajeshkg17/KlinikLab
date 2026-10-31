@@ -1,0 +1,660 @@
+{
+  "runId": "fdi16-pc-xr-procedure-fdi16-20261031-10",
+  "testedCommit": "49f921f0a09983ac27d89d8df0c5dec67c9fb5f5",
+  "profile": "Meta IWER Quest2 on isolated PC Chrome",
+  "procedure": "FDI16 simplified educational occlusal preparation",
+  "operator": "automated IWER controller, not a filmed dentist",
+  "clinicalValidation": "PENDING",
+  "calibrated": false,
+  "steps": [
+    {
+      "n": 1,
+      "file": "01-select-fdi16.png",
+      "label": "Select FDI 16 in active tooth preparation",
+      "sha256": "651aeb45e506d7bac5512d4a9f8b00bd6d028f3bc00882a81f3c8c0e35febc42",
+      "bytes": 338734,
+      "frame": 69,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 0,
+        "bur": [],
+        "burRadius": 0.2,
+        "revision": 9,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14856,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 30960,
+            "fingerprint": "ed7520b7"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "142eac8b"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "93fbb9c1"
+          }
+        ],
+        "active": true,
+        "evidenceMode": false,
+        "xrFrames": 71,
+        "session": true,
+        "modal": "treatment"
+      }
+    },
+    {
+      "n": 2,
+      "file": "02-precut.png",
+      "label": "Inspect untreated occlusal geometry, fixed stereo camera",
+      "sha256": "ecb5b8dfffb9a0d7716788da2358b5f78e3aa846eb79916dedbb1097d9a942b2",
+      "bytes": 201266,
+      "frame": 141,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 0,
+        "bur": [],
+        "burRadius": 0.2,
+        "revision": 9,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14856,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 30960,
+            "fingerprint": "ed7520b7"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "142eac8b"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "93fbb9c1"
+          }
+        ],
+        "active": true,
+        "evidenceMode": true,
+        "xrFrames": 143,
+        "session": true,
+        "modal": "treatment"
+      }
+    },
+    {
+      "n": 3,
+      "file": "03-aim.png",
+      "label": "Aim tracked right-hand IWER target ray at crown",
+      "sha256": "780fa5698b798001191d03a9df3668d5f7dde6f63429246f65579a2d9fbab547",
+      "bytes": 351841,
+      "frame": 216,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 0,
+        "bur": [],
+        "burRadius": 0.2,
+        "revision": 9,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14856,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 30960,
+            "fingerprint": "ed7520b7"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "142eac8b"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 336,
+            "fingerprint": "93fbb9c1"
+          }
+        ],
+        "active": true,
+        "evidenceMode": false,
+        "xrFrames": 218,
+        "session": true,
+        "modal": "treatment"
+      }
+    },
+    {
+      "n": 4,
+      "file": "04-cut.png",
+      "label": "After real in-app trigger-driven educational preparation cut",
+      "sha256": "ebbb438559c3f826d8dcddbc6e0147354c631276b8e2f02b96958e75ae2dacb8",
+      "bytes": 205974,
+      "frame": 295,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 1,
+        "bur": [
+          {
+            "p": [
+              0.08000004768371571,
+              0.9565926939448772,
+              -0.0799998455489952
+            ],
+            "r": 0.14850000000000002
+          }
+        ],
+        "burRadius": 0.2,
+        "revision": 10,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14916,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 31038,
+            "fingerprint": "db5f021b"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 441,
+            "fingerprint": "764f7df3"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 333,
+            "fingerprint": "6bd19ca6"
+          }
+        ],
+        "active": true,
+        "evidenceMode": true,
+        "xrFrames": 298,
+        "session": true,
+        "modal": "treatment"
+      }
+    },
+    {
+      "n": 5,
+      "file": "05-postcut.png",
+      "label": "Review cut and recorded FDI context",
+      "sha256": "dc034cd2186a22fd3ba6231a6d377b200f4ea8364cbb8635cf46a7343ce639cd",
+      "bytes": 354454,
+      "frame": 371,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 1,
+        "bur": [
+          {
+            "p": [
+              0.08000004768371571,
+              0.9565926939448772,
+              -0.0799998455489952
+            ],
+            "r": 0.14850000000000002
+          }
+        ],
+        "burRadius": 0.2,
+        "revision": 10,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14916,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 31038,
+            "fingerprint": "db5f021b"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 441,
+            "fingerprint": "764f7df3"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 333,
+            "fingerprint": "6bd19ca6"
+          }
+        ],
+        "active": true,
+        "evidenceMode": false,
+        "xrFrames": 373,
+        "session": true,
+        "modal": "treatment"
+      }
+    },
+    {
+      "n": 6,
+      "file": "06-switchback.png",
+      "label": "Return to FDI 16 after switching to FDI 36",
+      "sha256": "ebbb438559c3f826d8dcddbc6e0147354c631276b8e2f02b96958e75ae2dacb8",
+      "bytes": 205974,
+      "frame": 441,
+      "eyes": 2,
+      "state": {
+        "fdi": "16",
+        "caseKey": "molar",
+        "cuts": 1,
+        "bur": [
+          {
+            "p": [
+              0.08000004768371571,
+              0.9565926939448772,
+              -0.0799998455489952
+            ],
+            "r": 0.14850000000000002
+          }
+        ],
+        "burRadius": 0.2,
+        "revision": 12,
+        "evidenceView": {
+          "position": [
+            0.28,
+            2.07,
+            -0.35
+          ],
+          "pitch": -0.584601256120326,
+          "lookAt": [
+            0.28,
+            1.62,
+            -1.03
+          ]
+        },
+        "triangles": 14916,
+        "meshState": [
+          {
+            "material": "enamel",
+            "hidden": false,
+            "vertices": 31038,
+            "fingerprint": "db5f021b"
+          },
+          {
+            "material": "dentin",
+            "hidden": false,
+            "vertices": 441,
+            "fingerprint": "764f7df3"
+          },
+          {
+            "material": "pulp",
+            "hidden": false,
+            "vertices": 621,
+            "fingerprint": "2c79a05b"
+          },
+          {
+            "material": "cementum",
+            "hidden": false,
+            "vertices": 12315,
+            "fingerprint": "5815b02b"
+          },
+          {
+            "material": "caries",
+            "hidden": false,
+            "vertices": 333,
+            "fingerprint": "6bd19ca6"
+          }
+        ],
+        "active": true,
+        "evidenceMode": true,
+        "xrFrames": 444,
+        "session": true,
+        "modal": "treatment"
+      }
+    }
+  ],
+  "pixelDifference": {
+    "changedPixels": [
+      1233,
+      1197
+    ],
+    "thresholdRGBL1": 55,
+    "eyes": 2
+  },
+  "videoAcceptance": "PENDING independent playback and pixel review",
+  "aim": {
+    "local": [
+      0.08,
+      0.8566394862095261,
+      -0.08
+    ],
+    "world": [
+      0.30000000000000004,
+      1.6341598715523815,
+      -1.05
+    ],
+    "origin": [
+      0.30000000000000004,
+      1.9241598715523816,
+      -1.05
+    ],
+    "originalPose": {
+      "quaternion": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "position": [
+        0.30000000000000004,
+        1.9241598715523816,
+        -1.05
+      ]
+    },
+    "firstRay": {
+      "origin": [
+        0.30000001192092896,
+        1.9241598844528198,
+        -1.0499999523162842
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ],
+      "hit": null,
+      "obstacle": null,
+      "xrFrames": 213
+    },
+    "rotatedRay": {
+      "origin": [
+        0.30000001192092896,
+        1.9241598844528198,
+        -1.0499999523162842
+      ],
+      "direction": [
+        0,
+        -0.9999999657714582,
+        -3.422854177870249e-8
+      ],
+      "hit": {
+        "model": [
+          0.08000004768371571,
+          0.9565926939448772,
+          -0.0799998455489952
+        ],
+        "world": [
+          0.30000001192092896,
+          1.6591481734862192,
+          -1.0499999613872488
+        ],
+        "distance": 0.26501172003756546
+      },
+      "obstacle": {
+        "key": "tool:excavator",
+        "distance": 0.8041832377179771
+      },
+      "xrFrames": 214
+    },
+    "finalRay": {
+      "origin": [
+        0.30000001192092896,
+        1.9241598844528198,
+        -1.0499999523162842
+      ],
+      "direction": [
+        0,
+        -0.9999999657714582,
+        -3.422854177870249e-8
+      ],
+      "hit": {
+        "model": [
+          0.08000004768371571,
+          0.9565926939448772,
+          -0.0799998455489952
+        ],
+        "world": [
+          0.30000001192092896,
+          1.6591481734862192,
+          -1.0499999613872488
+        ],
+        "distance": 0.26501172003756546
+      },
+      "obstacle": {
+        "key": "tool:excavator",
+        "distance": 0.8041832377179771
+      },
+      "xrFrames": 215
+    },
+    "correctedQuaternion": [
+      -0.7071067811865475,
+      0,
+      0,
+      0.7071067811865475
+    ],
+    "delta": [
+      -1.1920928910669204e-8,
+      -1.2900438273177883e-8,
+      -4.768371586472142e-8
+    ],
+    "method": "calibrated from XR targetRaySpace measured inside valid XRFrame"
+  },
+  "meshComparison": {
+    "before": [
+      {
+        "material": "enamel",
+        "hidden": false,
+        "vertices": 30960,
+        "fingerprint": "ed7520b7"
+      },
+      {
+        "material": "dentin",
+        "hidden": false,
+        "vertices": 336,
+        "fingerprint": "142eac8b"
+      },
+      {
+        "material": "pulp",
+        "hidden": false,
+        "vertices": 621,
+        "fingerprint": "2c79a05b"
+      },
+      {
+        "material": "cementum",
+        "hidden": false,
+        "vertices": 12315,
+        "fingerprint": "5815b02b"
+      },
+      {
+        "material": "caries",
+        "hidden": false,
+        "vertices": 336,
+        "fingerprint": "93fbb9c1"
+      }
+    ],
+    "after": [
+      {
+        "material": "enamel",
+        "hidden": false,
+        "vertices": 31038,
+        "fingerprint": "db5f021b"
+      },
+      {
+        "material": "dentin",
+        "hidden": false,
+        "vertices": 441,
+        "fingerprint": "764f7df3"
+      },
+      {
+        "material": "pulp",
+        "hidden": false,
+        "vertices": 621,
+        "fingerprint": "2c79a05b"
+      },
+      {
+        "material": "cementum",
+        "hidden": false,
+        "vertices": 12315,
+        "fingerprint": "5815b02b"
+      },
+      {
+        "material": "caries",
+        "hidden": false,
+        "vertices": 333,
+        "fingerprint": "6bd19ca6"
+      }
+    ],
+    "beforeTriangles": 14856,
+    "afterTriangles": 14916,
+    "beforeCutCount": 0,
+    "afterCutCount": 1,
+    "burRadius": 0.2,
+    "bur": [
+      {
+        "p": [
+          0.08000004768371571,
+          0.9565926939448772,
+          -0.0799998455489952
+        ],
+        "r": 0.14850000000000002
+      }
+    ]
+  },
+  "shortVideo": {
+    "file": "video/actual-app-stereo-steps.webm",
+    "bytes": 52329,
+    "sha256": "88b11abaa5f537c7148ecfe24d3a569d85bc415adadb936e7f73c4c9dd1a1470",
+    "status": "VIDEO VALIDATION FAILED; DO NOT ACCEPT"
+  },
+  "passed": true
+}
