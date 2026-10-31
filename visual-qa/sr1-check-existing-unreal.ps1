@@ -28,8 +28,8 @@ $report=[ordered]@{
  projectSHA256=$null
  projectEngineAssociation=$null
  projectEngineAssociationKind=$null
- projectEngineAssociationVerified=$false
  projectEngineAssociationRegistryPath=$null
+ projectEngineAssociationVerified=$false
  engineExecutable=$null
  ue58Version=$null
  engineFilePresent=$false
@@ -92,14 +92,13 @@ try {
  if($association -match '^5\.8(?:\.\d+)?$'){
   $report.projectEngineAssociationKind='UE58_VERSION'
  }elseif($isGuid){
-  $report.projectEngineAssociationKind='REGISTERED_GUID'
+  $report.projectEngineAssociationKind='GUID_PENDING_ENGINE_CORRELATION'
  }elseif([string]::IsNullOrWhiteSpace($association)){
   $report.projectEngineAssociationKind='UNSPECIFIED'
-  $report.notes+=@('EngineAssociation absent: rely on exact running editor executable and installed Build.version')
+  $report.notes+=@('Missing EngineAssociation: require a matched live editor and installed Build.version')
  }else{
-  Block "Unrecognized/mismatched EngineAssociation: $association (expected UE 5.8 version or GUID)"
+  Block "Unexpected EngineAssociation '$association': expected UE 5.8 version or GUID"
  }
-
  $editor=Join-Path $EngineRoot 'Engine\Binaries\Win64\UnrealEditor.exe'
  $versionFile=Join-Path $EngineRoot 'Engine\Build\Build.version'
  if(-not (Test-Path -LiteralPath $editor -PathType Leaf)){throw "No UnrealEditor.exe: $editor"}
@@ -111,24 +110,29 @@ try {
  if($version.MajorVersion -ne 5 -or $version.MinorVersion -ne 8){
   throw "Wrong engine version $($report.ue58Version): UE 5.8 required"
  }
- # A GUID can be assigned by UnrealVersionSelector for a locally registered build.
- # If a registry mapping exists, it must agree with the selected engine root.
- # If absent, never use GUID text alone: require the live project process binary.
+ # UnrealVersionSelector can use a GUID for a locally registered engine build.
+ # An existing registry mapping MUST agree with the actual selected installation.
+ # When no mapping exists, a live project's exact executable path + Build.version
+ # are needed; a syntactically valid GUID alone is never accepted as proof.
  if($isGuid){
   $builds=Get-ItemProperty -Path 'HKCU:\Software\Epic Games\Unreal Engine\Builds' -ErrorAction SilentlyContinue
   if($null -ne $builds){
-   foreach($key in (@($association,$association.Trim('{}'),('{'+$association.Trim('{}')+'}')) | Select-Object -Unique)){
+   $keys=@($association,$association.Trim('{}'),('{'+$association.Trim('{}')+'}'))|Select-Object -Unique
+   foreach($key in $keys){
     $entry=$builds.PSObject.Properties[$key]
     if($null -ne $entry -and -not [string]::IsNullOrWhiteSpace([string]$entry.Value)){
      $report.projectEngineAssociationRegistryPath=[string]$entry.Value
      $registered=[IO.Path]::GetFullPath([string]$entry.Value).TrimEnd('\')
      $expected=[IO.Path]::GetFullPath($EngineRoot).TrimEnd('\')
      if(-not [string]::Equals($registered,$expected,[StringComparison]::OrdinalIgnoreCase)){
-      Block "GUID EngineAssociation registry maps to a different engine root: $registered"
+      Block "GUID EngineAssociation registered to a different engine root: $registered"
      }
      break
     }
    }
+  }
+  if(-not $report.projectEngineAssociationRegistryPath){
+   $report.notes+=@('GUID registry mapping unavailable; matching running editor executable and Engine Build.version are required')
   }
  }
  # Match any real interactive UnrealEditor processes to the actual project.
@@ -137,7 +141,7 @@ try {
  $activeStart=$null
  foreach($proc in $procs){
   $cmd=[string]$proc.CommandLine
-  $matchesProject=$cmd.IndexOf($project.Name,[StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+  $matchesProject=$cmd.IndexOf($project.FullName,[StringComparison]::OrdinalIgnoreCase) -ge 0 -or
    $cmd.IndexOf($projectRoot,[StringComparison]::OrdinalIgnoreCase) -ge 0
   $procExe=[string]$proc.ExecutablePath
   $matchesEngine=(-not [string]::IsNullOrWhiteSpace($procExe)) -and
@@ -145,7 +149,7 @@ try {
     [StringComparison]::OrdinalIgnoreCase)
   $report.editorProcesses+=@([ordered]@{pid=[int]$proc.ProcessId;projectMatched=$matchesProject;engineExecutableMatched=$matchesEngine})
   if($matchesProject -and -not $matchesEngine){
-   Block 'Project-matched UnrealEditor.exe does not have a verified executable path under the selected UE_5.8 engine'
+   Block 'Project-matched editor executable does not match selected UE 5.8 engine installation'
   }
   if($matchesProject -and $matchesEngine){
    $report.projectProcessMatched=$true
@@ -157,13 +161,16 @@ try {
  }
  if($null -ne $activeStart){$report.matchedProcessStartedUTC=$activeStart.ToString('o')}
  if($procs.Count -eq 0){Block 'No running UnrealEditor.exe process observed on workstation'}
- if(-not $report.projectProcessMatched){Block 'No UnrealEditor.exe process conclusively matched both the project and selected UE 5.8 executable; log/screenshot may be historical'}
- $report.projectEngineAssociationVerified=$report.projectProcessMatched -and
-  ($report.projectEngineAssociationKind -in @('UE58_VERSION','REGISTERED_GUID','UNSPECIFIED')) -and
-  ($null -eq $report.projectEngineAssociationRegistryPath -or
-   [string]::Equals([IO.Path]::GetFullPath($report.projectEngineAssociationRegistryPath).TrimEnd('\'),
-     [IO.Path]::GetFullPath($EngineRoot).TrimEnd('\'),[StringComparison]::OrdinalIgnoreCase))
-
+ if(-not $report.projectProcessMatched){Block 'No running UnrealEditor.exe matched BOTH project and selected engine executable'}
+ $associationKind=[string]$report.projectEngineAssociationKind
+ $registryAgrees= -not $report.projectEngineAssociationRegistryPath -or
+  [string]::Equals([IO.Path]::GetFullPath($report.projectEngineAssociationRegistryPath).TrimEnd('\'),
+   [IO.Path]::GetFullPath($EngineRoot).TrimEnd('\'),[StringComparison]::OrdinalIgnoreCase)
+ $report.projectEngineAssociationVerified=$report.projectProcessMatched -and $registryAgrees -and
+  ($associationKind -in @('UE58_VERSION','GUID_PENDING_ENGINE_CORRELATION','UNSPECIFIED'))
+ if(-not $report.projectEngineAssociationVerified){
+  Block 'UE 5.8 EngineAssociation could not be correlated with running project, registered engine root and Build.version'
+ }
  # Evidence from actual UE native project, not from browser Playwright.
  $logDir=Join-Path $projectRoot 'Saved\Logs'
  $logs=@(Get-ChildItem -LiteralPath $logDir -File -Filter '*.log' -ErrorAction SilentlyContinue|
@@ -179,8 +186,8 @@ try {
   $logFile=Join-Path $out 'unreal-native-latest.log'
   $report.logSHA256=(Get-FileHash -LiteralPath $logFile -Algorithm SHA256).Hash.ToLowerInvariant()
   $report.projectLogFound=$true
-  # GPU identity assessment runs after NVENC preflight, so its expected GPU
-  # comes from independently queried dedicated hardware, not from this log.
+  # Evaluate separately selected D3D12 adapter id and native CSV GPU metadata
+  # against the independent GPU/NVENC preflight after it completes.
 
  }else{Block 'No original Unreal native .log found in project Saved/Logs'}
  # Editor screenshots can be in WindowsEditor, while PIE/game images use Windows.
@@ -221,14 +228,14 @@ try {
   }
  }
  else {Block 'NVENC was explicitly skipped; hardware gate remains pending'}
- if($report.projectLogFound){
+ if($report.projectLogFound -and $report.nativeLogFreshForProcess -and $report.projectProcessMatched){
   if(-not $report.dedicatedGPUPreflightPassed){
-   Block 'Cannot correlate native RHI/CSV GPU metadata without passed dedicated GPU/NVENC preflight'
+   Block 'Native GPU identity cannot be correlated without successful dedicated GPU/NVENC preflight'
   }else{
    $parser=Join-Path $PSScriptRoot 'sr1-unreal-adapter-evidence.mjs'
    $adapterJson=(& node $parser "--log=$logFile" "--expected-gpu=$preflightGpuName" | Out-String)
    if($LASTEXITCODE -ne 0){
-    Block 'Native RHI/CSV GPU evidence parser failed'
+    Block 'Native D3D12/CSV GPU evidence parser failed'
    }else{
     $adapter=$adapterJson|ConvertFrom-Json
     $report.selectedAdapterEvidenceFound=[bool]$adapter.evidenceFound
@@ -239,8 +246,11 @@ try {
     $report.adapterIndexMappedToGPU=[bool]$adapter.adapterIndexMappedToGPU
     foreach($problem in @($adapter.blockers)){Block "Native GPU evidence: $problem"}
     foreach($warning in @($adapter.warnings)){$report.notes+=@($warning)}
+    if(-not $report.selectedAdapterEvidenceFound){Block 'Chosen D3D12 adapter/CSV GPU correlation insufficient'}
    }
   }
+ }else{
+  Block 'Fresh native log and matched running editor are required for native GPU attribution'
  }
  # Presence and consistency are not GPU-render acceptance.
  if($report.blockers.Count -eq 0){
