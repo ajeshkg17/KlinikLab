@@ -49,3 +49,11 @@ Reviewers must mark *not assessable* rather than pass when a required image, eye
 | Overall result | **PENDING — no clinical acceptance** |
 
 **Status rule:** Source CI and test-harness functional success permit publishing an *educational prototype*. They do not establish expert validation. Only fill this record using a tested and personally inspected six-frame run.
+
+## Engineering observation after job10 (31 October 2026) — NOT dental signoff
+
+- Job: `pc-xr-procedure-fdi16-20261031-10`; exact source: `49f921f0a09983ac27d89d8df0c5dec67c9fb5f5`; owner-PC browser/IWER renderer (no server GPU).
+- Six original published two-eye PNGs manually inspected in both eye halves; all six SHA-256 values independently recomputed from returned PNG binaries and matched the manifest. Selected FDI remains 16. A single saved app cut changes the original mesh and produces a small visible central occlusal cavity in both eyes; reported changed pixels `[1233,1197]` at RGB L1 >55. Switch-back after FDI 36 preserves the shown cavity.
+- Three isolated close-up views (`02/04/06`) have a dark background while `01/03/05` use the clinic view; screenshots communicate a simplified app operation but **do not** establish a dentist's continuous hand/tool movement. Clipped peripheral text in the wider images remains a defect; relative anatomical/cavity plausibility and instrument realism need a qualified clinician.
+- Short 52,329-byte WebM browser decoder **failed**; decoded preview absent; do not accept video playback. Full viewport WebM 1,848,615 bytes not independently decoded, and no continuous motion claim is justified.
+- Medical/dental reviewer, physical Quest2 test, true LAN server rendering and streaming, and real-world force/handpiece calibration: **all pending**. This engineering inspection does not fill the professional review fields or establish any clinical correctness.
