@@ -1,0 +1,48 @@
+name: SR1C inspect archived job04 PNG bytes (READ ONLY, NO GODOT)
+
+on:
+  push:
+    branches: [integration/single-chat-validation-2026-10-30]
+    paths: ['.github/workflows/sr1c-inspect-immutable-png.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived-pixels-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Read exact published immutable job04 PNG and verify SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin visual-feedback
+          target="runs/pc-godot-pc-godot-fdi16-20261031-job04-f4d4d4151851a08342def08d9f2e461f5f5e7109/godot-native-fdi16.png"
+          git show "FETCH_HEAD:$target" > "$RUNNER_TEMP/job04-exact.png"
+          printf '%s  %s\n' 'd8e92a28ab409f9f51ed279c8c6bcb3d53f25bfd663459ebccdbeddb700cc411' "$RUNNER_TEMP/job04-exact.png" | sha256sum --check
+          test "$(wc -c < "$RUNNER_TEMP/job04-exact.png")" -eq 40327
+          python3 - <<'PY'
+          import base64, hashlib, struct, os
+          filename=os.path.join(os.environ['RUNNER_TEMP'],'job04-exact.png')
+          data=open(filename,'rb').read()
+          assert data[:8]==b'\x89PNG\r\n\x1a\n'
+          width,height=struct.unpack('>II',data[16:24])
+          assert (width,height)==(1600,900)
+          print('KL_IMMUTABLE_ARCHIVE_JOB04_SOURCE_SHA=f4d4d4151851a08342def08d9f2e461f5f5e7109')
+          print('KL_IMMUTABLE_ARCHIVE_JOB04_IMAGE_SHA256='+hashlib.sha256(data).hexdigest())
+          print('KL_IMMUTABLE_ARCHIVE_JOB04_PNG_DIMENSIONS=1600x900')
+          print('KL_ARCHIVE_PNG_BASE64_BEGIN')
+          encoded=base64.b64encode(data).decode('ascii')
+          for i in range(0,len(encoded),2048):
+              print(encoded[i:i+2048])
+          print('KL_ARCHIVE_PNG_BASE64_END')
+          PY
+      - name: Evidence boundary
+        if: always()
+        run: |
+          echo 'Read-only inspection of already published original job04 PNG. No Godot execution, no new job, no screenshot regeneration, and no GPU acceptance.' >> "$GITHUB_STEP_SUMMARY"
