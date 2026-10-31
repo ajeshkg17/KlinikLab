@@ -7,6 +7,10 @@
 (()=>{
 const CLAMP=(v,a,b)=>Math.max(a,Math.min(b,v));
 const COLORS={enamel:'#efe6cd',dentin:'#dda66a',pulp:'#b64c61',cementum:'#9f826d',caries:'#654444'};
+ // Bounded educational reflectance hierarchy, not measured optical constants:
+ // mineralized enamel appears gently smoother; porous/damaged or internal
+ // tissues stay matte. Uses the existing single-pass WebGL lighting shader.
+ const TISSUE_FINISH=Object.freeze({enamel:.54,dentin:.16,pulp:.06,cementum:.10,caries:.025});
 const WORLD={center:[.28,1.42,-1.03],scale:.25};
 const materials=Object.keys(COLORS);
 class XRToothPractice {
@@ -19,7 +23,7 @@ class XRToothPractice {
     this.toggleButton.hidden=true;this.toggleText.hidden=true;
     this.meshes=materials.map((material)=>{
       const kind='xrvol-'+material;
-      const m=scene.add(kind,WORLD.center,[WORLD.scale,WORLD.scale,WORLD.scale],COLORS[material],{});
+      const m=scene.add(kind,WORLD.center,[WORLD.scale,WORLD.scale,WORLD.scale],COLORS[material],{finish:TISSUE_FINISH[material]});
       m.hidden=true;
       m.xrMaterial=material;
       return m;
