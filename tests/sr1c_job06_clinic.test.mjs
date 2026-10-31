@@ -46,7 +46,7 @@ test('native clinic props are distinct from original FDI16 source; no fake full-
  assert(worker.includes('nativeSceneMode:'));
  assert(worker.includes('fullKlinikLabApplicationMigrated:false'));
  assert(worker.includes('godot-gpu-pdh-diagnostics.json'));
- assert(!clinic.includes('https://')&&!clinic.includes('download'), 'No unlicensed external assets');
+ assert(!clinic.includes('https://')&&!clinic.includes('HTTPRequest.new'), 'No network asset loader in clinic workspace');
 });
 
 test('invalid wildcard PDH statuses are filtered without fabricating RTX utilization',()=>{
