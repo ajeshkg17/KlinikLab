@@ -24,7 +24,8 @@ test('PowerShell workstation procedure refuses fallback and does not claim GPU s
  'gpuRendererActuallyRunning','actualUERenderVerified','physicalQuest2Verified'
  ].filter(x=>x!=='gpuRendererActuallyRunning'))
   assert(ps.includes(contract),'Missing workstation-only evidence gate '+contract);
- assert(!ps.includes('-nullrhi'));
+ assert(ps.includes("$args=@(('\"' + $project + '\"'),'-log','-d3d12','-NoSplash')"));
+ assert(!/\$args\s*=\s*@\([^\n]*['\"]-nullrhi['\"]/i.test(ps),'native render command must never select null RHI');
  assert(ps.includes("actualUERenderVerified=$false"));
  assert(ps.includes("physicalQuest2Verified=$false"));
  assert(ps.includes("pixelStreaming2Verified=$false"));
