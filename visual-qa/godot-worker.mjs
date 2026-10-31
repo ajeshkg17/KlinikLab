@@ -258,6 +258,79 @@ async function publish(j,run,result){
  await api(token,'/git/refs/heads/'+RESULT_BRANCH,'PATCH',{sha:next.sha,force:false});
  return 'https://github.com/'+OWNER+'/blob/'+RESULT_BRANCH+'/'+prefix+'/README.md';
 }
+// REPAIR ONLY: finalizes previously attempted job02/job03 without spawning a
+// Windows process or touching original source submissions, captures or logs.
+// A stale executing ledger may be recovered ONLY by this explicit command.
+// The original job IDs are NEVER retried.
+const INCOMPLETE_LEGACY_IDS=Object.freeze([
+ 'pc-godot-fdi16-20261031-job02',
+ 'pc-godot-fdi16-20261031-job03'
+]);
+async function recoverIncompleteAttempts(){
+ await initialize();
+ await permission(); // fail before writing any recovery metadata
+ const ledger=await readLedger();
+ for(const id of INCOMPLETE_LEGACY_IDS){
+  const entry=ledger.completed[id];
+  if(!entry||entry.status==='published'||entry.status==='failed')continue;
+  if(entry.commit!=='f4d4d4151851a08342def08d9f2e461f5f5e7109')
+   throw Error('Legacy job source identity does not match immutable original: '+id);
+  if(!['executing','publish-pending'].includes(entry.status))
+   throw Error('Unexpected immutable recovery status '+id+': '+entry.status);
+  const j={jobId:id,commit:entry.commit,suite:'sr1c-fdi16-before-after'};
+  const run=entry.run||path.join(EVIDENCE,id+'-'+entry.commit.slice(0,10));
+  if(path.resolve(run)!==path.resolve(path.join(EVIDENCE,id+'-'+entry.commit.slice(0,10))))
+   throw Error('Recovery ledger path is not canonical original evidence path: '+id);
+  const capture=path.join(run,'Captures');
+  await fs.mkdir(capture,{recursive:true});
+  let native=null, nativeError=null;
+  try{
+   native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),
+    'immutable old WinPS owner report '+id);
+  }catch(e){nativeError=String(e.message)}
+  const originalResultPath=path.join(capture,'godot-job-result.json');
+  let result=null;
+  try{
+   result=parseGodotJson(await fs.readFile(originalResultPath,'utf8'),'old original job result '+id);
+  }catch(e){
+   if(e.code!=='ENOENT')throw e; // never overwrite malformed original evidence
+  }
+  if(!result){
+   result={
+    jobId:id,sourceGitSHA:entry.commit,watcherSuite:j.suite,
+    executedOn:'owner Windows PC (archived original attempt)',
+    generatedAt:new Date().toISOString(),
+    nativeReportStatus:'EVIDENCE_INCOMPLETE',
+    imageExists:false,sourceMeshVerified:false,gpuProcessCorroborated:false,
+    imageIndependentPixelReviewAccepted:false,
+    overallStatus:'EVIDENCE_INCOMPLETE',
+    recoveryOnly:true,reexecuted:false,
+    errors:[nativeError].filter(Boolean),
+    blockers:[
+     'Historical job already executed and ledger stuck executing; this is recovery-only, NO rerender',
+     ...(Array.isArray(native?.blockers)?native.blockers:[]),
+     nativeError||''
+    ].filter(Boolean)
+   };
+   await fs.writeFile(originalResultPath,jsonWithoutBom(result),{flag:'wx'});
+  }
+  // Even a preexisting result cannot transform an unverified failed PC
+  // attempt into accepted native/GPU evidence.
+  const terminalResult={...result,overallStatus:'EVIDENCE_INCOMPLETE',
+   imageIndependentPixelReviewAccepted:false,recoveryOnly:true,reexecuted:false};
+  if(entry.status==='executing'){
+   ledger.completed[id]={commit:entry.commit,status:'publish-pending',run,
+    result:terminalResult,endedAt:new Date().toISOString(),recoveryOnly:true};
+   await saveLedger(ledger);
+  }
+  const url=await publish(j,run,terminalResult);
+  ledger.completed[id]={...ledger.completed[id],status:'published',url,
+   publishedAt:new Date().toISOString(),recoveryOnly:true};
+  await saveLedger(ledger);
+  await heartbeat('recovered-incomplete-published',id,{url,reexecuted:false});
+  console.log('Preserved/recovered original incomplete Godot attempt:',id,url);
+ }
+}
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
@@ -301,5 +374,9 @@ async function tick(){
  finally{busy=false}
 }
 function textLog(...x){console.log(...x)}
-await tick();
-if(process.argv.includes('--watch'))setInterval(tick,10000);
+if(process.argv.includes('--recover-incomplete')){
+ await recoverIncompleteAttempts(); // never calls execute(), powershell(), or Godot
+}else{
+ await tick();
+ if(process.argv.includes('--watch'))setInterval(tick,10000);
+}
