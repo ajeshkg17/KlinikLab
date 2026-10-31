@@ -197,7 +197,7 @@ class LiveFunctionIntegrationTests(unittest.TestCase):
             'require':lambda ok,msg:None if ok else (_ for _ in ()).throw(RuntimeError(msg))}
         verifier=extract_function('verify_reloaded_procedural_scene',ns)
         diagnostics={}
-        result=verifier(EXPECTED,COUNTS,diagnostics)
+        result=verifier(EXPECTED,COUNTS,diagnostics,SOURCE_SECTIONS)
         self.assertEqual(set(result),{'before','after'})
         self.assertEqual(level.loaded,['/Game/Maps/L_KlinikLab_FDI16'])
         self.assertTrue(diagnostics['bothToothActorsAndTenTissueSectionsValidated'])
