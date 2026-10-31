@@ -38,7 +38,8 @@ export async function checkSR1Evidence(manifest,{readArtifact}={}){
  if(a.schemaVersion!==1||a.kind!=='SR1 UE5 Pixel Streaming 2 VR Quest 2 physical feasibility')
   bad('Not an SR1 UE5 PS2 VR evidence manifest');
  if(status==='NOT_RUN'){
-  return {result:'NOT_RUN',validatedLocalHashes:0,failures:['No physical workstation/UE/Quest run has been recorded'],
+  return {result:failures.length?'BLOCKED':'NOT_RUN',validatedLocalHashes:0,
+   failures:[...failures,'No physical workstation/UE/Quest run has been recorded'],
    physicalQuestValidatedByTool:false,serverRenderingValidatedByTool:false,
    humanApprovalGranted:false};
  }
@@ -95,13 +96,14 @@ export async function checkSR1Evidence(manifest,{readArtifact}={}){
  }
  let validatedLocalHashes=0;
  if(typeof readArtifact==='function'&&entries.every(([,v])=>safeRelative(v))&&
-    entries.every(([,v])=>!entries.some(([,other])=>v!==other&&v===other))){
+    unique.size===entries.length){
   try{
    const hashBytes=await readArtifact(evidence.sha256Manifest);
    if(!hashBytes||hashBytes.length>1024*1024)throw Error('Bad hash manifest size');
    const hashes=JSON.parse(Buffer.from(hashBytes).toString('utf8'));
    if(hashes?.schemaVersion!==1||typeof hashes.files!=='object'||Array.isArray(hashes.files))
     throw Error('Invalid SHA-256 manifest schema');
+   const retained={};
    for(const [key,rel] of entries){
     if(key==='sha256Manifest')continue; // self-hash cannot authenticate itself
     const expected=hashes.files[rel];
@@ -114,9 +116,29 @@ export async function checkSR1Evidence(manifest,{readArtifact}={}){
      if((key==='leftEye'||key==='rightEye')&&
        !(Buffer.from(bytes).subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))))
       throw Error('Not an original PNG signature');
+     retained[key]=Buffer.from(bytes);
      validatedLocalHashes++;
     }catch(error){bad('Unverified '+key+': '+error.message)}
    }
+   // A checked byte hash does not prove the GPU/encoder or its source. The
+   // hardware gate must at least be internally consistent with the exact
+   // machine-preflight JSON and source revision, rather than arbitrary text.
+   if(retained.preflight){
+    try{
+     const pf=JSON.parse(retained.preflight.toString('utf8'));
+     if(pf.passed!==true||pf.sourceCommit?.toLowerCase()!==g.sourceCommit?.toLowerCase()||
+       pf.gpu?.name!==g.gpuModel||pf.gpu?.vramMiB!==g.vramMiB||
+       pf.gpu?.driver!==g.driver||pf.gpu?.vendor!=='NVIDIA'||
+       pf.gpu?.dedicatedHardwareRequired!==true||
+       pf.encoder?.name!=='h264_nvenc'||pf.encoder.actualEncodeSucceeded!==true||
+       pf.encoder.deviceIndex!==pf.gpu.index||
+       pf.lowQualityFallbackAvailable!==false||pf.softwareEncoderFallbackAvailable!==false)
+      throw Error('Dedicated GPU/NVENC preflight does not match the exact source and server manifest');
+    }catch(error){bad('Inconsistent preflight.json: '+error.message)}
+   }
+   if(retained.leftEye&&retained.rightEye&&
+     digest(retained.leftEye)===digest(retained.rightEye))
+    bad('Left/right evidence PNGs are identical; binocular perspective is not demonstrated');
    // This is a structural consistency check, not a source authenticity check.
    if(validatedLocalHashes!==REQUIRED.length)bad('Not all required evidence files matched hashes');
   }catch(error){bad('Cannot verify evidence hash manifest: '+error.message)}

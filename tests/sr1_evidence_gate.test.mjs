@@ -29,12 +29,21 @@ function fabricatedFixture(){
   comfortObservations:'MOCK fixture only: not a real Quest run'};
  const files={};
  for(const name of required){
-  const rel=name==='leftEye'?'left.png':name==='rightEye'?'right.png':name+'.txt';
+  const rel=name==='leftEye'?'left.png':name==='rightEye'?'right.png':
+   name==='preflight'?'preflight.json':name+'.txt';
   m.evidence[name]=rel;
   files[rel]=(name==='leftEye'||name==='rightEye')?
-   Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),Buffer.alloc(24,8)]):
+   Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),
+    Buffer.alloc(24,name==='leftEye'?8:9)]):
    Buffer.from('SIMULATED ONLY artifact '+name+' - not real hardware');
  }
+ files['preflight.json']=Buffer.from(JSON.stringify({
+  passed:true,sourceCommit:m.server.sourceCommit,
+  gpu:{index:0,name:m.server.gpuModel,vramMiB:m.server.vramMiB,
+   driver:m.server.driver,vendor:'NVIDIA',dedicatedHardwareRequired:true},
+  encoder:{name:'h264_nvenc',deviceIndex:0,actualEncodeSucceeded:true},
+  lowQualityFallbackAvailable:false,softwareEncoderFallbackAvailable:false
+ }));
  m.evidence.sha256Manifest='sha256-manifest.json';
  files['sha256-manifest.json']=Buffer.from(JSON.stringify({
   schemaVersion:1,files:Object.fromEntries(Object.entries(files).map(([p,b])=>[p,sha(b)]))
@@ -98,4 +107,38 @@ test('Unreal, stereo, transport, Quest witness and measured p95 remain separate 
   const r=await checkSR1Evidence(x.m,{readArtifact:x.reader});
   assert.equal(r.result,'BLOCKED');
  }
+});
+
+test('Mismatched exact-source/GPU/NVENC preflight cannot substantiate a manifest flag',async()=>{
+ for(const change of [
+  pf=>pf.sourceCommit='b'.repeat(40),
+  pf=>pf.gpu.vramMiB=2048,
+  pf=>pf.gpu.name='Some other GPU',
+  pf=>pf.encoder.actualEncodeSucceeded=false,
+  pf=>pf.encoder.name='libx264',
+  pf=>pf.gpu.dedicatedHardwareRequired=false
+ ]){
+  const f=fabricatedFixture(),pf=JSON.parse(f.files['preflight.json'].toString());
+  change(pf);f.files['preflight.json']=Buffer.from(JSON.stringify(pf));
+  const hash=JSON.parse(f.files['sha256-manifest.json'].toString());
+  hash.files['preflight.json']=sha(f.files['preflight.json']);
+  f.files['sha256-manifest.json']=Buffer.from(JSON.stringify(hash));
+  const r=await checkSR1Evidence(f.m,{readArtifact:f.reader});
+  assert.equal(r.result,'BLOCKED');
+  assert(r.failures.some(x=>x.includes('Inconsistent preflight')),r.failures.join(';'));
+ }
+});
+test('Byte-identical left and right PNGs cannot be accepted as binocular evidence',async()=>{
+ const f=fabricatedFixture();
+ f.files['right.png']=Buffer.from(f.files['left.png']);
+ const hm=JSON.parse(f.files['sha256-manifest.json'].toString());
+ hm.files['right.png']=sha(f.files['right.png']);
+ f.files['sha256-manifest.json']=Buffer.from(JSON.stringify(hm));
+ const r=await checkSR1Evidence(f.m,{readArtifact:f.reader});
+ assert.equal(r.result,'BLOCKED');
+ assert(r.failures.some(x=>x.includes('identical')),r.failures.join(';'));
+});
+test('Malformed NOT_RUN manifests never masquerade as valid templates',async()=>{
+ const r=await checkSR1Evidence({status:'NOT_RUN',schemaVersion:0});
+ assert.equal(r.result,'BLOCKED');
 });
