@@ -7,8 +7,15 @@ import json
 import os
 import traceback
 from pathlib import Path
+import sys
 
 import unreal
+
+helper_dir = os.environ.get('KLINIKLAB_SR1B_SCRIPT_DIR', '')
+if not helper_dir or not (Path(helper_dir) / 'sr1b_section_contract.py').is_file():
+    raise RuntimeError('Missing source-pinned SR1B tissue section contract')
+sys.path.insert(0, helper_dir)
+from sr1b_section_contract import MATERIALS, validate_sections
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -34,7 +41,8 @@ def spawn(actor_type, x, y, z, label, rot=None):
     actor.set_actor_label(label)
     return actor
 
-def import_native_obj(path, name, expected_triangles):
+def import_native_obj(path, name, expected_counts, expected_total):
+    """Preserve each tissue group when UE imports multi-material OBJ as N meshes."""
     task = unreal.AssetImportTask()
     for key, value in {
         'filename': str(path),
@@ -47,23 +55,80 @@ def import_native_obj(path, name, expected_triangles):
         task.set_editor_property(key, value)
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
     objects = list(task.get_objects())
-    meshes = [x for x in objects if isinstance(x, unreal.StaticMesh)]
-    require(len(meshes) == 1, 'Native OBJ import failed or did not produce exactly one StaticMesh: ' + name + ' (got ' + str([str(x) for x in objects]) + ')')
-    mesh = meshes[0]
-    require(mesh.get_num_lods() >= 1, 'Imported native mesh has no LOD: ' + name)
-    actual_triangles = int(mesh.get_num_triangles(0))
-    require(actual_triangles == int(expected_triangles),
-            'UE native OBJ triangle count differs from source mesher for ' + name +
-            ': exported=' + str(expected_triangles) + ', imported=' + str(actual_triangles))
-    return mesh
+    meshes = [obj for obj in objects if isinstance(obj, unreal.StaticMesh)]
+    rows = []
+    by_path = {}
+    for mesh in meshes:
+        require(mesh.get_num_lods() >= 1,
+                'Imported native mesh has no LOD: ' + mesh.get_name())
+        material_entries = list(mesh.get_editor_property('static_materials'))
+        row = {
+            'assetName': mesh.get_name(),
+            'assetPath': mesh.get_path_name(),
+            'triangleCount': int(mesh.get_num_triangles(0)),
+            'materialSlots': [str(slot.get_editor_property('material_slot_name'))
+                              for slot in material_entries],
+            'materialInterfaces': [
+                slot.get_editor_property('material_interface').get_name()
+                if slot.get_editor_property('material_interface') is not None
+                else None for slot in material_entries
+            ]
+        }
+        rows.append(row)
+        by_path[row['assetPath']] = mesh
+    # Source manifest contains all five tissue counts; require one native
+    # StaticMesh per nonempty group with exact material interface and LOD0 parity.
+    # Do not guess identity from import order or merge/recolor silently.
+    try:
+        sections = validate_sections(rows, expected_counts, expected_total)
+    except ValueError as exc:
+        raise RuntimeError(
+            'Unreal multi-material OBJ import contract failed for ' + name +
+            ': ' + str(exc) + '; observed=' + json.dumps(rows, sort_keys=True))
+    return {material: by_path[row['assetPath']] for material, row in sections.items()}, sections
 
-def mesh_actor(mesh, name, y_offset):
-    actor = spawn(unreal.StaticMeshActor, 0, y_offset, 74, name)
-    component = actor.get_component_by_class(unreal.StaticMeshComponent)
-    require(component is not None, 'No native StaticMeshComponent: ' + name)
-    component.set_static_mesh(mesh)
-    require(component.get_editor_property('static_mesh') is not None, 'Native mesh binding failed: ' + name)
-    return actor
+
+def mesh_actor(sections, name, y_offset):
+    """One logical labelled tooth, five native material-section mesh actors.
+
+    Root carries enamel StaticMesh; other material actors attach to this root,
+    all at the same source-derived world transform. No mesh is discarded.
+    """
+    require('enamel' in sections, 'Cannot anchor tooth: enamel group absent')
+    root = spawn(unreal.StaticMeshActor, 0, y_offset, 74, name)
+    children = {}
+    for material in MATERIALS:
+        if material not in sections:
+            continue
+        mesh = sections[material]
+        if material == 'enamel':
+            actor = root
+        else:
+            actor = spawn(unreal.StaticMeshActor, 0, y_offset, 74,
+                          name + '_SECTION_' + material.upper())
+        component = actor.get_component_by_class(unreal.StaticMeshComponent)
+        require(component is not None, 'No native StaticMeshComponent: ' + material)
+        component.set_static_mesh(mesh)
+        assigned = component.get_editor_property('static_mesh')
+        require(assigned is not None and
+                assigned.get_path_name() == mesh.get_path_name(),
+                'Wrong native StaticMesh component binding: ' + material)
+        if actor is not root:
+            attached = actor.attach_to_actor(
+                root, unreal.Name('None'), unreal.AttachmentRule.KEEP_WORLD,
+                unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
+                False)
+            require(bool(attached) and actor.get_attach_parent_actor() == root,
+                    'Could not attach source tissue section under tooth root: ' + material)
+        children[material] = actor
+    attached_labels = {x.get_actor_label() for x in root.get_attached_actors()}
+    expected_labels = {x.get_actor_label() for material, x in children.items()
+                       if material != 'enamel'}
+    require(attached_labels == expected_labels,
+            'Logical tooth attachment hierarchy incomplete')
+    require(len(children) == len(sections), 'Tooth sections lost after actor assembly')
+    return root, children
+
 
 def native_text(name, txt, x, y, z):
     actor = spawn(unreal.TextRenderActor, x, y, z, name, unreal.Rotator(0, 180, 0))
@@ -103,6 +168,8 @@ def main():
         'nativeLevelPackage': LEVEL,
         'importedMeshes': [],
         'importedTrianglesLOD0': {},
+        'importedMaterialSections': {},
+        'actorHierarchy': {},
         'actorLabels': [],
         'actualNativeViewportScreenshot': False,
         'verifiedProcessGPUEngineActivity': False,
@@ -123,20 +190,39 @@ def main():
                     'Original OBJ/MTL SHA-256 mismatch: ' + name)
         report['clinicalMeshManifestSHA256'] = hash_file(manifest_file)
         # These are verified source-generated meshes; no third-party Dundee assets.
-        before = import_native_obj(folder / MODEL_NAMES[0], 'KL_FDI16_Before',
-                                   manifest['sceneStates']['before']['triangles'])
-        after = import_native_obj(folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut',
-                                  manifest['sceneStates']['after']['triangles'])
-        report['importedMeshes'] = [str(before.get_path_name()), str(after.get_path_name())]
+        before, before_rows = import_native_obj(
+            folder / MODEL_NAMES[0], 'KL_FDI16_Before',
+            manifest['sceneStates']['before']['byMaterial'],
+            manifest['sceneStates']['before']['triangles'])
+        after, after_rows = import_native_obj(
+            folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut',
+            manifest['sceneStates']['after']['byMaterial'],
+            manifest['sceneStates']['after']['triangles'])
+        report['importedMaterialSections'] = {'before': before_rows,
+                                              'after': after_rows}
+        report['importedMeshes'] = [
+            r['assetPath'] for rows in (before_rows, after_rows) for r in rows.values()]
         report['importedTrianglesLOD0'] = {
-            'before': int(before.get_num_triangles(0)),
-            'after': int(after.get_num_triangles(0))
+            'before': sum(row['triangleCount'] for row in before_rows.values()),
+            'after': sum(row['triangleCount'] for row in after_rows.values())
         }
+        for state in ('before', 'after'):
+            require(report['importedTrianglesLOD0'][state] ==
+                    int(manifest['sceneStates'][state]['triangles']),
+                    'Aggregate native triangle mismatch for ' + state)
 
         level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
         require(level.new_level(LEVEL), 'Native Unreal Editor failed to create a new level')
-        a = mesh_actor(before, 'KL_FDI16_BEFORE_SOURCE_MESH', -120)
-        b = mesh_actor(after, 'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 120)
+        a, a_children = mesh_actor(before, 'KL_FDI16_BEFORE_SOURCE_MESH', -120)
+        b, b_children = mesh_actor(after, 'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 120)
+        report['actorHierarchy'] = {
+            'before': {'rootActor': a.get_actor_label(),
+                       'sections': {m: x.get_actor_label()
+                                    for m, x in a_children.items()}},
+            'after': {'rootActor': b.get_actor_label(),
+                      'sections': {m: x.get_actor_label()
+                                   for m, x in b_children.items()}}
+        }
         report['actorLabels'] += [str(a.get_actor_label()), str(b.get_actor_label())]
 
         # Minimal LOCAL teaching workspace with source-labelled native actors.
