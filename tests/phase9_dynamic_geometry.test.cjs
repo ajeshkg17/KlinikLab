@@ -40,9 +40,9 @@ test('Phase9 dynamic dental buffers keep five stable VBO identities across edits
  assert.equal(f.calls.uploads.length,5);
  assert(f.calls.uploads.every(x=>x.usage===f.gl.DYNAMIC_DRAW));
  const first=f.materials.map(m=>f.scene.geom['xrvol-'+m].buffer);
- assert.equal(f.scene.geom.xrvol_enamel.count,3);
- assert.equal(f.scene.geom.xrvol_cementum.count,3);
- assert.equal(f.scene.geom.xrvol_dentin.count,0);
+ assert.equal(f.scene.geom['xrvol-enamel'].count,3);
+ assert.equal(f.scene.geom['xrvol-cementum'].count,3);
+ assert.equal(f.scene.geom['xrvol-dentin'].count,0);
  assert.equal(f.practice.surfaceNormalMode,'implicit-field-gradient');
  assert.equal(f.practice.visibleTriangles,2);
  f.practice.triggers.add('right');
@@ -52,17 +52,17 @@ test('Phase9 dynamic dental buffers keep five stable VBO identities across edits
  assert.equal(f.calls.uploads.length,10,'all five materials uploaded with changed LOD');
  assert.equal(f.calls.deletes.length,0);
  for(let i=0;i<5;i++)assert.equal(f.scene.geom['xrvol-'+f.materials[i]].buffer,first[i]);
- assert.equal(f.scene.geom.xrvol_enamel.count,0,'removed material does not retain stale triangles');
- assert.equal(f.scene.geom.xrvol_cementum.count,0);
- assert.equal(f.scene.geom.xrvol_dentin.count,3);
- assert.equal(f.scene.geom.xrvol_dentin.cpu.length,24,'CPU vertex copy tracks latest geometry');
+ assert.equal(f.scene.geom['xrvol-enamel'].count,0,'removed material does not retain stale triangles');
+ assert.equal(f.scene.geom['xrvol-cementum'].count,0);
+ assert.equal(f.scene.geom['xrvol-dentin'].count,3);
+ assert.equal(f.scene.geom['xrvol-dentin'].cpu.length,24,'CPU vertex copy tracks latest geometry');
  assert.equal(f.practice.visibleTriangles,1);
 });
 test('Phase9 dynamic geometry rejects malformed data without corrupting existing GPU mesh',()=>{
  const f=fixture();f.run();
- const original=f.scene.geom.xrvol_enamel,uploads=f.calls.uploads.length;
- assert.throws(()=>f.scene.updateDynamicGeometry('xrvol_enamel',[1,2,3]),/interleaved/);
- assert.equal(f.calls.uploads.length,uploads);assert.equal(f.scene.geom.xrvol_enamel,original);
+ const original=f.scene.geom['xrvol-enamel'],uploads=f.calls.uploads.length;
+ assert.throws(()=>f.scene.updateDynamicGeometry('xrvol-enamel',[1,2,3]),/interleaved/);
+ assert.equal(f.calls.uploads.length,uploads);assert.equal(f.scene.geom['xrvol-enamel'],original);
  const staticMesh=f.scene.geometry([0,0,0,0,1,0,0,0]);
  assert.equal(f.calls.uploads.at(-1).usage,f.gl.STATIC_DRAW,'static geometry retains existing behavior');
  assert.equal(staticMesh.count,1);
