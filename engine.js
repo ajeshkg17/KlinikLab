@@ -411,7 +411,7 @@ class DentalScene {
     // A narrow tab near the top of the workspace, clear of the tool tray and ?.
     cat.launcher=this.box([-.94,2.15,-1.05],[.32,.12,.06],'#225e70',{key:'catalog:toggle'});
     cat.launcherLabel=this.label('TOOLS',[-.94,2.16,-1.01],[.29,.085,1],{font:39,bold:true,color:'#f4ffff'});
-    register(this.box([-.60,1.47,-1.03],[.88,1.30,.045],'#173b48'));
+    register(this.box([-.60,1.47,-1.03],[.92,1.30,.045],'#173b48'));
     register(this.label('INSTRUMENTS',[-.60,1.84,-.995],[.81,.10,1],{font:42,bold:true}));
     for(let i=0;i<catalogSpecs.length;i++){
       const y=1.71-i*.12;
@@ -424,12 +424,15 @@ class DentalScene {
       register(this.box([x,.87,-.985],[.27,.115,.05],'#1d7975',{key:'catalog:'+key}));
       register(this.label(label,[x,.875,-.95],[.25,.075,1],{font:47,bold:true}));
     }
-    // Compact raised foreground catalog: all three actions stay above the
-    // instrument tray and the entire panel stays inside binocular margins.
-    // Transform the panel + every label/control together, preserving hit-boxes.
+    // Phase 8 eye-frustum correction: the former raised, near-eye catalog
+    // exceeded stereo margins despite passing model-space tray clearance.
+    // Shrink the complete layout about its original center, move the panel
+    // into the central binocular field, and lower the upper edge. Apply the
+    // same affine transform to every glyph/button and its pick target.
+    // Keep z forward of the tray and leave the true per-eye assertion intact.
     for(const m of cat.panels){
-      m.p=[m.p[0]+.49,1.47+(m.p[1]-1.47)*.72+.48,m.p[2]+.57];
-      m.s=[m.s[0]*.90,m.s[1]*.78,m.s[2]];
+      m.p=[.10+(m.p[0]+.60)*.82,1.80+(m.p[1]-1.47)*.63,m.p[2]+.57];
+      m.s=[m.s[0]*.82,m.s[1]*.66,m.s[2]];
       m.model=null;
       for(const hit of this.pickables.filter(hit=>hit.mesh===m))hit.p=m.p.slice();
     }
