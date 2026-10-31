@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 const p=fs.readFileSync(new URL('../visual-qa/sr1-check-existing-unreal.ps1',import.meta.url),'utf8');
 test('Attach to existing UE 5.8 blank project rather than launch another editor',()=>{
  for(const token of ['UE58_RenderSmokeTest','Get-ChildItem -LiteralPath $projectRoot -File -Filter',
@@ -61,4 +63,23 @@ test('Native GPU source assessment correlates D3D12 and CSV GPU with a passed pr
   'nativeLogFreshForProcess'
  ])assert(p.includes(token),token);
  assert(!p.includes("($selectedText -match '(?i)NVIDIA"));
+});
+
+test('Collector is exactly one script with no duplicated/trailing content',()=>{
+ const marker='# Exit zero ONLY says files collected, not GPU validated or streamed.';
+ assert(p.trimEnd().endsWith(marker));
+ assert.equal(p.split(marker).length,2);
+ assert.equal(p.split('# Existing UE5.8 project: non-invasive workstation evidence collection.').length,2);
+ assert.equal((p.match(/\bparam\s*\(/g)||[]).length,1);
+});
+test('PowerShell syntax parses on runners where pwsh is installed',t=>{
+ const script=fileURLToPath(new URL('../visual-qa/sr1-check-existing-unreal.ps1',import.meta.url));
+ const quoted=script.replaceAll("'","''");
+ const command="$tokens=$null; $errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('"+
+  quoted+"', [ref]$tokens, [ref]$errors) | Out-Null; if($errors.Count -gt 0){ "+
+  "$errors | ForEach-Object { Write-Error $_.Message }; exit 2 }";
+ const run=spawnSync('pwsh',['-NoProfile','-NonInteractive','-Command',command],
+  {encoding:'utf8',timeout:20000});
+ if(run.error?.code==='ENOENT'){t.skip('PowerShell not installed on this runner');return}
+ assert.equal(run.status,0,run.stderr||run.stdout||String(run.error));
 });
