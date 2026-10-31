@@ -1,0 +1,19 @@
+{
+  "jobId": "pc-godot-fdi16-20261031-job01",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1c-fdi16-before-after",
+  "executedOn": "owner Windows PC (watcher runtime)",
+  "generatedAt": "2026-10-31T20:35:55.847Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "imageExists": false,
+  "sourceMeshVerified": false,
+  "gpuProcessCorroborated": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [
+    "sr1c-build-godot-local.ps1 exit 1"
+  ],
+  "blockers": [
+    "Native Windows evidence collector did not return its JSON report"
+  ]
+}
