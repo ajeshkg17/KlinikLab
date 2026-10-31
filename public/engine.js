@@ -336,12 +336,35 @@ class DentalScene {
     this.box([.09,.97,-.69],[1.16,.085,.75],'#e5ece6');this.cy([.09,.53,-.69],[.075,.85,.075],'#adc6c6');
     this.box([.09,1.02,-.69],[1.06,.014,.64],'#91b0b2');
     this.xrTableTools=[];
+    // Phase 9: retain the proven five tool anchors and grip/select targets, but
+    // avoid the former oversized cartoon shafts and heads. Dimensions are
+    // restrained visual teaching props, NOT calibrated clinical instruments.
     const tools=[['mirror',-.31,'#c4d9d6'],['probe',-.11,'#d6e2dd'],['suction',.09,'#89d5d1'],['excavator',.29,'#e1c69e'],['composite',.49,'#c5a8d7']];
-    for(const [name,x,color] of tools){const toolStart=this.meshes.length;this.cy([x,1.08,-.68],[.027,.35,.027],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19});this.cy([x,1.09,-.47],[.034,.09,.034],'#6b8591',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12});
-      if(name==='mirror'){this.cy([x,1.085,-.84],[.12,.025,.12],'#d9eff1',{key:`tool:${name}`,radius:.12});}
-      if(name==='probe'||name==='excavator'){this.cy([x+.03,1.09,-.89],[.012,.13,.012],'#cedce0',{rot:[0,0,.55],key:`tool:${name}`,radius:.08});}
-      if(name==='suction'){this.cy([x,1.11,-.90],[.064,.18,.064],'#76b1ad',{rot:[1.03,0,0],key:`tool:${name}`,radius:.1});}
-      if(name==='composite'){this.cy([x,1.09,-.89],[.068,.13,.068],'#e6d3ed',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1});}
+    for(const [name,x,color] of tools){
+      const toolStart=this.meshes.length;
+      // The first mesh remains the immutable grip-local anchor used by XR tools.
+      this.cy([x,1.08,-.68],[.014,.33,.014],'#a7bdc3',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.19,finish:.88,tag:'instrument-shaft'});
+      this.cy([x,1.09,-.47],[.023,.095,.023],color,{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.12,finish:.28,tag:'instrument-grip'});
+      this.cy([x,1.09,-.523],[.025,.023,.025],'#617e86',{rot:[Math.PI/2,0,0],finish:.56,tag:'instrument-ferrule'});
+      if(name==='mirror'){
+        this.cy([x,1.085,-.842],[.048,.013,.048],'#d3e3e4',{key:`tool:${name}`,radius:.12,finish:.96,tag:'working-tip'});
+        this.cy([x,1.085,-.818],[.010,.048,.010],'#a9c4c7',{rot:[Math.PI/2,0,0],finish:.85});
+      }
+      if(name==='probe'){
+        this.cy([x+.014,1.093,-.874],[.007,.096,.007],'#d1ddde',{rot:[Math.PI/2+.24,0,.26],key:`tool:${name}`,radius:.08,finish:.88,tag:'working-tip'});
+      }
+      if(name==='suction'){
+        this.cy([x,1.098,-.884],[.031,.117,.031],'#86b7b4',{rot:[Math.PI/2+.20,0,0],key:`tool:${name}`,radius:.1,finish:.45,tag:'working-tip'});
+        this.cy([x,1.111,-.947],[.020,.024,.020],'#b2d5d2',{rot:[Math.PI/2+.2,0,0],finish:.48});
+      }
+      if(name==='excavator'){
+        this.cy([x+.014,1.098,-.865],[.009,.103,.009],'#c8d1d0',{rot:[Math.PI/2+.16,0,.29],key:`tool:${name}`,radius:.08,finish:.8});
+        this.sphere([x+.030,1.106,-.925],[.027,.012,.037],'#d5d0bc',{finish:.7,tag:'working-tip'});
+      }
+      if(name==='composite'){
+        this.cy([x,1.094,-.878],[.024,.105,.024],'#b9adc1',{rot:[Math.PI/2,0,0],key:`tool:${name}`,radius:.1,finish:.42});
+        this.box([x+.014,1.10,-.94],[.035,.008,.041],'#d4c5d1',{rot:[0,-.18,-.1],finish:.85,tag:'working-tip'});
+      }
       this.xrTableTools.push({name,meshes:this.meshes.slice(toolStart),owner:null,home:null,hover:null});
       this.label(name.toUpperCase(),[x,.985,-.28],[.24,.085,1],{font:34,color:'#47707b',width:400,height:110,tag:'tool-label'});
     }
