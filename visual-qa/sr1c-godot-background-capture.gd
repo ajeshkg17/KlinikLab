@@ -87,7 +87,22 @@ func _capture_once() -> void:
 	if before_root == null or after_root == null:
 		_fail("Expected original BEFORE and AFTER source geometry nodes missing")
 		return
-	var midpoint: Vector3 = (before_root.global_position + after_root.global_position) * 0.5
+	var lo := Vector3(INF, INF, INF)
+	var hi := Vector3(-INF, -INF, -INF)
+	for tooth in [before_root, after_root]:
+		for part in tooth.get_children():
+			if part is MeshInstance3D:
+				var box: AABB = part.get_aabb()
+				for xx in [box.position.x, box.end.x]:
+					for yy in [box.position.y, box.end.y]:
+						for zz in [box.position.z, box.end.z]:
+							var v: Vector3 = part.to_global(Vector3(xx, yy, zz))
+							lo = lo.min(v)
+							hi = hi.max(v)
+	if not lo.is_finite() or not hi.is_finite():
+		_fail("Native bounds invalid; cannot frame orbit")
+		return
+	var midpoint: Vector3 = (lo + hi) * 0.5
 	# Original f4d4 source GUI footer still mentions the deprecated F12 mode.
 	# Change only this display text at runtime; original clinical OBJ stays SHA-pinned.
 	var overlay: CanvasLayer = scene.get_node_or_null("KL_FDI16_PlainTextOverlay")
