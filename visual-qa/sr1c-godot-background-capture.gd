@@ -88,6 +88,13 @@ func _capture_once() -> void:
 		_fail("Expected original BEFORE and AFTER source geometry nodes missing")
 		return
 	var midpoint: Vector3 = (before_root.global_position + after_root.global_position) * 0.5
+	# Original f4d4 source GUI footer still mentions the deprecated F12 mode.
+	# Change only this display text at runtime; original clinical OBJ stays SHA-pinned.
+	var overlay: CanvasLayer = scene.get_node_or_null("KL_FDI16_PlainTextOverlay")
+	if overlay != null:
+		for child in overlay.get_children():
+			if child is Label and child.text.contains("F12 capture"):
+				child.text = child.text.replace("F12 capture", "AUTOMATED PRIVATE-DESKTOP ORBIT")
 	var start_cam: Vector3 = camera.global_position
 	var radius: float = maxf(8.0, start_cam.distance_to(midpoint))
 	var initial_height: float = start_cam.y - midpoint.y
