@@ -4,7 +4,8 @@
 param(
  [Parameter(Mandatory=$true)][string]$EvidenceDir,
  [Parameter(Mandatory=$true)][string]$ExpectedSha,
- [Parameter(Mandatory=$true)][string]$GodotExe
+ [Parameter(Mandatory=$true)][string]$GodotExe,
+ [ValidateSet('fdi16','clinic-overview')][string]$SceneMode='fdi16'
 )
 $ErrorActionPreference='Stop'
 $run=[IO.Path]::GetFullPath($EvidenceDir)
@@ -28,9 +29,24 @@ if(-not(Test-Path -LiteralPath $script) -or -not(Test-Path -LiteralPath $launche
 $projectScript=Join-Path $project 'sr1c-godot-background-capture.gd'
 if(Test-Path -LiteralPath $projectScript){throw 'Refusing to overwrite preexisting project background script'}
 Copy-Item -LiteralPath $script -Destination $projectScript -ErrorAction Stop
+# Only the allowlisted source-anchored clinic shell may be added for job06.
+# Original f4d4 FDI16 OBJ, original five-tissue report and source hashes are unchanged.
+if($SceneMode -eq 'clinic-overview'){
+ $clinicScript=Join-Path $PSScriptRoot 'sr1c-godot-clinic-overview.gd'
+ if(-not(Test-Path -LiteralPath $clinicScript)){throw 'Approved native clinic workspace source absent'}
+ $dest=Join-Path $project 'sr1c-godot-clinic-overview.gd'
+ if(Test-Path -LiteralPath $dest){throw 'Refusing to overwrite existing clinic scene'}
+ Copy-Item -LiteralPath $clinicScript -Destination $dest -ErrorAction Stop
+}
+$sceneModeFile=Join-Path $project 'source\scene-mode.txt'
+if(Test-Path -LiteralPath $sceneModeFile){throw 'Refusing to overwrite pinned native scene-mode file'}
+[IO.File]::WriteAllText($sceneModeFile,$SceneMode+[Environment]::NewLine,
+ (New-Object System.Text.UTF8Encoding($false)))
 $report=[ordered]@{
  schemaVersion=2
  status='EVIDENCE_INCOMPLETE'
+ nativeSceneMode=$SceneMode
+ fullKlinikLabApplicationMigrated=$false
  sourceGitSHA=$ExpectedSha
  godotExe=[IO.Path]::GetFullPath($GodotExe)
  godotProject=(Join-Path $project 'project.godot')
@@ -199,6 +215,12 @@ try{
  if(Test-Path -LiteralPath $background){
   $capture=Get-Content -LiteralPath $background -Raw|ConvertFrom-Json
   $report.backgroundCaptureStatus=[string]$capture.status
+  if([string]$capture.nativeSceneMode -ne $SceneMode){
+   Block 'Native Godot captured scene mode does not match the approved PC job'
+  }
+  if($SceneMode -eq 'clinic-overview' -and [int]$capture.nativeClinicWorkspaceObjectCount -lt 25){
+   Block 'Native KlinikLab clinic workspace not populated with expected objects'
+  }
   $report.renderingMethod=[string]$capture.renderingMethod
   $report.renderingDriver=[string]$capture.renderingDriver
   $report.videoAdapterName=[string]$capture.videoAdapterName
