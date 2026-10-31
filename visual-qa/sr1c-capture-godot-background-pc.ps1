@@ -5,7 +5,7 @@ param(
  [Parameter(Mandatory=$true)][string]$EvidenceDir,
  [Parameter(Mandatory=$true)][string]$ExpectedSha,
  [Parameter(Mandatory=$true)][string]$GodotExe,
- [ValidateSet('fdi16','clinic-overview')][string]$SceneMode='fdi16'
+ [ValidateSet('fdi16','clinic-overview','clinic-cases')][string]$SceneMode='fdi16'
 )
 $ErrorActionPreference='Stop'
 $run=[IO.Path]::GetFullPath($EvidenceDir)
@@ -31,12 +31,22 @@ if(Test-Path -LiteralPath $projectScript){throw 'Refusing to overwrite preexisti
 Copy-Item -LiteralPath $script -Destination $projectScript -ErrorAction Stop
 # Only the allowlisted source-anchored clinic shell may be added for job06.
 # Original f4d4 FDI16 OBJ, original five-tissue report and source hashes are unchanged.
-if($SceneMode -eq 'clinic-overview'){
+if($SceneMode -in @('clinic-overview','clinic-cases')){
  $clinicScript=Join-Path $PSScriptRoot 'sr1c-godot-clinic-overview.gd'
  if(-not(Test-Path -LiteralPath $clinicScript)){throw 'Approved native clinic workspace source absent'}
  $dest=Join-Path $project 'sr1c-godot-clinic-overview.gd'
  if(Test-Path -LiteralPath $dest){throw 'Refusing to overwrite existing clinic scene'}
  Copy-Item -LiteralPath $clinicScript -Destination $dest -ErrorAction Stop
+}
+if($SceneMode -eq 'clinic-cases'){
+ $workflowScript=Join-Path $PSScriptRoot 'sr1d-godot-case-workflow.gd'
+ $data=Join-Path $project 'source\kliniklab-native-cases.json'
+ if(-not(Test-Path -LiteralPath $workflowScript) -or -not(Test-Path -LiteralPath $data)){
+  throw 'Source-pinned production cases or allowlisted native Godot workflow unavailable'
+ }
+ $target=Join-Path $project 'sr1d-godot-case-workflow.gd'
+ if(Test-Path -LiteralPath $target){throw 'Refusing existing Godot case workflow script'}
+ Copy-Item -LiteralPath $workflowScript -Destination $target -ErrorAction Stop
 }
 $sceneModeFile=Join-Path $project 'source\scene-mode.txt'
 if(Test-Path -LiteralPath $sceneModeFile){throw 'Refusing to overwrite pinned native scene-mode file'}
@@ -46,6 +56,7 @@ $report=[ordered]@{
  schemaVersion=2
  status='EVIDENCE_INCOMPLETE'
  nativeSceneMode=$SceneMode
+ nativeCaseWorkflowVerified=$false
  fullKlinikLabApplicationMigrated=$false
  sourceGitSHA=$ExpectedSha
  godotExe=[IO.Path]::GetFullPath($GodotExe)
@@ -215,6 +226,26 @@ try{
  if(Test-Path -LiteralPath $background){
   $capture=Get-Content -LiteralPath $background -Raw|ConvertFrom-Json
   $report.backgroundCaptureStatus=[string]$capture.status
+  if($SceneMode -eq 'clinic-cases'){
+   $workflowPath=Join-Path $captures 'godot-native-workflow-state.json'
+   if(-not(Test-Path -LiteralPath $workflowPath)){
+    Block 'No native clinical workflow state report after actual render'
+   }else{
+    try{
+     $w=Get-Content -LiteralPath $workflowPath -Raw|ConvertFrom-Json -ErrorAction Stop
+     $report.nativeCaseWorkflowVerified=($w.valid -eq $true -and $w.caseCount -eq 6 -and
+      $w.stationCount -eq 7 -and $w.selectedCaseId -eq 'endo' -and
+      $w.selectedFDI -eq '36' -and $w.selectedStationId -eq 'practical' -and
+      $w.originalFDI16GeometryAvailable -eq $false -and
+      $w.fullKlinikLabApplicationMigrated -eq $false -and
+      $w.originalCaseSpecificSimulationImplemented -eq $false -and
+      @($w.caseStationEvents|Where-Object{$_.type -eq 'case'}).Count -ge 2)
+     if(-not $report.nativeCaseWorkflowVerified){
+      Block 'Native case/station transitions not verified; never substitute FDI16 as FDI36'
+     }
+    }catch{Block ('Native workflow report invalid: '+$_.Exception.Message)}
+   }
+  }
   if([string]$capture.nativeSceneMode -ne $SceneMode){
    Block 'Native Godot captured scene mode does not match the approved PC job'
   }
@@ -293,6 +324,7 @@ finally {
  if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
   $report.nativeImagePresent -and $report.nativeAngledImagePresent -and
   $report.godotProcessGPUCorroborated -and $report.gpuAdapterLuidMatchedToNvidia -and
+  ($SceneMode -ne 'clinic-cases' -or $report.nativeCaseWorkflowVerified) -and
   $report.blockers.Count -eq 0){
   $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
  }
