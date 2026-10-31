@@ -1,4 +1,4 @@
-# KlininkLab SR1B native local-only clinical app mesh proof.
+# KlinikLab SR1B native local-only clinical app mesh proof.
 # Build  -> exports *production* FDI16 geometry, imports into DISTINCT UE5.8 project.
 # Open   -> starts interactive clinical UE project for original HighResShot.
 # Collect-> copies native PNG/log and samples exact UnrealEditor PID GPU 3D counters.
@@ -38,6 +38,7 @@ function Assert-Run(){
 }
 if($Mode -eq 'Build'){
  if(Test-Path -LiteralPath $out){throw "Refusing to overwrite existing native clinical evidence: $out"}
+ New-Item -ItemType Directory -Path (Split-Path $out -Parent) -Force -ErrorAction Stop | Out-Null
  New-Item -ItemType Directory -Path $out -ErrorAction Stop | Out-Null
  $projectDir=Join-Path $out 'Project'
  New-Item -ItemType Directory -Path $projectDir | Out-Null
