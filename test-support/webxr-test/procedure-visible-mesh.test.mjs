@@ -73,3 +73,21 @@ test('FDI16 cut persistence across specimen switch does not mutate FDI36 control
  assert(one.field(...center,false)>0);
  assert(other.bur.length===0,'different selected FDI has independent tooth state');
 });
+
+test('IWER procedure observer looks down at the FDI16 occlusal plane and restores the original XR headset',()=>{
+ const eye=[.28,2.07,-.35],look=[.28,1.62,-1.03];
+ const pitch=Math.atan2(look[1]-eye[1],eye[2]-look[2]);
+ const forward=[0,Math.sin(pitch),-Math.cos(pitch)];
+ assert(forward[1]<-.4&&forward[2]<-.7,'observer must see down onto occlusal crown');
+ const t=(look[2]-eye[2])/forward[2];
+ const viewed=[eye[0],eye[1]+forward[1]*t,eye[2]+forward[2]*t];
+ assert(Math.abs(viewed[1]-look[1])<1e-6,'camera centered on top-facing tooth rather than its underside');
+ for(const required of [
+  'device.position.set(...eye)',
+  'device.quaternion.set(Math.sin(pitch/2),0,0,Math.cos(pitch/2))',
+  'window.__procedureOriginalHeadset',
+  'device.position.set(...headset.position)',
+  'device.quaternion.set(...headset.quaternion)',
+  'window.__procedureEvidenceHeadset'
+ ])assert(procedural.includes(required),'Missing tracked IWER viewer contract: '+required);
+});
