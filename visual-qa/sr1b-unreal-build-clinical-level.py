@@ -674,10 +674,10 @@ def main():
         level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
         require(level.new_level(LEVEL), 'Native Unreal Editor failed to create a new level')
         a, before_proc = native_procedural_tooth_actor(
-            'KL_FDI16_BEFORE_SOURCE_MESH', -120, before_mat, before_source,
+            'KL_FDI16_BEFORE_SOURCE_MESH', -65, before_mat, before_source,
             manifest['sceneStates']['before']['byMaterial'])
         b, after_proc = native_procedural_tooth_actor(
-            'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 120, after_mat, after_source,
+            'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 65, after_mat, after_source,
             manifest['sceneStates']['after']['byMaterial'])
         report['nativeProceduralSections'] = {
             'before':before_proc,'after':after_proc}
@@ -699,10 +699,10 @@ def main():
         report['actorLabels'] += [str(a.get_actor_label()), str(b.get_actor_label())]
 
         # Minimal LOCAL teaching workspace with source-labelled native actors.
-        native_text('KL_FDI16_CASE_ID', 'KlinikLab  /  FDI 16  /  MOD COMPOSITE', 0, 0, 165)
-        native_text('KL_BEFORE_TITLE', 'BEFORE', 0, -120, 125)
-        native_text('KL_AFTER_TITLE', 'AFTER  /  SIMULATED CUT', 0, 120, 125)
-        native_text('KL_EDUCATION_NOTICE', 'EDUCATIONAL GEOMETRY  |  NOT CLINICALLY CALIBRATED', 0, 0, 7)
+        native_text('KL_FDI16_CASE_ID', 'KlinikLab  /  FDI 16  /  MOD COMPOSITE', 0, 0, 143)
+        native_text('KL_BEFORE_TITLE', 'BEFORE', 0, -65, 112)
+        native_text('KL_AFTER_TITLE', 'AFTER  /  SIMULATED CUT', 0, 65, 112)
+        native_text('KL_EDUCATION_NOTICE', 'EDUCATIONAL GEOMETRY  |  NOT CLINICALLY CALIBRATED', 0, 0, 22)
         report['actorLabels'] += ['KL_FDI16_CASE_ID', 'KL_BEFORE_TITLE', 'KL_AFTER_TITLE', 'KL_EDUCATION_NOTICE']
 
         point_light('KL_CHAIR_LIGHT_LEFT', (-80, -170, 270), 65000)
@@ -711,8 +711,8 @@ def main():
                          unreal.Rotator(-45, 22, 0))
         report['actorLabels'].append(daylight.get_actor_label())
 
-        camera = spawn(unreal.CameraActor, -470, 0, 185, 'KL_NATIVE_CAMERA_FDI16_COMPARISON',
-                       unreal.Rotator(-12, 0, 0))
+        camera = spawn(unreal.CameraActor, -170, 0, 104, 'KL_NATIVE_CAMERA_FDI16_COMPARISON',
+                       unreal.Rotator(-9, 0, 0))
         report['actorLabels'].append(camera.get_actor_label())
         require(level.save_current_level(), 'Failed to save native UE clinical level')
         require(unreal.EditorAssetLibrary.does_asset_exist(LEVEL),
