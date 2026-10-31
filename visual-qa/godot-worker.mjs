@@ -108,7 +108,18 @@ function verifyChildHashModule(){
 function powershell(script,args,timeoutMs=180000){
  return new Promise((resolve,reject)=>{
   const p=spawn('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','Bypass','-File',script,...args],
-   {shell:false,stdio:'inherit',env:cleanWindowsPowerShellEnv(process.env)});
+   {shell:false,stdio:['ignore','pipe','pipe'],env:cleanWindowsPowerShellEnv(process.env)});
+  // Preserve the real child failure text in machine-readable job results.
+  // This avoids job01's generic 'exit 1' with no published module error.
+  let childStdout='',childStderr='';
+  p.stdout.on('data',bytes=>{
+   process.stdout.write(bytes);
+   childStdout=(childStdout+String(bytes)).slice(-8000);
+  });
+  p.stderr.on('data',bytes=>{
+   process.stderr.write(bytes);
+   childStderr=(childStderr+String(bytes)).slice(-8000);
+  });
   let finished=false;
   const timer=setTimeout(()=>{
    if(finished)return;
@@ -122,7 +133,10 @@ function powershell(script,args,timeoutMs=180000){
    if(err)reject(err);else resolve(0);
   };
   p.on('error',finish);
-  p.on('exit',code=>finish(code===0?null:Error(path.basename(script)+' exit '+code)));
+  p.on('exit',code=>finish(code===0?null:Error(
+   path.basename(script)+' exit '+code+
+   '; child stderr: '+childStderr.slice(-1800)+
+   '; child stdout: '+childStdout.slice(-900))));
  });
 }
 async function execute(j){
