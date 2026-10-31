@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
 const capture=read('../visual-qa/sr1c-godot-background-capture.gd');
 const pc=read('../visual-qa/sr1c-capture-godot-background-pc.ps1');
+const pdhFilter=read('../visual-qa/sr1c-pdh-filter.ps1');
 const dxgi=read('../visual-qa/sr1c-dxgi-luid.cs');
 const worker=read('../visual-qa/godot-worker.mjs');
 const desktop=read('../visual-qa/sr1c-private-desktop.ps1');
@@ -32,8 +33,8 @@ test('Godot native scene performs 42-second active camera orbit and ORIGINAL ind
 test('ONE persistent Windows PDH query at one-second intervals counts distinct sample periods and not raw engine rows',()=>{
  assert.equal((pc.match(/Get-Counter -Counter/g)||[]).length,1);
  assert(pc.includes("-SampleInterval 1 -MaxSamples 34"));
- assert(pc.includes("collectionIndex=$period"));
- assert(pc.includes("$stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')"));
+ assert(pdhFilter.includes("collectionIndex=$index"));
+ assert(pdhFilter.includes(".ToUniversalTime().ToString('o')"));
  assert(pc.includes("Select-Object -ExpandProperty utc -Unique"));
  assert(pc.includes('process3DPositiveDistinctPeriods'));
  assert(pc.includes('-ErrorAction Continue -ErrorVariable +pdhPowerShellErrors'));
