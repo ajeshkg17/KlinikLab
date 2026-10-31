@@ -72,7 +72,7 @@ function Start-KLPrivateDesktopGodot {
  if($GodotExecutable.Contains('"') -or $ProjectDir.Contains('"') -or $LogPath.Contains('"')){
   throw 'Unsupported Windows path contains quote'
  }
- $desktopName='KL_SR1C_'+[Guid]::NewGuid().ToString('N')
+ $desktopName='KL_SR1C_'+[Guid]::NewGuid().ToString('N').Substring(0,12)
  # Diagnose the assigned process window station. Do NOT change it or switch desktops.
  $station=[KlinikLab.PrivateDesktop]::GetProcessWindowStation()
  if($station -eq [IntPtr]::Zero){
@@ -90,16 +90,21 @@ function Start-KLPrivateDesktopGodot {
  if($stationName.ToString() -ne 'WinSta0'){
   throw "Current process window station is '$($stationName.ToString())', not WinSta0; no foreground fallback"
  }
- # Request only CREATEWINDOW | READOBJECTS | WRITEOBJECTS | ENUMERATE,
- # rather than DESKTOP_ALL_ACCESS=0x000F01FF. Some owner Windows sessions
- # return ERROR_INVALID_PARAMETER (87) for the oversized access mask.
- # CreateDesktopW requires CREATEWINDOW; no SWITCHDESKTOP requested/used.
+ # Windows CI reproduced Win32 87 with the original string-marshaled
+ # CreateDesktopW P/Invoke, but SUCCESS with the raw UTF-16 LPCWSTR pointer.
+ # Explicit native marshaling is the evidenced fix, not silently relaxing the gate.
+ # DESKTOP_CREATEWINDOW | READOBJECTS | WRITEOBJECTS | ENUMERATE = 0xC3.
  $desktopAccess=[uint32]0x000000C3
- $desktop=[KlinikLab.PrivateDesktop]::CreateDesktop($desktopName,$null,[IntPtr]::Zero,
-  [uint32]0,$desktopAccess,[IntPtr]::Zero)
- if($desktop -eq [IntPtr]::Zero){
-  $last=[Runtime.InteropServices.Marshal]::GetLastWin32Error()
-  throw "CreateDesktopW failed Win32=$last; station=$($stationName.ToString()); mask=0x$($desktopAccess.ToString('X8')); desktop=$desktopName; no fallback to foreground"
+ $desktopNamePointer=[Runtime.InteropServices.Marshal]::StringToHGlobalUni($desktopName)
+ try{
+  $desktop=[KlinikLab.PrivateDesktop]::CreateDesktopRaw($desktopNamePointer,
+   [IntPtr]::Zero,[IntPtr]::Zero,[uint32]0,$desktopAccess,[IntPtr]::Zero)
+  if($desktop -eq [IntPtr]::Zero){
+   $last=[Runtime.InteropServices.Marshal]::GetLastWin32Error()
+   throw "CreateDesktopW raw UTF16 failed Win32=$last; station=$($stationName.ToString()); mask=0x$($desktopAccess.ToString('X8')); desktop=$desktopName; no foreground fallback"
+  }
+ }finally{
+  [Runtime.InteropServices.Marshal]::FreeHGlobal($desktopNamePointer)
  }
  $start=New-Object KlinikLab.PrivateDesktop+STARTUPINFO
  $start.cb=[Runtime.InteropServices.Marshal]::SizeOf([type][KlinikLab.PrivateDesktop+STARTUPINFO])
