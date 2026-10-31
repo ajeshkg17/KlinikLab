@@ -83,3 +83,19 @@ test('PowerShell syntax parses on runners where pwsh is installed',t=>{
  if(run.error?.code==='ENOENT'){t.skip('PowerShell not installed on this runner');return}
  assert.equal(run.status,0,run.stderr||run.stdout||String(run.error));
 });
+
+test('Collector has exactly one coherent PowerShell entrypoint without trailing duplicated content',()=>{
+ assert.equal((p.match(/^\s*param\(/gm)||[]).length,1);
+ assert.equal((p.match(/# Match any real interactive/g)||[]).length,1);
+ assert.equal((p.match(/# Exit zero ONLY says files collected/g)||[]).length,1);
+ assert(p.trim().endsWith('# Exit zero ONLY says files collected, not GPU validated or streamed.'));
+ assert(p.split('\n').length<350);
+});
+test('GUID/version checks require live engine provenance and source-pinned GPU evidence',()=>{
+ assert(p.includes("$association -match '^5\\.8(?:\\.\\d+)?$'"));
+ assert(p.includes("$isGuid=$association -match '^(?:\\{"));
+ assert(p.includes('projectEngineAssociationRegistryPath'));
+ assert(p.includes('UE 5.8 EngineAssociation could not be correlated'));
+ assert(p.includes('projectEngineAssociationVerified=$report.projectProcessMatched'));
+ assert(p.includes('nativeLogFreshForProcess -and $report.projectProcessMatched'));
+});
