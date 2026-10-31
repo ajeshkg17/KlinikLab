@@ -89,6 +89,10 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   assert.equal(record.file,filename);
   assert(record.eyes===2&&record.captureFrame>0,'fresh binocular XR framebuffer required');
   if(i===1||i===3||i===4||i===5){
+    assert.equal(record.eyeProcedureTarget?.length,2,'Missing per-eye site projection');
+    assert(record.eyeProcedureTarget.every(t=>t?.projection?.inFrustum&&
+       Math.abs(t.projection.x)<.86&&Math.abs(t.projection.y)<.86),
+      'Preparation site outside XR eye margins: '+JSON.stringify(record.eyeProcedureTarget));
     assert.equal(record.eyeFdiVisiblePixels?.length,2,'Missing tooth raster measurements');
     assert(record.eyeFdiVisiblePixels.every(v=>v>120),
       'FDI16 tooth not actually drawn in both XR eyes: '+JSON.stringify(record.eyeFdiVisiblePixels));
@@ -122,6 +126,7 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   // rasterizable size for this *educational* capture, never a clinical bur.
   window.__procedureOriginalBurRadius=lab.burRadius;
   lab.burRadius=.20;
+  window.__kliniklabProcedureTargetModel=[.08,lab.solid.height(.08,-.08),-.08];
   s.xrFdiEvidence=false;
  });
  await take(0);
@@ -374,6 +379,7 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
       if(Number.isFinite(window.__procedureOriginalBurRadius))
         lab.burRadius=window.__procedureOriginalBurRadius;
       delete window.__procedureOriginalBurRadius;
+      delete window.__kliniklabProcedureTargetModel;
       lab.persistTooth?.();lab.rebuild();
       s.xrPrep?.triggers?.clear();s.xrPrep?.syncCase();s.xrPrep?.updateMesh();
       s.xrFdiEvidence=false;

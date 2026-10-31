@@ -235,8 +235,14 @@ try{
                [-1,-1],[1,-1],[1,1],[-1,1]
              ].map(([sx,sy])=>project([mesh.p[0]+sx*mesh.s[0]/2,mesh.p[1]+sy*mesh.s[1]/2,mesh.p[2]+mesh.s[2]/2])):[]
            })):[];
+           // Actual cut/site projection in the submitted *per-eye* matrices:
+           // only diagnostic metadata; original XR eye pixels remain intact.
+           const cut=this.xrPrep?.lab?.solid?.bur?.at(-1);
+           const localTarget=cut?.p||window.__kliniklabProcedureTargetModel||null;
+           const eyeProcedureTarget=localTarget&&this.xrPrep?
+             {model:localTarget.slice(),projection:project(this.xrPrep.modelToWorld(localTarget))}:null;
            if(!this.__xrEyeParts)this.__xrEyeParts=[];
-           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels,eyeClinical,catalogSurfaces});
+           this.__xrEyeParts.push({canvas,tools,anatomyBounds,anatomyPixels,rasterBounds,fdiVisiblePixels,eyeClinical,catalogSurfaces,eyeProcedureTarget});
            if(this.__xrEyeParts.length>=2){
              const sides=this.__xrEyeParts.slice(0,2);
              const combined=document.createElement('canvas');
@@ -247,7 +253,7 @@ try{
              out.drawImage(sides[1].canvas,sides[0].canvas.width,0);
              this.__xrEyeCapturePending=false;this.__xrEyeParts=[];
              this.__xrEyeCapture={dataURL:combined.toDataURL('image/png'),frame:this.xrVisualDiagnostics?.frames||0,
-               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),eyeClinical:sides.map(v=>v.eyeClinical),eyeCatalog:sides.map(v=>v.catalogSurfaces),
+               width:combined.width,height:combined.height,eyes:2,eyeTools:sides.map(v=>v.tools),eyeAnatomy:sides.map(v=>v.anatomyBounds),eyeAnatomyPixels:sides.map(v=>v.anatomyPixels),eyeAnatomyRaster:sides.map(v=>v.rasterBounds),eyeFdiVisiblePixels:sides.map(v=>v.fdiVisiblePixels),eyeClinical:sides.map(v=>v.eyeClinical),eyeCatalog:sides.map(v=>v.catalogSurfaces),eyeProcedureTarget:sides.map(v=>v.eyeProcedureTarget),
                source:'two fresh WebXR eye framebuffers read through WebGL'};
            }
          }catch(e){this.__xrEyeCapturePending=false;this.__xrEyeParts=[];this.__xrEyeCapture={
@@ -274,7 +280,7 @@ try{
    if(!duplicateOf)captureHashes.set(sha256,filename);
    const destination=auxiliary?(result.phase7Captures??=[]):result.captureManifest;
    if(!auxiliary){result.captureManifest.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeTools:screenshot.eyeTools,eyeAnatomy:screenshot.eyeAnatomy,eyeAnatomyPixels:screenshot.eyeAnatomyPixels,eyeAnatomyRaster:screenshot.eyeAnatomyRaster,sha256,duplicateOf,testedRevision:process.env.GITHUB_SHA||process.env.KLINIKLAB_BUILD_SHA||'revision not provided',origin});}
-   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeClinical:screenshot.eyeClinical,eyeCatalog:screenshot.eyeCatalog,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
+   else destination.push({file:filename,label,kind:'Meta IWER Quest 2 emulator, WebGL XR eye framebuffer',captureFrame:screenshot.frame,width:screenshot.width,height:screenshot.height,eyes:screenshot.eyes,eyeClinical:screenshot.eyeClinical,eyeCatalog:screenshot.eyeCatalog,eyeFdiVisiblePixels:screenshot.eyeFdiVisiblePixels,eyeProcedureTarget:screenshot.eyeProcedureTarget,sha256,duplicateOf,testedRevision:process.env.KLINIKLAB_BUILD_SHA||'revision not provided'});
  };
  await page.evaluate(()=>{window.__xrTestDevice.controllers.left.connected=false;window.__xrTestDevice.controllers.right.connected=false});
  await page.waitForFunction(()=>window.__xrTestDevice.activeSession.inputSources.length===0);
