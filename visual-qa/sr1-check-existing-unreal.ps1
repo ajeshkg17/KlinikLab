@@ -88,8 +88,8 @@ try {
  $p=Get-Content -LiteralPath $project.FullName -Raw | ConvertFrom-Json
  $association=[string]$p.EngineAssociation
  $report.projectEngineAssociation=$association
- $isGuid=$association -match '^(?:\{[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}|[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})
- if($association -match '^5\.8(?:\.\d+)?){
+ $isGuid=$association -match '^(?:\{[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\}|[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})$'
+ if($association -match '^5\.8(?:\.\d+)?$'){
   $report.projectEngineAssociationKind='UE58_VERSION'
  }elseif($isGuid){
   $report.projectEngineAssociationKind='REGISTERED_GUID'
