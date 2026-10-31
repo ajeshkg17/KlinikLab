@@ -62,7 +62,8 @@ test('actual Godot child launcher uses cleaned environment in BOTH hash prefligh
  const s=fs.readFileSync(new URL('../visual-qa/godot-worker.mjs',import.meta.url),'utf8');
  assert(s.includes("import {cleanWindowsPowerShellEnv}"));
  assert(s.includes("const env=cleanWindowsPowerShellEnv({...process.env,KLINIKLAB_PS_PREFLIGHT_FILE:target})"));
- assert(s.includes("stdio:'inherit',env:cleanWindowsPowerShellEnv(process.env)"));
+ assert(s.includes("stdio:['ignore','pipe','pipe'],env:cleanWindowsPowerShellEnv(process.env)"));
+ assert(s.includes("child stderr: '+childStderr.slice(-1800)"), 'actual child error retained in machine-readable job result');
  assert(s.includes('const childPowerShell=verifyChildHashModule()'));
  assert(s.includes("'-NoProfile','-STA','-ExecutionPolicy','Bypass','-File'"));
  assert(s.includes('Get-FileHash -LiteralPath $env:KLINIKLAB_PS_PREFLIGHT_FILE'));
