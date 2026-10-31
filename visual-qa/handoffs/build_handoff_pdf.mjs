@@ -65,17 +65,17 @@ export function buildHandoffPdf(md){
  pages.forEach((items,i)=>{
   const p=pageIds[i],c=p+1;
   const stream=[
-   'BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1B LOCAL NATIVE RENDER FIRST) Tj ET',
+   'BT /F2 9 Tf 48 764 Td (KLINIKLAB  |  SR1C GODOT LOCAL RENDER FIRST) Tj ET',
    '0.55 w 48 755 m 564 755 l S',
    ...items.map(x=>'BT /'+x.font+' '+x.size+' Tf 48 '+x.y.toFixed(2)+' Td ('+esc(x.text)+') Tj ET'),
    '0.4 w 48 47 m 564 47 l S',
-   'BT /F1 7.8 Tf 48 33 Td (Source code SHA: 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1) Tj ET',
+   'BT /F1 7.8 Tf 48 33 Td (Source code SHA: f4d4d4151851a08342def08d9f2e461f5f5e7109) Tj ET',
    'BT /F1 7.8 Tf 473 33 Td (Page '+(i+1)+' of '+n+') Tj ET'
   ].join('\n')+'\n';
   objects[p]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+c+' 0 R >>';
   objects[c]='<< /Length '+stream.length+' >>\nstream\n'+stream+'endstream';
  });
- objects[infoId]='<< /Title (KlinikLab durable SR1B next-chat handoff) /Author (KlinikLab development) /Creator (KlinikLab deterministic Markdown handoff generator) /Subject (Paired with the same-base-name Markdown source at committed Git revision) >>';
+ objects[infoId]='<< /Title (KlinikLab durable SR1C Godot next-chat handoff) /Author (KlinikLab development) /Creator (KlinikLab deterministic Markdown handoff generator) /Subject (Paired with the same-base-name Markdown source at committed Git revision) >>';
  let pdf='%PDF-1.4\n% ASCII, searchable, deterministic\n';
  const offsets=[0];
  for(let i=1;i<=infoId;i++){offsets[i]=pdf.length;pdf+=i+' 0 obj\n'+objects[i]+'\nendobj\n'}
