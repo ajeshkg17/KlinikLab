@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase9-room-focus-20261031-06",
-  "commit": "13526d54a36e5092ee139312cafa02f8dc7c8a6f",
+  "jobId": "pc-xr-procedure-fdi16-20261031-07",
+  "commit": "49e136f3fdbdb62ba4c13bf1ab5c36a4b446a222",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
@@ -16,5 +16,6 @@
     "help-closed",
     "catalog-open",
     "catalog-closed"
-  ]
+  ],
+  "procedureCapture": true
 }
