@@ -25,6 +25,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install PDF renderer for durable handoff validation
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
       - name: Application and XR mocked regressions
         run: node --test tests/*.test.cjs tests/*.test.mjs tests/real_scene_qa.cjs
       - name: Scenario matrix and visual worker helpers (no browser execution)
