@@ -180,6 +180,10 @@ async function execute(j){
   executedOn:'owner Windows PC (watcher runtime)',generatedAt:new Date().toISOString(),
   nativeReportStatus:native?.status||'EVIDENCE_INCOMPLETE',
   imageExists:!!native?.nativeImagePresent,
+  angledImageExists:!!native?.nativeAngledImagePresent,
+  distinctRtx5060Gpu3DPeriods:Number(native?.process3DPositiveRtx5060DistinctPeriods||0),
+  rtx5060DxgiLuid:native?.rtx5060DxgiLuid||null,
+  dxgiLuidMatchesGodotProcess:!!native?.gpuAdapterLuidMatchedToNvidia,
   sourceMeshVerified:!!native?.nativeSourceSubmissionVerified,
   gpuProcessCorroborated:!!native?.godotProcessGPUCorroborated,
   backgroundPrivateDesktopRenderRequested:true,
@@ -190,7 +194,7 @@ async function execute(j){
   errors:[preparationError,captureError,nativeParseError].filter(Boolean),
   blockers:native?.blockers||[nativeParseError||'Native Windows evidence collector did not return its JSON report']
  };
- if(!native?.nativeImagePresent||!native?.nativeSourceSubmissionVerified||!native?.godotProcessGPUCorroborated)
+ if(!native?.nativeImagePresent||!native?.nativeAngledImagePresent||!native?.nativeSourceSubmissionVerified||!native?.godotProcessGPUCorroborated||!native?.gpuAdapterLuidMatchedToNvidia)
   result.overallStatus='EVIDENCE_INCOMPLETE';
  await fs.writeFile(path.join(capture,'godot-job-result.json'),jsonWithoutBom(result));
  try{git(['worktree','remove','--force',worktree]);}
@@ -222,8 +226,13 @@ async function publish(j,run,result){
  if(result.imageExists){
   const native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),'published original owner-PC JSON');
   const name=native.nativeScreenshotFile;
-  if(!/^godot-native-fdi16-[0-9]+\.png$/.test(name||''))throw Error('Unsupported original native PNG name');
+  if(!/^godot-native-fdi16-frontal-[0-9]+\.png$/.test(name||''))throw Error('Unsupported original frontal PNG name');
   selected.push(['godot-native-fdi16.png',path.join(capture,name)]);
+  if(native.nativeAngledImagePresent){
+   const angle=native.nativeAngledScreenshotFile;
+   if(!/^godot-native-fdi16-occlusal-[0-9]+\.png$/.test(angle||''))throw Error('Unsupported original occlusal PNG name');
+   selected.push(['godot-native-fdi16-occlusal.png',path.join(capture,angle)]);
+  }
  }
  const artifacts=[];
  for(const [name,file] of selected){
@@ -241,7 +250,8 @@ async function publish(j,run,result){
   'No Quest/streaming success is claimed.','',
   ...artifacts.flatMap(a=>[a.name+': SHA256 '+a.sha256,'']),
   'If present, original native PNG requires independent pixel review:','',
-  artifacts.some(a=>a.name==='godot-native-fdi16.png')?'![Native Godot FDI16](./godot-native-fdi16.png)':'No native PNG was returned.',''];
+  artifacts.some(a=>a.name==='godot-native-fdi16.png')?'![Native Godot FDI16 frontal](./godot-native-fdi16.png)':'No original frontal native PNG was returned.',
+  artifacts.some(a=>a.name==='godot-native-fdi16-occlusal.png')?'![Native Godot FDI16 elevated/occlusal](./godot-native-fdi16-occlusal.png)':'No original occlusal native PNG was returned.',''];
  artifacts.push({name:'README.md',bytes:Buffer.from(lines.join('\n')),sha256:null});
  const items=[];
  for(const item of artifacts){
