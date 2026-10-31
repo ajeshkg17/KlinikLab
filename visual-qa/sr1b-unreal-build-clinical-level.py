@@ -18,6 +18,7 @@ sys.path.insert(0, helper_dir)
 from sr1b_section_contract import MATERIALS, validate_sections, tissue_from_name
 from sr1b_topology_source import read_obj_triangles
 from sr1b_procedural_buffers import exact_source_buffers
+from sr1b_native_material_contract import ensure_two_sided_native_material
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -313,16 +314,12 @@ def import_native_materials_only(obj_file, name, expected_counts, diagnostics):
                 tissue + ', source=' + str(expected_counts[tissue]) +
                 ', description=' + str(source_count))
         static_count = int(mesh.get_num_triangles(0))
-        if isinstance(material, unreal.Material):
-            material.set_editor_property('two_sided', True)
-            require(bool(material.get_editor_property('two_sided')),
-                    'Imported tissue material is not two-sided: ' + tissue)
-            require(bool(unreal.EditorAssetLibrary.save_loaded_asset(material)),
-                    'Imported two-sided tissue material was not saved: ' + tissue)
-        else:
-            require(bool(material.get_editor_property('two_sided')),
-                    'Native material instance is not independently verified two-sided: ' + tissue)
+        two_sided_proof = ensure_two_sided_native_material(material, tissue, unreal)
+        require(two_sided_proof['materialIdentityPreserved'] and
+                two_sided_proof['materialSavedAndReadbackVerified'],
+                'Native tissue material was not independently persisted: ' + tissue)
         diagnostics.append({
+            'twoSidedMaterialVerification':two_sided_proof,
             'material':tissue,'sourceMeshDescriptionTriangles':source_count,
             'staticMeshRenderLOD0Triangles_DIAGNOSTIC_NOT_USED':static_count,
             'lostStaticFaces_DIAGNOSTIC':source_count-static_count,
