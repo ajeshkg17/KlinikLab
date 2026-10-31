@@ -81,7 +81,9 @@ test('Local clinical evidence runner is unique, source-pinned and fails closed o
  assert.equal((runner.match(/# Never touches existing blank-project evidence/g)||[]).length,1);
 });
 test('Priority order in roadmap and operator guide is unambiguous: native clinical first, Quest deferred',()=>{
- assert(roadmap.indexOf('# Priority override')===0);
+ assert(roadmap.startsWith('# Engine decision override — 31 October 2026: Godot 4.7.2 native local render FIRST; Unreal paused'));
+ assert(roadmap.indexOf('# Priority override')>0,
+   'Unreal-specific historical priority remains recorded but is superseded');
  assert(roadmap.indexOf('SR1B NEW highest-priority unresolved gate')>0);
  assert(roadmap.includes('ONLY after (1)–(4) verified, start SR2'));
  assert(nativeDoc.includes('LOCAL KLINIKLAB ON OWNER RTX 5060 FIRST'));
