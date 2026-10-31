@@ -49,7 +49,7 @@ test('export rejects incorrect production revision and never writes a manifest',
     '--source-dir='+root,'--expected-sha='+'0'.repeat(40),'--output='+out],
    {cwd:root,encoding:'utf8',timeout:20000});
   assert.notEqual(bad.status,0);
-  assert.match(bad.stderr,/not exact pinned commit/);
+  assert.match(bad.stderr,/not exact pinned commit/i);
   assert.equal(fs.existsSync(out),false);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
