@@ -11,6 +11,7 @@ export const JOB07_SOURCE='f4d4d4151851a08342def08d9f2e461f5f5e7109';
 export const JOB07_WORKER='c3f2f71a1f6e2d48fc1a7144ea023b6e13863ebf';
 export const JOB07_DIR=JOB07_ID+'-'+JOB07_SOURCE.slice(0,10);
 const pngMagic=Buffer.from([137,80,78,71,13,10,26,10]);
+const pngEnd=Buffer.from([0,0,0,0,73,69,78,68,174,66,96,130]);
 const digest=b=>createHash('sha256').update(b).digest('hex');
 async function json(file){
  return parseGodotJson(await fs.readFile(file,'utf8'),path.basename(file));
@@ -25,6 +26,7 @@ function checkPng(bytes,expectedHash,expectedW,expectedH,name){
  ensure(bytes&&bytes.length>10_000,name+' original bytes absent/undersized');
  ensure(bytes.subarray(0,8).equals(pngMagic),name+' original PNG signature invalid');
  ensure(bytes.toString('ascii',12,16)==='IHDR',name+' no IHDR');
+ ensure(bytes.subarray(-12).equals(pngEnd),name+' missing standard PNG IEND trailer');
  const width=bytes.readUInt32BE(16),height=bytes.readUInt32BE(20);
  ensure(width===expectedW && height===expectedH,name+' dimensions invalid '+width+'x'+height);
  const hash=digest(bytes);
@@ -54,7 +56,7 @@ export async function inspectJob07(root){
   original.nativeSceneMode==='clinic-cases' &&
   original.fullKlinikLabApplicationMigrated===false,'native source scene/migration disclosure');
  ensure(original.renderingMethod==='forward_plus' && original.renderingDriver==='vulkan' &&
-  /RTX\\s*5060/i.test(String(original.videoAdapterName)) &&
+  /RTX\s*5060/i.test(String(original.videoAdapterName)) &&
   /NVIDIA/i.test(String(original.videoAdapterVendor)),'original Godot Vulkan GPU self-report');
  ensure(original.headlessUsed===false && original.userDesktopActivationRequested===false,
   'capture must remain private desktop without headless or foreground switch');
@@ -70,8 +72,8 @@ export async function inspectJob07(root){
   'no original case/station transition parity');
  const first=String(original.imageFile||'');
  const angled=String(original.angledImageFile||'');
- ensure(/^godot-native-fdi16-frontal-[0-9]+\\.png$/.test(first),'frontal filename not original/allowlisted');
- ensure(/^godot-native-fdi16-occlusal-[0-9]+\\.png$/.test(angled),'occlusal filename not original/allowlisted');
+ ensure(/^godot-native-fdi16-frontal-[0-9]+\.png$/.test(first),'frontal filename not original/allowlisted');
+ ensure(/^godot-native-fdi16-occlusal-[0-9]+\.png$/.test(angled),'occlusal filename not original/allowlisted');
  const [b1,b2]=await Promise.all([fs.readFile(path.join(capturePath,first)),fs.readFile(path.join(capturePath,angled))]);
  const images=[
   checkPng(b1,original.imageSHA256,1600,900,first),
