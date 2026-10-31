@@ -60,6 +60,7 @@ class FakeLibrary:
     def get_associated_object(handle):return handle
 
 class FakeUnreal:
+    Actor=FakeActor
     class ProceduralMeshComponent(FakeComponent):pass
     class AddNewSubobjectParams:
         def __init__(self,**kw):self.kw=kw
