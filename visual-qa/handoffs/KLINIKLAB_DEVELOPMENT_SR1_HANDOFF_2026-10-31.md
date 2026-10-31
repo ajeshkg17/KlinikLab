@@ -1,3 +1,85 @@
+# CURRENT 31 OCT 2026 HANDOFF OVERRIDE: GODOT SR1C LOCAL FDI16 (NOT ACCEPTED)
+
+**Binding engine decision:** Godot 4.7.2 for native LOCAL KlinikLab FDI16 before/after source-derived rendering. Unity Hub exists but Unity Editor installation was canceled; Unity is fallback only. Unreal 5.8.4 is PAUSED/EXPLORATORY, not an accepted render. Quest/streaming/server video are LATER and blocked until independent native source-derived pixels and Godot-process GPU proof.
+
+**Exact pinned FUNCTIONAL source SHA for the requested Windows experiment:**
+f4d4d4151851a08342def08d9f2e461f5f5e7109
+
+**Current handoff publication:** a separate later documentation-only integration SHA; check GitHub branch HEAD. Do NOT substitute the documentation commit for the pinned functional source when reproducing the requested experiment. Source tests at the pinned SHA: https://github.com/ajeshkg17/KlinikLab/actions/runs/41235259000 (252 Node tests + 14 checks passed). Godot 4.7.2 official HEADLESS import/parse: https://github.com/ajeshkg17/KlinikLab/actions/runs/41235199994 (success, not rendered).
+
+**Mandatory status as of this handoff:** SR1C GODOT LOCAL NATIVE RENDER UNVERIFIED / NOT ACCEPTED. This development session could not access the owner's Windows desktop, C: filesystem, installed Godot process or RTX 5060 from the separate Linux execution container. An attempted connected-browser read failed because the originating browser context was not connected. The environment had no /proc/driver/nvidia/gpus; Windows C: path was unavailable; repository network clone from container failed DNS. No fresh detached Windows worktree, physical Godot screenshot, original F12 image, live GPU counter or GPU-adapter correlation was actually produced or inspected in this session. DO NOT turn the successful headless Godot import/parser job into a GPU/pixel success. There is NO new accepted native Godot image.
+
+## Known existing source implementation
+
+- Authoritative roadmap: visual-qa/PHASE_ROADMAP.md -- latest Godot engine override at TOP supersedes all historical Unreal-first instructions below.
+- Architecture target: visual-qa/SERVER_RENDERING_ARCHITECTURE.md -- Godot-local-first; dedicated server-video architecture is only future design, not implemented.
+- Active guide: visual-qa/SR1C_GODOT_LOCAL_CLINICAL_RENDER.md.
+- Experimental native slice: visual-qa/godot-local-clinical/{project.godot,main.tscn,main.gd}.
+- Windows source-pinned project preparer: visual-qa/sr1c-build-godot-local.ps1.
+- Original production geometry exporter: visual-qa/sr1-local-kliniklab-export.mjs (loads real volumetric-lab.js ToothSolid('molar','16') + VoxelMesher, NOT Dundee).
+- Source-only Godot parser workflow: .github/workflows/sr1c-godot-4-7-native-parse.yml.
+- Asset provenance: visual-qa/dental-asset-register.json: Dundee is LEFT maxillary first-molar candidate, not the native RIGHT FDI16 source; headless FBX import does not establish permission or clinical correctness.
+
+**Source geometry contract, unchanged:**
+| Tissue | BEFORE triangles | AFTER cut triangles |
+| --- | ---: | ---: |
+| Enamel | 10,320 | 10,308 |
+| Dentin | 112 | 205 |
+| Pulp | 207 | 207 |
+| Cementum | 4,105 | 4,105 |
+| Caries | 112 | 111 |
+| **TOTAL** | **14,856** | **14,936** |
+
+Each Godot native ArrayMesh should have exactly one surface for each tissue and three indices per original triangle; 10 surfaces in two named tooth roots. The source program enforces original OBJ SHA-256, FDI16/right-upper identity, before/after material counts and Vulkan Forward+ method; all that is submission evidence, NOT a rendered image. The full browser KlinikLab app has NOT been migrated.
+
+## Exact NEXT owner-Windows source-pinned run (requires human/Codex access to local PC)
+
+Existing repo checkout is assumed to be at the following real Windows path, change only if necessary. Commands intentionally create NEW unique folder names; never reuse prior evidence.
+
+~~~powershell
+$ErrorActionPreference = 'Stop'
+$repo = 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
+$sha = 'f4d4d4151851a08342def08d9f2e461f5f5e7109'
+git -C $repo fetch origin integration/single-chat-validation-2026-10-30
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+$stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+$worktree = "C:\klab-sr1c-godot-worktree-$($sha.Substring(0,8))-$stamp"
+$run = "C:\klab-sr1c-godot-native-$($sha.Substring(0,8))-$stamp"
+git -C $repo worktree add --detach $worktree $sha
+if ($LASTEXITCODE -ne 0) { throw 'Detached worktree creation failed' }
+& "$worktree\visual-qa\sr1c-build-godot-local.ps1" -ExpectedSha $sha -EvidenceDir $run
+if ($LASTEXITCODE -ne 0) { throw "Godot source preparation failed: $run" }
+Write-Host "Import the NEW project: $run\Project\project.godot"
+Write-Host "Evidence destination: $run\Captures"
+~~~
+
+After preparation, use EXISTING Godot 4.7.2 Project Manager > Import > select the printed project.godot (not the older Dundee sandbox). Open main.tscn, press F5 to run native game. Expect two recognizable RIGHT FDI16 educational teeth with before/after simulated cut; this is NOT YET OBSERVED. With the Godot game window active, press F12 to trigger the code's original viewport PNG after RenderingServer.frame_post_draw. Save its original path and native-source-submission.json from Captures. DO NOT ACCEPT blank/black/billboard-only images. Personally inspect original pixels, confirming independent 3D tooth silhouette and before/after cut.
+
+Godot process/GPU evidence on Windows: record the actual Godot GAME process PID, full executable, full command line and process creation time (distinguish Project Manager/editor), the project path, the Godot source submission renderer values (Forward+/Vulkan), selected physical graphics adapter and nonzero same-PID Windows GPU Engine engtype_3D samples. A mere NVIDIA RTX 5060 device listing does NOT attribute rendering to the game; a mere GPU counter PID without LUID/NVIDIA mapping is partial evidence. Save raw observations and time samples. If GPU Engine counters are unavailable, malformed or zero, mark EVIDENCE_INCOMPLETE and collect alternate process-specific GPU metrics, not automatic pass. A functioning source stage and F12 image cannot alone close the GPU gate. Do not use a previous Unreal PID or its 1920x1080 screenshot.
+
+The owner-reported Godot 4.7.2 Dundee FBX import sandbox at C:\Users\ajesh\OneDrive\study and learn\coworker\output\kliniklab-engine-bakeoff is distinct: an independent left-molar native game-render smoke is useful, but is NOT the requested source-derived FDI16 clinical proof and must not be relabeled.
+
+## Unreal evidence retained, explicitly rejected/paused
+
+- f4d4d415... replaces the UE-first direction, but none of the former source files or evidence have been removed.
+- 57801f1c7f84cc8e561cac8fc99045cb14d8f6b5: C:\klab-sr1b-clinical-57801f1c-20261031-174525; enamel source MeshDescription 10,320, render StaticMesh LOD0 6,724, reconstructed native 6,721.
+- 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1: C:\klab-sr1b-clinical-0f27a7e0-20261031-181005; MaterialInstanceConstant two_sided API failed before source submission.
+- 2238259e827b3e82480558bdfac96903d4bd306a: C:\klab-sr1b-clinical-2238259e-20261031-182449; exact procedural submission and level save, then false actor-label-key reload validation failure.
+- d5371fe051bbca83e380e44fd3465dffe0718058: C:\klab-sr1b-clinical-d5371fe0-20261031-183117; legitimate UE native 1920x1080 screenshot was independently inspected and REJECTED: overbright/reversed text, billboards and grid, no identifiable tooth. GPU Engine counter collection failed on invalid utilizationPercent. This must NEVER be treated as accepted tooth render.
+- Browser/IWER screenshots remain client/browser graphics only, not Godot or headset streaming; dental expert validation absent.
+
+## Next-chat acceptance and handoff maintenance
+
+1. Read this highest-priority override, current roadmap and SR1C Godot operator guide from GitHub HEAD. Preserve the exact requested source baseline f4d4d4151851a08342def08d9f2e461f5f5e7109 for one uniquely timestamped Windows run.
+2. Obtain original local F12 native PNG and inspect pixels with an actual supported image viewer; compare both FDI16 surface states. Read native-source-submission.json and source hashes, confirm ten named material surfaces and 14,856 / 14,936 original triangles.
+3. Obtain actual Godot GAME PID and physical RTX 5060 correlation, not source-only/mock tests or FFmpeg encoder evidence. If hardware access is impossible, precisely record blocker and provide user a concrete executable command; do not claim later delivery or completion.
+4. ONLY after both native pixel gate and dedicated GPU attribution pass, plan clinically plausible room and procedural migration. Evaluate hardware video streaming and Quest LAST, with explicit latency/security testing.
+5. Keep matching Markdown and PDF named visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31.md and .pdf in sync via visual-qa/handoffs/build_handoff_pdf.mjs; check extracted PDF text and render its first page as part of validation.
+
+**The publication commit that updates this handoff is documentation, not new proof of native Godot raster or RTX utilization.**
+
+---
+
 # KlinikLab - Durable Next-Chat Handoff: Local Unreal Clinical Render First
 
 **Snapshot:** 31 October 2026, Europe/Berlin. Evidence-first; no background task or future delivery is implied.
