@@ -34,7 +34,7 @@ def spawn(actor_type, x, y, z, label, rot=None):
     actor.set_actor_label(label)
     return actor
 
-def import_native_obj(path, name):
+def import_native_obj(path, name, expected_triangles):
     task = unreal.AssetImportTask()
     for key, value in {
         'filename': str(path),
@@ -51,6 +51,10 @@ def import_native_obj(path, name):
     require(len(meshes) == 1, 'Native OBJ import failed or did not produce exactly one StaticMesh: ' + name + ' (got ' + str([str(x) for x in objects]) + ')')
     mesh = meshes[0]
     require(mesh.get_num_lods() >= 1, 'Imported native mesh has no LOD: ' + name)
+    actual_triangles = int(mesh.get_num_triangles(0))
+    require(actual_triangles == int(expected_triangles),
+            'UE native OBJ triangle count differs from source mesher for ' + name +
+            ': exported=' + str(expected_triangles) + ', imported=' + str(actual_triangles))
     return mesh
 
 def mesh_actor(mesh, name, y_offset):
@@ -98,6 +102,7 @@ def main():
         'clinicalMeshManifestSHA256': None,
         'nativeLevelPackage': LEVEL,
         'importedMeshes': [],
+        'importedTrianglesLOD0': {},
         'actorLabels': [],
         'actualNativeViewportScreenshot': False,
         'verifiedProcessGPUEngineActivity': False,
@@ -118,9 +123,15 @@ def main():
                     'Original OBJ/MTL SHA-256 mismatch: ' + name)
         report['clinicalMeshManifestSHA256'] = hash_file(manifest_file)
         # These are verified source-generated meshes; no third-party Dundee assets.
-        before = import_native_obj(folder / MODEL_NAMES[0], 'KL_FDI16_Before')
-        after = import_native_obj(folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut')
+        before = import_native_obj(folder / MODEL_NAMES[0], 'KL_FDI16_Before',
+                                   manifest['sceneStates']['before']['triangles'])
+        after = import_native_obj(folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut',
+                                  manifest['sceneStates']['after']['triangles'])
         report['importedMeshes'] = [str(before.get_path_name()), str(after.get_path_name())]
+        report['importedTrianglesLOD0'] = {
+            'before': int(before.get_num_triangles(0)),
+            'after': int(after.get_num_triangles(0))
+        }
 
         level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
         require(level.new_level(LEVEL), 'Native Unreal Editor failed to create a new level')
