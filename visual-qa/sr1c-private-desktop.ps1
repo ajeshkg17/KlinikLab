@@ -26,6 +26,12 @@ namespace KlinikLab {
    public IntPtr hProcess, hThread;
    public uint dwProcessId, dwThreadId;
   }
+  [DllImport("user32.dll", EntryPoint="GetProcessWindowStation", SetLastError=true)]
+  public static extern IntPtr GetProcessWindowStation();
+  [DllImport("user32.dll", EntryPoint="GetUserObjectInformationW", CharSet=CharSet.Unicode, SetLastError=true)]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static extern bool GetUserObjectInformation(IntPtr handle, int index, StringBuilder info,
+    int length, out int needed);
   [DllImport("user32.dll", EntryPoint="CreateDesktopW", CharSet=CharSet.Unicode, SetLastError=true)]
   public static extern IntPtr CreateDesktop(string name, string device, IntPtr devmode,
     uint flags, uint desiredAccess, IntPtr securityAttributes);
@@ -61,11 +67,33 @@ function Start-KLPrivateDesktopGodot {
   throw 'Unsupported Windows path contains quote'
  }
  $desktopName='KL_SR1C_'+[Guid]::NewGuid().ToString('N')
- # DESKTOP_ALL_ACCESS=0x000F01FF; NEVER SwitchDesktop or change user's session.
+ # Diagnose the assigned process window station. Do NOT change it or switch desktops.
+ $station=[KlinikLab.PrivateDesktop]::GetProcessWindowStation()
+ if($station -eq [IntPtr]::Zero){
+  $last=[Runtime.InteropServices.Marshal]::GetLastWin32Error()
+  throw "GetProcessWindowStation failed Win32=$last; cannot guarantee private WinSta0 capture"
+ }
+ $stationName=New-Object System.Text.StringBuilder 256
+ $needed=0
+ $stationOk=[KlinikLab.PrivateDesktop]::GetUserObjectInformation($station,2,
+  $stationName,$stationName.Capacity*2,[ref]$needed) # UOI_NAME=2
+ if(-not $stationOk){
+  $last=[Runtime.InteropServices.Marshal]::GetLastWin32Error()
+  throw "GetUserObjectInformationW(UOI_NAME) failed Win32=$last"
+ }
+ if($stationName.ToString() -ne 'WinSta0'){
+  throw "Current process window station is '$($stationName.ToString())', not WinSta0; no foreground fallback"
+ }
+ # Request only CREATEWINDOW | READOBJECTS | WRITEOBJECTS | ENUMERATE,
+ # rather than DESKTOP_ALL_ACCESS=0x000F01FF. Some owner Windows sessions
+ # return ERROR_INVALID_PARAMETER (87) for the oversized access mask.
+ # CreateDesktopW requires CREATEWINDOW; no SWITCHDESKTOP requested/used.
+ $desktopAccess=[uint32]0x000000C3
  $desktop=[KlinikLab.PrivateDesktop]::CreateDesktop($desktopName,$null,[IntPtr]::Zero,
-  [uint32]0,[uint32]0x000F01FF,[IntPtr]::Zero)
+  [uint32]0,$desktopAccess,[IntPtr]::Zero)
  if($desktop -eq [IntPtr]::Zero){
-  throw ('CreateDesktop failed: '+[Runtime.InteropServices.Marshal]::GetLastWin32Error())
+  $last=[Runtime.InteropServices.Marshal]::GetLastWin32Error()
+  throw "CreateDesktopW failed Win32=$last; station=$($stationName.ToString()); mask=0x$($desktopAccess.ToString('X8')); desktop=$desktopName; no fallback to foreground"
  }
  $start=New-Object KlinikLab.PrivateDesktop+STARTUPINFO
  $start.cb=[Runtime.InteropServices.Marshal]::SizeOf([type][KlinikLab.PrivateDesktop+STARTUPINFO])
