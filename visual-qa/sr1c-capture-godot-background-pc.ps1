@@ -113,26 +113,50 @@ try{
  # 34 ~1s data collections. Job04 reopened the full wildcard query each
  # iteration, yielding 54 ROWS but only TWO distinct collection timestamps.
  # Never count multiple GPU engine rows at one timestamp as independent proof.
- $counterData=@();$samplingErrors=@()
+ $counterData=@();$samplingErrors=@();$pdhPowerShellErrors=@()
+ $rejectedPidRows=@();$collectionPeriods=@()
  $report.persistentPDHQueryUsed=$true
+ # A wildcard GPU Engine counter set can include invalid instances unrelated to
+ # the Godot PID. WinPS Get-Counter -ErrorAction Stop aborted the ENTIRE query
+ # in job05. Continue collecting, but never count invalid counter samples.
  try{
-  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' `
-   -SampleInterval 1 -MaxSamples 34 -ErrorAction Stop)
+  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' 
+   -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhPowerShellErrors)
   $period=0
   foreach($snapshot in $snapshots){
+   if($null -eq $snapshot){continue}
    $period++
    $stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')
+   $collectionPeriods+= [PSCustomObject]@{collectionIndex=$period;utc=$stamp}
    foreach($c in @($snapshot.CounterSamples)){
-    if($c.Path -match ('(?i)pid_'+$session.Pid+'_') -and $c.Path -match '(?i)engtype_3d'){
-     $v=[double]$c.CookedValue
-     $finite=(-not [double]::IsNaN($v)) -and (-not [double]::IsInfinity($v))
-     $counterData+= [PSCustomObject]@{
-      utc=$stamp;collectionIndex=$period;godotPid=[int]$session.Pid
-      counterPath=[string]$c.Path
-      engineLuid=[KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$c.Path)
-      utilizationPercent=$v
-      finite=[bool]$finite
+    if($null -eq $c){continue}
+    $counterPath=[string]$c.Path
+    if($counterPath -notmatch ('(?i)pid_'+$session.Pid+'_') -or
+     $counterPath -notmatch '(?i)engtype_3d'){continue}
+    $statusName=[string]$c.Status
+    $statusValid=($statusName -eq 'ValidData' -or $statusName -eq '0')
+    $finite=$false
+    $v=$null
+    try{
+     $n=[double]$c.CookedValue
+     if(-not [double]::IsNaN($n) -and -not [double]::IsInfinity($n)){
+      $finite=$true;$v=$n
      }
+    }catch{}
+    $luid=[KlinikLab.DxgiEvidence]::FromGpuEnginePath($counterPath)
+    $usable=($statusValid -and $finite -and $null -ne $v -and
+      $v -ge 0 -and $v -le 100 -and -not [string]::IsNullOrWhiteSpace($luid))
+    $row=[PSCustomObject]@{
+     utc=$stamp;collectionIndex=$period;godotPid=[int]$session.Pid
+     counterPath=$counterPath;engineLuid=$luid
+     status=$statusName;statusValid=[bool]$statusValid
+     rawCookedValue=[string]$c.CookedValue
+     utilizationPercent=$v;finite=[bool]$finite;usable=[bool]$usable
+    }
+    # Retain all Godot 3D rows so invalid-status evidence is auditable.
+    $counterData+= $row
+    if(-not $usable -and $rejectedPidRows.Count -lt 100){
+     $rejectedPidRows+= $row
     }
    }
   }
@@ -141,17 +165,39 @@ try{
  $counterJson=ConvertTo-Json -InputObject @($counterData) -Depth 7
  [IO.File]::WriteAllText($counterOutput, ($counterJson + [Environment]::NewLine),
   (New-Object System.Text.UTF8Encoding($false)))
- $validSamples=@($counterData|Where-Object{$_.finite -and $_.utilizationPercent -ge 0 -and $_.utilizationPercent -le 100})
+ # PowerShell may warn about individual invalid wildcard rows and still produce
+ # valid samples. Warnings are evidence, not a reason to discard good snapshots.
+ $pdhWarningMessages=@($pdhPowerShellErrors|ForEach-Object{[string]$_.Exception.Message}|
+  Select-Object -Unique|Select-Object -First 40)
+ $pdhDiagnostic=[ordered]@{
+  schemaVersion=1;godotPid=[int]$session.Pid;query='GPU Engine(*)/Utilization Percentage'
+  commandErrorAction='Continue';queryInvocationCount=1
+  collectionPeriodCount=$collectionPeriods.Count;collectionPeriods=@($collectionPeriods)
+  godot3DRowsObserved=$counterData.Count;godot3DRowsRejected=@($counterData|Where-Object{-not $_.usable}).Count
+  rejectedGodotRows=@($rejectedPidRows)
+  nonTerminatingErrorCount=@($pdhPowerShellErrors).Count
+  nonTerminatingErrorMessages=$pdhWarningMessages
+  terminatingErrors=@($samplingErrors)
+ }
+ $pdhDiagnosticsPath=Join-Path $captures 'godot-gpu-pdh-diagnostics.json'
+ [IO.File]::WriteAllText($pdhDiagnosticsPath,
+  ((ConvertTo-Json -InputObject $pdhDiagnostic -Depth 12)+[Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ $report.pdhNonTerminatingErrorCount=@($pdhPowerShellErrors).Count
+ $report.pdhRejectedGodot3DRows=@($counterData|Where-Object{-not $_.usable}).Count
+ $report.pdhCollectionPeriods=$collectionPeriods.Count
+ $report.originalPdhDiagnosticFile='godot-gpu-pdh-diagnostics.json'
+ $validSamples=@($counterData|Where-Object{$_.usable})
  $positive=@($validSamples|Where-Object{$_.utilizationPercent -gt 0.05})
  $report.process3DSampleCount=$validSamples.Count
  $report.process3DPositiveSamples=$positive.Count
- $report.process3DDistinctSamplePeriods=@($validSamples|Select-Object -ExpandProperty collectionIndex -Unique).Count
- $report.process3DPositiveDistinctPeriods=@($positive|Select-Object -ExpandProperty collectionIndex -Unique).Count
+ $report.process3DDistinctSamplePeriods=@($validSamples|Select-Object -ExpandProperty utc -Unique).Count
+ $report.process3DPositiveDistinctPeriods=@($positive|Select-Object -ExpandProperty utc -Unique).Count
  $report.positiveGodotEngineLuids=@($positive|Select-Object -ExpandProperty engineLuid -Unique)
  if($validSamples.Count){
   $report.process3DMaxUtilizationPercent=[double](($validSamples|Measure-Object -Property utilizationPercent -Maximum).Maximum)
  }
- if($samplingErrors.Count){Block ('Persistent Windows PDH query failure: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
+ if($samplingErrors.Count){Block ('Persistent Windows PDH query terminated: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
  if($report.process3DPositiveDistinctPeriods -lt 3){
   Block 'Insufficient independent positive Godot-PID GPU 3D PDH COLLECTION PERIODS (require >=3)'
  }
@@ -169,7 +215,7 @@ try{
    $report.rtx5060DxgiLuid=[string]$nvidia[0].luid
    $matched=@($positive|Where-Object{$_.engineLuid -eq $report.rtx5060DxgiLuid})
    $report.process3DPositiveRtx5060DistinctPeriods=@(
-    $matched|Select-Object -ExpandProperty collectionIndex -Unique
+    $matched|Select-Object -ExpandProperty utc -Unique
    ).Count
    $report.gpuAdapterLuidMatchedToNvidia=($report.process3DPositiveRtx5060DistinctPeriods -ge 3)
    if(-not $report.gpuAdapterLuidMatchedToNvidia){
