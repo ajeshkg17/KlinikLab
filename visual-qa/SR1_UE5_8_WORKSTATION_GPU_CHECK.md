@@ -61,3 +61,46 @@ The user reports actual installed `Build.version` **5.8.4**, matched already-run
 **Parser correction:** `sr1-check-existing-unreal.ps1` now accepts a syntactically valid GUID association only when source-pinned UE 5.8 `Build.version` and the exact **live project-matched editor executable path** agree. An existing UnrealVersionSelector registry GUID mapping to another engine root is a blocker. `sr1-unreal-adapter-evidence.mjs` correlates chosen D3D12 id and `LogCsvProfiler` GPU name from the same fresh native log against the independently passed GPU/NVENC preflight. Conflicting indexed adapter/name entries, missing/ambiguous identities and GPU mismatch fail. If the chosen adapter index is **not explicitly mapped to a named device**, report `D3D12_CHOICE_PLUS_CSV_GPU_MATCH_UNMAPPED`, not verified adapter index mapping. All native screenshot/log freshness, SHA and unique evidence-directory protections remain in place.
 
 For a recheck, fetch the new integration HEAD into a **fresh detached worktree**, preserve the previous directory, then run the same existing-project collector with `-ExpectedSha` set to that new exact checked-out HEAD and a **new unique** `-EvidenceDir`. No new editor or screenshot must be fabricated. Evidence collection can yield `EVIDENCE_COLLECTED_INDEPENDENT_GPU_AND_PIXEL_REVIEW_PENDING` only after the revised checks pass; **this still does not certify active GPU raster, independently reviewed pixels, real Pixel Streaming 2 hardware encode or physical Quest 2 VR**.
+
+## Follow-up: native D3D12 indexed-name correlation false negative (2026-10-31)
+
+The owner workstation ran the previous collector from a new detached worktree at
+`45beb8933ce971d89e62432bc90a775702a1f59b`, keeping its evidence at
+`C:\klab-sr1-45beb893\visual-qa\evidence-local\ue58-fixrerun-20261031-1620`.
+The user reports that GUID/UE 5.8.4/project process/log/screenshot freshness and
+NVIDIA RTX 5060/NVENC smoke tests passed. The collector still returned
+`EVIDENCE_INCOMPLETE`, specifically `Chosen D3D12 indexed adapter name conflicts with preflight GPU`.
+The unmodified native log reportedly contains matching chosen D3D12 adapter id 0,
+an indexed adapter-0 NVIDIA RTX 5060 name, the native RHI adapter name, and
+`LogCsvProfiler` RTX 5060 metadata. This is a user-reported original-log observation,
+not a fresh independent log/pixel inspection in ChatGPT.
+
+The follow-up parser now distinguishes a precisely matching GPU model name from
+supported structured Unreal suffix metadata (e.g. `(VendorId: ...)`, memory/feature
+fields), while refusing unknown suffixes, contradictory indexed GPUs, missing
+RHI/CSV records, or inconsistent preflight GPU identity. It exposes
+`indexedAdapterChecks` and `rhiNameChecks` with raw descriptions and per-record
+comparison classifications in both its standalone JSON and the new collector
+report. This instrumentation is important: **without the full original native
+log we cannot yet conclude exactly why the earlier indexed-name comparison
+failed**. Do not silently promote a persistent conflict.
+
+A **read-only reanalysis of the already-preserved original log** is preferable
+to another full hardware collection for the immediate parser diagnosis.
+Execute this with Node from a detached checkout of the latest integration
+revision (do NOT modify or check out inside the original evidence directory):
+
+```powershell
+node .\visual-qa\sr1-unreal-adapter-evidence.mjs `
+  '--log=C:\klab-sr1-45beb893\visual-qa\evidence-local\ue58-fixrerun-20261031-1620\unreal-native-latest.log' `
+  '--expected-gpu=NVIDIA GeForce RTX 5060 Laptop GPU'
+```
+
+The result should report `evidenceFound`, `classification`,
+`adapterIndexMappedToGPU`, `indexedAdapterChecks`, `rhiNameChecks`,
+`blockers` and `warnings`. A parser finding is *derived source-log
+interpretation only*: it does not replace the original immutable failed report,
+independently inspect screenshot pixels or prove per-process GPU raster/actual
+Pixel Streaming 2 codec negotiation/Quest viewing. A new uniquely identified
+collector run is necessary only if a fresh source-pinned collector report is
+required after resolving any outstanding native-log contradiction.
