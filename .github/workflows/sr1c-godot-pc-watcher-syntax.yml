@@ -9,6 +9,8 @@ on:
       - 'visual-qa/sr1c-capture-godot-pc.ps1'
       - 'visual-qa/sr1c-capture-godot-background-pc.ps1'
       - 'visual-qa/sr1c-private-desktop.ps1'
+      - 'visual-qa/sr1c-dxgi-luid.cs'
+      - 'tests/sr1c_windows_dxgi_pdh_smoke.ps1'
       - 'visual-qa/sr1c-capture-godot-background-pc.ps1'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-build-godot-local.ps1'
@@ -75,6 +77,11 @@ jobs:
         run: |
           & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1c_windows_private_desktop_smoke.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Windows private desktop CreateDesktopW smoke failure' }
+      - name: Real Windows typed DXGI adapter LUID and persistent PDH 1Hz smoke (no Godot)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1c_windows_dxgi_pdh_smoke.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Windows DXGI adapter LUID or PDH persistent query regression failed' }
       - name: Evidence boundary
         shell: pwsh
         if: always()
