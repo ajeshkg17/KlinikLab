@@ -17,6 +17,8 @@ test('Dedicated local Godot job pins exact requested SHA with bounded non-execut
  assert.equal(RESULT_BRANCH,'visual-feedback');
  assert.equal(validated.graphics,'forward_plus-vulkan');
  assert(/^pc-godot-fdi16-/.test(validated.jobId));
+ assert.equal(validated.jobId,'pc-godot-fdi16-20261031-job02');
+ assert.notEqual(validated.jobId,'pc-godot-fdi16-20261031-job01', 'published EVIDENCE_INCOMPLETE job01 cannot be reused');
  assert.throws(()=>validateGodotJob({...job,suite:'shell'}));
  assert.throws(()=>validateGodotJob({...job,command:'powershell'}));
  assert.throws(()=>validateGodotJob({...job,script:'C:\\anything.ps1'}));
