@@ -113,3 +113,81 @@ test('One contradictory GPU entry for the chosen index cannot be hidden by a mat
  assert(r.blockers.some(x=>x.includes('indexed adapter name conflicts')));
  assert.equal(r.indexedAdapterChecks.length,2);
 });
+
+test('Preserved UE 5.8 log format: terminal Revision 00a1 without closing parenthesis and two-line LogRHI Info/Name',()=>{
+ const indexed='LogD3D12RHI: Found D3D12 adapter 0: NVIDIA GeForce RTX 5060 Laptop GPU (Revision: 00a1';
+ const header='LogRHI: RHI Adapter Info:';
+ const name='LogRHI:             Name: NVIDIA GeForce RTX 5060 Laptop GPU';
+ const result=check([indexed,chosen,header,name,csv]);
+ assert.equal(result.evidenceFound,true,JSON.stringify(result));
+ assert.equal(result.classification,'D3D12_INDEX_MAPPED_TO_MATCHING_NVIDIA_GPU');
+ assert.equal(result.chosenAdapterId,0);
+ assert.equal(result.adapterIndexMappedToGPU,true);
+ assert.equal(result.indexedAdapterChecks[0].missingClosingRevision,true);
+ assert.equal(result.indexedAdapterChecks[0].result,'MATCH_WITH_STRUCTURED_METADATA');
+ assert.deepEqual(result.indexedAdapterChecks[0].metadata,['revision: 00a1']);
+ assert.equal(result.rhiNameChecks[0].result,'EXACT_MATCH');
+ assert.equal(result.rhiNameChecks.length,1);
+ assert(result.evidenceLines.includes(indexed));
+ assert(result.evidenceLines.includes(header));
+ assert(result.evidenceLines.includes(name));
+ assert(result.warnings.some(x=>x.includes('missing closing parenthesis')));
+ assert.deepEqual(result.blockers,[]);
+});
+
+test('Unterminated revision accepted only when all preceding fields are complete and allowlisted',()=>{
+ const descriptor=expectedGpuName+' (VendorId: 10de, DeviceId: 2d06, SubSysId: 89ab12cd, Revision: 00a1';
+ const result=check(['LogD3D12RHI: Found D3D12 adapter 0: '+descriptor,chosen,
+  'LogRHI: Display: RHI Adapter Info:',
+  'LogRHI: Display:     Name: NVIDIA GeForce RTX 5060 Laptop GPU',csv]);
+ assert.equal(result.evidenceFound,true,JSON.stringify(result));
+ assert.equal(result.adapterIndexMappedToGPU,true);
+ assert.equal(result.indexedAdapterChecks[0].missingClosingRevision,true);
+ assert.equal(result.indexedAdapterChecks[0].metadata.length,4);
+});
+
+test('Trailing model words, unstructured text and partial revision fail closed',()=>{
+ const tails=[
+  ' Ti (Revision: 00a1',
+  ' (VendorId: 10de, DeviceId: 2d06, Revision: 00a1 extra',
+  ' (Revision: 00a1 malicious',
+  ' (Revision: 00a',
+  ' (Revision: 00a1, SomethingElse: NVIDIA',
+  ' (VendorId: 10de, UnknownField: x, Revision: 00a1',
+  ' (Revision: 00a1 (other model)',
+  ' [Revision: 00a1',
+ ];
+ for(const tail of tails){
+  const result=check(['LogD3D12RHI: Found D3D12 adapter 0: '+expectedGpuName+tail,chosen,csv]);
+  assert.equal(result.evidenceFound,false,JSON.stringify({tail,result}));
+  assert.equal(result.adapterIndexMappedToGPU,false);
+  assert.equal(result.indexedAdapterChecks[0].result,'UNRECOGNIZED_SUFFIX');
+ }
+});
+
+test('Two-line RHI name mismatch is reported as conflict',()=>{
+ const result=check(['LogD3D12RHI: Found D3D12 adapter 0: '+expectedGpuName,
+  chosen,'LogRHI: RHI Adapter Info:','LogRHI:           Name: Intel Arc Graphics',csv]);
+ assert.equal(result.evidenceFound,false);
+ assert(result.blockers.some(x=>x.includes('Named active LogRHI adapter conflicts')));
+ assert.equal(result.rhiNameChecks[0].result,'DIFFERENT_GPU');
+});
+
+test('RHI Info header cannot borrow an unrelated Name from a non-contiguous block',()=>{
+ const result=check([chosen,csv,
+  'LogRHI: RHI Adapter Info:',
+  'LogOther: unrelated GPU report',
+  'LogRHI:   Name: NVIDIA GeForce RTX 5060 Laptop GPU']);
+ assert.equal(result.evidenceFound,false);
+ assert(result.blockers.some(x=>x.includes('no adjacent LogRHI Name')));
+ assert.equal(result.rhiNameChecks.length,0);
+});
+
+test('Conflicting duplicated two-line RHI Info names block acceptance',()=>{
+ const result=check([chosen,csv,
+ 'LogRHI: RHI Adapter Info:','LogRHI:    Name: NVIDIA GeForce RTX 5060 Laptop GPU',
+ 'LogRHI: RHI Adapter Info:','LogRHI:    Name: Intel Arc Graphics']);
+ assert.equal(result.evidenceFound,false);
+ assert(result.blockers.some(x=>x.includes('Named active LogRHI adapter conflicts')));
+ assert.equal(result.rhiNameChecks.length,2);
+});
