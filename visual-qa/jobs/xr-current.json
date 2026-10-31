@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-phase9-clinical-focus-20261031-05",
-  "commit": "fae35adb80bdfab4cf579a1dedea1fa3bb20df06",
+  "jobId": "pc-xr-phase9-room-focus-20261031-06",
+  "commit": "13526d54a36e5092ee139312cafa02f8dc7c8a6f",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
