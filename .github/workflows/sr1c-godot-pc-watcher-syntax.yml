@@ -5,6 +5,8 @@ on:
     branches: [integration/single-chat-validation-2026-10-30]
     paths:
       - 'visual-qa/godot-worker.mjs'
+      - 'visual-qa/godot-job07-forensics.mjs'
+      - 'tests/sr1e_job07_forensic_recovery.test.mjs'
       - 'visual-qa/godot-single-instance.mjs'
       - 'visual-qa/install-godot-pc-watcher.ps1'
       - 'tests/sr1d_godot_watcher_lock.test.mjs'
@@ -53,6 +55,8 @@ jobs:
         shell: pwsh
         run: |
           node --check visual-qa/godot-worker.mjs
+          node --check visual-qa/godot-job07-forensics.mjs
+          node --test tests/sr1e_job07_forensic_recovery.test.mjs
           node --check visual-qa/godot-single-instance.mjs
           node --test tests/sr1d_godot_watcher_lock.test.mjs
           node --check visual-qa/godot-job-core.mjs
