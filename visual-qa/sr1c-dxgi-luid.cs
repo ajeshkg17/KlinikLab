@@ -45,7 +45,7 @@ namespace KlinikLab {
   public string luid {get;set;}
   public uint vendorId {get;set;}
   public uint deviceId {get;set;}
-  public string evidenceSource {get;set;} = "DXGI IDXGIAdapter1.GetDesc1";
+  public string evidenceSource {get;set;}
  }
  public static class DxgiEvidence {
   [DllImport("dxgi.dll",EntryPoint="CreateDXGIFactory1",PreserveSig=true)]
