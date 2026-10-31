@@ -50,10 +50,20 @@ $root=Join-Path $env:LOCALAPPDATA 'KlinikLabGodotWorker'
 if(-not(Test-Path $root)){New-Item -ItemType Directory -Force -Path $root|Out-Null}
 $env:KLINIKLAB_GODOT_EXE=$GodotExe
 $env:GIT_TERMINAL_PROMPT='0'
-$log=Join-Path $root 'godot-watcher-stdout.log'
-Add-Content -LiteralPath $log -Value ("=== start "+[DateTime]::UtcNow.ToString('o')+" pinned worker "+$ExpectedWorkerSha+" ===")
-# Node's --watch polls every ten seconds. The worker's file lease prevents duplicates.
-& $NodeExe $worker --watch 2>&1 | ForEach-Object {
- Add-Content -LiteralPath $log -Value (($_ | Out-String).TrimEnd())
+# Old "node --watch 2>&1 | ForEach-Object" with ErrorActionPreference=Stop
+# risks turning Get-Counter stderr into terminating PowerShell ErrorRecords.
+# Native stdout/stderr now go DIRECTLY to unique files, never a pipeline.
+$stamp=[DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff')
+$stdout=Join-Path $root ("godot-watcher-$stamp-stdout.log")
+$stderr=Join-Path $root ("godot-watcher-$stamp-stderr.log")
+$startNote=Join-Path $root ("godot-watcher-$stamp-start.json")
+[IO.File]::WriteAllText($startNote,
+ ((@{startedUTC=[DateTime]::UtcNow.ToString('o');workerSha=$ExpectedWorkerSha;
+    stdout=$stdout;stderr=$stderr;mode='--watch';fullAppMigrated=$false}
+   |ConvertTo-Json)+[Environment]::NewLine),
+ (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "Godot watcher log files: $stdout ; $stderr"
+$native=Start-Process -FilePath $NodeExe -ArgumentList @($worker,'--watch') -PassThru -Wait -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+if($native.ExitCode -ne 0){
+ throw "Godot watcher process exit $($native.ExitCode); preserve logs $stdout and $stderr; never rerun attempted job IDs"
 }
-if($LASTEXITCODE -ne 0){throw "Godot watcher stopped with exit code $LASTEXITCODE. Inspect $log and lease/ledger"}
