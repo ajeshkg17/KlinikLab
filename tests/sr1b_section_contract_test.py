@@ -32,6 +32,29 @@ class SectionContractTest(unittest.TestCase):
             self.assertEqual(sum(x['triangleCount'] for x in result.values()),sum(counts.values()))
             self.assertEqual(result['enamel']['materialInterfaces'],['KL_enamel'])
 
+    def test_owner_pc_real_obj_import_loss_is_blocked_not_rebaselined(self):
+        # Real 31 Oct 2026 UE5.8 report: all these are NONZERO source OBJ
+        # triangles; count losses cannot be interpreted as only degenerate.
+        observed = native_rows(BEFORE)
+        for row in observed:
+            if row['assetName'].endswith('_enamel'):
+                row['triangleCount'] = 6724  # source 10320
+            elif row['assetName'].endswith('_cementum'):
+                row['triangleCount'] = 3116  # source 4105
+        self.assertEqual(sum(x['triangleCount'] for x in observed),10271)
+        self.assertEqual(sum(BEFORE.values()),14856)
+        self.assertEqual(14856 - 10271,4585)
+        with self.assertRaisesRegex(ValueError,'per-material triangle mismatch enamel'):
+            contract.validate_sections(observed,BEFORE,14856)
+
+    def test_cancelling_unreal_section_loss_cannot_pass_aggregate_check(self):
+        observed = native_rows(BEFORE)
+        observed[0]['triangleCount'] -= 3596
+        observed[1]['triangleCount'] += 3596
+        self.assertEqual(sum(x['triangleCount'] for x in observed),14856)
+        with self.assertRaisesRegex(ValueError,'per-material triangle mismatch'):
+            contract.validate_sections(observed,BEFORE,14856)
+
     def test_importer_order_is_irrelevant(self):
         rows=native_rows(BEFORE)
         self.assertEqual(list(contract.validate_sections(rows[::-1],BEFORE,14856)),list(contract.MATERIALS))
