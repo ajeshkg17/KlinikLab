@@ -16,6 +16,10 @@ test('Dedicated local Godot job pins exact requested SHA with bounded non-execut
  assert.equal(JOB_REF,'visual-qa/jobs/godot-current.json');
  assert.equal(RESULT_BRANCH,'visual-feedback');
  assert.equal(validated.graphics,'forward_plus-vulkan');
+ assert.equal(validated.schemaVersion,2);
+ assert.equal(validated.launcherContract,'winps51-clear-psmodulepath-sha256-preflight');
+ assert.throws(()=>validateGodotJob({...job,schemaVersion:1}), 'old WinPS module-path unsafe watcher must reject new job');
+ assert.throws(()=>validateGodotJob({...job,launcherContract:'unsafe-inherited-PSModulePath'}));
  assert(/^pc-godot-fdi16-/.test(validated.jobId));
  assert.equal(validated.jobId,'pc-godot-fdi16-20261031-job02');
  assert.notEqual(validated.jobId,'pc-godot-fdi16-20261031-job01', 'published EVIDENCE_INCOMPLETE job01 cannot be reused');
