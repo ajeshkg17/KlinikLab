@@ -106,6 +106,7 @@ try{
  $report.godotPid=[int]$session.Pid
  $proc=Get-Process -Id $session.Pid -ErrorAction Stop
  $report.godotStartedUTC=$proc.StartTime.ToUniversalTime().ToString('o')
+ Start-Sleep -Seconds 3 # Give Godot time to register its Vulkan GPU Engine instances before opening ONE persistent PDH query
  # No foreground focus, no game/editor activation and no manual F12.
  # Capture script itself uses RenderingServer.frame_post_draw and records true adapter.
  # One Get-Counter invocation keeps ONE native Windows PDH query open across
