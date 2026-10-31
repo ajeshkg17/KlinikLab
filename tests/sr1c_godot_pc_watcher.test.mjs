@@ -81,7 +81,7 @@ test('Private desktop Windows collector rejects absent PNG and missing or invali
   "headlessUsed=$false",
   "Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage'",
   "process3DPositiveSamples",
-  "Windows GPU Engine counter errors",
+  "Persistent Windows PDH query failure",
   "rendererLogNvidiaRtx5060",
   "gpuAdapterLuidMatchedToNvidia=$false",
   "nativePixelReviewAccepted=$false",
