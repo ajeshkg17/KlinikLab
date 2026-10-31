@@ -2,7 +2,7 @@
   "FileVersion": 3,
   "EngineAssociation": "5.8",
   "Category": "SR1B native local KlinikLab clinical-mesh proof",
-  "Description": "Native UE 5.8 workstation-only proof: KlinikLab generated FDI16 before/after educational molar. NO Pixel Streaming/Quest.",
+  "Description": "Source-exact FDI16 native UE ProceduralMesh sections. NO Pixel Streaming or Quest.",
   "Modules": [],
   "Plugins": [
     {
@@ -11,6 +11,10 @@
     },
     {
       "Name": "EditorScriptingUtilities",
+      "Enabled": true
+    },
+    {
+      "Name": "ProceduralMeshComponent",
       "Enabled": true
     }
   ]
