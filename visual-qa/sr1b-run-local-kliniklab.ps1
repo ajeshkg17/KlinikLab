@@ -230,7 +230,7 @@ if($Mode -eq 'Collect'){
    # A missing/malformed counter is a BLOCKER, never evidence of GPU work.
    # Preserve the original PID instance path, cooked double and sample time.
    $report.gpuCounterDiagnostics=[ordered]@{
-    requestedCounter='\\GPU Engine(*)\\Utilization Percentage'
+    requestedCounter='\GPU Engine(*)\Utilization Percentage'
     matchedEditorPid=[int]$p.ProcessId
     totalWindowsSampleSets=0
     pid3DInstances=0
@@ -240,7 +240,7 @@ if($Mode -eq 'Collect'){
     rawCounterError=$null
    }
    try{
-    $counterSets=@(Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage' -SampleInterval 1 -MaxSamples 16 -ErrorAction Stop)
+    $counterSets=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 16 -ErrorAction Stop)
     $report.gpuCounterDiagnostics.totalWindowsSampleSets=$counterSets.Count
     $gpu=New-Object System.Collections.Generic.List[object]
     $positiveCount=0
