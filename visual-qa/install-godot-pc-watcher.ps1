@@ -35,8 +35,8 @@ if($RegisterAtLogon){
  if(-not(Test-Path -LiteralPath $exec)){
   $exec=(Get-Command powershell.exe -ErrorAction Stop).Source
  }
- $args='-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "{0}" -WorkerDirectory "{1}" -ExpectedWorkerSha {2} -GodotExe "{3}" -NodeExe "{4}"' -f $scriptFile,$WorkerDirectory,$ExpectedWorkerSha,$GodotExe,$NodeExe
- $action=New-ScheduledTaskAction -Execute $exec -Argument $args
+ $taskArguments='-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "{0}" -WorkerDirectory "{1}" -ExpectedWorkerSha {2} -GodotExe "{3}" -NodeExe "{4}"' -f $scriptFile,$WorkerDirectory,$ExpectedWorkerSha,$GodotExe,$NodeExe
+ $action=New-ScheduledTaskAction -Execute $exec -Argument $taskArguments
  $trigger=New-ScheduledTaskTrigger -AtLogOn -User $identity
  $principal=New-ScheduledTaskPrincipal -UserId $identity -LogonType Interactive -RunLevel Limited
  $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
