@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "jobId": "pc-godot-fdi16-20261031-job02",
   "commit": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
   "suite": "sr1c-fdi16-before-after",
   "graphics": "forward_plus-vulkan",
   "timeoutSec": 120,
-  "capture": "native-f12-before-after"
+  "capture": "native-f12-before-after",
+  "launcherContract": "winps51-clear-psmodulepath-sha256-preflight"
 }
