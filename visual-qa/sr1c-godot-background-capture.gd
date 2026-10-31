@@ -113,7 +113,7 @@ func _capture_once() -> void:
 		var progression: float = clampf(elapsed / 35.0, 0.0, 1.0)
 		var azimuth: float = deg_to_rad(42.0) * progression
 		var height: float = lerpf(initial_height, radius * 0.72, progression)
-		camera.global_position = midpoint + Vector3(sinf(azimuth) * radius, height, cosf(azimuth) * radius)
+		camera.global_position = midpoint + Vector3(sin(azimuth) * radius, height, cos(azimuth) * radius)
 		camera.look_at(midpoint, Vector3.UP)
 		if elapsed >= 3.0 and not frontal_saved:
 			var output: Dictionary = _write_gpu_frame("frontal")
