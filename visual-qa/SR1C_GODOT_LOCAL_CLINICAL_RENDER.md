@@ -1,3 +1,5 @@
+> **New supported remote job mechanism:** GitHub `visual-qa/jobs/godot-current.json` and separate `visual-qa/godot-worker.mjs` provide source-SHA-pinned native Godot launch/capture/GPU diagnostics on the actual owner Windows PC **only when the PC watcher is started in an unlocked interactive session**. The existing XR watcher cannot execute this job. Read [SR1C_GODOT_PC_WATCHER.md](./SR1C_GODOT_PC_WATCHER.md) for startup and the `visual-feedback/GODOT_PC_LATEST.md` publication gate. Until the PC publishes original PNG/results, the new job is only a queued request, not a successful render.
+
 # SR1C Godot 4.7.2: Native KlinikLab local first, Quest later
 
 **Binding engine decision, 31 October 2026:** Godot 4.7.2 is the immediate native render engine. Unity Hub has no confirmed Editor installation and Unity remains a fallback. Unreal 5.8.4 is PAUSED exploration, not visually accepted. Preserve the entire history of original Unreal evidence.
