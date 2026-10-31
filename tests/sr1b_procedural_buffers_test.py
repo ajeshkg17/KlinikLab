@@ -11,6 +11,9 @@ source=root/'visual-qa/sr1b_procedural_buffers.py'
 spec=importlib.util.spec_from_file_location('sr1b_procedural_buffers',source)
 mod=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
+bspec=importlib.util.spec_from_file_location('sr1b_native_bounds',root/'visual-qa/sr1b_native_bounds.py')
+bounds=importlib.util.module_from_spec(bspec)
+bspec.loader.exec_module(bounds)
 builder=root/'visual-qa/sr1b-unreal-build-clinical-level.py'
 MATERIALS=('enamel','dentin','pulp','cementum','caries')
 TRIS={'enamel':10320,'dentin':112,'pulp':207,'cementum':4105,'caries':112}
@@ -25,6 +28,7 @@ class FakeMaterial:
 class FakeComponent:
     def __init__(self,owner):
         self.owner=owner;self.section=None;self.material=None;self.props={}
+        self.world_location=(0.,0.,0.)
         owner.comps.append(self)
     def create_mesh_section_linear_color(self,index,verts,tris,normals,
                                           uv0,uv1,uv2,uv3,cols,tangents,collision,srgb):
@@ -32,6 +36,11 @@ class FakeComponent:
         assert len(verts)==len(tris)==len(normals)
         assert tris==list(range(len(verts)))
         self.section=(verts,tris)
+    def set_world_location(self,location,sweep,teleport):self.world_location=tuple(location)
+    def set_visibility(self,visible,propagate):self.props['visible']=visible
+    def set_hidden_in_game(self,hidden,propagate):self.props['hidden_in_game']=hidden
+    def is_visible(self):return self.props.get('visible',False)
+    def get_editor_property(self,key):return self.props[key]
     def get_num_sections(self):return int(self.section is not None)
     def is_mesh_section_visible(self,i):return i==0 and self.section is not None
     def set_material(self,i,mat):assert i==0;self.material=mat
@@ -117,6 +126,8 @@ class SourceExactTests(unittest.TestCase):
         fake.subsystem.add_new_subobject=add_component
         scope={'unreal':fake,'require':require,'MATERIALS':MATERIALS,
                'exact_source_buffers':mod.exact_source_buffers,
+               'source_bounds':bounds.source_bounds,
+               'check_native_component_bounds':bounds.check_native_component_bounds,
                'spawn':lambda cls,x,y,z,name:actor}
         build=extract_function('native_procedural_tooth_actor',scope)
         mats={name:{'materialInterface':FakeMaterial('KL_'+name)} for name in MATERIALS}
