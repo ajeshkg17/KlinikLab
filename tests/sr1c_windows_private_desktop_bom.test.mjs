@@ -92,7 +92,8 @@ test('New owner PowerShell results are explicitly UTF8 no BOM, and error 87 is d
 test('Old job02/job03 ledger recovery is publication-only and will NEVER execute them again',()=>{
  for(const id of ['pc-godot-fdi16-20261031-job02','pc-godot-fdi16-20261031-job03'])
   assert(worker.includes("'"+id+"'"));
- assert(worker.includes("process.argv.includes('--recover-incomplete')"));
+ assert(worker.includes("modes.includes('--recover-incomplete')"));
+ assert(worker.includes('await acquireGodotWorkerLease(ROOT)'), 'legacy recovery must hold exclusive worker lease');
  assert(worker.includes('async function recoverIncompleteAttempts()'));
  const recovery=worker.slice(worker.indexOf('async function recoverIncompleteAttempts()'),worker.indexOf('let busy=false;'));
  assert(recovery.includes("status:'publish-pending'"));

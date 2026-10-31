@@ -1,3 +1,39 @@
+# Default owner-PC Godot GitHub watcher — 1 November 2026
+
+The one-time job06 already published real process-attributable RTX 5060 evidence and its two original images. Both PNGs have now been directly inspected from GitHub, without manual uploads. Job06 is **a static clinic-workspace prototype, not full KlinikLab**. See `PHASE_ROADMAP.md` for objective pixel findings. **Job07** `pc-godot-clinic-20261101-job07` (six source-derived cases / seven native stations) is the next unique queued migration slice. It is not yet an executed native job or a full app.
+
+**Normal path** is a pinned per-user `--watch` process polling GitHub every ten seconds. It runs only the validated unique source-pinned job, builds its own immutable evidence worktree, starts unswitched WinSta0 native Vulkan Godot without foreground activation, captures BOTH original PNGs, and publishes the native JSON, PDH/DXGI result, warnings and PNG SHA256s to `visual-feedback`. This path does not require anyone to take screenshots. The watcher now has an exclusive file lease: concurrent `--once`/watch attempts are rejected. Crash leaves lease and uncertain execution ledger intact, never automatically rerun.
+
+**Once on the Windows owner PC, from a clean detached worktree of the approved exact integration SHA after CI:**
+
+```powershell
+$ErrorActionPreference='Stop'
+$repo='C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
+$sha='<EXACT_MERGED_INTEGRATION_WORKER_SHA>'
+$godot='C:\Users\ajesh\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\godot_v4.7.2-stable_win64.exe'
+$node=(Get-Command node.exe -ErrorAction Stop).Source
+git -C $repo fetch origin integration/single-chat-validation-2026-10-30
+if($LASTEXITCODE -ne 0){throw 'Fetch failed'}
+$worker="C:\klab-godot-watcher-$($sha.Substring(0,8))"
+if(Test-Path -LiteralPath $worker){throw 'Existing worktree path: use a new unique empty path'}
+git -C $repo worktree add --detach $worker $sha
+if($LASTEXITCODE -ne 0){throw 'Worktree creation failed'}
+node "$worker\visual-qa\godot-worker.mjs" --validate
+if($LASTEXITCODE -ne 0){throw 'PC watcher preflight failed'}
+& "$worker\visual-qa\install-godot-pc-watcher.ps1" -WorkerDirectory $worker -ExpectedWorkerSha $sha -GodotExe $godot -NodeExe $node -RegisterAtLogon
+Start-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher'
+Start-Sleep -Seconds 3
+node "$worker\visual-qa\godot-worker.mjs" --lock-status
+Get-Content "$env:LOCALAPPDATA\KlinikLabGodotWorker\godot-heartbeat.json" -Raw
+Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher' | Get-ScheduledTaskInfo
+```
+
+Expected evidence: Scheduled Task enabled/running, `--lock-status` `exists:true` with live PID and `processAlive:true`, heartbeat `polling`, `executing`, `publish-pending` or `published` with the **new job07 ID**, and a new immutable job07 folder / `GODOT_PC_LATEST.md` link. The actual RTX and two original PNG checks are mandatory, not presumed. Leave the pinned worker checkout intact while this task is registered; a future schema change requires explicit approved worker update.
+
+If `--lock-status` reports a dead PID, **do not delete the lock until checking the ledger, process and preservation of any incomplete run**. No older job is ever rerendered; only a new unique ID may be queued if an attempt was interrupted. Do not launch a second concurrent watcher. No Godot foreground editor/project manager, manual F12 or screenshots, web hosting/firewall/Tailscale changes, or Quest claim.
+
+---
+
 ## SR1D job07 — exact production six-case/seven-station native Godot milestone (1 November 2026)
 
 **Job06 remains immutable** with confirmed RTX process 3D attribution, **not** independent pixel or full application acceptance. New job `pc-godot-clinic-20261101-job07`, schema 7, from pinned production source `f4d4d4151851a08342def08d9f2e461f5f5e7109`. It uses the same never-switched WinSta0 Godot Vulkan process and persistent Windows PDH GPU counters, requiring three distinct matching RTX 5060 3D periods, and publishes frontal/angled new native PNG evidence.

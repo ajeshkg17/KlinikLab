@@ -14,6 +14,7 @@ import {fileURLToPath} from 'node:url';
 import {validateGodotJob,INTEGRATION_BRANCH,RESULT_BRANCH,JOB_REF} from './godot-job-core.mjs';
 import {cleanWindowsPowerShellEnv} from './godot-powershell-environment.mjs';
 import {parseGodotJson,jsonWithoutBom} from './godot-json.mjs';
+import {acquireGodotWorkerLease,readGodotWorkerLease} from './godot-single-instance.mjs';
 
 const REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabGodotWorker');
@@ -400,9 +401,43 @@ async function tick(){
  finally{busy=false}
 }
 function textLog(...x){console.log(...x)}
-if(process.argv.includes('--recover-incomplete')){
- await recoverIncompleteAttempts(); // never calls execute(), powershell(), or Godot
+// --validate is read-only/preflight, never captures, and does not take the
+// rendering lease. --once, --watch and repair mutually exclude one another.
+const args=process.argv.slice(2);
+const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status'].filter(x=>args.includes(x));
+if(modes.length>1)throw Error('Select only one approved Godot worker mode');
+if(args.some(x=>!modes.includes(x)))throw Error('Unknown Godot worker argument');
+if(modes.includes('--lock-status')){
+ const info=await readGodotWorkerLease(ROOT);
+ console.log(JSON.stringify({workerLease:info,heartbeat:HEARTBEAT,ledger:LEDGER},null,2));
+}else if(modes.includes('--validate')){
+ await tick(); // no render, safe even while a watcher is already polling
+}else if(modes.includes('--recover-incomplete')){
+ const lease=await acquireGodotWorkerLease(ROOT);
+ try{await recoverIncompleteAttempts()}finally{await lease.release()}
+}else if(modes.includes('--watch')){
+ const lease=await acquireGodotWorkerLease(ROOT);
+ let stopping=false,timer=null,activeCycle=Promise.resolve();
+ const cycle=()=>{
+  if(stopping)return;
+  activeCycle=tick(); // tick owns its own catch and heartbeat
+ };
+ const stop=()=>{
+  if(stopping)return;
+  stopping=true;
+  if(timer!==null)clearInterval(timer);
+  void activeCycle.finally(()=>lease.release()).catch(e=>{
+   console.error('Godot worker lease cleanup failed:',e);
+   process.exitCode=1;
+  });
+ };
+ process.once('SIGINT',stop);
+ process.once('SIGTERM',stop);
+ cycle();
+ await activeCycle;
+ if(!stopping)timer=setInterval(cycle,10000);
+ console.log('GitHub Godot PC watcher polling each 10 seconds; private-desktop captures only; PID',process.pid);
 }else{
- await tick();
- if(process.argv.includes('--watch'))setInterval(tick,10000);
+ const lease=await acquireGodotWorkerLease(ROOT);
+ try{await tick()}finally{await lease.release()}
 }
