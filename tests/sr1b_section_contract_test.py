@@ -8,8 +8,8 @@ spec=importlib.util.spec_from_file_location('sr1b_section_contract', str(source)
 contract=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contract)
 
-BEFORE={'enamel':12000,'dentin':1800,'pulp':80,'cementum':900,'caries':76}
-AFTER={'enamel':12080,'dentin':1800,'pulp':80,'cementum':900,'caries':76}
+BEFORE={'enamel':10320,'dentin':112,'pulp':207,'cementum':4105,'caries':112}
+AFTER={'enamel':10308,'dentin':205,'pulp':207,'cementum':4105,'caries':111}
 
 def native_rows(counts, prefix='KL_FDI16_Before'):
     return [
