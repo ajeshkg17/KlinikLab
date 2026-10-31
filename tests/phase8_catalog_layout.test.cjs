@@ -8,7 +8,7 @@ const source=fs.readFileSync(path.join(root,'engine.js'),'utf8');
 const start=source.indexOf('    // Phase 8 eye-frustum correction:');
 const end=source.indexOf('    this.setXRCatalogOpen?.(false);',start);
 assert(start>0&&end>start,'catalog transform exists');
-const run=vm.runInNewContext('(function(){'+source.slice(start,end)+'})');
+const run=vm.runInNewContext('(function(cat){'+source.slice(start,end)+'})');
 
 test('Phase8 revised catalog fits a central world-space stereo-safe footprint after XR comfort',()=>{
  const raw=[
@@ -24,7 +24,7 @@ test('Phase8 revised catalog fits a central world-space stereo-safe footprint af
  const hitables=raw.filter(m=>m.key).map(m=>({mesh:m,p:m.p.slice()}));
  const cat={panels:raw};
  const scene={pickables:hitables};
- run.call(scene);
+ run.call(scene,cat);
  // The exact production comfort pivot/factor and the same width/height
  // changes applied to every object; this is geometry only, not pixel acceptance.
  for(const m of raw){
