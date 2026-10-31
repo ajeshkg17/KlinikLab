@@ -1,0 +1,44 @@
+{
+    "schemaVersion":  2,
+    "status":  "EVIDENCE_INCOMPLETE",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\appdata\\local\\microsoft\\winget\\packages\\godotengine.godotengine_microsoft.winget.source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job04-f4d4d41518\\Project\\project.godot",
+    "privateDesktopCreated":  true,
+    "userDesktopActivationRequested":  false,
+    "headlessUsed":  false,
+    "godotPid":  8852,
+    "godotStartedUTC":  "2026-10-31T21:34:00.7576238Z",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeImagePresent":  true,
+    "nativeScreenshotFile":  "godot-native-fdi16-2017.png",
+    "imageSHA256":  "d8e92a28ab409f9f51ed279c8c6bcb3d53f25bfd663459ebccdbeddb700cc411",
+    "imageWidth":  1600,
+    "imageHeight":  900,
+    "nativePixelReviewAccepted":  false,
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "renderingMethod":  "forward_plus",
+    "renderingDriver":  "vulkan",
+    "videoAdapterName":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "videoAdapterVendor":  "NVIDIA",
+    "backgroundCaptureStatus":  "BACKGROUND_VULKAN_FRAME_CAPTURED_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
+    "process3DSampleCount":  54,
+    "process3DPositiveSamples":  2,
+    "process3DMaxUtilizationPercent":  1.3464199655882783,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "rendererLogNvidiaRtx5060":  true,
+    "gpuAdapterLuidMatchedToNvidia":  false,
+    "godotProcessGPUCorroborated":  false,
+    "blockers":  [
+                     "Not enough nonzero valid Godot-PID GPU Engine 3D counter samples (require \u003e=3)",
+                     "Actual Godot process RTX 5060 GPU render proof incomplete"
+                 ],
+    "limitations":  [
+                        "Independent original PNG pixel review remains required",
+                        "Windows GPU 3D PID utilization plus Godot Vulkan adapter identity does not itself map a DXGI LUID"
+                    ]
+}

@@ -1,0 +1,18 @@
+{
+	"displayDriver": "Windows",
+	"gpuProcessVerified": false,
+	"headlessUsed": false,
+	"imageFile": "godot-native-fdi16-2017.png",
+	"imageHeight": 900,
+	"imageWidth": 1600,
+	"pixelReviewed": false,
+	"renderingDriver": "vulkan",
+	"renderingMethod": "forward_plus",
+	"sourceTrianglesAfter": 14936,
+	"sourceTrianglesBefore": 14856,
+	"status": "BACKGROUND_VULKAN_FRAME_CAPTURED_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
+	"tissueSurfacesPerTooth": 5,
+	"userDesktopActivationRequested": false,
+	"videoAdapterName": "NVIDIA GeForce RTX 5060 Laptop GPU",
+	"videoAdapterVendor": "NVIDIA"
+}

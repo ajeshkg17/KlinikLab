@@ -1,0 +1,326 @@
+[
+    {
+        "utc":  "2026-10-31T21:34:10.1923691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012b1e_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_10_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_11_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_12_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_13_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_14_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_15_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_16_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_17_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_18_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2003691Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_19_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_1_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_20_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_21_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_22_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_23_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_24_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_2_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_3_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_4_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_5_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_6_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_7_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2013686Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_8_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2018780Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_9_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:10.2018780Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00013049_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  1.3464199655882783,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012b1e_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_10_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_11_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_12_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_13_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_14_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_15_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_16_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_17_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_18_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_19_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_1_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_20_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_21_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_22_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_23_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_24_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_2_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_3_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_4_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_5_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_6_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_7_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_8_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00012fbb_phys_0_eng_9_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  0,
+        "finite":  true
+    },
+    {
+        "utc":  "2026-10-31T21:34:18.4024522Z",
+        "counterPath":  "\\\\officegopi\\gpu engine(pid_8852_luid_0x00000000_0x00013049_phys_0_eng_0_engtype_3d)\\utilization percentage",
+        "utilizationPercent":  1.2640342329564602,
+        "finite":  true
+    }
+]

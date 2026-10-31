@@ -1,0 +1,25 @@
+{
+  "powerShellChildEnvironment": {
+    "inheritedPSModulePathRemoved": true,
+    "hashCmdletPreflightRequired": true
+  },
+  "jobId": "pc-godot-fdi16-20261031-job04",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1c-fdi16-before-after",
+  "executedOn": "owner Windows PC (watcher runtime)",
+  "generatedAt": "2026-10-31T21:34:19.679Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "imageExists": true,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": false,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [],
+  "blockers": [
+    "Not enough nonzero valid Godot-PID GPU Engine 3D counter samples (require >=3)",
+    "Actual Godot process RTX 5060 GPU render proof incomplete"
+  ]
+}
