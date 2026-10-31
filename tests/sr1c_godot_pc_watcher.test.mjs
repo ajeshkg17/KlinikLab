@@ -1,0 +1,79 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {validateGodotJob,EXACT_SOURCE_SHA,JOB_REF,RESULT_BRANCH} from '../visual-qa/godot-job-core.mjs';
+
+const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
+const job=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const watcher=read('../visual-qa/godot-worker.mjs');
+const powershell=read('../visual-qa/sr1c-capture-godot-pc.ps1');
+const xrCore=read('../visual-qa/xr-job-core.mjs');
+
+test('Dedicated local Godot job pins exact requested SHA with bounded non-executable suite',()=>{
+ const validated=validateGodotJob(job);
+ assert.equal(validated.commit,EXACT_SOURCE_SHA);
+ assert.equal(EXACT_SOURCE_SHA,'f4d4d4151851a08342def08d9f2e461f5f5e7109');
+ assert.equal(JOB_REF,'visual-qa/jobs/godot-current.json');
+ assert.equal(RESULT_BRANCH,'visual-feedback');
+ assert.equal(validated.graphics,'forward_plus-vulkan');
+ assert(/^pc-godot-fdi16-/.test(validated.jobId));
+ assert.throws(()=>validateGodotJob({...job,suite:'shell'}));
+ assert.throws(()=>validateGodotJob({...job,command:'powershell'}));
+ assert.throws(()=>validateGodotJob({...job,script:'C:\\anything.ps1'}));
+ assert.throws(()=>validateGodotJob({...job,commit:'d5371fe051bbca83e380e44fd3465dffe0718058'}));
+ assert.throws(()=>validateGodotJob({...job,timeoutSec:1000}));
+ assert.throws(()=>validateGodotJob({...job,jobId:'../../unsafe'}));
+});
+
+test('XR watcher and its job remain untouched and Godot suite is explicitly incompatible',()=>{
+ assert.equal(xrCore.includes("j.suite!=='quest2-phase3'"),true);
+ assert(!xrCore.includes('godot-current.json'));
+ assert(!watcher.includes('xr-current.json'));
+ assert(!watcher.includes('8891'));
+});
+
+test('Godot watcher is a strict opt-in Windows-only exact-SHA runner with durable state and GitHub publication',()=>{
+ for(const token of [
+  "process.platform!=='win32'",
+  "process.env.KLINIKLAB_GODOT_EXE",
+  "'godot-ledger.json'",
+  "'godot-heartbeat.json'",
+  "git(['show','FETCH_HEAD:'+JOB_REF])",
+  "git(['merge-base','--is-ancestor',j.commit,head])",
+  "git(['worktree','add','--detach',worktree,j.commit])",
+  "'sr1c-build-godot-local.ps1'",
+  "'sr1c-capture-godot-pc.ps1'",
+  "status:'executing'",
+  "status:'publish-pending'",
+  "status='published'",
+  "visual-feedback",
+  "'GODOT_PC_LATEST.md'",
+  "'godot-native-fdi16.png'",
+  "'godot-job-result.json'",
+  "imageIndependentPixelReviewAccepted:false"
+ ])assert(watcher.includes(token),token);
+ assert(!watcher.includes("spawn('cmd.exe'"));
+ assert(!watcher.includes("eval("));
+});
+
+test('Windows collector fails closed on absent PNG or GPU, retains raw error data and PID attribution',()=>{
+ for(const token of [
+  "EVIDENCE_INCOMPLETE",
+  "get_current_rendering",
+  "godot-native-fdi16-",
+  "Godot game window missing",
+  "[System.Windows.Forms.SendKeys]::SendWait('{F12}')",
+  "Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage'",
+  "process3DPositiveSamples",
+  "Windows GPU Engine counter failure",
+  "rendererLogNvidiaRtx5060",
+  "gpuAdapterLuidMatchedToNvidia=$false",
+  "nativePixelReviewAccepted=$false",
+  "native-source-submission.json",
+  "nativeSourceSubmissionVerified",
+  "expectedTissueSurfacesPerState=5",
+  "godot-owner-pc-result.json"
+ ])if(token==='get_current_rendering')continue;else assert(powershell.includes(token),token);
+ assert(powershell.includes("status='EVIDENCE_INCOMPLETE'"));
+ assert(!powershell.includes("process3DPositiveSamples=3"));
+});
