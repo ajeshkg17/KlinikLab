@@ -70,6 +70,7 @@ Expected output under the untouched unique run directory:
     Saved/Logs/*.log
     Saved/Screenshots/WindowsEditor/*.png
   unreal-clinical-level-build.json
+  native-level-file-hashes.json
   clinical-editor-open.json
   Captures/capture-<unique>/
     clinical-capture-report.json
@@ -81,7 +82,7 @@ Expected output under the untouched unique run directory:
 
 ## Acceptance — no shortcut
 
-A source commit / regression pass validates exporter logic **only**. First workstation confirmation must establish: exact source SHA, known FDI16 case and two non-identical source meshes; successfully imported native Unreal `.uasset` and saved map; fresh original native Editor screenshot and hash; matching UE 5.8.4 project process / exe / log / D3D12 NVIDIA chosen adapter; nonzero `GPU Engine\engtype_3D` performance samples tied to the **specific active clinical UnrealEditor PID**. The OS GPU counter's **LUID → physical RTX 5060 adapter association** is independently pending unless explicitly mapped. The collector must not accept a 12-frame standalone FFmpeg NVENC test as evidence that the Unreal process rendered, encoded or streamed any frame.
+A source commit / regression pass validates exporter logic **only**. First workstation confirmation must establish: exact source SHA, known FDI16 case and two non-identical source meshes; successfully imported native Unreal `.uasset` with LOD0 triangle counts identical to exported topology, hashed `.uasset` and saved map; fresh original native Editor screenshot and hash; matching UE 5.8.4 project process / exe / log / D3D12 NVIDIA chosen adapter; nonzero `GPU Engine\engtype_3D` performance samples tied to the **specific active clinical UnrealEditor PID**. The OS GPU counter's **LUID → physical RTX 5060 adapter association** is independently pending unless explicitly mapped. The collector must not accept a 12-frame standalone FFmpeg NVENC test as evidence that the Unreal process rendered, encoded or streamed any frame.
 
 **Independent visual signoff:** inspect the actual PNG pixels at original resolution, verify two rendered distinct FDI16 shapes, a visibly different occlusal cut, clinical labels, lighting/geometry and no blank default-map scene. Compare original file hashes and output source; the collector's PNG metadata/signature alone does not prove visual correctness. Clinical anatomy and calibration require later qualified review.
 
