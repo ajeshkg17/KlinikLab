@@ -50,6 +50,26 @@ test('Real Windows PowerShell 5.1 Set-Content -Encoding utf8 creates BOM: Node p
  }finally{fs.rmSync(dir,{force:true,recursive:true})}
 });
 
+test('Actual Windows PowerShell 5.1 UTF8Encoding(false) writer emits no BOM',t=>{
+ if(process.platform!=='win32'){t.skip('WinPS output writer requires Windows');return}
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'klab-sr1c-jsonwriter-'));
+ try{
+  const file=path.join(dir,'owner.json');
+  const code=[
+   "$ErrorActionPreference='Stop'",
+   "$encoding=New-Object System.Text.UTF8Encoding($false)",
+   "[IO.File]::WriteAllText($env:KL_JSON_OUTPUT, '{"+'"status":"EVIDENCE_INCOMPLETE"'+"}', $encoding)"
+  ].join('; ');
+  const env=cleanWindowsPowerShellEnv({...process.env,KL_JSON_OUTPUT:file});
+  const p=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',code],
+   {env,encoding:'utf8',timeout:30000});
+  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+  const bytes=fs.readFileSync(file);
+  assert.notEqual(bytes.subarray(0,3).toString('hex'),'efbbbf');
+  assert.equal(JSON.parse(bytes.toString('utf8')).status,'EVIDENCE_INCOMPLETE');
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+
 test('New owner PowerShell results are explicitly UTF8 no BOM, and error 87 is diagnosed with WinSta0 and minimal rights',()=>{
  assert(collector.includes('New-Object System.Text.UTF8Encoding($false)'));
  assert(!collector.includes("Set-Content -LiteralPath $reportPath -Encoding utf8"));
