@@ -129,6 +129,32 @@ test('Pure native tissue-section contract exercises actual before/after aggregat
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
 
+test('Original triangle stream native fallback is source-hashed, uses Unreal StaticMeshDescription and never accepts a reduced mesh',t=>{
+ const strict=[
+  'from sr1b_topology_source import read_obj_triangles',
+  'read_obj_triangles(path, expected_counts)',
+  'def report_mesh_source_build(mesh):',
+  "get_static_mesh_description(0)",
+  'get_lod_build_settings(mesh, 0)',
+  "settings.set_editor_property(flag, False)",
+  "subsystem.set_lod_build_settings(mesh, 0, settings)",
+  "save_loaded_asset(mesh)",
+  'def rebuild_from_source_triangle_stream(mesh, triangles, material):',
+  'unreal.StaticMesh.create_static_mesh_description()',
+  "smd.create_triangle(group, instances)",
+  'mesh.build_from_static_mesh_descriptions([smd], False, False)',
+  'get_num_triangles(0)',
+  'directSourceMeshDescriptionReconstruction',
+  'SOURCE_OBJ_NATIVE_STATICMESHDESCRIPTION_NO_REDUCTION',
+ ];
+ for(const part of strict)assert(importer.includes(part),part);
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_topology_source_test.py')],
+  {encoding:'utf8',timeout:30000});
+ if(p.error?.code==='ENOENT'){t.skip('Python not installed');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
 test('PowerShell clinical collector parse check on systems equipped with PowerShell',t=>{
  const script=path.join(root,'visual-qa/sr1b-run-local-kliniklab.ps1').replace(/'/g,"''");
  const command=`$null=$tokens=$errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('${script}',[ref]$tokens,[ref]$errors)|Out-Null; if($errors.Count -gt 0){$errors|ForEach-Object {Write-Error $_.Message};exit 2}`;
