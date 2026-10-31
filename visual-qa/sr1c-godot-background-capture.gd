@@ -75,21 +75,70 @@ func _capture_once() -> void:
 			if int(record.get("nativeSubmittedIndices", -1)) != 3 * int(record.get("sourceTriangles", -1)) or int(record.get("surfaceCount", -1)) != 1:
 				_fail("Original tissue indexed mesh surface mismatch: " + tissue)
 				return
-	for i in 6:
-		await RenderingServer.frame_post_draw
-	var texture: ViewportTexture = root.get_texture()
-	var image: Image = texture.get_image()
-	if image.is_empty() or image.get_width() < 1280 or image.get_height() < 720:
-		_fail("Private desktop viewport GPU readback empty or too small")
+	# Orbit for exactly 42 seconds in the private WinSta0 desktop.
+	# Keep submitting DIFFERENT camera transforms so PDH can observe sustained
+	# process-specific real GPU 3D work, even without a visible active desktop.
+	var camera: Camera3D = scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA")
+	if camera == null:
+		_fail("Expected original source-derived FDI16 Camera3D missing")
 		return
-	var name: String = "godot-native-fdi16-" + str(Time.get_ticks_msec()) + ".png"
-	var output: String = _capture_directory().path_join(name)
-	if image.save_png(output) != OK:
-		_fail("Could not save original native GPU viewport PNG")
+	var before_root: Node3D = scene.get_node_or_null("KL_FDI16_BEFORE")
+	var after_root: Node3D = scene.get_node_or_null("KL_FDI16_AFTER")
+	if before_root == null or after_root == null:
+		_fail("Expected original BEFORE and AFTER source geometry nodes missing")
+		return
+	var midpoint: Vector3 = (before_root.global_position + after_root.global_position) * 0.5
+	var start_cam: Vector3 = camera.global_position
+	var radius: float = maxf(8.0, start_cam.distance_to(midpoint))
+	var initial_height: float = start_cam.y - midpoint.y
+	var start_msec: int = Time.get_ticks_msec()
+	var angle_frame_saved := false
+	var frontal_saved := false
+	var frontal_file := ""
+	var angle_file := ""
+	var frontal_hash := ""
+	var angle_hash := ""
+	var last_frame_count := 0
+	while Time.get_ticks_msec() - start_msec < 42000:
+		await RenderingServer.frame_post_draw
+		last_frame_count += 1
+		var elapsed: float = float(Time.get_ticks_msec() - start_msec) / 1000.0
+		var progression: float = clampf(elapsed / 35.0, 0.0, 1.0)
+		var azimuth: float = deg_to_rad(42.0) * progression
+		var height: float = lerpf(initial_height, radius * 0.72, progression)
+		camera.global_position = midpoint + Vector3(sinf(azimuth) * radius, height, cosf(azimuth) * radius)
+		camera.look_at(midpoint, Vector3.UP)
+		if elapsed >= 3.0 and not frontal_saved:
+			var output: Dictionary = _write_gpu_frame("frontal")
+			if not output.get("ok", false):
+				_fail("Native frontal GPU image failed: " + str(output.get("error", "")))
+				return
+			frontal_file = str(output["name"])
+			frontal_hash = str(output["sha256"])
+			frontal_saved = true
+		if elapsed >= 32.0 and not angle_frame_saved:
+			var output: Dictionary = _write_gpu_frame("occlusal")
+			if not output.get("ok", false):
+				_fail("Native occlusal GPU image failed: " + str(output.get("error", "")))
+				return
+			angle_file = str(output["name"])
+			angle_hash = str(output["sha256"])
+			angle_frame_saved = true
+	if not frontal_saved or not angle_frame_saved:
+		_fail("Sustained orbit did not produce BOTH independent original native images")
+		return
+	var duration_sec: float = float(Time.get_ticks_msec() - start_msec) / 1000.0
+	if duration_sec < 40.0 or duration_sec > 45.0:
+		_fail("Private GPU orbit outside 40-45s duration gate")
 		return
 	_write_background_result({
-		"status":"BACKGROUND_VULKAN_FRAME_CAPTURED_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
-		"imageFile":name, "imageWidth":image.get_width(), "imageHeight":image.get_height(),
+		"status":"BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
+		"imageFile":frontal_file, "imageSHA256":frontal_hash,
+		"angledImageFile":angle_file, "angledImageSHA256":angle_hash,
+		"imageWidth":1600, "imageHeight":900,
+		"orbitDurationSeconds":duration_sec,
+		"orbitCameraMaxAzimuthDegrees":42.0, "orbitEndElevationRatio":0.72,
+		"orbitSubmittedFrames":last_frame_count,
 		"displayDriver":DisplayServer.get_name(), "renderingMethod":renderer,
 		"renderingDriver":driver, "videoAdapterName":adapter, "videoAdapterVendor":vendor,
 		"sourceTrianglesBefore":14856, "sourceTrianglesAfter":14936,
@@ -97,11 +146,26 @@ func _capture_once() -> void:
 		"pixelReviewed":false, "gpuProcessVerified":false,
 		"headlessUsed":false, "userDesktopActivationRequested":false
 	})
-	print("SR1C_BACKGROUND_CAPTURE_WRITTEN: " + output)
-	# Keep Godot GPU process alive while the Windows worker collects PID samples.
-	await create_timer(16.0).timeout
+	print("SR1C_ORBIT_TWO_IMAGES_WRITTEN: "+frontal_file+" ; "+angle_file)
 	DisplayServer.unregister_additional_output(self)
 	quit(0)
+
+func _write_gpu_frame(label: String) -> Dictionary:
+	# Read back only after completed Vulkan frame; never redraw a synthetic image.
+	var image: Image = root.get_texture().get_image()
+	if image.is_empty() or image.get_width() < 1280 or image.get_height() < 720:
+		return {"ok":false,"error":"Godot native Vulkan viewport readback empty or undersized"}
+	var folder: String = _capture_directory()
+	if folder.is_empty():
+		return {"ok":false,"error":"Missing pinned capture directory"}
+	var name: String = "godot-native-fdi16-" + label + "-" + str(Time.get_ticks_msec()) + ".png"
+	var output: String = folder.path_join(name)
+	if image.save_png(output) != OK:
+		return {"ok":false,"error":"Native Vulkan original PNG write failed"}
+	var hash: String = FileAccess.get_sha256(output)
+	if hash.length() != 64:
+		return {"ok":false,"error":"Original GPU screenshot SHA-256 failed"}
+	return {"ok":true,"name":name,"sha256":hash}
 
 func _capture_directory() -> String:
 	var destination: String = FileAccess.get_file_as_string(CAPTURE_DIRECTORY).strip_edges()
