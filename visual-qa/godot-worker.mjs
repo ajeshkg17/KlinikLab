@@ -154,7 +154,7 @@ async function execute(j){
  }catch(e){preparationError=e.message}
  if(!preparationError){
   try{
-   await powershell(path.join(sourceDir,'sr1c-capture-godot-pc.ps1'),
+   await powershell(path.join(sourceDir,'sr1c-capture-godot-background-pc.ps1'),
     ['-EvidenceDir',run,'-ExpectedSha',j.commit,
      '-GodotExe',process.env.KLINIKLAB_GODOT_EXE],j.timeoutSec*1000);
   }catch(e){captureError=e.message}
@@ -171,6 +171,9 @@ async function execute(j){
   imageExists:!!native?.nativeImagePresent,
   sourceMeshVerified:!!native?.nativeSourceSubmissionVerified,
   gpuProcessCorroborated:!!native?.godotProcessGPUCorroborated,
+  backgroundPrivateDesktopRenderRequested:true,
+  foregroundActivationRequested:false,
+  headlessDummyRendererAllowed:false,
   imageIndependentPixelReviewAccepted:false,
   overallStatus:'NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_AND_GPU_REVIEW',
   errors:[preparationError,captureError].filter(Boolean),
@@ -200,6 +203,8 @@ async function publish(j,run,result){
   ['native-source-submission.json',path.join(capture,'native-source-submission.json')],
   ['godot-source-prepare.json',path.join(run,'godot-source-prepare.json')],
   ['godot-gpu-3d-counters.json',path.join(capture,'godot-gpu-3d-counters.json')],
+  ['godot-background-capture.json',path.join(capture,'godot-background-capture.json')],
+  ['godot-native-background.log',path.join(capture,'godot-native-background.log')],
   ['godot-native-stdout.log',path.join(capture,'godot-native-stdout.log')],
   ['godot-native-stderr.log',path.join(capture,'godot-native-stderr.log')]
  ];
