@@ -59,6 +59,11 @@ test('New owner PowerShell results are explicitly UTF8 no BOM, and error 87 is d
  assert(desktop.includes('$desktopAccess=[uint32]0x000000C3'));
  assert(!desktop.includes('[uint32]0x000F01FF,[IntPtr]::Zero)'));
  assert(desktop.includes('GetLastWin32Error()'));
+ assert(desktop.includes('StringToHGlobalUni($desktopName)'));
+ assert(desktop.includes('CreateDesktopRaw($desktopNamePointer,'));
+ assert(desktop.includes('FreeHGlobal($desktopNamePointer)'));
+ assert(!desktop.includes('CreateDesktop($desktopName,$null'), 'production must not use broken managed string PInvoke');
+
  assert(desktop.includes('no fallback to foreground'));
  assert(!/^\s*.*SwitchDesktop\s*\(/m.test(desktop));
  assert(!/^\s*.*SetForegroundWindow\s*\(/m.test(desktop));
