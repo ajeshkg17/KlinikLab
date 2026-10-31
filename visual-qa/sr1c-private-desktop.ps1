@@ -35,6 +35,12 @@ namespace KlinikLab {
   [DllImport("user32.dll", EntryPoint="CreateDesktopW", CharSet=CharSet.Unicode, SetLastError=true)]
   public static extern IntPtr CreateDesktop(string name, string device, IntPtr devmode,
     uint flags, uint desiredAccess, IntPtr securityAttributes);
+  [DllImport("user32.dll", EntryPoint="CreateDesktopW", ExactSpelling=true, SetLastError=true)]
+  public static extern IntPtr CreateDesktopRaw(IntPtr name, IntPtr device, IntPtr devmode,
+    uint flags, uint desiredAccess, IntPtr securityAttributes);
+  [DllImport("user32.dll", EntryPoint="CreateDesktopExW", ExactSpelling=true, SetLastError=true)]
+  public static extern IntPtr CreateDesktopExRaw(IntPtr name, IntPtr device, IntPtr devmode,
+    uint flags, uint desiredAccess, IntPtr securityAttributes, uint heapSizeKB, IntPtr reserved);
   [DllImport("user32.dll", SetLastError=true)]
   [return: MarshalAs(UnmanagedType.Bool)]
   public static extern bool CloseDesktop(IntPtr desktop);
