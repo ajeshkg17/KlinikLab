@@ -37,7 +37,7 @@ test('Windows GPU process is launched in a never-switched PRIVATE desktop withou
   /SetForegroundWindow\s*\(/,/SwitchDesktop\s*\(/,
   /SendKeys/,/SendInput\s*\(/,
   /ShowWindow\s*\(/,/ActivateWindow\s*\(/,
-  /\bF12\b/,/--headless\b/,/--display-driver\s+headless/,
+  /SendWait\(/,/InputEventKey/,/--headless\b/,/--display-driver\s+headless/,
   /--editor(?:\s|$)/,/--project-manager/
  ])assert(!prohibited.test(runnable),'Foreground/headless operation prohibited: '+prohibited);
  assert(!worker.includes("'sr1c-capture-godot-pc.ps1'"));
