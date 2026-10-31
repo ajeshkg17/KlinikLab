@@ -494,6 +494,12 @@ def main():
         'importedTrianglesLOD0': {},
         'importedMaterialSections': {},
         'importStageDiagnostics': {'before': [], 'after': []},
+        'renderPath': 'NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS',
+        'nativeProceduralSourceTrianglesSubmitted': {},
+        'nativeProceduralSections': {},
+        'nativeProceduralReloadedSections': {},
+        'sourceTopologyAcceptedInProceduralInput': False,
+        'savedProceduralTriangleIndexReadbackVerified': False,
         'actorHierarchy': {},
         'actorLabels': [],
         'actualNativeViewportScreenshot': False,
@@ -514,41 +520,71 @@ def main():
             require((folder / name).is_file() and hash_file(folder / name) == digest,
                     'Original OBJ/MTL SHA-256 mismatch: ' + name)
         report['clinicalMeshManifestSHA256'] = hash_file(manifest_file)
-        # These are verified source-generated meshes; no third-party Dundee assets.
-        before, before_rows = import_native_obj(
+        # Native StaticMesh OBJ import is MATERIAL/SOURCE DIAGNOSTICS ONLY.
+        # UE5.8.4 reported source MeshDescription enamel 10320 but render LOD0
+        # 6724 after flags and 6721 after direct StaticMesh rebuild. The actual
+        # dental renderer below feeds original indexed triangles directly into
+        # ProceduralMeshComponent, bypassing the lossy StaticMesh render build.
+        before_source = read_obj_triangles(
+            folder / MODEL_NAMES[0], manifest['sceneStates']['before']['byMaterial'])
+        after_source = read_obj_triangles(
+            folder / MODEL_NAMES[1], manifest['sceneStates']['after']['byMaterial'])
+        before_mat = import_native_materials_only(
             folder / MODEL_NAMES[0], 'KL_FDI16_Before',
             manifest['sceneStates']['before']['byMaterial'],
-            manifest['sceneStates']['before']['triangles'],
             report['importStageDiagnostics']['before'])
-        after, after_rows = import_native_obj(
+        after_mat = import_native_materials_only(
             folder / MODEL_NAMES[1], 'KL_FDI16_AfterCut',
             manifest['sceneStates']['after']['byMaterial'],
-            manifest['sceneStates']['after']['triangles'],
             report['importStageDiagnostics']['after'])
-        report['importedMaterialSections'] = {'before': before_rows,
-                                              'after': after_rows}
-        report['importedMeshes'] = [
-            r['assetPath'] for rows in (before_rows, after_rows) for r in rows.values()]
-        report['importedTrianglesLOD0'] = {
-            'before': sum(row['triangleCount'] for row in before_rows.values()),
-            'after': sum(row['triangleCount'] for row in after_rows.values())
+        report['importedMaterialSections'] = {
+            state: {
+                tissue: {
+                    'assetPath':source[tissue]['staticMesh'].get_path_name(),
+                    'triangleCount':len(faces[tissue]),
+                    'staticRenderLOD0Triangles_DIAGNOSTIC_ONLY':
+                        source[tissue]['staticLOD0DiagnosticOnly'],
+                    'sourceMeshDescriptionTriangles':source[tissue]['originalSourceTriangles'],
+                    'materialInterface':source[tissue]['materialInterface'].get_path_name()
+                }
+                for tissue in source
+            }
+            for state,source,faces in (
+                ('before',before_mat,before_source),('after',after_mat,after_source))
         }
-        for state in ('before', 'after'):
-            require(report['importedTrianglesLOD0'][state] ==
-                    int(manifest['sceneStates'][state]['triangles']),
-                    'Aggregate native triangle mismatch for ' + state)
-
+        report['importedMeshes'] = [
+            part['assetPath'] for state in report['importedMaterialSections'].values()
+            for part in state.values()]
+        report['importedTrianglesLOD0'] = {
+            'before': sum(x['staticLOD0DiagnosticOnly'] for x in before_mat.values()),
+            'after': sum(x['staticLOD0DiagnosticOnly'] for x in after_mat.values())
+        }
+        # Never compare a lossy STATIC LOD to the source as though that static
+        # mesh is the selected native clinical render path.
         level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
         require(level.new_level(LEVEL), 'Native Unreal Editor failed to create a new level')
-        a, a_children = mesh_actor(before, 'KL_FDI16_BEFORE_SOURCE_MESH', -120)
-        b, b_children = mesh_actor(after, 'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 120)
+        a, before_proc = native_procedural_tooth_actor(
+            'KL_FDI16_BEFORE_SOURCE_MESH', -120, before_mat, before_source,
+            manifest['sceneStates']['before']['byMaterial'])
+        b, after_proc = native_procedural_tooth_actor(
+            'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 120, after_mat, after_source,
+            manifest['sceneStates']['after']['byMaterial'])
+        report['nativeProceduralSections'] = {
+            'before':before_proc,'after':after_proc}
+        report['nativeProceduralSourceTrianglesSubmitted'] = {
+            state:sum(item['proceduralTrianglesSubmitted'] for item in groups.values())
+            for state,groups in report['nativeProceduralSections'].items()
+        }
+        for state in ('before','after'):
+            require(report['nativeProceduralSourceTrianglesSubmitted'][state] ==
+                    int(manifest['sceneStates'][state]['triangles']),
+                    'Native procedural indexed original source triangle parity failed: '+state)
+        report['sourceTopologyAcceptedInProceduralInput'] = True
         report['actorHierarchy'] = {
-            'before': {'rootActor': a.get_actor_label(),
-                       'sections': {m: x.get_actor_label()
-                                    for m, x in a_children.items()}},
-            'after': {'rootActor': b.get_actor_label(),
-                      'sections': {m: x.get_actor_label()
-                                   for m, x in b_children.items()}}
+            'before':{'rootActor':a.get_actor_label(),
+                      'sections':{m:'KL_TISSUE_'+m.upper() for m in before_proc}},
+            'after':{'rootActor':b.get_actor_label(),
+                     'sections':{m:'KL_TISSUE_'+m.upper() for m in after_proc}}
         }
         report['actorLabels'] += [str(a.get_actor_label()), str(b.get_actor_label())]
 
@@ -572,6 +608,15 @@ def main():
         require(unreal.EditorAssetLibrary.does_asset_exist(LEVEL),
                 'Native level asset not found after save')
         report['levelSaved'] = True
+        report['nativeProceduralReloadedSections'] = verify_reloaded_procedural_scene(
+            {'before':'KL_FDI16_BEFORE_SOURCE_MESH',
+             'after':'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH'},
+            {'before':manifest['sceneStates']['before']['byMaterial'],
+             'after':manifest['sceneStates']['after']['byMaterial']})
+        # Python's exposed ProceduralMeshComponent has no triangle-index
+        # readback. Submission is strict; persistence of sections is verified;
+        # original native pixels and exact post-reload index bytes are NOT.
+        report['savedProceduralTriangleIndexReadbackVerified'] = False
         report['status'] = 'NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE'
         unreal.log('SR1B KlinikLab source-derived clinical level saved: ' + LEVEL)
     except Exception as exc:
