@@ -145,6 +145,8 @@ test('Original triangle stream native fallback is source-hashed, uses Unreal Sta
   'mesh.build_from_static_mesh_descriptions([smd], False, False)',
   'get_num_triangles(0)',
   'directSourceMeshDescriptionReconstruction',
+  "source_interface.set_editor_property('two_sided', True)",
+  "diag['nativeMaterialTwoSided'] = True",
   'SOURCE_OBJ_NATIVE_STATICMESHDESCRIPTION_NO_REDUCTION',
  ];
  for(const part of strict)assert(importer.includes(part),part);
