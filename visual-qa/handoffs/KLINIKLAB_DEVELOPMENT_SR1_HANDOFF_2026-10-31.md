@@ -53,7 +53,7 @@ The source-backed constraints apply at *every* gate: dedicated GPU/hardware enco
 ## 6. Unreal workstation: observed facts versus pending proof
 **Earlier 2026-10-31 ~14:23 observation:** `UE_5.8` ToolComplete marker; populated `Engine`, `FeaturePacks`, `Templates`; `UnrealEditor.exe` present, length 513,464 bytes. At that inspection, no coworker-workspace .uproject and no running editor were detected. These are installation observations only.
 **New later 2026-10-31 observation from user:** Blank UE 5.8 project at:
-`C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal Projects\\UE58_RenderSmokeTest`.
+`C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest`.
 Native Unreal log reportedly shows built-in **OpenWorld** loading, D3D12 and path-tracing shader pipeline initialization; editor remains responsive. Therefore a separate blank project and running/editor-loaded context are **reported**, superseding the earlier 'no project/no process' state. This is **not** a KlinikLab Unreal scene or Pixel Streaming render. **No genuine native screenshot or confirmed dedicated GPU adapter/NVENC evidence has been independently inspected in this chat.**
 No direct Windows workstation command execution or GUI access from this GitHub-only development chat was available. Never imply the new check was run on that PC.
 Prior source-only scaffold: `visual-qa/ue5_8-gpu-probe/KlinikLab_SR1_GPUProbe.uproject`; a minimal non-VR descriptor, not the external blank project or an installed Pixel Streaming VR template.
@@ -62,9 +62,9 @@ Recommended PowerShell from the checked-out repo root:
 ```powershell
 $sha=(git rev-parse HEAD).Trim()
 $run="visual-qa/evidence-local/ue58-attach-$([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))"
-.\\visual-qa\\sr1-check-existing-unreal.ps1 -ProjectDirectory 'C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal Projects\\UE58_RenderSmokeTest' -ExpectedSha $sha -GpuIndex 0 -EvidenceDir $run
+.\visual-qa\sr1-check-existing-unreal.ps1 -ProjectDirectory 'C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest' -ExpectedSha $sha -GpuIndex 0 -EvidenceDir $run
 ```
-The default engine root is `C:\\Program Files\\Epic Games\\UE_5.8`; override `-EngineRoot` if installed elsewhere. Node.js, NVIDIA driver, `nvidia-smi` and a real FFmpeg build with `h264_nvenc` must be available. A live editor log with shader compilation alone is *insufficient* to claim GPU raster. The collector does not launch a second editor and cannot approve physical GPU work by itself.
+The default engine root is `C:\Program Files\Epic Games\UE_5.8`; override `-EngineRoot` if installed elsewhere. Node.js, NVIDIA driver, `nvidia-smi` and a real FFmpeg build with `h264_nvenc` must be available. A live editor log with shader compilation alone is *insufficient* to claim GPU raster. The collector does not launch a second editor and cannot approve physical GPU work by itself.
 
 ## 7. UE5 Pixel Streaming 2 VR small feasibility prototype - planned, not built
 See `visual-qa/SR1_UE5_PS2_VR_PROTOTYPE.md`. After verifying local editor + real dedicated GPU/NVENC, create a **separate actual UE5 VR template project**, select exact installed engine version and matching Epic PixelStreamingInfrastructure version; enable Pixel Streaming 2 and follow Epic's experimental VR workflow, which documents disabling OpenXR in server VR template. First render a generic scene with explicit LEFT/RIGHT eye identity, depth-separated boxes and hand/controller markers. Do not port dental meshes before stereo/controls are proven.
@@ -118,7 +118,7 @@ When any regression fails, inspect the existing ledger, original images and stac
 - Latest gallery index: https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/PC_XR_LATEST.md
 - Experimental Epic VR feature documentation: https://dev.epicgames.com/documentation/unreal-engine/experimental-pixel-streaming-features
 - Epic Pixel Streaming infrastructure: https://github.com/EpicGames/PixelStreamingInfrastructure
-- Unreal local UE project: `C:\\Users\\ajesh\\OneDrive\\Documents\\Unreal Projects\\UE58_RenderSmokeTest`
+- Unreal local UE project: `C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest`
 - Ignored workstation evidence: `visual-qa/evidence-local/`. Never commit private logs, passwords, pairing credentials or patient data.
 
 ## 12. Active blockers and prioritized work
@@ -140,3 +140,8 @@ When any regression fails, inspect the existing ledger, original images and stac
 
 ## 14. Handoff provenance and caveat
 This text consolidates authoritative current repository roadmap/architecture, GitHub branch and commit history, published IWER evidence and the user's current owner-PC observations as of 31 October 2026. It is **not** a new workstation inspection, clinical review, remote-stream test or measured GPU benchmark. All status assertions explicitly distinguish code/source reports, personally reviewed browser images, user-reported local Unreal logs, and unperformed hardware gates.
+
+## 15. Post-publication developments from this same chat
+- `3c21561067d5cc48622504318b3cd541a469cbbf`: first matching editable Markdown/PDF handoff publication. The handoff document is a snapshot; never use its own commit as proof that work completed later.
+- `9152aa44719a9822b994543d4db5308082347c4b`: harden the external Unreal-project collector so native logs and native screenshots predating the currently matched UnrealEditor process cannot be accepted as current workstation evidence. This is GitHub source CI only. At that commit **202 Node tests and 14 additional build checks passed**. No local Windows PowerShell/UE/GPU run was conducted here.
+- The handoff is subsequently updated to normalize copy/paste Windows paths. The actual current integration HEAD is always obtained from GitHub, not inferred from this document's self-referential publication.
