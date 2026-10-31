@@ -103,6 +103,33 @@ func _capture_once() -> void:
 		_fail("Native bounds invalid; cannot frame orbit")
 		return
 	var midpoint: Vector3 = (lo + hi) * 0.5
+	var native_scene_mode: String = FileAccess.get_file_as_string("res://source/scene-mode.txt").strip_edges()
+	if native_scene_mode != "fdi16" and native_scene_mode != "clinic-overview":
+		_fail("Unapproved native Godot scene mode")
+		return
+	var clinic_workspace_count: int = 0
+	# Original source-derived meshes remain untouched. Clinic props are
+	# a separately identified educational migration preview, NOT the full app.
+	if native_scene_mode == "clinic-overview":
+		var clinic_script: GDScript = load("res://sr1c-godot-clinic-overview.gd")
+		if clinic_script == null:
+			_fail("Required native KlinikLab clinic workspace script absent")
+			return
+		var clinic_workspace: Node3D = clinic_script.new()
+		scene.add_child(clinic_workspace)
+		clinic_workspace_count = clinic_workspace.get_child_count()
+		if clinic_workspace_count < 25:
+			_fail("Native clinic workspace geometry incomplete")
+			return
+		camera.global_position = midpoint + Vector3(0.0, 4.5, 19.0)
+		camera.look_at(midpoint + Vector3(0, 0.4, 0), Vector3.UP)
+		var original_hud: CanvasLayer = scene.get_node_or_null("KL_FDI16_PlainTextOverlay")
+		if original_hud != null:
+			for ui in original_hud.get_children():
+				if ui is Label and ui.text.contains("NATIVE GODOT 4.7"):
+					ui.text = "KlinikLab / Godot native clinic workspace / FDI 16"
+				elif ui is Label and ui.text.contains("BEFORE (left)"):
+					ui.text = "Case: restoration | Original FDI16 source | Before / simulated cut"
 	# Original f4d4 source GUI footer still mentions the deprecated F12 mode.
 	# Change only this display text at runtime; original clinical OBJ stays SHA-pinned.
 	var overlay: CanvasLayer = scene.get_node_or_null("KL_FDI16_PlainTextOverlay")
@@ -165,6 +192,8 @@ func _capture_once() -> void:
 		"renderingDriver":driver, "videoAdapterName":adapter, "videoAdapterVendor":vendor,
 		"sourceTrianglesBefore":14856, "sourceTrianglesAfter":14936,
 		"tissueSurfacesPerTooth":5,
+		"nativeSceneMode":native_scene_mode, "nativeClinicWorkspaceObjectCount":clinic_workspace_count,
+		"fullKlinikLabApplicationMigrated":false,
 		"pixelReviewed":false, "gpuProcessVerified":false,
 		"headlessUsed":false, "userDesktopActivationRequested":false
 	})

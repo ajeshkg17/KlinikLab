@@ -4,7 +4,8 @@
 param(
  [Parameter(Mandatory=$true)][string]$EvidenceDir,
  [Parameter(Mandatory=$true)][string]$ExpectedSha,
- [Parameter(Mandatory=$true)][string]$GodotExe
+ [Parameter(Mandatory=$true)][string]$GodotExe,
+ [ValidateSet('fdi16','clinic-overview')][string]$SceneMode='fdi16'
 )
 $ErrorActionPreference='Stop'
 $run=[IO.Path]::GetFullPath($EvidenceDir)
@@ -28,9 +29,24 @@ if(-not(Test-Path -LiteralPath $script) -or -not(Test-Path -LiteralPath $launche
 $projectScript=Join-Path $project 'sr1c-godot-background-capture.gd'
 if(Test-Path -LiteralPath $projectScript){throw 'Refusing to overwrite preexisting project background script'}
 Copy-Item -LiteralPath $script -Destination $projectScript -ErrorAction Stop
+# Only the allowlisted source-anchored clinic shell may be added for job06.
+# Original f4d4 FDI16 OBJ, original five-tissue report and source hashes are unchanged.
+if($SceneMode -eq 'clinic-overview'){
+ $clinicScript=Join-Path $PSScriptRoot 'sr1c-godot-clinic-overview.gd'
+ if(-not(Test-Path -LiteralPath $clinicScript)){throw 'Approved native clinic workspace source absent'}
+ $dest=Join-Path $project 'sr1c-godot-clinic-overview.gd'
+ if(Test-Path -LiteralPath $dest){throw 'Refusing to overwrite existing clinic scene'}
+ Copy-Item -LiteralPath $clinicScript -Destination $dest -ErrorAction Stop
+}
+$sceneModeFile=Join-Path $project 'source\scene-mode.txt'
+if(Test-Path -LiteralPath $sceneModeFile){throw 'Refusing to overwrite pinned native scene-mode file'}
+[IO.File]::WriteAllText($sceneModeFile,$SceneMode+[Environment]::NewLine,
+ (New-Object System.Text.UTF8Encoding($false)))
 $report=[ordered]@{
  schemaVersion=2
  status='EVIDENCE_INCOMPLETE'
+ nativeSceneMode=$SceneMode
+ fullKlinikLabApplicationMigrated=$false
  sourceGitSHA=$ExpectedSha
  godotExe=[IO.Path]::GetFullPath($GodotExe)
  godotProject=(Join-Path $project 'project.godot')
@@ -113,45 +129,61 @@ try{
  # 34 ~1s data collections. Job04 reopened the full wildcard query each
  # iteration, yielding 54 ROWS but only TWO distinct collection timestamps.
  # Never count multiple GPU engine rows at one timestamp as independent proof.
- $counterData=@();$samplingErrors=@()
+ $filterScript=Join-Path $PSScriptRoot 'sr1c-pdh-filter.ps1'
+ if(-not(Test-Path -LiteralPath $filterScript)){throw 'Missing approved PDH validity filter'}
+ . $filterScript
+ $counterData=@();$samplingErrors=@();$pdhPowerShellErrors=@()
+ $rejectedPidRows=@();$collectionPeriods=@()
  $report.persistentPDHQueryUsed=$true
+ # A wildcard GPU Engine counter set can include invalid instances unrelated to
+ # the Godot PID. WinPS Get-Counter -ErrorAction Stop aborted the ENTIRE query
+ # in job05. Continue collecting, but never count invalid counter samples.
  try{
   $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' `
-   -SampleInterval 1 -MaxSamples 34 -ErrorAction Stop)
-  $period=0
-  foreach($snapshot in $snapshots){
-   $period++
-   $stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')
-   foreach($c in @($snapshot.CounterSamples)){
-    if($c.Path -match ('(?i)pid_'+$session.Pid+'_') -and $c.Path -match '(?i)engtype_3d'){
-     $v=[double]$c.CookedValue
-     $finite=(-not [double]::IsNaN($v)) -and (-not [double]::IsInfinity($v))
-     $counterData+= [PSCustomObject]@{
-      utc=$stamp;collectionIndex=$period;godotPid=[int]$session.Pid
-      counterPath=[string]$c.Path
-      engineLuid=[KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$c.Path)
-      utilizationPercent=$v
-      finite=[bool]$finite
-     }
-    }
-   }
-  }
+   -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhPowerShellErrors)
+  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) `
+   -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
+  $counterData=@($parsed.rows)
+  $collectionPeriods=@($parsed.periods)
+  $rejectedPidRows=@($parsed.invalidRows|Select-Object -First 100)
  }catch{$samplingErrors+=($_.Exception.Message)}
  $counterOutput=Join-Path $captures $report.originalGpuCounterSampleFile
  $counterJson=ConvertTo-Json -InputObject @($counterData) -Depth 7
  [IO.File]::WriteAllText($counterOutput, ($counterJson + [Environment]::NewLine),
   (New-Object System.Text.UTF8Encoding($false)))
- $validSamples=@($counterData|Where-Object{$_.finite -and $_.utilizationPercent -ge 0 -and $_.utilizationPercent -le 100})
+ # PowerShell may warn about individual invalid wildcard rows and still produce
+ # valid samples. Warnings are evidence, not a reason to discard good snapshots.
+ $pdhWarningMessages=@($pdhPowerShellErrors|ForEach-Object{[string]$_.Exception.Message}|
+  Select-Object -Unique|Select-Object -First 40)
+ $pdhDiagnostic=[ordered]@{
+  schemaVersion=1;godotPid=[int]$session.Pid;query='GPU Engine(*)/Utilization Percentage'
+  commandErrorAction='Continue';queryInvocationCount=1
+  collectionPeriodCount=$collectionPeriods.Count;collectionPeriods=@($collectionPeriods)
+  godot3DRowsObserved=$counterData.Count;godot3DRowsRejected=@($counterData|Where-Object{-not $_.usable}).Count
+  rejectedGodotRows=@($rejectedPidRows)
+  nonTerminatingErrorCount=@($pdhPowerShellErrors).Count
+  nonTerminatingErrorMessages=$pdhWarningMessages
+  terminatingErrors=@($samplingErrors)
+ }
+ $pdhDiagnosticsPath=Join-Path $captures 'godot-gpu-pdh-diagnostics.json'
+ [IO.File]::WriteAllText($pdhDiagnosticsPath,
+  ((ConvertTo-Json -InputObject $pdhDiagnostic -Depth 12)+[Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ $report.pdhNonTerminatingErrorCount=@($pdhPowerShellErrors).Count
+ $report.pdhRejectedGodot3DRows=@($counterData|Where-Object{-not $_.usable}).Count
+ $report.pdhCollectionPeriods=$collectionPeriods.Count
+ $report.originalPdhDiagnosticFile='godot-gpu-pdh-diagnostics.json'
+ $validSamples=@($counterData|Where-Object{$_.usable})
  $positive=@($validSamples|Where-Object{$_.utilizationPercent -gt 0.05})
  $report.process3DSampleCount=$validSamples.Count
  $report.process3DPositiveSamples=$positive.Count
- $report.process3DDistinctSamplePeriods=@($validSamples|Select-Object -ExpandProperty collectionIndex -Unique).Count
- $report.process3DPositiveDistinctPeriods=@($positive|Select-Object -ExpandProperty collectionIndex -Unique).Count
+ $report.process3DDistinctSamplePeriods=@($validSamples|Select-Object -ExpandProperty utc -Unique).Count
+ $report.process3DPositiveDistinctPeriods=@($positive|Select-Object -ExpandProperty utc -Unique).Count
  $report.positiveGodotEngineLuids=@($positive|Select-Object -ExpandProperty engineLuid -Unique)
  if($validSamples.Count){
   $report.process3DMaxUtilizationPercent=[double](($validSamples|Measure-Object -Property utilizationPercent -Maximum).Maximum)
  }
- if($samplingErrors.Count){Block ('Persistent Windows PDH query failure: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
+ if($samplingErrors.Count){Block ('Persistent Windows PDH query terminated: '+(($samplingErrors|Select-Object -Unique) -join '; '))}
  if($report.process3DPositiveDistinctPeriods -lt 3){
   Block 'Insufficient independent positive Godot-PID GPU 3D PDH COLLECTION PERIODS (require >=3)'
  }
@@ -169,7 +201,7 @@ try{
    $report.rtx5060DxgiLuid=[string]$nvidia[0].luid
    $matched=@($positive|Where-Object{$_.engineLuid -eq $report.rtx5060DxgiLuid})
    $report.process3DPositiveRtx5060DistinctPeriods=@(
-    $matched|Select-Object -ExpandProperty collectionIndex -Unique
+    $matched|Select-Object -ExpandProperty utc -Unique
    ).Count
    $report.gpuAdapterLuidMatchedToNvidia=($report.process3DPositiveRtx5060DistinctPeriods -ge 3)
    if(-not $report.gpuAdapterLuidMatchedToNvidia){
@@ -183,6 +215,12 @@ try{
  if(Test-Path -LiteralPath $background){
   $capture=Get-Content -LiteralPath $background -Raw|ConvertFrom-Json
   $report.backgroundCaptureStatus=[string]$capture.status
+  if([string]$capture.nativeSceneMode -ne $SceneMode){
+   Block 'Native Godot captured scene mode does not match the approved PC job'
+  }
+  if($SceneMode -eq 'clinic-overview' -and [int]$capture.nativeClinicWorkspaceObjectCount -lt 25){
+   Block 'Native KlinikLab clinic workspace not populated with expected objects'
+  }
   $report.renderingMethod=[string]$capture.renderingMethod
   $report.renderingDriver=[string]$capture.renderingDriver
   $report.videoAdapterName=[string]$capture.videoAdapterName

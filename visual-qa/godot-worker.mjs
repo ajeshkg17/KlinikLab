@@ -160,7 +160,8 @@ async function execute(j){
   try{
    await powershell(path.join(sourceDir,'sr1c-capture-godot-background-pc.ps1'),
     ['-EvidenceDir',run,'-ExpectedSha',j.commit,
-     '-GodotExe',process.env.KLINIKLAB_GODOT_EXE],j.timeoutSec*1000);
+     '-GodotExe',process.env.KLINIKLAB_GODOT_EXE,
+     '-SceneMode',j.sceneMode||'fdi16'],j.timeoutSec*1000);
   }catch(e){captureError=e.message}
  }
  await fs.mkdir(run,{recursive:true});
@@ -177,6 +178,8 @@ async function execute(j){
  const result={
   powerShellChildEnvironment:{inheritedPSModulePathRemoved:true,hashCmdletPreflightRequired:true},
   jobId:j.jobId,sourceGitSHA:j.commit,watcherSuite:j.suite,
+  workerGitSHA:git(['rev-parse','HEAD'],path.resolve(sourceDir,'..')),
+  nativeSceneMode:j.sceneMode||'fdi16',fullKlinikLabApplicationMigrated:false,
   executedOn:'owner Windows PC (watcher runtime)',generatedAt:new Date().toISOString(),
   nativeReportStatus:native?.status||'EVIDENCE_INCOMPLETE',
   imageExists:!!native?.nativeImagePresent,
@@ -218,6 +221,7 @@ async function publish(j,run,result){
   ['native-source-submission.json',path.join(capture,'native-source-submission.json')],
   ['godot-source-prepare.json',path.join(run,'godot-source-prepare.json')],
   ['godot-gpu-3d-counters.json',path.join(capture,'godot-gpu-3d-counters.json')],
+  ['godot-gpu-pdh-diagnostics.json',path.join(capture,'godot-gpu-pdh-diagnostics.json')],
   ['godot-background-capture.json',path.join(capture,'godot-background-capture.json')],
   ['godot-native-background.log',path.join(capture,'godot-native-background.log')],
   ['godot-native-stdout.log',path.join(capture,'godot-native-stdout.log')],
@@ -244,6 +248,9 @@ async function publish(j,run,result){
  if(!artifacts.some(x=>x.name==='godot-job-result.json'))throw Error('Missing mandatory result JSON');
  const lines=['# SR1C real Windows owner-PC Godot evidence','',
   'Request ID: '+j.jobId,'Source pinned SHA: '+j.commit,
+  'Worker SHA: '+result.workerGitSHA,
+  'Native scene mode: '+result.nativeSceneMode,
+  'Full browser application migrated to Godot: NO (clinic workspace prototype only)',
   'Status: '+result.overallStatus,'',
   'Evidence captured by dedicated Godot PC worker, **not** by GitHub Actions or Linux.',
   'Source hash and screenshot pixel verification are independent tests.',

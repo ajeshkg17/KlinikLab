@@ -5,11 +5,16 @@ import {validateGodotJob} from '../visual-qa/godot-job-core.mjs';
 
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
 const privateScript=read('../visual-qa/sr1c-private-desktop.ps1');
-const collector=read('../visual-qa/sr1c-capture-godot-background-pc.ps1');
+const collector=read('../visual-qa/sr1c-capture-godot-background-pc.ps1')+read('../visual-qa/sr1c-pdh-filter.ps1');
 const gd=read('../visual-qa/sr1c-godot-background-capture.gd');
 const worker=read('../visual-qa/godot-worker.mjs');
 const xr=read('../visual-qa/xr-worker.mjs');
-const job=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const activeJob=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+// Preserve historical schema-v5 regression fixtures without reusing the old request.
+const job={...activeJob,schemaVersion:5,jobId:'pc-godot-fdi16-20261031-job05',
+ suite:'sr1c-fdi16-before-after',capture:'native-orbit-frontal-occlusal',
+ telemetryContract:'persistent-pdh-1hz-dxgi-luid-42s-orbit-v1'};
+delete job.sceneMode;
 
 test('Godot job05 is newly scoped to no foreground/private WinSta0 desktop, old v4 watcher rejects',()=>{
  assert.equal(validateGodotJob(job).jobId,'pc-godot-fdi16-20261031-job05');
