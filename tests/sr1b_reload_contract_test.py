@@ -16,6 +16,10 @@ builder = root / 'visual-qa/sr1b-unreal-build-clinical-level.py'
 spec = importlib.util.spec_from_file_location('sr1b_reload_contract', str(helper))
 contract = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contract)
+bspec=importlib.util.spec_from_file_location('sr1b_native_bounds',root/'visual-qa/sr1b_native_bounds.py')
+bounds=importlib.util.module_from_spec(bspec)
+bspec.loader.exec_module(bounds)
+SOURCE_SECTIONS={state:{t:{'sourceLocalBoundsCm':{'min':[-.5,-.5,-.5],'max':[.5,.5,.5]},'targetWorldTranslationCm':[0.,float(y),74.]} for t in contract.MATERIALS} for state,y in [('before',-65),('after',65)]}
 
 EXPECTED = {
     'before': 'KL_FDI16_BEFORE_SOURCE_MESH',
