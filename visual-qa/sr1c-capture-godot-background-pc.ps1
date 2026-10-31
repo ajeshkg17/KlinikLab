@@ -139,9 +139,9 @@ try{
  # the Godot PID. WinPS Get-Counter -ErrorAction Stop aborted the ENTIRE query
  # in job05. Continue collecting, but never count invalid counter samples.
  try{
-  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' 
+  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' `
    -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhPowerShellErrors)
-  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) 
+  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) `
    -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
   $counterData=@($parsed.rows)
   $collectionPeriods=@($parsed.periods)
