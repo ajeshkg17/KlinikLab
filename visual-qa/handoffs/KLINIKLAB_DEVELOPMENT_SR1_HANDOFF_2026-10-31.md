@@ -1,147 +1,115 @@
-# KlinikLab - Development and SR1 Replacement-Chat Handoff
-**Snapshot:** 31 October 2026, Europe/Berlin. **Evidence-first document; do not interpret plans as completed work.**
-**Authoritative repository:** https://github.com/ajeshkg17/KlinikLab
-**Active integration branch:** `integration/single-chat-validation-2026-10-30`
-**Source snapshot immediately before this handoff publication:** `3cd4f90a923c8667b0351845612df5437700535d`
-**Handoff publication commit:** the successor commit containing this Markdown and PDF. Obtain its exact SHA from the branch, not from this self-referential PDF.
-**Authoritative documents:** `visual-qa/PHASE_ROADMAP.md` and `visual-qa/SERVER_RENDERING_ARCHITECTURE.md`. Read their current versions before taking action.
+# KlinikLab - Durable Next-Chat Handoff: Local Unreal Clinical Render First
 
-## 1. Why the project exists
-KlinikLab is a research/development platform for dental education, procedural training, dental anatomy and exam preparation (including FSP/KP contexts), with desktop and experimental XR interaction. The long-term target is credible clinical-education visuals, interactive FDI tooth selection and instrument workflows, a server-owned tooth/procedure simulation, high-quality detailed materials, and Meta Quest 2 viewing/interaction. The current application is a functioning browser/WebGL/WebXR prototype, not a clinically certified device or a production remote-rendered headset service. Its technical and clinical acceptance gates must be kept separate.
+**Snapshot:** 31 October 2026, Europe/Berlin. Evidence-first; no background task or future delivery is implied.
+**Repository:** https://github.com/ajeshkg17/KlinikLab
+**Integration branch:** integration/single-chat-validation-2026-10-30
+**Exact functional source SHA for the NEXT owner-PC attempt:** 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1
+**Source CI for that SHA:** https://github.com/ajeshkg17/KlinikLab/actions/runs/41226730861
+**This Markdown/PDF publication adds a documentation commit after 0f27a7e...** Do not confuse that documentation commit with the tested native renderer code. For the next owner-PC test, use the complete exact 40-character source SHA above, not the moving branch tip.
 
-## 2. User's non-negotiable instructions
-- Continue autonomous development in this single ChatGPT conversation when possible. Use existing context and source docs; do not routinely ask the user to repeat earlier decisions or redirect them to another assistant. Coordinate source using the integration branch and source-verified GitHub tools.
-- The **target** has a dedicated workstation/server GPU rendering the dental scene, authoritative tooth/cut/tool state and stereo frames, plus a **hardware video encoder**. Quest/browser becomes tracking and controller input plus video decode/display/compositor. Do not run clinical scene meshes/shaders/simulation on viewer in this target. Headset decoding/compositor remains inherently device-side.
-- **No CPU rendering, integrated GPU, software encoder or automatic low-quality asset/detail fallback** in the target streaming mode. If hardware/latency gates fail, report NO-GO and resolve hardware/transport rather than silently lowering clinical visual fidelity.
-- The workstation PC and Quest 2 are on the same Wi-Fi 7 router. This does not prove the Quest radio negotiated Wi-Fi 7 or any actual latency, throughput or comfort.
-- **Unreal Engine 5 Pixel Streaming 2 VR** is the first candidate, with Epic's VR feature explicitly experimental. Prove secure, low-latency, perspective-correct 6DoF stereo on a physical Quest 2 with a *small prototype* before migrating KlinikLab. Evaluate a native Quest streaming receiver only if browser presentation cannot meet requirements.
-- Photorealistic online dental assets must have provenance, rights and redistribution terms recorded. The existing Dundee School of Dentistry *left* maxillary first molar is only a license/provenance candidate, not automatically valid right-side FDI16 anatomy or an approved shipped asset. Qualified dental expert review is mandatory before claiming clinical correctness.
-- Keep generated image **design concepts** clearly separate from source-generated XR frame evidence. User wants a genuine Playwright-captured in-app procedure sequence/video, not substitute AI-drawn steps; label any simulated dental technique illustrative until clinically reviewed.
-- Preserve failed job IDs and evidence. Never re-run a processed XR job ID. The owner-PC watcher maintains current browser/IWER regression pipeline; development chat personally inspects actual stereo PNG pixels and video where available. CI is source/build verification only.
-- Never state that mere Unreal installation, GPU shader pipeline initialization, valid file hashes or browser/IWER screenshots prove workstation GPU raster, Pixel Streaming 2, a server render, hardware encoding, Quest 2 or dental expert validation.
+## 1. Binding order: LOCAL KLINIKLAB UNREAL, THEN QUEST
 
-## 3. GitHub state, branch, important commit history
-Canonical repository: `ajeshkg17/KlinikLab`. Active development: `integration/single-chat-validation-2026-10-30`; gallery/results: `visual-feedback` branch. Current job pointer: `visual-qa/jobs/xr-current.json`. The job was left at `pc-xr-procedure-fdi16-20261031-10`, pinned to exact `49f921f0a09983ac27d89d8df0c5dec67c9fb5f5`, not moved for SR1 work.
-Recent exact commits leading into this handoff:
-- `3cd4f90a923c8667b0351845612df5437700535d` - fix attach-script source tests and include Unreal Editor WindowsEditor screenshots.
-- `eac51b4dc7908b32ad5def5cfb92e57dfa9fe9ee` - report external blank UE58 project and add attach-to-existing-project workstation collector, roadmap and architecture status.
-- `0955b6b265e941fc54bfda7d49d174674ca0d10d` - previous non-VR UE5.8 smoke scaffold and D3D12 workstation launch check.
-- `49794f9b0e6b238b297e05b8695865688a4f1e72` - record UE5.8 installation files and add minimal .uproject descriptor.
-- `b530c6d006d962e481dfaab739fee0ba6edda6a9` - cross-check exact source, dedicated NVIDIA GPU/NVENC and reject identical stereo evidence.
-- `70ba8f45fd1f445b38a5d1847c22169197ffced8` - add SR1 offline evidence integrity tool, only ready for human review.
-- `7bef499cf95052d0a2814458bbda705acbda58b4` - fail-closed NVIDIA/NVENC preflight, experimental UE5 Pixel Streaming 2 VR guide and asset register.
-- `165a20f11613be64b98fe3465e797cb1eb28a715` - inspect published browser/IWER procedure job10 screenshots and explicitly reject video decoding.
-- `a5ad60c4d33e152c225970d8e25f28571b54f717` and `513ee43e1bafb57f2c6811adf872b47b18c76707` - user-required dedicated GPU / high-detail target direction.
-- `f1ca0fb4ea564ee7d9407831ccacce6000ca50e5` - code-path audit demonstrating current render location and LAN SR0-SR6 architecture plan.
-Check `git log` or GitHub commits for any new successor commits; avoid guessing at current HEAD.
+The user explicitly corrected the development order. FIRST produce an identifiable source-derived KlinikLab clinical education scene in the native Unreal Engine 5.8.4 editor on the owner Windows NVIDIA RTX 5060 workstation. Obtain a fresh genuine Unreal HighResShot, personally inspect its original image pixels, and corroborate the specific UnrealEditor process's D3D12 NVIDIA adapter selection and GPU 3D-engine work. ONLY AFTER the local native clinical content and process-specific GPU gate is independently accepted may development begin on Pixel Streaming 2, WebRTC/LAN, security/pairing, Quest 2 receiver, headset stereo, or controller return.
 
-## 4. Current rendering architecture: what is actually running
-`server/server.mjs` is a Node HTTP file/API server, including `/api/health` and optional `/api/ai`. It normally binds loopback `127.0.0.1`; a LAN proxy/tunnel may serve it remotely, but **it has no checked-in GPU renderer, stereo encoder or remote controller simulation**.
-`engine.js` / `public/engine.js` execute in browser, acquire `webgl2`/WebGL context, build shaders/meshes and call `gl.drawArrays`. For XR they use `navigator.xr.requestSession('immersive-vr')`, `XRWebGLLayer` and per-eye browser GPU framebuffers. `volumetric-lab.js` and `xr-procedure.js` perform browser-side tooth meshing/cutting and interaction. Owner-PC `test-support/webxr-test/smoke.mjs` uses Meta IWER on Chrome and `gl.readPixels` to capture XR eyes. These are **owner-PC browser-rendered** images; running server process elsewhere does not make them server frames.
-Target architecture remains unimplemented: authoritative dental simulation and GPU stereo rendering on workstation, hardware encode, encrypted low-latency WebRTC media, controller pose/trigger/grip event uplink to server, authenticated HTTPS/WSS signaling, input ACKs, IDs/timestamps and measured latency, Quest browser or native receiver providing tracking/decoding/compositing. Physical Quest 2 browser stereo VR might be insufficient due to projection/reprojection API limitations, so SR1 must decide before migration.
+No false acceptance from GitHub CI, source vertex counts, unloaded scene, self-reported metadata, blank-project evidence, FFmpeg NVENC alone, Chrome WebGL/IWER, a diagnostic viewport, or a mock Unreal Python test. Do not claim clinically calibrated anatomy; the FDI16 tooth is an original, *schematic educational* implicit-solid model, not a patient scan.
 
-## 5. SR0-SR6 gate status (read roadmap for complete acceptance language)
-**SR0 - render-location audit:** Source-level audit and negative regression tests completed. Actual deployed server GPU/Quest runtime trace absent.
-**SR1 - feasibility and tiny UE5 PS2 VR prototype:** Active. Dedicated GPU/NVENC source-only preflight tool exists; offline evidence validator exists; Unreal installation and blank project have been reported on owner PC, but a trustworthy native viewport screenshot, selected GPU identity, **workstation-run NVENC**, actual UE host render trace, installed Pixel Streaming 2 prototype, Quest receiver, encrypted stream and measured latency are all pending. No automatic success.
-**SR2 - server simulation + dedicated GPU renderer + photorealistic licensed assets:** Not implemented. No accepted Unreal-rendered KlinikLab anatomy. Asset register is candidate/provenance data only.
-**SR3 - hardware encode/WebRTC stereo stream/Quest presentation:** Not implemented or verified.
-**SR4 - authoritative controller/head pose and event uplink with server cuts/tools:** Not implemented or verified.
-**SR5 - actual Quest 2 p50/p95/p99 latency, stereo correctness, safety/comfort/reconnect tests:** Not performed. Example p95 <50 ms and 72 Hz are proposed thresholds, not achieved measurements.
-**SR6 - migration/release with fail-closed explicit server mode and separate legacy regression:** Not implemented. Do not silently fallback to current browser renderer when a remote stream is requested.
-The source-backed constraints apply at *every* gate: dedicated GPU/hardware encode; no CPU, integrated-GPU or quality fallback; secure LAN pairing; no unapproved patient data or unlicensed dental assets.
+## 2. Current status: SR1B NOT ACCEPTED
 
-## 6. Unreal workstation: observed facts versus pending proof
-**Earlier 2026-10-31 ~14:23 observation:** `UE_5.8` ToolComplete marker; populated `Engine`, `FeaturePacks`, `Templates`; `UnrealEditor.exe` present, length 513,464 bytes. At that inspection, no coworker-workspace .uproject and no running editor were detected. These are installation observations only.
-**New later 2026-10-31 observation from user:** Blank UE 5.8 project at:
-`C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest`.
-Native Unreal log reportedly shows built-in **OpenWorld** loading, D3D12 and path-tracing shader pipeline initialization; editor remains responsive. Therefore a separate blank project and running/editor-loaded context are **reported**, superseding the earlier 'no project/no process' state. This is **not** a KlinikLab Unreal scene or Pixel Streaming render. **No genuine native screenshot or confirmed dedicated GPU adapter/NVENC evidence has been independently inspected in this chat.**
-No direct Windows workstation command execution or GUI access from this GitHub-only development chat was available. Never imply the new check was run on that PC.
-Prior source-only scaffold: `visual-qa/ue5_8-gpu-probe/KlinikLab_SR1_GPUProbe.uproject`; a minimal non-VR descriptor, not the external blank project or an installed Pixel Streaming VR template.
-**Next concrete workstation step:** use `visual-qa/sr1-check-existing-unreal.ps1` (commit `3cd4f90...`) against the existing blank directory; discover its exact single .uproject rather than guessing filename; take native visible OpenWorld viewport screenshot from the editor via High Resolution Screenshot / `HighResShot 1920x1080`. Then run the attached collector with exact Git SHA and a **new unique** ignored `visual-qa/evidence-local/...` directory; it checks UE Build.version and process-to-project command line, retains original native Unreal log and original PNG with hashes, records selected D3D12 adapter evidence and runs the actual **dedicated NVIDIA H.264 NVENC hardware preflight**. If adapter, native picture, process identity or encoder cannot be verified, report incomplete and preserve diagnostics. Any valid files must be independently reviewed for real rendered pixels and GPU engine attribution.
-Recommended PowerShell from the checked-out repo root:
-```powershell
-$sha=(git rev-parse HEAD).Trim()
-$run="visual-qa/evidence-local/ue58-attach-$([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))"
-.\visual-qa\sr1-check-existing-unreal.ps1 -ProjectDirectory 'C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest' -ExpectedSha $sha -GpuIndex 0 -EvidenceDir $run
-```
-The default engine root is `C:\Program Files\Epic Games\UE_5.8`; override `-EngineRoot` if installed elsewhere. Node.js, NVIDIA driver, `nvidia-smi` and a real FFmpeg build with `h264_nvenc` must be available. A live editor log with shader compilation alone is *insufficient* to claim GPU raster. The collector does not launch a second editor and cannot approve physical GPU work by itself.
+**Implemented in repository:** a source-pinned OBJ/MTL export from the real production KlinikLab \`volumetric-lab.js\` ToothSolid('molar','16') and VoxelMesher; an isolated UE5.8 D3D12 project; Unreal Python native importer/level script; a new direct-source ProceduralMeshComponent path; Windows Build/Open/Collect runner, hashes and native log/PNG/PID GPU counter collector; tests and roadmap/runbook.
 
-## 7. UE5 Pixel Streaming 2 VR small feasibility prototype - planned, not built
-See `visual-qa/SR1_UE5_PS2_VR_PROTOTYPE.md`. After verifying local editor + real dedicated GPU/NVENC, create a **separate actual UE5 VR template project**, select exact installed engine version and matching Epic PixelStreamingInfrastructure version; enable Pixel Streaming 2 and follow Epic's experimental VR workflow, which documents disabling OpenXR in server VR template. First render a generic scene with explicit LEFT/RIGHT eye identity, depth-separated boxes and hand/controller markers. Do not port dental meshes before stereo/controls are proven.
-Serve Quest-facing frontend with trusted HTTPS; protect signaling and use encrypted media/data. Record real physical Quest 2 browser release, negotiated Wi-Fi connection, full 6DoF parallax during head movement, controller trigger/grip return path, distinct per-eye decoded frames, network jitter/loss, server GPU/render/encoder process metrics, actual video latency and human comfort. A flat 360 video or PC-only IWER run is NOT enough.
-`visual-qa/SR1_PROTOTYPE_RESULT_TEMPLATE.json` defaults all acceptance fields to false; `visual-qa/sr1-evidence-gate.mjs` checks locally collected hashes and internal agreement with the preflight but cannot authenticate fabricated internally consistent data or grant go-live approval.
+**Not yet observed:** a successful owner-PC Stage 1 run on commit 0f27a7e..., any saved and independently reviewed native clinical Unreal image, persisted procedural triangle-index byte readback, process-specific NVIDIA GPU 3D activity during rendering, any native KlinikLab frame encoded or streamed, physical Quest 2 operation, or dental professional signoff.
 
-## 8. Legacy XR worker and FDI16 procedure evidence
-Owner-PC watcher runs a **single immutable, exact-commit pinned** Playwright/Meta IWER request from `visual-qa/jobs/xr-current.json`, on a detached worktree; standard ten checkpoints, optional six FDI16 true XR eye screenshots and video sidecars. It must preserve failed output/ledger and never reuse a processed ID. `visual-feedback/PC_XR_LATEST.md` currently points to `pc-xr-procedure-fdi16-20261031-10` source `49f921f0a09983ac27d89d8df0c5dec67c9fb5f5`.
-Job10 published genuine **browser-rendered** stereo frames `01-select-fdi16.png` to `06-switchback.png`. Development chat personally inspected all six stereo pixel images and independently checked all six SHA-256 hashes. FDI16 educational saved cut increased from 0 to 1, original mesh changed, and identical-pose before/after changed pixels were **[1233 left, 1197 right]** (RGB L1 >55); post-cut remained after FDI16->36->16 switch. The simulated cavity is visible. This is a **source/GPU-in-browser educational visual pass**, *not* a dentist performing a real procedure, not clinical validation and not server-rendered Quest video.
-Known defects: wide procedure images have clipped peripheral text; 02/04/06 show a dark isolated model, not a continuous operator motion sequence. Short `actual-app-stereo-steps.webm` was 52,329 bytes but failed browser decode with `decoded:false`, no derived preview and no nonblank/distinct-stage verification. Full-session viewport WebM 1,848,615 bytes existed but independent playback was not established. Do not call either video an accepted procedure movie. No qualified dentist signed off.
-Gallery: `visual-feedback/runs/pc-xr-pc-xr-procedure-fdi16-20261031-10-49f921f0a09983ac27d89d8df0c5dec67c9fb5f5/`.
-Clinical review acceptance and pending signoff: `visual-qa/PROCEDURE_REVIEW_RUBRIC.md`. Keep browser/IWER regression labels distinct from future UE5 workstation server-render acceptance.
+**New untested runtime risk:** Unreal Python editor support for dynamically creating persistent ProceduralMeshComponent subobjects through SubobjectDataSubsystem, the precise UE5.8 Python signature of create_mesh_section_linear_color, material binding, serialization, saved-level reload, and pixel appearance. The new source/mocked regression cannot establish these on the owner GPU. If Stage 1 fails, preserve the original error and fix only the actual failed contract without relaxing input topology.
 
-## 9. Never rerun processed IDs; failure/repair chronology
-**Exact failed IDs to preserve, never rerun:**
-- `pc-xr-phase8-catalog-readable-20261031-02`: stereo catalog panel/action clipping failure at smoke.mjs around line 607. Fixed with geometry/frustum changes; later unique job03 passed.
-- `pc-xr-procedure-fdi16-20261031-07`: live target-ray never intersected FDI16, 18-second timeout; only two storyboard frames and partial full WebM. Fixed by probing targetRaySpace inside active XRFrame and calibrating controller origin/orientation.
-- `pc-xr-procedure-fdi16-20261031-08`: ray intersection and cut counter passed but before/after pixels were **[0,0]**; four partial frames/1.33 MB viewport WebM not accepted. Fixed with mesh/visibility/camera diagnostics, supported model bur radius and oblique viewer.
-**Other historical IDs must not be reused even if they were functionally successful or visually rejected:** `pc-xr-phase9-clinical-focus-20261031-05` passed functional checks but left cartoon patient visible; `pc-xr-phase9-room-focus-20261031-06` corrected and passed, `pc-xr-phase9-controllers-lighting-20261031-04` passed; `pc-xr-procedure-fdi16-20261031-09` was a distinct previously published request and must not be reused regardless of final watcher state; `pc-xr-procedure-fdi16-20261031-10` completed screenshot gate. Owner-PC ledger and GitHub history are authoritative for exact individual statuses.
-When any regression fails, inspect the existing ledger, original images and stack trace, correct real source/assumption, and create a **fresh unique ID and exact 40-char pinned source**. Never rerender under an old job ID or substitute generated imagery.
+## 3. Precise failure chronology (all original evidence stays unchanged)
 
-## 10. Evidence taxonomy: do not conflate
-- **GitHub CI source tests:** Node/unit/build/schema/static validation in hosted runners; cannot prove workstation GPU, NVENC, UE viewport, Quest browser or dental accuracy. Snapshot after attach script: commit `3cd4f90...` had green GitHub CI; verify successor commit in new chat.
-- **Owner-PC IWER:** genuine local Chrome WebGL/WebXR framebuffer images under emulated Quest poses, not a physical headset and not LAN server rendering. Job10 six original screenshot hashes and pixel inspection are usable as legacy dental-program regression.
-- **UE 5.8 file installation / responsive blank editor:** reported local observations; no selected adapter or native pixel frame has yet been verified in chat.
-- **Native Unreal GPU render proof:** needs original native UE screenshot visibly depicting lit OpenWorld/scene plus actual UE process's D3D12 selected dedicated GPU trace and a separately matched NVIDIA hardware preflight. Screenshot + adapter log still require human pixel/process review.
-- **Actual Pixel Streaming 2 render + encode:** requires dedicated UE host GPU/encoder attribution and stream stats in an actual running session; **NOT yet built**.
-- **Physical Quest 2 stereo + interactive latency:** requires real headset, secure local pairing, decoder, 6DoF perspective, control round-trip and p50/p95/p99 measurements; **NOT tested**.
-- **Clinical validation:** a named qualified dentist checks FDI anatomy, technique and educational claims, recorded in review rubric; **NOT obtained**.
-- **AI-generated concepts:** allowed only as clearly labeled design references, never app evidence.
-- **PDF/Markdown handoff:** documentation only. This handoff cannot substitute any of the above measurements.
+- **Blank UE5.8 SR1 evidence, NOT KlinikLab:** a read-only original native log SHA-256 3923f2e115a651597893e3d95c9d5c9a0755cf8c4a0a00ac322b2a75c9596e67 was reanalysed at adapter parser cd75663d7f32c678104ce508594552c083b3218e. Owner PC observed classification D3D12_INDEX_MAPPED_TO_MATCHING_NVIDIA_GPU, chosen D3D12 adapter 0, RTX 5060, no adapter blockers. Supplemental derived JSON SHA-256 a1ca8d73ba0b2d57a9c666925257877059537dc89a41d7aaf2ed6d55c43cd65c. Original collector report was not overwritten and its other evidence limitations persist. No actual clinical GPU raster or stream proven.
+- **First clinical source export and OBJ grouping failure, c23c85a7956a284546509a1b3a5fc8ede6c94594:** C:\klab-sr1b-clinical-c23c85a7-20261031-1650. Export succeeded: 14,856 before, 14,936 after; imported Unreal OBJ split into five StaticMeshes/materials, contrary to the original one-StaticMesh assertion. No level or accepted clinical screenshot.
+- **Five-tissue assembly fix failure, 54e3e06bc253d75a1136fed81243050db4a8e495:** C:\klab-sr1b-clinical-54e3e06b-20261031-1700. Native material interfaces were correctly identified, but before enamel source 10,320 -> UE render LOD0 6,724; cementum source 4,105 -> UE LOD0 3,116. Strict face-parity gate blocked level creation; no clinical screenshot accepted.
+- **Conservative and direct StaticMesh reconstruction failure, exact source 57801f1c7f84cc8e561cac8fc99045cb14d8f6b5:** detached worktree C:\klab-sr1b-worktree-57801f1c-20261031-174525; **evidence folder C:\klab-sr1b-clinical-57801f1c-20261031-174525**. Owner PC Unreal 5.8.4's imported *source MeshDescription* retained **10,320** enamel triangles, but native *render LOD0* remained **6,724** after disabling degenerate removal and relevant build options. Direct StaticMeshDescription reconstruction then produced just **6,721** rendered triangles and failed with exact error: "Direct native StaticMesh build still removed source OBJ triangles: enamel, source=10320, native=6721". The original detailed traceback/report is **C:\klab-sr1b-clinical-57801f1c-20261031-174525\unreal-clinical-level-build.json**. No native clinical level/screenshot or GPU trace completed. Never edit/reuse/rename this evidence.
+- **Source geometry audit:** original OBJ before: enamel 10,320, dentin 112, pulp 207, cementum 4,105, caries 112; after: enamel 10,308, dentin 205, pulp 207, cementum 4,105, caries 111. Totals 14,856 / 14,936. Exact source audit found **zero zero-area faces and zero exact duplicate unordered faces**, with only two triangles below 1e-6 cm^2 doubled area in each of enamel and cementum. Thus thousands of missing UE rendered faces are NOT explained by thousands of exactly degenerate source triangles. The precise internal Unreal optimization/welding/precision mechanism is not independently determined.
+- **Diagnostic screenshot LIMIT:** any earlier diagnostic viewport/blank-project screenshot is not an accepted image of a completed, source-provenanced clinical FDI16 native Unreal scene. It does not establish five material groups, visible before/after cut, preservation of native procedural buffers, the correct Unreal process GPU activity, or clinical correctness. The source/pixel acceptance gate is still open; the user explicitly disallowed treating the diagnostic viewport as accepted.
 
-## 11. Principal technical files and direct navigation
-- Roadmap: https://github.com/ajeshkg17/KlinikLab/blob/integration/single-chat-validation-2026-10-30/visual-qa/PHASE_ROADMAP.md
-- LAN architecture: https://github.com/ajeshkg17/KlinikLab/blob/integration/single-chat-validation-2026-10-30/visual-qa/SERVER_RENDERING_ARCHITECTURE.md
-- UE existing-project collector: `visual-qa/sr1-check-existing-unreal.ps1`
-- Workstation instructions: `visual-qa/SR1_UE5_8_WORKSTATION_GPU_CHECK.md`
-- Earlier repository-only smoke scaffold: `visual-qa/ue5_8-gpu-probe/KlinikLab_SR1_GPUProbe.uproject`
-- Dedicated GPU/NVENC gate: `visual-qa/sr1-dedicated-gpu-preflight.mjs`
-- Experimental UE5 VR prototype: `visual-qa/SR1_UE5_PS2_VR_PROTOTYPE.md`
-- Future evidence schema: `visual-qa/SR1_PROTOTYPE_RESULT_TEMPLATE.json`
-- Offline bundle check: `visual-qa/sr1-evidence-gate.mjs`
-- Asset license/provenance: `visual-qa/dental-asset-register.json`
-- Remote receiver read-only capability probe: `visual-qa/lan-stream-viewer-probe.mjs`
-- XR job pointer: `visual-qa/jobs/xr-current.json`
-- Worker operation: `visual-qa/xr-worker.mjs` and `visual-qa/README.md`
-- Actual XR procedure harness: `test-support/webxr-test/procedure-sequence.mjs`
-- XR procedure capture instructions: `test-support/webxr-test/PROCEDURE_CAPTURE.md`
-- Browser-owned renderer: `engine.js`, `public/engine.js`; mesh/cut: `volumetric-lab.js`, `xr-procedure.js`
-- Clinic dental review: `visual-qa/PROCEDURE_REVIEW_RUBRIC.md`
-- Latest gallery index: https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/PC_XR_LATEST.md
-- Experimental Epic VR feature documentation: https://dev.epicgames.com/documentation/unreal-engine/experimental-pixel-streaming-features
-- Epic Pixel Streaming infrastructure: https://github.com/EpicGames/PixelStreamingInfrastructure
-- Unreal local UE project: `C:\Users\ajesh\OneDrive\Documents\Unreal Projects\UE58_RenderSmokeTest`
-- Ignored workstation evidence: `visual-qa/evidence-local/`. Never commit private logs, passwords, pairing credentials or patient data.
+## 4. Latest source correction at exact 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1
 
-## 12. Active blockers and prioritized work
-**P0 - workstation native evidence:** Confirm exact UE5.8 engine root, sync latest repo, take original HighResShot of the visibly rendered OpenWorld project, then run attach collector with new unique evidence directory. Check NVIDIA model/driver and actual FFmpeg h264_nvenc execution; compare process command line/project, D3D12 selected adapter, screenshot bytes/hash and pixel content. Do not claim GPU verified until this is done.
-**P1 - actual UE5 Pixel Streaming 2 VR prototype:** After P0, create actual UE5 VR template; match Epic infrastructure versions; enable experimental PS2 VR pathway per current docs; test secure local video+pose/trigger round trip on physical Quest 2. No KlinikLab dental migration until a documented GO decision.
-**P2 - photographically plausible licensed anatomy/material assets:** retain source/attribution/usage licenses, hashes and dental expert review. Do not silently lower detail for latency.
-**P3 - existing app's optional short WebM decoder failure:** diagnose real browser recording/codec pipeline separately; preserve six verified app-eye PNGs; no fabricated video.
-**P4 - unclipped periphery in wide XR screenshots and clinic realism:** code change, fresh unique owner-PC job and direct pixel review; these remain a *legacy browser* track.
-**P5 - remote SR2-SR6 only after real Quest feasibility:** implement dedicated server GPU scene, synchronized per-eye encoding, secure WebRTC and authoritative controller actions with measured latency/comfort; maintain explicit no-fallback mode.
+**Reason for new route:** UE5.8.4 repeatedly removed valid faces when compiling a StaticMesh render LOD (10,320 source -> 6,724 / 6,721). The correction does NOT lower expected topology counts.
 
-## 13. Short exact resume checklist for replacement chat
-1. Open this handoff **and read current** `visual-qa/PHASE_ROADMAP.md` and `visual-qa/SERVER_RENDERING_ARCHITECTURE.md` from `integration/single-chat-validation-2026-10-30`. Fetch branch HEAD and inspect `git log`/commit statuses, do not treat snapshot SHA as eternally current.
-2. Confirm owner PC Unreal observation only: external `UE58_RenderSmokeTest` blank OpenWorld loads D3D12 pipelines and editor is responsive; no accepted native screenshot, GPU/NVENC, Quest or PS2 stream yet.
-3. Do **not** launch a second blank editor. Use `visual-qa/sr1-check-existing-unreal.ps1` on Windows with actual `-ProjectDirectory` and `-EngineRoot`; ensure native `HighResShot 1920x1080` was captured, run exact-source NVIDIA/NVENC preflight and collect native log/screenshot/process information into a fresh ignored evidence directory.
-4. Inspect **actual screenshot pixels and actual RHI GPU adapter selection**; distinguish evidence file hashes from genuine physical proof; if blocked, record precise missing command output/path rather than asking general repeated questions. Never claim Unreal server rendering or Pixel Streaming until demonstrated.
-5. Only after P0, build a separate true UE5 VR template + experimental Pixel Streaming 2 prototype, pair Quest 2 via HTTPS and test perspective-correct real 6DoF stereo and returned controller input with measurements.
-6. Preserve existing browser/IWER job pointer and gallery; **never reuse job07/job08/job09/job10 or other processed IDs**. CI ? hardware/clinical signoff. Continue one bounded change at a time and record tests, hardware limitations and acceptance status.
-7. Keep this Markdown editable beside the PDF at `visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31`. Update both together after material changes.
+**Selected native rendering method:** the isolated \`visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject\` explicitly enables the **ProceduralMeshComponent** plugin. \`visual-qa/sr1b-unreal-build-clinical-level.py\` imports the OBJ to source-identify the five \`KL_\` materials and record *lossy imported StaticMesh LODs only as diagnostics*. It separately reads the SHA-verified original OBJ triangle stream via \`sr1b_topology_source.py\`, creates exact per-face position/normal/index buffers with \`sr1b_procedural_buffers.py\`, and attempts to attach one native material-specific procedural mesh section for each of enamel, dentin, pulp, cementum and caries to **each** of two labeled native tooth actors. It preserves original face winding and uses two-sided tissue materials because the marching-tetrahedra source has inconsistent winding.
 
-## 14. Handoff provenance and caveat
-This text consolidates authoritative current repository roadmap/architecture, GitHub branch and commit history, published IWER evidence and the user's current owner-PC observations as of 31 October 2026. It is **not** a new workstation inspection, clinical review, remote-stream test or measured GPU benchmark. All status assertions explicitly distinguish code/source reports, personally reviewed browser images, user-reported local Unreal logs, and unperformed hardware gates.
+**Expected source submission contract:**
+| Tissue | BEFORE | AFTER simulated cut |
+| --- | ---: | ---: |
+| Enamel | 10,320 | 10,308 |
+| Dentin | 112 | 205 |
+| Pulp | 207 | 207 |
+| Cementum | 4,105 | 4,105 |
+| Caries | 112 | 111 |
+| **Total source triangles** | **14,856** | **14,936** |
 
-## 15. Post-publication developments from this same chat
-- `3c21561067d5cc48622504318b3cd541a469cbbf`: first matching editable Markdown/PDF handoff publication. The handoff document is a snapshot; never use its own commit as proof that work completed later.
-- `9152aa44719a9822b994543d4db5308082347c4b`: harden the external Unreal-project collector so native logs and native screenshots predating the currently matched UnrealEditor process cannot be accepted as current workstation evidence. This is GitHub source CI only. At that commit **202 Node tests and 14 additional build checks passed**. No local Windows PowerShell/UE/GPU run was conducted here.
-- The handoff is subsequently updated to normalize copy/paste Windows paths. The actual current integration HEAD is always obtained from GitHub, not inferred from this document's self-referential publication.
+Each source triangle contributes **3 indices**. Report \`renderPath\` must be \`NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS\`. \`nativeProceduralSourceTrianglesSubmitted\` must be 14,856 before / 14,936 after. \`nativeProceduralSections\` must include five correctly named tissue sections per tooth; the saved level must reload with both actors and all sections/materials present, recorded in \`nativeProceduralReloadedSections\`. The old \`importedTrianglesLOD0\` counts remain **diagnostic only** and are not substituted into procedural face acceptance.
+
+**Unproven beyond source submission:** even successful level save/reload with section count and visible flag does not prove exact byte-for-byte persistence of the raw procedural triangle indices. The script explicitly records \`savedProceduralTriangleIndexReadbackVerified=false\`. Actual native viewport pixels, geometry continuity, before/after cut differences and GPU engine attribution still need review.
+
+**Tests at exact SHA:** GitHub Actions run 41226730861 completed SUCCESS with **240 Node regression tests passed**, 0 failures/skips, plus **14 additional checks passed**. Source/mock tests include the actual 10,320 -> 6,724/6,721 StaticMesh loss fixture, strict original material/face counts, source OBJ rejection of malformed/degenerate faces, procedural buffers with 3 indices per source face and mocked native components. CI does **not** run the owner's UE5.8.4 editor or dedicated RTX 5060.
+
+## 5. EXACT next owner-PC Stage 1 - new, separate run; do not reuse 57801f1c
+
+The next action is **Build ONLY**, not Quest, not Pixel Streaming and not a reused capture. Run from Windows PowerShell, with Node and UE5.8.4 installed. Adjust the \`$repo\` path ONLY if the actual local Git checkout differs. Preserve old failed evidence directories.
+
+\`\`\`powershell
+$repo = 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
+$sha = '0f27a7e0e7179ef30a507e8bc0251749d6bbbad1'
+git -C $repo fetch origin integration/single-chat-validation-2026-10-30
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+$stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+$worktree = "C:\klab-sr1b-worktree-$($sha.Substring(0,8))-$stamp"
+$run = "C:\klab-sr1b-clinical-$($sha.Substring(0,8))-$stamp"
+git -C $repo worktree add --detach $worktree $sha
+if ($LASTEXITCODE -ne 0) { throw 'Worktree creation failed' }
+Push-Location $worktree
+try {
+  & .\visual-qa\sr1b-run-local-kliniklab.ps1 -Mode Build -ExpectedSha $sha -EvidenceDir $run
+  if ($LASTEXITCODE -ne 0) { throw "Native clinical Build failed: $run" }
+  $report = Get-Content (Join-Path $run 'unreal-clinical-level-build.json') -Raw | ConvertFrom-Json
+  $report | Select-Object status, renderPath, nativeProceduralSourceTrianglesSubmitted,
+    nativeProceduralSections, nativeProceduralReloadedSections, savedProceduralTriangleIndexReadbackVerified, errors | Format-List
+} finally { Pop-Location }
+Write-Host "Immutable SR1B run: $run"
+\`\`\`
+
+**If Build fails:** retain the entire unique evidence folder untouched. Read \`unreal-clinical-level-build.json\` -> \`errors\` and traceback, and collect the original Unreal \`Project\Saved\Logs\` log. Return the exact new run path and exception; never disable per-tissue strictness, replace clinical procedural buffers with the lossy StaticMeshes, or use diagnostic screenshot as accepted evidence. This next Stage 1 is expected to expose any UE5.8.4 Python ProceduralMeshComponent API/serialization constraints.
+
+**Only if Stage 1 succeeds** with \`status=NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE\` and correct source submission/reload: open the SAME run in the native Unreal editor with the SAME pinned worktree:
+\`\`\`powershell
+& "$worktree\visual-qa\sr1b-run-local-kliniklab.ps1" -Mode Open -ExpectedSha $sha -EvidenceDir $run
+\`\`\`
+Frame BOTH native FDI16 tooth actors in Lit mode; verify visibly distinct before/cut shape, labels and tissues; take genuine **Unreal HighResShot 1920x1080**. Then, only while the actual editor remains running/rendering, run:
+\`\`\`powershell
+& "$worktree\visual-qa\sr1b-run-local-kliniklab.ps1" -Mode Collect -ExpectedSha $sha -EvidenceDir $run
+\`\`\`
+Collector must retain original PNG and log SHA-256, exact project/PID, D3D12 selected RTX 5060, real Windows \`GPU Engine(*)\Utilization Percentage\` **engtype_3d** nonzero samples tied to that editor PID, and acknowledge that GPU engine LUID -> physical GPU mapping requires corroboration. The development assistant must personally inspect original PNG pixels, not infer success from PNG signature/hash, metadata, source counts or a watcher declaration. Without all applicable evidence, record **SR1B NOT_ACCEPTED**.
+
+## 6. Other project tracks and guardrails
+
+Current application \`server/server.mjs\` is a local Node API/file server, not a dedicated GPU simulation server. \`engine.js\`, \`xr-procedure.js\`, \`volumetric-lab.js\` are browser WebGL/WebXR and browser-side procedural geometry. Legacy Meta IWER/Playwright XR screenshots reflect Chrome-rendered emulation, NOT native Unreal/remote Quest video; processed IDs must never be rerun. User wants direct original pixel review, immutable evidence, exact SHAs and unique run IDs. The earlier browser FDI16 job10 did produce distinct before/after eye images, but short WebM decoding/accepted real procedure video remained unproven. The Dundee left-maxillary-molar third-party candidate is not cleared for right FDI16 redistribution, so the native SR1B slice uses only original production schematic geometry.
+
+Sources to read in a replacement chat:
+- Roadmap: \`visual-qa/PHASE_ROADMAP.md\` - current priority override wins over older Quest-first prose.
+- Current native runbook: \`visual-qa/SR1B_LOCAL_KLINIKLAB_RENDER.md\`.
+- UE project: \`visual-qa/ue5_8-kliniklab-local/KlinikLab_SR1B_Local.uproject\`.
+- Exporter: \`visual-qa/sr1-local-kliniklab-export.mjs\`; importer: \`visual-qa/sr1b-unreal-build-clinical-level.py\`.
+- Exact source face validator and procedural buffers: \`visual-qa/sr1b_topology_source.py\`, \`visual-qa/sr1b_procedural_buffers.py\`; five-tissue contract: \`visual-qa/sr1b_section_contract.py\`.
+- Windows orchestrator: \`visual-qa/sr1b-run-local-kliniklab.ps1\`.
+- Focused tests: \`tests/sr1b_procedural_buffers_test.py\`, \`tests/sr1b_topology_source_test.py\`, \`tests/sr1b_section_contract_test.py\`, \`tests/sr1b_local_native_project.test.mjs\`, \`tests/sr1b_local_kliniklab_export.test.mjs\`.
+- Architecture destination (future, not current): \`visual-qa/SERVER_RENDERING_ARCHITECTURE.md\`.
+- Previous blank GPU logs and failed clinical runs are different evidence classes; retain all originals, not in Git.
+
+## 7. Replacement-chat resume and handoff provenance
+
+1. Fetch branch HEAD and read THIS paired handoff + roadmap + current SR1B runbook. The **pinned functional test SHA remains 0f27a7e0e7179ef30a507e8bc0251749d6bbbad1** unless new functionality was explicitly committed and revalidated; publishing a handoff is NOT such a functional update.
+2. The **only immediate physical step** is a fresh owner-PC SR1B Stage 1 build of the exact ProceduralMeshComponent path at that SHA. Inspect the actual report; if it fails, fix the observed UE5.8 Python/runtime incompatibility, rerun source tests and use yet another unique local run. Do not ask the user to repeat known paths or earlier observations.
+3. On successful build, capture and personally review a genuine native clinical Unreal frame and actual editor-PID GPU engine data; mark the gate passed only after the appropriate independent evidence. Do not begin Pixel Streaming or Quest until then.
+4. Never misidentify diagnostic viewport, static source MeshDescription, separate FFmpeg NVENC, browser/IWER images, documentation PDF, or green CI as completed local native clinical rendering.
+5. This Markdown and the PDF at the same base path are documentation mirrors, not a signed experimental result. Future material handoff edits must update and verify BOTH. The actual GitHub publication commit SHA should be obtained from the repository and stated outside the self-referential handoff.
+
+**Artifact base path:** \`visual-qa/handoffs/KLINIKLAB_DEVELOPMENT_SR1_HANDOFF_2026-10-31\` (both .md and .pdf).
