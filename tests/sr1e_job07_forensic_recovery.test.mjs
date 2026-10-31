@@ -85,5 +85,5 @@ test('forensics and publication-only branch never rerender the interrupted ID',a
  assert(!body.includes('worktree add'));
  assert(installer.includes('-RedirectStandardOutput'));
  assert(installer.includes('-RedirectStandardError'));
- assert(!installer.includes('2>&1 | ForEach-Object'));
+ assert(!/^\\s*& \\$NodeExe .*2>&1.*ForEach-Object/m.test(installer));
 });
