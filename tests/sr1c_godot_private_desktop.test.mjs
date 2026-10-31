@@ -76,7 +76,7 @@ test('Automated original Godot GPU capture fails closed and verifies both tissue
   'nativePixelReviewAccepted=$false','godotPid=$null',
   'Get-Counter','engtype_3d','RTX\\s*5060',
   'gpuAdapterLuidMatchedToNvidia=$false',
-  "if($positive.Count -lt 3)",
+  "if($report.process3DPositiveDistinctPeriods -lt 3)",
   "if(-not $report.nativeImagePresent)",
   'EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
  ])assert(collector.includes(text),'Missing PC acceptance gate '+text);
