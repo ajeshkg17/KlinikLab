@@ -187,6 +187,31 @@ test('UE5.8 production faces bypass destructive StaticMesh render LOD using nati
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
 
+test('UE5.8.4 imported MaterialInstanceConstant uses explicit base overrides, not nonexistent two_sided direct property',t=>{
+ const materialPolicy=read('visual-qa/sr1b_native_material_contract.py');
+ assert(importer.includes('from sr1b_native_material_contract import ensure_two_sided_native_material'));
+ assert(importer.includes('two_sided_proof = ensure_two_sided_native_material(material, tissue, unreal)'));
+ assert(importer.includes("'twoSidedMaterialVerification':two_sided_proof"));
+ assert(!importer.includes("material.get_editor_property('two_sided')"));
+ assert(!importer.includes("material.set_editor_property('two_sided'"));
+ for(const token of [
+  'isinstance(material, unreal_api.MaterialInstanceConstant)',
+  "get_editor_property('base_property_overrides')",
+  "properties.set_editor_property('override_two_sided', True)",
+  "properties.set_editor_property('two_sided', True)",
+  "material.set_editor_property('base_property_overrides', properties)",
+  "unreal_api.MaterialEditingLibrary.update_material_instance(material)",
+  "unreal_api.EditorAssetLibrary.save_loaded_asset(material)",
+  'materialIdentityPreserved',
+  'materialSavedAndReadbackVerified',
+ ])assert(materialPolicy.includes(token),token);
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_native_material_contract_test.py')],
+  {encoding:'utf8',timeout:20000});
+ if(p.error?.code==='ENOENT'){t.skip('Python interpreter unavailable');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
 test('PowerShell clinical collector parse check on systems equipped with PowerShell',t=>{
  const script=path.join(root,'visual-qa/sr1b-run-local-kliniklab.ps1').replace(/'/g,"''");
  const command=`$null=$tokens=$errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('${script}',[ref]$tokens,[ref]$errors)|Out-Null; if($errors.Count -gt 0){$errors|ForEach-Object {Write-Error $_.Message};exit 2}`;
