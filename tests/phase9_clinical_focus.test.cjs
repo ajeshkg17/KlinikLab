@@ -18,12 +18,14 @@ test('Phase9 clinical view suppresses only cartoon patient props, never tray or 
  assert.equal((patient.match(/this\.sphere\(/g)||[]).length,6,'only six schematic face/hair parts');
  assert(!patient.includes('this.cy(')&&!patient.includes('this.box('),'do not conceal chair or lamp');
  const faces=Array.from({length:6},()=>({hidden:false})),tray={hidden:false},chair={hidden:false};
- const s={xrPatientMeshes:faces,xrSession:{},xrClinicalFocusActive:false,setXRClinicalFocus:setFocus};
+ const sign={hidden:false},s={xrPatientMeshes:faces,anatomyPedestalLabel:sign,
+  xrSession:{},xrClinicalFocusActive:false,setXRClinicalFocus:setFocus};
  assert.equal(s.setXRClinicalFocus(true),true);
- assert(faces.every(f=>f.hidden));assert.equal(tray.hidden,false);assert.equal(chair.hidden,false);
+ assert(faces.every(f=>f.hidden));assert.equal(sign.hidden,true,'decorative pedestal sign hidden in headset');
+ assert.equal(tray.hidden,false);assert.equal(chair.hidden,false);
  assert.equal(s.setXRClinicalFocus(true),true);
  assert.equal(s.setXRClinicalFocus(false),false);
- assert(faces.every(f=>!f.hidden));
+ assert(faces.every(f=>!f.hidden));assert.equal(sign.hidden,false,'desktop pedestal sign restored');
  s.xrSession=null;
  assert.equal(s.setXRClinicalFocus(true),false,'desktop mode cannot hide patient');
 });
@@ -42,6 +44,8 @@ test('XR session focus stays active through help/catalog and restores only after
  assert(smoke.includes('s.xrPatientMeshes.every(m=>m.hidden)'),'XR framebuffer smoke must require hidden cartoon patient');
  assert(smoke.includes('Cartoon patient reappeared after XR re-entry'),'XR re-entry must be verified');
  assert(engine.includes('this.setXRClinicalFocus?.(false);'),'XR end must restore desktop face');
+ assert(engine.includes('this.anatomyPedestalLabel=this.label('),'pedestal label must be grouped separately');
+ assert(engine.includes('this.anatomyPedestalLabel.hidden=focused'),'decorative sign follows immersive focus state');
  const focusTarget={xrPatientMeshes:Array.from({length:6},()=>({hidden:false})),xrSession:{},xrClinicalFocusActive:false,setXRClinicalFocus:setFocus};
  // Model actual entry -> idle modal -> procedure off -> session end sequence.
  assert.equal(focusTarget.setXRClinicalFocus(true),true);

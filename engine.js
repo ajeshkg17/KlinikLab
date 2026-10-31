@@ -313,7 +313,9 @@ class DentalScene {
     const vrPropsStart=this.meshes.length;
     // Table and pedestal for enlarged, schematic anatomy.
     this.cy([0,.56,-1.88],[.12,1.08,.12],'#acc0c2');this.cy([0,.13,-1.88],[.73,.11,.73],'#9cb6b8');this.box([0,1.08,-1.83],[2.00,.09,1.6],'#ecf1e7');this.box([0,1.025,-1.83],[2.02,.04,1.63],'#93babc');
-    this.label('ANATOMY MODEL', [0,1.13,-1.012],[1.23,.17,1],{font:33,color:'#365b60'});
+    // Decorative pedestal lettering is desktop orientation context only.
+    // In immersive XR it competes with the actual tooth/case identification.
+    this.anatomyPedestalLabel=this.label('ANATOMY MODEL', [0,1.13,-1.012],[1.23,.17,1],{font:33,color:'#365b60',tag:'decor-pedestal-sign'});
     // Separate U-shaped maxillary and mandibular arches with anatomically
     // differentiated incisors, canines, premolars and molars.
     this.teeth={};this.archMeshes=[[],[]];this.archMode='both';
@@ -606,6 +608,7 @@ class DentalScene {
     const focused=Boolean(active&&this.xrSession);
     if(focused===!!this.xrClinicalFocusActive)return focused;
     for(const m of this.xrPatientMeshes||[])m.hidden=focused;
+    if(this.anatomyPedestalLabel)this.anatomyPedestalLabel.hidden=focused;
     this.xrClinicalFocusActive=focused;
     return focused;
   }
