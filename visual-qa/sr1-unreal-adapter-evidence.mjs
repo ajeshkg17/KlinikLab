@@ -24,9 +24,7 @@ function gpuDescriptorComparison(raw,expectedName){
  // Full model-name boundary: never treat extra model tokens as harmless suffix.
  const metadataParts=[];
  while(rest.length){
-); // annotations must be delimited
-  if(!group)break;
-  const open=rest.match(/^\s*([([])/);
+  const open=rest.match(/^\s*(\(|\[)/);
   if(open){
    const close=open[1]==='('?')':']';
    const start=open[0].length, end=rest.indexOf(close,start);
