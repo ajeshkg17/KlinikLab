@@ -14,6 +14,7 @@ window/size/window_height_override=900
 
 [rendering]
 
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
-textures/default_filters/use_nearest_mipmap_filter=false
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver="vulkan"
+rendering_device/fallback_to_opengl3=false
