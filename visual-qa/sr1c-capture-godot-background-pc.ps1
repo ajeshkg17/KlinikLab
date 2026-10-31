@@ -198,26 +198,48 @@ try{
    Block 'Godot did not report real native Vulkan rendering on the NVIDIA RTX 5060'
   }else{$report.rendererLogNvidiaRtx5060=$true}
   $name=[string]$capture.imageFile
-  if($name -match '^godot-native-fdi16-frontal-[0-9]+\.png{
+  if($name -match '^godot-native-fdi16-frontal-[0-9]+\.png$'){
    $shot=Join-Path $captures $name
    if(Test-Path -LiteralPath $shot){
-    $binary=[IO.File]::ReadAllBytes($shot)
-    if($binary.Length -gt 10000 -and [BitConverter]::ToString($binary,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
-     $report.nativeImagePresent=$true
-     $report.nativeScreenshotFile=$name
-     $report.imageSHA256=(Get-FileHash -LiteralPath $shot -Algorithm SHA256).Hash.ToLowerInvariant()
-     $report.imageWidth=[int]$capture.imageWidth
-     $report.imageHeight=[int]$capture.imageHeight
-     if($report.imageWidth -lt 1280 -or $report.imageHeight -lt 720){
-      $report.nativeImagePresent=$false
-      Block 'Reported screenshot size below required dimensions'
-     }
+    $bytes=[IO.File]::ReadAllBytes($shot)
+    if($bytes.Length -gt 10000 -and [BitConverter]::ToString($bytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+     $shotHash=(Get-FileHash -LiteralPath $shot -Algorithm SHA256).Hash.ToLowerInvariant()
+     if($shotHash -eq [string]$capture.imageSHA256){
+      $report.nativeImagePresent=$true
+      $report.nativeScreenshotFile=$name
+      $report.imageSHA256=$shotHash
+      $report.imageWidth=[int]$capture.imageWidth
+      $report.imageHeight=[int]$capture.imageHeight
+      if($report.imageWidth -lt 1280 -or $report.imageHeight -lt 720){
+       $report.nativeImagePresent=$false
+       Block 'Frontal original PNG dimensions insufficient'
+      }
+     }else{Block 'Frontal original PNG SHA256 mismatch'}
     }
    }
   }
-  # A second original native GPU readback is mandatory for source cut QA.
+  # A second original native Vulkan GPU readback is mandatory.
   $angleName=[string]$capture.angledImageFile
-  if($angleName -match '^godot-native-fdi16-occlusal-[0-9]+\.png
+  if($angleName -match '^godot-native-fdi16-occlusal-[0-9]+\.png$'){
+   $angledShot=Join-Path $captures $angleName
+   if(Test-Path -LiteralPath $angledShot){
+    $angledBytes=[IO.File]::ReadAllBytes($angledShot)
+    if($angledBytes.Length -gt 10000 -and [BitConverter]::ToString($angledBytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
+     $angledHash=(Get-FileHash -LiteralPath $angledShot -Algorithm SHA256).Hash.ToLowerInvariant()
+     if($angledHash -eq [string]$capture.angledImageSHA256){
+      $report.nativeAngledImagePresent=$true
+      $report.nativeAngledScreenshotFile=$angleName
+      $report.angledImageSHA256=$angledHash
+     }else{Block 'Angled original PNG SHA256 mismatch'}
+    }
+   }
+  }
+  $report.orbitDurationSeconds=[double]$capture.orbitDurationSeconds
+  if($report.orbitDurationSeconds -lt 40 -or $report.orbitDurationSeconds -gt 45){
+   Block 'Native Godot continuous orbit did not complete required 40-45 seconds'
+  }
+  if(-not $report.nativeImagePresent){Block 'No valid original frontal private-desktop Vulkan PNG'}
+  if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal private-desktop Vulkan PNG'}
  }else{Block 'No original Godot background capture report returned'}
  $report.godotProcessGPUCorroborated=(
   $report.rendererLogNvidiaRtx5060 -and
@@ -232,133 +254,6 @@ finally {
  if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
   $report.nativeImagePresent -and $report.nativeAngledImagePresent -and
   $report.godotProcessGPUCorroborated -and $report.gpuAdapterLuidMatchedToNvidia -and
-  $report.blockers.Count -eq 0){
-  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
- }
- $reportJson=$report|ConvertTo-Json -Depth 12
- [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
-  (New-Object System.Text.UTF8Encoding($false)))
- Write-Host "Native background Godot evidence: $reportPath"
- Write-Host "Native background Godot status: $($report.status)"
-}
-){
-   $angledShot=Join-Path $captures $angleName
-   if(Test-Path -LiteralPath $angledShot){
-    $angledBytes=[IO.File]::ReadAllBytes($angledShot)
-    if($angledBytes.Length -gt 10000 -and [BitConverter]::ToString($angledBytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
-     $sha=(Get-FileHash -LiteralPath $angledShot -Algorithm SHA256).Hash.ToLowerInvariant()
-     if($sha -eq [string]$capture.angledImageSHA256){
-      $report.nativeAngledImagePresent=$true
-      $report.nativeAngledScreenshotFile=$angleName
-      $report.angledImageSHA256=$sha
-     }
-    }
-   }
-  }
-  $report.orbitDurationSeconds=[double]$capture.orbitDurationSeconds
-  if($report.orbitDurationSeconds -lt 40 -or $report.orbitDurationSeconds -gt 45){
-   Block 'Native Godot continuous orbit did not complete required 40-45 seconds'
-  }
-  if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal native Godot GPU PNG'}
-  if(-not $report.nativeImagePresent){Block 'No valid original private-desktop GPU PNG'}
- }else{Block 'No original Godot background capture report returned'}
- $report.godotProcessGPUCorroborated=(
-  $report.rendererLogNvidiaRtx5060 -and
-  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
-  $report.gpuAdapterLuidMatchedToNvidia
- )
- if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
-} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
-finally {
- if($session){Stop-KLPrivateDesktopGodot -Session $session}
- $report.blockers=@($report.blockers|Select-Object -Unique)
- if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
-  $report.nativeImagePresent -and $report.godotProcessGPUCorroborated -and
-  $report.blockers.Count -eq 0){
-  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
- }
- $reportJson=$report|ConvertTo-Json -Depth 12
- [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
-  (New-Object System.Text.UTF8Encoding($false)))
- Write-Host "Native background Godot evidence: $reportPath"
- Write-Host "Native background Godot status: $($report.status)"
-}
-){
-   $shot=Join-Path $captures $name
-   if(Test-Path -LiteralPath $shot){
-    $binary=[IO.File]::ReadAllBytes($shot)
-    if($binary.Length -gt 10000 -and [BitConverter]::ToString($binary,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
-     $report.nativeImagePresent=$true
-     $report.nativeScreenshotFile=$name
-     $report.imageSHA256=(Get-FileHash -LiteralPath $shot -Algorithm SHA256).Hash.ToLowerInvariant()
-     $report.imageWidth=[int]$capture.imageWidth
-     $report.imageHeight=[int]$capture.imageHeight
-     if($report.imageWidth -lt 1280 -or $report.imageHeight -lt 720){
-      $report.nativeImagePresent=$false
-      Block 'Reported screenshot size below required dimensions'
-     }
-    }
-   }
-  }
-  # A second original native GPU readback is mandatory for source cut QA.
-  $angleName=[string]$capture.angledImageFile
-  if($angleName -match '^godot-native-fdi16-occlusal-[0-9]+\.png
- }else{Block 'No original Godot background capture report returned'}
- $report.godotProcessGPUCorroborated=(
-  $report.rendererLogNvidiaRtx5060 -and
-  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
-  $report.gpuAdapterLuidMatchedToNvidia
- )
- if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
-} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
-finally {
- if($session){Stop-KLPrivateDesktopGodot -Session $session}
- $report.blockers=@($report.blockers|Select-Object -Unique)
- if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
-  $report.nativeImagePresent -and $report.nativeAngledImagePresent -and
-  $report.godotProcessGPUCorroborated -and $report.gpuAdapterLuidMatchedToNvidia -and
-  $report.blockers.Count -eq 0){
-  $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
- }
- $reportJson=$report|ConvertTo-Json -Depth 12
- [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
-  (New-Object System.Text.UTF8Encoding($false)))
- Write-Host "Native background Godot evidence: $reportPath"
- Write-Host "Native background Godot status: $($report.status)"
-}
-){
-   $angledShot=Join-Path $captures $angleName
-   if(Test-Path -LiteralPath $angledShot){
-    $angledBytes=[IO.File]::ReadAllBytes($angledShot)
-    if($angledBytes.Length -gt 10000 -and [BitConverter]::ToString($angledBytes,0,8) -eq '89-50-4E-47-0D-0A-1A-0A'){
-     $sha=(Get-FileHash -LiteralPath $angledShot -Algorithm SHA256).Hash.ToLowerInvariant()
-     if($sha -eq [string]$capture.angledImageSHA256){
-      $report.nativeAngledImagePresent=$true
-      $report.nativeAngledScreenshotFile=$angleName
-      $report.angledImageSHA256=$sha
-     }
-    }
-   }
-  }
-  $report.orbitDurationSeconds=[double]$capture.orbitDurationSeconds
-  if($report.orbitDurationSeconds -lt 40 -or $report.orbitDurationSeconds -gt 45){
-   Block 'Native Godot continuous orbit did not complete required 40-45 seconds'
-  }
-  if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal native Godot GPU PNG'}
-  if(-not $report.nativeImagePresent){Block 'No valid original private-desktop GPU PNG'}
- }else{Block 'No original Godot background capture report returned'}
- $report.godotProcessGPUCorroborated=(
-  $report.rendererLogNvidiaRtx5060 -and
-  $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
-  $report.gpuAdapterLuidMatchedToNvidia
- )
- if(-not $report.godotProcessGPUCorroborated){Block 'Actual Godot process RTX 5060 GPU render proof incomplete'}
-} catch {Block ('Private desktop Godot process exception: '+$_.Exception.Message)}
-finally {
- if($session){Stop-KLPrivateDesktopGodot -Session $session}
- $report.blockers=@($report.blockers|Select-Object -Unique)
- if($report.privateDesktopCreated -and $report.nativeSourceSubmissionVerified -and
-  $report.nativeImagePresent -and $report.godotProcessGPUCorroborated -and
   $report.blockers.Count -eq 0){
   $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
  }
