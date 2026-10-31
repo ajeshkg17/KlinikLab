@@ -1,0 +1,54 @@
+name: SR1C Godot PC watcher syntax and bounded contract (NO NATIVE RENDER)
+
+on:
+  push:
+    branches: [integration/single-chat-validation-2026-10-30]
+    paths:
+      - 'visual-qa/godot-worker.mjs'
+      - 'visual-qa/godot-job-core.mjs'
+      - 'visual-qa/sr1c-capture-godot-pc.ps1'
+      - 'visual-qa/sr1c-build-godot-local.ps1'
+      - 'visual-qa/jobs/godot-current.json'
+      - 'tests/sr1c_godot_pc_watcher.test.mjs'
+      - '.github/workflows/sr1c-godot-pc-watcher-syntax.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-source-syntax:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript source and bounded Godot job schema
+        shell: pwsh
+        run: |
+          node --check visual-qa/godot-worker.mjs
+          node --check visual-qa/godot-job-core.mjs
+          node --test tests/sr1c_godot_pc_watcher.test.mjs
+      - name: Parse PowerShell scripts without executing on hosted runner
+        shell: pwsh
+        run: |
+          $paths = @(
+            'visual-qa/sr1c-build-godot-local.ps1',
+            'visual-qa/sr1c-capture-godot-pc.ps1'
+          )
+          foreach ($p in $paths) {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $p), [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error "$p : $($_.Message)" }
+              throw "PowerShell parse failure: $p"
+            }
+            Write-Host "PowerShell syntax accepted: $p"
+          }
+      - name: Evidence boundary
+        shell: pwsh
+        if: always()
+        run: |
+          'Hosted Windows workflow performs source syntax/schema checks only. It does not start Godot, capture native pixels, or access owner RTX 5060.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
