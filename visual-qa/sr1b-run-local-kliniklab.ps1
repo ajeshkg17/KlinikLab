@@ -226,27 +226,72 @@ if($Mode -eq 'Collect'){
      }
     }
    }
-   # A separate independent observed Windows performance counter trace from the
-   # *specific clinical UnrealEditor.exe PID*. Never substitute FFmpeg NVENC.
+   # GPU Engine(*)\\Utilization Percentage counters are optional OS signals.
+   # A missing/malformed counter is a BLOCKER, never evidence of GPU work.
+   # Preserve the original PID instance path, cooked double and sample time.
+   $report.gpuCounterDiagnostics=[ordered]@{
+    requestedCounter='\\GPU Engine(*)\\Utilization Percentage'
+    matchedEditorPid=[int]$p.ProcessId
+    totalWindowsSampleSets=0
+    pid3DInstances=0
+    rejectedInvalidReadings=0
+    totalValidReadings=0
+    positiveReadings=0
+    rawCounterError=$null
+   }
    try{
-    $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 16 -ErrorAction Stop)
-    $gpu=@(foreach($sample in $samples){
-     foreach($metric in $sample.CounterSamples){
-      if($metric.Path -match "pid_$($p.ProcessId)_" -and $metric.Path -match '(?i)engtype_3d'){
-       [ordered]@{timeUTC=$sample.Timestamp.ToUniversalTime().ToString('o');counter=$metric.Path;utilizationPercent=[double]$metric.CookedValue}
+    $counterSets=@(Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage' -SampleInterval 1 -MaxSamples 16 -ErrorAction Stop)
+    $report.gpuCounterDiagnostics.totalWindowsSampleSets=$counterSets.Count
+    $gpu=New-Object System.Collections.Generic.List[object]
+    $positiveCount=0
+    $maxObserved=0.0
+    $invalidCount=0
+    $matchedCount=0
+    foreach($sample in $counterSets){
+     foreach($metric in @($sample.CounterSamples)){
+      $metricPath=[string]$metric.Path
+      if($metricPath -notmatch ("(?i)pid_"+[regex]::Escape([string]$p.ProcessId)+"_") -or
+         $metricPath -notmatch '(?i)engtype_3d(?:_|\\|$)'){continue}
+      $matchedCount++
+      $value=[double]$metric.CookedValue
+      if([double]::IsNaN($value) -or [double]::IsInfinity($value) -or
+         $value -lt 0.0 -or $value -gt 100.0){
+       $invalidCount++
+       continue
       }
+      $gpu.Add([pscustomobject]@{
+       timeUTC=$sample.Timestamp.ToUniversalTime().ToString('o')
+       counter=$metricPath
+       utilizationPercent=$value
+      })
+      if($value -gt $maxObserved){$maxObserved=$value}
+      if($value -gt 0.05){$positiveCount++}
      }
-    })
-    $gpu|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $capture 'gpu-engine-3d-pid-samples.json') -Encoding utf8
-    $positive=@($gpu|Where-Object {$_.utilizationPercent -gt 0.05})
-    $report.process3DCounterPositiveSamples=$positive.Count
-    if($gpu.Count){$report.process3DMaxUtilizationPercent=[double](($gpu | Measure-Object utilizationPercent -Maximum).Maximum)}
-    $report.processSpecificGPUActivityCorroborated=($positive.Count -ge 3)
-    if(-not $report.processSpecificGPUActivityCorroborated){Block 'No sufficient nonzero clinical editor PID GPU 3D counters'}
-    # Per-process GPU 3D counter activity is corroboration only.
-    # LUID/physical NVIDIA adapter mapping remains explicitly unproven;
-    # keep this as a stated limitation, not a fabricated acceptance.
-   }catch{Block ('Windows GPU Engine counters unavailable: '+$_.Exception.Message)}
+    }
+    $report.gpuCounterDiagnostics.pid3DInstances=$matchedCount
+    $report.gpuCounterDiagnostics.rejectedInvalidReadings=$invalidCount
+    $report.gpuCounterDiagnostics.totalValidReadings=$gpu.Count
+    $report.gpuCounterDiagnostics.positiveReadings=$positiveCount
+    # Avoid Measure-Object -Property on OrderedDictionary/hashtables: the
+    # prior collector raised "utilizationPercent is not valid" before writing
+    # a meaningful GPU counter report. Use a strongly typed PSCustomObject.
+    ConvertTo-Json -InputObject @($gpu.ToArray()) -Depth 6 |
+      Set-Content -LiteralPath (Join-Path $capture 'gpu-engine-3d-pid-samples.json') -Encoding utf8
+    $report.process3DCounterPositiveSamples=$positiveCount
+    $report.process3DMaxUtilizationPercent=[double]$maxObserved
+    $report.processSpecificGPUActivityCorroborated=($positiveCount -ge 3 -and
+                                                     $gpu.Count -ge 3 -and $invalidCount -eq 0)
+    if($matchedCount -eq 0){Block 'Windows GPU Engine counters provided NO instances for the exact clinical editor PID / engtype_3D'}
+    if($invalidCount -gt 0){Block "Windows GPU Engine counters had $invalidCount invalid numeric readings"}
+    if(-not $report.processSpecificGPUActivityCorroborated){Block 'No sufficient valid nonzero GPU 3D counters for the exact clinical UnrealEditor PID'}
+    # Per-PID counter evidence is only corroboration; adapter LUID remains
+    # independent and screenshot still needs direct human pixel inspection.
+   }catch{
+    $report.gpuCounterDiagnostics.rawCounterError=$_.Exception.Message
+    $report.processSpecificGPUActivityCorroborated=$false
+    $report.process3DCounterPositiveSamples=0
+    Block ('Windows GPU Engine counters unavailable/invalid: '+$_.Exception.Message)
+   }
   }
   if($report.blockers.Count -eq 0){$report.status='NATIVE_CLINICAL_EVIDENCE_COLLECTED_PENDING_INDEPENDENT_REVIEW'}
  }catch{Block $_.Exception.Message}
