@@ -5,6 +5,9 @@ on:
     branches: [integration/single-chat-validation-2026-10-30]
     paths:
       - 'visual-qa/godot-worker.mjs'
+      - 'visual-qa/godot-single-instance.mjs'
+      - 'visual-qa/install-godot-pc-watcher.ps1'
+      - 'tests/sr1d_godot_watcher_lock.test.mjs'
       - 'visual-qa/godot-job-core.mjs'
       - 'visual-qa/sr1c-capture-godot-pc.ps1'
       - 'visual-qa/sr1c-capture-godot-background-pc.ps1'
@@ -50,6 +53,8 @@ jobs:
         shell: pwsh
         run: |
           node --check visual-qa/godot-worker.mjs
+          node --check visual-qa/godot-single-instance.mjs
+          node --test tests/sr1d_godot_watcher_lock.test.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
           node --test tests/sr1c_job05_pdh_orbit.test.mjs tests/sr1c_job06_clinic.test.mjs tests/sr1d_godot_cases.test.mjs
@@ -64,6 +69,7 @@ jobs:
         run: |
           $paths = @(
             'visual-qa/sr1c-build-godot-local.ps1',
+            'visual-qa/install-godot-pc-watcher.ps1',
             'visual-qa/sr1c-capture-godot-pc.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1',
             'visual-qa/sr1c-private-desktop.ps1',
