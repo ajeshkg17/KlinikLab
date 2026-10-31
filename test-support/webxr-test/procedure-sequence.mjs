@@ -46,6 +46,20 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
      Object.assign(c.style,{position:'fixed',inset:'0',width:'100vw',height:'100vh',
        zIndex:'2147483647',pointerEvents:'none',background:'#081721'});
      document.body.appendChild(c);
+     // Browser MediaRecorder runs only during the six procedure steps.
+     // It records this transparent-to-Playwright overlay, composed solely
+     // of true, unedited left/right XR eye framebuffer screenshots.
+     if(window.MediaRecorder&&c.captureStream){
+       const stream=c.captureStream(12);
+       const type=['video/webm;codecs=vp8','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));
+       if(type){
+         const recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:3500000});
+         const chunks=[];
+         recorder.addEventListener('dataavailable',e=>{if(e.data.size)chunks.push(e.data)});
+         recorder.start(250);
+         window.__kliniklabProcedureVideo={recorder,chunks,stream,type};
+       }
+     }
    }
    const i=new Image();i.src=dataURL;await i.decode();
    const x=c.getContext('2d');x.fillStyle='#081721';x.fillRect(0,0,c.width,c.height);
@@ -144,6 +158,39 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
  await take(5);
  assert.equal(manifest.steps[5].state.cuts,manifest.steps[4].state.cuts,'cut not persistent after FDI switch');
  assert(manifest.steps.every((x,i)=>i===0||x.frame>manifest.steps[i-1].frame),'Step frames are stale');
+ // Finalize a short optional WebM from the exact six XR-eye framebuffer steps.
+ // Not continuous hand animation: each real app checkpoint remains on screen
+ // ~1.1 s and is visually different when the application state changes.
+ let shortVideo=null;
+ try{
+  shortVideo=await page.evaluate(async()=>{
+    const v=window.__kliniklabProcedureVideo;
+    if(!v||v.recorder.state==='inactive')return null;
+    const blob=await new Promise((resolve,reject)=>{
+      v.recorder.addEventListener('stop',()=>resolve(new Blob(v.chunks,{type:v.type})),{once:true});
+      v.recorder.addEventListener('error',e=>reject(Error(e.error?.message||'Recorder error')),{once:true});
+      v.recorder.stop();
+    });
+    for(const t of v.stream.getTracks())t.stop();
+    const bytes=new Uint8Array(await blob.arrayBuffer());
+    const sections=[];
+    for(let i=0;i<bytes.length;i+=16384)
+      sections.push(String.fromCharCode(...bytes.subarray(i,i+16384)));
+    return {base64:btoa(sections.join('')),bytes:bytes.length,type:blob.type};
+  });
+  if(shortVideo&&shortVideo.bytes>2000&&shortVideo.bytes<24*1024*1024){
+    const vd=path.join(dir,'video');await mkdir(vd,{recursive:true});
+    const bytes=Buffer.from(shortVideo.base64,'base64');
+    await writeFile(path.join(vd,'actual-app-stereo-steps.webm'),bytes);
+    const check={capture:'Playwright-controlled MediaRecorder from six ACTUAL XR binocular rendered framebuffers',
+      type:shortVideo.type,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),
+      continuousHandMotion:false,frameSource:'genuine-IWER-app',
+      decoded:false,nonblankFrameVerified:false,status:'PENDING independent video decode and actual pixel review'};
+    await writeFile(path.join(vd,'stereo-steps-check.json'),JSON.stringify(check,null,2)+'\n');
+    manifest.shortVideo={file:'video/actual-app-stereo-steps.webm',bytes:check.bytes,sha256:check.sha256,
+      status:check.status};
+  }else manifest.shortVideo={status:'PENDING — browser MediaRecorder unavailable or unusable'};
+ }catch(error){manifest.shortVideo={status:'PENDING — recorder error',error:String(error.message)}}
  manifest.passed=true;
  const relativePath='procedure/'+config.id;
  result.procedureEvidence={status:'SIX LOCAL XR IMAGES CAPTURED; VIDEO REVIEW PENDING',
