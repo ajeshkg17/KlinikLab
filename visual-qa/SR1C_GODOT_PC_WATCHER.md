@@ -1,3 +1,20 @@
+## LATEST job06 — invalid-PDH recovery + native clinic-workspace prototype (31 October 2026)
+
+Job05 is **EVIDENCE_INCOMPLETE**; do not rerun its ID or treat a separate post-render PDH probe as process attribution. Fresh queued job: **`pc-godot-clinic-20261031-job06`**, schema **6**, original production source SHA **`f4d4d4151851a08342def08d9f2e461f5f5e7109`**. The executing worker SHA is recorded separately. This job is **NOT a complete port** of the browser KlinikLab application: it renders a labelled native clinical room/tray/chair/workbench preview surrounding unchanged source FDI16 before/cut geometry.
+
+The dedicated WinSta0 unswitched desktop launcher, 42-second Godot Forward+ Vulkan orbit and two original native screenshot gates remain. The PC collector's single persistent 34-sample GPU Engine query now uses **`Get-Counter -ErrorAction Continue`**, records nonterminating PDH warning diagnostics plus rejected Godot-PID GPU 3D rows, and only counts finite, valid-status, in-range 3D samples for Godot's actual PID. Three distinct positive UTC collection periods must match independent DXGI RTX5060 adapter LUID. Valid samples are not thrown away because an unrelated GPU Engine instance is invalid. No samples, invalid samples, mismatched PID/LUID, absent PNG or missing original source remain **EVIDENCE_INCOMPLETE**, not accepted. Published data includes `godot-gpu-3d-counters.json` and `godot-gpu-pdh-diagnostics.json`.
+
+The requester should use a **new detached checkout of the exact current integration worker SHA** after source/Windows CI passes. Set `KLINIKLAB_GODOT_EXE` to the installed 4.7.2 GUI executable and run, from that fresh checkout:
+```powershell
+node --test tests/sr1c_job06_clinic.test.mjs tests/sr1c_job05_pdh_orbit.test.mjs
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1c_pdh_invalid_rows_windows.ps1
+node visual-qa/godot-worker.mjs --validate
+node visual-qa/godot-worker.mjs --once
+```
+The watcher handles unique detached source worktree, Godot private desktop, diagnostics, and publication to `visual-feedback`. It does **not** open Godot on the visible foreground, change firewall/Tailscale/Funnel, modify prior jobs or start Quest streaming. `--validate` is only preflight. Inspect the new `GODOT_PC_LATEST.md` and original new PNG pixels before any visual gate. The full browser app remains separately runnable in its existing PC browser and is not silently redefined as a native Godot application.
+
+---
+
 ## LATEST: job05 persistent PDH/DXGI GPU and native orbit, 31 October 2026
 
 This overrides older owner-PC job01–job04 instructions. NEW unique request: pc-godot-fdi16-20261031-job05, schema 5, original clinical functional source SHA f4d4d4151851a08342def08d9f2e461f5f5e7109. Job contract: native-orbit-frontal-occlusal, persistent-pdh-1hz-dxgi-luid-42s-orbit-v1. Old watchers reject schema 5. Do not rerun, overwrite or reuse prior IDs. XR worker remains untouched.
