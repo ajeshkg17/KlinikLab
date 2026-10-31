@@ -89,6 +89,8 @@ if($Mode -eq 'Collect'){
   selectedD3D12GPUClassification=$null;adapterIndexMappedToGPU=$false
   process3DCounterPositiveSamples=0;process3DMaxUtilizationPercent=0.0
   processSpecificGPUActivityCorroborated=$false;gpuAdapterLuidMatchedToNVIDIA=$false
+  limitations=@('GPU 3D-engine counters identify the clinical process PID, but an independent Windows GPU-engine LUID to NVIDIA adapter mapping is still pending',
+                'Original clinical screenshot requires independent pixel review before the local render gate passes')
   independentNativePixelReviewPassed=$false;clinicianAnatomyReviewPassed=$false
   pixelStreaming2Verified=$false;quest2Verified=$false;blockers=@()
  }
@@ -124,7 +126,8 @@ if($Mode -eq 'Collect'){
    $shotDirs=@('Saved\Screenshots\WindowsEditor','Saved\Screenshots\Windows')
    $shots=@(foreach($folder in $shotDirs){
     Get-ChildItem -LiteralPath (Join-Path (Join-Path $out 'Project') $folder) -File -Filter '*.png' -ErrorAction SilentlyContinue
-   }|Sort-Object LastWriteTimeUtc -Descending)
+   })
+   $shots=@($shots | Sort-Object LastWriteTimeUtc -Descending)
    if(-not $shots.Count){Block 'No real native UE clinical HighResShot PNG; capture in running Editor'}
    else{
     $shot=$shots[0]
@@ -175,7 +178,9 @@ if($Mode -eq 'Collect'){
     if($gpu.Count){$report.process3DMaxUtilizationPercent=[double](($gpu | Measure-Object utilizationPercent -Maximum).Maximum)}
     $report.processSpecificGPUActivityCorroborated=($positive.Count -ge 3)
     if(-not $report.processSpecificGPUActivityCorroborated){Block 'No sufficient nonzero clinical editor PID GPU 3D counters'}
-    $report.blockers=@($report.blockers)+@('Counter 3D engine LUID not yet independently mapped to NVIDIA adapter; review native RHI/OS device mapping')
+    # Per-process GPU 3D counter activity is corroboration only.
+    # LUID/physical NVIDIA adapter mapping remains explicitly unproven;
+    # keep this as a stated limitation, not a fabricated acceptance.
    }catch{Block ('Windows GPU Engine counters unavailable: '+$_.Exception.Message)}
   }
   if($report.blockers.Count -eq 0){$report.status='NATIVE_CLINICAL_EVIDENCE_COLLECTED_PENDING_INDEPENDENT_REVIEW'}
