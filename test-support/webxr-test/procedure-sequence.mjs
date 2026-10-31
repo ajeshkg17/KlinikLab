@@ -49,6 +49,7 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   return {fdi:String(lab.fdiTooth),caseKey:lab.caseKey,cuts:lab.solid.bur.length,
     bur:lab.solid.bur.map(b=>({p:b.p.slice(),r:b.r})),
     burRadius:lab.burRadius,revision:lab.revision,
+    evidenceView:window.__procedureEvidenceHeadset||null,
     triangles:p.visibleTriangles,meshState,active:p.active,
     evidenceMode:!!s.xrFdiEvidence,xrFrames:s.xrVisualDiagnostics.frames,
     session:!!s.xrSession,modal:p.modalOwner};
@@ -128,6 +129,23 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   window.__procedureOriginalBurRadius=lab.burRadius;
   lab.burRadius=.20;
   window.__kliniklabProcedureTargetModel=[.08,lab.solid.height(.08,-.08),-.08];
+  // IWER exposes the tracked headset at XRDevice.position/quaternion.
+  // The stock horizontal eye height cannot reliably see a small cavity on
+  // the upper occlusal tooth surface. Use a genuine tracked overhead-oblique
+  // observer pose, constant across precut and postcut stereo framebuffer
+  // captures; never rotate/paint the screenshot itself.
+  const device=window.__xrTestDevice;
+  if(!device?.position?.set||!device?.quaternion?.set)
+    throw Error('IWER headset pose controls unavailable');
+  window.__procedureOriginalHeadset={
+    position:[device.position.x,device.position.y,device.position.z],
+    quaternion:[device.quaternion.x,device.quaternion.y,device.quaternion.z,device.quaternion.w]
+  };
+  const eye=[.28,2.07,-.35],lookAt=[.28,1.62,-1.03];
+  const pitch=Math.atan2(lookAt[1]-eye[1],eye[2]-lookAt[2]);
+  device.position.set(...eye);
+  device.quaternion.set(Math.sin(pitch/2),0,0,Math.cos(pitch/2));
+  window.__procedureEvidenceHeadset={position:eye,pitch,lookAt};
   s.xrFdiEvidence=false;
  });
  await take(0);
@@ -383,6 +401,13 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
         lab.burRadius=window.__procedureOriginalBurRadius;
       delete window.__procedureOriginalBurRadius;
       delete window.__kliniklabProcedureTargetModel;
+      const device=window.__xrTestDevice,headset=window.__procedureOriginalHeadset;
+      if(headset&&device){
+        device.position.set(...headset.position);
+        device.quaternion.set(...headset.quaternion);
+      }
+      delete window.__procedureOriginalHeadset;
+      delete window.__procedureEvidenceHeadset;
       lab.persistTooth?.();lab.rebuild();
       s.xrPrep?.triggers?.clear();s.xrPrep?.syncCase();s.xrPrep?.updateMesh();
       s.xrFdiEvidence=false;
