@@ -35,3 +35,30 @@ test('Native screenshot and GPU identity remain explicitly unreviewed',()=>{
  assert(p.includes('quest2StreamingVerified=$false'));
  assert(p.includes('Refusing to overwrite existing SR1 evidence directory'));
 });
+
+test('Accept GUID EngineAssociation only with validated installed UE 5.8 and running engine executable',()=>{
+ for(const token of [
+  'projectEngineAssociationKind',
+  'REGISTERED_GUID',
+  "Get-ItemProperty -Path 'HKCU:",
+  'engineExecutableMatched',
+  'GetFullPath($procExe)',
+  'projectEngineAssociationVerified',
+  'Build.version',
+  'projectProcessMatched'
+ ])assert(p.includes(token),token);
+ assert(!p.includes('EngineAssociation is $($p.EngineAssociation), not UE 5.8'));
+});
+test('Native GPU source assessment correlates D3D12 and CSV GPU with a passed preflight',()=>{
+ for(const token of [
+  'sr1-unreal-adapter-evidence.mjs',
+  '--expected-gpu=',
+  'selectedAdapterClassification',
+  'chosenD3D12AdapterId',
+  'unrealReportedGPU',
+  'adapterIndexMappedToGPU',
+  'dedicatedGPUPreflightPassed',
+  'nativeLogFreshForProcess'
+ ])assert(p.includes(token),token);
+ assert(!p.includes("($selectedText -match '(?i)NVIDIA"));
+});
