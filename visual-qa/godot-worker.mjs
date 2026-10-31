@@ -15,6 +15,7 @@ import {validateGodotJob,INTEGRATION_BRANCH,RESULT_BRANCH,JOB_REF} from './godot
 import {cleanWindowsPowerShellEnv} from './godot-powershell-environment.mjs';
 import {parseGodotJson,jsonWithoutBom} from './godot-json.mjs';
 import {acquireGodotWorkerLease,readGodotWorkerLease} from './godot-single-instance.mjs';
+import {inspectJob07,JOB07_ID,JOB07_SOURCE,JOB07_DIR,JOB07_WORKER} from './godot-job07-forensics.mjs';
 
 const REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabGodotWorker');
@@ -225,6 +226,7 @@ async function publish(j,run,result){
  const capture=path.join(run,'Captures');
  const selected=[
   ['godot-job-result.json',path.join(capture,'godot-job-result.json')],
+  ['godot-job07-forensic-review.json',path.join(capture,'godot-job07-forensic-review.json')],
   ['godot-owner-pc-result.json',path.join(capture,'godot-owner-pc-result.json')],
   ['native-source-submission.json',path.join(capture,'native-source-submission.json')],
   ['godot-source-prepare.json',path.join(run,'godot-source-prepare.json')],
@@ -238,7 +240,17 @@ async function publish(j,run,result){
   ['godot-native-stderr.log',path.join(capture,'godot-native-stderr.log')]
  ];
  if(result.imageExists){
-  const native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),'published original owner-PC JSON');
+  // Only an explicitly verified, publication-only job07 archive may use the
+  // original raw Godot background report in place of absent owner-PC JSON.
+  // It NEVER invents Godot PID / PDH samples / owner-PC acceptance.
+  let native;
+  if(result.recoveryOnly && result.jobId===JOB07_ID && result.originalNativeImagesVerified){
+   const raw=parseGodotJson(await fs.readFile(path.join(capture,'godot-background-capture.json'),'utf8'),'verified original Godot capture');
+   native={nativeScreenshotFile:raw.imageFile,nativeAngledImagePresent:true,
+    nativeAngledScreenshotFile:raw.angledImageFile};
+  }else{
+   native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),'published original owner-PC JSON');
+  }
   const name=native.nativeScreenshotFile;
   if(!/^godot-native-fdi16-frontal-[0-9]+\.png$/.test(name||''))throw Error('Unsupported original frontal PNG name');
   selected.push(['godot-native-fdi16.png',path.join(capture,name)]);
@@ -264,6 +276,7 @@ async function publish(j,run,result){
   'Status: '+result.overallStatus,'',
   'Evidence captured by dedicated Godot PC worker, **not** by GitHub Actions or Linux.',
   'Source hash and screenshot pixel verification are independent tests.',
+  ...(result.recoveryOnly?['PUBLICATION-ONLY RECOVERY: existing original image bytes. NO rerender, NO owner-PC result, NO attributable GPU acceptance.']:[]),
   'No Quest/streaming success is claimed.','',
   ...artifacts.flatMap(a=>[a.name+': SHA256 '+a.sha256,'']),
   'If present, original native PNG requires independent pixel review:','',
@@ -358,6 +371,92 @@ async function recoverIncompleteAttempts(){
   console.log('Preserved/recovered original incomplete Godot attempt:',id,url);
  }
 }
+/** Forensic-only job07 publication: DOES NOT call execute(), capture or Godot.
+ * Never clears the stale watcher lease. Separate exclusive recovery file is
+ * retained on abnormal exit to prevent duplicate/ambiguous publication.
+ */
+async function recoverRawJob07({diagnoseOnly=false}={}){
+ if(process.platform!=='win32')throw Error('Owner-PC interrupted evidence recovery is Windows-only');
+ const lock=await readGodotWorkerLease(ROOT);
+ if(!lock.exists||lock.malformed||lock.processAlive!==false||lock.jobPoller!=='visual-qa/godot-worker.mjs')
+  throw Error('Refusing job07 recovery unless known stale watcher lease is intact and original watcher PID is confirmed DEAD');
+ const target=path.join(EVIDENCE,JOB07_DIR);
+ const original=await inspectJob07(ROOT); // verify originals before any write/network
+ const ledger=await readLedger();
+ if(!ledger||typeof ledger.completed!=='object'||!ledger.completed||Array.isArray(ledger.completed))
+  throw Error('Malformed ledger; refusing recovery');
+ const prev=ledger.completed[JOB07_ID];
+ if(prev && (prev.commit!==JOB07_SOURCE||
+    !['executing','publish-pending'].includes(prev.status)))
+  throw Error('Existing job07 ledger conflict/terminal state; require investigation, not overwrite');
+ const recovery={
+  ...original,ledgerEntryAbsentAtInspection:!prev,
+  existingLedgerState:prev?.status||null,
+  staleWatcherPid:lock.pid,staleWatcherStartedUTC:lock.startedAt,
+  inspectedUTC:new Date().toISOString(),
+  recoveryToolSHA:git(['rev-parse','HEAD'],path.resolve(sourceDir,'..')),
+  limitations:['No original owner-PC result JSON', 'No validated original PDH/DXGI Godot-PID 3D attribution', 'Original pixels not independently clinically reviewed',
+   'Application remains unported; only source-derived case navigation'],
+  decision:'PUBLISH_ORIGINAL_FILES_ONLY_AS_EVIDENCE_INCOMPLETE_NO_RERENDER'
+ };
+ if(diagnoseOnly){
+  console.log(JSON.stringify({job07Forensics:recovery,watcherLease:lock},null,2));
+  return;
+ }
+ const recoveryLock=path.join(ROOT,'godot-job07-publication-only.lock');
+ const lease=await fs.open(recoveryLock,'wx',0o600)
+  .catch(e=>{if(e.code==='EEXIST')throw Error('Existing job07 recovery lock: inspect prior archive attempt; NEVER rerun renderer');throw e});
+ await lease.writeFile(JSON.stringify({pid:process.pid,startedUTC:new Date().toISOString(),
+  job07:JOB07_ID,mode:'publication-only',noRerender:true},null,2));
+ await lease.sync();
+ try{
+  await permission();
+  const j=await currentJob();
+  if(j.jobId!==JOB07_ID||j.commit!==JOB07_SOURCE||j.sceneMode!=='clinic-cases')
+   throw Error('GitHub approved active request no longer exactly job07; refusing archival publication');
+  const capture=path.join(target,'Captures');
+  const workerResult={
+   jobId:JOB07_ID,sourceGitSHA:JOB07_SOURCE,watcherSuite:j.suite,
+   workerGitSHA:JOB07_WORKER,
+   recoveryToolGitSHA:recovery.recoveryToolSHA,
+   nativeSceneMode:'clinic-cases',fullKlinikLabApplicationMigrated:false,
+   executedOn:'original owner Windows PC, interrupted watcher process',
+   generatedAt:new Date().toISOString(),
+   nativeReportStatus:'OWNER_PC_RESULT_ABSENT_ORIGINAL_RAW_GODOT_CAPTURE_ONLY',
+   nativeWorkflowVerified:true,imageExists:true,angledImageExists:true,
+   originalNativeImagesVerified:true,
+   sourceMeshVerified:true,sourceDerivedWorkflowNavigationVerified:true,
+   distinctRtx5060Gpu3DPeriods:0,rtx5060DxgiLuid:null,dxgiLuidMatchesGodotProcess:false,
+   gpuProcessCorroborated:false,imageIndependentPixelReviewAccepted:false,
+   backgroundPrivateDesktopRenderRequested:true,foregroundActivationRequested:false,
+   headlessDummyRendererAllowed:false,
+   recoveryOnly:true,reexecuted:false,
+   overallStatus:'EVIDENCE_INCOMPLETE',
+   errors:['Original watcher terminated before collector final JSON and regular worker result were written'],
+   blockers:['No original owner-PC result: independent Godot-PID/DXGI/PDH GPU proof not available',
+    'The raw Godot self-report and PNGs are not independently sufficient for process GPU acceptance'],
+   ledgerEntryAbsentAtRecovery:!prev,
+   rawForensicsFile:'godot-job07-forensic-review.json'
+  };
+  // Atomically refuse overwrites of previous original reports or results.
+  await fs.writeFile(path.join(capture,'godot-job07-forensic-review.json'),
+   jsonWithoutBom(recovery),{flag:'wx'});
+  await fs.writeFile(path.join(capture,'godot-job-result.json'),
+   jsonWithoutBom(workerResult),{flag:'wx'});
+  ledger.completed[JOB07_ID]={commit:JOB07_SOURCE,status:'publish-pending',
+   run:target,result:workerResult,endedAt:new Date().toISOString(),recoveryOnly:true};
+  await saveLedger(ledger);
+  const url=await publish(j,target,workerResult);
+  ledger.completed[JOB07_ID]={...ledger.completed[JOB07_ID],
+   status:'published',url,publishedAt:new Date().toISOString()};
+  await saveLedger(ledger);
+  await heartbeat('job07-archived-incomplete-no-rerender',JOB07_ID,{url,reexecuted:false});
+  console.log('JOB07 ORIGINALS PRESERVED/PUBLISHED WITHOUT RERENDER; GPU INCOMPLETE:',url);
+ } finally{
+  await lease.close(); // intentionally preserve separate recovery lease as historical marker
+ }
+}
+
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
@@ -404,10 +503,14 @@ function textLog(...x){console.log(...x)}
 // --validate is read-only/preflight, never captures, and does not take the
 // rendering lease. --once, --watch and repair mutually exclude one another.
 const args=process.argv.slice(2);
-const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status'].filter(x=>args.includes(x));
+const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--diagnose-job07','--archive-job07'].filter(x=>args.includes(x));
 if(modes.length>1)throw Error('Select only one approved Godot worker mode');
 if(args.some(x=>!modes.includes(x)))throw Error('Unknown Godot worker argument');
-if(modes.includes('--lock-status')){
+if(modes.includes('--diagnose-job07')){
+ await recoverRawJob07({diagnoseOnly:true});
+}else if(modes.includes('--archive-job07')){
+ await recoverRawJob07({diagnoseOnly:false});
+}else if(modes.includes('--lock-status')){
  const info=await readGodotWorkerLease(ROOT);
  console.log(JSON.stringify({workerLease:info,heartbeat:HEARTBEAT,ledger:LEDGER},null,2));
 }else if(modes.includes('--validate')){
