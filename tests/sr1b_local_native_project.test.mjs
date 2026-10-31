@@ -67,7 +67,7 @@ test('Local clinical evidence runner is unique, source-pinned and fails closed o
   'NATIVE_ASSET_FILES_HASHED_NOT_RENDERED',
   "'\\GPU Engine(*)\\Utilization Percentage'",
   'engtype_3d',
-  'pid_$($p.ProcessId)_',
+  'matchedEditorPid=[int]$p.ProcessId',
   'nativeScreenshotFreshForProcess',
   'selectedD3D12GPUClassification',
   'gpuAdapterLuidMatchedToNVIDIA=$false',
@@ -243,6 +243,41 @@ test('UE5.8 saved-level reload matches actor label VALUES, inventories real clas
  const p=spawnSync(cmd,[path.join(root,'tests/sr1b_reload_contract_test.py')],
   {encoding:'utf8',timeout:30000});
  if(p.error?.code==='ENOENT'){t.skip('Python unavailable');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
+test('Source-exact procedural bounds gate and camera/Windows GPU evidence fail closed',t=>{
+ const bounds=read('visual-qa/sr1b_native_bounds.py');
+ const frame=read('visual-qa/sr1b-frame-clinical-viewport.py');
+ for(const key of [
+  'source_bounds(source)',
+  'unreal.SystemLibrary.get_component_bounds(component)',
+  'check_native_component_bounds(',
+  "report['nativeWorldBoundsSourceParityVerified'] = True",
+  "diagnostics['geometryBoundsVerifiedPreAndPostReload'] = True",
+  'component.set_world_location(unreal.Vector(*placement), False, True)',
+  "component.set_visibility(True, False)",
+  "component.set_hidden_in_game(False, False)"
+ ])assert(importer.includes(key),key);
+ assert(bounds.includes('Native procedural section world bounds are empty'));
+ assert(frame.includes('set_level_viewport_camera_info('));
+ assert(frame.includes('editor_set_game_view(True,key)'));
+ assert(frame.includes('set_level_viewport_fov('));
+ for(const key of [
+  'gpuCounterDiagnostics',
+  'New-Object System.Collections.Generic.List[object]',
+  '[pscustomobject]@{',
+  '[double]::IsNaN($value)',
+  '[double]::IsInfinity($value)',
+  'No sufficient valid nonzero GPU 3D counters',
+  'Windows GPU Engine counters provided NO instances',
+  "processSpecificGPUActivityCorroborated=$false"
+ ])assert(runner.includes(key),key);
+ assert(!runner.includes('Measure-Object utilizationPercent'));
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_native_bounds_test.py')],
+  {encoding:'utf8',timeout:20000});
+ if(p.error?.code==='ENOENT'){t.skip('Python interpreter unavailable');return}
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
 
