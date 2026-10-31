@@ -1,3 +1,20 @@
+# Priority override — 31 October 2026: local native KlinikLab render BEFORE Quest streaming
+
+**User-approved development order (binding for SR1/SR2):** First render real, identified KlinikLab clinical-app content in a native Unreal Engine 5.8.4 level on the owner workstation's NVIDIA RTX 5060 and independently verify an original native screenshot plus process-specific GPU work. Only AFTER this gate is met should Pixel Streaming 2, WebRTC, secure LAN viewer or physical Quest 2 receiver implementation begin. Existing earlier prototype descriptions that suggest a Quest-first order are superseded. Keep the legacy browser/XR Phase 9 QA separate.
+
+**SR1A completed limited hardware/log observation (not clinical render):** Owner PC reported a successful source-pinned UE 5.8.4 blank-project log and H.264 NVENC preflight. Preserved native log SHA-256 `3923f2e115a651597893e3d95c9d5c9a0755cf8c4a0a00ac322b2a75c9596e67` was read-only reanalysed on the owner PC with parser `cd75663d7f32c678104ce508594552c083b3218e`: observed `D3D12_INDEX_MAPPED_TO_MATCHING_NVIDIA_GPU`, chosen adapter 0, RTX 5060, no blockers. Supplemental derived report `unreal-adapter-reanalysis-cd75663d.json` SHA-256 `a1ca8d73ba0b2d57a9c666925257877059537dc89a41d7aaf2ed6d55c43cd65c`; original `EVIDENCE_INCOMPLETE` collector report remains unchanged. This does NOT prove process GPU raster, any native KlinikLab geometry, GPU encode by Unreal, video or Quest.
+
+**SR1B NEW highest-priority unresolved gate — LOCAL KLINIKLAB CLINICAL CONTENT RENDER:**
+1. Extract one **native provenance-pinned FDI16 educational molar** from existing `volumetric-lab.js` `ToothSolid('molar','16')` and the existing `KlinikVoxelMesher.build` triangle groups; show original and the same model with one labelled simulated occlusal cut. Export deterministic, non-patient OBJ+MTL in a new ignored local output directory with JSON manifest containing source SHA, FDI ID, procedure archetype, per-state triangles/materials, hashes, coordinate/display scale and attribution. No Dundee third-party mesh needed. The right-side FDI16 geometry is this app's schematic implicit solid, NOT a Dundee left-side tooth relabelled.
+2. In a **distinct UE5.8 clinical-slice project**, use Unreal Editor native Python asset import to create a saved level with both state meshes, dedicated teaching-room lights, camera/labels and case identity. The resulting level must load without browser, WebGL, remote video, patient data, Quest, or a CPU-render quality fallback. Take a real native Unreal viewport HighResShot, not generated imagery.
+3. Collect a **fresh unique, source-pinned** native clinical evidence directory separate from `ue58-attach-*` blank-project runs, with original PNG/log/level manifest and SHA-256, exact UnrealEngine 5.8.4, actual editor executable/project command line, log freshness, matching NVIDIA adapter and **real per-process UE GPU 3D-engine counter trace** under visible rendering. The preflight FFmpeg `h264_nvenc` is not a replacement for measured process GPU rendering. Reject stale, blank-scene, software fallback or reused evidence.
+4. Developer independently inspect original screenshot *pixels*, confirm identifiable FDI16 molar, distinct uncut/cut surfaces, actual clinical text, true native UE viewport, nonblank geometry, and match the manifest. Qualified dental anatomy validity is a separate pending gate. Do not mark SR1B complete from CI, screenshots metadata, scripted actor creation, or an unreviewed file.
+5. ONLY after (1)–(4) verified, start SR2: design/measure dedicated RTX 5060 encoding, secure LAN transport, Quest browser/native receiving and 6DoF controller return. No networking work before SR1B is accepted.
+
+**Source-only implementation is not a workstation result.** While owner-PC tools are unavailable, implement the exporter, isolated UE project, import/level script, checkers and tests, and retain `NOT_RUN` for hardware/pixel acceptance. No new XR job IDs or browser worker changes in SR1B.
+
+---
+
 # KlinikLab — clinical-training visual and XR roadmap
 
 ## Visual direction and evidence rules
