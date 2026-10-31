@@ -532,13 +532,16 @@ class DentalScene {
     this.xrControllers=[];
     for(const handedness of ['left','right']){
       const side=handedness==='left'?-1:1;
+      // A restrained Quest2 Touch-like silhouette, not a licensed device
+      // model or hand tracking: muted body, smaller cap and slimmer ring.
+      // The pose and visible aim ray still come from real gripSpace/targetRaySpace.
       const parts=[
-        this.cy([0,-20,0],[.039,.125,.044],'#303b49',{finish:.4}),
-        this.sphere([0,-20,0],[.055,.040,.061],'#b5bcc6'),
-        this.tor([0,-20,0],[.108,.110,.108],'#c2c8cf'),
-        this.box([0,-20,0],[.027,.035,.041],'#3b4e5f'),
-        this.cy([0,-20,0],[.023,.025,.023],'#252c39'),
-        this.sphere([0,-20,0],[.014,.014,.014],handedness==='left'?'#5caaf4':'#f49d7a')
+        this.cy([0,-20,0],[.034,.095,.037],'#34434c',{finish:.32}),
+        this.sphere([0,-20,0],[.043,.028,.044],'#849397',{finish:.26}),
+        this.tor([0,-20,0],[.061,.058,.061],'#72858a',{finish:.24}),
+        this.box([0,-20,0],[.019,.027,.022],'#384c57'),
+        this.cy([0,-20,0],[.016,.014,.016],'#27323a'),
+        this.sphere([0,-20,0],[.012,.012,.012],handedness==='left'?'#5caaf4':'#f49d7a')
       ];
       const ray=this.cy([0,-20,0],[.008,1.5,.008],handedness==='left'?'#76baff':'#80dec9',{alpha:.56});
       this.xrControllers.push({handedness,side,parts,ray,active:false,gripValid:false,aimValid:false,buttons:{trigger:false,grip:false,thumbstick:false,primary:false,secondary:false},profiles:[]});
@@ -563,12 +566,12 @@ class DentalScene {
     c.buttons={trigger:pressed(0),grip:pressed(1),thumbstick:pressed(3),primary:pressed(4),secondary:pressed(5)};
     // Left/right mirrored handle, cap, tracking ring, grip/trigger, thumbstick, face button.
     const layouts=[
-      {p:[0,-.046,.018],s:[.050,.120,.056],rot:[-.21,0,0]},
-      {p:[0,.024,-.007],s:[.064,.035,.065]},
-      {p:[0,.054,-.010],s:[.083,.075,.080],rot:[Math.PI/2,0,0]},
-      {p:[side*.026,-.018,-.031],s:[.022,.033,.029]},
-      {p:[side*.026,.043,-.034],s:[.021,.019,.021]},
-      {p:[-side*.025,.043,-.035],s:[.016,.016,.016]}
+      {p:[0,-.046,.018],s:[.037,.092,.041],rot:[-.21,0,0]},
+      {p:[0,.024,-.007],s:[.043,.028,.044]},
+      {p:[0,.054,-.010],s:[.061,.058,.061],rot:[Math.PI/2,0,0]},
+      {p:[side*.026,-.018,-.031],s:[.019,.027,.022]},
+      {p:[side*.026,.043,-.034],s:[.016,.014,.016]},
+      {p:[-side*.025,.043,-.035],s:[.012,.012,.012]}
     ];
     for(let i=0;i<c.parts.length;i++){
       const m=c.parts[i],layout=layouts[i];
