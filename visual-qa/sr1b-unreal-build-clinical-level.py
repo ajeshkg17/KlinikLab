@@ -344,7 +344,7 @@ def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
     path. Section presence is rechecked after saving and reloading the level.
     """
     root = spawn(unreal.Actor, 0, y_offset, 74, name)
-    subsystem = unreal.SubobjectDataSubsystem.get()
+    subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
     require(subsystem is not None, 'SubobjectDataSubsystem unavailable')
     handles = list(subsystem.k2_gather_subobject_data_for_instance(root))
     require(handles, 'Native actor root SubobjectDataHandle missing')
