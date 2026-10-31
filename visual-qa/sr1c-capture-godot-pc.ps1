@@ -137,7 +137,6 @@ try{
   }
   if(-not $report.nativeImagePresent){Block 'PNG invalid or resolution insufficient'}
  }else{Block 'No original native Godot F12 PNG was produced'}
- } # end running/exit check
 } catch {Block ('Native Godot capture runner exception: '+$_.Exception.Message)}
 finally{
  if($p -and -not $p.HasExited){try{Stop-Process -Id $p.Id -Force -ErrorAction Stop}catch{}}
