@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import os from 'node:os';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
 import {buildHandoffPdf,MD_PATH,PDF_PATH} from '../visual-qa/handoffs/build_handoff_pdf.mjs';
 
 test('Durable next-chat Markdown and actual committed PDF are byte-reproducible mirrors',()=>{
@@ -39,4 +42,35 @@ test('Generated PDF text commands stay inside printable page boundaries',()=>{
   count++;
  }
  assert(count>180,'Handoff PDF has too little displayed text');
+});
+
+test('Committed handoff PDF parses, extracts real content, and renders through Poppler when available',t=>{
+ const out=fs.mkdtempSync(path.join(os.tmpdir(),'kliniklab-sr1b-handoff-pdf-'));
+ try{
+  const pdfinfo=spawnSync('pdfinfo',[PDF_PATH],{encoding:'utf8',timeout:20000});
+  if(pdfinfo.error?.code==='ENOENT'){t.skip('Poppler pdfinfo unavailable');return}
+  assert.equal(pdfinfo.status,0,pdfinfo.stderr);
+  assert.match(pdfinfo.stdout,/Pages:\s+4\b/);
+  assert.match(pdfinfo.stdout,/Page size:\s+612 x 792 pts/);
+  const extract=spawnSync('pdftotext',['-layout',PDF_PATH,'-'],{encoding:'utf8',timeout:20000});
+  assert.equal(extract.status,0,extract.stderr);
+  for(const value of [
+   'SR1B LOCAL NATIVE RENDER FIRST',
+   '0f27a7e0e7179ef30a507e8bc0251749d6bbbad1',
+   '10,320',
+   '6,724',
+   '6,721',
+   '14,856',
+   '14,936',
+   'ProceduralMeshComponent',
+   'Quest',
+   'NOT ACCEPTED'
+  ])assert(extract.stdout.includes(value),'PDF extracted text missing '+value);
+  const png=path.join(out,'page1');
+  const render=spawnSync('pdftoppm',['-f','1','-l','1','-png','-singlefile','-r','110',PDF_PATH,png],{encoding:'utf8',timeout:30000});
+  assert.equal(render.status,0,render.stderr);
+  const data=fs.readFileSync(png+'.png');
+  assert(data.length>10000);
+  assert.equal(data.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+ } finally { fs.rmSync(out,{recursive:true,force:true}); }
 });
