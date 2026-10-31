@@ -339,7 +339,7 @@ def import_native_materials_only(obj_file, name, expected_counts, diagnostics):
 
 
 def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
-                                 expected_counts):
+                                 expected_counts, geometry_diagnostics=None):
     """A SINGLE named native Actor with five ProceduralMeshComponent sections.
 
     The buffers never call StaticMesh build/LOD/simplification. This preserves
@@ -398,6 +398,17 @@ def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
         component.set_editor_property('component_tags', [unreal.Name('KL_TISSUE_'+tissue.upper())])
         src_bounds = source_bounds(source)
         origin, extent, radius = unreal.SystemLibrary.get_component_bounds(component)
+        if geometry_diagnostics is not None:
+            geometry_diagnostics.append({
+                'toothActor':name,'tissue':tissue,
+                'targetWorldTranslationCm':list(placement),
+                'sourceBoundsCm':src_bounds,
+                'nativeWorldCenterCm':[float(origin.x),float(origin.y),float(origin.z)],
+                'nativeWorldHalfExtentCm':[float(extent.x),float(extent.y),float(extent.z)],
+                'nativeBoundingSphereRadiusCm':float(radius),
+                'sceneComponentVisible':bool(component.is_visible()),
+                'sceneComponentHiddenInGame':bool(component.get_editor_property('hidden_in_game'))
+            })
         checked = check_native_component_bounds(
             src_bounds, placement, (origin.x, origin.y, origin.z),
             (extent.x, extent.y, extent.z))
@@ -605,6 +616,7 @@ def main():
         'renderPath': 'NATIVE_PROCEDURAL_MESH_EXACT_OBJ_FACE_INDEX_BUFFERS',
         'nativeProceduralSourceTrianglesSubmitted': {},
         'nativeProceduralSections': {},
+        'nativeGeometryDiagnostics': {'before': [], 'after': []},
         'nativeProceduralReloadedSections': {},
         'nativeWorldBoundsSourceParityVerified': False,
         'nativeActorReloadDiagnostics': {},
@@ -675,10 +687,10 @@ def main():
         require(level.new_level(LEVEL), 'Native Unreal Editor failed to create a new level')
         a, before_proc = native_procedural_tooth_actor(
             'KL_FDI16_BEFORE_SOURCE_MESH', -65, before_mat, before_source,
-            manifest['sceneStates']['before']['byMaterial'])
+            manifest['sceneStates']['before']['byMaterial'], report['nativeGeometryDiagnostics']['before'])
         b, after_proc = native_procedural_tooth_actor(
             'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH', 65, after_mat, after_source,
-            manifest['sceneStates']['after']['byMaterial'])
+            manifest['sceneStates']['after']['byMaterial'], report['nativeGeometryDiagnostics']['after'])
         report['nativeProceduralSections'] = {
             'before':before_proc,'after':after_proc}
         report['nativeProceduralSourceTrianglesSubmitted'] = {
