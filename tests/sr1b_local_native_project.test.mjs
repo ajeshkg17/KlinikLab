@@ -157,6 +157,36 @@ test('Original triangle stream native fallback is source-hashed, uses Unreal Sta
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
 
+test('UE5.8 production faces bypass destructive StaticMesh render LOD using native persistent procedural mesh buffers',t=>{
+ assert(project.Plugins.some(x=>x.Name==='ProceduralMeshComponent'&&x.Enabled),
+  'native UE runtime plugin is explicitly enabled');
+ for(const token of [
+  "from sr1b_procedural_buffers import exact_source_buffers",
+  'def native_procedural_tooth_actor(',
+  'unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)',
+  'k2_gather_subobject_data_for_instance(root)',
+  'unreal.AddNewSubobjectParams(',
+  'unreal.ProceduralMeshComponent',
+  'create_mesh_section_linear_color(',
+  'get_num_sections() == 1',
+  'sourceCoordinateSHA256',
+  'nativeProceduralSourceTrianglesSubmitted',
+  'sourceTopologyAcceptedInProceduralInput',
+  'savedProceduralTriangleIndexReadbackVerified',
+  'verify_reloaded_procedural_scene(',
+  'staticMeshRenderLOD0Triangles_DIAGNOSTIC_ONLY'
+ ])assert(importer.includes(token),token);
+ assert(runner.includes('Native procedural source topology parity failed'));
+ assert(runner.includes('nativeProceduralSourceTrianglesSubmitted'));
+ assert(!importer.includes("        before, before_rows = import_native_obj("),
+  'lossy static mesh must not be selected as dental render geometry');
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_procedural_buffers_test.py')],
+  {encoding:'utf8',timeout:40000});
+ if(p.error?.code==='ENOENT'){t.skip('Python unavailable');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
 test('PowerShell clinical collector parse check on systems equipped with PowerShell',t=>{
  const script=path.join(root,'visual-qa/sr1b-run-local-kliniklab.ps1').replace(/'/g,"''");
  const command=`$null=$tokens=$errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('${script}',[ref]$tokens,[ref]$errors)|Out-Null; if($errors.Count -gt 0){$errors|ForEach-Object {Write-Error $_.Message};exit 2}`;
