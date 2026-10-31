@@ -4,7 +4,12 @@ import fs from 'node:fs';
 import {validateGodotJob,EXACT_SOURCE_SHA,JOB_REF,RESULT_BRANCH} from '../visual-qa/godot-job-core.mjs';
 
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
-const job=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const activeJob=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+// Preserve historical schema-v5 regression fixtures without reusing the old request.
+const job={...activeJob,schemaVersion:5,jobId:'pc-godot-fdi16-20261031-job05',
+ suite:'sr1c-fdi16-before-after',capture:'native-orbit-frontal-occlusal',
+ telemetryContract:'persistent-pdh-1hz-dxgi-luid-42s-orbit-v1'};
+delete job.sceneMode;
 const watcher=read('../visual-qa/godot-worker.mjs');
 const powershell=read('../visual-qa/sr1c-capture-godot-background-pc.ps1');
 const xrCore=read('../visual-qa/xr-job-core.mjs');
@@ -84,7 +89,7 @@ test('Private desktop Windows collector rejects absent PNG and missing or invali
   "headlessUsed=$false",
   "Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage'",
   "process3DPositiveSamples",
-  "Persistent Windows PDH query failure",
+  "Persistent Windows PDH query terminated",
   "rendererLogNvidiaRtx5060",
   "gpuAdapterLuidMatchedToNvidia=$false",
   "nativePixelReviewAccepted=$false",
