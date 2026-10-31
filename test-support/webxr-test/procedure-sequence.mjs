@@ -33,10 +33,23 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   procedure:'FDI16 simplified educational occlusal preparation',operator:'automated IWER controller, not a filmed dentist',
   clinicalValidation:'PENDING',calibrated:false,
   steps:[],pixelDifference:null,videoAcceptance:'PENDING independent playback and pixel review'};
+ // Saved cut geometry and the GPU-submitted model are not equivalent. Read
+ // each real WebGL mesh's CPU vertex buffer and visibility, not generated art.
  const state=()=>page.evaluate(()=>{
   const app=window.kliniklab,s=app.scene,p=s.xrPrep,lab=app.volLab;
-  return {fdi:String(lab.fdiTooth),cuts:lab.solid.bur.length,revision:lab.revision,
-    triangles:p.visibleTriangles,active:p.active,xrFrames:s.xrVisualDiagnostics.frames,
+  const meshState=p.meshes.map(m=>{
+    const g=s.geom[m.kind],cpu=g?.cpu||new Float32Array();
+    const bytes=new Uint8Array(cpu.buffer,cpu.byteOffset,cpu.byteLength);
+    let hash=2166136261;
+    for(let i=0;i<bytes.length;i++)hash=Math.imul(hash^bytes[i],16777619);
+    return {material:m.xrMaterial,hidden:!!m.hidden,vertices:g?.count||0,
+      fingerprint:(hash>>>0).toString(16).padStart(8,'0')};
+  });
+  return {fdi:String(lab.fdiTooth),caseKey:lab.caseKey,cuts:lab.solid.bur.length,
+    bur:lab.solid.bur.map(b=>({p:b.p.slice(),r:b.r})),
+    burRadius:lab.burRadius,revision:lab.revision,
+    triangles:p.visibleTriangles,meshState,active:p.active,
+    evidenceMode:!!s.xrFdiEvidence,xrFrames:s.xrVisualDiagnostics.frames,
     session:!!s.xrSession,modal:p.modalOwner};
  });
  const drawVideoFrame=async(dataURL)=>{
@@ -75,6 +88,11 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   const record=result.phase7Captures.at(-1);
   assert.equal(record.file,filename);
   assert(record.eyes===2&&record.captureFrame>0,'fresh binocular XR framebuffer required');
+  if(i===1||i===3||i===4||i===5){
+    assert.equal(record.eyeFdiVisiblePixels?.length,2,'Missing tooth raster measurements');
+    assert(record.eyeFdiVisiblePixels.every(v=>v>120),
+      'FDI16 tooth not actually drawn in both XR eyes: '+JSON.stringify(record.eyeFdiVisiblePixels));
+  }
   const source=path.join(out,filename),target=path.join(dir,filename);
   const bytes=await readFile(source);
   await rename(source,target);
@@ -100,11 +118,19 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   s.setXRCatalogOpen(false);s.xrGuide?.close?.();
   if(!s.xrPrep.active)s.xrPrep.toggle();
   s.xrPrep.syncCase();s.xrPrep.updateMesh();s.xrPrep.syncModalVisibility();
+  // Native slider range is .055 to .215 normalized units. Use a reliably
+  // rasterizable size for this *educational* capture, never a clinical bur.
+  window.__procedureOriginalBurRadius=lab.burRadius;
+  lab.burRadius=.20;
   s.xrFdiEvidence=false;
  });
  await take(0);
  await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=true});
  const before=await take(1);
+ const preCutState=manifest.steps[1].state;
+ assert(preCutState.evidenceMode,'Precut frame does not show isolated XR tooth');
+ assert(preCutState.meshState.every(m=>!m.hidden),'Precut meshes hidden');
+ assert(preCutState.meshState.some(m=>m.vertices>100),'No visible meshed volume');
  // XRFrame.getPose may ONLY be sampled in an active XR animation callback.
  // The previous waitForFunction read scene.latestFrame later and therefore
  // could produce null poses even with a correctly positioned controller.
@@ -163,7 +189,25 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
  },prior,{timeout:18000,polling:50});
  await page.evaluate(()=>window.__xrTestDevice.controllers.right.updateButtonValue('trigger',0));
  await page.waitForFunction(()=>window.kliniklab.xrPrep.triggers.size===0,null,{timeout:18000});
- await page.evaluate(()=>{const a=window.kliniklab;a.scene.xrFdiEvidence=true;a.xrPrep.updateMesh()});
+ await page.evaluate(()=>{
+  const a=window.kliniklab;
+  // During a held trigger the app deliberately reduces resolution to 14.
+  // Refresh its actual post-release model at 24 cells before evidentiary
+  // capture. Do not alter the XR geometry directly or substitute a bitmap.
+  a.volLab.rebuild(true);a.xrPrep.syncCase();
+  if(!a.xrPrep.updateMesh())throw Error('Post-cut XR mesh update refused');
+  a.xrPrep.syncModalVisibility();a.scene.xrFdiEvidence=true;
+ });
+ const postCutState=await state();
+ manifest.meshComparison={before:preCutState.meshState,after:postCutState.meshState,
+  beforeTriangles:preCutState.triangles,afterTriangles:postCutState.triangles,
+  beforeCutCount:preCutState.cuts,afterCutCount:postCutState.cuts,
+  burRadius:postCutState.burRadius,bur:postCutState.bur};
+ assert(postCutState.cuts>preCutState.cuts,'No recorded FDI16 cut');
+ assert(postCutState.meshState.every(m=>!m.hidden),'Postcut volume hidden');
+ assert(postCutState.meshState.some((m,i)=>m.vertices!==preCutState.meshState[i].vertices||
+     m.fingerprint!==preCutState.meshState[i].fingerprint),
+   'Actual GPU-backed geometry unchanged despite cut: '+JSON.stringify(manifest.meshComparison));
  const after=await take(3);
  assert(manifest.steps[3].state.cuts>manifest.steps[1].state.cuts,'real in-app cut never occurred');
  const difference=await page.evaluate(async({before,after})=>{
@@ -327,6 +371,9 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
     try{
       lab.setTooth('16');
       lab.solid.bur.length=0;lab.physics.trace.length=0;
+      if(Number.isFinite(window.__procedureOriginalBurRadius))
+        lab.burRadius=window.__procedureOriginalBurRadius;
+      delete window.__procedureOriginalBurRadius;
       lab.persistTooth?.();lab.rebuild();
       s.xrPrep?.triggers?.clear();s.xrPrep?.syncCase();s.xrPrep?.updateMesh();
       s.xrFdiEvidence=false;
