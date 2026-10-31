@@ -1,0 +1,8 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Category": "SR1 GPU renderer smoke only",
+  "Description": "Offline dedicated-GPU Unreal render sanity project. NOT Pixel Streaming, a Quest receiver, or KlinikLab VR migration.",
+  "Modules": [],
+  "Plugins": []
+}

@@ -12,6 +12,8 @@ Epic's VR Pixel Streaming 2 recipe is explicitly **experimental**, may change or
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-pixel-streaming-reference
 - Version-paired signalling/frontend: https://github.com/EpicGames/PixelStreamingInfrastructure
 
+**Current UE 5.8 installation observation:** Engine files and UnrealEditor.exe were reported present on the owner PC as of 2026-10-31 ~14:23, but no local Unreal process, dedicated GPU render, or VR template project has been verified. For the first real RHI launch, start with [the separate non-VR GPU smoke project and Windows collector](./SR1_UE5_8_WORKSTATION_GPU_CHECK.md). Do not mistake that descriptor for a VR template or Pixel Streaming 2 app.
+
 ## Step 0 — preflight (workstation only; this does not start Unreal)
 
 From a trusted exact Git checkout with **Node.js 22+, NVIDIA GPU driver and an FFmpeg build containing h264_nvenc**:

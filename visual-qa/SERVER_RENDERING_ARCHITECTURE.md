@@ -86,6 +86,8 @@ Capture physical Quest Browser version, `isSecureContext`, `navigator.xr`, `XRMe
 
 **Go/no-go:** demonstrably functioning authenticated HTTPS/DTLS-SRTP video + input path and correct 6DoF stereo on physical Quest 2. No geometry rendering on client. If blocked, document unsupported API/codec/reprojection and choose native Quest approach or reject remote VR browser branch.
 
+**Owner-PC install observation (2026-10-31):** The UE 5.8 installation files, including UnrealEditor.exe and templates, are reportedly present. The actual editor/GPU render has not been run or inspected from this development session, and the coworker workspace had no .uproject. `visual-qa/ue5_8-gpu-probe/` provides only a starter non-VR project descriptor to open the real workstation editor; `visual-qa/sr1-unreal-render-check.ps1` records source-pinned NVIDIA NVENC preflight, native UE D3D12 RHI log and native screenshot information, with automatic acceptance prohibited. See `SR1_UE5_8_WORKSTATION_GPU_CHECK.md`. A proper VR template/Pixel Streaming 2 project and Quest 2 experiment remain unbuilt.
+
 ### SR2 — Server simulation & headless GPU output
 Create separate server runtime process and headless stereo GPU renderer, migrate selected tooth/FDI state, procedural meshing, tool hit tests and ownership to server. Render two eye textures using explicit pose matrices. Add deterministic server tick and scene-state revision IDs, GPU timing capture and server-to-video tests.
 

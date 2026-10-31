@@ -18,3 +18,9 @@ qa_screens/
 
 # Local-only Unreal/Quest SR1 evidence and hardware logs
 visual-qa/evidence-local/
+
+# UE 5.8 local GPU smoke probe runtime artifacts (keep source descriptors only)
+visual-qa/ue5_8-gpu-probe/Binaries/
+visual-qa/ue5_8-gpu-probe/Intermediate/
+visual-qa/ue5_8-gpu-probe/Saved/
+visual-qa/ue5_8-gpu-probe/DerivedDataCache/
