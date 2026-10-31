@@ -34,8 +34,11 @@ test('ONE persistent Windows PDH query at one-second intervals counts distinct s
  assert(pc.includes("-SampleInterval 1 -MaxSamples 34"));
  assert(pc.includes("collectionIndex=$period"));
  assert(pc.includes("$stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')"));
- assert(pc.includes("Select-Object -ExpandProperty collectionIndex -Unique"));
+ assert(pc.includes("Select-Object -ExpandProperty utc -Unique"));
  assert(pc.includes('process3DPositiveDistinctPeriods'));
+ assert(pc.includes('-ErrorAction Continue -ErrorVariable +pdhPowerShellErrors'));
+ assert(pc.includes('ConvertTo-KLGodotGpu3DRows'));
+ assert(pc.includes('godot-gpu-pdh-diagnostics.json'));
  assert(pc.includes('process3DPositiveRtx5060DistinctPeriods'));
  assert(pc.includes("if($report.process3DPositiveDistinctPeriods -lt 3)"));
  assert(pc.includes('getGpu')===false);
