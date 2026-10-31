@@ -113,6 +113,9 @@ try{
  # 34 ~1s data collections. Job04 reopened the full wildcard query each
  # iteration, yielding 54 ROWS but only TWO distinct collection timestamps.
  # Never count multiple GPU engine rows at one timestamp as independent proof.
+ $filterScript=Join-Path $PSScriptRoot 'sr1c-pdh-filter.ps1'
+ if(-not(Test-Path -LiteralPath $filterScript)){throw 'Missing approved PDH validity filter'}
+ . $filterScript
  $counterData=@();$samplingErrors=@();$pdhPowerShellErrors=@()
  $rejectedPidRows=@();$collectionPeriods=@()
  $report.persistentPDHQueryUsed=$true
@@ -122,44 +125,11 @@ try{
  try{
   $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' 
    -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhPowerShellErrors)
-  $period=0
-  foreach($snapshot in $snapshots){
-   if($null -eq $snapshot){continue}
-   $period++
-   $stamp=$snapshot.Timestamp.ToUniversalTime().ToString('o')
-   $collectionPeriods+= [PSCustomObject]@{collectionIndex=$period;utc=$stamp}
-   foreach($c in @($snapshot.CounterSamples)){
-    if($null -eq $c){continue}
-    $counterPath=[string]$c.Path
-    if($counterPath -notmatch ('(?i)pid_'+$session.Pid+'_') -or
-     $counterPath -notmatch '(?i)engtype_3d'){continue}
-    $statusName=[string]$c.Status
-    $statusValid=($statusName -eq 'ValidData' -or $statusName -eq '0')
-    $finite=$false
-    $v=$null
-    try{
-     $n=[double]$c.CookedValue
-     if(-not [double]::IsNaN($n) -and -not [double]::IsInfinity($n)){
-      $finite=$true;$v=$n
-     }
-    }catch{}
-    $luid=[KlinikLab.DxgiEvidence]::FromGpuEnginePath($counterPath)
-    $usable=($statusValid -and $finite -and $null -ne $v -and
-      $v -ge 0 -and $v -le 100 -and -not [string]::IsNullOrWhiteSpace($luid))
-    $row=[PSCustomObject]@{
-     utc=$stamp;collectionIndex=$period;godotPid=[int]$session.Pid
-     counterPath=$counterPath;engineLuid=$luid
-     status=$statusName;statusValid=[bool]$statusValid
-     rawCookedValue=[string]$c.CookedValue
-     utilizationPercent=$v;finite=[bool]$finite;usable=[bool]$usable
-    }
-    # Retain all Godot 3D rows so invalid-status evidence is auditable.
-    $counterData+= $row
-    if(-not $usable -and $rejectedPidRows.Count -lt 100){
-     $rejectedPidRows+= $row
-    }
-   }
-  }
+  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) 
+   -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
+  $counterData=@($parsed.rows)
+  $collectionPeriods=@($parsed.periods)
+  $rejectedPidRows=@($parsed.invalidRows|Select-Object -First 100)
  }catch{$samplingErrors+=($_.Exception.Message)}
  $counterOutput=Join-Path $captures $report.originalGpuCounterSampleFile
  $counterJson=ConvertTo-Json -InputObject @($counterData) -Depth 7
