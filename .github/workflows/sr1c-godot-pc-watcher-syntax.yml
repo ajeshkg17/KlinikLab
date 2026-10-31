@@ -10,6 +10,8 @@ on:
       - 'visual-qa/sr1c-build-godot-local.ps1'
       - 'visual-qa/jobs/godot-current.json'
       - 'tests/sr1c_godot_pc_watcher.test.mjs'
+      - 'tests/sr1c_windows_psmodulepath.test.mjs'
+      - 'visual-qa/godot-powershell-environment.mjs'
       - '.github/workflows/sr1c-godot-pc-watcher-syntax.yml'
   workflow_dispatch:
 
@@ -31,6 +33,11 @@ jobs:
           node --check visual-qa/godot-worker.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
+      - name: Simulate inherited pwsh 7 PSModulePath and prove Windows PowerShell 5.1 SHA256 -File works
+        shell: pwsh
+        run: |
+          $env:PSModulePath = "$env:ProgramFiles\PowerShell\7\Modules;$env:PSModulePath"
+          node --test tests/sr1c_windows_psmodulepath.test.mjs
       - name: Parse PowerShell scripts without executing on hosted runner
         shell: pwsh
         run: |
