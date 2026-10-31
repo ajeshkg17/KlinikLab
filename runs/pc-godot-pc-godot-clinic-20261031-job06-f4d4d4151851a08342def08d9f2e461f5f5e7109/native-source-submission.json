@@ -1,0 +1,96 @@
+{
+	"engine": "{ \"major\": 4, \"minor\": 7, \"patch\": 2, \"hex\": 263938, \"status\": \"stable\", \"build\": \"official\", \"hash\": \"ed1daf0bf001b61586d9930840f2f1394092c079\", \"timestamp\": 0, \"string\": \"4.7.2-stable (official)\" }",
+	"kind": "SR1C native Godot source-exact FDI16 submission, NOT clinical/GPU acceptance",
+	"nativeScreenshotReviewed": false,
+	"processGpuVerified": false,
+	"questVerified": false,
+	"renderingDriver": "vulkan",
+	"renderingMethod": "forward_plus",
+	"sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+	"sourceProvenanceVerified": true,
+	"states": {
+		"after": {
+			"nativeSurfaceCount": 5,
+			"submittedTriangles": 14936,
+			"tissues": {
+				"caries": {
+					"materialName": "KL_caries",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 333,
+					"sourceTriangles": 111,
+					"surfaceCount": 1
+				},
+				"cementum": {
+					"materialName": "KL_cementum",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 12315,
+					"sourceTriangles": 4105,
+					"surfaceCount": 1
+				},
+				"dentin": {
+					"materialName": "KL_dentin",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 615,
+					"sourceTriangles": 205,
+					"surfaceCount": 1
+				},
+				"enamel": {
+					"materialName": "KL_enamel",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 30924,
+					"sourceTriangles": 10308,
+					"surfaceCount": 1
+				},
+				"pulp": {
+					"materialName": "KL_pulp",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 621,
+					"sourceTriangles": 207,
+					"surfaceCount": 1
+				}
+			}
+		},
+		"before": {
+			"nativeSurfaceCount": 5,
+			"submittedTriangles": 14856,
+			"tissues": {
+				"caries": {
+					"materialName": "KL_caries",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 336,
+					"sourceTriangles": 112,
+					"surfaceCount": 1
+				},
+				"cementum": {
+					"materialName": "KL_cementum",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 12315,
+					"sourceTriangles": 4105,
+					"surfaceCount": 1
+				},
+				"dentin": {
+					"materialName": "KL_dentin",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 336,
+					"sourceTriangles": 112,
+					"surfaceCount": 1
+				},
+				"enamel": {
+					"materialName": "KL_enamel",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 30960,
+					"sourceTriangles": 10320,
+					"surfaceCount": 1
+				},
+				"pulp": {
+					"materialName": "KL_pulp",
+					"meshClass": "MeshInstance3D",
+					"nativeSubmittedIndices": 621,
+					"sourceTriangles": 207,
+					"surfaceCount": 1
+				}
+			}
+		}
+	},
+	"status": "NATIVE_GODOT_SCENE_SUBMITTED_PENDING_PIXEL_AND_GPU"
+}

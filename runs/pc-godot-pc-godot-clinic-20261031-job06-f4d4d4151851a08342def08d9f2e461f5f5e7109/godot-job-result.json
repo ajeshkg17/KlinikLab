@@ -1,0 +1,29 @@
+{
+  "powerShellChildEnvironment": {
+    "inheritedPSModulePathRemoved": true,
+    "hashCmdletPreflightRequired": true
+  },
+  "jobId": "pc-godot-clinic-20261031-job06",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1c-clinic-workspace-prototype",
+  "workerGitSHA": "bb416139c3aa9c65e8506c237b0d25b623b59e6f",
+  "nativeSceneMode": "clinic-overview",
+  "fullKlinikLabApplicationMigrated": false,
+  "executedOn": "owner Windows PC (watcher runtime)",
+  "generatedAt": "2026-10-31T23:13:12.242Z",
+  "nativeReportStatus": "EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW",
+  "imageExists": true,
+  "angledImageExists": true,
+  "distinctRtx5060Gpu3DPeriods": 15,
+  "rtx5060DxgiLuid": "0x00000000_0x00013049",
+  "dxgiLuidMatchesGodotProcess": true,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": true,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_AND_GPU_REVIEW",
+  "errors": [],
+  "blockers": []
+}

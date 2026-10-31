@@ -1,0 +1,92 @@
+{
+    "schemaVersion":  2,
+    "status":  "EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW",
+    "nativeSceneMode":  "clinic-overview",
+    "fullKlinikLabApplicationMigrated":  false,
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-clinic-20261031-job06-f4d4d41518\\Project\\project.godot",
+    "privateDesktopCreated":  true,
+    "userDesktopActivationRequested":  false,
+    "headlessUsed":  false,
+    "godotPid":  20032,
+    "godotStartedUTC":  "2026-10-31T23:11:55.7179912Z",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeImagePresent":  true,
+    "nativeScreenshotFile":  "godot-native-fdi16-frontal-13472.png",
+    "imageSHA256":  "15ddf76a147242cb91496ab14467b6d794ed91eb00f0b8c1e6311d62c3a802bc",
+    "imageWidth":  1600,
+    "imageHeight":  900,
+    "nativePixelReviewAccepted":  false,
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "renderingMethod":  "forward_plus",
+    "renderingDriver":  "vulkan",
+    "videoAdapterName":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "videoAdapterVendor":  "NVIDIA",
+    "backgroundCaptureStatus":  "BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
+    "process3DSampleCount":  380,
+    "process3DPositiveSamples":  16,
+    "process3DMaxUtilizationPercent":  12.537058110584006,
+    "process3DDistinctSamplePeriods":  15,
+    "process3DPositiveDistinctPeriods":  15,
+    "process3DPositiveRtx5060DistinctPeriods":  15,
+    "persistentPDHQueryUsed":  true,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "dxgiAdapters":  [
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00012b1e",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+                             "luid":  "0x00000000_0x00013049",
+                             "vendorId":  4318,
+                             "deviceId":  11609,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00020475",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Microsoft Basic Render Driver",
+                             "luid":  "0x00000000_0x00012fbb",
+                             "vendorId":  5140,
+                             "deviceId":  140,
+                             "evidenceSource":  null
+                         }
+                     ],
+    "rtx5060DxgiLuid":  "0x00000000_0x00013049",
+    "positiveGodotEngineLuids":  [
+                                     "0x00000000_0x00013049",
+                                     "0x00000000_0x00012b1e"
+                                 ],
+    "nativeAngledScreenshotFile":  "godot-native-fdi16-occlusal-42436.png",
+    "angledImageSHA256":  "01fba7b6be7a3853f986ff2384b6c72cf958a19060c98acc3a4046f5c8d30495",
+    "nativeAngledImagePresent":  true,
+    "orbitDurationSeconds":  42.005,
+    "rendererLogNvidiaRtx5060":  true,
+    "gpuAdapterLuidMatchedToNvidia":  true,
+    "godotProcessGPUCorroborated":  true,
+    "blockers":  [
+
+                 ],
+    "limitations":  [
+                        "Independent original PNG pixel review remains required",
+                        "Windows GPU 3D PID utilization plus Godot Vulkan adapter identity does not itself map a DXGI LUID"
+                    ],
+    "pdhNonTerminatingErrorCount":  20,
+    "pdhRejectedGodot3DRows":  538,
+    "pdhCollectionPeriods":  34,
+    "originalPdhDiagnosticFile":  "godot-gpu-pdh-diagnostics.json"
+}
