@@ -60,7 +60,21 @@ class DentalScene {
     this.target=[0,1.33,-2.28];this.yaw=.28;this.pitch=.27;this.distance=3.8;this.selectedKey='';this.hoverKey='';this.mode='clinic';this.xrSession=null;this.xrRef=null;this.frameCount=0;
     this.installEvents();this.buildScene();this.loop();
   }
-  geometry(data){const gl=this.gl,b=gl.createBuffer(),cpu=new Float32Array(data);gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,cpu,gl.STATIC_DRAW);return {buffer:b,count:cpu.length/8,cpu};}
+  geometry(data,usage=this.gl.STATIC_DRAW){const gl=this.gl,b=gl.createBuffer(),cpu=data instanceof Float32Array?data:new Float32Array(data);gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,cpu,usage);return {buffer:b,count:cpu.length/8,cpu};}
+  // Editable tooth volumes are rebuilt after each cut, sometimes at 14 and
+  // sometimes at 24 samples. Reuse each material's VBO instead of deleting and
+  // creating five WebGL buffers per update; bufferData reallocates storage as
+  // needed while preserving the buffer object's identity and CPU inspection.
+  updateDynamicGeometry(kind,data){
+    const gl=this.gl,cpu=data instanceof Float32Array?data:new Float32Array(data);
+    if(cpu.length%8!==0)throw Error('Dynamic mesh requires interleaved position/normal/UV vertices');
+    const previous=this.geom[kind];
+    if(!previous){this.geom[kind]=this.geometry(cpu,gl.DYNAMIC_DRAW);return this.geom[kind];}
+    gl.bindBuffer(gl.ARRAY_BUFFER,previous.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER,cpu,gl.DYNAMIC_DRAW);
+    previous.cpu=cpu;previous.count=cpu.length/8;
+    return previous;
+  }
   tri(a,b,c,n=null){const A=a.p||a,B=b.p||b,C=c.p||c;const normal=n||M3.unit(M3.cross(M3.sub(B,A),M3.sub(C,A)));return [...A,...normal,...(a.uv||[0,0]),...B,...normal,...(b.uv||[1,0]),...C,...normal,...(c.uv||[1,1])];}
   quadData(){return [...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,-.5,0],uv:[1,0]},{p:[.5,.5,0],uv:[1,1]},[0,0,1]),...this.tri({p:[-.5,-.5,0],uv:[0,0]},{p:[.5,.5,0],uv:[1,1]},{p:[-.5,.5,0],uv:[0,1]},[0,0,1])];}
   boxData(){const p=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],v=[];for(let ax=0;ax<3;ax++)for(const dir of [-1,1]){const n=[0,0,0];n[ax]=dir;const other=[0,1,2].filter(x=>x!==ax),corners=[];for(const [a,b] of [[-1,-1],[1,-1],[1,1],[-1,1]]){const q=[0,0,0];q[ax]=dir*.5;q[other[0]]=a*.5;q[other[1]]=b*.5;corners.push(q)}if(dir*(ax===1?-1:1)<0)corners.reverse();v.push(...this.tri(corners[0],corners[1],corners[2],n),...this.tri(corners[0],corners[2],corners[3],n));}return v}

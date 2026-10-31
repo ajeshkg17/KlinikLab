@@ -102,8 +102,9 @@ class XRToothPractice {
     }
     this.surfaceNormalMode='implicit-field-gradient';
     this.surfaceNormalCount=normalCache.size;
-    for(const material of materials){const kind='xrvol-'+material;const old=scene.geom[kind];if(old)scene.gl.deleteBuffer(old.buffer);
-      scene.geom[kind]=scene.geometry(groups[material]);}
+    // Keep the five material WebGL buffers stable across repeated cuts, case
+    // switches, and 14/24 resolution transitions. No XR input/state changes.
+    for(const material of materials)scene.updateDynamicGeometry('xrvol-'+material,groups[material]);
     this.dirty=false;this.lastRevision=this.lab.revision;this.lastMeshAt=performance.now();this.visibleTriangles=result.count;return true;
   }
   poseRay(pose){const q=pose.transform.orientation,p=pose.transform.position;return {o:[p.x,p.y,p.z],d:this.scene.rotateByQuat([0,0,-1],q)}}
