@@ -288,8 +288,11 @@ class DentalScene {
     this.box([0,.93,-3.5],[1.04,.24,1.95],'#244c5b',{rot:[-.14,0,0]});this.box([0,1.04,-3.44],[.96,.25,1.73],'#3a9b98',{rot:[-.14,0,0]});
     this.box([0,1.43,-4.37],[.94,1.4,.24],'#295969',{rot:[-.49,0,0]});this.box([0,1.44,-4.24],[.87,1.26,.19],'#2f9091',{rot:[-.49,0,0]});this.box([0,1.94,-4.6],[.56,.48,.2],'#20636d',{rot:[-.45,0,0]});
     for(const x of [-.68,.68]){this.box([x,1.09,-3.55],[.18,.12,1.3],'#a7c4c2');this.box([x,1.11,-3.53],[.15,.08,1.1],'#347b7d')}
-    // Stylized patient silhouette, separate from teaching models.
+    // Stylized patient silhouette is only orientation context, not clinical
+    // anatomy. Hide it during an active XR preparation but keep room/chair.
+    const patientStart=this.meshes.length;
     this.sphere([0,2.17,-4.43],[.29,.37,.27],'#d5ad94');this.sphere([0,2.43,-4.54],[.29,.16,.28],'#493e3c');this.sphere([0,2.08,-4.15],[.12,.045,.04],'#915b65');this.sphere([-.115,2.24,-4.186],[.028,.023,.025],'#433c42');this.sphere([.115,2.24,-4.186],[.028,.023,.025],'#433c42');this.sphere([0,2.17,-4.138],[.047,.09,.057],'#c99b86');
+    this.xrPatientMeshes=this.meshes.slice(patientStart);
     this.box([0,1.12,-3.55],[.66,.27,1.18],'#c4d2c7');this.box([0,1.0,-2.81],[.53,.18,.62],'#bdcfd0');
     this.cy([1.38,2.82,-3.95],[.07,1.5,.07],'#b5c9c8');this.cy([.72,3.42,-3.82],[.064,1.35,.064],'#b5c9c8',{rot:[0,0,1.05]});this.cy([.10,3.39,-3.69],[.065,.75,.065],'#9fb8b8',{rot:[-.65,0,.35]});this.sphere([-.02,3.11,-3.42],[.33,.13,.33],'#e4ece6');this.cy([-.02,3.055,-3.42],[.24,.065,.24],'#f6e1a8');
     this.roomMeshes=this.meshes.slice();
@@ -596,6 +599,16 @@ class DentalScene {
     }return hit}
 
 
+  // Keep the schematic patient as room orientation only. Active XR tooth
+  // preparation uses the anatomical model as its only patient representation.
+  // This toggle is reversible, does not move geometry or alter pick targets.
+  setXRClinicalFocus(active){
+    const focused=Boolean(active&&this.xrSession);
+    if(focused===!!this.xrClinicalFocusActive)return focused;
+    for(const m of this.xrPatientMeshes||[])m.hidden=focused;
+    this.xrClinicalFocusActive=focused;
+    return focused;
+  }
   // Restore desktop transforms and hit targets exactly after the XR session.
   setXRComfort(active){
     if(Boolean(active)===this.xrComfort.active)return;

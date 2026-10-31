@@ -40,7 +40,7 @@ class XRToothPractice {
   }
   get lab(){return this.app.volLab}
   onEnter(){this.toggleButton.hidden=false;this.toggleText.hidden=false;this.syncCase();if(this.active)this.showActive(true)}
-  onExit(){for(const m of this.clinicalUI)m.hidden=true;this.triggers.clear();this.toggleButton.hidden=true;this.toggleText.hidden=true;this.showActive(false);this.active=false;this.finish();}
+  onExit(){for(const m of this.clinicalUI)m.hidden=true;this.triggers.clear();this.toggleButton.hidden=true;this.toggleText.hidden=true;this.active=false;this.showActive(false);this.finish();}
   refreshClinicalUI(){
     const lab=this.lab;if(!lab)return;
     const id=lab.fdiTooth||this.app.selectedTooth||this.app.caseData?.num||'--';
@@ -62,6 +62,7 @@ class XRToothPractice {
     for(const m of this.meshes)m.hidden=!workspace;
     this.info.hidden=!workspace;
     if(!workspace)this.tip.hidden=true;
+    this.scene.setXRClinicalFocus?.(this.active);
     this.modalOwner=modal||'treatment';
     if(modal)this.triggers.clear();
     return workspace;
