@@ -22,7 +22,13 @@ test('Durable next-chat Markdown and actual committed PDF are byte-reproducible 
  assert.equal((actual.match(/\/Type \/Page \/Parent/g)||[]).length,result.pages);
  const mdSHA=crypto.createHash('sha256').update(md).digest('hex');
  assert.equal(mdSHA,result.originalHash);
- assert(actual.includes('0f27a7e0e7179ef30a507e8bc0251749d6bbbad1'));
+ assert(actual.includes('f4d4d4151851a08342def08d9f2e461f5f5e7109'));
+ assert(md.startsWith('# CURRENT 31 OCT 2026 HANDOFF OVERRIDE: GODOT SR1C'));
+ assert(md.includes('14,856') && md.includes('14,936'));
+ assert(md.includes('SR1C GODOT LOCAL NATIVE RENDER UNVERIFIED / NOT ACCEPTED'));
+ assert(md.includes('separate Linux execution container'));
+ assert(md.includes('sr1c-build-godot-local.ps1'));
+ assert(md.includes('Quest/streaming/server video are LATER'));
  assert(md.includes('C:\\klab-sr1b-clinical-57801f1c-20261031-174525'));
  assert(md.includes('source=10320, native=6721'));
  assert(md.includes('diagnostic viewport'));
@@ -50,13 +56,16 @@ test('Committed handoff PDF parses, extracts real content, and renders through P
   const pdfinfo=spawnSync('pdfinfo',[PDF_PATH],{encoding:'utf8',timeout:20000});
   if(pdfinfo.error?.code==='ENOENT'){t.skip('Poppler pdfinfo unavailable');return}
   assert.equal(pdfinfo.status,0,pdfinfo.stderr);
-  assert.match(pdfinfo.stdout,/Pages:\s+4\b/);
+  const count=buildHandoffPdf(fs.readFileSync(MD_PATH,'utf8')).pages;
+  assert.match(pdfinfo.stdout,new RegExp('Pages:\\s+'+count+'\\b'));
   assert.match(pdfinfo.stdout,/Page size:\s+612 x 792 pts/);
   const extract=spawnSync('pdftotext',['-layout',PDF_PATH,'-'],{encoding:'utf8',timeout:20000});
   assert.equal(extract.status,0,extract.stderr);
   for(const value of [
-   'SR1B LOCAL NATIVE RENDER FIRST',
-   '0f27a7e0e7179ef30a507e8bc0251749d6bbbad1',
+   'SR1C GODOT LOCAL RENDER FIRST',
+   'f4d4d4151851a08342def08d9f2e461f5f5e7109',
+   'Godot 4.7.2',
+   'SR1C GODOT LOCAL NATIVE RENDER UNVERIFIED',
    '10,320',
    '6,724',
    '6,721',
