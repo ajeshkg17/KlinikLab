@@ -6,7 +6,7 @@ import {validateGodotJob,EXACT_SOURCE_SHA,JOB_REF,RESULT_BRANCH} from '../visual
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
 const job=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
 const watcher=read('../visual-qa/godot-worker.mjs');
-const powershell=read('../visual-qa/sr1c-capture-godot-pc.ps1');
+const powershell=read('../visual-qa/sr1c-capture-godot-background-pc.ps1');
 const xrCore=read('../visual-qa/xr-job-core.mjs');
 
 test('Dedicated local Godot job pins exact requested SHA with bounded non-executable suite',()=>{
@@ -48,7 +48,7 @@ test('Godot watcher is a strict opt-in Windows-only exact-SHA runner with durabl
   "git(['merge-base','--is-ancestor',j.commit,head])",
   "git(['worktree','add','--detach',worktree,j.commit])",
   "'sr1c-build-godot-local.ps1'",
-  "'sr1c-capture-godot-pc.ps1'",
+  "'sr1c-capture-godot-background-pc.ps1'",
   "status:'executing'",
   "status:'publish-pending'",
   "status='published'",
@@ -62,24 +62,32 @@ test('Godot watcher is a strict opt-in Windows-only exact-SHA runner with durabl
  assert(!watcher.includes("eval("));
 });
 
-test('Windows collector fails closed on absent PNG or GPU, retains raw error data and PID attribution',()=>{
+test('Private desktop Windows collector rejects absent PNG and missing or invalid Godot-PID GPU evidence',()=>{
  for(const token of [
   "EVIDENCE_INCOMPLETE",
-  "get_current_rendering",
   "godot-native-fdi16-",
-  "Godot game window missing",
-  "[System.Windows.Forms.SendKeys]::SendWait('{F12}')",
+  "Start-KLPrivateDesktopGodot",
+  "Stop-KLPrivateDesktopGodot",
+  "privateDesktopCreated=$false",
+  "userDesktopActivationRequested=$false",
+  "headlessUsed=$false",
   "Get-Counter -Counter '\\GPU Engine(*)\\Utilization Percentage'",
   "process3DPositiveSamples",
-  "Windows GPU Engine counter failure",
+  "Windows GPU Engine counter errors",
   "rendererLogNvidiaRtx5060",
   "gpuAdapterLuidMatchedToNvidia=$false",
   "nativePixelReviewAccepted=$false",
   "native-source-submission.json",
   "nativeSourceSubmissionVerified",
   "expectedTissueSurfacesPerState=5",
-  "godot-owner-pc-result.json"
- ])if(token==='get_current_rendering')continue;else assert(powershell.includes(token),token);
- assert(powershell.includes("status='EVIDENCE_INCOMPLETE'"));
- assert(!powershell.includes("process3DPositiveSamples=3"));
+  "godot-owner-pc-result.json",
+  "godot-background-capture.json",
+  "sr1c-godot-background-capture.gd"
+ ])assert(powershell.includes(token),token);
+ assert(!powershell.includes('SetForegroundWindow'));
+ assert(!powershell.includes('SendKeys'));
+ assert(!powershell.includes('F12'));
+ assert(!powershell.includes('--headless'));
+ assert(!watcher.includes("'sr1c-capture-godot-pc.ps1'"));
+ assert(watcher.includes("'sr1c-capture-godot-background-pc.ps1'"));
 });
