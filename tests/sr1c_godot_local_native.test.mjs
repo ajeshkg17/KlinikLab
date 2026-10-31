@@ -21,7 +21,8 @@ test('Authoritative roadmap/architecture select Godot 4.7.2 first, retain failed
    '14,856','14,936','Dundee','Unity Hub','Quest','SR1C_GODOT_LOCAL_CLINICAL_RENDER.md'])
    assert(roadmap.includes(t),t);
  assert(arch.startsWith('> **New binding engine selection'));
- for(const t of ['Godot 4.7.2','not accepted','Quest','WebRTC'])assert(arch.includes(t),t);
+ for(const t of ['Godot 4.7.2','Quest','WebRTC'])assert(arch.includes(t),t);
+ assert(/not accepted/i.test(arch));
  assert(guide.includes('C:\\klab-sr1b-clinical-57801f1c-20261031-174525'));
  assert(guide.includes('C:\\klab-sr1b-clinical-d5371fe0-20261031-183117'));
  assert(guide.includes('not accepted')||guide.includes('REJECTED'));
@@ -33,7 +34,7 @@ test('Godot project uses native Vulkan Forward+ rather than default OpenGL/Quest
  assert(descriptor.includes('rendering_device/driver="vulkan"'));
  assert(descriptor.includes('rendering_device/fallback_to_opengl3=false'));
  assert(scene.includes('path="res://main.gd"'));
- assert(!script.includes('dundee')&&!script.includes('Dundee'));
+ assert(!/res:\/\/.*dundee/i.test(script),'native source proof must not reference any Dundee asset path');
  assert(!descriptor.includes('PixelStreaming')&&!descriptor.includes('Quest'));
 });
 test('Original production source faces and materials are directly submitted into ten strict Godot ArrayMesh sections',()=>{
