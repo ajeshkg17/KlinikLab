@@ -148,7 +148,11 @@ finally{
  }
  $joined=$logs -join [Environment]::NewLine
  if($joined){
-  $report.godotLogSHA256=(Get-FileHash -LiteralPath (Join-Path $captures 'godot-native-stdout.log') -Algorithm SHA256 -ErrorAction SilentlyContinue).Hash.ToLowerInvariant()
+  $stdoutPath=Join-Path $captures 'godot-native-stdout.log'
+  if(Test-Path -LiteralPath $stdoutPath){
+   $hash=Get-FileHash -LiteralPath $stdoutPath -Algorithm SHA256 -ErrorAction SilentlyContinue
+   if($hash){$report.godotLogSHA256=$hash.Hash.ToLowerInvariant()}
+  }
   $report.rendererLogNvidiaRtx5060=($joined -match '(?is)vulkan' -and $joined -match '(?i)NVIDIA' -and $joined -match '(?i)RTX 5060')
  }
  if(-not $report.rendererLogNvidiaRtx5060){Block 'No renderer process log proves native Vulkan RTX 5060 adapter'}
