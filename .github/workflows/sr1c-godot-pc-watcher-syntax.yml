@@ -16,6 +16,7 @@ on:
       - 'visual-qa/sr1c-build-godot-local.ps1'
       - 'visual-qa/jobs/godot-current.json'
       - 'tests/sr1c_godot_pc_watcher.test.mjs'
+      - 'tests/sr1c_job05_pdh_orbit.test.mjs'
       - 'tests/sr1c_windows_private_desktop_bom.test.mjs'
       - 'tests/sr1c_windows_private_desktop_smoke.ps1'
       - 'visual-qa/godot-json.mjs'
@@ -42,6 +43,7 @@ jobs:
           node --check visual-qa/godot-worker.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
+          node --test tests/sr1c_job05_pdh_orbit.test.mjs
           node --test tests/sr1c_windows_private_desktop_bom.test.mjs
       - name: Simulate inherited pwsh 7 PSModulePath and prove Windows PowerShell 5.1 SHA256 -File works
         shell: pwsh
