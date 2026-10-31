@@ -11,12 +11,14 @@ const worker=read('../visual-qa/godot-worker.mjs');
 const xr=read('../visual-qa/xr-worker.mjs');
 const job=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
 
-test('Godot job03 is newly scoped to no foreground/private WinSta0 desktop, old v2 watcher rejects',()=>{
- assert.equal(validateGodotJob(job).jobId,'pc-godot-fdi16-20261031-job03');
- assert.equal(job.schemaVersion,3);
+test('Godot job04 is newly scoped to no foreground/private WinSta0 desktop, old v3 watcher rejects',()=>{
+ assert.equal(validateGodotJob(job).jobId,'pc-godot-fdi16-20261031-job04');
+ assert.equal(job.schemaVersion,4);
  assert.equal(job.backgroundContract,'private-winsta0-vulkan-autocapture-no-foreground');
+ assert.equal(job.desktopApiContract,'raw-utf16-createdesktopw-bom-safe-recovery');
+ assert.notEqual(job.jobId,'pc-godot-fdi16-20261031-job03');
  assert.equal(job.commit,'f4d4d4151851a08342def08d9f2e461f5f5e7109');
- assert.throws(()=>validateGodotJob({...job,schemaVersion:2}));
+ assert.throws(()=>validateGodotJob({...job,schemaVersion:3}));
  assert.throws(()=>validateGodotJob({...job,backgroundContract:null}));
  assert.notEqual(job.jobId,'pc-godot-fdi16-20261031-job02');
  assert.notEqual(job.jobId,'pc-godot-fdi16-20261031-job01');
