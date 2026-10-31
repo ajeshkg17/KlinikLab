@@ -1,12 +1,13 @@
 {
-  "schemaVersion": 4,
-  "jobId": "pc-godot-fdi16-20261031-job04",
+  "schemaVersion": 5,
+  "jobId": "pc-godot-fdi16-20261031-job05",
   "commit": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
   "suite": "sr1c-fdi16-before-after",
   "graphics": "forward_plus-vulkan",
-  "timeoutSec": 120,
-  "capture": "native-background-before-after",
+  "timeoutSec": 150,
+  "capture": "native-orbit-frontal-occlusal",
   "launcherContract": "winps51-clear-psmodulepath-sha256-preflight",
   "backgroundContract": "private-winsta0-vulkan-autocapture-no-foreground",
-  "desktopApiContract": "raw-utf16-createdesktopw-bom-safe-recovery"
+  "desktopApiContract": "raw-utf16-createdesktopw-bom-safe-recovery",
+  "telemetryContract": "persistent-pdh-1hz-dxgi-luid-42s-orbit-v1"
 }
