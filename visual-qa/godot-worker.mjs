@@ -5,12 +5,14 @@
  * Prereqs: interactive Windows session + GODOT_EXE + Git Credential Manager.
  */
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {spawnSync,spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {validateGodotJob,INTEGRATION_BRANCH,RESULT_BRANCH,JOB_REF} from './godot-job-core.mjs';
+import {cleanWindowsPowerShellEnv} from './godot-powershell-environment.mjs';
 
 const REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabGodotWorker');
@@ -75,10 +77,38 @@ async function currentJob(){
  git(['merge-base','--is-ancestor',j.commit,head]);
  return j;
 }
+function verifyChildHashModule(){
+ // pwsh -> Node -> Windows PowerShell does not get pwsh's WinPSModulePath fix.
+ // Remove only the inherited child PSModulePath, then test actual Get-FileHash.
+ const target=path.join(sourceDir,'godot-worker.mjs');
+ const expected=createHash('sha256').update(fsSync.readFileSync(target)).digest('hex');
+ const command=[
+  "$ErrorActionPreference='Stop'",
+  "$cmd=Get-Command -Name Get-FileHash -ErrorAction Stop",
+  "$h=Get-FileHash -LiteralPath $env:KLINIKLAB_PS_PREFLIGHT_FILE -Algorithm SHA256 -ErrorAction Stop",
+  "Write-Output ('KL_PS_VERSION='+$PSVersionTable.PSVersion.ToString())",
+  "Write-Output ('KL_HASH_MODULE='+$cmd.ModuleName)",
+  "Write-Output ('KL_HASH_SHA256='+$h.Hash.ToLowerInvariant())"
+ ].join('; ');
+ const env=cleanWindowsPowerShellEnv({...process.env,KLINIKLAB_PS_PREFLIGHT_FILE:target});
+ const p=spawnSync('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-Command',command],
+  {encoding:'utf8',timeout:30000,windowsHide:true,env});
+ if(p.status!==0)throw Error('Child Windows PowerShell Get-FileHash preflight FAILED: '+
+  String(p.stderr||p.stdout||p.error).slice(0,500));
+ const stdout=String(p.stdout||'');
+ const version=/KL_PS_VERSION=([^\r\n]+)/.exec(stdout)?.[1];
+ const module=/KL_HASH_MODULE=([^\r\n]+)/.exec(stdout)?.[1];
+ const hash=/KL_HASH_SHA256=([a-f0-9]{64})/.exec(stdout)?.[1];
+ if(!version||module!=='Microsoft.PowerShell.Utility'||hash!==expected)
+  throw Error('Child Windows PowerShell SHA256/module verification failed: module '+
+   String(module||'MISSING')+'; version '+String(version||'MISSING'));
+ return {version,module,inheritedPSModulePathRemoved:true,sha256PreflightPassed:true};
+}
+
 function powershell(script,args,timeoutMs=180000){
  return new Promise((resolve,reject)=>{
   const p=spawn('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','Bypass','-File',script,...args],
-   {shell:false,stdio:'inherit',env:{...process.env}});
+   {shell:false,stdio:'inherit',env:cleanWindowsPowerShellEnv(process.env)});
   let finished=false;
   const timer=setTimeout(()=>{
    if(finished)return;
@@ -120,6 +150,7 @@ async function execute(j){
  await fs.mkdir(capture,{recursive:true});
  const native=await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8').then(JSON.parse,()=>null);
  const result={
+  powerShellChildEnvironment:{inheritedPSModulePathRemoved:true,hashCmdletPreflightRequired:true},
   jobId:j.jobId,sourceGitSHA:j.commit,watcherSuite:j.suite,
   executedOn:'owner Windows PC (watcher runtime)',generatedAt:new Date().toISOString(),
   nativeReportStatus:native?.status||'EVIDENCE_INCOMPLETE',
@@ -203,6 +234,8 @@ async function tick(){
  let j=null;
  try{
   await initialize();await heartbeat('polling');
+  const childPowerShell=verifyChildHashModule();
+  await heartbeat('powershell-hash-module-verified',null,{childPowerShell});
   j=await currentJob();
   const state=await readLedger(),previous=state.completed[j.jobId];
   if(previous?.commit&&previous.commit!==j.commit)throw Error('Job ID reused with different commit');
