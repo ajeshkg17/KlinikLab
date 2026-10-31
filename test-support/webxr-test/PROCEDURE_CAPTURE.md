@@ -47,3 +47,6 @@ Owner-PC published path (only after confirmed upload): `visual-feedback/runs/pc-
 
 ### Video verification improvement
 The short WebM is decoded in the same pinned Chrome via a native `<video>` element after MediaRecorder stops. The capture records measured duration/size, three decoded-frame contrast checks and sampled inter-frame pixel differences. A browser-decoded contact sheet `video/decoded-video-preview.png` is retained and published if available so the development chat can inspect real decoded video frames. The contact sheet is explicitly **derived video verification imagery**, never counted as one of the original six unaltered stereo XR screenshots. Any failure marks the short video as unaccepted; physical headset and clinical review are independent.
+
+### Offline actual-app six-step presentation
+A fully successful procedure run creates `presentation.html` beside the six original XR PNGs and the verified manifest. It is a locally navigable slideshow referencing only those unmodified PNG files, recording each actual XR frame ID, FDI16 saved-cut count and SHA-256. It rejects failed/incomplete evidence and cannot replace clinical or WebM review. This new artifact is available only for a future job pinned to source containing the viewer, **not** already queued job09.

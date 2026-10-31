@@ -56,7 +56,7 @@ async function preflight(){
 const PROCEDURE_FILES=[
  '01-select-fdi16.png','02-precut.png','03-aim.png',
  '04-cut.png','05-postcut.png','06-switchback.png',
- 'procedure-manifest.json','storyboard.md'
+ 'procedure-manifest.json','storyboard.md','presentation.html'
 ];
 const procedureRunId=job=>'fdi16-'+job.jobId;
 async function loadProcedure(dir,job,result){
@@ -203,6 +203,7 @@ async function publish(job,{result,captures,procedure}){
   index.push('## OPTIONAL ACTUAL-APP FDI16 PROCEDURE (not a filmed dentist or physical Quest2)',
    '','Automated IWER controller; non-calibrated educational preparation; professional dental review pending.',
    '','[Read six-step storyboard](./procedure/'+procedure.id+'/storyboard.md)',
+   '','[View actual-app six-step presentation](./procedure/'+procedure.id+'/presentation.html)',
    '','[Inspect original manifest](./procedure/'+procedure.id+'/procedure-manifest.json)','');
   for(const step of procedure.manifest.steps)index.push('### Step '+step.n+' — '+step.label,'',
    '!['+step.label+'](./procedure/'+procedure.id+'/'+step.file+')','');

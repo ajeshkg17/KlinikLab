@@ -6,6 +6,7 @@ import path from 'node:path';
 import {mkdir,readFile,rename,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {alignRayQuaternion,translationCorrection,DOWN} from './procedure-ray.mjs';
+import {slidesHTML} from './procedure-slides.mjs';
 
 export const STEPS=Object.freeze([
  ['01-select-fdi16.png','Select FDI 16 in active tooth preparation'],
@@ -339,6 +340,8 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
  result.procedureEvidence={status:'SIX LOCAL XR IMAGES CAPTURED; VIDEO REVIEW PENDING',
   runId:config.id,relativePath,steps:6,sha:config.sha,pixelDifference:difference};
  await writeFile(path.join(dir,'procedure-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+ // Only after all six true XR frames and original manifest pass.
+ await writeFile(path.join(dir,'presentation.html'),slidesHTML(manifest),'utf8');
  const storyboard=['# Actual-app KlinikLab XR FDI16 educational procedure',
   '','Source commit: '+config.sha+'; run: '+config.id,
   'Meta IWER Quest2, controlled by scripted Playwright trigger. Not a human dentist, actual patient, clinical validation or physical Quest headset.',
