@@ -119,9 +119,12 @@ try {
    Block 'D3D12 selected dedicated NVIDIA adapter NOT verified by Unreal native log'
   }
  }else{Block 'No original Unreal native .log found in project Saved/Logs'}
- $shotDir=Join-Path $projectRoot 'Saved\Screenshots\Windows'
- $shots=@(Get-ChildItem -LiteralPath $shotDir -File -Filter '*.png' -ErrorAction SilentlyContinue|
-  Sort-Object LastWriteTimeUtc -Descending)
+ # Editor screenshots can be in WindowsEditor, while PIE/game images use Windows.
+ $shotDirs=@('Saved\Screenshots\WindowsEditor','Saved\Screenshots\Windows')
+ $shots=@(foreach($folder in $shotDirs){
+   Get-ChildItem -LiteralPath (Join-Path $projectRoot $folder) -File -Filter '*.png' -ErrorAction SilentlyContinue
+  })
+ $shots=@($shots|Sort-Object LastWriteTimeUtc -Descending)
  if($shots.Count){
   $shot=$shots[0]
   $destination=Join-Path $out 'unreal-native-viewport.png'
