@@ -181,6 +181,20 @@ def import_native_obj(path, name, expected_counts, expected_total, diagnostics):
                 'Native mesh interface is not a source-identified tissue material: ' + mesh.get_name())
         require(tissue_from_name(mesh.get_name()) == material,
                 'Native section name and material identity disagree: ' + mesh.get_name())
+        # Original KlinikLab marching-tetrahedra renderer explicitly disables
+        # back-face culling because tetra surface triangle winding varies.
+        # Match that native visibility contract; this is a two-sided shading
+        # option, NOT a mesh decimation or source topology change.
+        if isinstance(source_interface, unreal.Material):
+            source_interface.set_editor_property('two_sided', True)
+            require(bool(source_interface.get_editor_property('two_sided')),
+                    'Native teaching tissue material cannot render both sides: ' + material)
+            require(bool(unreal.EditorAssetLibrary.save_loaded_asset(source_interface)),
+                    'Could not persist native two-sided tissue material: ' + material)
+            diag['nativeMaterialTwoSided'] = True
+        else:
+            diag['nativeMaterialTwoSided'] = False
+            diag['twoSidedMaterialTypeUnverified'] = str(source_interface.get_class().get_name())
         diag['sourceExpectedForMaterial'] = int(expected_counts[material])
         if diag['renderLOD0Saved'] != int(expected_counts[material]):
             diag['lossAfterConservativeRebuild'] = (
