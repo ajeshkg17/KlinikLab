@@ -156,6 +156,12 @@ async function execute(j){
   await powershell(path.join(worktree,'visual-qa','sr1c-build-godot-local.ps1'),
    ['-ExpectedSha',j.commit,'-EvidenceDir',run]);
  }catch(e){preparationError=e.message}
+ if(!preparationError&&j.sceneMode==='clinic-cases'){
+  try{
+   await powershell(path.join(sourceDir,'sr1d-prepare-godot-cases.ps1'),
+    ['-EvidenceDir',run,'-ExpectedSha',j.commit,'-SourceWorktree',worktree]);
+  }catch(e){preparationError='Production case/station metadata preparation failed: '+e.message}
+ }
  if(!preparationError){
   try{
    await powershell(path.join(sourceDir,'sr1c-capture-godot-background-pc.ps1'),
@@ -182,6 +188,7 @@ async function execute(j){
   nativeSceneMode:j.sceneMode||'fdi16',fullKlinikLabApplicationMigrated:false,
   executedOn:'owner Windows PC (watcher runtime)',generatedAt:new Date().toISOString(),
   nativeReportStatus:native?.status||'EVIDENCE_INCOMPLETE',
+  nativeWorkflowVerified:j.sceneMode!=='clinic-cases'||!!native?.nativeCaseWorkflowVerified,
   imageExists:!!native?.nativeImagePresent,
   angledImageExists:!!native?.nativeAngledImagePresent,
   distinctRtx5060Gpu3DPeriods:Number(native?.process3DPositiveRtx5060DistinctPeriods||0),
@@ -197,7 +204,7 @@ async function execute(j){
   errors:[preparationError,captureError,nativeParseError].filter(Boolean),
   blockers:native?.blockers||[nativeParseError||'Native Windows evidence collector did not return its JSON report']
  };
- if(!native?.nativeImagePresent||!native?.nativeAngledImagePresent||!native?.nativeSourceSubmissionVerified||!native?.godotProcessGPUCorroborated||!native?.gpuAdapterLuidMatchedToNvidia)
+ if(!native?.nativeImagePresent||!native?.nativeAngledImagePresent||!native?.nativeSourceSubmissionVerified||!native?.godotProcessGPUCorroborated||!native?.gpuAdapterLuidMatchedToNvidia||(j.sceneMode==='clinic-cases'&&!native?.nativeCaseWorkflowVerified))
   result.overallStatus='EVIDENCE_INCOMPLETE';
  await fs.writeFile(path.join(capture,'godot-job-result.json'),jsonWithoutBom(result));
  try{git(['worktree','remove','--force',worktree]);}
@@ -220,6 +227,8 @@ async function publish(j,run,result){
   ['godot-owner-pc-result.json',path.join(capture,'godot-owner-pc-result.json')],
   ['native-source-submission.json',path.join(capture,'native-source-submission.json')],
   ['godot-source-prepare.json',path.join(run,'godot-source-prepare.json')],
+  ['godot-native-cases-prepare.json',path.join(run,'godot-native-cases-prepare.json')],
+  ['godot-native-workflow-state.json',path.join(capture,'godot-native-workflow-state.json')],
   ['godot-gpu-3d-counters.json',path.join(capture,'godot-gpu-3d-counters.json')],
   ['godot-gpu-pdh-diagnostics.json',path.join(capture,'godot-gpu-pdh-diagnostics.json')],
   ['godot-background-capture.json',path.join(capture,'godot-background-capture.json')],
