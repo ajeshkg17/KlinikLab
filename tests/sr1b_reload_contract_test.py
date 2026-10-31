@@ -43,6 +43,9 @@ def inventory():
                 'componentName': 'SR1B_' + state + '_' + tissue,
                 'componentClass': 'ProceduralMeshComponent',
                 'componentTags': ['KL_TISSUE_' + tissue.upper()],
+                'componentVisible':True,'componentHiddenInGame':False,
+                'worldBoundsOriginCm':[0.,-65. if state=='before' else 65.,74.],
+                'worldBoundsExtentCm':[.5,.5,.5],
                 'sectionCount': 1, 'sectionVisible': True,
                 'materialName': material,
                 'materialPath': '/Game/KlinikLab/NativeMeshes/' +
@@ -198,6 +201,7 @@ class LiveFunctionIntegrationTests(unittest.TestCase):
             'LEVEL':'/Game/Maps/L_KlinikLab_FDI16',
             'editor_actor_inventory':get_inventory,
             'validate_loaded_actor_inventory':contract.validate_loaded_actor_inventory,
+            'check_native_component_bounds':bounds.check_native_component_bounds,
             'require':lambda ok,msg:None if ok else (_ for _ in ()).throw(RuntimeError(msg))}
         verifier=extract_function('verify_reloaded_procedural_scene',ns)
         diagnostics={}
