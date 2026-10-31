@@ -30,6 +30,13 @@ test('procedure storyboard has six ordered distinct real-app FDI16 evidence chec
  assert(src.includes("actual-app-stereo-steps.webm"));
  assert(src.includes('frameSource'));
  assert(src.includes('continuousHandMotion:false'));
+ assert(src.includes('finally{'));
+ assert(src.includes("await writeFile(path.join(dir,'procedure-manifest.json')"));
+ assert(src.includes('recorder.recorder.stop()'));
+ assert(src.includes('video decode failed'));
+ assert(src.includes('nonblankFrameVerified:contrast.every'));
+ assert(src.includes('distinctStagesVerified:changed.some'));
+ assert(src.includes('decoded-video-preview.png'));
 });
 test('default XR ten-checkpoint and existing gallery remain independent of optional procedure',()=>{
  const smoke=fs.readFileSync(new URL('./smoke.mjs',import.meta.url),'utf8');
@@ -40,7 +47,7 @@ test('default XR ten-checkpoint and existing gallery remain independent of optio
  assert(worker.includes("if(!result.passed||captures.length!==10)"));
  assert(worker.includes('if(job.procedureCapture){'));
  assert(worker.includes("'procedure-manifest.json','storyboard.md'"));
- assert(worker.includes("'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm'"));
+ assert(worker.includes("'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm','video/decoded-video-preview.png'"));
  const job=JSON.parse(fs.readFileSync(new URL('../../visual-qa/jobs/xr-current.json',import.meta.url),'utf8'));
  assert.equal(job.captures.length,10,'procedure jobs retain all ten original checkpoints');
  assert(job.procedureCapture===undefined||job.procedureCapture===true,'opt-in only, never an arbitrary action');

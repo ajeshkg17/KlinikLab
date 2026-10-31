@@ -227,6 +227,9 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
         if(!Number.isFinite(duration)||duration<3||!width||!height)throw Error('Invalid decoded WebM metadata');
         const canvas=document.createElement('canvas');canvas.width=96;canvas.height=64;
         const ctx=canvas.getContext('2d',{willReadFrequently:true}),sampled=[];
+        const preview=document.createElement('canvas');preview.width=1440;preview.height=334;
+        const previewContext=preview.getContext('2d');
+        let previewIndex=0;
         for(const time of [duration*.18,duration*.52,duration*.84]){
           await new Promise((resolve,reject)=>{
             const timer=setTimeout(()=>reject(Error('seek decode timeout')),9000);
@@ -234,6 +237,7 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
             v.currentTime=Math.max(0,Math.min(duration-.05,time));
           });
           ctx.drawImage(v,0,0,canvas.width,canvas.height);
+          previewContext.drawImage(v,previewIndex*480,0,480,334);previewIndex++;
           sampled.push(new Uint8Array(ctx.getImageData(0,0,canvas.width,canvas.height).data));
         }
         const n=sampled[0].length,contrast=sampled.map(a=>{
@@ -247,7 +251,8 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
         const changed=[pixelDiff(sampled[0],sampled[1]),pixelDiff(sampled[1],sampled[2])];
         validation={decoded:true,durationSec:duration,width,height,contrast,
           changedSampledPixels:changed,nonblankFrameVerified:contrast.every(x=>x>15),
-          distinctStagesVerified:changed.some(x=>x>120)};
+          distinctStagesVerified:changed.some(x=>x>120),
+          decodedFrameContactSheet:preview.toDataURL('image/png')};
       }finally{URL.revokeObjectURL(url);v.removeAttribute('src');v.load()}
     }catch(e){validation={decoded:false,nonblankFrameVerified:false,distinctStagesVerified:false,error:String(e.message)}}
     const bytes=new Uint8Array(await blob.arrayBuffer());
@@ -260,10 +265,17 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
     const vd=path.join(dir,'video');await mkdir(vd,{recursive:true});
     const bytes=Buffer.from(shortVideo.base64,'base64');
     await writeFile(path.join(vd,'actual-app-stereo-steps.webm'),bytes);
+    const previewData=shortVideo.validation?.decodedFrameContactSheet;
+    if(previewData?.startsWith('data:image/png;base64,')){
+      await writeFile(path.join(vd,'decoded-video-preview.png'),
+        Buffer.from(previewData.split(',')[1],'base64'));
+    }
+    const verification={...shortVideo.validation};
+    delete verification.decodedFrameContactSheet; // keep metadata bounded
     const check={capture:'Playwright-controlled MediaRecorder from six ACTUAL XR binocular rendered framebuffers',
       type:shortVideo.type,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),
       continuousHandMotion:false,frameSource:'genuine-IWER-app',
-      ...shortVideo.validation,
+      ...verification,
       status:shortVideo.validation?.decoded&&shortVideo.validation.nonblankFrameVerified
         &&shortVideo.validation.distinctStagesVerified
         ?'BROWSER DECODED; INDEPENDENT PIXEL/CLINICAL REVIEW PENDING'

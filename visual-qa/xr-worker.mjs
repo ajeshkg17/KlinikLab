@@ -76,7 +76,7 @@ async function loadProcedure(dir,job,result){
   files.push({name:sub+'/'+name,bytes});
  }
  const optional=['video/video-check.json','video/actual-app-playwright.webm',
-   'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm'];
+   'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm','video/decoded-video-preview.png'];
  for(const name of optional){
   try{const bytes=await fs.readFile(path.join(dir,sub,name));files.push({name:sub+'/'+name,bytes})}
   catch(e){if(e.code!=='ENOENT')throw e}
@@ -208,6 +208,9 @@ async function publish(job,{result,captures,procedure}){
    '!['+step.label+'](./procedure/'+procedure.id+'/'+step.file+')','');
   if(procedure.files.some(f=>f.name.endsWith('/actual-app-stereo-steps.webm')))
    index.push('[Short real-XR six-step WebM (Playwright-controlled recording) — decoder/clinical review pending](./procedure/'+procedure.id+'/video/actual-app-stereo-steps.webm)','');
+  if(procedure.files.some(f=>f.name.endsWith('/decoded-video-preview.png')))
+   index.push('### Actual decoded short-WebM frame contact sheet (not a raw XR capture)','',
+    '![WebM decoded stills](./procedure/'+procedure.id+'/video/decoded-video-preview.png)','');
   if(procedure.files.some(f=>f.name.endsWith('/actual-app-playwright.webm')))
    index.push('[Full Playwright browser viewport recording (includes test setup; playback review pending)](./procedure/'+procedure.id+'/video/actual-app-playwright.webm)','');
  }
