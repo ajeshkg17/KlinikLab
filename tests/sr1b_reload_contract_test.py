@@ -225,7 +225,7 @@ class LiveFunctionIntegrationTests(unittest.TestCase):
         verifier=extract_function('verify_reloaded_procedural_scene',ns)
         diagnostics={}
         with self.assertRaisesRegex(ValueError, 'occurred 0 times'):
-            verifier(EXPECTED,COUNTS,diagnostics)
+            verifier(EXPECTED,COUNTS,diagnostics,SOURCE_SECTIONS)
         self.assertEqual(diagnostics['afterReload']['actors'][1]['actorLabel'],
                          EXPECTED['after']+'_2')
         self.assertIn('beforeReload',diagnostics)
