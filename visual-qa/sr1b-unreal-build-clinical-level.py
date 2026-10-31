@@ -269,7 +269,11 @@ def mesh_actor(sections, name, y_offset):
                        if material != 'enamel'}
     require(attached_labels == expected_labels,
             'Logical tooth attachment hierarchy incomplete')
-    require(len(children) == len(sections), 'Tooth sectionsdef import_native_materials_only(obj_file, name, expected_counts, diagnostics):
+    require(len(children) == len(sections), 'Tooth sections lost after actor assembly')
+    return root, children
+
+
+def import_native_materials_only(obj_file, name, expected_counts, diagnostics):
     """Import materials and original mesh-source diagnostics, NOT render geometry.
 
     UE5.8's StaticMesh build reproducibly drops 10320 -> 6724 (and 6721
@@ -449,9 +453,6 @@ def verify_reloaded_procedural_scene(expected_actors, counts_by_state):
         results[state] = observed
     return results
 
-
- lost after actor assembly')
-    return root, children
 
 
 def native_text(name, txt, x, y, z):
