@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "jobId": "pc-xr-procedure-fdi16-20261031-07",
-  "commit": "49e136f3fdbdb62ba4c13bf1ab5c36a4b446a222",
+  "jobId": "pc-xr-procedure-fdi16-20261031-08",
+  "commit": "3c869a5bf771313b04e756b4a1a1d0be5e2d548c",
   "suite": "quest2-phase3",
   "graphics": "default",
   "deadlineMs": 60000,
