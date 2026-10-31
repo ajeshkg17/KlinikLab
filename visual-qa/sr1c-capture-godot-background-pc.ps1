@@ -118,7 +118,9 @@ try{
   }catch{$samplingErrors+=($_.Exception.Message)}
  }
  $counterOutput=Join-Path $captures $report.originalGpuCounterSampleFile
- @($counterData)|ConvertTo-Json -Depth 6|Set-Content -LiteralPath $counterOutput -Encoding utf8
+ $counterJson=@($counterData)|ConvertTo-Json -Depth 6
+ [IO.File]::WriteAllText($counterOutput, ($counterJson + [Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
  $validSamples=@($counterData|Where-Object{$_.finite -and $_.utilizationPercent -ge 0 -and $_.utilizationPercent -le 100})
  $positive=@($validSamples|Where-Object{$_.utilizationPercent -gt 0.05})
  $report.process3DSampleCount=$validSamples.Count
@@ -178,7 +180,9 @@ finally {
   $report.blockers.Count -eq 0){
   $report.status='EVIDENCE_CAPTURED_PENDING_INDEPENDENT_PIXEL_AND_LUID_REVIEW'
  }
- $report|ConvertTo-Json -Depth 12|Set-Content -LiteralPath $reportPath -Encoding utf8
+ $reportJson=$report|ConvertTo-Json -Depth 12
+ [IO.File]::WriteAllText($reportPath, ($reportJson + [Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
  Write-Host "Native background Godot evidence: $reportPath"
  Write-Host "Native background Godot status: $($report.status)"
 }
