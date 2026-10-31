@@ -107,7 +107,7 @@ func _ready() -> void:
 				var bb: Vector3 = face[1]
 				var c: Vector3 = face[2]
 				var normal: Vector3 = (bb - a).cross(c - a)
-				if normal.length_squared() < 1.0e-16:
+				if normal.length_squared() < 1.0e-24:
 					_fail("Source face degenerate after Godot axis transform " + state + "/" + tissue)
 					return
 				normal = normal.normalized()
@@ -209,7 +209,7 @@ func _parse_obj(path: String) -> Dictionary:
 					if index < 0 or index >= vertices.size():
 						return {"ok": false, "error": "Out of range source face index"}
 					face.append(vertices[index])
-				if (face[1] - face[0]).cross(face[2] - face[0]).length_squared() < 1.0e-16:
+				if (face[1] - face[0]).cross(face[2] - face[0]).length_squared() < 1.0e-24:
 					return {"ok": false, "error": "Degenerate source face"}
 				out[active].append(face)
 			"o", "g", "s", "mtllib":
@@ -275,8 +275,14 @@ func _make_overlay() -> void:
 	footer.add_theme_font_size_override("font_size", 15)
 	layer.add_child(footer)
 
+func _capture_folder() -> String:
+	var explicit := FileAccess.get_file_as_string(SOURCE_PREFIX + "capture-path.txt").strip_edges()
+	if not explicit.is_empty() and explicit.is_absolute_path():
+		return explicit
+	return OS.get_environment("KLINIKLAB_SR1C_CAPTURE_DIR")
+
 func _write_report() -> void:
-	var folder := OS.get_environment("KLINIKLAB_SR1C_CAPTURE_DIR")
+	var folder := _capture_folder()
 	if folder.is_empty():
 		print("SR1C REPORT (not saved; capture dir unset): " + JSON.stringify(_report))
 		return
@@ -301,9 +307,9 @@ func _capture_native_frame() -> void:
 	if image.is_empty():
 		_fail("Native image readback empty")
 		return
-	var folder := OS.get_environment("KLINIKLAB_SR1C_CAPTURE_DIR")
+	var folder := _capture_folder()
 	if folder.is_empty():
-		push_error("KLINIKLAB_SR1C_CAPTURE_DIR unset, native screenshot not written")
+		push_error("No source-pinned capture directory, native screenshot not written")
 		return
 	DirAccess.make_dir_recursive_absolute(folder)
 	var file_name := "godot-native-fdi16-" + str(Time.get_ticks_msec()) + ".png"
