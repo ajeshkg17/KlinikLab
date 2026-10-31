@@ -41,6 +41,8 @@ $report=[ordered]@{
  logSHA256=$null
  selectedAdapterEvidenceFound=$false
  selectedAdapterText=@()
+ indexedAdapterChecks=@()
+ rhiNameChecks=@()
  selectedAdapterClassification=$null
  chosenD3D12AdapterId=$null
  unrealReportedGPU=$null
@@ -240,6 +242,8 @@ try {
     $adapter=$adapterJson|ConvertFrom-Json
     $report.selectedAdapterEvidenceFound=[bool]$adapter.evidenceFound
     $report.selectedAdapterText=@($adapter.evidenceLines)
+    $report.indexedAdapterChecks=@($adapter.indexedAdapterChecks)
+    $report.rhiNameChecks=@($adapter.rhiNameChecks)
     $report.selectedAdapterClassification=[string]$adapter.classification
     $report.chosenD3D12AdapterId=$adapter.chosenAdapterId
     $report.unrealReportedGPU=$adapter.reportedGPU
