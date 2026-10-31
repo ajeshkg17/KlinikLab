@@ -24,3 +24,7 @@ Environment: `KLINIKLAB_XR_DEADLINE_MS` defaults to 45000, bounded 15000–12000
 The harness writes `output/playwright/webxr-smoke/result.json` and PNG screenshots. Do not silently reuse or download earlier evidence. The `visual-feedback` gallery must identify exact SHA, emulator environment and duplicate frames. On WebXR readback limitations, preserve failures and seek local validation; do not claim physical headset performance.
 
 Previous Phase 0/1/2 evidence, including Linux timeout investigations and successful Windows results, remains in Git history and the coordination board. These historical records are useful for unresolved performance/visual differences but are not current run instructions. Phase 4 tool catalog has not begun.
+
+## Opt-in actual-app FDI16 procedure video and screenshot storyboard
+
+See [procedure capture instructions](./PROCEDURE_CAPTURE.md). The normal ten-checkpoint XR test and worker gallery stay unchanged when opt-in is absent. A separate `procedureCapture:true` job requires the refreshed owner-PC worker; video and six exact-checkpoint screenshots are evidence **only after the local IWER run and actual upload**. This records an automated educational tooth-cut progression, not a dentist treating a patient, and physical headset/anatomy expert review remain separate.
