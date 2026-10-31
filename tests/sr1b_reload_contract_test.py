@@ -272,7 +272,15 @@ class FakeNativeActor:
     def get_components_by_class(self,cls): return list(self.comps)
 
 
+class FakeVector:
+    def __init__(self,x,y,z):self.x=x;self.y=y;self.z=z
+
+
 class FakeEditorUniverse:
+    class SystemLibrary:
+        @staticmethod
+        def get_component_bounds(comp):
+            return FakeVector(0.,float(-65 if comp.state=='before' else 65),74.),FakeVector(.5,.5,.5),.87
     class EditorActorSubsystem: pass
     class ActorComponent: pass
     class ProceduralMeshComponent: pass
