@@ -88,6 +88,11 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   await drawVideoFrame(dataURL);
   return dataURL;
  };
+ // The entire procedure is transactional with respect to the dedicated
+ // teaching tooth and IWER controller: retain partial evidence on failure,
+ // but always release trigger, stop recording, reset the tooth and remove the
+ // temporary browser video overlay. No global XR worker/pipeline mutation.
+ try {
  // Isolated browser profile: never use patient data or a signed-in browser.
  await page.evaluate(()=>{
   const app=window.kliniklab,s=app.scene,lab=app.volLab;
@@ -205,11 +210,51 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
       v.recorder.stop();
     });
     for(const t of v.stream.getTracks())t.stop();
+    // Decode the short recording in the same pinned Chrome instance before
+    // uploading it. File existence and MIME type alone prove nothing.
+    let validation;
+    try{
+      const url=URL.createObjectURL(blob),v=document.createElement('video');
+      try{
+        v.muted=true;v.preload='auto';
+        await new Promise((resolve,reject)=>{
+          const timer=setTimeout(()=>reject(Error('metadata decode timeout')),10000);
+          v.addEventListener('loadedmetadata',()=>{clearTimeout(timer);resolve()},{once:true});
+          v.addEventListener('error',()=>{clearTimeout(timer);reject(Error('video decode failed'))},{once:true});
+          v.src=url;
+        });
+        const duration=v.duration,width=v.videoWidth,height=v.videoHeight;
+        if(!Number.isFinite(duration)||duration<3||!width||!height)throw Error('Invalid decoded WebM metadata');
+        const canvas=document.createElement('canvas');canvas.width=96;canvas.height=64;
+        const ctx=canvas.getContext('2d',{willReadFrequently:true}),sampled=[];
+        for(const time of [duration*.18,duration*.52,duration*.84]){
+          await new Promise((resolve,reject)=>{
+            const timer=setTimeout(()=>reject(Error('seek decode timeout')),9000);
+            v.addEventListener('seeked',()=>{clearTimeout(timer);resolve()},{once:true});
+            v.currentTime=Math.max(0,Math.min(duration-.05,time));
+          });
+          ctx.drawImage(v,0,0,canvas.width,canvas.height);
+          sampled.push(new Uint8Array(ctx.getImageData(0,0,canvas.width,canvas.height).data));
+        }
+        const n=sampled[0].length,contrast=sampled.map(a=>{
+          let min=255,max=0;
+          for(let i=0;i<n;i+=4){const value=(a[i]+a[i+1]+a[i+2])/3;min=Math.min(min,value);max=Math.max(max,value)}
+          return max-min;
+        });
+        const pixelDiff=(a,b)=>{let count=0;for(let i=0;i<n;i+=4)
+          if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>55)count++;
+          return count;};
+        const changed=[pixelDiff(sampled[0],sampled[1]),pixelDiff(sampled[1],sampled[2])];
+        validation={decoded:true,durationSec:duration,width,height,contrast,
+          changedSampledPixels:changed,nonblankFrameVerified:contrast.every(x=>x>15),
+          distinctStagesVerified:changed.some(x=>x>120)};
+      }finally{URL.revokeObjectURL(url);v.removeAttribute('src');v.load()}
+    }catch(e){validation={decoded:false,nonblankFrameVerified:false,distinctStagesVerified:false,error:String(e.message)}}
     const bytes=new Uint8Array(await blob.arrayBuffer());
     const sections=[];
     for(let i=0;i<bytes.length;i+=16384)
       sections.push(String.fromCharCode(...bytes.subarray(i,i+16384)));
-    return {base64:btoa(sections.join('')),bytes:bytes.length,type:blob.type};
+    return {base64:btoa(sections.join('')),bytes:bytes.length,type:blob.type,validation};
   });
   if(shortVideo&&shortVideo.bytes>2000&&shortVideo.bytes<24*1024*1024){
     const vd=path.join(dir,'video');await mkdir(vd,{recursive:true});
@@ -218,7 +263,11 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
     const check={capture:'Playwright-controlled MediaRecorder from six ACTUAL XR binocular rendered framebuffers',
       type:shortVideo.type,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),
       continuousHandMotion:false,frameSource:'genuine-IWER-app',
-      decoded:false,nonblankFrameVerified:false,status:'PENDING independent video decode and actual pixel review'};
+      ...shortVideo.validation,
+      status:shortVideo.validation?.decoded&&shortVideo.validation.nonblankFrameVerified
+        &&shortVideo.validation.distinctStagesVerified
+        ?'BROWSER DECODED; INDEPENDENT PIXEL/CLINICAL REVIEW PENDING'
+        :'VIDEO VALIDATION FAILED; DO NOT ACCEPT'};
     await writeFile(path.join(vd,'stereo-steps-check.json'),JSON.stringify(check,null,2)+'\n');
     manifest.shortVideo={file:'video/actual-app-stereo-steps.webm',bytes:check.bytes,sha256:check.sha256,
       status:check.status};
@@ -240,12 +289,36 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
   'Actual stereo changed pixels at RGB L1 >55: '+JSON.stringify(difference.changedPixels),
   'Dental expert review, actual tool-use realism, and physical Quest2 remain pending.'];
  await writeFile(path.join(dir,'storyboard.md'),storyboard.join('\n')+'\n');
- // Preserve existing Phase7 baseline invariants by cleaning this isolated fixture.
- await page.evaluate(()=>{
-  const a=window.kliniklab,lab=a.volLab,s=a.scene;
-  lab.setTooth('16');lab.solid.bur.length=0;lab.physics.trace.length=0;
-  lab.persistTooth?.();lab.rebuild();s.xrPrep.syncCase();s.xrPrep.updateMesh();
-  s.xrFdiEvidence=false;document.getElementById('__procedure_stereo_frame')?.remove();
- });
  return manifest;
+ }catch(error){
+  // Preserve the exact partial stereo frame file names/hashes and pose
+  // diagnostics; this is a failed job, not a publishable completed storyboard.
+  manifest.passed=false;manifest.failure=String(error.stack||error).slice(0,6000);
+  manifest.partialSteps=manifest.steps.length;
+  result.procedureEvidence={status:'FAILED -- partial local evidence only',
+    runId:config.id,sha:config.sha,partialSteps:manifest.steps.length,
+    failure:String(error.message||error)};
+  await writeFile(path.join(dir,'procedure-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+  throw error;
+ }finally{
+  await page.evaluate(()=>{
+    try{window.__xrTestDevice?.controllers?.right?.updateButtonValue('trigger',0)}catch{}
+    const recorder=window.__kliniklabProcedureVideo;
+    if(recorder){
+      try{if(recorder.recorder.state!=='inactive')recorder.recorder.stop()}catch{}
+      try{for(const track of recorder.stream.getTracks())track.stop()}catch{}
+      delete window.__kliniklabProcedureVideo;
+    }
+    document.getElementById('__procedure_stereo_frame')?.remove();
+    const a=window.kliniklab,lab=a?.volLab,s=a?.scene;
+    if(!lab||!s)return;
+    try{
+      lab.setTooth('16');
+      lab.solid.bur.length=0;lab.physics.trace.length=0;
+      lab.persistTooth?.();lab.rebuild();
+      s.xrPrep?.triggers?.clear();s.xrPrep?.syncCase();s.xrPrep?.updateMesh();
+      s.xrFdiEvidence=false;
+    }catch(error){window.__procedureCleanupError=String(error.message||error)}
+  }).catch(error=>{result.procedureCleanupError=String(error.message)});
+ }
 }
