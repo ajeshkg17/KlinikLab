@@ -224,5 +224,94 @@ class LiveFunctionIntegrationTests(unittest.TestCase):
         self.assertNotIn('bothToothActorsAndTenTissueSectionsValidated',diagnostics)
 
 
+class ClassDescriptor:
+    def __init__(self,name): self.name=name
+    def get_name(self): return self.name
+
+
+class FakeNativeComponent:
+    def __init__(self,tissue):
+        self.tissue=tissue
+    def get_name(self): return 'KL_Section_'+self.tissue
+    def get_class(self): return ClassDescriptor('ProceduralMeshComponent')
+    def get_editor_property(self,key):
+        if key != 'component_tags': raise RuntimeError('Unexpected component property')
+        return ['KL_TISSUE_'+self.tissue.upper()]
+    def get_num_sections(self): return 1
+    def is_mesh_section_visible(self,index): return index==0
+    def get_material(self,index):
+        if index!=0: raise RuntimeError('Wrong material slot')
+        tissue=self.tissue
+        class Mat:
+            def get_name(self): return 'KL_'+tissue
+            def get_path_name(self):
+                return '/Game/KlinikLab/NativeMeshes/KL_'+tissue+'.KL_'+tissue
+        return Mat()
+
+
+class FakeNativeActor:
+    def __init__(self,state,label):
+        self.state=state
+        self.label=label
+        self.comps=[FakeNativeComponent(t) for t in contract.MATERIALS]
+    def get_actor_label(self): return self.label
+    def get_class(self): return ClassDescriptor('Actor')
+    def get_name(self): return 'Actor_'+self.state
+    def get_path_name(self): return '/Game/Maps/L_KlinikLab_FDI16.PersistentLevel.Actor_'+self.state
+    def get_components_by_class(self,cls): return list(self.comps)
+
+
+class FakeEditorUniverse:
+    class EditorActorSubsystem: pass
+    class ActorComponent: pass
+    class ProceduralMeshComponent: pass
+    def __init__(self, actors, modern=None):
+        self.actors=actors
+        self.modern=modern
+        owner=self
+        class Actors:
+            def get_all_level_actors(self): return list(owner.actors if owner.modern is None else owner.modern)
+        self.subsystem=Actors()
+        class Legacy:
+            @staticmethod
+            def get_all_level_actors(): return list(owner.actors)
+        self.EditorLevelLibrary=Legacy
+    def get_editor_subsystem(self,cls): return self.subsystem
+
+
+class ActualActorInventoryTests(unittest.TestCase):
+    def test_editor_actor_inventory_records_real_labels_classes_and_five_tissues(self):
+        actors=[FakeNativeActor(state,label) for state,label in EXPECTED.items()]
+        env=FakeEditorUniverse(actors)
+        ns={'unreal':env,
+            'require':lambda ok,msg:None if ok else (_ for _ in ()).throw(RuntimeError(msg))}
+        collect=extract_function('editor_actor_inventory',ns)
+        report=collect()
+        self.assertEqual(report['selectedEnumerationAPI'],
+                         'EditorActorSubsystem.get_all_level_actors')
+        self.assertEqual(report['actorCount'],2)
+        self.assertEqual([a['actorLabel'] for a in report['actors']],
+                         list(EXPECTED.values()))
+        self.assertEqual([a['actorClass'] for a in report['actors']],['Actor','Actor'])
+        for row in report['actors']:
+            self.assertEqual(len(row['proceduralComponents']),5)
+            self.assertEqual(len(row['componentClasses']),5)
+            self.assertEqual(row['proceduralComponents'][0]['materialName'],'KL_enamel')
+        contract.validate_loaded_actor_inventory(report['actors'],EXPECTED,COUNTS)
+
+    def test_enumeration_fallback_diagnostics_not_silent(self):
+        actors=[FakeNativeActor(state,label) for state,label in EXPECTED.items()]
+        env=FakeEditorUniverse(actors,modern=[])
+        ns={'unreal':env,
+            'require':lambda ok,msg:None if ok else (_ for _ in ()).throw(RuntimeError(msg))}
+        collect=extract_function('editor_actor_inventory',ns)
+        report=collect()
+        self.assertEqual(report['selectedEnumerationAPI'],
+                         'EditorLevelLibrary.get_all_level_actors')
+        self.assertEqual(report['enumerationAttempts'][0]['count'],0)
+        self.assertEqual(report['enumerationAttempts'][1]['count'],2)
+        contract.validate_loaded_actor_inventory(report['actors'],EXPECTED,COUNTS)
+
+
 if __name__=='__main__':
     unittest.main()
