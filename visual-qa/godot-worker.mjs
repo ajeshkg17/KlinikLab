@@ -75,12 +75,24 @@ async function currentJob(){
  git(['merge-base','--is-ancestor',j.commit,head]);
  return j;
 }
-function powershell(script,args){
+function powershell(script,args,timeoutMs=180000){
  return new Promise((resolve,reject)=>{
   const p=spawn('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','Bypass','-File',script,...args],
    {shell:false,stdio:'inherit',env:{...process.env}});
-  p.on('error',reject);
-  p.on('exit',code=>code===0?resolve(0):reject(Error(path.basename(script)+' exit '+code)));
+  let finished=false;
+  const timer=setTimeout(()=>{
+   if(finished)return;
+   finished=true;
+   // Terminate the entire Windows process tree, including child Godot game.
+   spawnSync('taskkill',['/PID',String(p.pid),'/T','/F'],{windowsHide:true,timeout:20000});
+   reject(Error('Bounded native Godot Windows operation exceeded '+timeoutMs+' ms'));
+  },timeoutMs);
+  const finish=(err)=>{
+   if(finished)return;finished=true;clearTimeout(timer);
+   if(err)reject(err);else resolve(0);
+  };
+  p.on('error',finish);
+  p.on('exit',code=>finish(code===0?null:Error(path.basename(script)+' exit '+code)));
  });
 }
 async function execute(j){
@@ -100,7 +112,7 @@ async function execute(j){
   try{
    await powershell(path.join(sourceDir,'sr1c-capture-godot-pc.ps1'),
     ['-EvidenceDir',run,'-ExpectedSha',j.commit,
-     '-GodotExe',process.env.KLINIKLAB_GODOT_EXE]);
+     '-GodotExe',process.env.KLINIKLAB_GODOT_EXE],j.timeoutSec*1000);
   }catch(e){captureError=e.message}
  }
  await fs.mkdir(run,{recursive:true});
