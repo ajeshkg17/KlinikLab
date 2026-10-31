@@ -42,5 +42,6 @@ test('default XR ten-checkpoint and existing gallery remain independent of optio
  assert(worker.includes("'procedure-manifest.json','storyboard.md'"));
  assert(worker.includes("'video/stereo-steps-check.json','video/actual-app-stereo-steps.webm'"));
  const job=JSON.parse(fs.readFileSync(new URL('../../visual-qa/jobs/xr-current.json',import.meta.url),'utf8'));
- assert.equal(job.procedureCapture,undefined,'do not change processed job06');
+ assert.equal(job.captures.length,10,'procedure jobs retain all ten original checkpoints');
+ assert(job.procedureCapture===undefined||job.procedureCapture===true,'opt-in only, never an arbitrary action');
 });

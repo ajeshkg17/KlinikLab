@@ -23,7 +23,8 @@ test('opt-in real-app procedure capture is bounded and never changes the standar
  assert.equal(request.procedureCapture,true);assert.equal(request.captures.length,10);
  for(const extra of [{procedureCapture:false},{procedureCapture:'true'},{procedureCapture:1}])
   assert.throws(()=>validateXRJob({...valid,...extra}));
- assert.throws(()=>validateXRJob({...valid,procedureCapture:true}),'non-procedure job ID');
+ assert.throws(()=>validateXRJob({...valid,jobId:'pc-xr-standard-example',procedureCapture:true}),
+  'non-procedure job ID');
  const worker=fs.readFileSync(new URL('../xr-worker.mjs',import.meta.url),'utf8');
  assert(worker.includes("KLINIKLAB_PROCEDURE_CAPTURE:job.procedureCapture?'1':'0'"));
  assert(worker.includes('loadProcedure(dir,job,result)'));
