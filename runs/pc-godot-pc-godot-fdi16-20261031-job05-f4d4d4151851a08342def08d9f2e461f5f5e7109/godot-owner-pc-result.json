@@ -1,0 +1,88 @@
+{
+    "schemaVersion":  2,
+    "status":  "EVIDENCE_INCOMPLETE",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\appdata\\local\\microsoft\\winget\\packages\\godotengine.godotengine_microsoft.winget.source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job05-f4d4d41518\\Project\\project.godot",
+    "privateDesktopCreated":  true,
+    "userDesktopActivationRequested":  false,
+    "headlessUsed":  false,
+    "godotPid":  12472,
+    "godotStartedUTC":  "2026-10-31T22:03:57.8753349Z",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeImagePresent":  true,
+    "nativeScreenshotFile":  "godot-native-fdi16-frontal-4573.png",
+    "imageSHA256":  "5e04724ea633c3d8a36504e418c1cd10df725eddba622519bc8b75af1799072f",
+    "imageWidth":  1600,
+    "imageHeight":  900,
+    "nativePixelReviewAccepted":  false,
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "renderingMethod":  "forward_plus",
+    "renderingDriver":  "vulkan",
+    "videoAdapterName":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "videoAdapterVendor":  "NVIDIA",
+    "backgroundCaptureStatus":  "BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
+    "process3DSampleCount":  0,
+    "process3DPositiveSamples":  0,
+    "process3DMaxUtilizationPercent":  null,
+    "process3DDistinctSamplePeriods":  0,
+    "process3DPositiveDistinctPeriods":  0,
+    "process3DPositiveRtx5060DistinctPeriods":  0,
+    "persistentPDHQueryUsed":  true,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "dxgiAdapters":  [
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00012b1e",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+                             "luid":  "0x00000000_0x00013049",
+                             "vendorId":  4318,
+                             "deviceId":  11609,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00020475",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Microsoft Basic Render Driver",
+                             "luid":  "0x00000000_0x00012fbb",
+                             "vendorId":  5140,
+                             "deviceId":  140,
+                             "evidenceSource":  null
+                         }
+                     ],
+    "rtx5060DxgiLuid":  "0x00000000_0x00013049",
+    "positiveGodotEngineLuids":  [
+
+                                 ],
+    "nativeAngledScreenshotFile":  "godot-native-fdi16-occlusal-33571.png",
+    "angledImageSHA256":  "52126d95739081a062ebf9afb1961cb1d4e0919e4dbceedd80f013e233f41806",
+    "nativeAngledImagePresent":  true,
+    "orbitDurationSeconds":  42.011,
+    "rendererLogNvidiaRtx5060":  true,
+    "gpuAdapterLuidMatchedToNvidia":  false,
+    "godotProcessGPUCorroborated":  false,
+    "blockers":  [
+                     "Persistent Windows PDH query failure: The data in one of the performance counter samples is not valid. View the Status property for each PerformanceCounterSample object to make sure it contains valid data.",
+                     "Insufficient independent positive Godot-PID GPU 3D PDH COLLECTION PERIODS (require \u003e=3)",
+                     "Fewer than three independent Godot-PID GPU 3D periods match the RTX 5060 DXGI LUID",
+                     "Actual Godot process RTX 5060 GPU render proof incomplete"
+                 ],
+    "limitations":  [
+                        "Independent original PNG pixel review remains required",
+                        "Windows GPU 3D PID utilization plus Godot Vulkan adapter identity does not itself map a DXGI LUID"
+                    ]
+}

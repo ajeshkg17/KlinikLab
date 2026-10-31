@@ -1,0 +1,31 @@
+{
+  "powerShellChildEnvironment": {
+    "inheritedPSModulePathRemoved": true,
+    "hashCmdletPreflightRequired": true
+  },
+  "jobId": "pc-godot-fdi16-20261031-job05",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1c-fdi16-before-after",
+  "executedOn": "owner Windows PC (watcher runtime)",
+  "generatedAt": "2026-10-31T22:04:42.311Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "imageExists": true,
+  "angledImageExists": true,
+  "distinctRtx5060Gpu3DPeriods": 0,
+  "rtx5060DxgiLuid": "0x00000000_0x00013049",
+  "dxgiLuidMatchesGodotProcess": false,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": false,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [],
+  "blockers": [
+    "Persistent Windows PDH query failure: The data in one of the performance counter samples is not valid. View the Status property for each PerformanceCounterSample object to make sure it contains valid data.",
+    "Insufficient independent positive Godot-PID GPU 3D PDH COLLECTION PERIODS (require >=3)",
+    "Fewer than three independent Godot-PID GPU 3D periods match the RTX 5060 DXGI LUID",
+    "Actual Godot process RTX 5060 GPU render proof incomplete"
+  ]
+}
