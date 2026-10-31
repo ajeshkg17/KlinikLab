@@ -13,7 +13,7 @@ if($buffer.ToString() -ne 'WinSta0'){
  Write-Host "SKIP: hosted runner window station is not WinSta0; cannot verify private interactive desktop"
  exit 0
 }
-$name='KL_SR1C_CONTRACT_'+[Guid]::NewGuid().ToString('N')
+$name='KLX_'+[Guid]::NewGuid().ToString('N').Substring(0,12) # short, no path separators
 $mask=[uint32]0xC3
 $desktop=[KlinikLab.PrivateDesktop]::CreateDesktop($name,$null,[IntPtr]::Zero,[uint32]0,$mask,[IntPtr]::Zero)
 if($desktop -eq [IntPtr]::Zero){
