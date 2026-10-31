@@ -75,7 +75,7 @@ export function buildHandoffPdf(md){
   objects[p]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+c+' 0 R >>';
   objects[c]='<< /Length '+stream.length+' >>\nstream\n'+stream+'endstream';
  });
- objects[infoId]='<< /Title (KlinikLab durable SR1B next-chat handoff) /Author (KlinikLab development) /Creator (KlinikLab deterministic Markdown handoff generator) /Subject (Exact source Markdown SHA256 '+hash+') >>';
+ objects[infoId]='<< /Title (KlinikLab durable SR1B next-chat handoff) /Author (KlinikLab development) /Creator (KlinikLab deterministic Markdown handoff generator) /Subject (Paired with the same-base-name Markdown source at committed Git revision) >>';
  let pdf='%PDF-1.4\n% ASCII, searchable, deterministic\n';
  const offsets=[0];
  for(let i=1;i<=infoId;i++){offsets[i]=pdf.length;pdf+=i+' 0 obj\n'+objects[i]+'\nendobj\n'}
