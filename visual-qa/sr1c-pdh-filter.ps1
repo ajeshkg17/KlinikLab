@@ -3,7 +3,7 @@
 function ConvertTo-KLGodotGpu3DRows {
  [CmdletBinding()]
  param(
-  [Parameter(Mandatory=$true)][object[]]$Snapshots,
+  [Parameter(Mandatory=$true)][AllowEmptyCollection()][object[]]$Snapshots,
   [Parameter(Mandatory=$true)][int]$GodotPid,
   [Parameter(Mandatory=$true)][scriptblock]$GetEngineLuid
  )
