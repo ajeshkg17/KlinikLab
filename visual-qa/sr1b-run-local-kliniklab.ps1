@@ -92,6 +92,16 @@ if($Mode -eq 'Build'){
   }
   $reloaded=@($report.nativeProceduralReloadedSections.$state.PSObject.Properties.Value)
   if($reloaded.Count -ne $rows.Count){throw "Native persisted procedural sections not verified: $state"}
+  if(-not [bool]$report.nativeWorldBoundsSourceParityVerified -or
+     -not [bool]$report.nativeActorReloadDiagnostics.geometryBoundsVerifiedPreAndPostReload){
+   throw "Native source tooth world bounds/visibility did not survive level reload: $state"
+  }
+  foreach($proc in $procGroups){
+   if(-not [bool]$proc.worldBoundsProof.boundsContainEverySourceFace -or
+      [double]$proc.nativeBoundingSphereRadiusCm -le 0){
+    throw "Native original procedural tissue has no correctly placed rendered bounds: $state"
+   }
+  }
  }
  if($expectedSectionCount -lt 2 -or $sectionRows.Count -ne $expectedSectionCount){
   throw 'Invalid native multi-material section report'
