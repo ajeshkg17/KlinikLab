@@ -1,3 +1,18 @@
+# Interrupted job07: publication-only forensics, 1 November 2026
+
+The per-user Windows Scheduled Task invoked worker `c3f2f71a1f6e2d48fc1a7144ea023b6e13863ebf` for job07, but that process exited while the native owner-PC result and regular worker result remained absent. **Do not run `--once` or `--watch` while the stale lease exists; never rerender job07.**
+
+A fresh approved worker checkout has two strictly bounded forensic modes:
+
+1. `node visual-qa/godot-worker.mjs --diagnose-job07` reads only the original immutable job07 source metadata, source hash, six-case workflow state, original native PNG headers/IEND/SHA256 and old lock; it also summarizes the ledger, original watcher log and Windows Scheduled Task last result, without writing to the original capture or using Godot. A failure means STOP, not force recovery.
+2. `node visual-qa/godot-worker.mjs --archive-job07` repeats the strict checks, requires the old watcher PID dead, takes a separately named exclusive recovery lock, writes `godot-job07-forensic-review.json` and a new **clearly incomplete** `godot-job-result.json`, then publishes the ORIGINAL two images, original native reports and log to a new job07 GitHub folder. It explicitly refuses fabricated `godot-owner-pc-result.json`, GPU attribution, pixel/clinical acceptance and full app migration. It never invokes the Godot capture process or the earlier source exporter. On a failed partial attempt, inspect files and recovery lock before retrying any publication command; do not remove locks or overwrite evidence.
+
+**After** a confirmed incomplete archive, `node visual-qa/godot-worker.mjs --retire-archived-job07-lock` requires verified published recovery-only ledger status, original PID dead and Scheduled Task state Ready/Disabled. It preserves the stale lock by moving it to an archived filename instead of deleting it. Only then should the owner update the Scheduled Task to the fixed newer worker (the launcher now uses separate native stdout/stderr files and no PowerShell error pipeline). **Do not use these modes from the old pinned worker SHA**; the new checked-out worker must be exact and CI-approved.
+
+The launcher stderr hypothesis remains unproven until the original local log/Task Scheduler last-run result is independently examined. The correct next render, if GPU proof is still required, must be a NEW unique job ID, not job07. The owner should not supply manual screenshots: original PNGs are published by this recovery script and subsequent jobs by the GitHub watcher.
+
+---
+
 # Default owner-PC Godot GitHub watcher — 1 November 2026
 
 The one-time job06 already published real process-attributable RTX 5060 evidence and its two original images. Both PNGs have now been directly inspected from GitHub, without manual uploads. Job06 is **a static clinic-workspace prototype, not full KlinikLab**. See `PHASE_ROADMAP.md` for objective pixel findings. **Job07** `pc-godot-clinic-20261101-job07` (six source-derived cases / seven native stations) is the next unique queued migration slice. It is not yet an executed native job or a full app.
