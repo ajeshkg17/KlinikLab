@@ -15,7 +15,8 @@ helper_dir = os.environ.get('KLINIKLAB_SR1B_SCRIPT_DIR', '')
 if not helper_dir or not (Path(helper_dir) / 'sr1b_section_contract.py').is_file():
     raise RuntimeError('Missing source-pinned SR1B tissue section contract')
 sys.path.insert(0, helper_dir)
-from sr1b_section_contract import MATERIALS, validate_sections
+from sr1b_section_contract import MATERIALS, validate_sections, tissue_from_name
+from sr1b_topology_source import read_obj_triangles
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -57,7 +58,7 @@ def report_mesh_source_build(mesh):
         'potentialLossStage': 'UNKNOWN'
     }
     try:
-        src = mesh.get_mesh_description(0)
+        src = mesh.get_static_mesh_description(0)
         if src is not None:
             result['sourceMeshDescriptionTriangles'] = int(src.get_triangle_count())
     except Exception as e:
@@ -105,6 +106,47 @@ def report_mesh_source_build(mesh):
     return result
 
 
+def rebuild_from_source_triangle_stream(mesh, triangles, material):
+    """Bypass lossy OBJ translator/build with the ORIGINAL source-pinned OBJ faces.
+
+    Native Unreal StaticMeshDescription is populated triangle by triangle.
+    No mesh decimation, no artificial face insertion and no count rebaselining.
+    Any Python API incompatibility or native geometry loss aborts stage 1.
+    """
+    require(triangles and material in MATERIALS, 'Unexpected original source material')
+    smd = unreal.StaticMesh.create_static_mesh_description()
+    require(smd is not None, 'UE StaticMeshDescription factory unavailable')
+    group = smd.create_polygon_group()
+    smd.set_polygon_group_material_slot_name(group, unreal.Name('KL_' + material))
+    smd.reserve_new_vertices(len(triangles) * 3)
+    smd.reserve_new_vertex_instances(len(triangles) * 3)
+    smd.reserve_new_triangles(len(triangles))
+    for triangle in triangles:
+        instances = []
+        for x, y, z in triangle:
+            vertex = smd.create_vertex()
+            smd.set_vertex_position(vertex, unreal.Vector(x, y, z))
+            instance = smd.create_vertex_instance(vertex)
+            smd.set_vertex_instance_uv(instance, unreal.Vector2D(0, 0), 0)
+            instances.append(instance)
+        smd.create_triangle(group, instances)
+    require(int(smd.get_triangle_count()) == len(triangles),
+            'Direct native MeshDescription lost source OBJ triangles before build: ' + material)
+    mesh.build_from_static_mesh_descriptions([smd], False, False)
+    require(int(mesh.get_num_triangles(0)) == len(triangles),
+            'Direct native StaticMesh build still removed source OBJ triangles: ' + material +
+            ', source=' + str(len(triangles)) +
+            ', native=' + str(mesh.get_num_triangles(0)))
+    require(bool(unreal.EditorAssetLibrary.save_loaded_asset(mesh)),
+            'Failed to save native source-reconstructed StaticMesh: ' + material)
+    require(int(mesh.get_num_triangles(0)) == len(triangles),
+            'Direct native mesh triangle count changed after saving: ' + material)
+    return {'method': 'SOURCE_OBJ_NATIVE_STATICMESHDESCRIPTION_NO_REDUCTION',
+            'directInputTriangles': len(triangles),
+            'savedNativeTriangles': int(mesh.get_num_triangles(0)),
+            'sourceMaterial': 'KL_' + material}
+
+
 def import_native_obj(path, name, expected_counts, expected_total, diagnostics):
     """Preserve each tissue group when UE imports multi-material OBJ as N meshes."""
     task = unreal.AssetImportTask()
@@ -120,6 +162,7 @@ def import_native_obj(path, name, expected_counts, expected_total, diagnostics):
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
     objects = list(task.get_objects())
     meshes = [obj for obj in objects if isinstance(obj, unreal.StaticMesh)]
+    original_triangles = read_obj_triangles(path, expected_counts)
     rows = []
     by_path = {}
     for mesh in meshes:
@@ -128,6 +171,23 @@ def import_native_obj(path, name, expected_counts, expected_total, diagnostics):
         diag = report_mesh_source_build(mesh)
         diagnostics.append(diag)
         material_entries = list(mesh.get_editor_property('static_materials'))
+        require(len(material_entries) == 1,
+                'Native tissue mesh must have exactly one original source material: ' + mesh.get_name())
+        source_interface = material_entries[0].get_editor_property('material_interface')
+        require(source_interface is not None,
+                'Native mesh missing imported tissue material interface: ' + mesh.get_name())
+        material = tissue_from_name(source_interface.get_name())
+        require(material in expected_counts and expected_counts[material] > 0,
+                'Native mesh interface is not a source-identified tissue material: ' + mesh.get_name())
+        require(tissue_from_name(mesh.get_name()) == material,
+                'Native section name and material identity disagree: ' + mesh.get_name())
+        diag['sourceExpectedForMaterial'] = int(expected_counts[material])
+        if diag['renderLOD0Saved'] != int(expected_counts[material]):
+            diag['lossAfterConservativeRebuild'] = (
+                int(expected_counts[material]) - diag['renderLOD0Saved'])
+            diag['directSourceMeshDescriptionReconstruction'] = (
+                rebuild_from_source_triangle_stream(mesh, original_triangles[material], material))
+        diag['finalNativeRenderLOD0'] = int(mesh.get_num_triangles(0))
         row = {
             'assetName': mesh.get_name(),
             'assetPath': mesh.get_path_name(),
