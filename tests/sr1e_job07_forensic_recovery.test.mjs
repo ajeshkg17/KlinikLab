@@ -87,3 +87,15 @@ test('forensics and publication-only branch never rerender the interrupted ID',a
  assert(installer.includes('-RedirectStandardError'));
  assert(!/^\\s*& \\$NodeExe .*2>&1.*ForEach-Object/m.test(installer));
 });
+
+test('stale original watcher lease is not removed until recovery-only job07 is published and task stopped',async()=>{
+ const worker=await fs.readFile(new URL('../visual-qa/godot-worker.mjs',import.meta.url),'utf8');
+ const block=worker.slice(worker.indexOf('async function retireArchivedJob07StaleLease()'),worker.indexOf('let busy=false;'));
+ assert(block.includes("prior.status!=='published'"));
+ assert(block.includes('prior.recoveryOnly!==true'));
+ assert(block.includes('prior.result?.gpuProcessCorroborated!==false'));
+ assert(block.includes('Get-ScheduledTask'));
+ assert(block.includes('check.processAlive!==false'));
+ assert(block.includes('await fs.rename(from,dest)'));
+ assert(!block.includes('await fs.unlink('));
+});
