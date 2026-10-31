@@ -1,5 +1,8 @@
 # SR1 small Quest 2 prototype — Unreal Engine Pixel Streaming 2 VR
 
+> **SUPERSEDED DEVELOPMENT ORDER — 31 October 2026:** This older Quest-first prototype plan is **deferred**. The binding user priority is to produce and independently accept a **local native KlinikLab clinical-app content render** in Unreal on the owner PC GPU first (SR1B). See [SR1B local render instructions](./SR1B_LOCAL_KLINIKLAB_RENDER.md) and [priority override](./PHASE_ROADMAP.md). Do **not** start Pixel Streaming 2, LAN signalling, WebRTC, or Quest until the SR1B native clinical render/GPU/pixel gate is met. The content below is preserved as a *later* research/prototype reference, not a current next step.
+
+
 **Status: NOT BUILT OR RUN.** This guide is a controlled engineering experiment, not an installed UE project, downloaded dental scene, operational LAN streaming server, or headset acceptance. The existing KlinikLab browser/IWER test screenshots remain **legacy client-rendered evidence**.
 
 ## Why this first, and what is not allowed
