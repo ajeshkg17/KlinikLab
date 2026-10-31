@@ -17,6 +17,7 @@ if not helper_dir or not (Path(helper_dir) / 'sr1b_section_contract.py').is_file
 sys.path.insert(0, helper_dir)
 from sr1b_section_contract import MATERIALS, validate_sections, tissue_from_name
 from sr1b_topology_source import read_obj_triangles
+from sr1b_procedural_buffers import exact_source_buffers
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -268,7 +269,188 @@ def mesh_actor(sections, name, y_offset):
                        if material != 'enamel'}
     require(attached_labels == expected_labels,
             'Logical tooth attachment hierarchy incomplete')
-    require(len(children) == len(sections), 'Tooth sections lost after actor assembly')
+    require(len(children) == len(sections), 'Tooth sectionsdef import_native_materials_only(obj_file, name, expected_counts, diagnostics):
+    """Import materials and original mesh-source diagnostics, NOT render geometry.
+
+    UE5.8's StaticMesh build reproducibly drops 10320 -> 6724 (and 6721
+    with direct mesh description), despite retaining 10320 source polygons.
+    The discarded static render LOD MUST NOT be the clinical render input.
+    """
+    task = unreal.AssetImportTask()
+    for key, value in {
+        'filename': str(obj_file),
+        'destination_path': '/Game/KlinikLab/NativeMeshes',
+        'destination_name': name,
+        'automated': True,
+        'replace_existing': False,
+        'save': True
+    }.items():
+        task.set_editor_property(key, value)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    meshes = [x for x in list(task.get_objects()) if isinstance(x, unreal.StaticMesh)]
+    wanted = {m for m, n in expected_counts.items() if n > 0}
+    require(len(meshes) == len(wanted),
+            'Native material asset import did not yield exactly one mesh per tissue')
+    found = {}
+    for mesh in meshes:
+        slots = list(mesh.get_editor_property('static_materials'))
+        require(len(slots) == 1, 'Expected exactly one tissue material slot: ' + mesh.get_name())
+        material = slots[0].get_editor_property('material_interface')
+        require(material is not None, 'Missing imported native material interface: ' + mesh.get_name())
+        tissue = tissue_from_name(material.get_name())
+        require(tissue == tissue_from_name(mesh.get_name()) and tissue in wanted,
+                'Native imported material/mesh group mismatch: ' + mesh.get_name())
+        require(tissue not in found, 'Duplicate native imported material group: ' + tissue)
+        source_desc = mesh.get_static_mesh_description(0)
+        require(source_desc is not None, 'Native OBJ source MeshDescription unavailable: ' + tissue)
+        source_count = int(source_desc.get_triangle_count())
+        require(source_count == int(expected_counts[tissue]),
+                'Native OBJ source MeshDescription differs from SHA-verified OBJ: ' +
+                tissue + ', source=' + str(expected_counts[tissue]) +
+                ', description=' + str(source_count))
+        static_count = int(mesh.get_num_triangles(0))
+        if isinstance(material, unreal.Material):
+            material.set_editor_property('two_sided', True)
+            require(bool(material.get_editor_property('two_sided')),
+                    'Imported tissue material is not two-sided: ' + tissue)
+            require(bool(unreal.EditorAssetLibrary.save_loaded_asset(material)),
+                    'Imported two-sided tissue material was not saved: ' + tissue)
+        else:
+            require(bool(material.get_editor_property('two_sided')),
+                    'Native material instance is not independently verified two-sided: ' + tissue)
+        diagnostics.append({
+            'material':tissue,'sourceMeshDescriptionTriangles':source_count,
+            'staticMeshRenderLOD0Triangles_DIAGNOSTIC_NOT_USED':static_count,
+            'lostStaticFaces_DIAGNOSTIC':source_count-static_count,
+            'nativeMaterialInterface':material.get_path_name(),
+            'renderGeometrySource':'EXACT_SOURCE_OBJ_PROCEDURAL_INDEX_BUFFER',
+            'sourceVsStaticDiscrepancyAcceptedForRendering':False
+        })
+        found[tissue] = {
+            'materialInterface':material,
+            'staticMesh':mesh,'staticLOD0DiagnosticOnly':static_count,
+            'originalSourceTriangles':source_count
+        }
+    require(set(found) == wanted, 'Missing native clinical material source group')
+    return found
+
+
+def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
+                                 expected_counts):
+    """A SINGLE named native Actor with five ProceduralMeshComponent sections.
+
+    The buffers never call StaticMesh build/LOD/simplification. This preserves
+    the original triangle index stream, unlike the observed UE5.8 StaticMesh
+    path. Section presence is rechecked after saving and reloading the level.
+    """
+    root = spawn(unreal.Actor, 0, y_offset, 74, name)
+    subsystem = unreal.SubobjectDataSubsystem.get()
+    require(subsystem is not None, 'SubobjectDataSubsystem unavailable')
+    handles = list(subsystem.k2_gather_subobject_data_for_instance(root))
+    require(handles, 'Native actor root SubobjectDataHandle missing')
+    actor_handle = handles[0]
+    lib = unreal.SubobjectDataBlueprintFunctionLibrary
+    per_tissue = {}
+    wanted = {m for m in MATERIALS if int(expected_counts[m]) > 0}
+    for tissue in MATERIALS:
+        if tissue not in wanted:
+            continue
+        source = source_triangles[tissue]
+        buffers = exact_source_buffers(source)
+        require(buffers['submittedTriangles'] == int(expected_counts[tissue]),
+                'Procedural source index count mismatch: ' + tissue)
+        params = unreal.AddNewSubobjectParams(
+            parent_handle=actor_handle,
+            new_class=unreal.ProceduralMeshComponent,
+            blueprint_context=None)
+        handle, failure = subsystem.add_new_subobject(params)
+        require(lib.is_handle_valid(handle),
+                'Cannot create native persistent ProceduralMeshComponent: ' + str(failure))
+        data = lib.get_data(handle)
+        component = lib.get_associated_object(data)
+        require(isinstance(component, unreal.ProceduralMeshComponent),
+                'Subobject actor instance did not produce a procedural mesh: ' + tissue)
+        # Separate material-specific components; one exact topology section per
+        # group. No smoothing/welding; normals derived face-by-face from OBJ.
+        vertices = [unreal.Vector(*xyz) for xyz in buffers['positions']]
+        normals = [unreal.Vector(*xyz) for xyz in buffers['normals']]
+        component.create_mesh_section_linear_color(
+            0, vertices, buffers['indices'], normals,
+            [], [], [], [], [], [], False, False)
+        require(component.get_num_sections() == 1 and
+                component.is_mesh_section_visible(0),
+                'Native procedural tissue mesh section unavailable after source upload: ' + tissue)
+        mat = materials[tissue]['materialInterface']
+        component.set_material(0, mat)
+        assigned = component.get_material(0)
+        require(assigned is not None and assigned.get_path_name() == mat.get_path_name(),
+                'Native procedural material source lost: ' + tissue)
+        component.set_editor_property('component_tags', [unreal.Name('KL_TISSUE_'+tissue.upper())])
+        per_tissue[tissue] = {
+            'sourceTriangles':len(source),
+            'proceduralIndicesSubmitted':len(buffers['indices']),
+            'proceduralTrianglesSubmitted':buffers['submittedTriangles'],
+            'sourceCoordinateSHA256':buffers['sourceCoordinateSHA256'],
+            'minDoubledAreaCm2':buffers['minDoubledAreaCm2'],
+            'materialInterface':mat.get_path_name(),
+            'sectionCountAfterUpload':int(component.get_num_sections()),
+            'sectionVisibleAfterUpload':bool(component.is_mesh_section_visible(0)),
+            'componentName':component.get_name()
+        }
+    require(set(per_tissue) == wanted, 'Missing procedural tooth tissue section')
+    require(sum(x['proceduralTrianglesSubmitted'] for x in per_tissue.values()) ==
+            sum(int(n) for n in expected_counts.values()),
+            'Native procedural actor total submitted triangles differ from the original source')
+    require(len(root.get_components_by_class(unreal.ProceduralMeshComponent)) == len(wanted),
+            'Native actor does not own all original tissue procedural mesh components')
+    return root, per_tissue
+
+
+def verify_reloaded_procedural_scene(expected_actors, counts_by_state):
+    """Verify components survive native .umap save/load, without inventing raster evidence.
+
+    UE Python exposes get_num_sections and section visibility but not the
+    non-Blueprint GetProcMeshSection raw index buffer. Accordingly full
+    persisted index parity must remain PENDING until visual and/or C++ review.
+    """
+    level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+    require(bool(level.load_level(LEVEL)), 'Saved clinical level could not be reloaded')
+    actors = list(unreal.EditorLevelLibrary.get_all_level_actors())
+    by_name = {a.get_actor_label():a for a in actors
+               if a.get_actor_label() in expected_actors}
+    require(set(by_name) == set(expected_actors),
+            'Reloaded native clinical scene lost either tooth actor')
+    results = {}
+    for state, label in expected_actors.items():
+        actor = by_name[label]
+        comps = list(actor.get_components_by_class(unreal.ProceduralMeshComponent))
+        count = len([m for m, n in counts_by_state[state].items() if n > 0])
+        require(len(comps) == count,
+                'Reloaded procedural tooth lost tissue components: ' + state)
+        observed = {}
+        for comp in comps:
+            tags = [str(t).lower() for t in list(comp.get_editor_property('component_tags'))]
+            tissues = [m for m in MATERIALS if 'kl_tissue_'+m in tags]
+            require(len(tissues) == 1 and tissues[0] not in observed,
+                    'Reloaded native tooth component tissue tag invalid or duplicated: ' + state)
+            tissue = tissues[0]
+            require(comp.get_num_sections() == 1 and comp.is_mesh_section_visible(0),
+                    'Reloaded native tooth lost its visible triangle section: ' + tissue)
+            mat = comp.get_material(0)
+            require(mat is not None and tissue_from_name(mat.get_name()) == tissue,
+                    'Reloaded native tooth material identity incorrect: ' + tissue)
+            observed[tissue] = {
+                'savedSectionCount':int(comp.get_num_sections()),
+                'savedSectionVisible':bool(comp.is_mesh_section_visible(0)),
+                'savedMaterial':mat.get_path_name()
+            }
+        require(set(observed) == {m for m, n in counts_by_state[state].items() if n > 0},
+                'Reloaded tooth has wrong tissue group set')
+        results[state] = observed
+    return results
+
+
+ lost after actor assembly')
     return root, children
 
 
