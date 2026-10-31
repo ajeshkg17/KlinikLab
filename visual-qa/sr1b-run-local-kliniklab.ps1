@@ -59,6 +59,19 @@ if($Mode -eq 'Build'){
  }
  $umap=Join-Path $projectDir 'Content\Maps\L_KlinikLab_FDI16.umap'
  if(-not (Test-Path -LiteralPath $umap -PathType Leaf)){throw 'No native UE .umap saved on disk'}
+ $meshFiles=@(Get-ChildItem -LiteralPath (Join-Path $projectDir 'Content\KlinikLab\NativeMeshes') -Filter '*.uasset' -File -ErrorAction SilentlyContinue)
+ if($meshFiles.Count -lt 2){throw 'No two real native UE StaticMesh .uasset files saved in clinical project'}
+ $fileHashes=[ordered]@{
+  sourceGitSHA=$sha
+  status='NATIVE_ASSET_FILES_HASHED_NOT_RENDERED'
+  originalFdi16ManifestSHA256=(Get-FileHash (Join-Path $exportDir 'kliniklab-export-manifest.json') -Algorithm SHA256).Hash.ToLowerInvariant()
+  nativeLevelSHA256=(Get-FileHash $umap -Algorithm SHA256).Hash.ToLowerInvariant()
+  nativeAssetFiles=@(foreach($asset in $meshFiles){
+   [ordered]@{name=$asset.Name;sizeBytes=$asset.Length;sha256=(Get-FileHash -LiteralPath $asset.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+  })
+  gpuAndPixelValidated=$false
+ }
+ $fileHashes|ConvertTo-Json -Depth 9|Set-Content -LiteralPath (Join-Path $out 'native-level-file-hashes.json') -Encoding utf8
  Write-Host "SOURCE/ASSET-ONLY SR1B level created: $umap (NOT a verified GPU frame)"
  Write-Host "Next: rerun with -Mode Open -EvidenceDir '$out' -ExpectedSha $sha"
  exit 0
