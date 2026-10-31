@@ -16,3 +16,18 @@ test('worker authorizes GCM before rendering and stages evidence durably',()=>{
  assert.match(code,/const data=await loadEvidence\(job\)/);
  assert.match(code,/HEARTBEAT/);
 });
+
+test('opt-in real-app procedure capture is bounded and never changes the standard ten scenes',()=>{
+ const id='pc-xr-procedure-fdi16-20261031-01';
+ const request=validateXRJob({...valid,jobId:id,procedureCapture:true});
+ assert.equal(request.procedureCapture,true);assert.equal(request.captures.length,10);
+ for(const extra of [{procedureCapture:false},{procedureCapture:'true'},{procedureCapture:1}])
+  assert.throws(()=>validateXRJob({...valid,...extra}));
+ assert.throws(()=>validateXRJob({...valid,procedureCapture:true}),'non-procedure job ID');
+ const worker=fs.readFileSync(new URL('../xr-worker.mjs',import.meta.url),'utf8');
+ assert(worker.includes("KLINIKLAB_PROCEDURE_CAPTURE:job.procedureCapture?'1':'0'"));
+ assert(worker.includes('loadProcedure(dir,job,result)'));
+ assert(worker.includes("step.sha256!==createHash('sha256').update(bytes).digest('hex')"));
+ assert(worker.includes("files.push({path:prefix+'/'+item.name,contents:item.bytes,encoding:'base64'})"));
+ assert(worker.includes("[Read six-step storyboard]"));
+});

@@ -53,12 +53,42 @@ async function preflight(){
  await githubApi(token,'/git/ref/heads/'+RESULT_BRANCH);
  return token;
 }
+const PROCEDURE_FILES=[
+ '01-select-fdi16.png','02-precut.png','03-aim.png',
+ '04-cut.png','05-postcut.png','06-switchback.png',
+ 'procedure-manifest.json','storyboard.md'
+];
+const procedureRunId=job=>'fdi16-'+job.jobId;
+async function loadProcedure(dir,job,result){
+ if(!job.procedureCapture)return null;
+ const id=procedureRunId(job),sub='procedure/'+id;
+ if(result.procedureEvidence?.runId!==id)throw Error('Procedure evidence missing or wrong run ID');
+ const manifest=JSON.parse(await fs.readFile(path.join(dir,sub,'procedure-manifest.json'),'utf8'));
+ if(!manifest.passed||manifest.steps?.length!==6||manifest.testedCommit!==job.commit)throw Error('Procedure manifest incomplete');
+ const files=[];
+ for(const name of PROCEDURE_FILES){
+  const bytes=await fs.readFile(path.join(dir,sub,name));
+  if(name.endsWith('.png')){
+   const step=manifest.steps.find(x=>x.file===name);
+   if(!step||step.eyes!==2||step.frame<1||
+     step.sha256!==createHash('sha256').update(bytes).digest('hex'))throw Error('Procedure stereo PNG invalid: '+name);
+  }
+  files.push({name:sub+'/'+name,bytes});
+ }
+ const optional=['video/video-check.json','video/actual-app-playwright.webm'];
+ for(const name of optional){
+  try{const bytes=await fs.readFile(path.join(dir,sub,name));files.push({name:sub+'/'+name,bytes})}
+  catch(e){if(e.code!=='ENOENT')throw e}
+ }
+ return {id,manifest,files};
+}
 async function loadEvidence(job){
  const dir=path.join(EVIDENCE,job.jobId);
  const result=JSON.parse(await fs.readFile(path.join(dir,'result.json'),'utf8'));
  const captures=await Promise.all(result.captureManifest.map(async ({file})=>({name:file,bytes:await fs.readFile(path.join(dir,file))})));
  if(!result.passed||captures.length!==10)throw Error('Incomplete retained evidence');
- return {result,captures};
+ const procedure=await loadProcedure(dir,job,result);
+ return {result,captures,procedure};
 }
 async function fetchJob(){
  git(['fetch','origin',INTEGRATION_BRANCH]);
@@ -87,7 +117,9 @@ async function execute(job){
   if(!ready)throw Error('Dedicated port 8891 unavailable; no existing server was changed');
   await run(process.execPath,['test-support/webxr-test/smoke.mjs'],checkout,{
    KLINIKLAB_URL:URL,KLINIKLAB_BUILD_SHA:job.commit,
-   KLINIKLAB_XR_GRAPHICS:job.graphics,KLINIKLAB_XR_DEADLINE_MS:String(job.deadlineMs)});
+   KLINIKLAB_XR_GRAPHICS:job.graphics,KLINIKLAB_XR_DEADLINE_MS:String(job.deadlineMs),
+   KLINIKLAB_PROCEDURE_CAPTURE:job.procedureCapture?'1':'0',
+   KLINIKLAB_PROCEDURE_RUN_ID:job.procedureCapture?procedureRunId(job):''});
   const dir=path.join(checkout,'output','playwright','webxr-smoke');
   const result=JSON.parse(await fs.readFile(path.join(dir,'result.json'),'utf8'));
   if(!result.passed||result.captureManifest?.length!==10)throw Error('IWER checks or captures incomplete');
@@ -99,7 +131,17 @@ async function execute(job){
   await fs.mkdir(retained,{recursive:true});
   await fs.copyFile(path.join(dir,'result.json'),path.join(retained,'result.json'));
   for(const {name,bytes} of captures)await fs.writeFile(path.join(retained,name),bytes);
-  return {result,captures};
+  let procedure=null;
+  if(job.procedureCapture){
+   procedure=await loadProcedure(dir,job,result);
+   const sub=path.join(retained,'procedure',procedure.id);
+   await fs.mkdir(sub,{recursive:true});
+   for(const file of procedure.files){
+    const target=path.join(retained,file.name);
+    await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,file.bytes);
+   }
+  }
+  return {result,captures,procedure};
  }finally{
   if(server){server.kill();await sleep(300)}
   // Even a failed smoke run can contain diagnostically useful images/logs.
@@ -117,7 +159,7 @@ async function execute(job){
   }
  }
 }
-async function publish(job,{result,captures}){
+async function publish(job,{result,captures,procedure}){
  // GitHub git-data API: upload only new blobs; never checkout/download old visual-feedback PNGs.
  const token=await preflight();
  const api=(endpoint,method='GET',data)=>githubApi(token,endpoint,method,data);
@@ -144,11 +186,28 @@ async function publish(job,{result,captures}){
  const report={...result,jobId:job.jobId,testedCommit:job.commit,
   location:'owner-PC IWER emulator, not a physical headset',captureHashes:hashes,duplicates};
  files.push({path:prefix+'/result.json',contents:Buffer.from(JSON.stringify(report,null,2)),encoding:'base64'});
+ if(job.procedureCapture){
+  if(!procedure||procedure.manifest.testedCommit!==job.commit)throw Error('No verified procedure files to publish');
+  for(const item of procedure.files){
+   // Opt-in source-derived files only; no arbitrary job-controlled paths.
+   files.push({path:prefix+'/'+item.name,contents:item.bytes,encoding:'base64'});
+  }
+ }
  const index=['# Owner-PC XR evidence','', 'Job: '+job.jobId,
   'Tested commit: '+job.commit,'','Meta IWER Quest2 in desktop Chrome; not physical headset evidence.',
   'Captured from a newly rendered XR eye frame when framebuffer readback is supported.',
   duplicates.length?'Duplicate frames: '+JSON.stringify(duplicates):'No byte-identical images; framing still needs human review.',''];
  for(const {name} of captures)index.push('## '+name,'','!['+name+'](./'+name+')','');
+ if(procedure){
+  index.push('## OPTIONAL ACTUAL-APP FDI16 PROCEDURE (not a filmed dentist or physical Quest2)',
+   '','Automated IWER controller; non-calibrated educational preparation; professional dental review pending.',
+   '','[Read six-step storyboard](./procedure/'+procedure.id+'/storyboard.md)',
+   '','[Inspect original manifest](./procedure/'+procedure.id+'/procedure-manifest.json)','');
+  for(const step of procedure.manifest.steps)index.push('### Step '+step.n+' — '+step.label,'',
+   '!['+step.label+'](./procedure/'+procedure.id+'/'+step.file+')','');
+  if(procedure.files.some(f=>f.name.endsWith('/actual-app-playwright.webm')))
+   index.push('[Playwright recorded stereo-step video — playback review pending](./procedure/'+procedure.id+'/video/actual-app-playwright.webm)','');
+ }
  files.push({path:prefix+'/README.md',contents:Buffer.from(index.join('\n')),encoding:'base64'});
  files.push({path:'PC_XR_LATEST.md',contents:Buffer.from('# Latest owner-PC XR test\n\n[Browse '+job.jobId+'](./'+prefix+'/README.md)\n'),encoding:'base64'});
  const treeItems=[];
