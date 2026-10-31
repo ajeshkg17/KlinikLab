@@ -23,7 +23,7 @@ test('procedure storyboard has six ordered distinct real-app FDI16 evidence chec
  const src=fs.readFileSync(new URL('./procedure-sequence.mjs',import.meta.url),'utf8');
  for(const required of ['await captureXR(filename,label,true)','updateButtonValue',
   'traceSurface(ray.o,ray.d)','manifest.pixelDifference=difference','assert.equal(manifest.steps[5].state.cuts',
-  'sha256:createHash','record.eyes===2'])if(!src.includes(required)
+  'sha256:createHash','record.eyes===2'])if(!src.includes(required))
   assert.fail('Missing evidence contract: '+required);
  assert(src.includes("KLINIKLAB_PROCEDURE_CAPTURE"));
 });
