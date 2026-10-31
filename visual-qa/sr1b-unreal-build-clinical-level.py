@@ -19,6 +19,7 @@ from sr1b_section_contract import MATERIALS, validate_sections, tissue_from_name
 from sr1b_topology_source import read_obj_triangles
 from sr1b_procedural_buffers import exact_source_buffers
 from sr1b_native_material_contract import ensure_two_sided_native_material
+from sr1b_reload_contract import validate_loaded_actor_inventory
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -407,49 +408,108 @@ def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
     return root, per_tissue
 
 
-def verify_reloaded_procedural_scene(expected_actors, counts_by_state):
-    """Verify components survive native .umap save/load, without inventing raster evidence.
+def editor_actor_inventory():
+    """Capture ACTUAL actor labels, classes, paths and component state.
 
-    UE Python exposes get_num_sections and section visibility but not the
-    non-Blueprint GetProcMeshSection raw index buffer. Accordingly full
-    persisted index parity must remain PENDING until visual and/or C++ review.
+    UE5.8 recommends EditorActorSubsystem; keep legacy EditorLevelLibrary
+    as diagnostic fallback if the subsystem cannot enumerate actors.
+    An empty source is recorded, not silently presented as valid.
     """
+    methods = []
+    try:
+        subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        if subsystem is None:
+            raise RuntimeError('EditorActorSubsystem not returned')
+        modern = list(subsystem.get_all_level_actors())
+        methods.append({'api': 'EditorActorSubsystem.get_all_level_actors',
+                        'count': len(modern)})
+    except Exception as exc:
+        modern = None
+        methods.append({'api': 'EditorActorSubsystem.get_all_level_actors',
+                        'error': str(exc)})
+    try:
+        legacy = list(unreal.EditorLevelLibrary.get_all_level_actors())
+        methods.append({'api': 'EditorLevelLibrary.get_all_level_actors',
+                        'count': len(legacy)})
+    except Exception as exc:
+        legacy = None
+        methods.append({'api': 'EditorLevelLibrary.get_all_level_actors',
+                        'error': str(exc)})
+    require(modern is not None or legacy is not None,
+            'Neither UE editor level actor enumeration API succeeded: ' + repr(methods))
+    if modern is not None and (modern or legacy is None):
+        actors = modern
+        selected_api = 'EditorActorSubsystem.get_all_level_actors'
+    else:
+        actors = legacy
+        selected_api = 'EditorLevelLibrary.get_all_level_actors'
+    inventory = []
+    for actor in actors:
+        # Diagnostics are collected BEFORE matching any name. This prevents
+        # repeating the observed before/after dictionary-KEY lookup bug.
+        row = {
+            'actorLabel': str(actor.get_actor_label()),
+            'actorClass': str(actor.get_class().get_name()),
+            'actorName': str(actor.get_name()),
+            'actorPath': str(actor.get_path_name()),
+            'proceduralComponents': [],
+            'componentClasses': []
+        }
+        components = list(actor.get_components_by_class(unreal.ActorComponent))
+        row['componentClasses'] = [
+            {'componentName': str(c.get_name()),
+             'componentClass': str(c.get_class().get_name())}
+            for c in components]
+        for comp in actor.get_components_by_class(unreal.ProceduralMeshComponent):
+            data = {
+                'componentName': str(comp.get_name()),
+                'componentClass': str(comp.get_class().get_name()),
+                'componentTags': [str(x) for x in
+                                  list(comp.get_editor_property('component_tags'))],
+                'sectionCount': int(comp.get_num_sections()),
+                'sectionVisible': bool(comp.is_mesh_section_visible(0)),
+                'materialName': None,
+                'materialPath': None
+            }
+            material = comp.get_material(0)
+            if material is not None:
+                data['materialName'] = str(material.get_name())
+                data['materialPath'] = str(material.get_path_name())
+            row['proceduralComponents'].append(data)
+        inventory.append(row)
+    return {'enumerationAttempts': methods,
+            'selectedEnumerationAPI': selected_api,
+            'actorCount': len(inventory),
+            'actors': inventory}
+
+
+def verify_reloaded_procedural_scene(expected_actors, counts_by_state, diagnostics):
+    """Require both separately labelled tooth actors and all tissue sections
+    after an actual save/load. Retain actor inventories on any contract failure.
+
+    Source triangle submissions are separately verified; Unreal Python does
+    not expose a raw post-reload procedural-index byte readback. No GPU claim.
+    """
+    diagnostics['expectedActors'] = dict(expected_actors)
+    diagnostics['expectedTissues'] = {
+        state: dict(counts) for state, counts in counts_by_state.items()}
+    diagnostics['beforeReload'] = editor_actor_inventory()
+    before = validate_loaded_actor_inventory(
+        diagnostics['beforeReload']['actors'], expected_actors, counts_by_state)
     level = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     require(bool(level.load_level(LEVEL)), 'Saved clinical level could not be reloaded')
-    actors = list(unreal.EditorLevelLibrary.get_all_level_actors())
-    by_name = {a.get_actor_label():a for a in actors
-               if a.get_actor_label() in expected_actors}
-    require(set(by_name) == set(expected_actors),
-            'Reloaded native clinical scene lost either tooth actor')
-    results = {}
-    for state, label in expected_actors.items():
-        actor = by_name[label]
-        comps = list(actor.get_components_by_class(unreal.ProceduralMeshComponent))
-        count = len([m for m, n in counts_by_state[state].items() if n > 0])
-        require(len(comps) == count,
-                'Reloaded procedural tooth lost tissue components: ' + state)
-        observed = {}
-        for comp in comps:
-            tags = [str(t).lower() for t in list(comp.get_editor_property('component_tags'))]
-            tissues = [m for m in MATERIALS if 'kl_tissue_'+m in tags]
-            require(len(tissues) == 1 and tissues[0] not in observed,
-                    'Reloaded native tooth component tissue tag invalid or duplicated: ' + state)
-            tissue = tissues[0]
-            require(comp.get_num_sections() == 1 and comp.is_mesh_section_visible(0),
-                    'Reloaded native tooth lost its visible triangle section: ' + tissue)
-            mat = comp.get_material(0)
-            require(mat is not None and tissue_from_name(mat.get_name()) == tissue,
-                    'Reloaded native tooth material identity incorrect: ' + tissue)
-            observed[tissue] = {
-                'savedSectionCount':int(comp.get_num_sections()),
-                'savedSectionVisible':bool(comp.is_mesh_section_visible(0)),
-                'savedMaterial':mat.get_path_name()
-            }
-        require(set(observed) == {m for m, n in counts_by_state[state].items() if n > 0},
-                'Reloaded tooth has wrong tissue group set')
-        results[state] = observed
-    return results
-
+    diagnostics['afterReload'] = editor_actor_inventory()
+    after = validate_loaded_actor_inventory(
+        diagnostics['afterReload']['actors'], expected_actors, counts_by_state)
+    for state in ('before', 'after'):
+        for tissue in before[state]:
+            require(
+                before[state][tissue]['savedMaterial'] ==
+                after[state][tissue]['savedMaterial'],
+                'Source tissue material path changed across level save/reload: ' +
+                state + '/' + tissue)
+    diagnostics['bothToothActorsAndTenTissueSectionsValidated'] = True
+    return after
 
 
 def native_text(name, txt, x, y, z):
@@ -496,6 +556,7 @@ def main():
         'nativeProceduralSourceTrianglesSubmitted': {},
         'nativeProceduralSections': {},
         'nativeProceduralReloadedSections': {},
+        'nativeActorReloadDiagnostics': {},
         'sourceTopologyAcceptedInProceduralInput': False,
         'savedProceduralTriangleIndexReadbackVerified': False,
         'actorHierarchy': {},
@@ -610,7 +671,8 @@ def main():
             {'before':'KL_FDI16_BEFORE_SOURCE_MESH',
              'after':'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH'},
             {'before':manifest['sceneStates']['before']['byMaterial'],
-             'after':manifest['sceneStates']['after']['byMaterial']})
+             'after':manifest['sceneStates']['after']['byMaterial']},
+            report['nativeActorReloadDiagnostics'])
         # Python's exposed ProceduralMeshComponent has no triangle-index
         # readback. Submission is strict; persistence of sections is verified;
         # original native pixels and exact post-reload index bytes are NOT.
