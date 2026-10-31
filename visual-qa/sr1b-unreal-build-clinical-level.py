@@ -20,6 +20,7 @@ from sr1b_topology_source import read_obj_triangles
 from sr1b_procedural_buffers import exact_source_buffers
 from sr1b_native_material_contract import ensure_two_sided_native_material
 from sr1b_reload_contract import validate_loaded_actor_inventory
+from sr1b_native_bounds import source_bounds, check_native_component_bounds
 
 MODEL_NAMES = ('fdi16-before.obj', 'fdi16-after-cut.obj')
 LEVEL = '/Game/Maps/L_KlinikLab_FDI16'
@@ -372,6 +373,13 @@ def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
         component = lib.get_associated_object(data)
         require(isinstance(component, unreal.ProceduralMeshComponent),
                 'Subobject actor instance did not produce a procedural mesh: ' + tissue)
+        placement = (0.0, float(y_offset), 74.0)
+        component.set_world_location(unreal.Vector(*placement), False, True)
+        component.set_visibility(True, False)
+        component.set_hidden_in_game(False, False)
+        require(bool(component.is_visible()) and
+                not bool(component.get_editor_property('hidden_in_game')),
+                'Native source section component is hidden: ' + tissue)
         # Separate material-specific components; one exact topology section per
         # group. No smoothing/welding; normals derived face-by-face from OBJ.
         vertices = [unreal.Vector(*xyz) for xyz in buffers['positions']]
@@ -388,7 +396,17 @@ def native_procedural_tooth_actor(name, y_offset, materials, source_triangles,
         require(assigned is not None and assigned.get_path_name() == mat.get_path_name(),
                 'Native procedural material source lost: ' + tissue)
         component.set_editor_property('component_tags', [unreal.Name('KL_TISSUE_'+tissue.upper())])
+        src_bounds = source_bounds(source)
+        origin, extent, radius = unreal.SystemLibrary.get_component_bounds(component)
+        checked = check_native_component_bounds(
+            src_bounds, placement, (origin.x, origin.y, origin.z),
+            (extent.x, extent.y, extent.z))
+        require(float(radius)>0, 'Native procedural tooth bounds unavailable: '+tissue)
         per_tissue[tissue] = {
+            'sourceLocalBoundsCm':src_bounds,
+            'worldBoundsProof':checked,
+            'targetWorldTranslationCm':list(placement),
+            'nativeBoundingSphereRadiusCm':float(radius),
             'sourceTriangles':len(source),
             'proceduralIndicesSubmitted':len(buffers['indices']),
             'proceduralTrianglesSubmitted':buffers['submittedTriangles'],
