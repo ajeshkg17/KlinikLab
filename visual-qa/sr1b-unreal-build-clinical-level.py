@@ -486,9 +486,17 @@ def editor_actor_inventory():
                                   list(comp.get_editor_property('component_tags'))],
                 'sectionCount': int(comp.get_num_sections()),
                 'sectionVisible': bool(comp.is_mesh_section_visible(0)),
+                'componentVisible':bool(comp.is_visible()),
+                'componentHiddenInGame':bool(comp.get_editor_property('hidden_in_game')),
+                'worldBoundsOriginCm':None,
+                'worldBoundsExtentCm':None,
                 'materialName': None,
                 'materialPath': None
             }
+            center, half, sphere = unreal.SystemLibrary.get_component_bounds(comp)
+            data['worldBoundsOriginCm'] = [float(center.x),float(center.y),float(center.z)]
+            data['worldBoundsExtentCm'] = [float(half.x),float(half.y),float(half.z)]
+            data['nativeBoundingSphereRadiusCm'] = float(sphere)
             material = comp.get_material(0)
             if material is not None:
                 data['materialName'] = str(material.get_name())
@@ -501,7 +509,7 @@ def editor_actor_inventory():
             'actors': inventory}
 
 
-def verify_reloaded_procedural_scene(expected_actors, counts_by_state, diagnostics):
+def verify_reloaded_procedural_scene(expected_actors, counts_by_state, diagnostics, source_sections):
     """Require both separately labelled tooth actors and all tissue sections
     after an actual save/load. Retain actor inventories on any contract failure.
 
@@ -526,6 +534,30 @@ def verify_reloaded_procedural_scene(expected_actors, counts_by_state, diagnosti
                 after[state][tissue]['savedMaterial'],
                 'Source tissue material path changed across level save/reload: ' +
                 state + '/' + tissue)
+    for state in ('before', 'after'):
+        for tissue, source_part in source_sections[state].items():
+            for when in ('beforeReload', 'afterReload'):
+                inventory = diagnostics[when]['actors']
+                matches = [a for a in inventory
+                           if a['actorLabel'] == expected_actors[state]]
+                require(len(matches) == 1,
+                        'Original source tooth actor bounds missing at '+when)
+                components = [c for c in matches[0]['proceduralComponents']
+                              if 'KL_TISSUE_'+tissue.upper() in c['componentTags']]
+                require(len(components) == 1,
+                        'Original source tooth tissue bounds missing at '+when+':'+tissue)
+                comp = components[0]
+                require(comp['componentVisible'] and
+                        not comp['componentHiddenInGame'],
+                        'Native tooth scene component hidden at '+when+':'+tissue)
+                origin=comp['worldBoundsOriginCm']
+                extent=comp['worldBoundsExtentCm']
+                require(origin is not None and extent is not None,
+                        'Native tooth bounds unavailable at '+when+':'+tissue)
+                check_native_component_bounds(
+                    source_part['sourceLocalBoundsCm'],
+                    source_part['targetWorldTranslationCm'], origin, extent)
+    diagnostics['geometryBoundsVerifiedPreAndPostReload'] = True
     diagnostics['bothToothActorsAndTenTissueSectionsValidated'] = True
     return after
 
@@ -574,6 +606,7 @@ def main():
         'nativeProceduralSourceTrianglesSubmitted': {},
         'nativeProceduralSections': {},
         'nativeProceduralReloadedSections': {},
+        'nativeWorldBoundsSourceParityVerified': False,
         'nativeActorReloadDiagnostics': {},
         'sourceTopologyAcceptedInProceduralInput': False,
         'savedProceduralTriangleIndexReadbackVerified': False,
@@ -690,10 +723,12 @@ def main():
              'after':'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH'},
             {'before':manifest['sceneStates']['before']['byMaterial'],
              'after':manifest['sceneStates']['after']['byMaterial']},
-            report['nativeActorReloadDiagnostics'])
+            report['nativeActorReloadDiagnostics'],
+            report['nativeProceduralSections'])
         # Python's exposed ProceduralMeshComponent has no triangle-index
         # readback. Submission is strict; persistence of sections is verified;
         # original native pixels and exact post-reload index bytes are NOT.
+        report['nativeWorldBoundsSourceParityVerified'] = True
         report['savedProceduralTriangleIndexReadbackVerified'] = False
         report['status'] = 'NATIVE_LEVEL_CREATED_PENDING_GPU_AND_PIXEL_EVIDENCE'
         unreal.log('SR1B KlinikLab source-derived clinical level saved: ' + LEVEL)
