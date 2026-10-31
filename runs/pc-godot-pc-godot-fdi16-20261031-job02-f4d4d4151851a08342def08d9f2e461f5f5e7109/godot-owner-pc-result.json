@@ -1,0 +1,38 @@
+﻿{
+    "schemaVersion":  1,
+    "kind":  "owner-PC Godot native FDI16 source/GPU/capture diagnostics; no pixel acceptance",
+    "status":  "EVIDENCE_INCOMPLETE",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\appdata\\local\\microsoft\\winget\\packages\\godotengine.godotengine_microsoft.winget.source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job02-f4d4d41518\\Project\\project.godot",
+    "godotPid":  10268,
+    "godotStartedUTC":  "2026-10-31T20:49:11.0763578Z",
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "nativeSourceSubmissionVerified":  true,
+    "nativeScreenshotFile":  "godot-native-fdi16-9668.png",
+    "imageSHA256":  "d8e92a28ab409f9f51ed279c8c6bcb3d53f25bfd663459ebccdbeddb700cc411",
+    "imageWidth":  1600,
+    "imageHeight":  900,
+    "nativeImagePresent":  true,
+    "nativePixelReviewAccepted":  false,
+    "godotLogSHA256":  null,
+    "rendererLogNvidiaRtx5060":  true,
+    "process3DSampleCount":  0,
+    "process3DPositiveSamples":  0,
+    "process3DMaxUtilizationPercent":  null,
+    "gpuAdapterLuidMatchedToNvidia":  false,
+    "godotProcessGPUCorroborated":  false,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "blockers":  [
+                     "Windows GPU Engine counter failure: The data in one of the performance counter samples is not valid. View the Status property for each PerformanceCounterSample object to make sure it contains valid data.",
+                     "Godot process-specific GPU engine proof incomplete"
+                 ],
+    "limitations":  [
+                        "Source geometry and a native PNG require independent visual inspection",
+                        "GPU 3D PID counters plus NVIDIA Vulkan log are corroboration, not independent Windows LUID mapping"
+                    ]
+}

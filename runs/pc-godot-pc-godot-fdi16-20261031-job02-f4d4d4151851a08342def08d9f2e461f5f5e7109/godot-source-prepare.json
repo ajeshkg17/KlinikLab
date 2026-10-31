@@ -1,0 +1,18 @@
+﻿{
+    "schemaVersion":  1,
+    "kind":  "SR1C Godot clinical source PREPARED (not native rendered)",
+    "status":  "SOURCE_EXPORTED_GODOT_PROJECT_READY_NOT_RENDERED",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotEditorVersionConfirmedOnThisRun":  false,
+    "nativeScreenshotReviewed":  false,
+    "processSpecificGpuVerified":  false,
+    "questVerified":  false,
+    "fullKlinikLabApplicationMigrated":  false,
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job02-f4d4d41518\\Project",
+    "requestedGodotMethod":  "forward_plus",
+    "requestedGodotDriver":  "vulkan",
+    "sourceTrianglesBefore":  14856,
+    "sourceTrianglesAfter":  14936,
+    "screenshotDirectory":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-fdi16-20261031-job02-f4d4d41518\\Captures",
+    "sourceManifestSHA256":  "28a70e0addaf28714c5881412f0333024c1adb680ab6ca7e51d2a9665b6e43ae"
+}
