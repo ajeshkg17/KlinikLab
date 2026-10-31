@@ -13,6 +13,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {validateGodotJob,INTEGRATION_BRANCH,RESULT_BRANCH,JOB_REF} from './godot-job-core.mjs';
 import {cleanWindowsPowerShellEnv} from './godot-powershell-environment.mjs';
+import {parseGodotJson,jsonWithoutBom} from './godot-json.mjs';
 
 const REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabGodotWorker');
@@ -39,7 +40,10 @@ async function initialize(){
  catch{git(['clone','--filter=blob:none','--no-checkout',REMOTE,REPO],ROOT)}
  if(git(['remote','get-url','origin'])!==REMOTE)throw Error('Unexpected Godot watcher Git remote');
 }
-async function readLedger(){try{return JSON.parse(await fs.readFile(LEDGER,'utf8'))}catch(e){if(e.code==='ENOENT')return {completed:{}};throw e}}
+async function readLedger(){
+ try{return parseGodotJson(await fs.readFile(LEDGER,'utf8'),'Godot worker ledger')}
+ catch(e){if(e.code==='ENOENT')return {completed:{}};throw e}
+}
 async function saveLedger(s){const tmp=LEDGER+'.tmp';await fs.writeFile(tmp,JSON.stringify(s,null,2));await fs.rename(tmp,LEDGER)}
 async function heartbeat(status,id=null,other={}){
  await fs.mkdir(ROOT,{recursive:true});
@@ -72,7 +76,7 @@ async function permission(){
 async function currentJob(){
  git(['fetch','origin',INTEGRATION_BRANCH]);
  const head=git(['rev-parse','FETCH_HEAD']);
- const j=validateGodotJob(JSON.parse(git(['show','FETCH_HEAD:'+JOB_REF])));
+ const j=validateGodotJob(parseGodotJson(git(['show','FETCH_HEAD:'+JOB_REF]),'GitHub Godot job'));
  git(['cat-file','-e',j.commit+'^{commit}']);
  git(['merge-base','--is-ancestor',j.commit,head]);
  return j;
@@ -162,7 +166,14 @@ async function execute(j){
  await fs.mkdir(run,{recursive:true});
  const capture=path.join(run,'Captures');
  await fs.mkdir(capture,{recursive:true});
- const native=await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8').then(JSON.parse,()=>null);
+ let native=null;
+ let nativeParseError=null;
+ try{
+  native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),
+   'original Windows PowerShell Godot owner-PC result');
+ }catch(e){
+  nativeParseError=String(e.message);
+ }
  const result={
   powerShellChildEnvironment:{inheritedPSModulePathRemoved:true,hashCmdletPreflightRequired:true},
   jobId:j.jobId,sourceGitSHA:j.commit,watcherSuite:j.suite,
@@ -176,12 +187,12 @@ async function execute(j){
   headlessDummyRendererAllowed:false,
   imageIndependentPixelReviewAccepted:false,
   overallStatus:'NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_AND_GPU_REVIEW',
-  errors:[preparationError,captureError].filter(Boolean),
-  blockers:native?.blockers||['Native Windows evidence collector did not return its JSON report']
+  errors:[preparationError,captureError,nativeParseError].filter(Boolean),
+  blockers:native?.blockers||[nativeParseError||'Native Windows evidence collector did not return its JSON report']
  };
  if(!native?.nativeImagePresent||!native?.nativeSourceSubmissionVerified||!native?.godotProcessGPUCorroborated)
   result.overallStatus='EVIDENCE_INCOMPLETE';
- await fs.writeFile(path.join(capture,'godot-job-result.json'),JSON.stringify(result,null,2)+'\n');
+ await fs.writeFile(path.join(capture,'godot-job-result.json'),jsonWithoutBom(result));
  try{git(['worktree','remove','--force',worktree]);}
  catch(e){await fs.writeFile(path.join(capture,'worktree-cleanup-warning.txt'),String(e.message)+'\n')}
  return {run,result};
@@ -209,7 +220,7 @@ async function publish(j,run,result){
   ['godot-native-stderr.log',path.join(capture,'godot-native-stderr.log')]
  ];
  if(result.imageExists){
-  const native=JSON.parse(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'));
+  const native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),'published original owner-PC JSON');
   const name=native.nativeScreenshotFile;
   if(!/^godot-native-fdi16-[0-9]+\.png$/.test(name||''))throw Error('Unsupported original native PNG name');
   selected.push(['godot-native-fdi16.png',path.join(capture,name)]);
