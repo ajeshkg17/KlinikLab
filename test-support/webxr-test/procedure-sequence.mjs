@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import {mkdir,readFile,rename,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
+import {alignRayQuaternion,translationCorrection,DOWN} from './procedure-ray.mjs';
 
 export const STEPS=Object.freeze([
  ['01-select-fdi16.png','Select FDI 16 in active tooth preparation'],
@@ -99,23 +100,55 @@ export async function runProcedureCapture({page,captureXR,result,out,config}){
  await take(0);
  await page.evaluate(()=>{window.kliniklab.scene.xrFdiEvidence=true});
  const before=await take(1);
+ // XRFrame.getPose may ONLY be sampled in an active XR animation callback.
+ // The previous waitForFunction read scene.latestFrame later and therefore
+ // could produce null poses even with a correctly positioned controller.
+ // Additionally, targetRaySpace may be offset/rotated from IWER controller
+ // pose; measure it, do not assume quaternion [-sqrt(.5),0,0,sqrt(.5)].
  const aim=await page.evaluate(()=>{
-  const app=window.kliniklab,lab=app.volLab,p=app.xrPrep;
-  const local=[.08,lab.solid.height(.08,-.08)+.02,-.08];
-  const world=p.modelToWorld(local),origin=[world[0],world[1]+.36,world[2]];
-  const c=window.__xrTestDevice.controllers.right;
-  c.connected=true;c.position.set(...origin);
-  c.quaternion.set(-Math.SQRT1_2,0,0,Math.SQRT1_2);
-  app.scene.xrFdiEvidence=false;
-  return {local,world,origin};
+  const a=window.kliniklab,p=a.xrPrep,solid=a.volLab.solid;
+  const local=[.08,solid.height(.08,-.08)-.065,-.08];
+  const world=p.modelToWorld(local),origin=[world[0],world[1]+.29,world[2]];
+  const controller=window.__xrTestDevice.controllers.right;
+  controller.connected=true;
+  controller.position.set(...origin);controller.quaternion.set(0,0,0,1);
+  a.scene.xrFdiEvidence=false;
+  return {local,world,origin,originalPose:{quaternion:[0,0,0,1],position:origin}};
  });
- manifest.aim=aim;
- await page.waitForFunction(()=>{
-  const sc=window.kliniklab.scene,frame=sc.latestFrame;
-  const source=[...(frame?.session?.inputSources||[])].find(s=>s.handedness==='right');
-  const ray=source&&sc.xrPrep.rayForFrame(frame,source);
-  return !!ray&&!!sc.xrPrep.traceSurface(ray.o,ray.d);
- },null,{timeout:18000});
+ const liveRay=()=>page.evaluate(()=>new Promise((resolve,reject)=>{
+   const scene=window.kliniklab.scene,session=scene.xrSession;
+   if(!session)return reject(Error('No active XR session for targetRaySpace'));
+   session.requestAnimationFrame((_time,frame)=>{
+     try{
+       const source=[...frame.session.inputSources].find(s=>s.handedness==='right'&&s.targetRaySpace);
+       if(!source)return reject(Error('Tracked right targetRaySpace not connected'));
+       const ray=scene.xrPrep.rayForFrame(frame,source);
+       if(!ray)return reject(Error('Missing ray pose in active XRFrame'));
+       const hit=scene.xrPrep.traceSurface(ray.o,ray.d);
+       const obstacle=scene.getRayHit(ray.o,ray.d);
+       resolve({origin:ray.o,direction:ray.d,
+        hit:hit?{model:hit.p,world:hit.world,distance:hit.distance}:null,
+        obstacle:obstacle?{key:obstacle.key,distance:obstacle.distance}:null,
+        xrFrames:scene.xrVisualDiagnostics.frames});
+     }catch(error){reject(Error('Active XRFrame probe failed: '+error.message))}
+   });
+ }));
+ const firstRay=await liveRay();
+ const correctedQuaternion=alignRayQuaternion(firstRay.direction,[0,0,0,1],DOWN);
+ await page.evaluate(q=>window.__xrTestDevice.controllers.right.quaternion.set(...q),correctedQuaternion);
+ const rotatedRay=await liveRay();
+ const delta=translationCorrection(rotatedRay.origin,aim.origin);
+ await page.evaluate(delta=>{
+   const c=window.__xrTestDevice.controllers.right;
+   c.position.set(c.position.x+delta[0],c.position.y+delta[1],c.position.z+delta[2]);
+ },delta);
+ const finalRay=await liveRay();
+ manifest.aim={...aim,firstRay,rotatedRay,finalRay,correctedQuaternion,delta,
+  method:'calibrated from XR targetRaySpace measured inside valid XRFrame'};
+ assert(finalRay.hit,'Right-hand target ray still misses FDI 16 surface after calibrated alignment: '+JSON.stringify(manifest.aim));
+ assert(!finalRay.obstacle||finalRay.obstacle.distance>=finalRay.hit.distance-.025,
+   'A nearer GUI object blocks the actual procedure ray: '+JSON.stringify(manifest.aim));
+ assert(finalRay.direction[1]<-.93,'Aligned ray not pointing down to crown');
  await take(2);
  const prior=await state();
  await page.evaluate(()=>window.__xrTestDevice.controllers.right.updateButtonValue('trigger',1));
