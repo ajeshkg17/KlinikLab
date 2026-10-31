@@ -58,7 +58,7 @@ def mesh_actor(mesh, name, y_offset):
     component = actor.get_component_by_class(unreal.StaticMeshComponent)
     require(component is not None, 'No native StaticMeshComponent: ' + name)
     component.set_static_mesh(mesh)
-    require(component.get_static_mesh() is not None, 'Native mesh binding failed: ' + name)
+    require(component.get_editor_property('static_mesh') is not None, 'Native mesh binding failed: ' + name)
     return actor
 
 def native_text(name, txt, x, y, z):
@@ -66,8 +66,8 @@ def native_text(name, txt, x, y, z):
     comp = actor.get_component_by_class(unreal.TextRenderComponent)
     require(comp is not None, 'TextRender component absent: ' + name)
     comp.set_text(txt)
-    comp.set_editor_property('world_size', 12.0)
-    comp.set_editor_property('horizontal_alignment', unreal.HorizTextAligment.EHTA_CENTER)
+    comp.set_world_size(12.0)
+    comp.set_horizontal_alignment(unreal.HorizTextAligment.EHTA_CENTER)
     return actor
 
 def point_light(name, xyz, intensity):
