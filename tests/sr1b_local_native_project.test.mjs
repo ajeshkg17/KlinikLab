@@ -95,6 +95,40 @@ test('Unreal build script parses as normal Python without importing unavailable 
  if(p.error?.code==='ENOENT'){t.skip('Python not found on this CI host');return}
  assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
 });
+test('Five Unreal imported tissue assets form distinct attached clinical tooth assemblies with per-section parity',()=>{
+ for(const token of [
+  'from sr1b_section_contract import MATERIALS, validate_sections',
+  'unreal.StaticMeshActor',
+  'attach_to_actor(',
+  'unreal.AttachmentRule.KEEP_WORLD',
+  'get_attach_parent_actor() == root',
+  'get_attached_actors()',
+  "require('enamel' in sections",
+  "report['actorHierarchy']",
+  "report['importedMaterialSections']",
+  "manifest['sceneStates']['before']['byMaterial']",
+  "manifest['sceneStates']['after']['byMaterial']",
+  "report['importedTrianglesLOD0']",
+  "sum(row['triangleCount'] for row in before_rows.values())",
+  'get_editor_property(\'static_materials\')',
+  "get_editor_property('material_interface')"
+ ])assert(importer.includes(token),token);
+ assert(!importer.includes('require(len(meshes) == 1'),'must support real UE multi-object OBJ import');
+ assert(!importer.includes('merge_static_mesh_actors'),'merging without verified material preservation is not allowed');
+ assert(runner.includes('KLINIKLAB_SR1B_SCRIPT_DIR'));
+ assert(runner.includes('Missing native section uasset'));
+ assert(runner.includes('Aggregate native LOD0 triangle parity failed'));
+ assert(runner.split('\\n').length<300,'PowerShell duplicate body detected');
+ assert.equal((runner.match(/^if\(\$Mode -eq 'Collect'\)/gm)||[]).length,1);
+});
+test('Pure native tissue-section contract exercises actual before/after aggregate counts and fails on swapped or missing materials',t=>{
+ const cmd=process.platform==='win32'?'python':'python3';
+ const p=spawnSync(cmd,[path.join(root,'tests/sr1b_section_contract_test.py')],
+  {encoding:'utf8',timeout:20000});
+ if(p.error?.code==='ENOENT'){t.skip('Python not found on this CI host');return}
+ assert.equal(p.status,0,p.stderr||p.stdout||String(p.error));
+});
+
 test('PowerShell clinical collector parse check on systems equipped with PowerShell',t=>{
  const script=path.join(root,'visual-qa/sr1b-run-local-kliniklab.ps1').replace(/'/g,"''");
  const command=`$null=$tokens=$errors=$null; [System.Management.Automation.Language.Parser]::ParseFile('${script}',[ref]$tokens,[ref]$errors)|Out-Null; if($errors.Count -gt 0){$errors|ForEach-Object {Write-Error $_.Message};exit 2}`;
