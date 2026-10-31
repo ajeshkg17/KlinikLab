@@ -1,3 +1,41 @@
+## NEW binding owner instruction (31 October 2026): background-only Godot job03, no foreground activation
+
+**Highest-priority replacement for all F12/game-window instructions further down this historical document.** User has prohibited any Godot Project Manager, editor, or game coming to the active desktop foreground. The active GitHub request is **`pc-godot-fdi16-20261031-job03`**, schema **3**, source pinned **`f4d4d4151851a08342def08d9f2e461f5f5e7109`**, with `backgroundContract=private-winsta0-vulkan-autocapture-no-foreground` and `capture=native-background-before-after`. A prior schema-v2 watcher **rejects** this job. **Job01** is published EVIDENCE_INCOMPLETE and **job02** has owner-PC local prepared evidence with no accepted render; do not alter, delete, reuse, or rerender either ID. The existing XR watcher and XR queue are untouched.
+
+**Actual technique:** The dedicated PC watcher uses `visual-qa/sr1c-private-desktop.ps1` to create a newly named **private WinSta0 desktop** via Windows `CreateDesktopW`, then native `CreateProcessW` with `STARTUPINFO.lpDesktop` pointing exclusively to that new desktop, plus `SW_SHOWNOACTIVATE`. **It never calls SwitchDesktop, SetForegroundWindow, ShowWindow on the user's active desktop, SendKeys, or F12.** The Godot binary uses `--rendering-method forward_plus --rendering-driver vulkan` and a fixed approved `--script res://sr1c-godot-background-capture.gd`. It does **not** use Godot `--headless` or a dummy renderer; those disable GPU rendering. The Godot SceneTree autonomously loads original `main.tscn`, checks original source five-tissue 14,856/14,936 triangle parity, registers an additional off-screen output to prevent the render loop being skipped, waits until `RenderingServer.frame_post_draw`, reads the original GPU viewport texture and saves an original numbered PNG. The PC collector additionally requires the native Godot renderer to report Vulkan Forward+ plus NVIDIA RTX 5060 and sufficient nonzero **same-Godot-PID** GPU Engine 3D counter samples. Missing/private-desktop-unavailable GPU evidence or no image remains `EVIDENCE_INCOMPLETE`; no Linux/headless fallback, no independent pixel acceptance without examining original bytes. Private desktop GPU feasibility must still be confirmed by actual owner PC results, not CI.
+
+**PC run (PowerShell 7, interactive login, but no application activation):**
+
+~~~powershell
+$ErrorActionPreference = 'Stop'
+$repo = 'C:\Users\ajesh\OneDrive\study and learn\coworker\KlinikLab'
+$watcherSha = '<FRESH_EXACT_INTEGRATION_SHA_FROM_CHAT>'
+git -C $repo fetch origin integration/single-chat-validation-2026-10-30
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+$stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+$watcherDir = "C:\klab-godot-watcher-$($watcherSha.Substring(0,8))-$stamp"
+git -C $repo worktree add --detach $watcherDir $watcherSha
+if ($LASTEXITCODE -ne 0) { throw 'Watcher worktree failed' }
+# Preserve your correctly configured installed Godot 4.7.2 GUI .exe path:
+if (-not (Test-Path -LiteralPath $env:KLINIKLAB_GODOT_EXE)) {
+  throw 'Set KLINIKLAB_GODOT_EXE to the full installed Godot 4.7.2 GUI .exe path'
+}
+Push-Location $watcherDir
+try {
+  node --test .\tests\sr1c_godot_private_desktop.test.mjs
+  if ($LASTEXITCODE -ne 0) { throw 'No-foreground contract regression failed' }
+  node .\visual-qa\godot-worker.mjs --validate
+  node .\visual-qa\godot-worker.mjs --once
+}
+finally { Pop-Location }
+Get-Content "$env:LOCALAPPDATA\KlinikLabGodotWorker\godot-heartbeat.json" -Raw
+Get-Content "$env:LOCALAPPDATA\KlinikLabGodotWorker\godot-ledger.json" -Raw
+~~~
+
+The Godot private process runs without activating the user's visible desktop; **no manual F12, opening Godot editor/Project Manager or mouse action is needed**. The result is published only if the PC watcher actually executes; check `visual-feedback/GODOT_PC_LATEST.md` and the new job03 immutable `runs/pc-godot-...` path. Original GUI screenshot and process-specific RTX 5060 verification are **not yet claimed**. Do not advance Quest streaming until native pixel and GPU evidence pass.
+
+---
+
 > **31 October 2026 job02 recovery (NEW):** Owner-PC job01 `pc-godot-fdi16-20261031-job01` is already **PUBLISHED EVIDENCE_INCOMPLETE** at [its immutable result](https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/runs/pc-godot-pc-godot-fdi16-20261031-job01-f4d4d4151851a08342def08d9f2e461f5f5e7109/godot-job-result.json). Its manifest successfully retained source exact SHA `f4d4d4151851a08342def08d9f2e461f5f5e7109` and before/after **14,856/14,936** original triangles, but **did not create a native Godot project, image or GPU evidence**: WinPS 5.1 child unexpectedly could not resolve `Get-FileHash`. **Root cause:** PowerShell 7.6.5 -> Node -> Windows PowerShell 5.1 inherits PS7 `PSModulePath`; shared `Microsoft.PowerShell.Utility` resolves to incompatible version, suppressing cmdlet autoload. Microsoft [documents this exact intermediary-process problem](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath). The dedicated watcher now removes inherited `PSModulePath` **only in the launched Windows PowerShell child**, checks actual WinPS `Get-FileHash` against Node SHA256 *before starting the job*, then launches both known `-STA -File` scripts with the same clean environment and retains child stderr in failure records. **Active replacement job** is `pc-godot-fdi16-20261031-job02`, **schema v2** requiring `launcherContract=winps51-clear-psmodulepath-sha256-preflight`, so an old schema-v1 watcher rejects the job instead of consuming it. The actual Godot source SHA remains **f4d4d4151851a08342def08d9f2e461f5f5e7109**. **You MUST launch the NEW watcher checkout/process after the fixing integration commit; do not reuse job01 or the older watcher process.** Windows CI tests both polluted PSModulePath -> cleaned real `-Command` and `-STA -File` hashing. Source/CI success is NOT native PC image acceptance. Quest remains later.
 
 # SR1C — bounded owner-PC Godot GitHub watcher
