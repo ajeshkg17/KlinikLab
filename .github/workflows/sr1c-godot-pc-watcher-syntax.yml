@@ -48,7 +48,7 @@ jobs:
           node --check visual-qa/godot-worker.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
-          node --test tests/sr1c_job05_pdh_orbit.test.mjs
+          node --test tests/sr1c_job05_pdh_orbit.test.mjs tests/sr1c_job06_clinic.test.mjs
           node --test tests/sr1c_windows_private_desktop_bom.test.mjs
       - name: Simulate inherited pwsh 7 PSModulePath and prove Windows PowerShell 5.1 SHA256 -File works
         shell: pwsh
