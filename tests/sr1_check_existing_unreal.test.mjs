@@ -41,7 +41,7 @@ test('Native screenshot and GPU identity remain explicitly unreviewed',()=>{
 test('Accept GUID EngineAssociation only with validated installed UE 5.8 and running engine executable',()=>{
  for(const token of [
   'projectEngineAssociationKind',
-  'REGISTERED_GUID',
+  'GUID_PENDING_ENGINE_CORRELATION',
   "Get-ItemProperty -Path 'HKCU:",
   'engineExecutableMatched',
   'GetFullPath($procExe)',
