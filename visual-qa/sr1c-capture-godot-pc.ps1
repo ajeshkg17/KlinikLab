@@ -109,7 +109,7 @@ try{
   $after=@($source.states.after.tissues.PSObject.Properties)
   $correct=($source.sourceGitSHA -eq $ExpectedSha -and
    $source.status -eq 'NATIVE_GODOT_SCENE_SUBMITTED_PENDING_PIXEL_AND_GPU' -and
-   $source.renderingMethod -eq 'gl_compatibility' -eq $false -and
+   $source.renderingMethod -eq 'forward_plus' -and $source.renderingDriver -eq 'vulkan' -and
    [int]$source.states.before.submittedTriangles -eq 14856 -and
    [int]$source.states.after.submittedTriangles -eq 14936 -and
    $before.Count -eq 5 -and $after.Count -eq 5)
