@@ -86,7 +86,8 @@ test('Private desktop Windows collector rejects absent PNG and missing or invali
  ])assert(powershell.includes(token),token);
  assert(!powershell.includes('SetForegroundWindow'));
  assert(!powershell.includes('SendKeys'));
- assert(!powershell.includes('F12'));
+ const executableLines=powershell.split('\n').filter(x=>!x.trimStart().startsWith('#')).join('\n');
+ assert(!executableLines.includes('F12'), 'No manual capture key in runnable code');
  assert(!powershell.includes('--headless'));
  assert(!watcher.includes("'sr1c-capture-godot-pc.ps1'"));
  assert(watcher.includes("'sr1c-capture-godot-background-pc.ps1'"));
