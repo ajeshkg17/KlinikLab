@@ -104,13 +104,13 @@ func _capture_once() -> void:
 		return
 	var midpoint: Vector3 = (lo + hi) * 0.5
 	var native_scene_mode: String = FileAccess.get_file_as_string("res://source/scene-mode.txt").strip_edges()
-	if native_scene_mode != "fdi16" and native_scene_mode != "clinic-overview":
+	if native_scene_mode not in ["fdi16", "clinic-overview", "clinic-cases"]:
 		_fail("Unapproved native Godot scene mode")
 		return
 	var clinic_workspace_count: int = 0
 	# Original source-derived meshes remain untouched. Clinic props are
 	# a separately identified educational migration preview, NOT the full app.
-	if native_scene_mode == "clinic-overview":
+	if native_scene_mode in ["clinic-overview", "clinic-cases"]:
 		var clinic_script: GDScript = load("res://sr1c-godot-clinic-overview.gd")
 		if clinic_script == null:
 			_fail("Required native KlinikLab clinic workspace script absent")
@@ -130,6 +130,18 @@ func _capture_once() -> void:
 					ui.text = "KlinikLab / Godot native clinic workspace / FDI 16"
 				elif ui is Label and ui.text.contains("BEFORE (left)"):
 					ui.text = "Case: restoration | Original FDI16 source | Before / simulated cut"
+	var workflow: CanvasLayer = null
+	if native_scene_mode == "clinic-cases":
+		var workflow_script: GDScript = load("res://sr1d-godot-case-workflow.gd")
+		if workflow_script == null:
+			_fail("Source-pinned native case/station script missing")
+			return
+		workflow = workflow_script.new()
+		scene.add_child(workflow)
+		var initial: Dictionary = workflow.call("evidence_state")
+		if not initial.get("valid", false) or int(initial.get("caseCount", 0)) != 6 or int(initial.get("stationCount", 0)) != 7:
+			_fail("Production native case/station parity failed")
+			return
 	# Original f4d4 source GUI footer still mentions the deprecated F12 mode.
 	# Change only this display text at runtime; original clinical OBJ stays SHA-pinned.
 	var overlay: CanvasLayer = scene.get_node_or_null("KL_FDI16_PlainTextOverlay")
@@ -148,11 +160,19 @@ func _capture_once() -> void:
 	var frontal_hash := ""
 	var angle_hash := ""
 	var last_frame_count := 0
+	var switched_case := false
 	while Time.get_ticks_msec() - start_msec < 42000:
 		await RenderingServer.frame_post_draw
 		last_frame_count += 1
 		var elapsed: float = float(Time.get_ticks_msec() - start_msec) / 1000.0
 		var progression: float = clampf(elapsed / 35.0, 0.0, 1.0)
+		# An actual native state transition in the same private-desktop process.
+		# FDI36's production *case metadata* is selected; no FDI16 geometry
+		# may be falsely labelled FDI36. UI remains interactive in normal GUI.
+		if workflow != null and elapsed >= 22.0 and not switched_case:
+			workflow.call("select_case", 1) # endodontic case FDI36
+			workflow.call("select_station", 4) # practical exercises
+			switched_case = true
 		var azimuth: float = deg_to_rad(42.0) * progression
 		var height: float = lerpf(initial_height, radius * 0.72, progression)
 		camera.global_position = midpoint + Vector3(sin(azimuth) * radius, height, cos(azimuth) * radius)
@@ -180,6 +200,24 @@ func _capture_once() -> void:
 	if duration_sec < 40.0 or duration_sec > 45.0:
 		_fail("Private GPU orbit outside 40-45s duration gate")
 		return
+	var native_workflow_state: Dictionary = {}
+	if workflow != null:
+		native_workflow_state = workflow.call("evidence_state")
+		if not switched_case or not native_workflow_state.get("valid", false) or \
+			native_workflow_state.get("selectedCaseId", "") != "endo" or \
+			native_workflow_state.get("selectedFDI", "") != "36" or \
+			native_workflow_state.get("selectedStationId", "") != "practical" or \
+			native_workflow_state.get("originalFDI16GeometryAvailable", true) or \
+			native_workflow_state.get("fullKlinikLabApplicationMigrated", true):
+			_fail("Native state transition did not preserve true FDI36 case/geometry limits")
+			return
+		var save_path: String = _capture_directory().path_join("godot-native-workflow-state.json")
+		var wf: FileAccess = FileAccess.open(save_path, FileAccess.WRITE)
+		if wf == null:
+			_fail("Native clinic workflow evidence write blocked")
+			return
+		wf.store_string(JSON.stringify(native_workflow_state, "\t") + "\n")
+		wf.close()
 	_write_background_result({
 		"status":"BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
 		"imageFile":frontal_file, "imageSHA256":frontal_hash,
@@ -194,6 +232,7 @@ func _capture_once() -> void:
 		"tissueSurfacesPerTooth":5,
 		"nativeSceneMode":native_scene_mode, "nativeClinicWorkspaceObjectCount":clinic_workspace_count,
 		"fullKlinikLabApplicationMigrated":false,
+		"nativeCaseWorkflowStateVerified":workflow != null and switched_case,
 		"pixelReviewed":false, "gpuProcessVerified":false,
 		"headlessUsed":false, "userDesktopActivationRequested":false
 	})

@@ -27,6 +27,13 @@ export function validateGodotJob(job){
    job.sceneMode!=='clinic-overview' ||
    job.capture!=='native-clinic-orbit-frontal-occlusal')
    throw Error('Unknown/unapproved native clinic migration mode');
+ }else if(job.schemaVersion===7){
+  if(job.telemetryContract!=='persistent-pdh-valid-rows-dxgi-luid-42s-orbit-v2' ||
+   !/^pc-godot-clinic-[a-z0-9-]{8,50}$/.test(job.jobId||'') ||
+   job.suite!=='sr1d-clinic-case-station-migration' ||
+   job.sceneMode!=='clinic-cases' ||
+   job.capture!=='native-clinic-case-switch-orbit')
+   throw Error('Unknown native clinical case migration mode');
  }else throw Error('Unsupported Godot job schema');
  return Object.freeze({...job});
 }

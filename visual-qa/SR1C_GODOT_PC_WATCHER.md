@@ -1,3 +1,13 @@
+## SR1D job07 — exact production six-case/seven-station native Godot milestone (1 November 2026)
+
+**Job06 remains immutable** with confirmed RTX process 3D attribution, **not** independent pixel or full application acceptance. New job `pc-godot-clinic-20261101-job07`, schema 7, from pinned production source `f4d4d4151851a08342def08d9f2e461f5f5e7109`. It uses the same never-switched WinSta0 Godot Vulkan process and persistent Windows PDH GPU counters, requiring three distinct matching RTX 5060 3D periods, and publishes frontal/angled new native PNG evidence.
+
+Job07 changes the *content and state*, not the host/network: the worker additionally builds SHA256-verified case/station metadata from the six CASES/seven STATIONS in production `app.js` using an isolated deterministic exporter. `sr1d-godot-case-workflow.gd` implements actual Godot case selector + station controls and a case16-to-case36 (endodontic/practical) transition during the local capture, recording original case and station IDs and verifying that unavailable FDI36 geometry is **not** replaced with a mislabeled FDI16. This is **still not the complete browser application**, a clinical assessment, or a physically tested Quest program. Missing case JSON, workflow changes, provenance or RTX GPU evidence fail closed.
+
+After integration CI passes, obtain a new detached **worker SHA** from the integration branch, with the original `KLINIKLAB_GODOT_EXE` pointing to installed Godot 4.7.2 GUI. Use `node --test tests/sr1d_godot_cases.test.mjs`, `node visual-qa/godot-worker.mjs --validate`, then `node visual-qa/godot-worker.mjs --once` from that new worker checkout. The worker handles unique source worktree, preparation, private-desktop render and publication. No automated Quest streaming, firewall or Tailscale/Funnel changes. Evidence is visible only if the actual PC worker executes and successfully publishes it.
+
+---
+
 ## LATEST job06 — invalid-PDH recovery + native clinic-workspace prototype (31 October 2026)
 
 Job05 is **EVIDENCE_INCOMPLETE**; do not rerun its ID or treat a separate post-render PDH probe as process attribution. Fresh queued job: **`pc-godot-clinic-20261031-job06`**, schema **6**, original production source SHA **`f4d4d4151851a08342def08d9f2e461f5f5e7109`**. The executing worker SHA is recorded separately. This job is **NOT a complete port** of the browser KlinikLab application: it renders a labelled native clinical room/tray/chair/workbench preview surrounding unchanged source FDI16 before/cut geometry.
