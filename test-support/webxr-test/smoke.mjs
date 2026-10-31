@@ -498,6 +498,26 @@ try{
  result.help.closing=closing;
  await captureXR('08-help-closed-after-close.png','Help panel closed by right-hand synthetic ray selection');
  result.checks.push('Right-hand close ray works; gripping cannot reopen help');
+ // The same view is intentionally reached after closing catalog. Identical
+ // pixels are a valid closed-baseline restoration, not a failed checkpoint.
+ // Capture independent, user-visible state before opening the catalog.
+ const closedSceneSnapshot=()=>page.evaluate(()=>{
+   const s=window.kliniklab.scene;
+   return {
+     helpOpen:!!s.xrGuide?.state?.open,
+     helpVisiblePanels:s.xrGuide.meshes.filter(m=>!m.hidden).length,
+     catalogOpen:!!s.xrCatalog.open,
+     catalogVisiblePanels:s.xrCatalog.panels.filter(m=>!m.hidden).length,
+     treatmentActive:!!s.xrPrep.active,
+     clinicalContextVisible:s.xrPrep.clinicalUI.filter(m=>!m.hidden).length,
+     patientVisible:(s.xrPatientMeshes||[]).filter(m=>!m.hidden).length,
+     toolOwners:s.xrTableTools.map(t=>[t.name,t.owner])
+   };
+ });
+ const closedBaselineAfterHelp=await closedSceneSnapshot();
+ assert.equal(closedBaselineAfterHelp.helpOpen,false);
+ assert.equal(closedBaselineAfterHelp.catalogOpen,false);
+ assert.equal(closedBaselineAfterHelp.catalogVisiblePanels,0);
 
  // Phase 4 catalog functional checks use synthetic tracked rays, with the
  // real IWER session and renderer running. This is not physical controller proof.
@@ -538,6 +558,18 @@ try{
  });
  result.catalog.return=catalogReturn;
  await captureXR('10-tool-catalog-closed.png','Phase 4 workspace after controlled return, reset and close');
+ const closedAfterCatalog=await closedSceneSnapshot();
+ assert.deepEqual(closedAfterCatalog,closedBaselineAfterHelp,
+   'Catalog close did not restore the same visible workspace as help close');
+ const helpClosedCapture=result.captureManifest.find(c=>c.file==='08-help-closed-after-close.png');
+ const catalogClosedCapture=result.captureManifest.find(c=>c.file==='10-tool-catalog-closed.png');
+ result.catalog.closedBaseline={
+   stateEqual:true,helpCloseFrame:helpClosedCapture?.captureFrame,
+   catalogCloseFrame:catalogClosedCapture?.captureFrame,
+   pixelsIdentical:!!helpClosedCapture&&helpClosedCapture.sha256===catalogClosedCapture?.sha256,
+   closedScene:closedAfterCatalog
+ };
+ result.checks.push('Catalog close restores the same visible workspace state as help close; identical pixels are expected');
  result.checks.push('Phase 4 controlled tray spawn, reset, close do not clone instruments');
  // Phase 7 diagnostic captures are locally retained by the owner-PC worker.
  // Keep the 10 required interaction captures unchanged until the worker's

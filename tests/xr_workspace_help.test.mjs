@@ -50,3 +50,12 @@ test('IWER button transitions await new matching XR event acknowledgements, neve
  assert.match(source,/await driveInput\('left','trigger',0\)/);
  assert.doesNotMatch(source,/page\.waitForTimeout\((?:120|300)\)/);
 });
+
+test('Phase9 catalog closed frame is independently checked against help-closed baseline',()=>{
+ const smoke=fs.readFileSync(new URL('../test-support/webxr-test/smoke.mjs',import.meta.url),'utf8');
+ assert(smoke.includes("const closedBaselineAfterHelp=await closedSceneSnapshot()"));
+ assert(smoke.includes("const closedAfterCatalog=await closedSceneSnapshot()"));
+ assert(smoke.includes('assert.deepEqual(closedAfterCatalog,closedBaselineAfterHelp'));
+ assert(smoke.includes("helpClosedCapture.sha256===catalogClosedCapture?.sha256"));
+ assert(smoke.includes('result.catalog.closedBaseline='));
+});
