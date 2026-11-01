@@ -8,7 +8,8 @@ extends RefCounted
 static func verified_path(source_path: String, expected_sha256: String) -> String:
 	if expected_sha256.length()!=64 or not (
 		source_path.begins_with("res://source/") or
-		source_path.begins_with("res://assets/cc0/3dassets-dental/")
+		source_path.begins_with("res://assets/cc0/3dassets-dental/") or
+		source_path.begins_with("res://assets/dundee/")
 	):
 		return ""
 	var rel := source_path.trim_prefix("res://")

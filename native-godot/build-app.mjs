@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  copy('native-godot/main-raw-sidecar.gd','main.gd');
  copy('visual-qa/godot-local-clinical/main.tscn','main.tscn');
  copy('native-godot/raw-source.gd','raw-source.gd');
@@ -105,6 +105,51 @@ try{
   optionalChair.godotSha256=compatible.convertedSha256;
   optionalChair.available=true;
  }
+ // First separately sourced tooth surface: Dundee mandibular left first molar, FDI 36.
+ // Verify the upstream Git blob identity before any conversion; keep original bytes.
+ const toothSource=path.join(root,'assets/dundee/mandibular_first_molar.glb');
+ const toothBytes=fs.readFileSync(toothSource);
+ const toothBlobSha=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+toothBytes.length+'\0'),toothBytes])).digest('hex');
+ const expectedToothBlob='73e9f3029d770c6b4052ebbaba708283de4c47fd';
+ if(toothBlobSha!==expectedToothBlob)throw Error('Dundee FDI36 source Git blob identity mismatch');
+ const toothDir=path.join(dest,'assets/dundee');
+ fs.mkdirSync(toothDir,{recursive:true});
+ const toothOriginalName='mandibular_first_molar.glb.source';
+ const toothOriginalPath=path.join(toothDir,toothOriginalName);
+ fs.writeFileSync(toothOriginalPath,toothBytes,{flag:'wx'});
+ const toothOriginalSha256=sha256(fs.readFileSync(toothOriginalPath));
+ if(toothOriginalSha256!==sha256(toothBytes))throw Error('Dundee FDI36 original byte copy changed');
+ const toothConvertedName='mandibular_first_molar-godot.glb';
+ const toothConvertedPath=path.join(toothDir,toothConvertedName);
+ run(path.join(root,'native-godot/decode-draco-tooth.mjs'),[
+  '--input='+toothOriginalPath,'--output='+toothConvertedPath,
+  '--decoder-js='+path.join(root,'assets/draco/draco_decoder_gltf.js'),
+  '--decoder-wasm='+path.join(root,'assets/draco/draco_decoder_gltf.wasm'),
+  '--expected-blob-sha='+expectedToothBlob
+ ]);
+ const toothConvertedSha256=sha256(fs.readFileSync(toothConvertedPath));
+ const toothConvertedSidecar=toothConvertedPath+'.source';
+ fs.copyFileSync(toothConvertedPath,toothConvertedSidecar,fs.constants.COPYFILE_EXCL);
+ if(sha256(fs.readFileSync(toothConvertedSidecar))!==toothConvertedSha256)throw Error('Dundee FDI36 converted raw sidecar checksum mismatch');
+ const toothManifest={
+  schemaVersion:1,sourceGitSHA:sha,caseId:'endo',fdi:'36',
+  sourceFile:'mandibular_first_molar.glb',runtimeFile:toothConvertedName,
+  originalSidecar:toothOriginalName,originalSha256:toothOriginalSha256,
+  convertedSidecar:'mandibular_first_molar-godot.glb.source',
+  originalGitBlobSha:expectedToothBlob,
+  upstreamRepository:'sameralseedbth-Dental/dental-3d-models',
+  upstreamCommit:'4f0ffb651998a4641ddf45c7632ea236cc164fcb',
+  upstreamPath:'mandibular_first_molar.glb',
+  upstreamSourceUrl:'https://github.com/sameralseedbth-Dental/dental-3d-models/blob/4f0ffb651998a4641ddf45c7632ea236cc164fcb/mandibular_first_molar.glb',
+  licenseSPDX:'CC-BY-4.0',
+  attribution:'3D tooth model © University of Dundee, School of Dentistry',
+  licenseUrl:'https://creativecommons.org/licenses/by/4.0/',
+  sourceCollectionUrl:'https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f',
+  convertedSha256:toothConvertedSha256,sourceGitBlobVerified:true,
+  surfaceOnly:true,internalTissuesProvided:false,texturePreserved:false,
+  clinicalAccuracyValidated:false,qualifiedAnatomyReviewPending:true,
+  role:'FDI36_STATIC_SURFACE_REFERENCE_NOT_EDITABLE_TISSUE_VOLUME'
+ };
  const clinicManifest={
   schemaVersion:1,kind:'REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY',
   sourceGitSHA:sha,licenseSPDX:'CC0-1.0',publisher:approved.packSource,
@@ -118,6 +163,7 @@ try{
  fs.writeFileSync(path.join(cc0Dest,'clinic-manifest.json'),JSON.stringify(clinicManifest,null,2)+'\n',{flag:'wx'});
  const exported=path.join(dest,'source');
  run(exportSource,['--output='+exported,'--expected-sha='+sha]);
+ fs.writeFileSync(path.join(exported,'tooth-fdi36-manifest.json'),JSON.stringify(toothManifest,null,2)+'\n',{flag:'wx'});
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
  run(path.join(root,'native-godot/export-volume.mjs'),
@@ -179,6 +225,12 @@ try{
   nativeCc0WholeClinicStaticEnvironment:true,
   nativeCc0InstrumentTrayProp:true,
   nativeCc0ChairOptionalAvailable:optionalChair.available,
+  nativeDundeeFDI36SurfaceReference:true,
+  nativeDundeeFDI36SourceGitBlobSHA:expectedToothBlob,
+  nativeDundeeFDI36OriginalSHA256:toothOriginalSha256,
+  nativeDundeeFDI36ConvertedSHA256:toothConvertedSha256,
+  nativeDundeeFDI36License:'CC-BY-4.0',
+  nativeDundeeFDI36SurfaceOnly:true,
   cataloguedSourceGLBs:54,requiredCC0GLBs:2,optionalRealChairGLBs:optionalChair.available?1:0,
   nativeCc0Hashes:caseAssets.map(x=>({name:x.name,sha256:x.sha256})),
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,

@@ -169,3 +169,12 @@ Owner-PC job11 verified source-specific FDI16 and CC0 imported GLB runtime plus 
 ## SR21 — Physical pixel-review remediation
 
 Original physical job12 showed correct CC0 clinic, six case workflows, FDI36 practical and real RTX5060 3D rendering, but revealed non-final UX: legacy source-only FDI16 overlay over the app, dark text, geometry visible through panels, small room and teeth overlapping the case notes. The native app now hides only that legacy overlay, displays high-contrast text on opaque side panels, scrolls top tabs, updates current FDI title, and reframes both source clinic and practical teeth. No source 3D geometry, hashes, patient cases or saved clinical progress were replaced. The new Godot headless UI smoke test is only geometric; new original Windows pixels and independent visual review are necessary before UX acceptance. Owner-PC jobs09–12 remain immutable.
+
+
+## SR40 — source-verified FDI 36 tooth reference
+
+The native endodontic practical for the original endo case (FDI 36) now mounts a separate University of Dundee mandibular-left-first-molar surface reference. Its original GLB is byte-verified against upstream Git blob 73e9f3029d770c6b4052ebbaba708283de4c47fd at source commit 4f0ffb651998a4641ddf45c7632ea236cc164fcb. A build-time Draco decoder creates a Godot-importable GLB; geometry, indices and node transforms are retained, while the embedded WebP texture is replaced with a neutral material. Both original and converted binaries are carried as SHA-256-verified raw sidecars.
+
+This surface mesh is not the synthetic editable tooth volume: it contains no internal tissue/canal segmentation and is not patient-specific or clinically calibrated. The UI retains University of Dundee attribution and CC BY 4.0. If either source sidecar or the converted resource is absent or corrupt, a clearly labelled FDI 36 missing-asset fallback appears. The reference is only visible in the FDI 36 endodontic practical station; other FDI cases and their source task definitions remain independent.
+
+Headless CI validates exact source identity, Draco conversion/import, runtime mesh instantiation, FDI station gating, fallback labelling, and the six-case source mapping. It does not establish visual/GPU placement, clinical anatomy review, browser parity, or workstation/Quest acceptance.

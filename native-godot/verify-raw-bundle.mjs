@@ -47,6 +47,18 @@ if(original.sourceGitSHA!==sha||cc0.sourceGitSHA!==sha||
  throw Error('Source-derived raw sidecar provenance/license mismatch');
 for(const file of ['fdi16-before.obj','fdi16-after-cut.obj','kliniklab-fdi16.mtl'])
  validateFile(sidecar+'source/'+file,original.originals?.[file]);
+const tooth=asJson(sidecar+'source/tooth-fdi36-manifest.json');
+if(tooth.sourceGitSHA!==sha||tooth.caseId!=='endo'||tooth.fdi!=='36'||
+   tooth.originalGitBlobSha!=='73e9f3029d770c6b4052ebbaba708283de4c47fd'||
+   tooth.licenseSPDX!=='CC-BY-4.0'||tooth.surfaceOnly!==true||
+   tooth.internalTissuesProvided!==false||tooth.clinicalAccuracyValidated!==false)
+ throw Error('FDI36 Dundee source/attribution/surface-only manifest mismatch');
+const toothSidecar=sidecar+'assets/dundee/mandibular_first_molar.glb.source';
+const toothBytes=validateFile(toothSidecar,tooth.originalSha256);
+if(toothBytes<1000)throw Error('FDI36 original source sidecar is implausibly small');
+const toothConvertedSidecar=sidecar+'assets/dundee/mandibular_first_molar-godot.glb.source';
+const toothConvertedBytes=validateFile(toothConvertedSidecar,tooth.convertedSha256);
+if(toothConvertedBytes<1000)throw Error('FDI36 converted source sidecar is implausibly small');
 const roots=[];
 for(const row of cc0.assets){
  if(!['whole-clinic-starter-v1.glb','instrument-tray-v1.glb'].includes(row.name)||
@@ -64,5 +76,5 @@ const archivedReadme=read('README-FIRST.txt').toString('utf8');
 if(!archivedReadme.includes('verified-raw-source'))
  throw Error('Windows portability instructions omit required verified source sidecar');
 console.log('SR16_WINDOWS_EXPORTED_RAW_ASSETS_SHA_AND_PCK_PARITY_PASS source_sha='+sha+
- ' OBJ/MTL original=3 CC0 source+dequantized=4 '+roots.join(' ; ')+
+ ' OBJ/MTL original=3 CC0 source+dequantized=4 Dundee FDI36 original=1 '+roots.join(' ; ')+
  ' clinical accuracy NOT validated; RTX/PC pixels NOT verified');

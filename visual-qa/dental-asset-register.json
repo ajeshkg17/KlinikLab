@@ -34,6 +34,45 @@
         "qualifiedReviewer": null
       },
       "status": "CANDIDATE — NOT APPROVED OR USED IN UE"
+    },
+    {
+      "id": "dundee-mandibular-left-first-molar-fdi36",
+      "assetType": "surface-only tooth model",
+      "title": "Mandibular First Molar (Left)",
+      "creator": "University of Dundee, School of Dentistry",
+      "sourceUrl": "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6",
+      "repositoryMirrorUrl": "https://github.com/sameralseedbth-Dental/dental-3d-models",
+      "sourceRepositoryCommit": "4f0ffb651998a4641ddf45c7632ea236cc164fcb",
+      "sourceGitBlobSha": "73e9f3029d770c6b4052ebbaba708283de4c47fd",
+      "sourceLicenseLabel": "Creative Commons Attribution (CC BY 4.0), as recorded in the repository asset notice",
+      "exactLicenseVersionVerified": true,
+      "originalDownloadSha256": null,
+      "ueImportedFileSha256": null,
+      "redistributionApprovedForThisDerivative": true,
+      "attribution": "3D tooth model © University of Dundee, School of Dentistry; retain CC BY 4.0 attribution and source link",
+      "transformations": "Original GLB mirrored byte-for-byte; native Godot conversion decodes Draco geometry, removes embedded WebP texture and applies a neutral material; original bytes retained as SHA-verified sidecar",
+      "geometry": {
+        "location": "permanent mandibular left first molar, FDI 36",
+        "sourceTriangleCountApprox": 980,
+        "metersPerUnit": null,
+        "scaleValidated": false
+      },
+      "material": {
+        "textureProvenanceVerified": false,
+        "availablePBRMaps": [],
+        "photorealQualityAccepted": false
+      },
+      "clinical": {
+        "status": "NOT_REVIEWED",
+        "qualifiedReviewer": null
+      },
+      "status": "SOURCE-VERIFIED FOR ATTRIBUTED STATIC RUNTIME REFERENCE ONLY — NOT CLINICALLY APPROVED",
+      "runtime": {
+        "nativeGodot": "FDI36 endodontic practical station only",
+        "surfaceOnly": true,
+        "internalTissuesProvided": false,
+        "clinicalAccuracyValidated": false
+      }
     }
   ],
   "requirements": [

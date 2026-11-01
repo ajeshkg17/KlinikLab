@@ -58,6 +58,7 @@ var _practical_feedback: Dictionary = {}
 var _boot_error := ""
 var _volume: Node3D
 var _volumes: Dictionary = {}
+var _tooth36_reference: Node3D
 var _cut_position := Vector3(0.0, 1.01, 0.0)
 var _cut_radius := 0.22
 var _direct_bur_mode := false
@@ -787,6 +788,7 @@ func _show_case_geometry() -> void:
 		editor.visible = str(id) == CASE_IDS[_case_index]
 	if _atlas != null:
 		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
+	_update_fdi36_reference_visibility()
 
 func _set_environment_camera() -> void:
 	if _scene == null:
@@ -878,6 +880,7 @@ func _switch_view(view: String) -> void:
 	if _view == "language" and view != "language":
 		_language_save_draft()
 	_view = view
+	_update_fdi36_reference_visibility()
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
@@ -956,6 +959,33 @@ func _refresh() -> void:
 		_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
+
+func _ensure_fdi36_reference() -> void:
+	if _tooth36_reference != null or _scene == null:
+		return
+	var script: GDScript = load("res://tooth36-reference.gd")
+	if script == null:
+		var fallback := Node3D.new()
+		fallback.name = "KL_DUNDEE_FDI36_SOURCE_SURFACE_REFERENCE"
+		var label := Label3D.new()
+		label.text = "FDI 36 source surface asset unavailable"
+		fallback.add_child(label)
+		_scene.add_child(fallback)
+		_tooth36_reference = fallback
+		return
+	var reference: Node3D = script.new()
+	if not bool(reference.call("configure",str(_content.get("sourceGitSHA","")))):
+		push_warning("FDI36 source reference loader rejected: "+str(reference.call("summary")))
+		_scene.add_child(reference)
+		_tooth36_reference = reference
+		return
+	_scene.add_child(reference)
+	_tooth36_reference = reference
+
+func _update_fdi36_reference_visibility() -> void:
+	if _tooth36_reference == null:
+		return
+	_tooth36_reference.visible = _view == "clinic" and _station_index == 4 and _case_index == 1
 
 func _show_station() -> void:
 	var station: String = str(STATION_IDS[_station_index])
@@ -1174,6 +1204,12 @@ func _save_draft() -> void:
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
+	if _case_index == 1:
+		_ensure_fdi36_reference()
+		_update_fdi36_reference_visibility()
+		var tooth_report: Dictionary = _tooth36_reference.call("summary") if _tooth36_reference != null else {}
+		var tooth_status := "source surface mesh loaded" if bool(tooth_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
+		_page.add_child(_heading("FDI 36 source reference: %s · University of Dundee, School of Dentistry · CC BY 4.0. External surface mesh only; internal tissues/canals are not supplied. Editable synthetic working volume remains separate." % tooth_status,13))
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
 	_page.add_child(_heading("Original case-specific practical tasks. All six cases have distinct local editable synthetic volume states when source checks pass; these are NOT validated operative simulations.", 14))
