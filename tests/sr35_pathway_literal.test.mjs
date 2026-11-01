@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {extractClinicalPathwayLiteral} from '../native-godot/pathway-literal.mjs';
-const obj='const data={molar:{chief:"fixture"}}';
+const obj='const data={\n molar:{chief:"fixture"}\n}';
 const bounded=(seam)=>'const PREAMBLE = true;\n'+obj+seam+'const STAGE=1;\n';
 test('clinical literal remains bounded with LF and CRLF and whitespace at closing seam',()=>{
  for (const seam of [';\n',';\r\n',';   \n  ',';\r\n\t']) {
