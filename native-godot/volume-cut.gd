@@ -242,7 +242,7 @@ func ray_hit(world_origin: Vector3, world_direction: Vector3) -> Dictionary:
 	# The mesh is displayed in local -Z while source grid uses +Z.
 	if not world_origin.is_finite() or not world_direction.is_finite() or world_direction.length_squared()<0.5 or world_direction.length_squared()>1.5:
 		return {"found":false}
-	if _mesh_instance == null or _mesh_instance.mesh == null or not visible:
+	if not is_inside_tree() or _mesh_instance == null or _mesh_instance.mesh == null or not visible:
 		return {"found":false}
 	var origin := to_local(world_origin)
 	var end := to_local(world_origin + world_direction.normalized()*50.0)
