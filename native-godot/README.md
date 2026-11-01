@@ -152,3 +152,11 @@ The new application-only `main-raw-sidecar.gd` retains all original FDI16 tissue
 **Portable extraction:** extract the ZIP in full. Keep `KlinikLab.exe`, `verified-raw-source`, both SHA sum files and the manifest in the **same extracted directory**; never launch the EXE alone or delete the sidecar. These assets contain fictional educational geometry only; this is not clinician validation or a real patient image. Source-only legacy Godot scene and historical job07/job08/failed job09 evidence remain immutable.
 
 This repair needs a **new** exact-SHA Windows GitHub Actions export and **new unique job10** (not job09 rerun) for actual owner-PC pixels and RTX PID/DXGI/PDH validation. A passing source or GitHub export check does not establish physical Windows runtime or GPU pixel acceptance.
+
+## SR17 — exported Windows EXE capture hook (job10 forensic repair)
+
+Immutable owner-PC job10 (pc-godot-exported-20261101-cc0-job10-525457) verified original OBJ and CC0 3D scene imports and observed 34 positive RTX 5060 same-PID/LUID 3D periods. However, the application returned no capture JSON or original PNGs. Its standalone executable loaded the normal app.tscn despite the previous '--script res://exported-app-capture.gd' launcher option. Independent image/RTX acceptance therefore remains BLOCKED; never rerun job10.
+
+The new capture path is a strictly opt-in child Node in the real app.tscn. The approved private WinSta0 watcher launches the full exported KlinikLab.exe with the Godot user argument '-- --kliniklab-exported-pc-capture'. On actual startup, app.gd reads OS.get_cmdline_user_args() and only for this explicit flag loads the compiled exported-app-capture-node.gd. The child checks the pinned source SHA, native Vulkan renderer, actual CC0 imported mesh, all six FDI/treatment workflows, and FDI36 practical state, and saves native viewport PNGs plus a local in-app report. Normal learner launches neither capture nor upload data; no foreground activation is allowed.
+
+The Godot 4.7.2 CI checks the new Node script and source wiring but is headless, with no claim of Windows pixels or RTX process attribution. Acceptance requires a new exact-SHA export and a single unique job11, with original watcher-generated screenshots and independent image/GPU review. Preserve job07/job08/job09/job10 immutable archives.
