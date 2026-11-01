@@ -58,6 +58,13 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  const capture=read('visual-qa/sr1x-capture-native-exported-app-pc.ps1');
  assert.match(capture,/process3DPositiveRtx5060DistinctPeriods/);
  assert.match(capture,/gpuAdapterLuidMatchedToNvidia/);
+ const gpuDecision=capture.indexOf('$script:report.godotProcessGPUCorroborated=$gpuProcessConfirmed');
+ const nativeWait=capture.indexOf('$nativeFile=Join-Path $capture');
+ assert.ok(gpuDecision>0&&nativeWait>gpuDecision,'GPU decision must precede the independent native capture-report wait');
+ assert.match(capture,/\$pdhAliveStart -and \$pdhAliveEnd/);
+ assert.match(capture,/processAliveAtGpuSamplingStart/);
+ assert.match(capture,/rendererReportConfirmsNvidiaRtx5060/);
+ assert.doesNotMatch(capture.slice(nativeWait),/\$script:report\.godotProcessGPUCorroborated=/);
  assert.match(capture,/KlinikLab\.exe/);
  assert.match(capture,/native-build-manifest\.json/);
  assert.match(capture,/nativeImagePresent/);
