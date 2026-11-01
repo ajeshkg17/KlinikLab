@@ -104,3 +104,12 @@ test('retiring an interrupted idle watcher preserves lock bytes and never runs a
  assert.match(segment,/await fs\.rename\(original,saved\)/);
  assert.doesNotMatch(segment,/await execute\(|await powershell\(|await fs\.unlink\(|worktree add/);
 });
+
+test('no-render readiness probe never fetches, publishes or writes live task state',async()=>{
+ const worker=await fs.readFile(path.join(root,'visual-qa','godot-worker.mjs'),'utf8');
+ const src=worker.slice(worker.indexOf('async function probeNextJobWithoutExecuting()'),
+  worker.indexOf('let busy=false;'));
+ assert.match(src,/git\(\['show','FETCH_HEAD:'\+JOB_REF\]\)/);
+ assert.doesNotMatch(src,/await currentJob\(|git\(\['fetch'/);
+ assert.doesNotMatch(src,/await heartbeat\(|await saveLedger\(|await execute\(|await publish\(|writeFile\(|spawn\('powershell/);
+});
