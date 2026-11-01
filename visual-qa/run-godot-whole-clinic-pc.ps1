@@ -38,8 +38,22 @@ try {
  & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $prepare -EvidenceDir $run -ExpectedSha $sha -SourceWorktree $source
  if($LASTEXITCODE -ne 0){throw 'Original six cases/seven stations preparation failed'}
  $captureScript=Join-Path $scriptRoot 'sr1c-capture-godot-background-pc.ps1'
- & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $captureScript -EvidenceDir $run -ExpectedSha $sha -GodotExe $exe -SceneMode clinic-cases
- if($LASTEXITCODE -ne 0){throw 'Private-desktop Godot Vulkan capture failed; original logs retained'}
+ # A separate bounded owner-PC collector process, with direct stdout/stderr
+ # logs; never pipe native stderr through WinPS ErrorActionPreference=Stop.
+ $arguments='-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "'+
+  $captureScript+'" -EvidenceDir "'+$run+'" -ExpectedSha '+$sha+
+  ' -GodotExe "'+$exe+'" -SceneMode clinic-cases'
+ $stdout=Join-Path $run 'godot-collector-stdout.log'
+ $stderr=Join-Path $run 'godot-collector-stderr.log'
+ $pcProcess=Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+ if(-not $pcProcess.WaitForExit(200000)){
+  & taskkill.exe /PID $pcProcess.Id /T /F | Out-Null
+  throw 'Bounded private-desktop Godot capture exceeded limit; original logs retained'
+ }
+ $pcProcess.Refresh()
+ if($pcProcess.ExitCode -ne 0){
+  throw "Private-desktop Godot Vulkan collector exited $($pcProcess.ExitCode); original logs retained"
+ }
  $cap=Join-Path $run 'Captures'
  $native=Join-Path $cap 'godot-owner-pc-result.json'
  $workflow=Join-Path $cap 'godot-native-workflow-state.json'
