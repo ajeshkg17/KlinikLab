@@ -2,8 +2,10 @@ extends Node3D
 ## Reviewed CC0 STATIC dental clinic, not anatomy, calibrated apparatus or patient data.
 ## Exact publisher binaries from 3DAssets.dev, documented in source-manifest.json.
 const MANIFEST := "res://source/cc0-clinic-manifest.json"
-const CLINIC := "res://cc0/whole-clinic-starter-v1.glb"
-const TRAY := "res://cc0/instrument-tray-v1.glb"
+const CLINIC := "res://cc0/whole-clinic-starter-godot-v1.glb"
+const CLINIC_RAW := "res://cc0/whole-clinic-starter-v1.glb.original.bin"
+const TRAY := "res://cc0/instrument-tray-godot-v1.glb"
+const TRAY_RAW := "res://cc0/instrument-tray-v1.glb.original.bin"
 const CLINIC_SHA := "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a"
 const TRAY_SHA := "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036"
 
@@ -59,18 +61,25 @@ func configure(source_sha: String) -> bool:
 	if assets.size()!=2:
 		_error = "Expected exactly two independently reviewed static CC0 source assets"
 		return false
-	for item in [{"id":"whole-clinic-starter","file":CLINIC,"sha":CLINIC_SHA},
-				 {"id":"instrument-tray","file":TRAY,"sha":TRAY_SHA}]:
+	for item in [{"id":"whole-clinic-starter","original":CLINIC_RAW,"import":CLINIC,"sha":CLINIC_SHA},
+				 {"id":"instrument-tray","original":TRAY_RAW,"import":TRAY,"sha":TRAY_SHA}]:
 		var id: String = str(item["id"])
 		var row: Dictionary = assets.get(id,{})
-		var filepath: String = str(item["file"])
-		if (str(row.get("path","")) != filepath or
+		var original_path: String = str(item["original"])
+		var import_path: String = str(item["import"])
+		if (str(row.get("path","")) != original_path or
+			str(row.get("importPath","")) != import_path or
 			str(row.get("sha256","")) != str(item["sha"]) or
+			str(row.get("compatibilityConverter","")) != "@gltf-transform/cli@4.5.1 dequantize" or
 			str(row.get("status","")) != "STATIC_VISUAL_ONLY"):
 			_error = "Independent reviewed CC0 source manifest mismatch for " + id
 			return false
-		if not FileAccess.file_exists(filepath) or FileAccess.get_sha256(filepath)!=str(item["sha"]):
+		if not FileAccess.file_exists(original_path) or FileAccess.get_sha256(original_path)!=str(item["sha"]):
 			_error = "Missing/mutated ORIGINAL CC0 GLB bytes for " + id
+			return false
+		if not FileAccess.file_exists(import_path) or FileAccess.get_sha256(import_path) != str(row.get("importSha256","")) or
+			str(row.get("importSha256","")).length()!=64:
+			_error = "Missing/mutated COMPATIBILITY-DERIVED Godot CC0 GLB for " + id
 			return false
 	_clinic = _load_glb(CLINIC)
 	if _clinic == null:
