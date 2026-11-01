@@ -1,0 +1,87 @@
+name: Unity FDI16 source-only experiment (NO UNITY/GPU RENDER)
+on:
+  pull_request:
+    branches: [integration/single-chat-validation-2026-10-30]
+    paths:
+      - 'visual-qa/run-unity-source-probe.ps1'
+      - 'visual-qa/run-unity-clinic-render-pc.ps1'
+      - 'visual-qa/publish-unity-clinic-evidence.ps1'
+      - 'tests/sr1i_unity_whole_clinic_render.test.mjs'
+      - 'visual-qa/unity-probe/**'
+      - 'tests/sr1h_unity_source_probe.test.mjs'
+      - '.github/workflows/unity-source-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  win-ps-and-exact-source:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check isolated Unity experiment regression contract
+        shell: pwsh
+        run: |
+          node --test tests/sr1h_unity_source_probe.test.mjs tests/sr1i_unity_whole_clinic_render.test.mjs
+      - name: Real Windows PowerShell 5.1 and 7 parser checks (do not launch Unity)
+        shell: pwsh
+        run: |
+          $files = @((Resolve-Path 'visual-qa/run-unity-source-probe.ps1').Path, (Resolve-Path 'visual-qa/run-unity-clinic-render-pc.ps1').Path, (Resolve-Path 'visual-qa/publish-unity-clinic-evidence.ps1').Path)
+          $check = {
+            param($scriptFile)
+            $tokens = $null
+            $errs = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($scriptFile, [ref]$tokens, [ref]$errs) | Out-Null
+            if (@($errs).Count -ne 0) { throw (($errs | ForEach-Object { $_.Message }) -join '; ') }
+            Write-Host "PASS: parsed by $($PSVersionTable.PSVersion)"
+          }
+          foreach ($file in $files) { & $check $file }
+          $checkFile = Join-Path $env:RUNNER_TEMP 'unity_probe_parser_ps51.ps1'
+          @'
+          param([string]$Target)
+          $tokens=$null
+          $errs=$null
+          [System.Management.Automation.Language.Parser]::ParseFile($Target,[ref]$tokens,[ref]$errs) | Out-Null
+          if (@($errs).Count -ne 0) { throw (($errs | ForEach-Object { $_.Message }) -join '; ') }
+          Write-Host 'PS51_UNITY_PARSER_OK'
+          '@ | Set-Content -LiteralPath $checkFile -Encoding utf8
+          foreach ($file in $files) {
+            & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -File $checkFile $file
+            if ($LASTEXITCODE -ne 0) { throw "PS 5.1 Unity probe syntax failed: $file" }
+          }
+      - name: Reexport exact browser source FDI16 in unique temp folder
+        shell: pwsh
+        run: |
+          $old = 'f4d4d4151851a08342def08d9f2e461f5f5e7109'
+          $tmp = Join-Path $env:RUNNER_TEMP ('klunity-' + [guid]::NewGuid().ToString('n'))
+          New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+          $worktree = Join-Path $tmp 'Pinned'
+          $output = Join-Path $tmp 'OBJs'
+          try {
+            git worktree add --detach $worktree $old
+            if ($LASTEXITCODE -ne 0) { throw 'Exact source commit unavailable' }
+            node "$worktree/visual-qa/sr1-local-kliniklab-export.mjs" "--expected-sha=$old" "--output=$output"
+            if ($LASTEXITCODE -ne 0) { throw 'Original source export failed' }
+            $manifest = Get-Content "$output/kliniklab-export-manifest.json" -Raw | ConvertFrom-Json
+            if ($manifest.sceneStates.before.triangles -ne 14856 -or
+                $manifest.sceneStates.after.triangles -ne 14936 -or
+                $manifest.sourceGitSHA -ne $old) { throw 'FDI16 source parity changed' }
+            foreach ($item in $manifest.originals.PSObject.Properties) {
+              $sha = (Get-FileHash -LiteralPath (Join-Path $output $item.Name) -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($sha -cne [string]$item.Value) { throw 'Original OBJ integrity failed' }
+            }
+            Write-Host 'SOURCE_EXPORTED_FDI16_BEFORE_14856_AFTER_14936_NO_UNITY_RENDER'
+          } finally {
+            git worktree remove --force $worktree 2>$null
+            Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+          }
+      - name: Source-only evidence boundary
+        if: always()
+        shell: pwsh
+        run: |
+          'This CI has NOT launched Unity, imported assets into a real Unity Editor, rendered a frame, tested Unity PID or GPU DXGI LUID, or touched Godot job07. Native whole-clinic render is a local PC-only evidence gate.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
