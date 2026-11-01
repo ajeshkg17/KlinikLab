@@ -10,6 +10,7 @@ on:
       - 'tests/sr1e_watcher_stderr_windows.ps1'
       - 'visual-qa/godot-single-instance.mjs'
       - 'visual-qa/install-godot-pc-watcher.ps1'
+      - 'tests/sr1f_godot_watcher_installer_ps_parser_windows.ps1'
       - 'tests/sr1d_godot_watcher_lock.test.mjs'
       - 'visual-qa/godot-job-core.mjs'
       - 'visual-qa/sr1c-capture-godot-pc.ps1'
@@ -64,6 +65,13 @@ jobs:
           node --test tests/sr1c_godot_pc_watcher.test.mjs
           node --test tests/sr1c_job05_pdh_orbit.test.mjs tests/sr1c_job06_clinic.test.mjs tests/sr1d_godot_cases.test.mjs
           node --test tests/sr1c_windows_private_desktop_bom.test.mjs
+      - name: Dual-engine installer syntax gate (real Windows PowerShell 5.1 AND PowerShell 7; no execution)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1f_godot_watcher_installer_ps_parser_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Windows PowerShell 5.1 installer parser failed' }
+          & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr1f_godot_watcher_installer_ps_parser_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell 7 installer parser failed' }
       - name: Prove native Windows PowerShell watcher stderr stays separated and capture can finish
         shell: pwsh
         run: |
