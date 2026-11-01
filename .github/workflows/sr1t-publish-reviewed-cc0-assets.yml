@@ -1,0 +1,49 @@
+name: 'SR1T Publish independently reviewed CC0 original dental visual assets'
+on:
+  push:
+    branches:
+      - asset-research/cc0-reviewed-models-20261101
+permissions:
+  contents: write
+jobs:
+  publish-source-verified:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce independent original native pixels plus CC0 source and clinical no-claim
+        run: |
+          node --test tests/sr1t_reviewed_cc0_binary_gate.test.mjs
+          python3 -m py_compile visual-qa/asset-research/publish_reviewed_cc0_originals.py visual-qa/asset-research/acquire_cc0_batch.py
+      - name: Download exact original CC0 versioned binaries and independently verify pinned SHA256
+        run: |
+          python3 visual-qa/asset-research/acquire_cc0_batch.py \
+            --manifest visual-qa/asset-research/cc0-render-batch-v1.json \
+            --out "$RUNNER_TEMP/cc0-exact-originals"
+      - name: Publish ONLY two visually reviewed original GLB bytes to opt-in CC0 directory
+        run: |
+          set -euo pipefail
+          python3 visual-qa/asset-research/publish_reviewed_cc0_originals.py \
+            --source "$RUNNER_TEMP/cc0-exact-originals" \
+            --destination assets/cc0/3dassets-dental \
+            --review-manifest assets/cc0/3dassets-dental/source-manifest.json
+          for f in instrument-tray-v1.glb whole-clinic-starter-v1.glb; do
+            test -s "assets/cc0/3dassets-dental/$f"
+          done
+          if test -n "$(git status --porcelain --untracked-files=all | grep '^??' | grep -vE 'assets/cc0/3dassets-dental/(instrument-tray-v1|whole-clinic-starter-v1).glb' || true)"; then
+            echo "Unapproved source file generated; refusing public commit" >&2
+            exit 1
+          fi
+          git config user.name 'KlinikLab Licensed Asset Publisher'
+          git config user.email 'licensed-asset-publisher@users.noreply.github.com'
+          git add -- assets/cc0/3dassets-dental/instrument-tray-v1.glb assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb
+          git diff --cached --name-only
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git commit -m 'Add original CC0 dental clinic and tray models after Blender pixel review; no clinical claims'
+          git push origin HEAD:refs/heads/asset-research/cc0-reviewed-models-20261101
+          echo 'Exact reviewed source files committed to PR branch, NOT to the application integration branch; CC0/visual-only, not clinical.' >> "$GITHUB_STEP_SUMMARY"
