@@ -146,7 +146,6 @@ try{
   clinicalAccuracyValidated:false,qualifiedAnatomyReviewPending:true,
   role:'FDI36_STATIC_SURFACE_REFERENCE_NOT_EDITABLE_TISSUE_VOLUME'
  };
- fs.writeFileSync(path.join(exported,'tooth-fdi36-manifest.json'),JSON.stringify(toothManifest,null,2)+'\n',{flag:'wx'});
  const clinicManifest={
   schemaVersion:1,kind:'REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY',
   sourceGitSHA:sha,licenseSPDX:'CC0-1.0',publisher:approved.packSource,
@@ -159,6 +158,7 @@ try{
  };
  fs.writeFileSync(path.join(cc0Dest,'clinic-manifest.json'),JSON.stringify(clinicManifest,null,2)+'\n',{flag:'wx'});
  const exported=path.join(dest,'source');
+ fs.writeFileSync(path.join(exported,'tooth-fdi36-manifest.json'),JSON.stringify(toothManifest,null,2)+'\n',{flag:'wx'});
  run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
