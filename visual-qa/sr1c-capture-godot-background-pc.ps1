@@ -220,10 +220,26 @@ try{
    }
   }
  }catch{Block ('Native DXGI GetDesc1 LUID map failed: '+$_.Exception.Message)}
+ # PDH lasts ~34s while the native camera orbit lasts 42s. Reading
+ # godot-background-capture.json immediately after PDH produced job08's
+ # FALSE "No original Godot background capture report" even though both
+ # Godot PNGs and the final JSON were written moments later. This is a
+ # producer/consumer completion race, NOT a new GPU or renderer failure.
+ # Wait for the SAME original Godot PID (never spawn a second process).
  $nativeSource=Join-Path $captures 'native-source-submission.json'
  Read-StrictSource -Path $nativeSource
  $background=Join-Path $captures 'godot-background-capture.json'
- if(Test-Path -LiteralPath $background){
+ $completionScript=Join-Path $PSScriptRoot 'sr1n-godot-capture-completion.ps1'
+ if(-not(Test-Path -LiteralPath $completionScript)){
+  throw 'Missing pinned bounded original Godot completion gate'
+ }
+ . $completionScript
+ $captureComplete=$false
+ try{
+  $null=Wait-KLNativeGodotCaptureCompletion -Process $proc -ReportPath $background -MaxWaitMilliseconds 70000
+  $captureComplete=$true
+ }catch{Block ('Original Godot capture completion verification: '+$_.Exception.Message)}
+ if($captureComplete -and (Test-Path -LiteralPath $background)){
   $capture=Get-Content -LiteralPath $background -Raw|ConvertFrom-Json
   $report.backgroundCaptureStatus=[string]$capture.status
   if($SceneMode -eq 'clinic-cases'){
@@ -310,7 +326,7 @@ try{
   }
   if(-not $report.nativeImagePresent){Block 'No valid original frontal private-desktop Vulkan PNG'}
   if(-not $report.nativeAngledImagePresent){Block 'No valid original angled/occlusal private-desktop Vulkan PNG'}
- }else{Block 'No original Godot background capture report returned'}
+ }else{Block 'Original Godot capture report unavailable after bounded process-completion verification'}
  $report.godotProcessGPUCorroborated=(
   $report.rendererLogNvidiaRtx5060 -and
   $report.process3DPositiveRtx5060DistinctPeriods -ge 3 -and
