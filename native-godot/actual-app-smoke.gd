@@ -64,6 +64,18 @@ func _run() -> void:
 			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
 			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
 			return
+		if i == 0:
+			var mirrored_ref: Node3D = app.get("_tooth16_mirror")
+			if mirrored_ref == null:
+				_fail("FDI16 mirrored educational reference was not mounted")
+				return
+			var mirror_info: Dictionary = mirrored_ref.call("summary")
+			if not bool(mirror_info.get("assetLoaded",false)) or bool(mirror_info.get("fallbackVisible",true)) or not bool(mirror_info.get("mirroredFromContralateral",false)) or bool(mirror_info.get("anatomicalSideValidated",true)) or bool(mirror_info.get("exactSideSourceAvailable",true)) or str(mirror_info.get("sourceFdi","")) != "26" or str(mirror_info.get("fdi","")) != "16" or float(mirror_info.get("mirrorScaleX",0.0)) >= 0.0 or not mirrored_ref.visible:
+				_fail("FDI16 mirror not loaded with source FDI26 and explicit nonvalidated disclosure")
+				return
+		elif app.get("_tooth16_mirror") != null and app.get("_tooth16_mirror").visible:
+			_fail("FDI16 mirrored reference leaked into another practical")
+			return
 		if i == 3:
 			var crown_ref: Node3D = app.get("_tooth26_reference")
 			if crown_ref == null:
@@ -118,6 +130,21 @@ func _run() -> void:
 		_fail("FDI26 fallback lacks labelled asset absence")
 		return
 	missing_crown.free()
+	var mirror_script: GDScript = load("res://tooth16-mirror-reference.gd")
+	if mirror_script == null:
+		_fail("Missing FDI16 mirror script")
+		return
+	var missing_mirror: Node3D = mirror_script.new()
+	missing_mirror.call("force_missing_fallback_for_test")
+	var fallback_info: Dictionary = missing_mirror.call("summary")
+	if bool(fallback_info.get("assetLoaded",true)) or not bool(fallback_info.get("fallbackVisible",false)) or not missing_mirror.has_node("KL_FDI16_MIRRORED_SURFACE_ASSET_MISSING_FALLBACK"):
+		_fail("FDI16 mirror missing-asset fallback not exposed")
+		return
+	var missing_label: Node3D = missing_mirror.get_node("KL_FDI16_MIRRORED_SURFACE_ASSET_MISSING_FALLBACK")
+	if missing_label.get_child_count()!=1 or not (missing_label.get_child(0) is Label3D):
+		_fail("FDI16 fallback has no clear Label3D")
+		return
+	missing_mirror.free()
 	app.call("_reset_progress")
-	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases plus separately loaded FDI36 and FDI26 Dundee surface meshes with labelled fallbacks; headless only, no real pixels/GPU claimed")
+	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")
 	quit(0)

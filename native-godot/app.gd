@@ -60,6 +60,7 @@ var _volume: Node3D
 var _volumes: Dictionary = {}
 var _tooth36_reference: Node3D
 var _tooth26_reference: Node3D
+var _tooth16_mirror: Node3D
 var _cut_position := Vector3(0.0, 1.01, 0.0)
 var _cut_radius := 0.22
 var _direct_bur_mode := false
@@ -791,6 +792,7 @@ func _show_case_geometry() -> void:
 		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
 	_update_fdi36_reference_visibility()
 	_update_fdi26_reference_visibility()
+	_update_fdi16_mirror_visibility()
 
 func _set_environment_camera() -> void:
 	if _scene == null:
@@ -884,6 +886,7 @@ func _switch_view(view: String) -> void:
 	_view = view
 	_update_fdi36_reference_visibility()
 	_update_fdi26_reference_visibility()
+	_update_fdi16_mirror_visibility()
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
@@ -1016,6 +1019,33 @@ func _update_fdi26_reference_visibility() -> void:
 	if _tooth26_reference == null:
 		return
 	_tooth26_reference.visible = _view == "clinic" and _station_index == 4 and _case_index == 3
+
+func _ensure_fdi16_mirror() -> void:
+	if _tooth16_mirror != null or _scene == null:
+		return
+	var script: GDScript = load("res://tooth16-mirror-reference.gd")
+	if script == null:
+		var fallback := Node3D.new()
+		fallback.name = "KL_DUNDEE_FDI16_MIRRORED_SOURCE_SURFACE_REFERENCE"
+		var label := Label3D.new()
+		label.text = "FDI 16 mirrored source surface asset unavailable"
+		fallback.add_child(label)
+		_scene.add_child(fallback)
+		_tooth16_mirror = fallback
+		return
+	var reference: Node3D = script.new()
+	if not bool(reference.call("configure",str(_content.get("sourceGitSHA","")))):
+		push_warning("FDI16_MIRRORED source reference loader rejected: "+str(reference.call("summary")))
+		_scene.add_child(reference)
+		_tooth16_mirror = reference
+		return
+	_scene.add_child(reference)
+	_tooth16_mirror = reference
+
+func _update_fdi16_mirror_visibility() -> void:
+	if _tooth16_mirror == null:
+		return
+	_tooth16_mirror.visible = _view == "clinic" and _station_index == 4 and _case_index == 0
 
 func _show_station() -> void:
 	var station: String = str(STATION_IDS[_station_index])
@@ -1234,6 +1264,12 @@ func _save_draft() -> void:
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
+	if _case_index == 0:
+		_ensure_fdi16_mirror()
+		_update_fdi16_mirror_visibility()
+		var mirrored_report: Dictionary = _tooth16_mirror.call("summary") if _tooth16_mirror != null else {}
+		var mirrored_state := "illustrative mirrored surface loaded" if bool(mirrored_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
+		_page.add_child(_heading("FDI 16 illustrative surface: %s. MIRRORED FROM SOURCE FDI 26 (University of Dundee, School of Dentistry; CC BY 4.0). NOT verified right-side anatomy; no pulp/canals or calibrated drilling. Synthetic editable working volume remains independent." % mirrored_state,13))
 	if _case_index == 3:
 		_ensure_fdi26_reference()
 		_update_fdi26_reference_visibility()
