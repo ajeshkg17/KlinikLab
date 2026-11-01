@@ -17,6 +17,10 @@ test('SR31 desktop walk is explicit keyboard/mouse input mapped to reusable move
   assert.ok(model.includes(marker),marker);
  assert.ok(app.includes('not (focused is TextEdit or focused is LineEdit)'));
  assert.ok(app.includes('_middle.get_global_rect().has_point(mouse.position)'));
+ assert.equal((app.match(/^func _input\(event: InputEvent\) -> void:/gm)||[]).length,1,'only one _input handler may exist');
+ assert.match(app,/func _handle_walk_input\(event: InputEvent\) -> void:/);
+ assert.match(app,/func _input\(event: InputEvent\) -> void:\n\t# Single entry point:[\s\S]*?_handle_walk_input\(event\)/);
+ assert.match(app,/if not _direct_bur_mode or _middle == null or _scene == null:/);
 });
 
 test('SR31 operatory entry is range-gated and opens original FDI practical without drilling',()=>{
