@@ -129,7 +129,7 @@ try{
  ]);
  const toothConvertedSha256=sha256(fs.readFileSync(toothConvertedPath));
  const toothConvertedSidecar=toothConvertedPath+'.source';
- fs.copyFileSync(toothConvertedPath,toothConvertedSidecar,{flag:'wx'});
+ fs.copyFileSync(toothConvertedPath,toothConvertedSidecar,fs.constants.COPYFILE_EXCL);
  if(sha256(fs.readFileSync(toothConvertedSidecar))!==toothConvertedSha256)throw Error('Dundee FDI36 converted raw sidecar checksum mismatch');
  const toothManifest={
   schemaVersion:1,sourceGitSHA:sha,caseId:'endo',fdi:'36',
