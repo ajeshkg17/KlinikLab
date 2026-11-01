@@ -30,6 +30,8 @@ on:
       - 'visual-qa/sr1c-pdh-filter.ps1'
       - 'visual-qa/sr1x-capture-native-exported-app-pc.ps1'
       - 'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1'
+      - 'visual-qa/sr26-lease-raw-timestamp.ps1'
+      - 'tests/sr26_lease_raw_timestamp_windows.ps1'
       - 'tests/sr16_ownerpc_readonly_diagnostics.test.mjs'
       - 'visual-qa/sr1d-prepare-godot-cases.ps1'
       - 'visual-qa/sr1d-export-native-cases.mjs'
@@ -97,6 +99,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'WinPS5.1 original job08 ledger reconciliation regression failed' }
           & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoProfile -NonInteractive -File tests/sr1p_job08_ledger_reconciliation_windows.ps1
           if ($LASTEXITCODE -ne 0) { throw 'PowerShell7 original job08 ledger reconciliation regression failed' }
+      - name: SR26 verify raw Node Z lease timestamp and 54ms correlation on real WinPS 5.1 and PS7 (pure read-only synthetic)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr26_lease_raw_timestamp_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'WinPS 5.1 raw UTC lease timestamp regression failed' }
+          & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr26_lease_raw_timestamp_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell 7 raw UTC lease timestamp regression failed' }
       - name: Prove actual Windows PowerShell 5.1 scheduled launcher passes Godot EXE to child Node
         shell: pwsh
         run: |
@@ -138,6 +147,8 @@ jobs:
             'visual-qa/sr1c-pdh-filter.ps1',
             'visual-qa/sr1x-capture-native-exported-app-pc.ps1',
             'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1',
+            'visual-qa/sr26-lease-raw-timestamp.ps1',
+            'tests/sr26_lease_raw_timestamp_windows.ps1',
             'visual-qa/sr1d-prepare-godot-cases.ps1',
             'tests/sr1c_pdh_invalid_rows_windows.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1'
