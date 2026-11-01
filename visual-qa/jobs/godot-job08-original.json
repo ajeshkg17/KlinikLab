@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 7,
+  "jobId": "pc-godot-clinic-20261101-job08",
+  "commit": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "suite": "sr1d-clinic-case-station-migration",
+  "sceneMode": "clinic-cases",
+  "graphics": "forward_plus-vulkan",
+  "timeoutSec": 150,
+  "capture": "native-clinic-case-switch-orbit",
+  "launcherContract": "winps51-clear-psmodulepath-sha256-preflight",
+  "backgroundContract": "private-winsta0-vulkan-autocapture-no-foreground",
+  "desktopApiContract": "raw-utf16-createdesktopw-bom-safe-recovery",
+  "telemetryContract": "persistent-pdh-valid-rows-dxgi-luid-42s-orbit-v2"
+}
