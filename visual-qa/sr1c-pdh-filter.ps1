@@ -23,7 +23,7 @@ function ConvertTo-KLGodotGpu3DRows {
    if($counterPath -notmatch ('(?i)pid_'+$GodotPid+'_') -or
     $counterPath -notmatch '(?i)engtype_3d'){continue}
    $statusName=[string]$c.Status
-   $statusValid=($statusName -eq 'ValidData' -or $statusName -eq '0')
+   $statusValid=($statusName -in @('ValidData','NewData','0','1'))
    $finite=$false;$v=$null
    try{
     $n=[double]$c.CookedValue
