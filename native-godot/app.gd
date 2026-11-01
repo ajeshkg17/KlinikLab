@@ -760,6 +760,8 @@ func _show_progress() -> void:
 	var export_button := _button("Export local learning report (.txt)")
 	export_button.pressed.connect(_choose_report_path)
 	_page.add_child(export_button)
+	var clinical_states: Dictionary = _progress.get("journey",{})
+	_page.add_child(_heading("Case-specific clinical journey sessions: %d/6" % clinical_states.size(), 14))
 	var reset := _button("Reset saved educational progress")
 	reset.pressed.connect(_reset_progress)
 	_page.add_child(reset)
@@ -795,6 +797,14 @@ func _generate_report() -> String:
 			if notes.has(key):
 				lines.append("  Saved draft (no automated correctness assessment):")
 				lines.append(str(notes[key]).substr(0,10000))
+		var all_journeys: Dictionary = _progress.get("journey",{})
+		if all_journeys.has(str(c["id"])):
+			var j: Dictionary = all_journeys[str(c["id"])]
+			lines.append("  Native clinical journey: history=%s; tests=%s; workingDiagnosisIndex=%s" %
+				[str(j.get("history",[])),str(j.get("tests",[])),str(j.get("diagnosis",-1))])
+			lines.append("  Treatment indices A/B=%s/%s; consentExercise=%s; ordered=%s; errors=%s" %
+				[str(j.get("primary",-1)),str(j.get("alternative",-1)),str(j.get("consent",false)),
+				str(j.get("ordered",0)),str(j.get("errors",0))])
 		lines.append("")
 	if _volume != null:
 		var v: Dictionary = _volume.call("summary")
