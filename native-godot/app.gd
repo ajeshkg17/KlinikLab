@@ -197,7 +197,7 @@ func _process(delta: float) -> void:
 			_walk_near_operatory = now_near
 			_refresh()
 
-func _input(event: InputEvent) -> void:
+func _handle_walk_input(event: InputEvent) -> void:
 	if not _walk_active or _view != "environment" or _walk == null:
 		return
 	if event is InputEventMouseButton:
@@ -1130,6 +1130,9 @@ func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
+	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
+	# native direct bur still requires separate explicit practical opt-in.
+	_handle_walk_input(event)
 	if not _direct_bur_mode or _middle == null or _scene == null:
 		return
 	if not (event is InputEventMouseButton):
