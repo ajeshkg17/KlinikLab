@@ -441,7 +441,14 @@ async function recoverRawJob07({diagnoseOnly=false}={}){
   job07:JOB07_ID,mode:'publication-only',noRerender:true},null,2));
  await lease.sync();
  try{
-  await permission();
+  const token=await permission();
+  const remoteResult='/contents/runs/pc-godot-'+JOB07_ID+'-'+JOB07_SOURCE+'/godot-job-result.json?ref='+RESULT_BRANCH;
+  try{
+   await api(token,remoteResult);
+   throw Error('An immutable remote job07 report already exists: do not duplicate or overwrite it');
+  }catch(e){
+   if(!String(e.message).includes('status 404'))throw e;
+  }
   const j=await currentJob();
   if(j.jobId!==JOB07_ID||j.commit!==JOB07_SOURCE||j.sceneMode!=='clinic-cases')
    throw Error('GitHub approved active request no longer exactly job07; refusing archival publication');
