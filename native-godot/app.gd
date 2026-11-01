@@ -31,6 +31,7 @@ var _progress_label: Label
 var _middle: Control
 var _answer_label: Label
 var _draft: TextEdit
+var _practical_feedback: Dictionary = {}
 var _boot_error := ""
 
 func _ready() -> void:
@@ -239,6 +240,7 @@ func _show_blocked(reason: String) -> void:
 	_shell.add_child(label)
 
 func _clear_page() -> void:
+	_practical_feedback.clear()
 	for c in _page.get_children():
 		_page.remove_child(c)
 		c.queue_free()
@@ -399,21 +401,66 @@ func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
-	_page.add_child(_heading("Choose a virtual instrument to inspect its original name. No force/torque or case-specific drill geometry is simulated.", 14))
-	var instruments: Array = _content["tools"]
-	for item in instruments:
-		var t: Dictionary = item
-		var b := _button(str(t["german"]) + " / " + str(t["english"]))
-		b.pressed.connect(_select_tool.bind(str(t["id"]), str(t["german"])))
-		_page.add_child(b)
-	_answer_label = _heading("No instrument selected", 13)
-	_page.add_child(_answer_label)
+	_page.add_child(_heading("Original case-specific practical learning tasks. Selecting answers is formative. A drill task is NOT a ported voxel cutter.", 14))
+	var steps: Array = _content["practical"][_case_index]
+	for step_index in range(steps.size()):
+		var step: Dictionary = steps[step_index]
+		_page.add_child(_heading("%d. %s" % [step_index + 1, str(step["title"])], 16))
+		_page.add_child(_heading(str(step["detail"]), 13))
+		match str(step["type"]):
+			"choice":
+				var choices: Array = step["options"]
+				for choice in range(choices.size()):
+					var b := _button(str(choices[choice]))
+					b.pressed.connect(_practical_choice.bind(step_index, choice))
+					_page.add_child(b)
+			"tooth":
+				for tooth in FDI:
+					var t := _button("FDI " + str(tooth))
+					t.pressed.connect(_practical_target.bind(step_index, str(tooth)))
+					_page.add_child(t)
+			"tool":
+				var menu := OptionButton.new()
+				menu.add_item("Select original instrument", 0)
+				for item in _content["tools"]:
+					menu.add_item(str(item["german"]) + " / " + str(item["english"]))
+				menu.item_selected.connect(_practical_tool.bind(step_index))
+				_page.add_child(menu)
+			"drill":
+				_page.add_child(_heading("Original drill task retained as an educational instruction. Real-time bur subtraction, collision and scoring NOT YET PORTED.", 13))
+		var feedback := _heading("Not answered", 13)
+		_practical_feedback[step_index] = feedback
+		_page.add_child(feedback)
 
-func _select_tool(id: String, label_text: String) -> void:
-	(_progress["notes"] as Dictionary)[_key() + ":tool"] = id
+func _practical_choice(step_index: int, choice: int) -> void:
+	var step: Dictionary = _content["practical"][_case_index][step_index]
+	var correct := choice == int(step.get("correct", -1))
+	_record_practical(step_index, choice, correct, str(step.get("explanation", "")))
+
+func _practical_target(step_index: int, tooth: String) -> void:
+	var step: Dictionary = _content["practical"][_case_index][step_index]
+	var correct := tooth == str(step.get("target", ""))
+	_record_practical(step_index, tooth, correct, str(step.get("success", "FDI target confirmed")))
+
+func _practical_tool(index: int, step_index: int) -> void:
+	if index < 1:
+		return
+	var tools: Array = _content["tools"]
+	if index - 1 >= tools.size():
+		return
+	var chosen: Dictionary = tools[index - 1]
+	var step: Dictionary = _content["practical"][_case_index][step_index]
+	var correct := str(chosen["id"]) == str(step.get("target", ""))
+	_record_practical(step_index, str(chosen["id"]), correct, str(step.get("success", "")))
+
+func _record_practical(step_index: int, response: Variant, correct: bool, detail: String) -> void:
+	var answer_key := _key() + ":" + str(step_index)
+	(_progress["answers"] as Dictionary)[answer_key] = {
+		"selected": response, "correct": correct, "sourceQuestion": step_index}
 	_save_progress()
-	if _answer_label != null:
-		_answer_label.text = "Selected: " + label_text + " · vocabulary exercise only"
+	if _practical_feedback.has(step_index):
+		var display: Label = _practical_feedback[step_index]
+		display.text = ("Correct. " if correct else "Review required. ") + detail
 
 func _mark_studied() -> void:
 	(_progress["studied"] as Dictionary)[_key()] = true
