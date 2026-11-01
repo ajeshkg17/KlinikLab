@@ -5,6 +5,9 @@ on:
     branches: [integration/single-chat-validation-2026-10-30]
     paths:
       - 'visual-qa/godot-worker.mjs'
+      - 'visual-qa/godot-job07-forensics.mjs'
+      - 'tests/sr1e_job07_forensic_recovery.test.mjs'
+      - 'tests/sr1e_watcher_stderr_windows.ps1'
       - 'visual-qa/godot-single-instance.mjs'
       - 'visual-qa/install-godot-pc-watcher.ps1'
       - 'tests/sr1d_godot_watcher_lock.test.mjs'
@@ -53,12 +56,19 @@ jobs:
         shell: pwsh
         run: |
           node --check visual-qa/godot-worker.mjs
+          node --check visual-qa/godot-job07-forensics.mjs
+          node --test tests/sr1e_job07_forensic_recovery.test.mjs
           node --check visual-qa/godot-single-instance.mjs
           node --test tests/sr1d_godot_watcher_lock.test.mjs
           node --check visual-qa/godot-job-core.mjs
           node --test tests/sr1c_godot_pc_watcher.test.mjs
           node --test tests/sr1c_job05_pdh_orbit.test.mjs tests/sr1c_job06_clinic.test.mjs tests/sr1d_godot_cases.test.mjs
           node --test tests/sr1c_windows_private_desktop_bom.test.mjs
+      - name: Prove native Windows PowerShell watcher stderr stays separated and capture can finish
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1e_watcher_stderr_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Native stderr-safe watcher regression failed' }
       - name: Simulate inherited pwsh 7 PSModulePath and prove Windows PowerShell 5.1 SHA256 -File works
         shell: pwsh
         run: |
@@ -70,6 +80,7 @@ jobs:
           $paths = @(
             'visual-qa/sr1c-build-godot-local.ps1',
             'visual-qa/install-godot-pc-watcher.ps1',
+            'tests/sr1e_watcher_stderr_windows.ps1',
             'visual-qa/sr1c-capture-godot-pc.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1',
             'visual-qa/sr1c-private-desktop.ps1',
