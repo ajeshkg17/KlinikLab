@@ -299,6 +299,12 @@ func _button(t: String) -> Button:
 	b.text = t
 	b.custom_minimum_size = Vector2(0, 35)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.clip_text = true
+	b.tooltip_text = t
+	b.add_theme_color_override("font_color", INK)
+	b.add_theme_color_override("font_hover_color", Color.WHITE)
+	b.add_theme_color_override("font_pressed_color", Color.WHITE)
+	b.add_theme_color_override("font_focus_color", INK)
 	return b
 
 func _style_panel(panel: PanelContainer) -> void:
@@ -358,8 +364,11 @@ func _build_app() -> void:
 	var nav := ScrollContainer.new()
 	nav.custom_minimum_size = Vector2(244, 0)
 	nav.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	nav.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	nav.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_left_panel.add_child(nav)
 	var nav_col := VBoxContainer.new()
+	nav_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_col)
 	nav_col.add_child(_heading("Cases • source-derived", 17))
 	for i in range(_cases.size()):
@@ -387,9 +396,13 @@ func _build_app() -> void:
 	right.add_child(_right_panel)
 	var pane := _right_panel
 	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	pane.add_child(scroll)
 	_page = VBoxContainer.new()
-	_page.custom_minimum_size = Vector2(440, 0)
+	_page.custom_minimum_size = Vector2(0, 0)
+	_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_page.add_theme_constant_override("separation", 10)
 	scroll.add_child(_page)
 	_progress_label = _heading("", 13)
@@ -490,8 +503,8 @@ func _set_environment_camera() -> void:
 		push_warning("Source scene camera missing for CC0 environment")
 		return
 	# Move near the actual imported whole-clinic, framed inside central UI.
-	camera.position=Vector3(3.0,7.0,4.0)
-	camera.fov=58.0
+	camera.position=Vector3(3.0,6.5,2.0)
+	camera.fov=52.0
 	camera.look_at(Vector3(3.0,-1.4,-19.0))
 	camera.current=true
 	# In this dedicated environment overview, avoid mistaking original
@@ -528,8 +541,8 @@ func _set_camera_mode(mode: String) -> void:
 		camera.look_at(Vector3(0.0, 0.0, -2.5))
 	else:
 		# Keep both practical teeth within the middle of the 1600px window.
-		camera.position = Vector3(2.2, 1.7, 16.0)
-		camera.fov = 48.0
+		camera.position = Vector3(2.2, 1.7, 14.5)
+		camera.fov = 44.0
 		camera.look_at(Vector3(2.2, 0.5, 0.0))
 	camera.current = true
 	_apply_environment_visibility()
@@ -766,7 +779,10 @@ func _show_language_studio() -> void:
 	var stored: Dictionary = _progress.get("fspKpByTask",{})
 	var state: Dictionary = stored.get(_language_task_key(),{})
 	_language_draft = TextEdit.new()
-	_language_draft.custom_minimum_size = Vector2(480,245)
+	_language_draft.custom_minimum_size = Vector2(0,245)
+	_language_draft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_language_draft.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_language_draft.add_theme_color_override("font_color", INK)
 	_language_draft.text = str(state.get("text","")).substr(0,6000)
 	_language_draft_key = _language_task_key()
 	_language_draft.focus_exited.connect(_language_save_draft)
@@ -807,7 +823,10 @@ func _show_writing(station: String) -> void:
 	_page.add_child(_heading("Option A: " + str(c["primaryPlan"]), 14))
 	_page.add_child(_heading("Option B: " + str(c["alternativePlan"]), 14))
 	_draft = TextEdit.new()
-	_draft.custom_minimum_size = Vector2(475, 240)
+	_draft.custom_minimum_size = Vector2(0, 240)
+	_draft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_draft.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_draft.add_theme_color_override("font_color", INK)
 	_draft.text = str((_progress["notes"] as Dictionary).get(_key(), ""))
 	_page.add_child(_draft)
 	var save := _button("Save draft on this computer")
@@ -848,6 +867,9 @@ func _show_practical() -> void:
 			"tool":
 				var menu := OptionButton.new()
 				menu.add_item("Select original instrument", 0)
+				menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				menu.clip_text = true
+				menu.add_theme_color_override("font_color", INK)
 				for item in _content["tools"]:
 					menu.add_item(str(item["german"]) + " / " + str(item["english"]))
 				menu.item_selected.connect(_practical_tool.bind(step_index))
@@ -874,7 +896,7 @@ func _show_practical() -> void:
 func _make_cut_slider(title: String, low: float, high: float, start: float) -> HSlider:
 	var row := HBoxContainer.new()
 	var label := _heading(title, 13)
-	label.custom_minimum_size = Vector2(130, 0)
+	label.custom_minimum_size = Vector2(110, 0)
 	label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	row.add_child(label)
 	var slider := HSlider.new()
@@ -882,7 +904,7 @@ func _make_cut_slider(title: String, low: float, high: float, start: float) -> H
 	slider.max_value = high
 	slider.step = 0.01
 	slider.value = clampf(start, low, high)
-	slider.custom_minimum_size = Vector2(300, 20)
+	slider.custom_minimum_size = Vector2(0, 20)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(slider)
 	_page.add_child(row)
