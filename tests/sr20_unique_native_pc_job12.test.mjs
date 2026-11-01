@@ -12,7 +12,7 @@ test('SR20 job12 source-unique schema8 from verified Windows export, preserving 
  assert.equal(archived.jobId,'pc-godot-exported-20261101-cc0-job11-a33c31');
  assert.equal(archived.commit,'a33c31a9e1c364463f96c29a6004a7e625cd4e89');
  assert.notEqual(active.jobId,archived.jobId);
- assert.deepEqual(Object.fromEntries(Object.entries(active).filter(([k])=>!['jobId','commit'].includes(k))),Object.fromEntries(Object.entries(archived).filter(([k])=>!['jobId','commit'].includes(k)));
+ for(const key of Object.keys(active))if(key!=='jobId' && key!=='commit') assert.deepEqual(active[key],archived[key],key);
  assert.throws(()=>validateGodotJob({...active,timeoutSec:181}));
 });
 test('SR20 exact artifact and capture bootstrap evidence contract documented',()=>{
