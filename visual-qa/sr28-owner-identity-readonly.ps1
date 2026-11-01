@@ -6,6 +6,7 @@ param()
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'sr28-owner-identity-core.ps1')
 . (Join-Path $PSScriptRoot 'sr26-lease-raw-timestamp.ps1')
+. (Join-Path $PSScriptRoot 'sr29-utc-correlation.ps1')
 $out=[ordered]@{
  mode='SR28_OWNER_IDENTITY_AND_LEASE_ACCESS_STAGE_READ_ONLY'
  sampledAtUTC=[datetime]::UtcNow.ToString('o')
@@ -147,17 +148,17 @@ if($out.leasePid -gt 0 -and $out.leaseRawTimestampPreserved -and $out.leaseJobPo
  $candidate=@($matched|Where-Object{$_.pid -eq $out.leasePid})
  if($candidate.Count -eq 1 -and $candidate[0].processOwnerSidReadable -and
   $candidate[0].processOwnerMatchesTaskPrincipal){
-  $stamp=[DateTimeOffset]::MinValue
-  $parsed=[DateTimeOffset]::TryParse([string]$out.leaseStartedAt,
-   [Globalization.CultureInfo]::InvariantCulture,
-   [Globalization.DateTimeStyles]::RoundtripKind,[ref]$stamp)
-  if($parsed -and $out.leaseStartedAt -match '(?i)(?:Z|[+-][0-9]{2}:[0-9]{2})$'){
-   $created=[datetime]$candidate[0].createdUTC
-   $delta=($stamp.UtcDateTime-$created).TotalSeconds
-   $out.leasePidWorkerIdentityVerified=($delta -ge -5 -and $delta -le 180)
-   $out.leaseStartDeltaSeconds=[math]::Round($delta,3)
-  }
- }
+  # SR29: compare BOTH explicit-offset ISO timestamps in UTC. A
+  # [datetime] cast of an existing Z string reinterpreted local time on
+  # the owner PC, falsely shifting the lease delta by exactly one hour.
+  try{
+   $clock=Get-KLLeaseProcessUtcCorrelation -LeaseStartedAt ([string]$out.leaseStartedAt) -ProcessCreatedUTC ([string]$candidate[0].createdUTC)
+   $out.leasePidWorkerIdentityVerified=[bool]$clock.createdAtOrBeforeLeaseWithinBound
+   $out.leaseStartDeltaSeconds=$clock.deltaRoundedSeconds
+   $out.leaseClockComparedExplicitUtcInstants=[bool]$clock.onlyUtcInstantsCompared
+  }catch{
+   $out.leaseReadErrorStages+=('CORRELATION_'+$_.Exception.GetType().Name)
+  } }
 }
 $out.classification=if($out.leasePidWorkerIdentityVerified -and $out.leaseHashReadable){
  'OWNER_LEASE_IDENTITY_VERIFIED__LIVE_WATCHER_HOLD'
