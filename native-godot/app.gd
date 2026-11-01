@@ -27,6 +27,8 @@ var _quiz_index := 0
 var _progress: Dictionary = {}
 var _scene: Node3D
 var _atlas: Node3D
+var _scan: Node3D
+var _scan_wireframe := false
 var _shell: CanvasLayer
 var _view := "clinic"
 var _camera_mode := "overview"
@@ -64,6 +66,11 @@ func _ready() -> void:
 			_atlas.visible = false
 		else:
 			push_warning("Source 32-tooth atlas blocked: " + str(atlas.call("error")))
+	var scan_script: GDScript = load("res://scan-viewer.gd")
+	if scan_script != null:
+		_scan = scan_script.new()
+		add_child(_scan)
+		_scan.visible = false
 	var editor_script: GDScript = load("res://volume-cut.gd")
 	if editor_script != null:
 		var editable: Node3D = editor_script.new()
@@ -233,7 +240,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "journey", "anatomy", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "anatomy", "scans", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -357,7 +364,7 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "journey", "anatomy", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "anatomy", "scans", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
@@ -365,9 +372,12 @@ func _switch_view(view: String) -> void:
 	if _atlas != null:
 		_atlas.visible = view == "anatomy" or (view == "clinic" and _case_index != 0)
 		_atlas.call("set_camera_enabled",view == "anatomy")
+	if _scan != null:
+		_scan.visible = view == "scans"
+		_scan.call("set_camera_enabled",view == "scans")
 	if view == "clinic":
 		_set_camera_mode(_camera_mode)
-	_middle.visible = view in ["clinic", "anatomy"]
+	_middle.visible = view in ["clinic", "anatomy", "scans"]
 	_refresh()
 
 func _refresh() -> void:
@@ -384,6 +394,8 @@ func _refresh() -> void:
 		_show_journey()
 	elif _view == "anatomy":
 		_show_atlas_controls()
+	elif _view == "scans":
+		_show_scan_controls()
 	elif _view == "coverage":
 		_show_coverage()
 	else:
@@ -811,6 +823,58 @@ func _atlas_rotate(degrees: float) -> void:
 	if _atlas != null:
 		_atlas.call("rotate_model",degrees)
 
+
+func _show_scan_controls() -> void:
+	_page.add_child(_heading("Local STL/OBJ surface inspection", 18))
+	_page.add_child(_heading("Choose a licensed local dental surface mesh. Remains on your computer; no upload or patient registration. Maximum 20 MB / 50,000 triangles. Original units not assumed.", 13))
+	if _scan == null:
+		_page.add_child(_heading("Native scan viewer unavailable", 14))
+		return
+	_page.add_child(_heading(str(_scan.call("description")), 14))
+	var browse := _button("Open local STL / OBJ file")
+	browse.pressed.connect(_scan_open_dialog)
+	_page.add_child(browse)
+	var buttons := HBoxContainer.new()
+	var left := _button("Rotate left 30°")
+	left.pressed.connect(_scan_rotate.bind(-30.0))
+	buttons.add_child(left)
+	var right := _button("Rotate right 30°")
+	right.pressed.connect(_scan_rotate.bind(30.0))
+	buttons.add_child(right)
+	_page.add_child(buttons)
+	var wire := CheckBox.new()
+	wire.text = "Display surface wireframe (mesh inspection)"
+	wire.button_pressed = _scan_wireframe
+	wire.toggled.connect(_scan_set_wireframe)
+	_page.add_child(wire)
+	_page.add_child(_heading("Binary STL and OBJ with positive vertex indices supported; negative-index, malformed and ASCII STL files are rejected. The viewer does not interpret radiographs, assign a tooth number or infer diagnoses.", 12))
+
+func _scan_open_dialog() -> void:
+	var dialog := FileDialog.new()
+	dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
+	dialog.filters = PackedStringArray(["*.stl, *.obj ; STL / OBJ surface meshes"])
+	dialog.file_selected.connect(_scan_open_path)
+	dialog.close_requested.connect(dialog.queue_free)
+	_shell.add_child(dialog)
+	dialog.popup_centered_ratio(0.65)
+
+func _scan_open_path(path: String) -> void:
+	if _scan == null:
+		return
+	if not bool(_scan.call("load_scan_path",path)):
+		push_warning("Local scan import refused: " + str(_scan.call("error")))
+	_refresh()
+
+func _scan_rotate(degrees: float) -> void:
+	if _scan != null:
+		_scan.call("rotate_model",degrees)
+
+func _scan_set_wireframe(enabled: bool) -> void:
+	_scan_wireframe = enabled
+	if _scan != null:
+		_scan.call("set_wireframe",enabled)
+
 func _show_progress() -> void:
 	_page.add_child(_heading("Personal local progress (not an official exam score)", 17))
 	for c in _cases:
@@ -922,6 +986,8 @@ func _show_coverage() -> void:
 			status = "SIX_CASES_AND_NATIVE_SIX_STAGE_SOURCE_CLINICAL_JOURNEY"
 		if str(id) == "anatomyAtlas" and _atlas != null:
 			status = "SOURCE_DERIVED_32_PERMANENT_TEETH_PREVIEW_ONLY__NOT_CLINICALLY_VALIDATED"
+		if str(id) == "scanImportAndRadiography" and _scan != null:
+			status = "LOCAL_BOUND_3D_STL_BINARY_AND_OBJ_SURFACE_VIEWER_ONLY__XRAY_NOT_PORTED"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("FDI16 live synthetic cutting, seven original guided interview replies per case and local learning-report export are available. Still missing: free-form patient dialogue, full anatomy, native scan/radiography, XR/Quest, AI and validated assessment. Browser app remains reference.", 15))
+	_page.add_child(_heading("Now available: native FDI16 live synthetic cutting; 32-tooth procedural preview; guided interviews; 6-stage clinical journey; offline report and bounded local STL/OBJ mesh inspection. Still missing: validated clinical grading, radiography, free-form patient, XR/Quest, AI and complete clinical parity.", 15))
