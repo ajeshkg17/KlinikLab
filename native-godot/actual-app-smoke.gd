@@ -64,6 +64,33 @@ func _run() -> void:
 			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
 			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
 			return
+		if i == 1:
+			var reference: Node3D = app.get("_tooth36_reference")
+			if reference == null:
+				_fail("FDI36 practical did not instantiate its separate source tooth reference")
+				return
+			var tooth_report: Dictionary = reference.call("summary")
+			if not bool(tooth_report.get("assetLoaded",false)) or bool(tooth_report.get("fallbackVisible",true)) or int(tooth_report.get("meshInstances",0)) < 1 or str(tooth_report.get("fdi","")) != "36" or str(tooth_report.get("license","")) != "CC-BY-4.0" or not bool(tooth_report.get("surfaceOnly",false)):
+				_fail("Actual source-verified Dundee FDI36 mesh did not load with correct identity/limits")
+				return
+			if not reference.visible:
+				_fail("FDI36 reference not visible in its own practical station")
+				return
+		elif app.get("_tooth36_reference") != null and bool((app.get("_tooth36_reference").call("summary") as Dictionary).get("assetLoaded",false)) and app.get("_tooth36_reference").visible:
+			_fail("FDI36 reference leaked into another FDI practical case")
+			return
+	var reference_script: GDScript = load("res://tooth36-reference.gd")
+	var missing_reference: Node3D = reference_script.new()
+	missing_reference.call("force_missing_fallback_for_test")
+	var missing_summary: Dictionary = missing_reference.call("summary")
+	if bool(missing_summary.get("assetLoaded",true)) or not bool(missing_summary.get("fallbackVisible",false)) or not missing_reference.has_node("KL_DUNDEE_FDI36_SURFACE_ASSET_MISSING_FALLBACK"):
+		_fail("FDI36 missing-asset fallback was not clearly exposed")
+		return
+	var fallback_node: Node3D = missing_reference.get_node("KL_DUNDEE_FDI36_SURFACE_ASSET_MISSING_FALLBACK")
+	if fallback_node.get_child_count() != 1 or not (fallback_node.get_child(0) is Label3D):
+		_fail("FDI36 fallback lacks a visible text label")
+		return
+	missing_reference.free()
 	app.call("_reset_progress")
-	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all GLB meshes and exact-source cases in real app._ready; no real pixels/GPU claimed")
+	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases plus separately loaded FDI36 Dundee surface mesh and labelled fallback; headless only, no real pixels/GPU claimed")
 	quit(0)
