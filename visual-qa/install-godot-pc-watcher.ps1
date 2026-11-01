@@ -57,11 +57,21 @@ $stamp=[DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff')
 $stdout=Join-Path $root ("godot-watcher-$stamp-stdout.log")
 $stderr=Join-Path $root ("godot-watcher-$stamp-stderr.log")
 $startNote=Join-Path $root ("godot-watcher-$stamp-start.json")
-[IO.File]::WriteAllText($startNote,
- ((@{startedUTC=[DateTime]::UtcNow.ToString('o');workerSha=$ExpectedWorkerSha;
-    stdout=$stdout;stderr=$stderr;mode='--watch';fullAppMigrated=$false}
-   |ConvertTo-Json)+[Environment]::NewLine),
- (New-Object System.Text.UTF8Encoding($false)))
+# Keep construction, JSON serialization and UTF8 encoding separate.
+# The former multiline hashtable pipeline inside WriteAllText was not
+# parseable by Windows PowerShell 5.1 on the real owner PC.
+$startRecord = [ordered]@{
+ startedUTC = [DateTime]::UtcNow.ToString('o')
+ workerSha = $ExpectedWorkerSha
+ stdout = $stdout
+ stderr = $stderr
+ mode = '--watch'
+ fullAppMigrated = $false
+}
+$startJson = ConvertTo-Json -InputObject $startRecord -Compress
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllText(
+ $startNote, ($startJson + [System.Environment]::NewLine), $utf8NoBom)
 Write-Host "Godot watcher log files: $stdout ; $stderr"
 $native=Start-Process -FilePath $NodeExe -ArgumentList @($worker,'--watch') -PassThru -Wait -NoNewWindow -RedirectStandardOutput $stdout -RedirectStandardError $stderr
 if($native.ExitCode -ne 0){
