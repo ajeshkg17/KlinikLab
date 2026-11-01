@@ -63,7 +63,7 @@ fs.mkdirSync(output,{recursive:true});
 for(let c=0;c<6;c++){
  const row=info[c];
  if(!Array.isArray(row)||row.length!==5||row[0]!==IDs[c]||row[1]!==FDIs[c]||row[4]!==KINDS[c]||
-    row.slice(2,4).some(s=>typeof s!=='string'||s.length<15||s.length>500))
+    row.slice(2,4).some(s=>typeof s!=='string'||s.length<6||s.length>500))
   throw Error('Original radiography case identity/finding mismatch index '+c);
  const [id,fdi,title,reference,kind]=row;
  const solid=new ToothSolid(id,fdi);
