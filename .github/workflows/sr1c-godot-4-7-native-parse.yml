@@ -7,6 +7,7 @@ on:
       - 'visual-qa/godot-local-clinical/**'
       - 'native-godot/**'
       - 'tests/sr2_godot_native_full_app_foundation.test.mjs'
+      - 'tests/sr31_desktop_clinic_walk.test.mjs'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -192,6 +193,14 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://actual-app-smoke.gd > "$RUNNER_TEMP/actual-cc0-app-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+      - name: SR31 real native desktop walk and selected FDI operatory input (HEADLESS, NO PC PIXELS)
+        run: |
+          set -euo pipefail
+          node --test tests/sr31_desktop_clinic_walk.test.mjs
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://clinic-walk-intent.gd > "$RUNNER_TEMP/sr31-walk-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr31-walk-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://clinic-walk-smoke.gd > "$RUNNER_TEMP/sr31-walk-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/sr31-walk-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr31-walk-smoke.log"
+          grep -F "SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
