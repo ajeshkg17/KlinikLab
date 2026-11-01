@@ -71,7 +71,7 @@ test('SR34 manual practical checklist is persisted, per-case, and distinct from 
   'checklist_state.toggled.connect(_procedure_toggle_checklist.bind(step_index))',
   '_save_progress()','Learner checklist: %d/%d manually completed']) assert.ok(app.includes(marker),marker);
  const impl=app.slice(app.indexOf('func _procedure_checklist_complete('),app.indexOf('func _handle_procedure_input('));
- assert.doesNotMatch(impl,/(?:_record_practical|_direct_cut_world_ray|_apply_cut|cut_to|_journey_procedure|_mark_studied)\\(/);
+ assert.doesNotMatch(impl,/(?:_record_practical|_direct_cut_world_ray|_apply_cut|cut_to|_journey_procedure|_mark_studied)\(/);
  const smoke=read('native-godot/guided-practical-smoke.gd');
  for(const marker of ['SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS','_procedure_set_checklist','_load_progress','practicalChecklist','before_answers']) assert.ok(smoke.includes(marker),marker);
 });
