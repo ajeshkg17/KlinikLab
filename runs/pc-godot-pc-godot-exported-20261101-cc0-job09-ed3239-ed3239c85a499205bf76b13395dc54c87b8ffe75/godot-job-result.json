@@ -1,0 +1,34 @@
+{
+  "jobId": "pc-godot-exported-20261101-cc0-job09-ed3239",
+  "sourceGitSHA": "ed3239c85a499205bf76b13395dc54c87b8ffe75",
+  "watcherSuite": "sr14-native-exported-cc0-six-case",
+  "workerGitSHA": "14a9e5e7e0273685c82927f69f37290b93f1f954",
+  "nativeSceneMode": "native-exported-cc0",
+  "fullKlinikLabApplicationMigrated": false,
+  "executedOn": "owner Windows PC (actual exported EXE watcher)",
+  "originalArtifact": {
+    "runId": 41304091271,
+    "id": 13082771261,
+    "name": "KlinikLab-Windows-x64-ed3239c85a499205bf76b13395dc54c87b8ffe75"
+  },
+  "generatedAt": "2026-11-01T12:10:29.299Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "nativeWorkflowVerified": false,
+  "imageExists": false,
+  "angledImageExists": false,
+  "distinctRtx5060Gpu3DPeriods": 0,
+  "rtx5060DxgiLuid": "0x00000000_0x00013049",
+  "dxgiLuidMatchesGodotProcess": false,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": false,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [],
+  "blockers": [
+    "Fewer than three independent positive exact exported-app PID GPU 3D periods on RTX5060 LUID",
+    "Exported PC evidence exception: Exported exe did not publish its own capture report; check --script embedded-PCK launch"
+  ]
+}

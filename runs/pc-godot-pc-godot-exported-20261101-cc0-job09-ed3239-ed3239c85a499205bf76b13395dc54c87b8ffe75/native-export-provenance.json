@@ -1,0 +1,12 @@
+{
+  "kind": "EXACT_GITHUB_ACTIONS_PORTABLE_WINDOWS_EXECUTABLE",
+  "sourceGitSHA": "ed3239c85a499205bf76b13395dc54c87b8ffe75",
+  "artifact": {
+    "runId": 41304091271,
+    "id": 13082771261,
+    "name": "KlinikLab-Windows-x64-ed3239c85a499205bf76b13395dc54c87b8ffe75"
+  },
+  "downloadedZipSHA256": "d5e86ee84080307954b0f8e986915864f18b7afddb07da32802e7ba441a1f0bc",
+  "originalGitHubArchiveBytes": 43762728,
+  "noLocalRebuild": true
+}
