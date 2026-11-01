@@ -53,7 +53,7 @@ test('Unity new owner PC runner is exact-SHA two-stage source import PLUS real p
  for(const marker of ['-force-d3d11','CreateDesktopRaw','GetProcessWindowStation',
   'Get-Counter','-MaxSamples 34','DxgiEvidence','FromGpuEnginePath',
   'processGpuCorroborated=$gpuOK','nativeCaseStationSelectionPreviewVerified',
-  'sourceRun=$src','nativeRun=$run','codeGitSHA=$actual',
+  'sourceRun=$src','nativeRun=$run','codeGitSHA=$code',
   'FileMode]::CreateNew']){
    assert(unityGPU.includes(marker),marker);
  }
