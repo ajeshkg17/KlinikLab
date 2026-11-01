@@ -45,8 +45,8 @@ if($Mode -eq 'Prepare'){
  $builder=Join-Path $source 'visual-qa\sr1b-run-local-kliniklab.ps1'
  $buildArgs='-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "'+
   $builder+'" -Mode Build -EvidenceDir "'+$run+'" -ExpectedSha '+$sha+' -EngineRoot "'+$ue+'"'
- $outLog=Join-Path $run 'original-source-build-stdout.log'
- $errLog=Join-Path $run 'original-source-build-stderr.log'
+ $outLog=Join-Path $parent ($id+'-original-source-build-stdout.log')
+ $errLog=Join-Path $parent ($id+'-original-source-build-stderr.log')
  $p=Start-Process -FilePath 'powershell.exe' -ArgumentList $buildArgs -PassThru -NoNewWindow -RedirectStandardOutput $outLog -RedirectStandardError $errLog
  if(-not $p.WaitForExit(1800000)){
   & taskkill.exe /PID $p.Id /T /F | Out-Null
