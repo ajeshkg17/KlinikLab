@@ -64,8 +64,9 @@ func configure(source_sha: String) -> bool:
 		var id: String = str(item["id"])
 		var row: Dictionary = assets.get(id,{})
 		var filepath: String = str(item["file"])
-		if str(row.get("path","")) != filepath or str(row.get("sha256","")) != str(item["sha"]) or
-			str(row.get("status","")) != "STATIC_VISUAL_ONLY":
+		if (str(row.get("path","")) != filepath or
+			str(row.get("sha256","")) != str(item["sha"]) or
+			str(row.get("status","")) != "STATIC_VISUAL_ONLY"):
 			_error = "Independent reviewed CC0 source manifest mismatch for " + id
 			return false
 		if not FileAccess.file_exists(filepath) or FileAccess.get_sha256(filepath)!=str(item["sha"]):
