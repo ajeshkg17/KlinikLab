@@ -30,6 +30,7 @@ on:
       - 'visual-qa/sr1c-pdh-filter.ps1'
       - 'visual-qa/sr1x-capture-native-exported-app-pc.ps1'
       - 'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1'
+      - 'tests/sr16_ownerpc_readonly_diagnostics.test.mjs'
       - 'visual-qa/sr1d-prepare-godot-cases.ps1'
       - 'visual-qa/sr1d-export-native-cases.mjs'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -73,6 +74,7 @@ jobs:
           node --test tests/sr1g_godot_watcher_env_readiness.test.mjs
           node --test tests/sr1n_godot_native_capture_race.test.mjs
           node --test tests/sr1p_q_job08_unity_native_workflow.test.mjs
+          node --test tests/sr16_ownerpc_readonly_diagnostics.test.mjs
           node --check visual-qa/godot-job07-forensics.mjs
           node --test tests/sr1e_job07_forensic_recovery.test.mjs
           node --check visual-qa/godot-single-instance.mjs
