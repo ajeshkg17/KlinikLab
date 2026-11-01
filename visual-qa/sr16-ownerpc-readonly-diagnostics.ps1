@@ -24,8 +24,15 @@ $ledgerPath=Join-Path $root 'godot-ledger.json'
 $heartPath=Join-Path $root 'godot-heartbeat.json'
 $runtimePath=Join-Path $root 'godot-watcher-runtime.json'
 $task=Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher' -ErrorAction Stop
-$me=[Security.Principal.WindowsIdentity]::GetCurrent().Name
+$currentIdentity=[Security.Principal.WindowsIdentity]::GetCurrent()
+$currentUserSid=if($null -ne $currentIdentity.User){$currentIdentity.User.Value}else{''}
 $principal=[string]$task.Principal.UserId
+$taskPrincipalSid=''
+try{$taskPrincipalSid=([Security.Principal.SecurityIdentifier]::new($principal)).Value}catch{
+ try{$taskPrincipalSid=([Security.Principal.NTAccount]::new($principal)).Translate([Security.Principal.SecurityIdentifier]).Value}catch{}
+}
+$taskPrincipalSidResolved=(-not [string]::IsNullOrWhiteSpace($taskPrincipalSid))
+$currentLoginMatchesTaskPrincipal=($taskPrincipalSidResolved -and -not [string]::IsNullOrWhiteSpace($currentUserSid) -and $currentUserSid -ceq $taskPrincipalSid)
 $actions=@($task.Actions)
 $actionArgs=''
 $actionExe=''
@@ -53,11 +60,15 @@ if($taskWorkerDirectoryExists -and (Get-Command git.exe -ErrorAction SilentlyCon
 }
 $ledgerPresent=Test-Path -LiteralPath $ledgerPath -PathType Leaf
 $entryPresent=$false;$status=$null;$ledgerSha=$null;$ledgerErrors=@()
+$ledgerTopLevelKeys=@();$ledgerCompletedPropertyPresent=$false;$ledgerCompletedEntryCount=0
 if($ledgerPresent){
  $ledgerSha=(Get-FileHash -LiteralPath $ledgerPath -Algorithm SHA256).Hash.ToLowerInvariant()
  try{
   $ledger=Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $ledgerTopLevelKeys=@($ledger.PSObject.Properties.Name)
+  $ledgerCompletedPropertyPresent=($null -ne $ledger.completed)
   if($null -ne $ledger.completed){
+   $ledgerCompletedEntryCount=@($ledger.completed.PSObject.Properties).Count
    $entry=$ledger.completed.PSObject.Properties[$JobId]
    $entryPresent=($null -ne $entry)
    if($entryPresent){$status=[string]$entry.Value.status}
@@ -74,17 +85,20 @@ if($originalEvidenceExists){
 }
 $heartbeatExists=Test-Path -LiteralPath $heartPath -PathType Leaf
 $runtimeExists=Test-Path -LiteralPath $runtimePath -PathType Leaf
-$heartbeatJobId=$null;$heartbeatStatus=$null
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null;$heartbeatProcessAlive=$false
 if($heartbeatExists){
  try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
   $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
+  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  if($heartbeatPid -gt 0){$heartbeatProcessAlive=($null -ne (Get-Process -Id $heartbeatPid -ErrorAction SilentlyContinue))}
  }catch{}
 }
-$runtimeWorkerSha=$null;$runtimeCurrentJob=$null
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
 if($runtimeExists){
  try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
   $runtimeWorkerSha=[string]$receipt.workerGitSHA
   $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
  }catch{}
 }
 # Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
@@ -93,12 +107,15 @@ try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdo
  Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
 try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
  Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
-$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutBlocked=$false
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
 if($null -ne $latestStdout){
  try{
   $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
   $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
-  $stdoutLedgerReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
   $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
  }catch{}
 }
@@ -121,7 +138,8 @@ $report=[ordered]@{
  mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
  noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
  jobId=$JobId;expectedSourceSHA=$ExpectedSha
- currentLoginMatchesTaskPrincipal=($me -ieq $principal)
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
  taskState=[string]$task.State;taskActionCount=$actions.Count
  taskActionExecutableExists=$taskActionExecutableExists
  taskInstallScriptExists=$taskInstallScriptExists
@@ -132,14 +150,21 @@ $report=[ordered]@{
  localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
  workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
  localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
  localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
  localOriginalEvidenceFolderExists=$originalEvidenceExists
  localOriginalEvidenceFileCount=$originalEvidenceFileCount
  heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
- runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt;heartbeatProcessAlive=$heartbeatProcessAlive
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
  latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=if($null -ne $latestStdout){$latestStdout.LastWriteTimeUtc.ToString('o')}else{$null}
+ latestWorkerStderrLastWriteUTC=if($null -ne $latestStderr){$latestStderr.LastWriteTimeUtc.ToString('o')}else{$null}
  latestWorkerStdoutPublishedMessage=$stdoutPublished
  latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
  latestWorkerStdoutBlockedMessage=$stdoutBlocked
  latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
  systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
