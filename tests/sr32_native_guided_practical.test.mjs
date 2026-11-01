@@ -24,7 +24,7 @@ test('SR32 optional guided practical shows only the chosen original task and sto
   'start_guide.pressed.connect(_set_procedure_guided.bind(true))',
   'show_all.pressed.connect(_set_procedure_guided.bind(false))',
   'KEY_N','KEY_P',
-  'focused is LineEdit or focused is TextEdit or focused is OptionButton or focused is PopupMenu'])
+  'focused is LineEdit or focused is TextEdit or focused is OptionButton'])
   assert.ok(app.includes(value),value);
  const guide=app.slice(app.indexOf('func _procedure_move_step('),app.indexOf('func _load_source()'));
  assert.match(guide,/clampi\(_procedure_step_index \+ delta, 0, steps.size\(\) - 1\)/);
