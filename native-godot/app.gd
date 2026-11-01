@@ -67,8 +67,10 @@ var _walk: RefCounted
 var _walk_active := false
 var _walk_look_dragging := false
 var _walk_near_operatory := false
+var _walk_near_language_station := false
 # A practical station entered through walk may return to the same safe camera pose.
 var _walk_station_return_available := false
+var _walk_language_return_available := false
 # SR32: optional source-derived practical stepper. Navigation is never treatment
 # scoring or a tool/cut action; answers remain in the original progress journal.
 var _procedure_guided := false
@@ -199,8 +201,10 @@ func _process(delta: float) -> void:
 		_walk.call("apply_move_intent", direction, delta)
 		_apply_walk_camera()
 		var now_near: bool = bool(_walk.call("in_operatory_range"))
-		if now_near != _walk_near_operatory:
+		var now_language_near: bool = bool(_walk.call("in_language_station_range"))
+		if now_near != _walk_near_operatory or now_language_near != _walk_near_language_station:
 			_walk_near_operatory = now_near
+			_walk_near_language_station = now_language_near
 			_refresh()
 
 func _handle_walk_input(event: InputEvent) -> void:
@@ -220,7 +224,7 @@ func _handle_walk_input(event: InputEvent) -> void:
 		var key: InputEventKey = event
 		if key.pressed and not key.echo:
 			if key.physical_keycode == KEY_E or key.keycode == KEY_E:
-				if _walk_enter_procedure():
+				if _walk_enter_language_station() or _walk_enter_procedure():
 					get_viewport().set_input_as_handled()
 			elif key.keycode == KEY_ESCAPE:
 				_stop_clinic_walk()
@@ -234,7 +238,9 @@ func _start_clinic_walk() -> void:
 	_walk_look_dragging = false
 	_walk.call("reset")
 	_walk_station_return_available = false
+	_walk_language_return_available = false
 	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
+	_walk_near_language_station = bool(_walk.call("in_language_station_range"))
 	_apply_walk_camera()
 	_refresh()
 
@@ -272,14 +278,30 @@ func _walk_enter_procedure() -> bool:
 
 # An explicit station exit restores the bounded walk without restarting at spawn.
 # Never enable the bur, grade, or rewrite learner progress.
-func _return_to_clinic_walk() -> bool:
-	if not _walk_station_return_available or _view != "clinic" or _station_index != 4 or _walk == null or _cc0_clinic == null:
+func _walk_enter_language_station() -> bool:
+	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_language_station_range")):
 		return false
+	_language_save_draft()
+	_walk_active = false
+	_walk_look_dragging = false
+	_walk_language_return_available = true
+	_walk_station_return_available = false
+	_switch_view("language")
+	return _view == "language"
+
+func _return_to_clinic_walk() -> bool:
+	var from_practical: bool = _walk_station_return_available and _view == "clinic" and _station_index == 4
+	var from_language: bool = _walk_language_return_available and _view == "language"
+	if (not from_practical and not from_language) or _walk == null or _cc0_clinic == null:
+		return false
+	if from_language:
+		_language_save_draft()
 	_direct_bur_mode = false
 	_switch_view("environment")
 	_walk_active = true
 	_walk_look_dragging = false
 	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
+	_walk_near_language_station = bool(_walk.call("in_language_station_range"))
 	_apply_walk_camera()
 	_refresh()
 	return true
@@ -803,11 +825,17 @@ func _show_environment() -> void:
 	else:
 		_page.add_child(_heading("Room exploration preview: WASD / arrows move; right-drag over central 3D view to look; E enters the operatory when nearby; Esc exits walk. Bounded navigation only: no collision or clinical-scale calibration.",13))
 		var within: bool = bool(_walk.call("in_operatory_range"))
-		_page.add_child(_heading("Operatory interaction: " + ("in range" if within else "walk toward the room's operatory marker"),14))
+		var language_within: bool = bool(_walk.call("in_language_station_range"))
+		_page.add_child(_heading("Dental practical operatory: " + ("in range" if within else "walk toward the operatory marker"),14))
 		var enter := _button("Enter selected FDI %s practical station (E)" % FDI[_case_index])
 		enter.disabled = not within
 		enter.pressed.connect(_walk_enter_procedure)
 		_page.add_child(enter)
+		_page.add_child(_heading("FSP/KP language station: " + ("in range" if language_within else "walk toward the separate language-station marker"),14))
+		var language_enter := _button("Enter FSP/KP language station (E)")
+		language_enter.disabled = not language_within
+		language_enter.pressed.connect(_walk_enter_language_station)
+		_page.add_child(language_enter)
 		var stop_walk := _button("Exit walk (Esc)")
 		stop_walk.pressed.connect(_stop_clinic_walk)
 		_page.add_child(stop_walk)
@@ -848,6 +876,8 @@ func _switch_view(view: String) -> void:
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
+	if _view == "language" and view != "language":
+		_language_save_draft()
 	if view != "clinic":
 		_procedure_guided = false
 		_procedure_step_index = 0
@@ -1047,6 +1077,10 @@ func _language_reset_exercise() -> void:
 	_refresh()
 
 func _show_language_studio() -> void:
+	if _walk_language_return_available:
+		var return_walk := _button("Return to clinic walk from FSP/KP station (no progress loss)")
+		return_walk.pressed.connect(_return_to_clinic_walk)
+		_page.add_child(return_walk)
 	if _language == null:
 		_page.add_child(_heading("Original FSP/KP source not available", 14))
 		return
