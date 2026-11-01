@@ -1,0 +1,10 @@
+{
+    "schemaVersion":  1,
+    "kind":  "CASE_STATION_EXPORT_NOT_FULL_KLINIKLAB",
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "sourceAppSHA256":  "2ad804cfa6b09697923a60fc631e5941a00637b9ce888bf64c35c37ba67f6468",
+    "nativeManifestSHA256":  "9e14cf28a526640cc02bcbf2121760608128fdd6217c330f0b1097ee7374ba49",
+    "cases":  6,
+    "stations":  7,
+    "fullKlinikLabApplicationMigrated":  false
+}

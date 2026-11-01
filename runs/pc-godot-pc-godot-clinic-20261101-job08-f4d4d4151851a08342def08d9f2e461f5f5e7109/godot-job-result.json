@@ -1,0 +1,33 @@
+{
+  "powerShellChildEnvironment": {
+    "inheritedPSModulePathRemoved": true,
+    "hashCmdletPreflightRequired": true
+  },
+  "jobId": "pc-godot-clinic-20261101-job08",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1d-clinic-case-station-migration",
+  "workerGitSHA": "f41078e3fc7049adb9158f1122adca7298168df8",
+  "nativeSceneMode": "clinic-cases",
+  "fullKlinikLabApplicationMigrated": false,
+  "executedOn": "owner Windows PC (watcher runtime)",
+  "generatedAt": "2026-11-01T08:05:40.514Z",
+  "nativeReportStatus": "EVIDENCE_INCOMPLETE",
+  "nativeWorkflowVerified": false,
+  "imageExists": false,
+  "angledImageExists": false,
+  "distinctRtx5060Gpu3DPeriods": 34,
+  "rtx5060DxgiLuid": "0x00000000_0x00013049",
+  "dxgiLuidMatchesGodotProcess": true,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": false,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [],
+  "blockers": [
+    "No original Godot background capture report returned",
+    "Actual Godot process RTX 5060 GPU render proof incomplete"
+  ]
+}

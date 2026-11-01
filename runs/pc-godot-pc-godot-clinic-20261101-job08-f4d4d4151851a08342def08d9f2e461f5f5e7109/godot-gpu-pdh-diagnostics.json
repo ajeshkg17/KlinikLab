@@ -1,0 +1,158 @@
+{
+    "schemaVersion":  1,
+    "godotPid":  41820,
+    "query":  "GPU Engine(*)/Utilization Percentage",
+    "commandErrorAction":  "Continue",
+    "queryInvocationCount":  1,
+    "collectionPeriodCount":  34,
+    "collectionPeriods":  [
+                              {
+                                  "collectionIndex":  1,
+                                  "utc":  "2026-11-01T08:05:05.8573569Z"
+                              },
+                              {
+                                  "collectionIndex":  2,
+                                  "utc":  "2026-11-01T08:05:06.8911086Z"
+                              },
+                              {
+                                  "collectionIndex":  3,
+                                  "utc":  "2026-11-01T08:05:07.9289557Z"
+                              },
+                              {
+                                  "collectionIndex":  4,
+                                  "utc":  "2026-11-01T08:05:08.9482299Z"
+                              },
+                              {
+                                  "collectionIndex":  5,
+                                  "utc":  "2026-11-01T08:05:09.9711974Z"
+                              },
+                              {
+                                  "collectionIndex":  6,
+                                  "utc":  "2026-11-01T08:05:10.9914667Z"
+                              },
+                              {
+                                  "collectionIndex":  7,
+                                  "utc":  "2026-11-01T08:05:12.0219067Z"
+                              },
+                              {
+                                  "collectionIndex":  8,
+                                  "utc":  "2026-11-01T08:05:13.0474756Z"
+                              },
+                              {
+                                  "collectionIndex":  9,
+                                  "utc":  "2026-11-01T08:05:14.0682729Z"
+                              },
+                              {
+                                  "collectionIndex":  10,
+                                  "utc":  "2026-11-01T08:05:15.0979189Z"
+                              },
+                              {
+                                  "collectionIndex":  11,
+                                  "utc":  "2026-11-01T08:05:16.1432722Z"
+                              },
+                              {
+                                  "collectionIndex":  12,
+                                  "utc":  "2026-11-01T08:05:17.2090496Z"
+                              },
+                              {
+                                  "collectionIndex":  13,
+                                  "utc":  "2026-11-01T08:05:18.2466894Z"
+                              },
+                              {
+                                  "collectionIndex":  14,
+                                  "utc":  "2026-11-01T08:05:19.2744046Z"
+                              },
+                              {
+                                  "collectionIndex":  15,
+                                  "utc":  "2026-11-01T08:05:20.3231905Z"
+                              },
+                              {
+                                  "collectionIndex":  16,
+                                  "utc":  "2026-11-01T08:05:21.3520482Z"
+                              },
+                              {
+                                  "collectionIndex":  17,
+                                  "utc":  "2026-11-01T08:05:22.3722442Z"
+                              },
+                              {
+                                  "collectionIndex":  18,
+                                  "utc":  "2026-11-01T08:05:23.3951009Z"
+                              },
+                              {
+                                  "collectionIndex":  19,
+                                  "utc":  "2026-11-01T08:05:24.4085336Z"
+                              },
+                              {
+                                  "collectionIndex":  20,
+                                  "utc":  "2026-11-01T08:05:25.4269393Z"
+                              },
+                              {
+                                  "collectionIndex":  21,
+                                  "utc":  "2026-11-01T08:05:26.4904126Z"
+                              },
+                              {
+                                  "collectionIndex":  22,
+                                  "utc":  "2026-11-01T08:05:27.5044886Z"
+                              },
+                              {
+                                  "collectionIndex":  23,
+                                  "utc":  "2026-11-01T08:05:28.5388691Z"
+                              },
+                              {
+                                  "collectionIndex":  24,
+                                  "utc":  "2026-11-01T08:05:29.5567436Z"
+                              },
+                              {
+                                  "collectionIndex":  25,
+                                  "utc":  "2026-11-01T08:05:30.5946809Z"
+                              },
+                              {
+                                  "collectionIndex":  26,
+                                  "utc":  "2026-11-01T08:05:31.6449367Z"
+                              },
+                              {
+                                  "collectionIndex":  27,
+                                  "utc":  "2026-11-01T08:05:32.6651222Z"
+                              },
+                              {
+                                  "collectionIndex":  28,
+                                  "utc":  "2026-11-01T08:05:33.6850350Z"
+                              },
+                              {
+                                  "collectionIndex":  29,
+                                  "utc":  "2026-11-01T08:05:34.7375257Z"
+                              },
+                              {
+                                  "collectionIndex":  30,
+                                  "utc":  "2026-11-01T08:05:35.7514600Z"
+                              },
+                              {
+                                  "collectionIndex":  31,
+                                  "utc":  "2026-11-01T08:05:36.7697619Z"
+                              },
+                              {
+                                  "collectionIndex":  32,
+                                  "utc":  "2026-11-01T08:05:37.7878891Z"
+                              },
+                              {
+                                  "collectionIndex":  33,
+                                  "utc":  "2026-11-01T08:05:38.8029672Z"
+                              },
+                              {
+                                  "collectionIndex":  34,
+                                  "utc":  "2026-11-01T08:05:39.8326380Z"
+                              }
+                          ],
+    "godot3DRowsObserved":  918,
+    "godot3DRowsRejected":  0,
+    "rejectedGodotRows":  [
+
+                          ],
+    "nonTerminatingErrorCount":  0,
+    "nonTerminatingErrorMessages":  [
+
+                                    ],
+    "terminatingErrors":  [
+
+                          ]
+}

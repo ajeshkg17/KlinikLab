@@ -1,0 +1,93 @@
+{
+    "schemaVersion":  2,
+    "status":  "EVIDENCE_INCOMPLETE",
+    "nativeSceneMode":  "clinic-cases",
+    "nativeCaseWorkflowVerified":  false,
+    "fullKlinikLabApplicationMigrated":  false,
+    "sourceGitSHA":  "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+    "godotExe":  "C:\\Users\\ajesh\\AppData\\Local\\Microsoft\\WinGet\\Packages\\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\\godot_v4.7.2-stable_win64.exe",
+    "godotProject":  "C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-clinic-20261101-job08-f4d4d41518\\Project\\project.godot",
+    "privateDesktopCreated":  true,
+    "userDesktopActivationRequested":  false,
+    "headlessUsed":  false,
+    "godotPid":  41820,
+    "godotStartedUTC":  "2026-11-01T08:04:56.1256382Z",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeImagePresent":  false,
+    "nativeScreenshotFile":  null,
+    "imageSHA256":  null,
+    "imageWidth":  null,
+    "imageHeight":  null,
+    "nativePixelReviewAccepted":  false,
+    "sourceTriangles":  {
+                            "before":  14856,
+                            "after":  14936
+                        },
+    "expectedTissueSurfacesPerState":  5,
+    "renderingMethod":  null,
+    "renderingDriver":  null,
+    "videoAdapterName":  null,
+    "videoAdapterVendor":  null,
+    "backgroundCaptureStatus":  null,
+    "process3DSampleCount":  918,
+    "process3DPositiveSamples":  34,
+    "process3DMaxUtilizationPercent":  12.559505087101563,
+    "process3DDistinctSamplePeriods":  34,
+    "process3DPositiveDistinctPeriods":  34,
+    "process3DPositiveRtx5060DistinctPeriods":  34,
+    "persistentPDHQueryUsed":  true,
+    "originalGpuCounterSampleFile":  "godot-gpu-3d-counters.json",
+    "dxgiAdapters":  [
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00012b1e",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+                             "luid":  "0x00000000_0x00013049",
+                             "vendorId":  4318,
+                             "deviceId":  11609,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Intel(R) Graphics",
+                             "luid":  "0x00000000_0x00020475",
+                             "vendorId":  32902,
+                             "deviceId":  32103,
+                             "evidenceSource":  null
+                         },
+                         {
+                             "name":  "Microsoft Basic Render Driver",
+                             "luid":  "0x00000000_0x00012fbb",
+                             "vendorId":  5140,
+                             "deviceId":  140,
+                             "evidenceSource":  null
+                         }
+                     ],
+    "rtx5060DxgiLuid":  "0x00000000_0x00013049",
+    "positiveGodotEngineLuids":  [
+                                     "0x00000000_0x00013049"
+                                 ],
+    "nativeAngledScreenshotFile":  null,
+    "angledImageSHA256":  null,
+    "nativeAngledImagePresent":  false,
+    "orbitDurationSeconds":  null,
+    "rendererLogNvidiaRtx5060":  false,
+    "gpuAdapterLuidMatchedToNvidia":  true,
+    "godotProcessGPUCorroborated":  false,
+    "blockers":  [
+                     "No original Godot background capture report returned",
+                     "Actual Godot process RTX 5060 GPU render proof incomplete"
+                 ],
+    "limitations":  [
+                        "Independent original PNG pixel review remains required",
+                        "Windows GPU 3D PID utilization plus Godot Vulkan adapter identity does not itself map a DXGI LUID"
+                    ],
+    "pdhNonTerminatingErrorCount":  0,
+    "pdhRejectedGodot3DRows":  0,
+    "pdhCollectionPeriods":  34,
+    "originalPdhDiagnosticFile":  "godot-gpu-pdh-diagnostics.json"
+}
