@@ -80,6 +80,28 @@ func _run() -> void:
 	if editor==null or str((editor.call("summary") as Dictionary)["fdi"])!="36" or (editor.call("summary") as Dictionary).get("removedSamplePoints",0)!=0:
 		_fail("Interaction altered synthetic tooth geometry or wrong FDI")
 		return
+	# SR37 station exit resumes the same bounded pose, not a reset or bur.
+	var station_pose: Vector3 = walker.get("position")
+	var station_yaw: float = float(walker.get("yaw"))
+	if not bool(app.call("_return_to_clinic_walk")):
+		_fail("Source practical station cannot return to same clinic walk")
+		return
+	if str(app.get("_view")) != "environment" or not bool(app.get("_walk_active")) or bool(app.get("_direct_bur_mode")):
+		_fail("Returning to clinic walk left station active or enabled cutting")
+		return
+	if walker.get("position").distance_to(station_pose)>0.0001 or absf(float(walker.get("yaw"))-station_yaw)>0.0001:
+		_fail("Station exit reset walker position or heading")
+		return
+	if bool(app.call("_return_to_clinic_walk")):
+		_fail("Walking outside the station allowed a duplicate exit")
+		return
+	if int(app.get("_case_index")) != 1 or str((app.get("_progress") as Dictionary)["fspKpByTask"]["endo|anamnese"]["text"]) != "Synthetic German training draft":
+		_fail("Station return changed FDI or FSP/KP progress")
+		return
+	app.call("_stop_clinic_walk")
+	if bool(app.call("_return_to_clinic_walk")):
+		_fail("Inactive environment may not return from practical")
+		return
 	app.call("_switch_view","environment")
 	app.call("_start_clinic_walk")
 	if not bool(app.get("_walk_active")):
@@ -96,5 +118,5 @@ func _run() -> void:
 	if bool(app.get("_walk_active")) or bool(app.call("_walk_enter_procedure")):
 		_fail("Keyboard walk leaked into FSP/KP language view")
 		return
-	print("SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS no capture/Quest/clinical validation")
+	print("SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS SR37_STATION_RETURN_SAME_POSE_PASS no capture/Quest/clinical validation")
 	quit(0)
