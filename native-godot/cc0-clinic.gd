@@ -2,6 +2,7 @@ extends Node3D
 ## SR13: live static CC0 clinic/environment, not patient anatomy/instruments.
 ## Only two reviewed source-original GLBs, hashes and CC0 terms pinned.
 const ROOT := "res://assets/cc0/3dassets-dental/"
+const RAW_RESOLVER = preload("res://raw-source.gd")
 const INDEX := ROOT + "clinic-manifest.json"
 const WHOLE := "whole-clinic-starter-v1.glb"
 const TRAY := "instrument-tray-v1.glb"
@@ -49,8 +50,8 @@ func configure(expected_sha: String) -> bool:
 			_error = "Reviewed CC0 asset identity/hash mismatch "+file
 			return false
 		var filepath := ROOT+file+".source"
-		if not FileAccess.file_exists(filepath) or FileAccess.get_sha256(filepath)!=str(HASHES[file]):
-			_error = "Missing/corrupt original CC0 GLB "+file
+		if RAW_RESOLVER.verified_path(filepath,str(HASHES[file])).is_empty():
+			_error = "Missing/corrupt ORIGINAL CC0 bytes (editor or exported EXE sidecar): "+file
 			return false
 		# Original source GLB uses KHR_mesh_quantization. Stock Godot
 		# requires the separately hashed, deterministic float32 conversion.
@@ -59,8 +60,8 @@ func configure(expected_sha: String) -> bool:
 			_error = "Godot compatibility source manifest missing "+file
 			return false
 		var native_path := ROOT+compatible
-		if not FileAccess.file_exists(native_path) or FileAccess.get_sha256(native_path)!=str(row.get("godotSha256","")):
-			_error = "Missing/corrupt Godot-compatible converted CC0 GLB "+file
+		if RAW_RESOLVER.verified_path(native_path,str(row.get("godotSha256",""))).is_empty():
+			_error = "Missing/corrupt verified RAW converted CC0 bytes in exported EXE sidecar: "+file
 			return false
 		var resource := load(native_path)
 		if not (resource is PackedScene):
