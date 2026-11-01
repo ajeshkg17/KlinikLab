@@ -16,6 +16,7 @@ import {cleanWindowsPowerShellEnv} from './godot-powershell-environment.mjs';
 import {parseGodotJson,jsonWithoutBom} from './godot-json.mjs';
 import {acquireGodotWorkerLease,readGodotWorkerLease} from './godot-single-instance.mjs';
 import {inspectJob07,JOB07_ID,JOB07_SOURCE,JOB07_DIR,JOB07_WORKER} from './godot-job07-forensics.mjs';
+import {verifyNextJobAdmission,PROBE_JOB_ID} from './godot-next-job-admission.mjs';
 
 const REMOTE='https://github.com/ajeshkg17/KlinikLab.git';
 const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','share'),'KlinikLabGodotWorker');
@@ -577,35 +578,15 @@ async function probeNextJobWithoutExecuting(){
  // in this diagnostic terminal; no heartbeat, lock or ledger is written.
  if(process.platform!=='win32')throw Error('Owner Windows PC only');
  const lease=await readGodotWorkerLease(ROOT);
- if(!lease.exists||lease.malformed||lease.processAlive!==true)
-  throw Error('No active, live Godot watcher lease for readiness probe');
  const receipt=parseGodotJson(await fs.readFile(RUNTIME,'utf8'),'running watcher runtime receipt');
- if(receipt.workerPid!==lease.pid||receipt.workerGitSHA!==workerSha()||
-    receipt.executableEnvironmentInherited!==true||receipt.executableExists!==true||
-    receipt.childPowerShellHashModuleVerified!==true||
-    receipt.githubPublisherPermissionVerified!==true||
-    receipt.githubJobApprovalVerified!==true)
-  throw Error('Running watcher receipt does not prove inherited Godot / GitHub readiness');
- if(Date.now()-Date.parse(receipt.updatedUTC)>40000||
-    !Number.isFinite(Date.parse(receipt.updatedUTC)))
-  throw Error('Running watcher environment receipt is stale; current poller not proven');
- if(!path.win32.isAbsolute(receipt.godotExecutablePath))throw Error('Runtime Godot path not absolute');
- await fs.access(receipt.godotExecutablePath);
  const current=await currentJob();
  const ledger=await readLedger();
- if(current.jobId!==JOB07_ID||current.commit!==JOB07_SOURCE)
-  throw Error('Active GitHub request changed: examine new request before probing, do not run anything');
- const job07=ledger.completed?.[JOB07_ID];
- if(job07?.status!=='published'||job07?.recoveryOnly!==true||
-    job07?.commit!==JOB07_SOURCE||job07?.result?.reexecuted!==false||
-    job07?.result?.gpuProcessCorroborated!==false)
-  throw Error('Immutable job07 archive not safely terminal in owner PC ledger');
- // Validate admission of a unique, NEVER-QUEUED schema7 job ID.
- // This ID is a probe marker, NOT a request committed to GitHub.
- const candidate=validateGodotJob({...current,
-  jobId:'pc-godot-clinic-20261101-probe-never-queued-job08'});
- if(ledger.completed?.[candidate.jobId])
-  throw Error('Probe-only identity was unexpectedly used in the ledger');
+ const candidate=verifyNextJobAdmission({
+  lease,receipt,current,ledger,workerSHA:workerSha()
+ });
+ if(!path.win32.isAbsolute(receipt.godotExecutablePath))
+  throw Error('Runtime Godot executable path is not absolute');
+ await fs.access(receipt.godotExecutablePath);
  const run=path.join(EVIDENCE,candidate.jobId+'-'+candidate.commit.slice(0,10));
  try{await fs.access(run);throw Error('Probe-only evidence folder exists')}
  catch(e){if(e.code!=='ENOENT')throw e}
