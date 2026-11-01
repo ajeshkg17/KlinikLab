@@ -22,23 +22,22 @@ const actual=execFileSync('git',['-C',src,'rev-parse','HEAD'],{encoding:'utf8'})
 if(actual!==sha)throw Error('Native app requires exact original source commit; refusing source drift');
 const dest=path.resolve(output);
 if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot project');
-fs.mkdirSync(path.join(dest,'source'),{recursive:true});
+fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
  for(const name of ['app.gd','app.tscn','project.godot'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
- const exportSource=path.join(root,'visual-qa/sr1-local-kliniklab-export.mjs');
+ const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
  const exportCases=path.join(root,'visual-qa/sr1d-export-native-cases.mjs');
  const exportContent=path.join(root,'native-godot/export-content.mjs');
- function run(script,target){
-  execFileSync(process.execPath,[script,'--source-dir='+src,'--output='+target,'--expected-sha='+sha],
-   {stdio:'inherit',timeout:90000});
+ function run(script,args){
+  execFileSync(process.execPath,[script,...args],{stdio:'inherit',timeout:90000});
  }
  const exported=path.join(dest,'source');
- run(exportSource,exported);
- run(exportCases,path.join(exported,'kliniklab-native-cases.json'));
- run(exportContent,path.join(exported,'app-content.json'));
+ run(exportSource,['--output='+exported,'--expected-sha='+sha]);
+ run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
+ run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'expected-sha.txt'),sha+'\n',{flag:'wx'});
  const hash=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-export-manifest.json'),'utf8'));
  const content=JSON.parse(fs.readFileSync(path.join(exported,'app-content.json'),'utf8'));
