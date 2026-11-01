@@ -67,6 +67,10 @@ var _walk: RefCounted
 var _walk_active := false
 var _walk_look_dragging := false
 var _walk_near_operatory := false
+# SR32: optional source-derived practical stepper. Navigation is never treatment
+# scoring or a tool/cut action; answers remain in the original progress journal.
+var _procedure_guided := false
+var _procedure_step_index := 0
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -259,7 +263,56 @@ func _walk_enter_procedure() -> bool:
 	_select_station(4) # original practical station from immutable source order
 	_switch_view("clinic")
 	_set_camera_mode("teeth")
+	_set_procedure_guided(true) # Enter from walk starts at original task 1.
 	return true
+
+func _procedure_context_available() -> bool:
+	return _view == "clinic" and _station_index == 4 and _case_index >= 0 and _case_index < _cases.size() and _content.has("practical") and (_content["practical"] as Array).size() > _case_index
+
+func _set_procedure_guided(enabled: bool) -> void:
+	if not _procedure_context_available():
+		_procedure_guided = false
+		_procedure_step_index = 0
+		return
+	_procedure_guided = enabled
+	_procedure_step_index = 0
+	# Even toggling the guide off is not permission to cut. Bur remains
+	# separate and requires explicit opt-in for the selected FDI model.
+	_direct_bur_mode = false
+	_refresh()
+
+func _procedure_move_step(delta: int) -> bool:
+	if not _procedure_guided or not _procedure_context_available():
+		return false
+	var steps: Array = _content["practical"][_case_index]
+	if steps.is_empty():
+		return false
+	var next_index: int = clampi(_procedure_step_index + delta, 0, steps.size() - 1)
+	if next_index == _procedure_step_index:
+		return false
+	_procedure_step_index = next_index
+	# The direct cutter is never carried between procedural tasks.
+	_direct_bur_mode = false
+	_refresh()
+	return true
+
+func _handle_procedure_input(event: InputEvent) -> void:
+	if not _procedure_guided or not _procedure_context_available() or not (event is InputEventKey):
+		return
+	var key: InputEventKey = event
+	if not key.pressed or key.echo or key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
+		return
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	if focused is LineEdit or focused is TextEdit or focused is OptionButton:
+		return
+	var code: Key = key.physical_keycode if key.physical_keycode != KEY_NONE else key.keycode
+	var moved := false
+	if code == KEY_N:
+		moved = _procedure_move_step(1)
+	elif code == KEY_P:
+		moved = _procedure_move_step(-1)
+	if moved:
+		get_viewport().set_input_as_handled()
 
 func _load_source() -> bool:
 	var sha := FileAccess.get_file_as_string(SOURCE_SHA).strip_edges()
@@ -575,6 +628,8 @@ func _select_case(index: int) -> void:
 	if index < 0 or index >= _cases.size():
 		return
 	_case_index = index
+	_procedure_guided = false
+	_procedure_step_index = 0
 	_direct_bur_mode = false # explicitly opt in for every new tooth
 	_quiz_index = 0
 	_journey_stage = 0
@@ -590,6 +645,8 @@ func _select_station(index: int) -> void:
 		return
 	_station_index = index
 	if STATION_IDS[index] != "practical":
+		_procedure_guided = false
+		_procedure_step_index = 0
 		_direct_bur_mode = false
 	_quiz_index = 0
 	_save_progress()
@@ -720,6 +777,8 @@ func _switch_view(view: String) -> void:
 		_walk_active = false
 		_walk_look_dragging = false
 	if view != "clinic":
+		_procedure_guided = false
+		_procedure_step_index = 0
 		_direct_bur_mode = false
 	if _scene != null:
 		_scene.visible = view in ["clinic","environment"]
@@ -1006,7 +1065,33 @@ func _show_practical() -> void:
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
 	_page.add_child(_heading("Original case-specific practical tasks. All six cases have distinct local editable synthetic volume states when source checks pass; these are NOT validated operative simulations.", 14))
 	var steps: Array = _content["practical"][_case_index]
+	if not _procedure_guided:
+		var start_guide := _button("Start guided practical (keyboard N/P to navigate original tasks)")
+		start_guide.pressed.connect(_set_procedure_guided.bind(true))
+		_page.add_child(start_guide)
+	else:
+		_procedure_step_index = clampi(_procedure_step_index, 0, maxi(0, steps.size() - 1))
+		var answered: int = 0
+		for i in range(steps.size()):
+			if (_progress["answers"] as Dictionary).has(_key() + ":" + str(i)):
+				answered += 1
+		_page.add_child(_heading("Guided practical: task %d/%d · %d/%d responses recorded for this FDI case" % [
+			_procedure_step_index + 1, steps.size(), answered, steps.size()], 16))
+		_page.add_child(_heading("N = next · P = previous. You can revisit any source task; navigation does not answer, certify, score or cut. Bur use always needs independent explicit opt-in.", 13))
+		var previous := _button("Previous task (P)")
+		previous.disabled = _procedure_step_index == 0
+		previous.pressed.connect(_procedure_move_step.bind(-1))
+		_page.add_child(previous)
+		var next_task := _button("Next task (N)")
+		next_task.disabled = _procedure_step_index >= steps.size() - 1
+		next_task.pressed.connect(_procedure_move_step.bind(1))
+		_page.add_child(next_task)
+		var show_all := _button("Show all original practical tasks")
+		show_all.pressed.connect(_set_procedure_guided.bind(false))
+		_page.add_child(show_all)
 	for step_index in range(steps.size()):
+		if _procedure_guided and step_index != _procedure_step_index:
+			continue
 		var step: Dictionary = steps[step_index]
 		_page.add_child(_heading("%d. %s" % [step_index + 1, str(step["title"])], 16))
 		_page.add_child(_heading(str(step["detail"]), 13))
@@ -1038,13 +1123,18 @@ func _show_practical() -> void:
 					_show_drill_controls()
 				else:
 					_page.add_child(_heading("Source-verified editable FDI %s volume not available. Task narrative only." % FDI[_case_index], 13))
-		var feedback := _heading("Not answered", 13)
+		var saved: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), {})
+		var feedback_text := "Not answered"
+		if saved.has("correct"):
+			feedback_text = "Correct response recorded" if bool(saved["correct"]) else "Review required — revisit original task"
+		var feedback := _heading(feedback_text, 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
 	# The source has no bur step for surgery/perio. Offer ONLY an explicitly
 	# separate synthetic tooth-volume experiment, never label it extraction
-	# or subgingival instrument mechanics.
-	if _case_index in [4, 5]:
+	# or subgingival instrument mechanics. Hide the unrelated sandbox in a
+	# focused source-derived guided task, but retain it in all-tasks mode.
+	if _case_index in [4, 5] and not _procedure_guided:
 		_page.add_child(_heading("Optional geometry sandbox — NOT extraction, scaling or surgical simulation.", 15))
 		if _volume != null:
 			_show_drill_controls()
@@ -1133,6 +1223,7 @@ func _input(event: InputEvent) -> void:
 	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
 	# native direct bur still requires separate explicit practical opt-in.
 	_handle_walk_input(event)
+	_handle_procedure_input(event)
 	if not _direct_bur_mode or _middle == null or _scene == null:
 		return
 	if not (event is InputEventMouseButton):
