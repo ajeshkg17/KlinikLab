@@ -47,6 +47,10 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  const launch=read('visual-qa/sr1c-private-desktop.ps1');
  assert.match(launch,/function Start-KLPrivateDesktopExportedApp/);
  assert.match(launch,/-- --kliniklab-exported-pc-capture/);
+ assert.match(read('native-godot/app.gd'),/SR20_NATIVE_CAPTURE_APP_BOOTSTRAP/);
+ assert.match(read('native-godot/app.gd'),/capture_runner.run\(self\)/);
+ assert.match(read('native-godot/exported-app-capture-node.gd'),/SR20_NATIVE_CAPTURE_SYNC_REPORT_WRITTEN/);
+ assert.match(read('native-godot/exported-app-capture-node.gd'),/stage/);
  assert.doesNotMatch(launch.split('function Start-KLPrivateDesktopExportedApp')[1],/--script res:\/\/exported-app-capture\.gd/);
  const embedded=read('native-godot/exported-app-capture-node.gd');
  const app=read('native-godot/app.gd');

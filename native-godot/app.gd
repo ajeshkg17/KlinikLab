@@ -108,10 +108,17 @@ func _ready() -> void:
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
-	# SR17 exported Windows EXE starts its embedded main scene; --script is
-	# ignored by the standalone export. A private-desktop watcher can explicitly
-	# request the same live app's native captured pixels through Godot user args.
-	# No normal learner session activates this path; evidence remains local.
+	# SR20 physical job11 forensic safeguard: synchronous capture intention
+	# logging before first deferred frame / potential shader startup stall.
+	var exported_capture_requested: bool=OS.get_cmdline_user_args().has("--kliniklab-exported-pc-capture")
+	var owner_expected_sha: String=OS.get_environment("KLINIKLAB_PC_EXPECTED_SHA")
+	if not owner_expected_sha.is_empty():
+		print("SR20_NATIVE_CAPTURE_APP_BOOTSTRAP requested=",exported_capture_requested,
+			" sha_length=",owner_expected_sha.length())
+	if owner_expected_sha.length()==40 and not exported_capture_requested:
+		push_error("SR20_CAPTURE_FLAG_NOT_RECEIVED_FROM_PRIVATE_DESKTOP_LAUNCHER")
+		get_tree().quit(7)
+		return
 	for arg in OS.get_cmdline_user_args():
 		if str(arg)=="--kliniklab-exported-pc-capture":
 			var export_capture: GDScript = load("res://exported-app-capture-node.gd")
@@ -121,7 +128,7 @@ func _ready() -> void:
 				return
 			var capture_runner: Node = export_capture.new()
 			add_child(capture_runner)
-			capture_runner.call_deferred("run",self)
+			capture_runner.run(self)
 			break
 	# Only an explicit unique owner-PC CLI user argument requests actual
 	# exported-app viewport evidence. Normal learners never capture/upload.

@@ -200,6 +200,21 @@ jobs:
           node --test tests/sr14_native_exported_watcher.test.mjs
           node --test tests/sr14_unique_native_pc_job09.test.mjs
           node --test tests/sr16_unique_native_pc_job10.test.mjs
+      - name: SR20 actual source startup emits early immutable capture checkpoint and fails closed headlessly (NO GPU)
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/sr20-actual-main-scene-capture"
+          mkdir -p "$evidence"
+          set +e
+          KLINIKLAB_PC_CAPTURE_DIR="$evidence" KLINIKLAB_PC_EXPECTED_SHA="$GITHUB_SHA" timeout 95 "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" -- --kliniklab-exported-pc-capture > "$RUNNER_TEMP/sr20-node-startup.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/sr20-node-startup.log"
+          test "$status" -eq 3
+          test -s "$evidence/native-exported-app-result.json"
+          node -e 'let r=JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8"));if(r.status!=="EVIDENCE_INCOMPLETE"||r.stage!=="blocked"||!r.blocker?.includes("windowed renderer"))process.exit(1)' "$evidence/native-exported-app-result.json"
+          grep -F "SR20_NATIVE_CAPTURE_APP_BOOTSTRAP requested=true" "$RUNNER_TEMP/sr20-node-startup.log"
+          grep -F "SR20_NATIVE_CAPTURE_SYNC_REPORT_WRITTEN" "$RUNNER_TEMP/sr20-node-startup.log"
       - name: Exact original OBJ/MTL and CC0 native raw source checks before Windows sidecar packaging
         run: |
           set -euo pipefail
