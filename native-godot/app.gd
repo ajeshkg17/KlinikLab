@@ -317,6 +317,32 @@ func _procedure_jump_to_review() -> bool:
 			return true
 	return false
 
+# Checklist is a manual learner self-tracking layer, intentionally distinct
+# from original formative answers and instrument/geometry actions.
+func _procedure_checklist_complete(step_index: int) -> bool:
+	if _case_index < 0 or _case_index >= CASE_IDS.size():
+		return false
+	var checklist: Dictionary = _progress.get("practicalChecklist", {})
+	var state: Dictionary = checklist.get(CASE_IDS[_case_index], {})
+	return bool(state.get(str(step_index), false))
+
+func _procedure_set_checklist(step_index: int, completed: bool) -> void:
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size():
+		return
+	var checklist: Dictionary = _progress.get("practicalChecklist", {})
+	var state: Dictionary = checklist.get(CASE_IDS[_case_index], {})
+	if completed:
+		state[str(step_index)] = true
+	else:
+		state.erase(str(step_index))
+	checklist[CASE_IDS[_case_index]] = state
+	_progress["practicalChecklist"] = checklist
+	_save_progress()
+	_refresh()
+
 func _handle_procedure_input(event: InputEvent) -> void:
 	if not _procedure_guided or not _procedure_context_available() or not (event is InputEventKey):
 		return
@@ -430,7 +456,7 @@ func _load_source() -> bool:
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
 		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [],
-		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "selectedCase": 0, "selectedStation": 0}
+		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "practicalChecklist": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -452,6 +478,8 @@ func _load_progress() -> void:
 		_progress["radiologyByCase"] = {}
 	if not (_progress.get("fspKpByTask", {}) is Dictionary):
 		_progress["fspKpByTask"] = {}
+	if not (_progress.get("practicalChecklist", {}) is Dictionary):
+		_progress["practicalChecklist"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
 	var stored_volumes: Dictionary = _progress["volumeByCase"]
 	if not stored_volumes.has("molar") and _progress.get("volumeFDI16", []) is Array:
@@ -1100,6 +1128,11 @@ func _show_practical() -> void:
 				answered += 1
 		_page.add_child(_heading("Guided practical: task %d/%d · %d/%d responses recorded for this FDI case" % [
 			_procedure_step_index + 1, steps.size(), answered, steps.size()], 16))
+		var completed_count: int = 0
+		for i in range(steps.size()):
+			if _procedure_checklist_complete(i):
+				completed_count += 1
+		_page.add_child(_heading("Learner checklist: %d/%d manually completed · independent of answer correctness" % [completed_count, steps.size()], 14))
 		_page.add_child(_heading("N = next · P = previous · R = next unanswered/incorrect task. Review navigation never answers, certifies, scores or cuts. Bur use needs independent opt-in.", 13))
 		var previous := _button("Previous task (P)")
 		previous.disabled = _procedure_step_index == 0
@@ -1125,6 +1158,12 @@ func _show_practical() -> void:
 		if _procedure_guided and step_index != _procedure_step_index:
 			continue
 		var step: Dictionary = steps[step_index]
+		if _procedure_guided:
+			var checklist_state := CheckBox.new()
+			checklist_state.text = "Practice checklist · step %d: %s (self-reported)" % [step_index + 1, "Complete" if _procedure_checklist_complete(step_index) else "Pending"]
+			checklist_state.button_pressed = _procedure_checklist_complete(step_index)
+			checklist_state.toggled.connect(_procedure_set_checklist.bind(step_index))
+			_page.add_child(checklist_state)
 		_page.add_child(_heading("%d. %s" % [step_index + 1, str(step["title"])], 16))
 		_page.add_child(_heading(str(step["detail"]), 13))
 		match str(step["type"]):
