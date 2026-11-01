@@ -23,6 +23,7 @@ images=[
  ('unreal-whole-clinic-angled.png',24.0),
  ('unreal-fdi16-cut-occlusal.png',40.0)]
 state={'requested':set(),'done':False,'frames':0,'error':None}
+_callback_handle=None
 
 def digest(file):
  h=hashlib.sha256()
@@ -66,7 +67,8 @@ def write_and_quit():
  report_path.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
  unreal.log('KL_SR1J_NATIVE_RENDER_STATUS='+report['status']+' pid='+str(os.getpid()))
  try:
-  unreal.unregister_slate_post_tick_callback(callback)
+  if _callback_handle is not None:
+   unreal.unregister_slate_post_tick_callback(_callback_handle)
  except Exception:
   pass
  unreal.SystemLibrary.quit_editor()
@@ -104,7 +106,7 @@ except Exception as exc:
  # Do not return apparently successful status.
  write_and_quit()
 
-def callback(delta):
+def _on_tick(delta):
  if state['done']:
   return
  try:
@@ -139,5 +141,14 @@ def callback(delta):
   write_and_quit()
 
 if not state['done']:
- callback=unreal.register_slate_post_tick_callback(callback)
- unreal.log('SR1J private native Unreal Editor D3D12 orbit registered: '+str(capture))
+ _callback_handle=unreal.register_slate_post_tick_callback(_on_tick)
+ # Native scene has loaded; the external collector may NOW open its 1Hz PDH
+ # query. This is an immutable readiness record, not GPU acceptance.
+ ready=capture/'unreal-native-capture-ready.json'
+ with ready.open('x',encoding='utf-8') as f:
+  json.dump({'schemaVersion':1,'status':'NATIVE_UNREAL_EDITOR_CALLBACK_REGISTERED',
+    'unrealPid':os.getpid(),'sourceSHA':SOURCE,
+    'level':LEVEL,'durationTargetSec':42,
+    'privateDesktopStatus':'OWNER_LAUNCHER_ATTESTATION_REQUIRED',
+    'gpuProcessVerified':False},f,indent=2)
+ unreal.log('SR1J live private native Unreal Editor orbit READY: '+str(capture))
