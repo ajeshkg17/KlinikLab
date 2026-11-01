@@ -73,10 +73,12 @@ try{
  }
  fs.copyFileSync(path.join(sourceAssets,'README.md'),path.join(dest,'cc0','README-ORIGINAL-SOURCE.md'),fs.constants.COPYFILE_EXCL);
  const exported=path.join(dest,'source');
- fs.mkdirSync(exported,{recursive:true});
+ // The historical SR1B source exporter must create this directory itself.
+ // Keep generated CC0 provenance in memory until AFTER that immutable export.
+
+ run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'cc0-clinic-manifest.json'),
   JSON.stringify(selectedManifest,null,2)+'\n',{flag:'wx'});
- run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
  run(path.join(root,'native-godot/export-volume.mjs'),
