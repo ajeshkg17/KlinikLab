@@ -40,7 +40,7 @@ if($Engine -eq 'Godot'){
   throw 'Third focused FDI16 source image was not independently validated by comparison runner'
  }
  foreach($p in $imageRows){
-  if($p[0] -cnotmatch '^godot-native-fdi16-(frontal|occlusal|cut-focused)-[0-9]+\.png){
+  if($p[0] -cnotmatch '^godot-native-fdi16-(frontal|occlusal|cut-focused)-[0-9]+\.png$'){
    throw 'Godot original native PNG name not allowlisted'}
   $names.Add($p[0]);$files.Add($p[0])
  }
