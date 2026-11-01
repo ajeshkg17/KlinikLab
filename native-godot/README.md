@@ -44,3 +44,11 @@ These are actual functionality milestones, **not** visual milestones. Do not mar
 ## Evidence acceptance
 
 Source CI can build/check and run synthetic headless tests using Godot 4.7.2, but does not prove native Windows GPU rendering. A fresh exact-SHA owner-PC run requires visible native full-clinic app pixels with the full UI, case selection changes, at least two training station interactions, saved/reloaded progress, source geometry hash/triangles, distinct valid engine-PID 3D PDH samples and matching RTX5060 DXGI LUID. Never rerun job07/job08 or overwrite their original evidence, do not bring Godot to visible foreground during automated capture, and review exact published PNG pixels directly. Native app migration status must remain **IN PROGRESS** until all functional gates pass.
+
+## SR3 — FDI16 source-pinned native volumetric practice (in progress)
+
+The build now exports a four-channel float32 grid sampled **directly from production `volumetric-lab.js` ToothSolid** at the exact Git source SHA (outer, dentin, pulp and caries). The native Godot `volume-cut.gd` verifies the grid's SHA-256 and implements true 3D signed-distance union-of-bur-spheres subtraction, marching-tetrahedra mesh reconstruction, separate native tissue materials, swept adjacent strokes, undo, reset and local JSON stroke replay. In case FDI16's practical station, use the X/Y/Z and radius sliders and Apply; the left mesh remains the immutable before model, the right model updates.
+
+The native sampled grid is a **new computational mesh**, not the immutable original OBJ or a medical scan. Rendering details and cervical tissue boundaries can differ from the source JS mesher (native trilinear material classification). Approximate removed-sample percentage is not a clinical cut-depth, volume in mm³, pulp proximity score, or competency grade. The 32-stroke cap bounds runtime cost. No other case has editable native geometry. Hash mismatch blocks the editor rather than silently substituting a model.
+
+Headless volume smoke: `godot --headless --path <built-project> --script res://volume-cut-smoke.gd`. A successful smoke verifies source grid loading, 3D changed mesh, undo/replay/reset and invalid parameter rejection; it is **not** a Windows RTX or clinical acceptance.
