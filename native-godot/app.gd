@@ -26,6 +26,7 @@ var _station_index := 0
 var _quiz_index := 0
 var _progress: Dictionary = {}
 var _scene: Node3D
+var _atlas: Node3D
 var _shell: CanvasLayer
 var _view := "clinic"
 var _camera_mode := "overview"
@@ -54,6 +55,15 @@ func _ready() -> void:
 	workspace.name = "KL_COMPLETE_OPERATORY_WORKSPACE"
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
+	var atlas_script: GDScript = load("res://atlas-viewer.gd")
+	if atlas_script != null:
+		var atlas: Node3D = atlas_script.new()
+		if bool(atlas.call("configure",str(_content["sourceGitSHA"]))):
+			_atlas = atlas
+			add_child(_atlas)
+			_atlas.visible = false
+		else:
+			push_warning("Source 32-tooth atlas blocked: " + str(atlas.call("error")))
 	var editor_script: GDScript = load("res://volume-cut.gd")
 	if editor_script != null:
 		var editable: Node3D = editor_script.new()
@@ -223,7 +233,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "journey", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "anatomy", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -302,6 +312,8 @@ func _select_case(index: int) -> void:
 	_quiz_index = 0
 	_journey_stage = 0
 	_show_case_geometry()
+	if _atlas != null:
+		_atlas.call("select_tooth",FDI[index])
 	_save_progress()
 	_refresh()
 
@@ -323,6 +335,8 @@ func _show_case_geometry() -> void:
 			original.visible = show_original and (node_name != "KL_FDI16_AFTER" or _volume == null)
 	if _volume != null:
 		_volume.visible = show_original
+	if _atlas != null:
+		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
 
 func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
@@ -343,12 +357,17 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "journey", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "anatomy", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
 		_scene.visible = view == "clinic"
-	_middle.visible = view == "clinic"
+	if _atlas != null:
+		_atlas.visible = view == "anatomy" or (view == "clinic" and _case_index != 0)
+		_atlas.call("set_camera_enabled",view == "anatomy")
+	if view == "clinic":
+		_set_camera_mode(_camera_mode)
+	_middle.visible = view in ["clinic", "anatomy"]
 	_refresh()
 
 func _refresh() -> void:
@@ -363,6 +382,8 @@ func _refresh() -> void:
 		_show_progress()
 	elif _view == "journey":
 		_show_journey()
+	elif _view == "anatomy":
+		_show_atlas_controls()
 	elif _view == "coverage":
 		_show_coverage()
 	else:
@@ -371,7 +392,10 @@ func _refresh() -> void:
 		_page.add_child(_heading("Exam: " + str(c["exam"]), 14))
 		_page.add_child(_heading("Risk/uncertainty: " + str(c["risk"]), 14))
 		if CASE_IDS[_case_index] != "molar":
-			_page.add_child(_heading("FDI %s: source case content is real; original drillable case geometry NOT PORTED. FDI16 is hidden." % FDI[_case_index], 14))
+			if _atlas != null:
+				_page.add_child(_heading("FDI %s: source-derived procedural synthetic tooth shown; this is a preview only, not the case-specific editable volume or validated scan anatomy." % FDI[_case_index], 14))
+			else:
+				_page.add_child(_heading("FDI %s: source geometry unavailable; original FDI16 hidden, no misattribution." % FDI[_case_index], 14))
 		else:
 			if _volume != null:
 				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
@@ -749,6 +773,44 @@ func _show_journey() -> void:
 	nav.add_child(forward)
 	_page.add_child(nav)
 
+
+func _show_atlas_controls() -> void:
+	if _atlas == null:
+		_page.add_child(_heading("Native procedural atlas unavailable. Source file/identity integrity may have failed.", 15))
+		return
+	_page.add_child(_heading("32 permanent FDI teeth · original browser ToothSolid source", 17))
+	_page.add_child(_heading("Procedural, sampled, source-derived educational geometry. Not extracted scans, calibrated anatomy or patient records.", 13))
+	_page.add_child(_heading("Selected FDI %s · %d source mesh triangles" %
+		[str(_atlas.call("selected")),int(_atlas.call("triangle_count"))], 14))
+	for q in range(1,5):
+		_page.add_child(_heading("Quadrant %d · %s %s" %
+			[q,"maxillary" if q<=2 else "mandibular","right" if q in [1,4] else "left"], 14))
+		var grid := GridContainer.new()
+		grid.columns=4
+		_page.add_child(grid)
+		for n in range(1,9):
+			var fdi:=str(q)+str(n)
+			var button:=_button("FDI "+fdi)
+			button.pressed.connect(_atlas_select.bind(fdi))
+			grid.add_child(button)
+	var orbit:=HBoxContainer.new()
+	var left:=_button("Rotate 30° left")
+	left.pressed.connect(_atlas_rotate.bind(-30.0))
+	orbit.add_child(left)
+	var right:=_button("Rotate 30° right")
+	right.pressed.connect(_atlas_rotate.bind(30.0))
+	orbit.add_child(right)
+	_page.add_child(orbit)
+	_page.add_child(_heading("Case-specific FDI16 is the only live edited-volume tooth; other FDI meshes are static procedural previews.", 12))
+
+func _atlas_select(fdi: String) -> void:
+	if _atlas != null and bool(_atlas.call("select_tooth",fdi)):
+		_refresh()
+
+func _atlas_rotate(degrees: float) -> void:
+	if _atlas != null:
+		_atlas.call("rotate_model",degrees)
+
 func _show_progress() -> void:
 	_page.add_child(_heading("Personal local progress (not an official exam score)", 17))
 	for c in _cases:
@@ -858,6 +920,8 @@ func _show_coverage() -> void:
 			status = "LOCAL_TEXT_LEARNING_REPORT_ONLY__NO_VALIDATED_GRADING"
 		if str(id) == "clinicalCases":
 			status = "SIX_CASES_AND_NATIVE_SIX_STAGE_SOURCE_CLINICAL_JOURNEY"
+		if str(id) == "anatomyAtlas" and _atlas != null:
+			status = "SOURCE_DERIVED_32_PERMANENT_TEETH_PREVIEW_ONLY__NOT_CLINICALLY_VALIDATED"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
 	_page.add_child(_heading("FDI16 live synthetic cutting, seven original guided interview replies per case and local learning-report export are available. Still missing: free-form patient dialogue, full anatomy, native scan/radiography, XR/Quest, AI and validated assessment. Browser app remains reference.", 15))
