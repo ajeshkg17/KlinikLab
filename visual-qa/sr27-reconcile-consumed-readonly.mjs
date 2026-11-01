@@ -109,7 +109,7 @@ export async function inspectPublication(root,anchors=PUBLISHED_ANCHORS){
     v && ['executing','publish-pending'].includes(v.status)).length;
  }catch(e){report.ledgerError=safeError(e)==='UNREADABLE'?'INVALID_OR_UNREADABLE_LEDGER':safeError(e)}
  for(const anchor of anchors)report.jobs.push(await one(root,ledger,anchor));
- report.reconciliationStatus=report.ledgerParseAccepted &&
+ report.reconciliationStatus=report.ledgerParseAccepted && report.nonterminalLedgerCount===0 &&
    report.jobs.every(j=>j.readOnlyPublicationAssessment===
     'ORIGINAL_BYTES_CORROBORATED__TERMINAL_LEDGER_ABSENT__NO_REPAIR_AUTHORIZED')
    ?'HISTORICAL_REMOTE_PUBLICATIONS_WITH_LOCAL_LEDGER_GAP__NO_REPLAY'
