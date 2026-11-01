@@ -116,6 +116,31 @@ func _run() -> void:
 		if str(after["fdi"])!=FDIS[i] or int(after.get("removedSamplePoints",-1)) != int(before.get("removedSamplePoints",-2)):
 			_fail("Guided navigation changed FDI or synthetic tooth samples for "+FDIS[i])
 			return
+		# SR34: independent manual checklist, retained in the existing v2 journal.
+		var before_answers: String = JSON.stringify((app.get("_progress") as Dictionary)["answers"])
+		app.call("_procedure_set_checklist",0,true)
+		app.call("_procedure_set_checklist",1,true)
+		if not bool(app.call("_procedure_checklist_complete",0)) or not bool(app.call("_procedure_checklist_complete",1)):
+			_fail("Checklist state not set for "+FDIS[i])
+			return
+		app.call("_procedure_set_checklist",1,false)
+		if bool(app.call("_procedure_checklist_complete",1)):
+			_fail("Checklist uncheck failed for "+FDIS[i])
+			return
+		if JSON.stringify((app.get("_progress") as Dictionary)["answers"]) != before_answers:
+			_fail("Checklist changed formative responses for "+FDIS[i])
+			return
+		var journal: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://kliniklab-native-progress-v2.json"))
+		if not (journal is Dictionary) or not bool((journal.get("practicalChecklist", {}) as Dictionary).get(IDS[i], {}).get("0",false)):
+			_fail("Checklist not persisted to source-versioned journal for "+FDIS[i])
+			return
+		app.call("_load_progress")
+		if not bool(app.call("_procedure_checklist_complete",0)) or bool(app.call("_procedure_checklist_complete",1)):
+			_fail("Checklist did not survive journal reload for "+FDIS[i])
+			return
+		if bool(app.get("_direct_bur_mode")):
+			_fail("Checklist action enabled bur for "+FDIS[i])
+			return
 		app.call("_switch_view","language")
 		if bool(app.get("_procedure_guided")) or bool(app.call("_procedure_move_step",-1)):
 			_fail("Practical navigation leaked into FSP/KP language view")
@@ -143,5 +168,6 @@ func _run() -> void:
 	if bool(app.get("_procedure_guided")) or not (app.get("_practical_feedback") as Dictionary).has((source_content["practical"][1] as Array).size()-1):
 		_fail("Original all-tasks mode not restored")
 		return
+	print("SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS six FDI, per-case isolation, journal reload, FSP/KP, no bur")
 	print("SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS keyboard N/P, source answers, optional all-tasks, no cutting/capture/Quest")
 	quit(0)

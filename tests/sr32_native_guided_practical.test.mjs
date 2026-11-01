@@ -56,10 +56,22 @@ test('SR33 review-first action skips correct source tasks without scoring or cut
    'var candidate: int = (_procedure_step_index + offset) % steps.size()',
    'if not bool(record.get("correct", false)):'])
   assert.ok(app.includes(marker),marker);
- const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _handle_procedure_input('));
+ const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _procedure_checklist_complete('));
  assert.match(navigation,/_direct_bur_mode = false/);
  assert.doesNotMatch(navigation,/(?:_record_practical|_save_progress|cut_to|_direct_cut_world_ray|_mark_studied)\(/);
  const smoke=read('native-godot/guided-practical-smoke.gd');
  for(const marker of ['KEY_R','sole review task','All-correct source tasks','wrap-around','removedSamplePoints'])
   assert.ok(smoke.toLowerCase().includes(marker.toLowerCase()),marker);
+});
+
+
+test('SR34 manual practical checklist is persisted, per-case, and distinct from answers and cutting',()=>{
+ for(const marker of ['"practicalChecklist": {}','func _procedure_checklist_complete(step_index: int) -> bool:',
+  'func _procedure_set_checklist(step_index: int, completed: bool) -> void:',
+  'checklist_state.toggled.connect(_procedure_toggle_checklist.bind(step_index))',
+  '_save_progress()','Learner checklist: %d/%d manually completed']) assert.ok(app.includes(marker),marker);
+ const impl=app.slice(app.indexOf('func _procedure_checklist_complete('),app.indexOf('func _handle_procedure_input('));
+ assert.doesNotMatch(impl,/(?:_record_practical|_direct_cut_world_ray|_apply_cut|cut_to|_journey_procedure|_mark_studied)\(/);
+ const smoke=read('native-godot/guided-practical-smoke.gd');
+ for(const marker of ['SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS','_procedure_set_checklist','_load_progress','practicalChecklist','before_answers']) assert.ok(smoke.includes(marker),marker);
 });
