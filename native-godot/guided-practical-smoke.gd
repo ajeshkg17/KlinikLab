@@ -90,7 +90,7 @@ func _run() -> void:
 		if bool(app.call("_procedure_jump_to_review")):
 			_fail("Sole review task must not falsely move or record an answer")
 			return
-		answers[IDS[i]+":practical:3]["correct"] = true
+		answers[IDS[i]+":practical:3"]["correct"] = true
 		if bool(app.call("_procedure_jump_to_review")):
 			_fail("All-correct source tasks must have no pending review")
 			return
