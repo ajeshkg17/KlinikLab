@@ -6,6 +6,7 @@ const godot=read('../visual-qa/run-godot-whole-clinic-pc.ps1');
 const unreal=read('../visual-qa/run-unreal-whole-clinic-pc.ps1');
 const stage=read('../visual-qa/unreal-whole-clinic-stage.py');
 const capture=read('../visual-qa/unreal-whole-clinic-capture.py');
+const initHook=read('../visual-qa/unreal-whole-clinic-init.py');
 const publish=read('../visual-qa/publish-whole-clinic-comparison-pc.ps1');
 const pinned='f4d4d4151851a08342def08d9f2e461f5f5e7109';
 
@@ -100,4 +101,22 @@ test('Publication only copies original validated engine pixel bytes; DOES NOT mo
    }else{assert.ok(!publish.includes(forbidden),'nonpublication '+forbidden);}
  }
  assert.match(publish,/pixel.*PENDING/i);
+});
+
+test('Unreal private desktop orbit remains live via persistent Editor init hook and readiness-gated GPU sampling',()=>{
+ for(const token of ['init_unreal.py','register_slate_post_tick_callback',
+  'time.monotonic','unreal.SystemLibrary.quit_editor','kl_sr1j_capture.py']){
+  assert.ok(initHook.includes(token),token);
+ }
+ for(const token of ['KLINIKLAB_SR1J_CAPTURE_ENABLED','unreal-whole-clinic-init.py',
+  'Content\\Python','unreal-native-capture-ready.json',
+  'NATIVE_UNREAL_EDITOR_CALLBACK_REGISTERED','-MaxSamples 34']){
+  assert.ok(unreal.includes(token),token);
+ }
+ assert.ok(!unreal.slice(unreal.indexOf('# Render phase:')).includes('-ExecutePythonScript='),
+  'Unreal Editor script would shutdown immediately; no render orbit');
+ assert.match(capture,/unreal-native-capture-ready\.json/);
+ assert.match(capture,/_callback_handle=unreal\.register_slate_post_tick_callback\(_on_tick\)/);
+ assert.ok(!initHook.includes('SwitchDesktop'));
+ assert.ok(!initHook.includes('SetForegroundWindow'));
 });
