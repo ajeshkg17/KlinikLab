@@ -36,7 +36,7 @@ test('Native Blender importer renders original geometry, 2 images per model, wit
  assert(!render.includes('sourceWorldBoundsXYZMeters":[]'));
 });
 test('Publication stage permits only original Blender PNGs and JSON, no GLB, SHA mismatch or overwrites',()=>{
- for(const x of ['Never overwrite','asset-batch-evidence.json','CC0-1.0',
+ for(const x of ['never overwrite','asset-batch-evidence.json','CC0-1.0',
    'sourceOriginalSha256','dst.open("xb")','PNG modified during publication staging',
    'independentlyReviewedPixels','visualAccepted','binaryModelsPublished',
    'originalSha256','sourceOriginalUrl','github']){
