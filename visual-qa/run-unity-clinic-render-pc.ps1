@@ -84,7 +84,10 @@ try{
  if($proc.ExitCode -ne 0){throw "Unity native render failed exit $($proc.ExitCode); logs at $log"}
  if(-not(Test-Path $native)){throw 'No native Unity GPU render JSON'}
  $r=Get-Content $native -Raw|ConvertFrom-Json
- if([int]$r.nativeUnityPid -ne $session.pid -or $r.status -cne 'UNITY_NATIVE_WHOLE_CLINIC_PIXELS_GPU_ATTRIBUTION_PENDING' -or $r.originalSourceSHA -cne $sha -or [int]$r.beforeTriangles -ne 14856 -or [int]$r.cutTriangles -ne 14936 -or [int]$r.caseCount -ne 6 -or [int]$r.stationCount -ne 7 -or [int]$r.orbitRenderFrames -lt 39){
+ if([int]$r.nativeUnityPid -ne $session.pid -or $r.status -cne 'UNITY_NATIVE_WHOLE_CLINIC_PIXELS_GPU_ATTRIBUTION_PENDING' -or $r.originalSourceSHA -cne $sha -or [int]$r.beforeTriangles -ne 14856 -or [int]$r.cutTriangles -ne 14936 -or [int]$r.caseCount -ne 6 -or [int]$r.stationCount -ne 7 -or
+ $r.nativeCaseStationSelectionPreviewVerified -ne $true -or
+ [int]@($r.workflowSelectionEvents).Count -ne 3 -or
+ [int]$r.orbitRenderFrames -lt 39){
   throw 'Original source/cases/native orbit mismatch'}
  $pngs=@('unity-whole-clinic-overview.png','unity-whole-clinic-angled.png','unity-fdi16-cut-occlusal.png')
  foreach($file in $pngs){
