@@ -85,6 +85,9 @@ foreach($spec in @(
  if($sha -cne $spec.sha){throw 'Original Godot PNG SHA does not match native Godot self-report: '+$name}
  $pngs+= [pscustomobject]@{name=$name;path=$file;sha256=$sha;bytes=$bytes.Length;width=$width;height=$height}
 }
+$publishedPngs=@($pngs|ForEach-Object{
+ [ordered]@{name=$_.name;sha256=$_.sha256;bytes=$_.bytes;width=$_.width;height=$_.height}
+})
 $record=[ordered]@{
  schemaVersion=1;status='ORIGINAL_JOB08_PIXELS_PRESERVED_PENDING_DIRECT_PIXEL_REVIEW'
  oldJob07Untouched=$true;originalJob08Untouched=$true;recoveryOnly=$true;reexecuted=$false
@@ -95,7 +98,7 @@ $record=[ordered]@{
  originalNativeWorkflowVerified=$true
  originalPDHPositiveRtx5060DistinctPeriods=[int]$owner.process3DPositiveRtx5060DistinctPeriods
  originalRtx5060DxgiLuid=$owner.rtx5060DxgiLuid
- pngs=$pngs|ForEach-Object{[ordered]@{name=$_.name;sha256=$_.sha256;bytes=$_.bytes;width=$_.width;height=$_.height}}
+ pngs=$publishedPngs
  originalOwnerReportStatus='EVIDENCE_INCOMPLETE'
  originalOwnerReportGpuProcessCorroborated=$false
  independentlyReviewedPixels=$false;fullKlinikLabApplicationMigrated=$false
