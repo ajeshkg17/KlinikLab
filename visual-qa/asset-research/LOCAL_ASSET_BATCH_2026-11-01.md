@@ -9,7 +9,7 @@ The public repository remains unchanged in visibility. The full downloaded sourc
 
 | Candidate batch | Local content and verified acquisition | Use in KlinikLab | GitHub binary status |
 |---|---|---|---|
-| 3DAssets.dev Dental Practice and Surgery | 54 individual GLB files, 3,193,436 bytes of model payload; local source manifest and per-file download index. Pack page states CC0 1.0. | Complete modular clinic environment: operatory, chair, lights, cabinets, reception, sterilization and instruments. Scene assets only; app behavior, colliders and clinical workflow are separate. | Not copied into this batch's public repository update. Individual source/manifest remains available locally for selection. |
+| 3DAssets.dev Dental Practice and Surgery | 54 GLBs including the assembled starter scene; original source manifest and per-model download index included. Pack page states CC0 1.0. Starter-scene SHA-256: `9AF6DD52D96BF94D50EDA63EE888DB975FADABB230A5DCD2FF98A11A518DB77A`. | Complete modular clinic environment: operatory, chair, lights, cabinets, reception, sterilization and instruments. Scene assets only; app behavior, colliders and clinical workflow are separate. | Uploaded to `visual-qa/asset-research/assets/dental-practice-cc0-v1/` with source metadata. |
 | Mendeley 97c3pf8h2h v1 | ZIP 109,573,420 bytes; SHA-256 `EB151C2217EF20F7B75A85952C07BADC525CC0FD7615D40C207E357D89ED00E7`; extracted 30 STL, 30 IGES and 31 SCDOC files. | Lower jaw, cortical/cancellous bone, teeth and periodontal ligament candidate. | Local only; publication decision pending. |
 | Mendeley xjsx7nfhj8 v1 | ZIP 109,300,897 bytes; SHA-256 `1ED0773CF3124AD26656FC92C39B95A240FBD5C72634B279C696090D94193462`; nested archive extracted to 30 STL, 30 IGES and 31 SCDOC files. | Second lower-jaw bone/tooth/PDL candidate. | Local only; publication decision pending. |
 | Figshare 24591537 v1 | ZIP 171,418,488 bytes; SHA-256 `B65D9F1C13CD6758B18D4BB7630763390285460CCB262BAF765EDC329DE4EC46`; six STEP solids extracted. | Immature molar, pulp/PDL and appliance example; not a full dentition. | Local only; publication decision pending. |
@@ -24,7 +24,7 @@ Embodi3D was not acquired: the source site returned its JavaScript/cookie gate. 
 
 ## Next development use
 
-1. Start by assembling the 54-piece clinic environment as the native app's room/equipment setting.
+1. Start by assembling the 54-model clinic environment as the native app's room/equipment setting.
 2. Treat this environment as scene content, not as the complete training application. Case/station navigation, instrument interaction, procedure state, explanations, persistence, and accessibility remain app code.
 3. Compare the already-downloaded anatomical candidates in Blender. Keep separate files/layers for bone, teeth and tissues where present; record which FDI teeth and structures each actually contains.
 4. Use Dental Scope as a source reference, not as a downloaded asset. It describes all 32 teeth and internal tissue layers, but its own page says the inside proportions are simplified and it is not for clinical decisions.
