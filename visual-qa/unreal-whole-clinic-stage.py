@@ -119,6 +119,8 @@ def main():
         B('KL_WALL_SCREEN_PANEL',(416,0,225),(.2,2.8,1.27))
         T('KL_SCREEN_TITLE','KLINIKLAB / UE NATIVE CLINIC',(402,0,270),15)
         T('KL_SCREEN_SCOPE','EDUCATIONAL WORKSPACE - NOT FULL APPLICATION',(402,0,230),8)
+        T('KL_ACTIVE_CASE_STATUS','ACTIVE FDI16 / MOLAR',(400,0,195),9)
+        T('KL_ACTIVE_STATION_STATUS','STATION 1/7: INTERVIEW',(400,0,176),9)
         # In native captures these two labels change as the educational
         # case/station preview advances; static catalog labels alone do
         # not demonstrate workflow selection. No simulated FDI36 mesh.
