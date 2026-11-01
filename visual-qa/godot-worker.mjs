@@ -557,6 +557,40 @@ async function writeRuntimeReceipt(job,publisherPermissionVerified){
  await fs.writeFile(tmp,jsonWithoutBom(receipt));
  await fs.rename(tmp,RUNTIME);
 }
+/** Optional owner-only cleanup of a dead *idle* watcher after task stop.
+ * Preserves old lock bytes; NEVER clears a live lock or uncertain job state.
+ */
+async function archiveDeadIdleWatcherLease(){
+ if(process.platform!=='win32')throw Error('Owner Windows PC only');
+ const lease=await readGodotWorkerLease(ROOT);
+ if(!lease.exists||lease.malformed||lease.processAlive!==false||
+  lease.jobPoller!=='visual-qa/godot-worker.mjs')
+  throw Error('Idle-upgrade lock archive requires confirmed dead previous worker PID');
+ const ledger=await readLedger();
+ if(Object.values(ledger.completed||{}).some(x=>['executing','publish-pending'].includes(x?.status)))
+  throw Error('One or more prior jobs might be incomplete; refusing lease archive');
+ const job07=ledger.completed?.[JOB07_ID];
+ if(job07?.commit!==JOB07_SOURCE||job07?.status!=='published'||
+  job07?.recoveryOnly!==true||job07?.result?.reexecuted!==false||
+  job07?.result?.overallStatus!=='EVIDENCE_INCOMPLETE')
+  throw Error('Original job07 must remain safely published incomplete');
+ const ps="(Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher' -ErrorAction Stop).State.ToString()";
+ const task=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',ps],
+  {encoding:'utf8',windowsHide:true,timeout:20000,env:cleanWindowsPowerShellEnv(process.env)});
+ if(task.status!==0||!['Ready','Disabled'].includes(String(task.stdout||'').trim()))
+  throw Error('Owner task is not stopped; refusing archived lease migration');
+ const current=await readGodotWorkerLease(ROOT);
+ if(current.pid!==lease.pid||current.processAlive!==false)
+  throw Error('Watcher lock changed during dead-PID verification');
+ const original=path.join(ROOT,'godot-worker-active.lock');
+ const saved=path.join(ROOT,'godot-worker-active.lock.idle-upgrade-'+lease.pid);
+ try{await fs.access(saved);throw Error('Idle upgrade archive path already exists')}
+ catch(e){if(e.code!=='ENOENT')throw e}
+ await fs.rename(original,saved); // preserve the exact original bytes
+ console.log('ARCHIVED_DEAD_IDLE_WATCHER_LEASE',JSON.stringify({oldPid:lease.pid,path:saved,
+  job07Untouched:true,noGodotLaunched:true}));
+}
+
 async function validateWithoutHeartbeat(){
  // Real preflight MUST fail nonzero, and NEVER touch another process heartbeat.
  await initialize();
@@ -648,10 +682,12 @@ function textLog(...x){console.log(...x)}
 // --validate is read-only/preflight, never captures, and does not take the
 // rendering lease. --once, --watch and repair mutually exclude one another.
 const args=process.argv.slice(2);
-const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--probe-next-job','--diagnose-job07','--archive-job07','--retire-archived-job07-lock'].filter(x=>args.includes(x));
+const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--probe-next-job','--archive-dead-idle-lease','--diagnose-job07','--archive-job07','--retire-archived-job07-lock'].filter(x=>args.includes(x));
 if(modes.length>1)throw Error('Select only one approved Godot worker mode');
 if(args.some(x=>!modes.includes(x)))throw Error('Unknown Godot worker argument');
-if(modes.includes('--probe-next-job')){
+if(modes.includes('--archive-dead-idle-lease')){
+ await archiveDeadIdleWatcherLease();
+}else if(modes.includes('--probe-next-job')){
  await probeNextJobWithoutExecuting();
 }else if(modes.includes('--retire-archived-job07-lock')){
  await retireArchivedJob07StaleLease();
