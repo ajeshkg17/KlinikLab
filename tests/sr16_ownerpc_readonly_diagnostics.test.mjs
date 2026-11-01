@@ -83,3 +83,22 @@ test('SR25: UTC-versus-local ambiguous lease clock is diagnosed, not trusted for
  assert.match(diagnostic,/taskRefreshSafetyHold=\$taskRefreshSafetyHold/);
  assert.doesNotMatch(diagnostic,/\b(Remove-Item|Stop-Process|Stop-ScheduledTask|Set-ScheduledTask|Register-ScheduledTask)\b/);
 });
+
+test('SR26: owner probe extracts original UTC clock token before ConvertFrom-Json DateTime coercion',()=>{
+ const clock=read('visual-qa/sr26-lease-raw-timestamp.ps1');
+ const regression=read('tests/sr26_lease_raw_timestamp_windows.ps1');
+ assert.match(diagnostic,/sr26-lease-raw-timestamp\.ps1/);
+ assert.match(diagnostic,/Get-KLRawLeaseTimestamp -JsonText \$leaseRaw/);
+ assert.match(diagnostic,/Get-KLRawWatcherTimestamp -JsonText \$hbRaw -PropertyName 'at'/);
+ assert.doesNotMatch(diagnostic,/\$workerLeaseStartedAt=\[string\]\$lease\.startedAt/);
+ assert.doesNotMatch(diagnostic,/\$heartbeatAt=\[string\]\$hb\.at/);
+ assert.match(clock,/function Get-KLRawWatcherTimestamp/);
+ assert.match(clock,/function Get-KLRawLeaseTimestamp/);
+ assert.match(clock,/\[regex\]::Matches/);
+ assert.match(clock,/found\.Count -ne 1/);
+ assert.match(clock,/DateTimeOffset\]::TryParse/);
+ assert.doesNotMatch(clock,/Get-Content|Set-Content|Remove-Item|Start-Process/);
+ assert.match(regression,/54\.27/);
+ assert.match(regression,/SR26_RAW_LEASE_UTC_CLOCK_PRESERVED_PASS/);
+ assert.match(regression,/2026-11-01T12:56:29\.736Z/);
+});

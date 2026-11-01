@@ -85,6 +85,10 @@ if($originalEvidenceExists){
 }
 $heartbeatExists=Test-Path -LiteralPath $heartPath -PathType Leaf
 $runtimeExists=Test-Path -LiteralPath $runtimePath -PathType Leaf
+# SR26: read exact Node JSON clock tokens before ConvertFrom-Json, because
+# Windows PowerShell 5.1 coerces ISO Z strings to DateTime and [string]
+# drops the UTC marker. Failure to read the source helper is fail-closed.
+. (Join-Path $PSScriptRoot 'sr26-lease-raw-timestamp.ps1')
 # A bare Get-Process PID existence test is UNSAFE: Windows can recycle the PID.
 # A Chrome renderer reused the stale job13 heartbeat PID. Only attribute liveness
 # to the watcher after matching Node executable + exact task script + --watch,
@@ -132,9 +136,11 @@ function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$
 $heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
 $heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
 if($heartbeatExists){
- try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
+ try{$hbRaw=Get-Content -LiteralPath $heartPath -Raw -ErrorAction Stop
+  $hb=$hbRaw | ConvertFrom-Json -ErrorAction Stop
   $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
-  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  $heartbeatPid=[int]$hb.pid
+  $heartbeatAt=Get-KLRawWatcherTimestamp -JsonText $hbRaw -PropertyName 'at'
   $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
   $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
   $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
@@ -148,9 +154,10 @@ $workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
 $workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
 if($workerLeaseExists){
  try{
-  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $leaseRaw=Get-Content -LiteralPath $leaseFile -Raw -ErrorAction Stop
+  $lease=$leaseRaw | ConvertFrom-Json -ErrorAction Stop
   $workerLeasePid=[int]$lease.pid
-  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseStartedAt=Get-KLRawLeaseTimestamp -JsonText $leaseRaw
   $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
   $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
  }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
