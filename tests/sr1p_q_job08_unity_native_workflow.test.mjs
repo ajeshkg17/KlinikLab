@@ -68,3 +68,17 @@ test('Unity new owner PC runner is exact-SHA two-stage source import PLUS real p
    assert(!unity.includes(danger),'owner runner must not mutate Godot watcher or foreground '+danger);
  }
 });
+
+test('Godot watcher does not mark unknown ledger job executing when original evidence already exists',()=>{
+ const w=source('../visual-qa/godot-worker.mjs');
+ const start=w.indexOf("if(!previous){",w.indexOf("async function tick()"));
+ const write=w.indexOf("state.completed[j.jobId]={commit:j.commit,status:'executing'",start);
+ assert(start>=0&&write>start);
+ const segment=w.slice(start,write);
+ for(const phrase of ["fs.stat(originalRun)","existing-original-evidence-ledger-reconciliation-required",
+  "publisherToken","/contents/","remote-original-published-ledger-reconciliation-required",
+  "if(!String(e.message).includes('status 404'))throw e"]){
+  assert(segment.includes(phrase),phrase);
+ }
+ assert(!segment.includes("await execute(j)"));
+});
