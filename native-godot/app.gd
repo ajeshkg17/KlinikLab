@@ -1273,7 +1273,6 @@ func _show_practical() -> void:
 	if _case_index == 3:
 		_ensure_fdi26_reference()
 		_update_fdi26_reference_visibility()
-	_update_fdi16_mirror_visibility()
 		var crown_report: Dictionary = _tooth26_reference.call("summary") if _tooth26_reference != null else {}
 		var crown_status := "source surface mesh loaded" if bool(crown_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
 		_page.add_child(_heading("FDI 26 source reference: %s · University of Dundee, School of Dentistry · CC BY 4.0. External surface mesh only; no internal tissue or clinically validated crown-preparation geometry. Synthetic working volume remains separate." % crown_status,13))
