@@ -55,7 +55,8 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  assert.match(embedded,/func run\(app: Node3D\)/);
  assert.match(embedded,/KLINIKLAB_PC_CAPTURE_DIR/);
  assert.match(embedded,/KLINIKLAB_PC_EXPECTED_SHA/);
- assert.match(embedded,/get_viewport\(\).get_texture\(\).get_image\(\)/);
+ assert.match(embedded,/get_viewport\(\).get_texture\(\)/);
+ assert.match(embedded,/tex\.get_image\(\)/);
  assert.match(embedded,/native-exported-app-result\.json/);
  assert.match(embedded,/kliniklab-exported-cc0-environment\.png/);
  assert.match(embedded,/kliniklab-exported-fdi36-practical\.png/);
