@@ -47,6 +47,10 @@ var _progress_label: Label
 var _middle: Control
 var _left_panel: PanelContainer
 var _right_panel: PanelContainer
+var _left_column: VBoxContainer
+var _right_column: VBoxContainer
+var _nav_scroll: ScrollContainer
+var _page_scroll: ScrollContainer
 var _screen_title: Label
 var _answer_label: Label
 var _draft: TextEdit
@@ -297,8 +301,9 @@ func _heading(t: String, pts: int = 20) -> Label:
 func _button(t: String) -> Button:
 	var b := Button.new()
 	b.text = t
-	b.custom_minimum_size = Vector2(0, 35)
+	b.custom_minimum_size = Vector2(0, 44)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_style_action(b)
 	return b
 
 func _style_panel(panel: PanelContainer) -> void:
@@ -310,6 +315,43 @@ func _style_panel(panel: PanelContainer) -> void:
 	surface.content_margin_top = 8.0
 	surface.content_margin_bottom = 8.0
 	panel.add_theme_stylebox_override("panel",surface)
+
+func _style_action(button: Button) -> void:
+	# The default Windows theme produced dark unreadable button bars in job13.
+	# Explicit accessible labels/hover states apply to case navigation, practical
+	# option rows, direct-bur controls and OptionButton instrument selectors.
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.clip_text = true
+	button.add_theme_color_override("font_color",Color("#f5fbff"))
+	button.add_theme_color_override("font_hover_color",Color("#ffffff"))
+	button.add_theme_color_override("font_pressed_color",Color("#ffffff"))
+	button.add_theme_color_override("font_focus_color",Color("#ffffff"))
+	for state in ["normal","hover","pressed","focus","disabled"]:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color("#24495d")
+		if state == "hover" or state == "focus":
+			style.bg_color = Color("#276f75")
+		elif state == "pressed":
+			style.bg_color = Color("#087d72")
+		elif state == "disabled":
+			style.bg_color = Color("#33404b")
+		style.border_color = Color("#74aeb8")
+		style.set_border_width_all(1)
+		style.set_content_margin_all(7)
+		button.add_theme_stylebox_override(state,style)
+
+func _update_responsive_layout() -> void:
+	if _left_column == null or _right_column == null:
+		return
+	# Keep a genuinely usable central 3D view at desktop/windowed widths.
+	# At <800 px the current three-column workflow is not yet phone-ready.
+	var width := float(get_viewport().get_visible_rect().size.x)
+	var nav_width := clampf(width * 0.147, 174.0, 238.0)
+	var notes_width := clampf(width * 0.25, 310.0, 420.0)
+	_left_column.custom_minimum_size.x = nav_width
+	_left_panel.custom_minimum_size.x = nav_width
+	_right_column.custom_minimum_size.x = notes_width
+	_right_panel.custom_minimum_size.x = notes_width
 
 func _build_app() -> void:
 	_shell = CanvasLayer.new()
@@ -347,20 +389,22 @@ func _build_app() -> void:
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
-	var left := VBoxContainer.new()
-	left.custom_minimum_size = Vector2(270, 0)
-	body.add_child(left)
+	_left_column = VBoxContainer.new()
+	body.add_child(_left_column)
 	_left_panel = PanelContainer.new()
 	_style_panel(_left_panel)
-	_left_panel.custom_minimum_size = Vector2(270,0)
 	_left_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	left.add_child(_left_panel)
-	var nav := ScrollContainer.new()
-	nav.custom_minimum_size = Vector2(244, 0)
-	nav.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_left_panel.add_child(nav)
+	_left_column.add_child(_left_panel)
+	_nav_scroll = ScrollContainer.new()
+	_nav_scroll.name = "CaseNavigationVerticalOnly"
+	_nav_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_nav_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_nav_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_nav_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_left_panel.add_child(_nav_scroll)
 	var nav_col := VBoxContainer.new()
-	nav.add_child(nav_col)
+	nav_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_nav_scroll.add_child(nav_col)
 	nav_col.add_child(_heading("Cases • source-derived", 17))
 	for i in range(_cases.size()):
 		var c: Dictionary = _cases[i]
@@ -375,26 +419,31 @@ func _build_app() -> void:
 		nav_col.add_child(btn)
 	_middle = Control.new()
 	_middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_middle.custom_minimum_size = Vector2(270,0)
 	_middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_middle)
-	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(470, 0)
-	body.add_child(right)
+	_right_column = VBoxContainer.new()
+	body.add_child(_right_column)
 	_right_panel = PanelContainer.new()
 	_style_panel(_right_panel)
-	_right_panel.custom_minimum_size = Vector2(470,0)
 	_right_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right.add_child(_right_panel)
-	var pane := _right_panel
-	var scroll := ScrollContainer.new()
-	pane.add_child(scroll)
+	_right_column.add_child(_right_panel)
+	_page_scroll = ScrollContainer.new()
+	_page_scroll.name = "ClinicalNotesVerticalOnly"
+	_page_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_page_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_page_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_right_panel.add_child(_page_scroll)
 	_page = VBoxContainer.new()
-	_page.custom_minimum_size = Vector2(440, 0)
+	_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_page.add_theme_constant_override("separation", 10)
-	scroll.add_child(_page)
+	_page_scroll.add_child(_page)
 	_progress_label = _heading("", 13)
 	outer.add_child(_progress_label)
 	outer.add_child(_heading("Synthetic educational cases · local only · no medical-device/clinical/exam validation · complete app port IN PROGRESS", 12))
+	_update_responsive_layout()
+	get_viewport().size_changed.connect(_update_responsive_layout)
 
 func _show_blocked(reason: String) -> void:
 	_shell = CanvasLayer.new()
@@ -489,10 +538,11 @@ func _set_environment_camera() -> void:
 	if camera == null:
 		push_warning("Source scene camera missing for CC0 environment")
 		return
-	# Move near the actual imported whole-clinic, framed inside central UI.
-	camera.position=Vector3(3.0,7.0,4.0)
-	camera.fov=58.0
-	camera.look_at(Vector3(3.0,-1.4,-19.0))
+	# SR23: bring the loaded CC0 environment forward in the usable center.
+	# The room is a decorative static background; no anatomy is rescaled.
+	camera.position=Vector3(3.0,4.2,-4.5)
+	camera.fov=46.0
+	camera.look_at(Vector3(3.0,-1.8,-20.0))
 	camera.current=true
 	# In this dedicated environment overview, avoid mistaking original
 	# source tooth podiums for anatomical objects inside the CC0 floor.
@@ -527,9 +577,11 @@ func _set_camera_mode(mode: String) -> void:
 		camera.fov = 60.0
 		camera.look_at(Vector3(0.0, 0.0, -2.5))
 	else:
-		# Keep both practical teeth within the middle of the 1600px window.
-		camera.position = Vector3(2.2, 1.7, 16.0)
-		camera.fov = 48.0
+		# Enlarge FDI36 practical anatomy without moving the underlying meshes.
+		# Center slightly to the right so the visible tooth falls inside the
+		# wider central column rather than under the clinical notes pane.
+		camera.position = Vector3(2.2, 1.7, 12.5)
+		camera.fov = 44.0
 		camera.look_at(Vector3(2.2, 0.5, 0.0))
 	camera.current = true
 	_apply_environment_visibility()
@@ -847,6 +899,10 @@ func _show_practical() -> void:
 					_page.add_child(t)
 			"tool":
 				var menu := OptionButton.new()
+				# Do not let the longest bilingual instrument expand the entire notes pane.
+				menu.fit_to_longest_item = false
+				_style_action(menu)
+				menu.custom_minimum_size = Vector2(0,44)
 				menu.add_item("Select original instrument", 0)
 				for item in _content["tools"]:
 					menu.add_item(str(item["german"]) + " / " + str(item["english"]))
@@ -874,7 +930,7 @@ func _show_practical() -> void:
 func _make_cut_slider(title: String, low: float, high: float, start: float) -> HSlider:
 	var row := HBoxContainer.new()
 	var label := _heading(title, 13)
-	label.custom_minimum_size = Vector2(130, 0)
+	label.custom_minimum_size = Vector2(126, 0)
 	label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	row.add_child(label)
 	var slider := HSlider.new()
@@ -882,7 +938,7 @@ func _make_cut_slider(title: String, low: float, high: float, start: float) -> H
 	slider.max_value = high
 	slider.step = 0.01
 	slider.value = clampf(start, low, high)
-	slider.custom_minimum_size = Vector2(300, 20)
+	slider.custom_minimum_size = Vector2(90, 20)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(slider)
 	_page.add_child(row)

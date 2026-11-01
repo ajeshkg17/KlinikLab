@@ -232,13 +232,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://pulp-sample-smoke.gd > "$RUNNER_TEMP/pulp-model-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/pulp-model-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/pulp-model-smoke.log"
           grep -F "SR15_NATIVE_SIX_CASE_PULP_SAMPLE_INDICATOR_PASS" "$RUNNER_TEMP/pulp-model-smoke.log"
-      - name: SR21 native app layout and camera geometry smoke (headless; NOT pixel acceptance)
+      - name: SR23 native responsive columns, contrast and camera smoke (headless; NOT pixel acceptance)
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://visual-layout-smoke.gd > "$RUNNER_TEMP/visual-layout-parse.log" 2>&1 || { cat "$RUNNER_TEMP/visual-layout-parse.log"; exit 1; }
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://visual-layout-smoke.gd > "$RUNNER_TEMP/visual-layout-test.log" 2>&1 || { cat "$RUNNER_TEMP/visual-layout-test.log"; exit 1; }
           cat "$RUNNER_TEMP/visual-layout-test.log"
-          grep -F "SR21_GODOT_SIX_CASE_UI_LAYOUT_GEOMETRY_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |

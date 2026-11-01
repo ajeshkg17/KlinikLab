@@ -78,3 +78,22 @@ test('SR2: source exporter does not evaluate full browser application or import 
  assert.match(read('native-godot/smoke.gd'),/SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS/);
  assert.doesNotMatch(read('native-godot/app.gd'),/HTTPRequest|OS\.shell_open|API_KEY|fetch\(/);
 });
+
+test('SR23: native app fixes captured job13 overflow and dark action labels without altering case data',()=>{
+ const app=read('native-godot/app.gd');
+ const layout=read('native-godot/visual-layout-smoke.gd');
+ assert.match(app,/func _update_responsive_layout\(/);
+ assert.match(app,/get_viewport\(\)\.size_changed\.connect\(_update_responsive_layout\)/);
+ assert.match(app,/_nav_scroll\.horizontal_scroll_mode = ScrollContainer\.SCROLL_MODE_DISABLED/);
+ assert.match(app,/_page_scroll\.horizontal_scroll_mode = ScrollContainer\.SCROLL_MODE_DISABLED/);
+ assert.match(app,/button\.add_theme_color_override\("font_color",Color\("#f5fbff"\)\)/);
+ assert.match(app,/button\.autowrap_mode = TextServer\.AUTOWRAP_WORD_SMART/);
+ assert.match(app,/_style_action\(menu\)/);
+ assert.match(app,/camera\.position=Vector3\(3\.0,4\.2,-4\.5\)/);
+ assert.match(app,/camera\.position = Vector3\(2\.2, 1\.7, 12\.5\)/);
+ assert.match(layout,/_validate_columns\(app,1600\)/);
+ assert.match(layout,/_validate_columns\(app,1280\)/);
+ assert.match(layout,/unlabelled dark action bar/);
+ assert.match(layout,/get_luminance\(\)/);
+ assert.match(layout,/SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS/);
+});
