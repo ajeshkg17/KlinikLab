@@ -206,6 +206,8 @@ try {
  $render.status -cne 'UNREAL_NATIVE_THREE_IMAGES_PENDING_PID_DXGI_GPU_AND_PIXEL_REVIEW' -or
  $render.workflowNativeSelectionVerified -ne $true -or
  [int]@($render.workflowSelectionEvents).Count -ne 3 -or
+ $render.workflowSelectionEvents[1].selectedFDI -ne '36' -or
+ $render.workflowSelectionEvents[1].caseSpecificFDI36GeometryClaimed -ne $false -or
  [double]$render.elapsedSeconds -lt 40 -or [int]$render.orbitViewportTicks -lt 30){
   throw 'Native screenshot/report, source parity or real camera orbit incomplete'}
  $files=@('unreal-whole-clinic-overview.png','unreal-whole-clinic-angled.png',
