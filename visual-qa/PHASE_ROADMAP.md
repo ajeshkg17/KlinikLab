@@ -1,5 +1,19 @@
 # Engine decision override — 31 October 2026: Godot 4.7.2 native local render FIRST; Unreal paused
 
+## SR1G — task Godot environment vs manual validation, 1 November 2026
+
+**Observed from owner:** after fixing the installer parser, scheduled task `KlinikLab-Godot-PC-Watcher` ran with live Node PID **26812** and was polling GitHub every ten seconds. A **separate manually invoked** `--validate` returned exit code **0** despite logging `Set KLINIKLAB_GODOT_EXE to installed Windows Godot 4.7.2 executable`, overwriting the shared heartbeat as `blocked`. This is NOT evidence the task child failed to receive the path: the task launcher assigns `$env:KLINIKLAB_GODOT_EXE=$GodotExe` before `Start-Process`, whereas a separate PowerShell terminal may not define that variable. This runtime distinction must be measured, not assumed. The job07 recovery-only archived result remains immutable `EVIDENCE_INCOMPLETE` and MUST NEVER rerender.
+
+**Fix:** standalone `--validate` now has an independent preflight that throws on failure (nonzero exit) and **never modifies the lease-owner's heartbeat or ledger**. To use `--validate` manually, set `$env:KLINIKLAB_GODOT_EXE` in that terminal explicitly. The lease-holding `--watch` process now writes `%LOCALAPPDATA%\KlinikLabGodotWorker\godot-watcher-runtime.json` with its **actual inherited exe path**, PID, worker exact SHA, GitHub permission check, PowerShell hash preflight and latest approved job identity. It updates each successful poll. It does not log tokens or claim that Godot was started.
+
+**No-render admission probe:** `--probe-next-job` verifies the independent current watcher lease is live and matches the fresh runtime receipt, exe file exists, latest poll is recent, task's noninteractive publishing permission is verified, source SHA/schema and exact approved current job are consistent, job07 remains recovery-only published/incomplete and an illustrative **never-queued** unique schema7 job ID passes the real job validator with no ledger entry/evidence directory. It reads only; no Godot, no GPU telemetry, no new task/job submission, no PNG synthesis, no ledger/heartbeat writes. Successful state `READY_FOR_FUTURE_UNIQUE_JOB_ADMISSION_NOT_EXECUTED` establishes admission readiness ONLY; it cannot prove future process/device GPU evidence without a newly approved and actually executed unique job.
+
+**Regression coverage:** hosted Windows PowerShell 5.1 executes a child Node through the same `Start-Process` environment model with an inert fake executable path, proves the env variable arrives unchanged, and performs no rendering. Node tests require failed `--validate` to exit nonzero and preserve a preexisting heartbeat, and exercise fail-closed future-job admission checks (missing env, stale receipt, wrong PID/SHA, wrong case/job identity, mismatched permission and original job07 status).
+
+---
+
+
+
 ## SR1E job07 interrupted owner-PC watcher — forensic publication-only recovery (1 November 2026)
 
 **Observed from owner-PC report (not yet independently read from its unpublished local filesystem):** the approved per-user task with worker SHA `c3f2f71a1f6e2d48fc1a7144ea023b6e13863ebf` picked up unique `pc-godot-clinic-20261101-job07`; its original Godot process produced `godot-background-capture.json`, both original PNGs, `godot-native-workflow-state.json`, `native-source-submission.json`, and native background logs. **No** `godot-owner-pc-result.json`, regular `godot-job-result.json` or GitHub publication returned. Owner reports dead watcher Node PID **42220**, retained stale lease, Scheduled Task Ready, stale `validated` heartbeat and no job07 ledger entry. Do **NOT** rerun job07 or delete the old lock. The ledger gap is inconsistent with the original worker's save-before-capture ordering; until actual local JSON/timestamps are examined, the precise termination cause is **not proven**.
