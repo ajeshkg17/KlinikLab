@@ -86,15 +86,14 @@ def main():
     scene.render.image_settings.file_format="PNG"
     scene.render.image_settings.color_mode="RGBA"
     scene.render.film_transparent=False
-    try:scene.render.engine="BLENDER_EEVEE_NEXT"
-    except Exception:
-        try:scene.render.engine="BLENDER_EEVEE"
-        except Exception:
-            scene.render.engine="CYCLES"
-            scene.cycles.samples=16
-    if scene.render.engine in ("BLENDER_EEVEE","BLENDER_EEVEE_NEXT"):
-        try:scene.eevee.taa_render_samples=48
-        except Exception:pass
+    # Hosted GitHub runners have no discrete GPU or display server. Render
+    # REAL Blender geometry with Cycles on CPU, not Eevee/EGL/OpenGL preview.
+    # This is a native Blender offline render, not a screenshot/mock image.
+    scene.render.engine="CYCLES"
+    scene.cycles.device="CPU"
+    scene.cycles.samples=12
+    scene.render.threads_mode="FIXED"
+    scene.render.threads=2
     scene.render.image_settings.color_depth="8"
     scene.view_settings.view_transform="Standard"
     scene.camera.data.lens=40
