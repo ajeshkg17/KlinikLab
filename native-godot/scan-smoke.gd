@@ -10,7 +10,7 @@ func _run() -> void:
 		quit(1)
 		return
 	var viewer: Node3D = script.new()
-	var obj := PackedByteArray("v 0 0 0\nv 2 0 0\nv 0 1 0\nf 1 2 3\n".to_utf8_buffer())
+	var obj := "v 0 0 0\nv 2 0 0\nv 0 1 0\nf 1 2 3\n".to_utf8_buffer()
 	if not bool(viewer.call("load_scan_bytes", obj, "obj", "synthetic-test.obj")) or int(viewer.call("triangle_count")) != 1:
 		push_error("SR7_SCAN_TEST_FAIL native OBJ triangle/mesh")
 		quit(1)
@@ -38,7 +38,7 @@ func _run() -> void:
 		push_error("SR7_SCAN_TEST_FAIL empty scan accepted")
 		quit(1)
 		return
-	if bool(viewer.call("load_scan_bytes",PackedByteArray("v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 99\n".to_utf8_buffer()),"obj")):
+	if bool(viewer.call("load_scan_bytes","v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 99\n".to_utf8_buffer(),"obj")):
 		push_error("SR7_SCAN_TEST_FAIL invalid face accepted")
 		quit(1)
 		return
