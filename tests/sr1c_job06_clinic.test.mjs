@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {validateGodotJob} from '../visual-qa/godot-job-core.mjs';
 
 const read = p => fs.readFileSync(new URL(p,import.meta.url),'utf8');
-const activeJob=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const activeJob=JSON.parse(read('../visual-qa/jobs/godot-job08-original.json'));
 // Immutable schema6 request regression, independent of today's queued job07.
 const request={...activeJob,schemaVersion:6,jobId:'pc-godot-clinic-20261031-job06',
  suite:'sr1c-clinic-workspace-prototype',sceneMode:'clinic-overview',

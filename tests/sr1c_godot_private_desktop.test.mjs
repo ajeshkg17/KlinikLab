@@ -9,7 +9,7 @@ const collector=read('../visual-qa/sr1c-capture-godot-background-pc.ps1')+read('
 const gd=read('../visual-qa/sr1c-godot-background-capture.gd');
 const worker=read('../visual-qa/godot-worker.mjs');
 const xr=read('../visual-qa/xr-worker.mjs');
-const activeJob=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const activeJob=JSON.parse(read('../visual-qa/jobs/godot-job08-original.json'));
 // Preserve historical schema-v5 regression fixtures without reusing the old request.
 const job={...activeJob,schemaVersion:5,jobId:'pc-godot-fdi16-20261031-job05',
  suite:'sr1c-fdi16-before-after',capture:'native-orbit-frontal-occlusal',
