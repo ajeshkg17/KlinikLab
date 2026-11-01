@@ -5,7 +5,7 @@ import path from 'node:path';
 import {validateGodotJob,EXACT_SOURCE_SHA} from '../visual-qa/godot-job-core.mjs';
 const root=path.resolve(import.meta.dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const sha='47f2a6b802e73ee4d9a6b38a0fc2b680f552e3df';
+const sha='bd3a62cac84706323c347e84a6e62b808fb5d041';
 test('SR14 independently identifies exact new exported app SHA and preserves historic evidence schema',()=>{
  const job={
   schemaVersion:8,jobId:'pc-godot-exported-20261101-cc0-native-job09',commit:sha,
