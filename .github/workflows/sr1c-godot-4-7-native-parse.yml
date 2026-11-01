@@ -164,6 +164,19 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://direct-bur-smoke.gd > "$RUNNER_TEMP/direct-bur-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/direct-bur-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/direct-bur-smoke.log"
           grep -F "SR12_NATIVE_DIRECT_3D_TOOTH_POINTER_PASS" "$RUNNER_TEMP/direct-bur-smoke.log"
+      - name: Import actual reviewed CC0 assembled clinic GLB and preserve six case/FDI procedures (HEADLESS)
+        run: |
+          set -euo pipefail
+          project="$RUNNER_TEMP/native-kliniklab-app"
+          test -s "$project/assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb.source"
+          test -s "$project/assets/cc0/3dassets-dental/instrument-tray-v1.glb.source"
+          test -s "$project/assets/cc0/3dassets-dental/clinic-manifest.json"
+          echo "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a  $project/assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb.source" | sha256sum -c -
+          echo "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036  $project/assets/cc0/3dassets-dental/instrument-tray-v1.glb.source" | sha256sum -c -
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --check-only --script res://cc0-clinic.gd > "$RUNNER_TEMP/cc0-parse.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --script res://cc0-clinic-smoke.gd > "$RUNNER_TEMP/cc0-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/cc0-smoke.log"
+          grep -F "SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS" "$RUNNER_TEMP/cc0-smoke.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |

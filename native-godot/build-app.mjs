@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
@@ -34,6 +34,68 @@ try{
  function run(script,args){
   execFileSync(process.execPath,[script,...args],{stdio:'inherit',timeout:90000});
  }
+ // The whole-clinic starter is the SAME exact reviewed GLB as the model
+ // named "Dental practice floor" in the 54-piece source pack. Do not
+ // duplicate the full pack or confuse equipment assets with anatomy.
+ const cc0Path=path.join(root,'assets/cc0/3dassets-dental');
+ const fullPack=path.join(root,'visual-qa/asset-research/assets/dental-practice-cc0-v1');
+ const approved=JSON.parse(fs.readFileSync(path.join(cc0Path,'source-manifest.json'),'utf8'));
+ const approvedFiles=[
+  ['whole-clinic-starter-v1.glb','Dental practice floor (Dental Practice and Surgery).glb',
+   '9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a',1177948],
+  ['instrument-tray-v1.glb','Instrument Tray (Dental Practice and Surgery).glb',
+   '63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036',30452]
+ ];
+ const crypto=await import('node:crypto');
+ const sha256=b=>crypto.createHash('sha256').update(b).digest('hex');
+ if(approved.licenseSPDX!=='CC0-1.0'||approved.status!=='REVIEWED_CC0_STATIC_VISUAL_PROTOTYPES_ONLY'||
+   approved.files?.length!==2||approved.review?.clinicalAccepted!==false)
+  throw Error('CC0 license or native review contract drift');
+ const cc0Dest=path.join(dest,'assets/cc0/3dassets-dental');
+ fs.mkdirSync(cc0Dest,{recursive:true});
+ const {convert}=await import('./dequantize-cc0.mjs');
+ const caseAssets=[];
+ for(const [file,original,hash,bytes] of approvedFiles){
+  const row=approved.files.find(x=>x.destFilename===file);
+  if(!row||row.sha256!==hash||row.bytes!==bytes||row.licenseAccepted!==true||
+     row.clinicalStatus!=='NOT_VALIDATED'||row.originalSourceBytesUnmodified!==true)
+    throw Error('CC0 source license/metadata mismatch: '+file);
+  const reviewedPath=path.join(cc0Path,file),packPath=path.join(fullPack,original);
+  if(!fs.existsSync(reviewedPath)||!fs.existsSync(packPath)||
+     fs.statSync(reviewedPath).size!==bytes||fs.statSync(packPath).size!==bytes||
+     sha256(fs.readFileSync(reviewedPath))!==hash||sha256(fs.readFileSync(packPath))!==hash)
+    throw Error('Reviewed GLB differs from same-source 54-model pack: '+file);
+  // Keep original binary byte-for-byte, but avoid Godot trying to import
+  // the unsupported quantized GLB as a resource. .source is raw evidence.
+  const originalName=file+'.source';
+  const destFile=path.join(cc0Dest,originalName);
+  fs.copyFileSync(reviewedPath,destFile,fs.constants.COPYFILE_EXCL);
+  if(sha256(fs.readFileSync(destFile))!==hash)throw Error('Native GLB package corruption: '+file);
+  // Godot 4.7.2 does not parse the original KHR_mesh_quantization extension.
+  // Dequantize mesh vertex attributes into float32, leaving original file
+  // untouched. Preserve exact original GLB hashes, nodal transforms, materials.
+  const compatible=convert(fs.readFileSync(reviewedPath),hash);
+  const convertedName=file.replace(/\.glb$/, '-godot.glb');
+  fs.writeFileSync(path.join(cc0Dest,convertedName),compatible.bytes,{flag:'wx'});
+  if(sha256(fs.readFileSync(path.join(cc0Dest,convertedName)))!==compatible.convertedSha256 ||
+    compatible.convertedAccessors<1)throw Error('CC0 Godot GLB compatibility export failed');
+  caseAssets.push({name:file,originalFile:originalName,sha256:hash,bytes,
+   godotFile:convertedName,godotSha256:compatible.convertedSha256,
+   godotBytes:compatible.bytes.length,godotFloat32Accessors:compatible.convertedAccessors,
+   sourcePackName:original,
+   role:file.startsWith('whole-')?'assembledStaticEnvironment':'staticInstrumentProp'});
+ }
+ const clinicManifest={
+  schemaVersion:1,kind:'REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY',
+  sourceGitSHA:sha,licenseSPDX:'CC0-1.0',publisher:approved.packSource,
+  reviewedAssetManifestSHA256:sha256(fs.readFileSync(path.join(cc0Path,'source-manifest.json'))),
+  sourcePackReconciledBySHA256:true,
+  godotConversion:'DETERMINISTIC_FLOAT32_VERTEX_ACCESSORS_PRESERVE_ORIGINAL_KHR_QUANTIZED_GLB',
+  godotConverterSHA256:sha256(fs.readFileSync(path.join(root,'native-godot/dequantize-cc0.mjs'))),
+  clinicalAccuracyValidated:false,
+  fullAppParityValidated:false,assets:caseAssets
+ };
+ fs.writeFileSync(path.join(cc0Dest,'clinic-manifest.json'),JSON.stringify(clinicManifest,null,2)+'\n',{flag:'wx'});
  const exported=path.join(dest,'source');
  run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
@@ -94,6 +156,9 @@ try{
   nativeSourceSyntheticRadiographySixCases:true,
   nativeOriginalFspKpFourCasesSixteenPhases:true,
   nativeMeshSurfacePointerEditingOptIn:true,
+  nativeCc0WholeClinicStaticEnvironment:true,
+  nativeCc0InstrumentTrayProp:true,
+  nativeCc0Hashes:caseAssets.map(x=>({name:x.name,sha256:x.sha256})),
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
   clinicalCalibrationVerified:false,

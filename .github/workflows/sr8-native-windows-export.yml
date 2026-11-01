@@ -5,6 +5,8 @@ on:
     branches: [integration/single-chat-validation-2026-10-30]
     paths:
       - 'native-godot/**'
+      - 'assets/cc0/3dassets-dental/**'
+      - 'visual-qa/asset-research/assets/dental-practice-cc0-v1/**'
       - 'visual-qa/godot-local-clinical/**'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
       - 'visual-qa/sr1-local-kliniklab-export.mjs'
@@ -48,6 +50,11 @@ jobs:
           test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/atlas/atlas.json"
           test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/fdi16-volume-field.bin"
           test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/clinical-pathways.json"
+          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb.source"
+          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/assets/cc0/3dassets-dental/clinic-manifest.json"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/KlinikLab-Godot-Source" --script res://cc0-clinic-smoke.gd > "$RUNNER_TEMP/cc0-app-validation.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-app-validation.log"; exit 1; }
+          cat "$RUNNER_TEMP/cc0-app-validation.log"
+          grep -F "SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS" "$RUNNER_TEMP/cc0-app-validation.log"
       - name: Download verified official 4.7.2 native export templates (no unpinned binaries)
         shell: bash
         run: |
@@ -75,7 +82,7 @@ jobs:
           dedicated_server=false
           custom_features=""
           export_filter="all_resources"
-          include_filter="source/**"
+          include_filter="source/**,assets/cc0/3dassets-dental/**"
           exclude_filter=""
           export_path=""
           patches=PackedStringArray()

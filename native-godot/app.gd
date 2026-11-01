@@ -36,6 +36,8 @@ var _progress: Dictionary = {}
 var _scene: Node3D
 var _atlas: Node3D
 var _scan: Node3D
+var _cc0_clinic: Node3D
+var _legacy_workspace: Node3D
 var _scan_wireframe := false
 var _shell: CanvasLayer
 var _view := "clinic"
@@ -67,6 +69,27 @@ func _ready() -> void:
 	workspace.name = "KL_COMPLETE_OPERATORY_WORKSPACE"
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
+	_legacy_workspace=workspace
+	var clinic_script: GDScript = load("res://cc0-clinic.gd")
+	if clinic_script == null:
+		_show_blocked("Required source-pinned reviewed CC0 clinic runtime script unavailable")
+		push_error("SR13 CC0 clinic startup blocked: missing runtime script")
+		get_tree().quit(4)
+		return
+	var env: Node3D = clinic_script.new()
+	if not bool(env.call("configure",str(_content["sourceGitSHA"]))):
+		var reason: String = str(env.call("error"))
+		env.free()
+		_show_blocked("Required reviewed CC0 clinic environment could not load: "+reason)
+		push_error("SR13 CC0 clinic startup blocked: "+reason)
+		get_tree().quit(4)
+		return
+	_scene.add_child(env)
+	_cc0_clinic=env
+	# The replacement CC0 room is an actual imported Godot scene, not just
+	# a catalog. Hide duplicate schematic shell so source tooth geometry
+	# and all six independent FDI volumes stay at their original transforms.
+	_legacy_workspace.visible=false
 	var atlas_script: GDScript = load("res://atlas-viewer.gd")
 	if atlas_script != null:
 		var atlas: Node3D = atlas_script.new()
@@ -257,7 +280,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
+	for section in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -396,6 +419,37 @@ func _show_case_geometry() -> void:
 	if _atlas != null:
 		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
 
+func _set_environment_camera() -> void:
+	if _scene == null:
+		return
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null:
+		push_warning("Source scene camera missing for CC0 environment")
+		return
+	camera.position=Vector3(0.0,8.5,11.0)
+	camera.fov=66.0
+	camera.look_at(Vector3(0.0,-1.5,-19.0))
+	camera.current=true
+	# In this dedicated environment overview, avoid mistaking original
+	# source tooth podiums for anatomical objects inside the CC0 floor.
+	for id in _volumes:
+		(_volumes[id] as Node3D).visible=false
+	for name in ["KL_FDI16_BEFORE","KL_FDI16_AFTER"]:
+		var tooth: Node3D = _scene.get_node_or_null(name)
+		if tooth!=null:
+			tooth.visible=false
+
+func _show_environment() -> void:
+	_page.add_child(_heading("Imported CC0 3DAssets.dev dental practice • native scene",18))
+	_page.add_child(_heading("The assembled whole-clinic starter and a separate instrument tray are imported GLB meshes, instantiated in the REAL Godot application. The schematic background is disabled; the original source-identified six FDI/tooth/training flows remain independent.",14))
+	if _cc0_clinic!=null:
+		var report: Dictionary = _cc0_clinic.call("summary")
+		_page.add_child(_heading("Imported clinic mesh instances: %s · static tray meshes: %s · original GLB hashes: verified" % [str(report.get("wholeMeshInstances",0)),str(report.get("trayMeshInstances",0))],14))
+	_page.add_child(_heading("CC0 1.0 · 3dassets.dev / Dental Practice and Surgery. Stylized static environment; not calibrated dental anatomy, full instrument physics, a clinical procedure simulator, or a patient record.",12))
+	var to_clinic:=_button("Return to six-case clinical training")
+	to_clinic.pressed.connect(_switch_view.bind("clinic"))
+	_page.add_child(to_clinic)
+
 func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
 		return
@@ -415,13 +469,13 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
+	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	_view = view
 	if view != "clinic":
 		_direct_bur_mode = false
 	if _scene != null:
-		_scene.visible = view == "clinic"
+		_scene.visible = view in ["clinic","environment"]
 	if _atlas != null:
 		_atlas.visible = view == "anatomy" or (view == "clinic" and _case_index != 0)
 		_atlas.call("set_camera_enabled",view == "anatomy")
@@ -430,7 +484,14 @@ func _switch_view(view: String) -> void:
 		_scan.call("set_camera_enabled",view == "scans")
 	if view == "clinic":
 		_set_camera_mode(_camera_mode)
-	_middle.visible = view in ["clinic", "anatomy", "scans"]
+		_show_case_geometry()
+	if view == "environment":
+		_set_environment_camera()
+	if _cc0_clinic != null:
+		_cc0_clinic.call("set_environment_visible",view in ["clinic","environment"])
+	if _legacy_workspace != null:
+		_legacy_workspace.visible = false
+	_middle.visible = view in ["clinic", "environment","anatomy", "scans"]
 	_refresh()
 
 func _refresh() -> void:
@@ -450,6 +511,8 @@ func _refresh() -> void:
 		_show_language_studio()
 	elif _view == "journey":
 		_show_journey()
+	elif _view == "environment":
+		_show_environment()
 	elif _view == "anatomy":
 		_show_atlas_controls()
 	elif _view == "scans":
@@ -1341,6 +1404,9 @@ func _reset_progress() -> void:
 
 func _show_coverage() -> void:
 	_page.add_child(_heading("MIGRATION STATUS · Functional parity is NOT complete", 18))
+	if _cc0_clinic != null:
+		var cc0: Dictionary = _cc0_clinic.call("summary")
+		_page.add_child(_heading("CC0 native imported room meshes=%s, static instrument tray=%s, SHA256 verified, NOT clinically validated" % [str(cc0.get("wholeMeshInstances",0)),str(cc0.get("trayMeshInstances",0))],14))
 	var gates: Dictionary = _content.get("migrationGates", {})
 	for id in gates:
 		var status := str(gates[id])
