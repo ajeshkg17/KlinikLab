@@ -3,6 +3,7 @@ extends Node3D
 ## Surface-only visual reference; never substitutes the editable synthetic volume.
 const MANIFEST := "res://source/tooth-fdi36-manifest.json"
 const RAW_SOURCE := "res://assets/dundee/mandibular_first_molar.glb.source"
+const CONVERTED_RAW_SOURCE := "res://assets/dundee/mandibular_first_molar-godot.glb.source"
 const GODOT_SCENE := "res://assets/dundee/mandibular_first_molar-godot.glb"
 const RAW_RESOLVER = preload("res://raw-source.gd")
 const SOURCE_BLOB := "73e9f3029d770c6b4052ebbaba708283de4c47fd"
@@ -34,8 +35,8 @@ func configure(expected_sha: String) -> bool:
 		_show_missing_fallback()
 		return true
 	var converted_sha := str(m.get("convertedSha256",""))
-	if converted_sha.length() != 64:
-		_error = "Godot-compatible FDI36 conversion manifest missing"
+	if converted_sha.length() != 64 or RAW_RESOLVER.verified_path(CONVERTED_RAW_SOURCE,converted_sha).is_empty():
+		_error = "Godot-compatible FDI36 conversion sidecar missing or SHA256 mismatch"
 		_show_missing_fallback()
 		return true
 	var resource := load(GODOT_SCENE)
