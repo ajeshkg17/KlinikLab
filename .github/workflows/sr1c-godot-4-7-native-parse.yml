@@ -191,6 +191,7 @@ jobs:
           cat "$RUNNER_TEMP/exported-app-capture-parse.log"
           node --test tests/sr14_native_exported_watcher.test.mjs
           node --test tests/sr14_unique_native_pc_job09.test.mjs
+          node --test tests/sr16_unique_native_pc_job10.test.mjs
       - name: Exact original OBJ/MTL and CC0 native raw source checks before Windows sidecar packaging
         run: |
           set -euo pipefail
