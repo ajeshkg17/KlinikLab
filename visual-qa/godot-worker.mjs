@@ -657,12 +657,37 @@ async function tick(){
   // Always check publisher permissions from the actual LEASE-HOLDING
   // task environment, even when the currently queued job is terminal.
   // A terminal job must never be rerendered.
-  await permission();
+  const publisherToken=await permission();
   await writeRuntimeReceipt(j,true);
   if(previous?.status==='published'||previous?.status==='failed'){
    await heartbeat(previous.status,j.jobId,previous);return;
   }
+  // Invariant: no local ledger entry does NOT imply a never-attempted job.
+  // Job08's published native evidence was observed on the owner PC while
+  // the manually inspected local ledger listed only jobs01..07. Avoid
+  // falsely marking "executing" or reusing any original run path.
+  // Check local original evidence AND independently published remote result
+  // BEFORE mutating the ledger. Never synthesize a replacement entry.
   if(!previous){
+   const originalRun=path.join(EVIDENCE,j.jobId+'-'+j.commit.slice(0,10));
+   if(await fs.stat(originalRun).then(()=>true,()=>false)){
+    await heartbeat('existing-original-evidence-ledger-reconciliation-required',j.jobId,
+     {reason:'Original native evidence folder exists while local ledger entry is absent; no render or ledger write'});
+    return;
+   }
+   const remotePath='runs/pc-godot-'+j.jobId+'-'+j.commit+'/godot-job-result.json';
+   let remotePublished=false;
+   try{
+    const remote=await api(publisherToken,'/contents/'+remotePath+'?ref='+RESULT_BRANCH);
+    remotePublished=remote?.path===remotePath;
+   }catch(e){
+    if(!String(e.message).includes('status 404'))throw e;
+   }
+   if(remotePublished){
+    await heartbeat('remote-original-published-ledger-reconciliation-required',j.jobId,
+     {reason:'Canonical original published GitHub result exists despite missing local ledger; never rerender'});
+    return;
+   }
    state.completed[j.jobId]={commit:j.commit,status:'executing',startedAt:new Date().toISOString()};
    await saveLedger(state);await heartbeat('executing',j.jobId);
    const {run,result}=await execute(j);
