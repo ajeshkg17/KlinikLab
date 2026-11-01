@@ -94,13 +94,17 @@ $expectedWatchScript=if($taskWorkerDirectoryExists){Join-Path $taskWorkerDirecto
 function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$RequireRecentStart){
  $item=[ordered]@{pid=$ProcessId;pidPresent=$false;identityVerified=$false
   executableIsNode=$false;scriptIsExactTaskWorker=$false;watchModeMatched=$false
-  processCreatedUTC=$null;recordedAtParsed=$false;createdBeforeRecordedAt=$false
-  startNearRecordedAt=$false;reason='PID_NOT_PRESENT_OR_CIM_UNAVAILABLE'}
+  processCreatedUTC=$null;cimCreationDateKind=$null;processStartCrossCheckDeltaSeconds=$null
+  recordedAtParsed=$false;recordHasExplicitOffset=$false
+  deltaFromProcessSeconds=$null;deltaIfNaiveRecordIsUTCSeconds=$null
+  deltaIfNaiveRecordIsLocalSeconds=$null;createdBeforeRecordedAt=$false
+  startNearRecordedAt=$false;parentPid=$null;reason='PID_NOT_PRESENT_OR_CIM_UNAVAILABLE'}
  if($ProcessId -le 0){return [pscustomobject]$item}
  try{
   $p=Get-CimInstance -ClassName Win32_Process -Filter ('ProcessId = '+$ProcessId) -ErrorAction Stop
   if($null -eq $p){return [pscustomobject]$item}
   $item.pidPresent=$true
+  $item.parentPid=[int]$p.ParentProcessId
   $base=[IO.Path]::GetFileName([string]$p.ExecutablePath)
   if([string]::IsNullOrWhiteSpace($base)){$base=[string]$p.Name}
   $item.executableIsNode=($base -ieq 'node.exe')
@@ -109,21 +113,1066 @@ function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$
     $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
   $item.watchModeMatched=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
   if($null -ne $p.CreationDate){
-   $created=([datetime]$p.CreationDate).ToUniversalTime()
+   $originalCreated=[datetime]$p.CreationDate
+   $item.cimCreationDateKind=[string]$originalCreated.Kind
+   $created=$originalCreated.ToUniversalTime()
    $item.processCreatedUTC=$created.ToString('o')
+   try{
+    $native=Get-Process -Id $ProcessId -ErrorAction Stop
+    $nativeCreated=$native.StartTime.ToUniversalTime()
+    $item.processStartCrossCheckDeltaSeconds=[math]::Round(($nativeCreated-$created).TotalSeconds,3)
+   }catch{}
+   # A missing ISO-8601 zone MUST NOT be implicitly trusted as UTC/local.
+   # Diagnostic candidates are reported separately, not promoted to identity.
+   $item.recordHasExplicitOffset=($RecordAt -match '(?i)(?:Z|[+-][0-9]{2}:[0-9]{2})
+ }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
+ return [pscustomobject]$item
+}
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
+$heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
+if($heartbeatExists){
+ try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
+  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
+  $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
+  $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
+ }catch{}
+}
+# The worker lease is READ ONLY. A stale/mismatched lease is a hold, never
+# permission to erase it or recreate the task.
+$leaseFile=Join-Path $root 'godot-worker-active.lock'
+$workerLeaseExists=Test-Path -LiteralPath $leaseFile -PathType Leaf
+$workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
+$workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
+$workerLeaseFileCreatedUTC=$null;$workerLeaseFileModifiedUTC=$null
+if($workerLeaseExists){
+ try{
+  $leaseInfo=Get-Item -LiteralPath $leaseFile -ErrorAction Stop
+  $workerLeaseFileCreatedUTC=$leaseInfo.CreationTimeUtc.ToString('o')
+  $workerLeaseFileModifiedUTC=$leaseInfo.LastWriteTimeUtc.ToString('o')
+  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $workerLeasePid=[int]$lease.pid
+  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
+  $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
+ }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
+}
+# Classify live task-related processes without publishing command lines, paths
+# or other users' process details. This is a safety inventory, not task control.
+$matchingWatcherProcesses=@();$taskLauncherProcesses=@()
+$watcherDirectChildren=@();$watcherChildInspectionComplete=$false
+$processEnumerationComplete=$false;$nodeCommandLineUnavailableCount=0
+try{
+ $running=@(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'node.exe' OR Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction Stop)
+ $processEnumerationComplete=$true
+ foreach($proc in $running){
+  $cmd=[string]$proc.CommandLine
+  $exe=[string]$proc.Name
+  if($exe -ieq 'node.exe' -and [string]::IsNullOrWhiteSpace($cmd)){$nodeCommandLineUnavailableCount++;continue}
+  $taskScript=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $launcher=($taskInstallScriptExists -and
+    $cmd.IndexOf($taskInstallScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $createdString=if($null -ne $proc.CreationDate){([datetime]$proc.CreationDate).ToUniversalTime().ToString('o')}else{$null}
+  if($taskScript -and $exe -ieq 'node.exe'){
+   $matchingWatcherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString
+     watchMode=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+     isHeartbeatPid=([int]$proc.ProcessId -eq $heartbeatPid)
+     isLeasePid=([int]$proc.ProcessId -eq $workerLeasePid)}
+  }elseif($launcher -and $exe -in @('powershell.exe','pwsh.exe')){
+   $taskLauncherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString}
+  }
+ }
+}catch{$processEnumerationComplete=$false}
+# Direct-parent classification only; cannot prove absence of grandchildren.
+# Never terminate processes, disclose commands, or interpret empty as approval.
+if($workerLeasePid -gt 0){
+ try{
+  $children=@(Get-CimInstance -ClassName Win32_Process -Filter ('ParentProcessId = '+$workerLeasePid) -ErrorAction Stop)
+  $watcherChildInspectionComplete=$true
+  foreach($child in $children){
+   $kind='other'
+   if([string]$child.Name -match '(?i)^node\.exe($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ workerLeaseFileCreatedUTC=$workerLeaseFileCreatedUTC
+ workerLeaseFileModifiedUTC=$workerLeaseFileModifiedUTC
+ watcherDirectChildren=$watcherDirectChildren
+ watcherChildInspectionComplete=$watcherChildInspectionComplete
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+)
    $when=[DateTimeOffset]::MinValue
    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
        [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
     $item.recordedAtParsed=$true
-    $item.createdBeforeRecordedAt=($created -le $when.UtcDateTime.AddSeconds(5))
     $elapsed=($when.UtcDateTime - $created).TotalSeconds
+    $item.deltaFromProcessSeconds=[math]::Round($elapsed,3)
+    $item.createdBeforeRecordedAt=($elapsed -ge -5)
     $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
+   }
+   if(-not $item.recordHasExplicitOffset){
+    $utcCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeUniversal,[ref]$utcCandidate)){
+     $item.deltaIfNaiveRecordIsUTCSeconds=[math]::Round(
+      ($utcCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+    $localCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeLocal,[ref]$localCandidate)){
+     $item.deltaIfNaiveRecordIsLocalSeconds=[math]::Round(
+      ($localCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
    }
   }
   $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
-    $item.watchModeMatched -and $item.createdBeforeRecordedAt -and
+    $item.watchModeMatched -and $item.recordHasExplicitOffset -and
+    $item.createdBeforeRecordedAt -and
     (-not $RequireRecentStart -or $item.startNearRecordedAt))
-  $item.reason=if($item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
+  $item.reason=if(-not $item.recordHasExplicitOffset){'TIMESTAMP_ZONE_MISSING_CANNOT_ATTEST_WATCHER_LEASE'}elseif(
+    $item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
+ }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
+ return [pscustomobject]$item
+}
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
+$heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
+if($heartbeatExists){
+ try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
+  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
+  $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
+  $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
+ }catch{}
+}
+# The worker lease is READ ONLY. A stale/mismatched lease is a hold, never
+# permission to erase it or recreate the task.
+$leaseFile=Join-Path $root 'godot-worker-active.lock'
+$workerLeaseExists=Test-Path -LiteralPath $leaseFile -PathType Leaf
+$workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
+$workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
+if($workerLeaseExists){
+ try{
+  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $workerLeasePid=[int]$lease.pid
+  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
+  $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
+ }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
+}
+# Classify live task-related processes without publishing command lines, paths
+# or other users' process details. This is a safety inventory, not task control.
+$matchingWatcherProcesses=@();$taskLauncherProcesses=@()
+$processEnumerationComplete=$false;$nodeCommandLineUnavailableCount=0
+try{
+ $running=@(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'node.exe' OR Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction Stop)
+ $processEnumerationComplete=$true
+ foreach($proc in $running){
+  $cmd=[string]$proc.CommandLine
+  $exe=[string]$proc.Name
+  if($exe -ieq 'node.exe' -and [string]::IsNullOrWhiteSpace($cmd)){$nodeCommandLineUnavailableCount++;continue}
+  $taskScript=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $launcher=($taskInstallScriptExists -and
+    $cmd.IndexOf($taskInstallScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $createdString=if($null -ne $proc.CreationDate){([datetime]$proc.CreationDate).ToUniversalTime().ToString('o')}else{$null}
+  if($taskScript -and $exe -ieq 'node.exe'){
+   $matchingWatcherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString
+     watchMode=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+     isHeartbeatPid=([int]$proc.ProcessId -eq $heartbeatPid)
+     isLeasePid=([int]$proc.ProcessId -eq $workerLeasePid)}
+  }elseif($launcher -and $exe -in @('powershell.exe','pwsh.exe')){
+   $taskLauncherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString}
+  }
+ }
+}catch{$processEnumerationComplete=$false}
+$taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+){$kind='node'}
+   elseif([string]$child.Name -match '(?i)^(KlinikLab|Godot).*\.exe($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+)
+   $when=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+       [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
+    $item.recordedAtParsed=$true
+    $elapsed=($when.UtcDateTime - $created).TotalSeconds
+    $item.deltaFromProcessSeconds=[math]::Round($elapsed,3)
+    $item.createdBeforeRecordedAt=($elapsed -ge -5)
+    $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
+   }
+   if(-not $item.recordHasExplicitOffset){
+    $utcCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeUniversal,[ref]$utcCandidate)){
+     $item.deltaIfNaiveRecordIsUTCSeconds=[math]::Round(
+      ($utcCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+    $localCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeLocal,[ref]$localCandidate)){
+     $item.deltaIfNaiveRecordIsLocalSeconds=[math]::Round(
+      ($localCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+   }
+  }
+  $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
+    $item.watchModeMatched -and $item.recordHasExplicitOffset -and
+    $item.createdBeforeRecordedAt -and
+    (-not $RequireRecentStart -or $item.startNearRecordedAt))
+  $item.reason=if(-not $item.recordHasExplicitOffset){'TIMESTAMP_ZONE_MISSING_CANNOT_ATTEST_WATCHER_LEASE'}elseif(
+    $item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
+ }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
+ return [pscustomobject]$item
+}
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
+$heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
+if($heartbeatExists){
+ try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
+  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
+  $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
+  $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
+ }catch{}
+}
+# The worker lease is READ ONLY. A stale/mismatched lease is a hold, never
+# permission to erase it or recreate the task.
+$leaseFile=Join-Path $root 'godot-worker-active.lock'
+$workerLeaseExists=Test-Path -LiteralPath $leaseFile -PathType Leaf
+$workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
+$workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
+if($workerLeaseExists){
+ try{
+  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $workerLeasePid=[int]$lease.pid
+  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
+  $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
+ }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
+}
+# Classify live task-related processes without publishing command lines, paths
+# or other users' process details. This is a safety inventory, not task control.
+$matchingWatcherProcesses=@();$taskLauncherProcesses=@()
+$processEnumerationComplete=$false;$nodeCommandLineUnavailableCount=0
+try{
+ $running=@(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'node.exe' OR Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction Stop)
+ $processEnumerationComplete=$true
+ foreach($proc in $running){
+  $cmd=[string]$proc.CommandLine
+  $exe=[string]$proc.Name
+  if($exe -ieq 'node.exe' -and [string]::IsNullOrWhiteSpace($cmd)){$nodeCommandLineUnavailableCount++;continue}
+  $taskScript=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $launcher=($taskInstallScriptExists -and
+    $cmd.IndexOf($taskInstallScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $createdString=if($null -ne $proc.CreationDate){([datetime]$proc.CreationDate).ToUniversalTime().ToString('o')}else{$null}
+  if($taskScript -and $exe -ieq 'node.exe'){
+   $matchingWatcherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString
+     watchMode=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+     isHeartbeatPid=([int]$proc.ProcessId -eq $heartbeatPid)
+     isLeasePid=([int]$proc.ProcessId -eq $workerLeasePid)}
+  }elseif($launcher -and $exe -in @('powershell.exe','pwsh.exe')){
+   $taskLauncherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString}
+  }
+ }
+}catch{$processEnumerationComplete=$false}
+$taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+){$kind='godot_or_exported_app'}
+   elseif([string]$child.Name -match '(?i)^(powershell|pwsh)\.exe($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+)
+   $when=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+       [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
+    $item.recordedAtParsed=$true
+    $elapsed=($when.UtcDateTime - $created).TotalSeconds
+    $item.deltaFromProcessSeconds=[math]::Round($elapsed,3)
+    $item.createdBeforeRecordedAt=($elapsed -ge -5)
+    $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
+   }
+   if(-not $item.recordHasExplicitOffset){
+    $utcCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeUniversal,[ref]$utcCandidate)){
+     $item.deltaIfNaiveRecordIsUTCSeconds=[math]::Round(
+      ($utcCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+    $localCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeLocal,[ref]$localCandidate)){
+     $item.deltaIfNaiveRecordIsLocalSeconds=[math]::Round(
+      ($localCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+   }
+  }
+  $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
+    $item.watchModeMatched -and $item.recordHasExplicitOffset -and
+    $item.createdBeforeRecordedAt -and
+    (-not $RequireRecentStart -or $item.startNearRecordedAt))
+  $item.reason=if(-not $item.recordHasExplicitOffset){'TIMESTAMP_ZONE_MISSING_CANNOT_ATTEST_WATCHER_LEASE'}elseif(
+    $item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
+ }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
+ return [pscustomobject]$item
+}
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
+$heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
+if($heartbeatExists){
+ try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
+  $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
+  $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
+  $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
+  $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
+ }catch{}
+}
+# The worker lease is READ ONLY. A stale/mismatched lease is a hold, never
+# permission to erase it or recreate the task.
+$leaseFile=Join-Path $root 'godot-worker-active.lock'
+$workerLeaseExists=Test-Path -LiteralPath $leaseFile -PathType Leaf
+$workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
+$workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
+if($workerLeaseExists){
+ try{
+  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $workerLeasePid=[int]$lease.pid
+  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
+  $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
+ }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
+}
+# Classify live task-related processes without publishing command lines, paths
+# or other users' process details. This is a safety inventory, not task control.
+$matchingWatcherProcesses=@();$taskLauncherProcesses=@()
+$processEnumerationComplete=$false;$nodeCommandLineUnavailableCount=0
+try{
+ $running=@(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'node.exe' OR Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction Stop)
+ $processEnumerationComplete=$true
+ foreach($proc in $running){
+  $cmd=[string]$proc.CommandLine
+  $exe=[string]$proc.Name
+  if($exe -ieq 'node.exe' -and [string]::IsNullOrWhiteSpace($cmd)){$nodeCommandLineUnavailableCount++;continue}
+  $taskScript=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $launcher=($taskInstallScriptExists -and
+    $cmd.IndexOf($taskInstallScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $createdString=if($null -ne $proc.CreationDate){([datetime]$proc.CreationDate).ToUniversalTime().ToString('o')}else{$null}
+  if($taskScript -and $exe -ieq 'node.exe'){
+   $matchingWatcherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString
+     watchMode=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+     isHeartbeatPid=([int]$proc.ProcessId -eq $heartbeatPid)
+     isLeasePid=([int]$proc.ProcessId -eq $workerLeasePid)}
+  }elseif($launcher -and $exe -in @('powershell.exe','pwsh.exe')){
+   $taskLauncherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString}
+  }
+ }
+}catch{$processEnumerationComplete=$false}
+$taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+){$kind='powershell'}
+   $watcherDirectChildren+=@{pid=[int]$child.ProcessId;kind=$kind;
+     createdUTC=if($null -ne $child.CreationDate){([datetime]$child.CreationDate).ToUniversalTime().ToString('o')}else{$null}}
+  }
+ }catch{$watcherChildInspectionComplete=$false}
+}
+$taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
+$runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
+if($runtimeExists){
+ try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
+  $runtimeWorkerSha=[string]$receipt.workerGitSHA
+  $runtimeCurrentJob=[string]$receipt.currentApprovedJob
+  $runtimeUpdatedUTC=[string]$receipt.updatedUTC
+ }catch{}
+}
+# Log inspection is summary-only: never emit raw logs, paths, tokens or credentials.
+$latestStdout=$null;$latestStderr=$null
+try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdout.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
+ Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
+$stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
+$stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
+if($null -ne $latestStdout){
+ try{
+  $tail=Get-Content -LiteralPath $latestStdout.FullName -Tail 300 -ErrorAction Stop
+  $stdoutPublished=[bool](@($tail | Select-String -SimpleMatch 'Godot PC evidence published').Count -gt 0)
+  $stdoutExistingEvidenceReconciliation=[bool](@($tail | Select-String -SimpleMatch 'existing-original-evidence-ledger-reconciliation-required').Count -gt 0)
+  $stdoutRemoteReconciliation=[bool](@($tail | Select-String -SimpleMatch 'remote-original-published-ledger-reconciliation-required').Count -gt 0)
+  $stdoutLedgerReconciliation=($stdoutExistingEvidenceReconciliation -or $stdoutRemoteReconciliation)
+  $stdoutBlocked=[bool](@($tail | Select-String -SimpleMatch 'Godot PC worker blocker').Count -gt 0)
+ }catch{}
+}
+$pdhErrorTypes=@();$sampleRows=@();$pdhStatusCounts=@()
+# System-wide provider check only. NO attribution to KlinikLab PID or RTX 5060.
+try{
+ $errs=@()
+ $samples=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 3 -ErrorAction Continue -ErrorVariable +errs)
+ foreach($snapshot in $samples){
+  foreach($sample in @($snapshot.CounterSamples)){
+   if($null -ne $sample -and [string]$sample.Path -match '(?i)engtype_3d'){
+    $sampleRows+=([string]$sample.Status)
+   }
+  }
+ }
+ $pdhStatusCounts=@($sampleRows | Group-Object | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+ $pdhErrorTypes=@($errs | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+}catch{$pdhErrorTypes+=('Collector error: '+$_.Exception.GetType().Name)}
+$report=[ordered]@{
+ mode='READ_ONLY_OWNER_PC_TASK_PDH_AND_LEDGER_DIAGNOSTICS'
+ noLedgerWrite=$true;noTaskChange=$true;noGodotLaunch=$true;noScreenCapture=$true
+ jobId=$JobId;expectedSourceSHA=$ExpectedSha
+ currentLoginMatchesTaskPrincipal=$currentLoginMatchesTaskPrincipal
+ taskPrincipalSidResolved=$taskPrincipalSidResolved
+ taskState=[string]$task.State;taskActionCount=$actions.Count
+ taskActionExecutableExists=$taskActionExecutableExists
+ taskInstallScriptExists=$taskInstallScriptExists
+ taskWorkerDirectoryExists=$taskWorkerDirectoryExists
+ taskWorkerSha=$taskWorkerSha;taskWorkerHead=$taskWorkerHead
+ taskWorkerHeadMatchesTaskSha=$taskWorkerHeadMatchesTaskSha
+ localAppDataEnvironmentPresent=(-not [string]::IsNullOrWhiteSpace($envLocalAppData))
+ localAppDataMatchesKnownFolder=([IO.Path]::GetFullPath($workerRootBase) -ieq [IO.Path]::GetFullPath($knownLocalAppData))
+ workerRootMatchesKnownFolder=([IO.Path]::GetFullPath($root) -ieq [IO.Path]::GetFullPath($knownRoot))
+ localLedgerExists=$ledgerPresent;localLedgerSha256=$ledgerSha
+ ledgerTopLevelKeys=$ledgerTopLevelKeys;ledgerCompletedPropertyPresent=$ledgerCompletedPropertyPresent
+ ledgerCompletedEntryCount=$ledgerCompletedEntryCount
+ localLedgerHasJob=$entryPresent;jobStatus=$status;ledgerParseErrors=$ledgerErrors
+ localOriginalEvidenceFolderExists=$originalEvidenceExists
+ localOriginalEvidenceFileCount=$originalEvidenceFileCount
+ heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
+ runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
+ latestWorkerStdoutExists=($null -ne $latestStdout)
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
+ latestWorkerStdoutPublishedMessage=$stdoutPublished
+ latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
+ latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
+ latestWorkerStdoutRemotePublishedReconciliationMessage=$stdoutRemoteReconciliation
+ latestWorkerStdoutBlockedMessage=$stdoutBlocked
+ latestWorkerStderrNonEmpty=($null -ne $latestStderr -and $latestStderr.Length -gt 0)
+ systemWideGpu3dPdhStatusCounts=$pdhStatusCounts;systemWideGpuCounterErrors=$pdhErrorTypes
+ status3221228486='PDH_INVALID_DATA (0xC0000BC6)'
+ systemWidePdhDoesNotProveSamePidRtx3d=$true
+}
+$report | ConvertTo-Json -Depth 8
+)
+   $when=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+       [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
+    $item.recordedAtParsed=$true
+    $elapsed=($when.UtcDateTime - $created).TotalSeconds
+    $item.deltaFromProcessSeconds=[math]::Round($elapsed,3)
+    $item.createdBeforeRecordedAt=($elapsed -ge -5)
+    $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
+   }
+   if(-not $item.recordHasExplicitOffset){
+    $utcCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeUniversal,[ref]$utcCandidate)){
+     $item.deltaIfNaiveRecordIsUTCSeconds=[math]::Round(
+      ($utcCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+    $localCandidate=[DateTimeOffset]::MinValue
+    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+      [Globalization.DateTimeStyles]::AssumeLocal,[ref]$localCandidate)){
+     $item.deltaIfNaiveRecordIsLocalSeconds=[math]::Round(
+      ($localCandidate.UtcDateTime-$created).TotalSeconds,3)
+    }
+   }
+  }
+  $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
+    $item.watchModeMatched -and $item.recordHasExplicitOffset -and
+    $item.createdBeforeRecordedAt -and
+    (-not $RequireRecentStart -or $item.startNearRecordedAt))
+  $item.reason=if(-not $item.recordHasExplicitOffset){'TIMESTAMP_ZONE_MISSING_CANNOT_ATTEST_WATCHER_LEASE'}elseif(
+    $item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
  }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
  return [pscustomobject]$item
 }
