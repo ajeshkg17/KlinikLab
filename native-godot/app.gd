@@ -51,6 +51,7 @@ var _volume: Node3D
 var _volumes: Dictionary = {}
 var _cut_position := Vector3(0.0, 1.01, 0.0)
 var _cut_radius := 0.22
+var _direct_bur_mode := false
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -335,6 +336,7 @@ func _select_case(index: int) -> void:
 	if index < 0 or index >= _cases.size():
 		return
 	_case_index = index
+	_direct_bur_mode = false # explicitly opt in for every new tooth
 	_quiz_index = 0
 	_journey_stage = 0
 	_ensure_case_volume(index)
@@ -348,6 +350,8 @@ func _select_station(index: int) -> void:
 	if index < 0 or index >= _stations.size():
 		return
 	_station_index = index
+	if STATION_IDS[index] != "practical":
+		_direct_bur_mode = false
 	_quiz_index = 0
 	_save_progress()
 	_refresh()
@@ -414,6 +418,8 @@ func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	_view = view
+	if view != "clinic":
+		_direct_bur_mode = false
 	if _scene != null:
 		_scene.visible = view == "clinic"
 	if _atlas != null:
@@ -750,6 +756,11 @@ func _show_drill_controls() -> void:
 	var y := _make_cut_slider("Height Y", -1.50, 1.30, _cut_position.y)
 	var z := _make_cut_slider("Buccal / lingual Z", -1.00, 1.00, _cut_position.z)
 	var radius := _make_cut_slider("Bur radius (model)", 0.06, 0.35, _cut_radius)
+	radius.value_changed.connect(_set_direct_bur_radius)
+	var direct := _button(("Disable" if _direct_bur_mode else "Enable") + " direct 3D tooth click-to-cut mode")
+	direct.pressed.connect(_toggle_direct_bur)
+	_page.add_child(direct)
+	_page.add_child(_heading("Direct mode: click the RIGHT editable tooth inside the central 3D viewport. A ray intersects its current native triangle mesh; only a verified surface hit removes synthetic material. Change radius with the slider. Switch to Teeth camera if needed. No real instrument force feedback.",12))
 	var apply := _button("Apply 3D bur stroke")
 	apply.pressed.connect(_apply_cut.bind(x,y,z,radius))
 	_page.add_child(apply)
@@ -763,6 +774,54 @@ func _show_drill_controls() -> void:
 	_page.add_child(_heading("Bur strokes %d/32 | %d native triangles | approximately %.1f%% of original occupied grid samples removed" %
 		[int(stats["strokes"]),int(stats["triangles"]),float(stats["removedPercentApprox"])], 13))
 	_page.add_child(_heading("No clinical units, scan anatomy, pulp safety or calibrated target score. Changes stored locally for this original-source build.", 12))
+
+
+func _set_direct_bur_radius(value: float) -> void:
+	_cut_radius = clampf(value,0.06,0.35)
+
+func _toggle_direct_bur() -> void:
+	if _view != "clinic" or STATION_IDS[_station_index] != "practical" or _volume == null:
+		_direct_bur_mode = false
+		return
+	_direct_bur_mode = not _direct_bur_mode
+	if _direct_bur_mode:
+		_set_camera_mode("teeth")
+	_refresh()
+
+func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
+	if not _direct_bur_mode or _view != "clinic" or STATION_IDS[_station_index] != "practical" or _volume == null:
+		return false
+	var current: Dictionary = _volume.call("summary")
+	if str(current.get("fdi","")) != FDI[_case_index] or str(current.get("caseId","")) != CASE_IDS[_case_index]:
+		push_warning("Direct 3D bur rejected a wrong-case tooth")
+		return false
+	var selection: Dictionary = _volume.call("ray_hit",origin,direction)
+	if not bool(selection.get("found",false)) or str(selection.get("fdi","")) != FDI[_case_index] or str(selection.get("caseId","")) != CASE_IDS[_case_index]:
+		return false
+	var point: Vector3 = selection["at"]
+	if not bool(_volume.call("cut_to",point,_cut_radius)):
+		return false
+	_cut_position = point
+	_store_cut()
+	return true
+
+func _input(event: InputEvent) -> void:
+	if not _direct_bur_mode or _middle == null or _scene == null:
+		return
+	if not (event is InputEventMouseButton):
+		return
+	var click: InputEventMouseButton = event
+	if not click.pressed or click.button_index != MOUSE_BUTTON_LEFT or not _middle.get_global_rect().has_point(click.position):
+		return
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null or not camera.current:
+		return
+	# Reject any click outside the central 3D viewport; never drill through
+	# case/station controls, report, source text or other tabs.
+	var origin: Vector3 = camera.project_ray_origin(click.position)
+	var direction: Vector3 = camera.project_ray_normal(click.position).normalized()
+	if _direct_cut_world_ray(origin,direction):
+		get_viewport().set_input_as_handled()
 
 func _apply_cut(x: HSlider, y: HSlider, z: HSlider, radius: HSlider) -> void:
 	if _volume == null:
@@ -1299,4 +1358,4 @@ func _show_coverage() -> void:
 			status = "4_SOURCE_CASES_16_GERMAN_TASKS_5_SOURCE_KEYWORDS_EACH__NOT_EXAM_GRADE"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("Now available: all six case-specific synthetic editable volume models; 32-tooth preview; guided interviews; 6-stage clinical journey; offline report and local STL/OBJ inspection. Still missing: physiological instrument forces, validated German oral/clinical assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))
+	_page.add_child(_heading("Now available: all six editable synthetic volumes with optional native direct 3D click-to-cut selection, 32-tooth preview, German source FSP/KP, guided interviews, six-stage clinical journey, offline reports and local STL/OBJ inspection. Still missing: physiological instrument forces, validated German oral/clinical assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))
