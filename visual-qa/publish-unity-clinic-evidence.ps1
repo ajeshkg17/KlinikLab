@@ -32,8 +32,20 @@ if($r.originalSourceSHA -cne $sha -or $o.sourceSHA -cne $sha -or
  $o.foregroundActivationRequested -ne $false -or
  $o.fullKlinikLabApplicationMigrated -ne $false -or
  $o.imageIndependentPixelReviewAccepted -ne $false -or
+ [int]$r.beforeTriangles -ne 14856 -or [int]$r.cutTriangles -ne 14936 -or
+ [int]$r.caseCount -ne 6 -or [int]$r.stationCount -ne 7 -or
+ $r.nativeCaseStationSelectionPreviewVerified -ne $true -or
+ @($r.workflowSelectionEvents).Count -ne 3 -or
+ $o.originalPngHashesVerified -ne $true -or
+ $o.headlessDummyRendererUsed -ne $false -or
  $o.status -notin @('EVIDENCE_INCOMPLETE','NATIVE_PIXELS_GPU_CORROBORATED_PENDING_PIXEL_REVIEW')){
+
  throw 'Original native Unity result is inconsistent; no publication'
+}
+if($o.status -ceq 'NATIVE_PIXELS_GPU_CORROBORATED_PENDING_PIXEL_REVIEW' -and (
+ $o.processGpuCorroborated -ne $true -or
+ [int]$o.positiveUnityPidRtx5060DistinctPeriods -lt 5)){
+ throw 'Unity GPU acceptance label unsupported by exact PID/LUID sample evidence'
 }
 $images=@(
  @('unity-whole-clinic-overview.png',[string]$r.overviewSHA256),
@@ -105,7 +117,7 @@ $latest=Join-Path $temporary 'UNITY_PC_LATEST.md'
  [Text.UTF8Encoding]::new($false))
 & git -C $temporary add -- $target 'UNITY_PC_LATEST.md'
 if($LASTEXITCODE -ne 0){throw 'Failed to stage new Unity-only evidence'}
-& git -C $temporary commit -m "Unity owner PC whole clinic source-exact native evidence $id $workerSha"
+& git -C $temporary -c user.name='KlinikLab Owner-PC Evidence' -c user.email='owner-pc-evidence@users.noreply.github.com' commit -m "Unity owner PC whole clinic source-exact native evidence $id $workerSha"
 if($LASTEXITCODE -ne 0){throw 'Failed to commit unique Unity evidence; original still local'}
 & git -C $temporary push origin HEAD:refs/heads/visual-feedback
 if($LASTEXITCODE -ne 0){throw 'Non-forced evidence push rejected; preserve original run and local commit'}
