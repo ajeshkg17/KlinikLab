@@ -112,7 +112,7 @@ func _capture() -> void:
 	var start:=Time.get_ticks_msec()
 	while Time.get_ticks_msec()-start<39000:
 		var t:=float(Time.get_ticks_msec()-start)/1000.0
-		cam.position=Vector3(sinf(t*.2)*0.55,1.7+cosf(t*.2)*0.25,13.2)
+		cam.position=Vector3(sin(t*.2)*0.55,1.7+cos(t*.2)*0.25,13.2)
 		cam.look_at(Vector3(0,0.5,0))
 		await RenderingServer.frame_post_draw
 	_report["status"]="EXPORTED_APP_TWO_NATIVE_PNGS_PENDING_INDEPENDENT_PIXEL_GPU_REVIEW"
