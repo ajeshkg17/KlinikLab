@@ -1,5 +1,5 @@
 extends Node3D
-## Editable synthetic FDI16 tooth. The four scalar fields are sampled from
+## Editable synthetic case-specific tooth. The four scalar fields are sampled from
 ## production ToothSolid at EXACT Git SHA during build, not hand-approximated.
 ## Marching tetrahedra runs natively; carving is true 3D union-of-spheres
 ## subtraction. Not a calibrated bur, medical scan or clinical score.
@@ -17,6 +17,9 @@ const PALETTE := [
 	Color(0.40,0.27,0.27)
 ]
 const MAX_STROKES := 32
+const CASE_FDI := {"molar":"16","endo":"36","anterior":"11","crown":"26","surgery":"48","perio":"46"}
+const CASE_CLASS := {"molar":"molar","endo":"molar","anterior":"incisor",
+	"crown":"molar","surgery":"molar","perio":"molar"}
 
 var _source_fields := PackedFloat32Array()
 var _points := PackedVector3Array()
@@ -27,15 +30,38 @@ var _initial_inside := 0
 var _removed := 0
 var _triangle_count := 0
 var _error := ""
+var _fdi := ""
+var _case_id := ""
 
-func configure(expected_sha: String) -> bool:
-	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://source/fdi16-volume-field-manifest.json"))
+func configure(expected_sha: String, case_id: String = "molar") -> bool:
+	if not CASE_FDI.has(case_id):
+		_error = "Unknown clinical synthetic case"
+		return false
+	var fdi: String = CASE_FDI[case_id]
+	var index: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://source/editable-case-volumes.json"))
+	if not (index is Dictionary):
+		_error = "Missing six-case source volume index"
+		return false
+	var catalog: Dictionary = index
+	var items: Dictionary = catalog.get("cases", {})
+	if str(catalog.get("sourceGitSHA", "")) != expected_sha or str(catalog.get("kind", "")) != "SOURCE_DERIVED_SIX_SYNTHETIC_EDITABLE_CASE_VOLUMES_NOT_CLINICAL" or items.size() != 6 or not items.has(case_id):
+		_error = "Volume source revision or six-case catalog mismatch"
+		return false
+	var item: Dictionary = items[case_id]
+	if str(item.get("fdi","")) != fdi:
+		_error = "Source catalog FDI mismatch"
+		return false
+	var manifest_path := "res://source/fdi" + fdi + "-volume-field-manifest.json"
+	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
 	if not (info is Dictionary):
-		_error = "Missing native FDI16 source field manifest"
+		_error = "Missing exact synthetic FDI " + fdi + " source field manifest"
 		return false
 	var m: Dictionary = info
-	if str(m.get("sourceGitSHA", "")) != expected_sha or str(m.get("model", "")) != "ORIGINAL_PROCEDURAL_FDI16_SYNTHETIC_UNCALIBRATED":
-		_error = "FDI16 source revision/model mismatch"
+	if str(m.get("sourceGitSHA", "")) != expected_sha or str(m.get("model", "")) != "ORIGINAL_PROCEDURAL_SYNTHETIC_CASE_VOLUME_UNCALIBRATED" or str(m.get("caseId", "")) != case_id or str(m.get("fdi","")) != fdi or str(m.get("toothClass","")) != str(CASE_CLASS[case_id]):
+		_error = "Source clinical case, tooth class or FDI manifest mismatch"
+		return false
+	if str(item.get("sha256", "")) != str(m.get("fieldSHA256", "")) or str(item.get("file", "")) != "fdi" + fdi + "-volume-field.bin":
+		_error = "Independent source catalog/field checksum mismatch"
 		return false
 	if int(m.get("resolution", -1)) != GRID or int(m.get("ny", -1)) != HEIGHT or int(m.get("sampleCount", -1)) != TOTAL:
 		_error = "Unsupported production voxel resolution"
@@ -43,7 +69,7 @@ func configure(expected_sha: String) -> bool:
 	if m.get("channels", []) != ["outer", "dentin", "pulp", "caries"]:
 		_error = "Production scalar-field channels changed"
 		return false
-	var path := "res://source/fdi16-volume-field.bin"
+	var path := "res://source/fdi" + fdi + "-volume-field.bin"
 	if not FileAccess.file_exists(path) or FileAccess.get_sha256(path) != str(m.get("fieldSHA256", "")):
 		_error = "Original scalar field SHA256 mismatch"
 		return false
@@ -73,9 +99,11 @@ func configure(expected_sha: String) -> bool:
 				if _source_fields[id] < 0.0:
 					_initial_inside += 1
 	_mesh_instance = MeshInstance3D.new()
-	_mesh_instance.name = "KL_FDI16_REGENERATED_TISSUE_MESH"
+	_mesh_instance.name = "KL_FDI" + fdi + "_REGENERATED_TISSUE_MESH"
 	add_child(_mesh_instance)
-	name = "KL_FDI16_EDITABLE_CUT"
+	name = "KL_FDI" + fdi + "_EDITABLE_CUT"
+	_fdi = fdi
+	_case_id = case_id
 	position.x = 2.9
 	_rebuild()
 	return _initial_inside > 0 and _triangle_count > 500
@@ -274,6 +302,8 @@ func restore_strokes(value: Variant) -> bool:
 
 func summary() -> Dictionary:
 	return {
+		"fdi":_fdi,
+		"caseId":_case_id,
 		"strokes":_strokes.size(),
 		"triangles":_triangle_count,
 		"removedSamplePoints":_removed,
