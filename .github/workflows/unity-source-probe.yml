@@ -38,10 +38,16 @@ jobs:
             Write-Host "PASS: parsed by $($PSVersionTable.PSVersion)"
           }
           & $check $file
-          $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes(
-            '$file = $args[0]; $tokens=$null; $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($file,[ref]$tokens,[ref]$errs)|Out-Null; if(@($errs).Count -ne 0){throw (($errs|ForEach-Object{$_.Message}) -join "; ")}; Write-Host "PS51_UNITY_PARSER_OK"'
-          ))
-          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -EncodedCommand $encoded -Args $file
+          $checkFile = Join-Path $env:RUNNER_TEMP 'unity_probe_parser_ps51.ps1'
+          @'
+          param([string]$Target)
+          $tokens=$null
+          $errs=$null
+          [System.Management.Automation.Language.Parser]::ParseFile($Target,[ref]$tokens,[ref]$errs) | Out-Null
+          if (@($errs).Count -ne 0) { throw (($errs | ForEach-Object { $_.Message }) -join '; ') }
+          Write-Host 'PS51_UNITY_PARSER_OK'
+          '@ | Set-Content -LiteralPath $checkFile -Encoding utf8
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -File $checkFile $file
           if ($LASTEXITCODE -ne 0) { throw 'PS 5.1 Unity probe syntax failed' }
       - name: Reexport exact browser source FDI16 in unique temp folder
         shell: pwsh
