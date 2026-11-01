@@ -18,6 +18,8 @@ $script:report=[ordered]@{
  nativeImagePresent=$false;nativeAngledImagePresent=$false
  nativeScreenshotFile=$null;nativeAngledScreenshotFile=$null
  godotProcessGPUCorroborated=$false;gpuAdapterLuidMatchedToNvidia=$false
+ processAliveAtGpuSamplingStart=$false;processAliveAtGpuSamplingEnd=$false
+ gpuProcessCorroborationReason='NOT_YET_SAMPLED';rendererReportConfirmsNvidiaRtx5060=$false
  process3DPositiveRtx5060DistinctPeriods=0;rtx5060DxgiLuid=$null
  godotPid=$null;renderingMethod=$null;renderingDriver=$null
  videoAdapterName=$null;videoAdapterVendor=$null;privateDesktopCreated=$false
@@ -68,6 +70,8 @@ try{
  $pdhAliveStart=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhErrors)
  $pdhAliveEnd=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
+ $script:report.processAliveAtGpuSamplingStart=$pdhAliveStart
+ $script:report.processAliveAtGpuSamplingEnd=$pdhAliveEnd
  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
  $rows=@($parsed.rows)
  [IO.File]::WriteAllText((Join-Path $capture 'godot-gpu-3d-counters.json'),(ConvertTo-Json -InputObject $rows -Depth 12),(New-Object Text.UTF8Encoding($false)))
@@ -93,10 +97,22 @@ try{
   $script:report.gpuAdapterLuidMatchedToNvidia=($script:report.process3DPositiveRtx5060DistinctPeriods -ge 3)
  }else{Block 'Not exactly one RTX 5060 DXGI adapter'}
  if(-not $script:report.gpuAdapterLuidMatchedToNvidia){Block 'Fewer than three independent positive exact exported-app PID GPU 3D periods on RTX5060 LUID'}
+ # Decide GPU process attribution from PID-scoped 3D PDH + DXGI evidence alone.
+ # Do not couple it to the app's separate PNG/capture-report delivery path.
+ $gpuProcessConfirmed=[bool]($pdhAliveStart -and $pdhAliveEnd -and
+  $script:report.gpuAdapterLuidMatchedToNvidia -and
+  ([int]$script:report.process3DPositiveRtx5060DistinctPeriods -ge 3))
+ $script:report.godotProcessGPUCorroborated=$gpuProcessConfirmed
+ if($gpuProcessConfirmed){
+  $script:report.gpuProcessCorroborationReason='Same launched Godot PID alive across sampling; at least three positive valid engtype_3d periods match enumerated NVIDIA RTX 5060 DXGI LUID'
+ }else{
+  $script:report.gpuProcessCorroborationReason='GPU attribution failed closed: require process alive at both sampling boundaries and at least three positive valid same-PID RTX5060 3D periods'
+  Block $script:report.gpuProcessCorroborationReason
+ }
  $nativeFile=Join-Path $capture 'native-exported-app-result.json'
  $until=[DateTime]::UtcNow.AddSeconds(75)
  while(-not(Test-Path -LiteralPath $nativeFile -PathType Leaf) -and [DateTime]::UtcNow -lt $until){Start-Sleep -Milliseconds 500}
- if(-not(Test-Path -LiteralPath $nativeFile -PathType Leaf)){throw 'Exported exe did not publish its own capture report; check --script embedded-PCK launch'}
+ if(-not(Test-Path -LiteralPath $nativeFile -PathType Leaf)){throw 'Exported exe did not publish its own capture report; inspect app-internal opt-in capture bootstrap/checkpoints'}
  $native=Get-Content -LiteralPath $nativeFile -Raw | ConvertFrom-Json
  $script:report.renderingMethod=[string]$native.renderingMethod
  $script:report.renderingDriver=[string]$native.renderingDriver
@@ -129,8 +145,9 @@ try{
   $script:report[$item.out]=$true
   $script:report[$item.name]=$file
  }
- $script:report.godotProcessGPUCorroborated=($script:report.gpuAdapterLuidMatchedToNvidia -and
- $script:report.renderingDriver -eq 'vulkan' -and $script:report.videoAdapterName -match '(?i)RTX\s*5060')
+ $script:report.rendererReportConfirmsNvidiaRtx5060=($script:report.renderingMethod -eq 'forward_plus' -and
+ $script:report.renderingDriver -eq 'vulkan' -and $script:report.videoAdapterName -match '(?i)RTX\s*5060' -and
+ $script:report.videoAdapterVendor -match '(?i)NVIDIA')
  if($script:report.nativeImagePresent -and $script:report.nativeAngledImagePresent -and
  $script:report.nativeCaseWorkflowVerified -and $script:report.godotProcessGPUCorroborated){
   $script:report.status='EXPORTED_APP_RENDER_EVIDENCE_PENDING_INDEPENDENT_PIXEL_REVIEW'
