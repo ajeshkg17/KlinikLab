@@ -79,7 +79,7 @@ func _run() -> void:
 		var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
 		for j in range(1,original_steps.size()):
 			answers[IDS[i]+":practical:"+str(j)] = {"selected":"test","correct":true,"sourceQuestion":j}
-		answers[IDS[i]+":practical:3]["correct"] = false
+		answers[IDS[i]+":practical:3"]["correct"] = false
 		if int(app.get("_procedure_step_index")) != 0:
 			_fail("Review setup lost first source task")
 			return
@@ -94,7 +94,7 @@ func _run() -> void:
 		if bool(app.call("_procedure_jump_to_review")):
 			_fail("All-correct source tasks must have no pending review")
 			return
-		answers[IDS[i]+":practical:1]["correct"] = false
+		answers[IDS[i]+":practical:1"]["correct"] = false
 		_send_key(app,KEY_R)
 		if int(app.get("_procedure_step_index")) != 1:
 			_fail("Review action failed wrap-around for "+FDIS[i])
