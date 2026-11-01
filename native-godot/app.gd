@@ -298,6 +298,8 @@ func _return_to_clinic_walk() -> bool:
 		_language_save_draft()
 	_direct_bur_mode = false
 	_switch_view("environment")
+	if from_language:
+		_walk_language_return_available = false
 	_walk_active = true
 	_walk_look_dragging = false
 	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
@@ -872,12 +874,12 @@ func _apply_environment_visibility() -> void:
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
+	if _view == "language" and view != "language":
+		_language_save_draft()
 	_view = view
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
-	if _view == "language" and view != "language":
-		_language_save_draft()
 	if view != "clinic":
 		_procedure_guided = false
 		_procedure_step_index = 0
