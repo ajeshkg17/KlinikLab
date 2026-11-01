@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "batchId": "cc0-clinic-blender-20261101-v1",
+  "license": "CC0-1.0",
+  "licenseDeed": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "publisher": "3DAssets.dev",
+  "publisherLicenseTerms": "https://3dassets.dev/docs",
+  "creator": "3D Assets; contributor reported AI-assisted (Claude Opus 5)",
+  "sourcePack": "https://3dassets.dev/packs/dental-practice-and-surgery",
+  "assetScope": "visual props and clinic staging, not clinically valid anatomy or calibrated dental instruments",
+  "publicBinaryUploadApproved": false,
+  "publishOriginalBinary": false,
+  "publishDerivedPreview": true,
+  "clinicalAccepted": false,
+  "items": [
+    {
+      "id": "instrument-tray",
+      "title": "Instrument Tray (Dental Practice and Surgery)",
+      "sourcePage": "https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c",
+      "sourceUrl": "https://cdn.3dassets.dev/assets/34383/v1/model.glb",
+      "version": "v1 / 34383",
+      "claimedTriangles": 728,
+      "claimedDimensionsMeters": [
+        0.28,
+        0.039,
+        0.213
+      ],
+      "fdIApplicable": false,
+      "maxBytes": 2000000,
+      "expectedOriginalSha256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036"
+    },
+    {
+      "id": "whole-clinic-starter",
+      "title": "Dental Practice and Surgery starter scene",
+      "sourcePage": "https://3dassets.dev/packs/dental-practice-and-surgery",
+      "sourceUrl": "https://cdn.3dassets.dev/assets/34423/v1/model.glb",
+      "version": "v1 / 34423",
+      "claimedTriangles": 46988,
+      "claimedDimensionsMeters": null,
+      "fdIApplicable": false,
+      "maxBytes": 7000000,
+      "expectedOriginalSha256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a"
+    }
+  ],
+  "sourceFileSha256": "computed from original GLB bytes on the successful runner; never invented",
+  "releasePolicy": "Publish only CC0 PNG preview and JSON evidence; retain original GLB in ephemeral runner and workflow artifact for provenance. Do not copy GLB into GitHub public repository until pixel/mesh review."
+}
