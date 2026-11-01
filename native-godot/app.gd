@@ -343,6 +343,9 @@ func _procedure_set_checklist(step_index: int, completed: bool) -> void:
 	_save_progress()
 	_refresh()
 
+func _procedure_toggle_checklist(completed: bool, step_index: int) -> void:
+	_procedure_set_checklist(step_index, completed)
+
 func _handle_procedure_input(event: InputEvent) -> void:
 	if not _procedure_guided or not _procedure_context_available() or not (event is InputEventKey):
 		return
@@ -1162,7 +1165,7 @@ func _show_practical() -> void:
 			var checklist_state := CheckBox.new()
 			checklist_state.text = "Practice checklist · step %d: %s (self-reported)" % [step_index + 1, "Complete" if _procedure_checklist_complete(step_index) else "Pending"]
 			checklist_state.button_pressed = _procedure_checklist_complete(step_index)
-			checklist_state.toggled.connect(_procedure_set_checklist.bind(step_index))
+			checklist_state.toggled.connect(_procedure_toggle_checklist.bind(step_index))
 			_page.add_child(checklist_state)
 		_page.add_child(_heading("%d. %s" % [step_index + 1, str(step["title"])], 16))
 		_page.add_child(_heading(str(step["detail"]), 13))
