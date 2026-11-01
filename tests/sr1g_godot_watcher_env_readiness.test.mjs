@@ -92,3 +92,15 @@ test('readiness remains independent of interactive terminal KLINIKLAB_GODOT_EXE'
  assert.match(worker,/READY_FOR_FUTURE_UNIQUE_JOB_ADMISSION_NOT_EXECUTED/);
  assert.match(worker,/--probe-next-job/);
 });
+
+test('retiring an interrupted idle watcher preserves lock bytes and never runs an old job',async()=>{
+ const worker=await fs.readFile(path.join(root,'visual-qa','godot-worker.mjs'),'utf8');
+ const segment=worker.slice(worker.indexOf('async function archiveDeadIdleWatcherLease()'),
+  worker.indexOf('async function validateWithoutHeartbeat()'));
+ assert.match(segment,/lease\.processAlive!==false/);
+ assert.match(segment,/\['executing','publish-pending'\]/);
+ assert.match(segment,/job07\?\.status!=='published'/);
+ assert.match(segment,/Get-ScheduledTask/);
+ assert.match(segment,/await fs\.rename\(original,saved\)/);
+ assert.doesNotMatch(segment,/await execute\(|await powershell\(|await fs\.unlink\(|worktree add/);
+});
