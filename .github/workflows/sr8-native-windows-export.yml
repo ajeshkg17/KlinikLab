@@ -104,9 +104,24 @@ jobs:
           cat "$RUNNER_TEMP/export-windows.log"
           test -s "$RUNNER_TEMP/release/KlinikLab.exe"
           test "$(stat -c '%s' "$RUNNER_TEMP/release/KlinikLab.exe")" -gt 10000000
-          printf '%s\n' "KlinikLab native Windows x64 Godot 4.7.2" "Git source SHA: $GITHUB_SHA" "Educational synthetic data only; not clinically validated." "Portable build, NOT tested on Windows RTX or Quest." "Launch KlinikLab.exe. Keep any generated .pck alongside the .exe." "Original source geometry, clinic/stations and local study functions." "No network or patient-data upload in the native project." > "$RUNNER_TEMP/release/README-FIRST.txt"
+          # Stock Godot imports/remaps OBJ/GLB into native meshes/scenes, and
+          # FileAccess(res://original.obj/glb) can no longer read original raw
+          # bytes inside PCK. Ship exact SHA-audited originals as separate
+          # immutable portable RAW data beside embedded-PCK KlinikLab.exe.
+          # The app uses these ONLY if res:// raw SHA cannot be verified.
+          mkdir -p "$RUNNER_TEMP/release/verified-raw-source/source"
+          mkdir -p "$RUNNER_TEMP/release/verified-raw-source/assets/cc0/3dassets-dental"
+          cp -a "$project/source/." "$RUNNER_TEMP/release/verified-raw-source/source/"
+          cp -a "$project/assets/cc0/3dassets-dental/." "$RUNNER_TEMP/release/verified-raw-source/assets/cc0/3dassets-dental/"
+          printf '%s\n' "KlinikLab native Windows x64 Godot 4.7.2" "Git source SHA: $GITHUB_SHA" "Educational synthetic data only; not clinically validated." "Portable build, NOT tested on Windows RTX or Quest." "Run KlinikLab.exe from this extracted folder. Keep the entire verified-raw-source folder BESIDE the exe, unchanged; otherwise the SHA-verified original geometry and CC0 scene fail closed." "The executable embeds Godot imported 3D scene resources, while this sidecar preserves original immutable source byte streams for runtime SHA checks." "No network or patient-data upload in the native project." > "$RUNNER_TEMP/release/README-FIRST.txt"
           cp "$project/native-build-manifest.json" "$RUNNER_TEMP/release/native-build-manifest.json"
+          node native-godot/verify-raw-bundle.mjs "--release-dir=$RUNNER_TEMP/release" "--expected-sha=$GITHUB_SHA"
           (cd "$RUNNER_TEMP/release" && sha256sum KlinikLab.exe > SHA256SUMS.txt)
+          (cd "$RUNNER_TEMP/release" && find verified-raw-source -type f -print0 | sort -z | xargs -0 sha256sum > RAW-SOURCE-SHA256SUMS.txt)
+          (cd "$RUNNER_TEMP/release" && sha256sum -c RAW-SOURCE-SHA256SUMS.txt > "$RUNNER_TEMP/raw-sidecar-sha-check.log")
+          test "$(wc -l < "$RUNNER_TEMP/raw-sidecar-sha-check.log")" -ge 12
+          echo "SR16_EXPORTED_RAW_SOURCE_RELEASE_PRESERVED_AND_VERIFIED"
+
       - name: Publish immutable portable Windows x64 release artifact
         uses: actions/upload-artifact@v4
         with:

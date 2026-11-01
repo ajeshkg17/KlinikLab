@@ -850,7 +850,11 @@ func _show_drill_controls() -> void:
 	var stats: Dictionary = _volume.call("summary")
 	_page.add_child(_heading("Bur strokes %d/32 | %d native triangles | approximately %.1f%% of original occupied grid samples removed" %
 		[int(stats["strokes"]),int(stats["triangles"]),float(stats["removedPercentApprox"])], 13))
-	_page.add_child(_heading("No clinical units, scan anatomy, pulp safety or calibrated target score. Changes stored locally for this original-source build.", 12))
+	_page.add_child(_heading("Sampled source-model pulp region: %d / %d occupied pulp-grid points removed (%s). This is a simplified synthetic voxel indicator, NOT a tooth exposure diagnosis, millimeter measurement or safety grade." % [
+		int(stats.get("removedModelPulpSamplePoints",0)),
+		int(stats.get("originalModelPulpSamplePoints",0)),
+		"model region contacted" if bool(stats.get("syntheticPulpRegionContact",false)) else "no sampled region contact detected"], 13))
+	_page.add_child(_heading("No clinical units, calibrated anatomy, force, pulp protection or procedural target score. These model-grid counts support formative exploration only; apparent non-contact is NOT proof of clinical safety.", 12))
 
 
 func _set_direct_bur_radius(value: float) -> void:
@@ -1375,6 +1379,10 @@ func _generate_report() -> String:
 	for id in _volumes:
 		var v: Dictionary = (_volumes[id] as Node3D).call("summary")
 		lines.append("Loaded FDI %s grid-based removed sample points (not mm³): %s" % [str(v["fdi"]),str(v["removedSamplePoints"])])
+		lines.append("Loaded FDI %s sampled synthetic pulp-grid removal: %s/%s; contact=%s (not clinical pulp safety or diagnosis)" % [
+			str(v["fdi"]),str(v.get("removedModelPulpSamplePoints",0)),
+			str(v.get("originalModelPulpSamplePoints",0)),
+			str(bool(v.get("syntheticPulpRegionContact",false)))])
 	lines.append("END OF LOCAL FORMATIVE REPORT")
 	return "\n".join(lines) + "\n"
 
