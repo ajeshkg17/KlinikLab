@@ -1,0 +1,52 @@
+{
+  "acceptedGpuAttribution": false,
+  "acceptedPixels": false,
+  "clinicalAccuracyValidated": false,
+  "directBurEnabled": true,
+  "display": "Windows",
+  "drawDurationSeconds": 39.013,
+  "elapsedMs": 944,
+  "engine": "{ \"major\": 4, \"minor\": 7, \"patch\": 2, \"hex\": 263938, \"status\": \"stable\", \"build\": \"official\", \"hash\": \"ed1daf0bf001b61586d9930840f2f1394092c079\", \"timestamp\": 0, \"string\": \"4.7.2-stable (official)\" }",
+  "environment": {
+    "clinicalAccuracyValidated": false,
+    "godotFloat32MeshesImported": true,
+    "kind": "STATIC_CC0_CLINIC_ENVIRONMENT_NOT_TREATMENT_SIMULATION",
+    "license": "CC0-1.0",
+    "patientFDIAnatomyProvided": false,
+    "sourceGitSHA": "678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec",
+    "sourceOriginalGLBsHashVerified": true,
+    "trayLoaded": true,
+    "trayMeshInstances": 4,
+    "wholeMeshInstances": 1042,
+    "wholeSceneLoaded": true,
+    "workflowProvided": false
+  },
+  "environmentImage": {
+    "bytes": 162361,
+    "file": "kliniklab-exported-cc0-environment.png",
+    "height": 900,
+    "sha256": "727e59e4fefe2218a2049351bd102219eca0cc6e8dea9a4766fd98f14a794c27",
+    "width": 1600
+  },
+  "kind": "EXPORTED_EMBEDDED_GODOT_WINDOWS_APP_NATIVE_CAPTURE",
+  "pid": 3420,
+  "practicalImage": {
+    "bytes": 190180,
+    "file": "kliniklab-exported-fdi36-practical.png",
+    "height": 900,
+    "sha256": "ebc470d22e89389ecf62abb29a24b8a012876d5c978ce7c2bf1963e704812d9d",
+    "width": 1600
+  },
+  "questVerified": false,
+  "renderingDriver": "vulkan",
+  "renderingMethod": "forward_plus",
+  "selectedCase": "endo",
+  "selectedFDI": "36",
+  "selectedStation": "practical",
+  "sourceCases": 6,
+  "sourceGitSHA": "678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec",
+  "stage": "completed",
+  "status": "EXPORTED_APP_TWO_NATIVE_PNGS_PENDING_INDEPENDENT_PIXEL_GPU_REVIEW",
+  "videoAdapterName": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "videoAdapterVendor": "NVIDIA"
+}
