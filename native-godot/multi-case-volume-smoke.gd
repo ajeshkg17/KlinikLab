@@ -90,5 +90,55 @@ func _run() -> void:
 	if str((surgery.call("summary") as Dictionary)["fdi"]) == str((perio.call("summary") as Dictionary)["fdi"]):
 		_fail("Case FDI identity collapsed across equivalent tooth-class source fields")
 		return
-	print("SR9_NATIVE_ALL_SIX_CASE_EDITABLE_VOLUMES_PASS source_sha="+sha+" FDI=16,36,11,26,48,46 cut/undo/replay/identity; NO GPU/CLINICAL ACCEPTANCE")
+	# Verify the real application switch/persistence path instead of only
+	# directly editing disconnected tooth nodes.
+	var app_script: GDScript = load("res://app.gd")
+	if app_script == null:
+		_fail("Native app script missing for integration test")
+		return
+	var app: Node3D = app_script.new()
+	if not bool(app.call("_load_source")):
+		_fail("App source integrity gate failed")
+		return
+	app.call("_load_progress")
+	app.set("_scene",Node3D.new())
+	app.call("_select_case",1) # FDI36
+	var e36: Node3D = app.get("_volume")
+	if e36 == null or str((e36.call("summary") as Dictionary)["fdi"])!="36":
+		_fail("Case navigation failed to bind editor to FDI36")
+		return
+	e36.call("reset")
+	if not bool(e36.call("cut_to",Vector3(0.0,1.01,0.0),0.22)):
+		_fail("FDI36 app editor cut failed")
+		return
+	app.call("_store_cut")
+	app.call("_select_case",3) # FDI26
+	var e26: Node3D = app.get("_volume")
+	if e26 == null or e26 == e36 or str((e26.call("summary") as Dictionary)["fdi"])!="26":
+		_fail("FDI26 editor reused wrong model instance")
+		return
+	e26.call("reset")
+	if not bool(e26.call("cut_to",Vector3(0.0,1.01,0.0),0.22)):
+		_fail("FDI26 app editor cut failed")
+		return
+	app.call("_store_cut")
+	app.call("_select_case",1)
+	if app.get("_volume") != e36 or int((e36.call("summary") as Dictionary)["strokes"]) != 1:
+		_fail("FDI36 volume not preserved on case switch")
+		return
+	var saved_log: Dictionary = (app.get("_progress") as Dictionary).get("volumeByCase", {})
+	if (saved_log.get("endo", []) as Array).size()!=1 or (saved_log.get("crown", []) as Array).size()!=1:
+		_fail("FDI36 and FDI26 stroke histories mixed or missing")
+		return
+	var app_reloaded: Node3D = app_script.new()
+	if not bool(app_reloaded.call("_load_source")):
+		_fail("Application reload source integrity failed")
+		return
+	app_reloaded.call("_load_progress")
+	var restored: Dictionary = (app_reloaded.get("_progress") as Dictionary).get("volumeByCase", {})
+	if (restored.get("endo", []) as Array).size()!=1 or (restored.get("crown", []) as Array).size()!=1:
+		_fail("Native case-specific progress not persisted on disk")
+		return
+	app.call("_reset_progress") # deterministic cleanup for all tests
+	print("SR9_NATIVE_ALL_SIX_CASE_EDITABLE_VOLUMES_PASS source_sha="+sha+" FDI=16,36,11,26,48,46 geometry/undo/replay + app switch/disk isolation; NO GPU/CLINICAL ACCEPTANCE")
 	quit(0)
