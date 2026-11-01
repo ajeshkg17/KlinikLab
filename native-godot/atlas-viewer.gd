@@ -53,7 +53,7 @@ func configure(expected_sha: String) -> bool:
 	_camera.position=Vector3(0.0,1.4,9.5)
 	_camera.fov=44.0
 	add_child(_camera)
-	_camera.look_at(Vector3(0,0,0))
+	_camera.rotation.x = -atan2(1.4, 9.5)
 	_camera.current=false
 	name="KL_NATIVE_32_TOOTH_ATLAS"
 	return select_tooth("16")
@@ -70,6 +70,10 @@ func triangle_count() -> int:
 func set_camera_enabled(active: bool) -> void:
 	if _camera != null:
 		_camera.current=active
+
+func rotate_model(degrees: float) -> void:
+	if _mesh_instance != null:
+		_mesh_instance.rotate_y(deg_to_rad(clampf(degrees,-90.0,90.0)))
 
 func select_tooth(fdi: String) -> bool:
 	if not _catalog.has(fdi):
@@ -144,6 +148,7 @@ func select_tooth(fdi: String) -> bool:
 		_error="No native atlas mesh surfaces"
 		return false
 	_mesh_instance.mesh=mesh
+	_mesh_instance.rotation=Vector3.ZERO
 	_selected=fdi
 	_last_count=count
 	return true
