@@ -1,4 +1,4 @@
-name: SR1S licensed CC0 dental assets: download, native Blender render, immutable pixel evidence
+name: 'SR1S licensed CC0 dental assets - native Blender render and immutable previews'
 on:
   push:
     branches:
