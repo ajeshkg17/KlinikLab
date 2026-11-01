@@ -86,6 +86,7 @@ jobs:
           set -euo pipefail
           node --test tests/sr39_native_chair_inventory.test.mjs
           node --test tests/sr40_fdi36_source_tooth.test.mjs
+          node --test tests/sr41_dundee_remaining_fdi.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/native-kliniklab-app"
