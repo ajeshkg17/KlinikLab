@@ -2,12 +2,14 @@
 # Windows PowerShell 5.1 ConvertFrom-Json converts ISO Z strings into DateTime;
 # converting that DateTime to [string] loses the Z/offset. Parse raw token first.
 # No filesystem, task, process, ledger, or watcher action is performed here.
-function Get-KLRawLeaseTimestamp {
+function Get-KLRawWatcherTimestamp {
  [CmdletBinding()]
- param([Parameter(Mandatory=$true)][string]$JsonText)
+ param([Parameter(Mandatory=$true)][string]$JsonText,
+       [Parameter(Mandatory=$true)][ValidateSet('startedAt','at')][string]$PropertyName)
  # The existing single-instance writer creates flat JSON with exactly one
  # startedAt string. Forbid escaped values and multiple keys (fail closed).
- $found=[regex]::Matches($JsonText,'"startedAt"\s*:\s*"(?<stamp>[0-9TZ:+.\-]{1,64})"')
+ $pattern='"'+[regex]::Escape($PropertyName)+'"\s*:\s*"(?<stamp>[0-9TZ:+.\-]{1,64})"'
+ $found=[regex]::Matches($JsonText,$pattern)
  if($found.Count -ne 1){throw 'LEASE_TIMESTAMP_RAW_TOKEN_MISSING_OR_DUPLICATE'}
  $stamp=[string]$found[0].Groups['stamp'].Value
  # Preserve both explicit offset and legacy ambiguous timestamps. This
@@ -23,4 +25,10 @@ function Get-KLRawLeaseTimestamp {
  # Returning the exact original JSON string is essential: never round-trip
  # through [datetime] or ConvertFrom-Json for lease timezone classification.
  return $stamp
+}
+
+function Get-KLRawLeaseTimestamp {
+ [CmdletBinding()]
+ param([Parameter(Mandatory=$true)][string]$JsonText)
+ return Get-KLRawWatcherTimestamp -JsonText $JsonText -PropertyName 'startedAt'
 }
