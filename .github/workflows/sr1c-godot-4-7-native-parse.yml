@@ -121,6 +121,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://atlas-smoke.gd > "$RUNNER_TEMP/atlas-test.log" 2>&1 || { cat "$RUNNER_TEMP/atlas-test.log"; exit 1; }
           cat "$RUNNER_TEMP/atlas-test.log"
           grep -F "SR6_NATIVE_SOURCE_32_ATLAS_LOGIC_PASS" "$RUNNER_TEMP/atlas-test.log"
+      - name: Native bounded STL/OBJ scan viewer test (HEADLESS, no GPU)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://scan-viewer.gd > "$RUNNER_TEMP/scan-parse.log" 2>&1 || { cat "$RUNNER_TEMP/scan-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://scan-smoke.gd > "$RUNNER_TEMP/scan-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/scan-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/scan-smoke.log"
+          grep -F "SR7_NATIVE_LOCAL_STL_OBJ_SCAN_LOGIC_PASS" "$RUNNER_TEMP/scan-smoke.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
