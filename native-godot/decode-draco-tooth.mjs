@@ -16,7 +16,7 @@ const args=Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')
 }));
 const input=args.input,output=args.output,decoderJs=args['decoder-js'],decoderWasm=args['decoder-wasm'];
 const expected=args['expected-blob-sha'];
-if(!input||!output||!decoderJs||!decoderWasm||expected!=='73e9f3029d770c6b4052ebbaba708283de4c47fd')
+if(!input||!output||!decoderJs||!decoderWasm||!['73e9f3029d770c6b4052ebbaba708283de4c47fd','0948d093089c5921281185a103b323c513365502'].includes(expected))
  throw Error('Require exact source-verified FDI36 GLB, Draco decoder JS/WASM, and expected Git blob SHA');
 const original=fs.readFileSync(input);
 const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+original.length+'\0'),original])).digest('hex');
