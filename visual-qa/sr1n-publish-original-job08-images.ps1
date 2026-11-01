@@ -15,20 +15,53 @@ $job='pc-godot-clinic-20261101-job08'
 $old='pc-godot-clinic-20261101-job07'
 $root=Join-Path $env:LOCALAPPDATA 'KlinikLabGodotWorker'
 $ledger=Get-Content (Join-Path $root 'godot-ledger.json') -Raw|ConvertFrom-Json
-$oldEntry=$ledger.completed.PSObject.Properties[$old].Value
+# The original owner-PC job08 GPU/PNG evidence was published while the
+# user-visible local ledger subsequently contained only job01..job07.
+# Never invent or rewrite a job08 ledger record. Authorize reconciliation
+# only from the EXISTING remote Git blob identity, with byte-exact local
+# original evidence cross-checks. No GitHub attachment or engine launch.
+$repo=[IO.Path]::GetFullPath($RepositoryPath)
+$actualGitHead=(& git -C $repo rev-parse HEAD).Trim()
+if($LASTEXITCODE -ne 0 -or $actualGitHead -cnotmatch '^[0-9a-f]{40}$'){
+ throw 'Recovery must run from an exact pinned Git checkout'}
+$env:GIT_TERMINAL_PROMPT='0'
+& git -C $repo fetch origin visual-feedback
+if($LASTEXITCODE -ne 0){throw 'Cannot read canonical remote original job08 evidence'}
+$remoteCommit=(& git -C $repo rev-parse FETCH_HEAD).Trim()
+$remoteRoot='runs/pc-godot-'+$job+'-'+$sourceSHA
+$remoteJobFile=$remoteRoot+'/godot-job-result.json'
+$remoteJobBytes=@(& git -C $repo show ('FETCH_HEAD:'+$remoteJobFile))
+if($LASTEXITCODE -ne 0 -or $remoteJobBytes.Count -eq 0){
+ throw 'No existing published original job08 report; missing local ledger alone cannot authorize recovery'}
+try{$remoteJob=($remoteJobBytes -join [Environment]::NewLine)|ConvertFrom-Json -ErrorAction Stop}
+catch{throw 'Published original job08 Git result malformed: '+$_.Exception.Message}
+. (Join-Path $PSScriptRoot 'sr1p-job08-publication-gate.ps1')
+$ledgerReconciliation=Assert-KLJob08OriginalPublicationGate -Ledger $ledger -RemoteJob $remoteJob -ExpectedSourceSha $sourceSHA -ExpectedWorkerSha $workerSHA
 $entry=$ledger.completed.PSObject.Properties[$job].Value
-if(-not $oldEntry -or $oldEntry.status -cne 'published' -or
- $oldEntry.recoveryOnly -ne $true -or $oldEntry.result.reexecuted -ne $false -or
- $oldEntry.result.overallStatus -cne 'EVIDENCE_INCOMPLETE'){
- throw 'Archived job07 must remain terminal incomplete and nonrerun'}
-if(-not $entry -or $entry.status -cne 'published' -or $entry.commit -cne $sourceSHA -or
- $entry.result.overallStatus -cne 'EVIDENCE_INCOMPLETE' -or
- $entry.result.workerGitSHA -cne $workerSHA -or
- $entry.result.imageExists -ne $false -or $entry.result.gpuProcessCorroborated -ne $false){
- throw 'Job08 is not the exact published-incomplete original attempt with a missing publication'}
 $run=Join-Path (Join-Path $root 'godot-evidence') ($job+'-'+$sourceSHA.Substring(0,10))
-if([IO.Path]::GetFullPath([string]$entry.run) -cne [IO.Path]::GetFullPath($run)){
- throw 'Job08 ledger original evidence path differs; refuse foreign images'}
+if($null -ne $entry -and [IO.Path]::GetFullPath([string]$entry.run) -cne [IO.Path]::GetFullPath($run)){
+ throw 'Original job08 ledger path disagrees with captured folder'}
+# Verify local original FILE bytes are exactly the same Git blobs that the
+# publisher committed previously; compare immutable git blob object SHAs,
+# NOT just self-reported JSON fields or rewritten/reformatted JSON.
+function Assert-KLOriginalRemoteByteParity([string]$Relative,[string]$LocalPath){
+ if(-not(Test-Path -LiteralPath $LocalPath -PathType Leaf)){
+  throw 'Original local capture missing: '+$LocalPath}
+ $remoteObject=(& git -C $repo rev-parse ('FETCH_HEAD:'+$remoteRoot+'/'+$Relative)).Trim()
+ if($LASTEXITCODE -ne 0 -or $remoteObject -cnotmatch '^[a-f0-9]{40}$'){
+  throw 'Original remote Git blob missing: '+$Relative}
+ $localObject=(& git -C $repo hash-object -- $LocalPath).Trim()
+ if($LASTEXITCODE -ne 0 -or $localObject -cne $remoteObject){
+  throw 'Local original capture does not match exact remote Git blob bytes: '+$Relative}
+ return $localObject
+}
+$remoteEvidenceBlobs=[ordered]@{}
+foreach($n in @('godot-owner-pc-result.json','godot-background-capture.json',
+ 'godot-native-workflow-state.json','native-source-submission.json',
+ 'godot-gpu-3d-counters.json','godot-gpu-pdh-diagnostics.json',
+ 'godot-job-result.json')){
+ $remoteEvidenceBlobs[$n]=Assert-KLOriginalRemoteByteParity -Relative $n -LocalPath (Join-Path (Join-Path $run 'Captures') $n)
+}
 $captures=Join-Path $run 'Captures'
 $bgPath=Join-Path $captures 'godot-background-capture.json'
 $nativePath=Join-Path $captures 'godot-owner-pc-result.json'
@@ -90,6 +123,12 @@ $publishedPngs=@($pngs|ForEach-Object{
 })
 $record=[ordered]@{
  schemaVersion=1;status='ORIGINAL_JOB08_PIXELS_PRESERVED_PENDING_DIRECT_PIXEL_REVIEW'
+ reconciliationStatus=$ledgerReconciliation
+ remoteOriginalGitCommit=$remoteCommit
+ remoteOriginalJob08BlobSHA=$remoteEvidenceBlobs['godot-job-result.json']
+ remoteOriginalEvidenceBlobSHAs=$remoteEvidenceBlobs
+ localJob08LedgerEntryPresent=($null -ne $entry)
+ ledgerModified=$false
  oldJob07Untouched=$true;originalJob08Untouched=$true;recoveryOnly=$true;reexecuted=$false
  sourceGitSHA=$sourceSHA;workerGitSHA=$workerSHA;jobId=$job
  originalGodotPid=[int]$owner.godotPid;originalNativeSceneMode='clinic-cases'
@@ -114,10 +153,11 @@ if($LASTEXITCODE -ne 0 -or $head -cnotmatch '^[0-9a-f]{40}$'){
  throw 'Recovery script repository must be a pinned exact SHA checkout'}
 $clean=@(& git -C $repo status --porcelain --untracked-files=no)
 if($LASTEXITCODE -ne 0 -or $clean.Count -ne 0){throw 'Originals publisher checkout must be clean'}
-$env:GIT_TERMINAL_PROMPT='0'
-& git -C $repo fetch origin visual-feedback
+# Remote exact-published evidence was fetched and source-checked above.
+# Do not re-fetch a moving visual-feedback head between validation and upload.
+
 if($LASTEXITCODE -ne 0){throw 'Could not fetch original visual-feedback branch'}
-$parent=(& git -C $repo rev-parse FETCH_HEAD).Trim()
+$parent=$remoteCommit
 $worktree=Join-Path $env:LOCALAPPDATA ('KlinikLabGodotRecoveryPublish-'+[guid]::NewGuid().ToString('N'))
 & git -C $repo worktree add --detach $worktree $parent
 if($LASTEXITCODE -ne 0){throw 'Unique detached publication checkout failed'}
