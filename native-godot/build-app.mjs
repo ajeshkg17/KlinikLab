@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','visual-layout-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  copy('native-godot/main-raw-sidecar.gd','main.gd');
  copy('visual-qa/godot-local-clinical/main.tscn','main.tscn');
  copy('native-godot/raw-source.gd','raw-source.gd');
