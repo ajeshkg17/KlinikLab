@@ -139,3 +139,26 @@ test('Unreal third image actually looks down onto source-exact FDI16 AFTER tooth
  assert.match(capture,/MathLibrary\.find_look_at_rotation/);
  assert.match(capture,/screenshotTasks'\]\.append/);
 });
+
+
+test('Unreal whole-clinic actually advances a native case/station state, not merely static names',()=>{
+ for(const token of ['KL_ACTIVE_CASE_STATUS','KL_ACTIVE_STATION_STATUS',
+  'nativeWorkflowPreviewActorsVerified']){
+  assert.ok(stage.includes(token),token);
+ }
+ for(const token of ['select_workflow_preview(0,0.0)',
+  'select_workflow_preview(1,elapsed)','select_workflow_preview(2,elapsed)',
+  'workflowSelectionEvents','workflowCaptureContexts',
+  'workflowNativeSelectionVerified','METADATA ONLY, NO CASE MESH']){
+  assert.ok(capture.includes(token),token);
+ }
+ assert.match(capture,/elapsed>=15\.0/);
+ assert.match(capture,/elapsed>=31\.0/);
+ assert.match(capture,/'selectedFDI'.*fdi/);
+ assert.match(capture,/\['16','36','16'\]/);
+ assert.match(capture,/\['interview','practical','practical'\]/);
+ assert.match(unreal,/\$render\.workflowNativeSelectionVerified -ne \$true/);
+ assert.match(unreal,/\$s\.nativeWorkflowPreviewActorsVerified -ne \$true/);
+ assert.ok(!capture.includes('FDI36_SOURCE_MESH'));
+ assert.ok(!capture.includes('caseSpecificFDI36GeometryClaimed\':True'));
+});
