@@ -18,6 +18,8 @@ on:
       - 'visual-qa/godot-job-core.mjs'
       - 'visual-qa/sr1c-capture-godot-pc.ps1'
       - 'visual-qa/sr1c-capture-godot-background-pc.ps1'
+      - 'visual-qa/sr1n-godot-capture-completion.ps1'
+      - 'tests/sr1n_godot_native_capture_completion_windows.ps1'
       - 'visual-qa/sr1c-private-desktop.ps1'
       - 'visual-qa/sr1c-dxgi-luid.cs'
       - 'visual-qa/sr1c-pdh-filter.ps1'
@@ -82,6 +84,13 @@ jobs:
         run: |
           & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1g_godot_launcher_env_windows.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Godot executable inheritance contract failed' }
+      - name: Prove delayed 42s Godot report cannot race 34s PDH collector (real WinPS 5.1 and PowerShell 7)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr1n_godot_native_capture_completion_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'WinPS5.1 delayed native capture producer-consumer regression failed' }
+          & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr1n_godot_native_capture_completion_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell7 delayed native capture producer-consumer regression failed' }
       - name: Prove native Windows PowerShell watcher stderr stays separated and capture can finish
         shell: pwsh
         run: |
@@ -102,6 +111,8 @@ jobs:
             'tests/sr1e_watcher_stderr_windows.ps1',
             'visual-qa/sr1c-capture-godot-pc.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1',
+            'visual-qa/sr1n-godot-capture-completion.ps1',
+            'tests/sr1n_godot_native_capture_completion_windows.ps1',
             'visual-qa/sr1c-private-desktop.ps1',
             'visual-qa/sr1c-pdh-filter.ps1',
             'visual-qa/sr1d-prepare-godot-cases.ps1',
