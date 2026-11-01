@@ -81,7 +81,7 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  assert.match(capture,/processAliveAtGpuSamplingStart/);
  assert.match(capture,/rendererReportConfirmsNvidiaRtx5060/);
  assert.doesNotMatch(capture.slice(nativeWait),/\$script:report\.godotProcessGPUCorroborated=/);
- assert.match(capture,/\$native\.stage -in @\('completed','blocked'\)/);
+ assert.match(capture,/\$lastCaptureStage -in @\('completed','blocked'\)/);
  assert.match(capture,/KLINIKLAB_SR1C_CAPTURE_DIR/);
  assert.match(capture,/KlinikLab\.exe/);
  assert.match(capture,/native-build-manifest\.json/);
