@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url));
+const src=p=>read(p).toString('utf8');
+const blob=x=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+x.length+'\0'),x])).digest('hex');
+test('SR41 audit distinguishes exact-left FDI26 from other four source-unverified side mappings',()=>{
+ const notice=src('assets/dundee/README.md');
+ assert.match(notice,/maxillary_first_molar\.glb.*\(26\)/);
+ assert.match(notice,/mandibular_first_molar\.glb.*\(36\)/);
+ assert.match(notice,/permanent left-side surface set/i);
+ assert.match(notice,/may be mirrored or placed.*explicit disclosure/);
+ const inventory=src('native-godot/README.md');
+ for(const fdi of ['16','11','48','46'])assert.match(inventory,new RegExp('FDI '+fdi+': no exact-side validated surface reference'));
+});
+test('SR41 FDI26 pinned upstream-mirror SHA and CC BY attribution',()=>{
+ assert.equal(blob(read('assets/dundee/maxillary_first_molar.glb')),'0948d093089c5921281185a103b323c513365502');
+ const build=src('native-godot/build-app.mjs');
+ assert.match(build,/expectedTooth26Blob='0948d093089c5921281185a103b323c513365502'/);
+ assert.match(build,/caseId:'crown',fdi:'26'/);
+ assert.match(build,/tooth-fdi26-manifest\.json/);
+ assert.match(build,/nativeDundeeFDI26License:'CC-BY-4\.0'/);
+ assert.match(build,/maxillary_first_molar-godot\.glb/);
+ assert.match(src('native-godot/decode-draco-tooth.mjs'),/0948d093089c5921281185a103b323c513365502/);
+});
+test('SR41 Godot runtime FDI26 reference never substitutes synthetic volume or other FDI cases',()=>{
+ const app=src('native-godot/app.gd');
+ const loader=src('native-godot/tooth26-reference.gd');
+ const smoke=src('native-godot/actual-app-smoke.gd');
+ assert.match(app,/func _ensure_fdi26_reference\(\)/);
+ assert.match(app,/_view == "clinic" and _station_index == 4 and _case_index == 3/);
+ assert.match(app,/Synthetic working volume remains separate/);
+ assert.match(loader,/KL_DUNDEE_FDI26_CC_BY_4_SURFACE_REFERENCE/);
+ assert.match(loader,/KL_DUNDEE_FDI26_SURFACE_ASSET_MISSING_FALLBACK/);
+ assert.match(loader,/RAW_RESOLVER\.verified_path\(CONVERTED_RAW_SOURCE,converted_sha\)/);
+ assert.match(loader,/internalTissuesProvided/);
+ assert.match(smoke,/FDI26 real Dundee surface not loaded in crown practical/);
+ assert.match(smoke,/FDI26 missing-asset fallback not clearly exposed/);
+});
