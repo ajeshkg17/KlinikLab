@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
 const godot=read('../visual-qa/run-godot-whole-clinic-pc.ps1');
+const godotCapture=read('../visual-qa/sr1c-godot-background-capture.gd');
 const unreal=read('../visual-qa/run-unreal-whole-clinic-pc.ps1');
 const stage=read('../visual-qa/unreal-whole-clinic-stage.py');
 const capture=read('../visual-qa/unreal-whole-clinic-capture.py');
@@ -119,4 +120,15 @@ test('Unreal private desktop orbit remains live via persistent Editor init hook 
  assert.match(capture,/_callback_handle=unreal\.register_slate_post_tick_callback\(_on_tick\)/);
  assert.ok(!initHook.includes('SwitchDesktop'));
  assert.ok(!initHook.includes('SetForegroundWindow'));
+});
+
+test('third original Godot GPU image is focused on FDI16 cut BEFORE the FDI36 case metadata switch',()=>{
+ assert.match(godotCapture,/elapsed >= 14\.0 and not focused_cut_saved/);
+ assert.match(godotCapture,/elapsed >= 22\.0 and not switched_case/);
+ assert.match(godotCapture,/_write_gpu_frame\("cut-focused"\)/);
+ assert.match(godotCapture,/"cutFocusedImageSHA256"/);
+ assert.match(godot,/nativeCutFocusedImageSHA256/);
+ assert.match(publish,/cutFocusedImageFile/);
+ assert.match(publish,/cutFocusedImageSHA256/);
+ assert.match(publish,/godot-native-fdi16-\(frontal\|occlusal\|cut-focused\)/);
 });
