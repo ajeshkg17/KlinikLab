@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
@@ -51,15 +51,32 @@ try{
  if(hash.sourceGitSHA!==sha||hash.sceneStates.before.triangles!==14856||
    hash.sceneStates.after.triangles!==14936||content.sourceAppSHA256!==cases.sourceFileSHA256||
    content.cases.length!==6||content.stations.length!==7)throw Error('Native export failed independent app/source parity');
+ const volumes=JSON.parse(fs.readFileSync(path.join(exported,'editable-case-volumes.json'),'utf8'));
+ const expectedVolumes=[['molar','16'],['endo','36'],['anterior','11'],
+  ['crown','26'],['surgery','48'],['perio','46']];
+ if(volumes.sourceGitSHA!==sha||Object.keys(volumes.cases||{}).length!==6)
+  throw Error('Six-case source volume catalog missing or source revision drift');
+ for(const [id,fdi] of expectedVolumes){
+  const entry=volumes.cases[id];
+  if(!entry||entry.fdi!==fdi||entry.file!=='fdi'+fdi+'-volume-field.bin')
+   throw Error('Source FDI identity mismatch '+id+'/'+fdi);
+  const descriptor=JSON.parse(fs.readFileSync(path.join(exported,'fdi'+fdi+'-volume-field-manifest.json'),'utf8'));
+  if(descriptor.sourceGitSHA!==sha||descriptor.caseId!==id||
+    descriptor.fdi!==fdi||descriptor.fieldSHA256!==entry.sha256||
+    fs.statSync(path.join(exported,entry.file)).size!==descriptor.sampleCount*16)
+   throw Error('Six-case native volume provenance/byte count failed '+id);
+ }
  const record={
   schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
   sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
   nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
   sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,nativeSourceClinicalJourneySixCases:true,nativeProcedural32ToothAtlas:true,nativeLocalStlObjInspection:true,
-  nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:false,
+  nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
+  sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
+  clinicalCalibrationVerified:false,
   fullInteractiveAppMigrated:false,verifiedNativeGpu:false,
   buildStatus:'NATIVE_GODOT_APP_PROJECT_BUILT_NEEDS_NATIVE_RUNTIME_QA',
-  limitation:'Full app browser workflows are not yet all natively implemented. No case-specific geometry except original FDI16.'
+  limitation:'All six source case volumes are editable synthetic sampled geometry, NOT calibrated tissue mechanics. Full browser parity, Quest/XR, AI, radiography and clinical validation remain incomplete.'
  };
  fs.writeFileSync(path.join(dest,'native-build-manifest.json'),JSON.stringify(record,null,2)+'\n',{flag:'wx'});
  console.log('KLINIKLAB_NATIVE_APP_PROJECT_CREATED: '+dest);
