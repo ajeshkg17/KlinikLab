@@ -56,6 +56,9 @@ if(tooth.sourceGitSHA!==sha||tooth.caseId!=='endo'||tooth.fdi!=='36'||
 const toothSidecar=sidecar+'assets/dundee/mandibular_first_molar.glb.source';
 const toothBytes=validateFile(toothSidecar,tooth.originalSha256);
 if(toothBytes<1000)throw Error('FDI36 original source sidecar is implausibly small');
+const toothConvertedSidecar=sidecar+'assets/dundee/mandibular_first_molar-godot.glb.source';
+const toothConvertedBytes=validateFile(toothConvertedSidecar,tooth.convertedSha256);
+if(toothConvertedBytes<1000)throw Error('FDI36 converted source sidecar is implausibly small');
 const roots=[];
 for(const row of cc0.assets){
  if(!['whole-clinic-starter-v1.glb','instrument-tray-v1.glb'].includes(row.name)||
