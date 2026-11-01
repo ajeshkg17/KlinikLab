@@ -128,10 +128,14 @@ try{
   '--expected-blob-sha='+expectedToothBlob
  ]);
  const toothConvertedSha256=sha256(fs.readFileSync(toothConvertedPath));
+ const toothConvertedSidecar=toothConvertedPath+'.source';
+ fs.copyFileSync(toothConvertedPath,toothConvertedSidecar,{flag:'wx'});
+ if(sha256(fs.readFileSync(toothConvertedSidecar))!==toothConvertedSha256)throw Error('Dundee FDI36 converted raw sidecar checksum mismatch');
  const toothManifest={
   schemaVersion:1,sourceGitSHA:sha,caseId:'endo',fdi:'36',
   sourceFile:'mandibular_first_molar.glb',runtimeFile:toothConvertedName,
   originalSidecar:toothOriginalName,originalSha256:toothOriginalSha256,
+  convertedSidecar:'mandibular_first_molar-godot.glb.source',
   originalGitBlobSha:expectedToothBlob,
   upstreamRepository:'sameralseedbth-Dental/dental-3d-models',
   upstreamCommit:'4f0ffb651998a4641ddf45c7632ea236cc164fcb',
