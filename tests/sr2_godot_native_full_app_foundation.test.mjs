@@ -14,7 +14,7 @@ test('SR2: exact-source builds a standalone Godot app with real FDI16 source, 6 
  try{
   execFileSync(process.execPath,[path.join(root,'native-godot/build-app.mjs'),
    '--source-dir='+root,'--expected-sha='+head,'--output='+project],{encoding:'utf8',timeout:180000});
-  const expected=['project.godot','app.tscn','app.gd','main.tscn','main.gd',
+  const expected=['project.godot','app.tscn','app.gd','smoke.gd','main.tscn','main.gd',
    'sr1c-godot-clinic-overview.gd','source/fdi16-before.obj','source/fdi16-after-cut.obj',
    'source/kliniklab-export-manifest.json','source/kliniklab-native-cases.json',
    'source/app-content.json','source/expected-sha.txt','native-build-manifest.json'];
@@ -59,5 +59,6 @@ test('SR2: source exporter does not evaluate full browser application or import 
  assert.match(exporter,/syntheticCasesOnly:true,clinicalAssessmentValidated:false/);
  assert.match(exporter,/sourceAppSHA256/);
  assert.match(read('native-godot/app.gd'),/FULL APP NOT YET PORTED/);
+ assert.match(read('native-godot/smoke.gd'),/SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS/);
  assert.doesNotMatch(read('native-godot/app.gd'),/HTTPRequest|OS\.shell_open|API_KEY|fetch\(/);
 });
