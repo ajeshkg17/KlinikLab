@@ -92,6 +92,11 @@ def main():
     scene.render.engine="CYCLES"
     scene.cycles.device="CPU"
     scene.cycles.samples=12
+    for layer in scene.view_layers:
+        if hasattr(layer,"cycles") and hasattr(layer.cycles,"use_denoising"):
+            layer.cycles.use_denoising=False
+    # Ubuntu Blender package omits Intel OpenImageDenoiser; no denoising pass.
+
     scene.render.threads_mode="FIXED"
     scene.render.threads=2
     scene.render.image_settings.color_depth="8"

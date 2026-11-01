@@ -72,6 +72,8 @@ def main():
         dst=out/(item["id"]+".glb")
         with dst.open("xb") as f:f.write(data)
         digest=hashlib.sha256(data).hexdigest()
+        if digest!=item.get("expectedOriginalSha256"):
+            raise RuntimeError("ORIGINAL_SHA256_CHANGED: Publisher binary differs from independently retrieved prior version: "+item["id"])
         report["assets"].append({
            "id":item["id"],"sourcePage":item["sourcePage"],
            "originalUrl":item["sourceUrl"],"actualFinalUrl":resp.geturl(),

@@ -12,6 +12,12 @@ test('Only two immutable CC0 official CDN sources can be acquired; NIH is exclud
  assert.equal(m.publicBinaryUploadApproved,false);
  assert.equal(m.publishOriginalBinary,false);
  assert.equal(m.publishDerivedPreview,true);
+ assert.deepEqual(m.items.map(x=>x.expectedOriginalSha256),[
+  '63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036',
+  '9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a'
+ ]);
+ assert(acquire.includes("ORIGINAL_SHA256_CHANGED"));
+ assert(render.includes("use_denoising=False"));
  assert.deepEqual(m.items.map(x=>x.id),['instrument-tray','whole-clinic-starter']);
  assert.deepEqual(m.items.map(x=>x.sourceUrl),[
   'https://cdn.3dassets.dev/assets/34383/v1/model.glb',

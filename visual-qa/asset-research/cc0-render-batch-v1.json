@@ -26,7 +26,8 @@
         0.213
       ],
       "fdIApplicable": false,
-      "maxBytes": 2000000
+      "maxBytes": 2000000,
+      "expectedOriginalSha256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036"
     },
     {
       "id": "whole-clinic-starter",
@@ -37,7 +38,8 @@
       "claimedTriangles": 46988,
       "claimedDimensionsMeters": null,
       "fdIApplicable": false,
-      "maxBytes": 7000000
+      "maxBytes": 7000000,
+      "expectedOriginalSha256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a"
     }
   ],
   "sourceFileSha256": "computed from original GLB bytes on the successful runner; never invented",
