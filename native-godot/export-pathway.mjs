@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
+import {extractClinicalPathwayLiteral} from './pathway-literal.mjs';
 import {execFileSync} from 'node:child_process';
 const o=Object.fromEntries(process.argv.slice(2).map(s=>{
  const i=s.indexOf('=');
@@ -19,10 +20,7 @@ const root=fs.realpathSync(dir);
 if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==sha)
  throw Error('Source revision differs from native clinical journey export');
 const source=fs.readFileSync(path.join(root,'clinical-pathway.js'),'utf8');
-const start=source.indexOf('const data={'),end=source.indexOf('\n};\nconst STAGE=',start);
-if(start<0||source.indexOf('const data={',start+1)>=0||end<start||end-start>40000)
- throw Error('Original browser clinical pathway literal is missing, duplicate or unbounded');
-const fragment=source.slice(start,end+3);
+const fragment=extractClinicalPathwayLiteral(source);
 const scenarios=vm.runInNewContext(fragment+'\n data',Object.create(null),{timeout:1000});
 const IDs=['molar','endo','anterior','crown','surgery','perio'];
 if(Object.keys(scenarios).sort().join(',')!==[...IDs].sort().join(','))

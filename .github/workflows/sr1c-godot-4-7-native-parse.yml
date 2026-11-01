@@ -84,6 +84,7 @@ jobs:
       - name: Build independent source-exact interactive Godot app project (no GPU)
         run: |
           set -euo pipefail
+          node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/native-kliniklab-app"
           test -f "$RUNNER_TEMP/native-kliniklab-app/app.tscn"
