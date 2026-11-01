@@ -86,6 +86,8 @@ jobs:
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/native-kliniklab-app"
           test -f "$RUNNER_TEMP/native-kliniklab-app/app.tscn"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/app-content.json"
+          test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field.bin"
+          test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field-manifest.json"
       - name: Parse full-app Godot scene and interactive app GDScript through real Godot 4.7.2
         run: |
           set -euo pipefail
@@ -102,6 +104,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://smoke.gd > "$RUNNER_TEMP/native-app-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/native-app-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/native-app-smoke.log"
           grep -F "SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS" "$RUNNER_TEMP/native-app-smoke.log"
+      - name: Native source-pinned interactive FDI16 volume regression (HEADLESS, not GPU)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://volume-cut.gd > "$RUNNER_TEMP/volume-parse.log" 2>&1 || { cat "$RUNNER_TEMP/volume-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://volume-cut-smoke.gd > "$RUNNER_TEMP/volume-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/volume-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/volume-smoke.log"
+          grep -F "SR3_NATIVE_FDI16_VOLUME_LOGIC_PASS" "$RUNNER_TEMP/volume-smoke.log"
       - name: Explicit evidence limits
         if: always()
         run: |
