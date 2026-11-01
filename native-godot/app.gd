@@ -975,8 +975,8 @@ func _ensure_fdi36_reference() -> void:
 	var reference: Node3D = script.new()
 	if not bool(reference.call("configure",str(_content.get("sourceGitSHA","")))):
 		push_warning("FDI36 source reference loader rejected: "+str(reference.call("summary")))
-	_tooth36_reference = reference
 		_scene.add_child(reference)
+		_tooth36_reference = reference
 		return
 	_scene.add_child(reference)
 	_tooth36_reference = reference
