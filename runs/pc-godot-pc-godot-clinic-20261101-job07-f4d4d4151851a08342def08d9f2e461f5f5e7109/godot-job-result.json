@@ -1,0 +1,38 @@
+{
+  "jobId": "pc-godot-clinic-20261101-job07",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "watcherSuite": "sr1d-clinic-case-station-migration",
+  "workerGitSHA": "c3f2f71a1f6e2d48fc1a7144ea023b6e13863ebf",
+  "recoveryToolGitSHA": "353f299f1d4ec280801ed139b2816d2a010af2da",
+  "nativeSceneMode": "clinic-cases",
+  "fullKlinikLabApplicationMigrated": false,
+  "executedOn": "original owner Windows PC, interrupted watcher process",
+  "generatedAt": "2026-11-01T00:03:52.130Z",
+  "nativeReportStatus": "OWNER_PC_RESULT_ABSENT_ORIGINAL_RAW_GODOT_CAPTURE_ONLY",
+  "nativeWorkflowVerified": true,
+  "imageExists": true,
+  "angledImageExists": true,
+  "originalNativeImagesVerified": true,
+  "sourceMeshVerified": true,
+  "sourceDerivedWorkflowNavigationVerified": true,
+  "distinctRtx5060Gpu3DPeriods": 0,
+  "rtx5060DxgiLuid": null,
+  "dxgiLuidMatchesGodotProcess": false,
+  "gpuProcessCorroborated": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "recoveryOnly": true,
+  "reexecuted": false,
+  "overallStatus": "EVIDENCE_INCOMPLETE",
+  "errors": [
+    "Original watcher terminated before collector final JSON and regular worker result were written"
+  ],
+  "blockers": [
+    "No original owner-PC result: independent Godot-PID/DXGI/PDH GPU proof not available",
+    "The raw Godot self-report and PNGs are not independently sufficient for process GPU acceptance"
+  ],
+  "ledgerEntryAbsentAtRecovery": true,
+  "rawForensicsFile": "godot-job07-forensic-review.json"
+}

@@ -1,0 +1,37 @@
+{
+	"caseCount": 6,
+	"caseStationEvents": [
+		{
+			"fdi": "16",
+			"id": "molar",
+			"originalFDI16GeometryVisible": true,
+			"type": "case"
+		},
+		{
+			"id": "interview",
+			"track": "fsp",
+			"type": "station"
+		},
+		{
+			"fdi": "36",
+			"id": "endo",
+			"originalFDI16GeometryVisible": false,
+			"type": "case"
+		},
+		{
+			"id": "practical",
+			"track": "kp",
+			"type": "station"
+		}
+	],
+	"clinicalAssessmentValidated": false,
+	"fullKlinikLabApplicationMigrated": false,
+	"originalCaseSpecificSimulationImplemented": false,
+	"originalFDI16GeometryAvailable": false,
+	"selectedCaseId": "endo",
+	"selectedFDI": "36",
+	"selectedStationId": "practical",
+	"stationCount": 7,
+	"valid": true,
+	"workflowNavigationImplemented": true
+}

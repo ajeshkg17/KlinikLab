@@ -1,0 +1,77 @@
+{
+  "jobId": "pc-godot-clinic-20261101-job07",
+  "sourceGitSHA": "f4d4d4151851a08342def08d9f2e461f5f5e7109",
+  "actualWorkerSHA": "c3f2f71a1f6e2d48fc1a7144ea023b6e13863ebf",
+  "originalOwnerPCResultPresent": false,
+  "originalWorkerResultPresent": false,
+  "allRawFilesPreserved": true,
+  "sourceMeshVerified": true,
+  "workflowSourceVerified": true,
+  "nativeCaseWorkflowVerified": true,
+  "originalNativeImagesVerified": true,
+  "images": [
+    {
+      "name": "godot-native-fdi16-frontal-5011.png",
+      "sha256": "42fc74c2777f10d3b790c141f46cebbc3f950d2e222b7a43b79e1a03b1aad623",
+      "bytes": 135841,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "name": "godot-native-fdi16-occlusal-34007.png",
+      "sha256": "7ceccf400115c3506a7c73cb9dbf8a99d79efcd45bb24f80954760be9e6df32b",
+      "bytes": 140543,
+      "width": 1600,
+      "height": 900
+    }
+  ],
+  "originalBackgroundSHA256": "9f37cfbed89e3b3676e95415f81bccc61b1ba2ef22ca92de65ef344d8f130627",
+  "originalWorkflowSHA256": "e0fb9479ec7124157ba7fd0258d35acafae291085bf460e720161bd74e1924f7",
+  "rawFiles": {
+    "godot-gpu-3d-counters.json": null,
+    "godot-gpu-pdh-diagnostics.json": null,
+    "godot-native-background.log": {
+      "sha256": "7236840ef827213cdc71a288fc50085886502b34c5aad80bb745adffbd2aa234",
+      "bytes": 24145
+    },
+    "godot-native-stdout.log": null,
+    "godot-native-stderr.log": null
+  },
+  "originalProcessGpuPDHEvidencePresent": false,
+  "nativeRendererSelfReportedRtx5060": true,
+  "independentGpuPidLuidAccepted": false,
+  "independentPixelReviewed": false,
+  "fullKlinikLabApplicationMigrated": false,
+  "status": "FORENSIC_RAW_NATIVE_IMAGES_VALIDATED_GPU_UNATTRIBUTED",
+  "localAudit": {
+    "ledger": {
+      "exists": true,
+      "byteLength": 9959,
+      "modifiedUTC": "2026-10-31T23:13:25.772Z",
+      "sha256": "92e95e35e734ba5cd00702245ff30df4f7018284e9a6f8b5a37ef702edc47bd2"
+    },
+    "ledgerTmp": {
+      "exists": false
+    },
+    "watcherLog": {
+      "exists": true,
+      "byteLength": 2270,
+      "modifiedUTC": "2026-10-31T23:50:23.349Z",
+      "tailRedacted": "\": 207,\r\n        \"cementum\": 4105,\r\n        \"caries\": 112\r\n      },\r\n      \"boundsDisplayCm\": {\r\n        \"min\": [\r\n          -10.71199082140065,\r\n          -9.212312246997959,\r\n          -15.258701422109173\r\n        ],\r\n        \"max\": [\r\n          10.71199082140065,\r\n          9.212312246997959,\r\n          12.877931595146874\r\n        ]\r\n      }\r\n    },\r\n    \"after\": {\r\n      \"triangles\": 14936,\r\n      \"byMaterial\": {\r\n        \"enamel\": 10308,\r\n        \"dentin\": 205,\r\n        \"pulp\": 207,\r\n        \"cementum\": 4105,\r\n        \"caries\": 111\r\n      },\r\n      \"boundsDisplayCm\": {\r\n        \"min\": [\r\n          -10.71199082140065,\r\n          -9.212312246997959,\r\n          -15.258701422109173\r\n        ],\r\n        \"max\": [\r\n          10.71199082140065,\r\n          9.212312246997959,\r\n          12.877931595146874\r\n        ]\r\n      },\r\n      \"simulatedCut\": {\r\n        \"center\": [\r\n          0,\r\n          1.01,\r\n          0\r\n        ],\r\n        \"radius\": 0.22,\r\n        \"units\": \"unscaled educational model units\"\r\n      }\r\n    }\r\n  }\r\n}\r\nSR1C source prepared, no rendered image: C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-clinic-20261101-job07-f4d4d41518\r\nImport this NEW Godot project via Project Manager:\r\nC:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-clinic-20261101-job07-f4d4d41518\\Project\\project.godot\r\nRun the project F5, inspect both tooth surfaces, then F12 in native game window.\r\nExpected original screenshot and source submission report: C:\\Users\\ajesh\\AppData\\Local\\KlinikLabGodotWorker\\godot-evidence\\pc-godot-clinic-20261101-job07-f4d4d41518\\Captures\r\nSR1D exact-source clinic cases exported, not full application: 6 cases / 7 stations\r\nSR1D source exact six clinical cases / seven stations PREPARED; no full-app acceptance\r\n"
+    },
+    "scheduledTaskLastRun": "{\"LastRunTime\":\"\\/Date(1793490616000)\\/\",\"LastTaskResult\":1,\"NextRunTime\":null,\"NumberOfMissedRuns\":0}"
+  },
+  "ledgerEntryAbsentAtInspection": true,
+  "existingLedgerState": null,
+  "staleWatcherPid": 42220,
+  "staleWatcherStartedUTC": "2026-10-31T23:50:16.958Z",
+  "inspectedUTC": "2026-11-01T00:03:50.045Z",
+  "recoveryToolSHA": "353f299f1d4ec280801ed139b2816d2a010af2da",
+  "limitations": [
+    "No original owner-PC result JSON",
+    "No validated original PDH/DXGI Godot-PID 3D attribution",
+    "Original pixels not independently clinically reviewed",
+    "Application remains unported; only source-derived case navigation"
+  ],
+  "decision": "PUBLISH_ORIGINAL_FILES_ONLY_AS_EVIDENCE_INCOMPLETE_NO_RERENDER"
+}
