@@ -155,6 +155,9 @@ func _capture_once() -> void:
 	var start_msec: int = Time.get_ticks_msec()
 	var angle_frame_saved := false
 	var frontal_saved := false
+	var focused_cut_saved := false
+	var focused_cut_file := ""
+	var focused_cut_sha := ""
 	var frontal_file := ""
 	var angle_file := ""
 	var frontal_hash := ""
@@ -185,6 +188,20 @@ func _capture_once() -> void:
 			frontal_file = str(output["name"])
 			frontal_hash = str(output["sha256"])
 			frontal_saved = true
+		# The later FDI36 navigation hides FDI16 geometry. Capture an actual
+		# FDI16 simulated-cut-focused native GPU view BEFORE the 22s switch.
+		if elapsed >= 14.0 and not focused_cut_saved:
+			var focus := Vector3(after_root.global_position.x, midpoint.y, midpoint.z)
+			camera.global_position = focus + Vector3(2.2, 5.8, 7.7)
+			camera.look_at(focus, Vector3.UP)
+			await RenderingServer.frame_post_draw
+			var cut_output: Dictionary = _write_gpu_frame("cut-focused")
+			if not cut_output.get("ok", false):
+				_fail("Native FDI16 cut-focused GPU image failed: " + str(cut_output.get("error", "")))
+				return
+			focused_cut_file = str(cut_output["name"])
+			focused_cut_sha = str(cut_output["sha256"])
+			focused_cut_saved = true
 		if elapsed >= 32.0 and not angle_frame_saved:
 			var output: Dictionary = _write_gpu_frame("occlusal")
 			if not output.get("ok", false):
@@ -193,7 +210,7 @@ func _capture_once() -> void:
 			angle_file = str(output["name"])
 			angle_hash = str(output["sha256"])
 			angle_frame_saved = true
-	if not frontal_saved or not angle_frame_saved:
+	if not frontal_saved or not angle_frame_saved or not focused_cut_saved:
 		_fail("Sustained orbit did not produce BOTH independent original native images")
 		return
 	var duration_sec: float = float(Time.get_ticks_msec() - start_msec) / 1000.0
@@ -222,6 +239,7 @@ func _capture_once() -> void:
 		"status":"BACKGROUND_VULKAN_ORBIT_TWO_IMAGES_PENDING_PIXEL_AND_PROCESS_GPU_REVIEW",
 		"imageFile":frontal_file, "imageSHA256":frontal_hash,
 		"angledImageFile":angle_file, "angledImageSHA256":angle_hash,
+		"cutFocusedImageFile":focused_cut_file, "cutFocusedImageSHA256":focused_cut_sha,
 		"imageWidth":1600, "imageHeight":900,
 		"orbitDurationSeconds":duration_sec,
 		"orbitCameraMaxAzimuthDegrees":42.0, "orbitEndElevationRatio":0.72,
@@ -236,7 +254,7 @@ func _capture_once() -> void:
 		"pixelReviewed":false, "gpuProcessVerified":false,
 		"headlessUsed":false, "userDesktopActivationRequested":false
 	})
-	print("SR1C_ORBIT_TWO_IMAGES_WRITTEN: "+frontal_file+" ; "+angle_file)
+	print("SR1J_ORBIT_THREE_ORIGINAL_IMAGES_WRITTEN: "+frontal_file+" ; "+focused_cut_file+" ; "+angle_file)
 	DisplayServer.unregister_additional_output(self)
 	quit(0)
 

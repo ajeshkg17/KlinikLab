@@ -1,0 +1,88 @@
+name: SR1J Godot and Unreal whole clinic experimental source contract (NO NATIVE RENDER)
+on:
+  pull_request:
+    branches:
+      - integration/single-chat-validation-2026-10-30
+    paths:
+      - 'visual-qa/run-godot-whole-clinic-pc.ps1'
+      - 'visual-qa/sr1c-godot-background-capture.gd'
+      - 'visual-qa/run-unreal-whole-clinic-pc.ps1'
+      - 'visual-qa/unreal-whole-clinic-stage.py'
+      - 'visual-qa/unreal-whole-clinic-init.py'
+      - 'visual-qa/unreal-whole-clinic-capture.py'
+      - 'visual-qa/publish-whole-clinic-comparison-pc.ps1'
+      - 'tests/sr1j_whole_clinic_engine_compare.test.mjs'
+      - '.github/workflows/sr1j-engine-clinic-compare.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-contract-not-render:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run engine comparison provenance and fail-closed source contracts
+        shell: pwsh
+        run: |
+          node --test tests/sr1j_whole_clinic_engine_compare.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Native engine comparison JS contract failed' }
+      - name: Python syntax only, NEVER import Unreal Editor or create assets
+        shell: pwsh
+        run: |
+          python -m py_compile visual-qa/unreal-whole-clinic-stage.py visual-qa/unreal-whole-clinic-init.py visual-qa/unreal-whole-clinic-capture.py
+          if ($LASTEXITCODE -ne 0) { throw 'Unreal whole clinic script syntax failure' }
+      - name: Parse ALL PC runners with real PowerShell 5.1 and PowerShell 7, no execution
+        shell: pwsh
+        run: |
+          $files = @(
+            (Resolve-Path 'visual-qa/run-godot-whole-clinic-pc.ps1').Path,
+            (Resolve-Path 'visual-qa/run-unreal-whole-clinic-pc.ps1').Path,
+            (Resolve-Path 'visual-qa/publish-whole-clinic-comparison-pc.ps1').Path
+          )
+          $parse = {
+            param($target)
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $target, [ref]$tokens, [ref]$errors) | Out-Null
+            if (@($errors).Count -ne 0) {
+              throw ("PS $($PSVersionTable.PSVersion) " + $target + ' : ' +
+                (($errors|ForEach-Object { $_.Message }) -join '; '))
+            }
+            Write-Host "PASS Parser=$($PSVersionTable.PSVersion) file=$target"
+          }
+          foreach ($path in $files) { & $parse $path }
+          $script = Join-Path $env:RUNNER_TEMP 'sr1j_parser_windows_ps51.ps1'
+          @'
+          param([Parameter(Mandatory=$true)][string]$Target)
+          $ErrorActionPreference = 'Stop'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            $Target, [ref]$tokens, [ref]$errors) | Out-Null
+          if (@($errors).Count -ne 0) {
+            throw (($errors | ForEach-Object { $_.Message }) -join '; ')
+          }
+          Write-Host "PS51_PARSE_OK $Target"
+          '@ | Set-Content -LiteralPath $script -Encoding utf8
+          foreach ($path in $files) {
+            & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $script $path
+            if ($LASTEXITCODE -ne 0) { throw "Windows PowerShell 5.1 parser failed for $path" }
+          }
+      - name: Preserve evidence boundaries
+        if: always()
+        shell: pwsh
+        run: |
+          @'
+          NO native Godot/Unreal Editor was executed by this workflow.
+          NO Windows GPU Engine samples or private desktop real renders were created by CI.
+          NO job07 replay or any Godot watcher job was enqueued.
+          A green CI report means syntax, source contract and safety checks ONLY.
+          Actual three original Unreal PNGs / three original Godot PNGs and independent PID/DXGI GPU evidence require unique owner-PC runs.
+          '@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
