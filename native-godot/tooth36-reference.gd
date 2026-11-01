@@ -7,7 +7,6 @@ const GODOT_SCENE := "res://assets/dundee/mandibular_first_molar-godot.glb"
 const RAW_RESOLVER = preload("res://raw-source.gd")
 const SOURCE_BLOB := "73e9f3029d770c6b4052ebbaba708283de4c47fd"
 const SOURCE_COMMIT := "4f0ffb651998a4641ddf45c7632ea236cc164fcb"
-const SOURCE_SHA256 := "REPLACED_BY_BUILD_MANIFEST"
 var _tooth: Node3D
 var _fallback: Node3D
 var _mesh_count := 0
@@ -25,7 +24,7 @@ func configure(expected_sha: String) -> bool:
 		_show_missing_fallback()
 		return true
 	var m: Dictionary = parsed
-	if str(m.get("sourceGitSHA","")) != expected_sha or str(m.get("caseId","")) != "endo" or str(m.get("fdi","")) != "36" or str(m.get("sourceGitBlobSha","")) != SOURCE_BLOB or str(m.get("upstreamCommit","")) != SOURCE_COMMIT or str(m.get("licenseSPDX","")) != "CC-BY-4.0" or m.get("surfaceOnly",false) != true or m.get("internalTissuesProvided",true) != false or m.get("clinicalAccuracyValidated",true) != false:
+	if str(m.get("sourceGitSHA","")) != expected_sha or str(m.get("caseId","")) != "endo" or str(m.get("fdi","")) != "36" or str(m.get("originalGitBlobSha","")) != SOURCE_BLOB or str(m.get("upstreamCommit","")) != SOURCE_COMMIT or str(m.get("licenseSPDX","")) != "CC-BY-4.0" or m.get("surfaceOnly",false) != true or m.get("internalTissuesProvided",true) != false or m.get("clinicalAccuracyValidated",true) != false:
 		_error = "FDI36 source identity, license or surface-only contract rejected"
 		_show_missing_fallback()
 		return true
