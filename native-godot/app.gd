@@ -819,6 +819,7 @@ func _show_environment() -> void:
 	if _cc0_clinic!=null:
 		var report: Dictionary = _cc0_clinic.call("summary")
 		_page.add_child(_heading("Imported clinic mesh instances: %s · static tray meshes: %s · original GLB hashes: verified" % [str(report.get("wholeMeshInstances",0)),str(report.get("trayMeshInstances",0))],14))
+		_page.add_child(_heading("CC0 source pack: %d GLB models catalogued; %d original scene assets loaded + %d separately imported operatory chair = %d runtime GLBs. Chair: %s." % [int(report.get("cataloguedSourceGLBs",0)),int(report.get("requiredGLBsLoaded",0)),int(bool(report.get("optionalChairLoaded",false))),int(report.get("requiredGLBsLoaded",0))+int(bool(report.get("optionalChairLoaded",false))),"real CC0 model loaded" if bool(report.get("optionalChairLoaded",false)) else "asset unavailable; labelled fallback"],14))
 	_page.add_child(_heading("CC0 1.0 · 3dassets.dev / Dental Practice and Surgery. Stylized static environment; not calibrated dental anatomy, full instrument physics, a clinical procedure simulator, or a patient record.",12))
 	if not _walk_active:
 		var start_walk := _button("Walk clinic (WASD / arrows, right-drag to look)")

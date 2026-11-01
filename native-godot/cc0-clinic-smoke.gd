@@ -22,6 +22,22 @@ func _run() -> void:
 	if not bool(result.get("sourceOriginalGLBsHashVerified",false)) or not bool(result.get("wholeSceneLoaded",false)) or not bool(result.get("trayLoaded",false)) or int(result.get("wholeMeshInstances",0))<20 or int(result.get("trayMeshInstances",0))<1:
 		_fail("GLB source hash did not produce substantial native environment meshes")
 		return
+	if int(result.get("cataloguedSourceGLBs",0)) != 54 or int(result.get("requiredGLBsLoaded",0)) != 2:
+		_fail("Catalogued vs runtime loaded GLB counts changed")
+		return
+	if not bool(result.get("optionalChairLoaded",false)) or int(result.get("optionalChairMeshes",0))<1 or bool(result.get("optionalChairFallback",true)) or not env.has_node("KL_SOURCE_CC0_REAL_OPERATORY_CHAIR"):
+		_fail("Actual catalogued dental-chair GLB was not instantiated")
+		return
+	var fallback_env: Node3D = script.new()
+	fallback_env.call("_show_chair_fallback")
+	if not bool((fallback_env.call("summary") as Dictionary).get("optionalChairFallback",false)) or not fallback_env.has_node("KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK"):
+		_fail("Missing-chair fallback fails closed")
+		return
+	var missing_node := fallback_env.get_node("KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK")
+	if missing_node.get_child_count() != 1 or not (missing_node.get_child(0) is Label3D):
+		_fail("Missing-chair fallback not visibly labelled")
+		return
+	fallback_env.free()
 	if not env.has_node("KL_SOURCE_CC0_WHOLE_CLINIC") or not env.has_node("KL_SOURCE_CC0_TRAY_STATIC_PROP"):
 		_fail("Live imported clinic/tray nodes missing")
 		return
@@ -64,5 +80,5 @@ func _run() -> void:
 			_fail("Clinic background unloaded during case navigation")
 			return
 	app.call("_reset_progress")
-	print("SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS real PackedScene meshes; original SHA and CC0; static only, NO WINDOWS PIXELS/GPU/CLINICAL QA")
+	print("SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS real PackedScene meshes; 54 catalogued GLBs / 3 loaded (2 baseline + chair); labelled missing-chair fallback; static only, NO WINDOWS PIXELS/GPU/CLINICAL QA")
 	quit(0)
