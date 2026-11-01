@@ -178,3 +178,18 @@ The native endodontic practical for the original endo case (FDI 36) now mounts a
 This surface mesh is not the synthetic editable tooth volume: it contains no internal tissue/canal segmentation and is not patient-specific or clinically calibrated. The UI retains University of Dundee attribution and CC BY 4.0. If either source sidecar or the converted resource is absent or corrupt, a clearly labelled FDI 36 missing-asset fallback appears. The reference is only visible in the FDI 36 endodontic practical station; other FDI cases and their source task definitions remain independent.
 
 Headless CI validates exact source identity, Draco conversion/import, runtime mesh instantiation, FDI station gating, fallback labelling, and the six-case source mapping. It does not establish visual/GPU placement, clinical anatomy review, browser parity, or workstation/Quest acceptance.
+
+
+## SR41 — remaining five FDI source-surface audit and first crown reference
+
+The six source cases stay ordered FDI 16, 36, 11, 26, 48, 46. Of the five cases not yet supplied with a Dundee surface reference:
+
+- FDI 26 (crown): exact-side left maxillary first molar, existing assets/dundee/maxillary_first_molar.glb, original Git blob SHA 0948d093089c5921281185a103b323c513365502, equal to pinned upstream Dundee mirror commit 4f0ffb651998a4641ddf45c7632ea236cc164fcb. CC BY 4.0 attribution. **Added as a separate static surface reference** in its native practical station.
+- FDI 16: no exact-side validated surface reference in the existing left-side Dundee set; maxillary first molar (26) would require explicit side mirroring and qualified anatomy review.
+- FDI 11: no exact-side validated surface reference in the existing left-side Dundee set; maxillary left central incisor (21) is not an unmodified FDI 11 model.
+- FDI 48: no exact-side validated surface reference in the existing left-side Dundee set; mandibular left third molar (38) is not an unmodified FDI 48 model.
+- FDI 46: no exact-side validated surface reference in the existing left-side Dundee set; mandibular left first molar (36) is not an unmodified FDI 46 model.
+
+All 16 Dundee GLBs are separately attributed under CC BY 4.0 in assets/dundee/README.md, but only the 36 and 26 native practical references have source-pinned import/loader checks; the other four are **candidate contralateral surface shapes**, not approved FDI-specific anatomy. No GLB encodes validated pulp/canal anatomy or a patient-specific cutting volume. Browser-side FDI tasks, synthetic volume editing, practical progress and FSP/KP remain unchanged.
+
+The native FDI26 reference is Draco decoded at build time using an exact original Git blob allowlist, retains original/converted SHA-checked raw sidecars, and uses a neutral (not original WebP textured) material. A missing or invalid model yields an explicit labelled fallback. Headless import and station routing are tested; clinical morphology, scale, graphical placement, native GPU pixels and Quest remain unverified.

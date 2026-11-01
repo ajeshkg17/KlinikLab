@@ -64,6 +64,18 @@ func _run() -> void:
 			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
 			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
 			return
+		if i == 3:
+			var crown_ref: Node3D = app.get("_tooth26_reference")
+			if crown_ref == null:
+				_fail("FDI26 crown practical never mounted actual surface source")
+				return
+			var crown_info: Dictionary = crown_ref.call("summary")
+			if not bool(crown_info.get("assetLoaded",false)) or bool(crown_info.get("fallbackVisible",true)) or int(crown_info.get("meshInstances",0)) < 1 or str(crown_info.get("fdi","")) != "26" or str(crown_info.get("caseId","")) != "crown" or str(crown_info.get("license","")) != "CC-BY-4.0" or not bool(crown_info.get("surfaceOnly",false)) or not crown_ref.visible:
+				_fail("FDI26 real Dundee surface not loaded in crown practical with correct identity/limits")
+				return
+		elif app.get("_tooth26_reference") != null and app.get("_tooth26_reference").visible:
+			_fail("FDI26 tooth surface leaked to another FDI practical")
+			return
 		if i == 1:
 			var reference: Node3D = app.get("_tooth36_reference")
 			if reference == null:
@@ -91,6 +103,21 @@ func _run() -> void:
 		_fail("FDI36 fallback lacks a visible text label")
 		return
 	missing_reference.free()
+	var crown_script: GDScript = load("res://tooth26-reference.gd")
+	if crown_script == null:
+		_fail("FDI26 runtime source reference script is missing")
+		return
+	var missing_crown: Node3D = crown_script.new()
+	missing_crown.call("force_missing_fallback_for_test")
+	var crown_fallback: Dictionary = missing_crown.call("summary")
+	if bool(crown_fallback.get("assetLoaded",true)) or not bool(crown_fallback.get("fallbackVisible",false)) or not missing_crown.has_node("KL_DUNDEE_FDI26_SURFACE_ASSET_MISSING_FALLBACK"):
+		_fail("FDI26 missing-asset fallback not clearly exposed")
+		return
+	var fallback_label: Node3D = missing_crown.get_node("KL_DUNDEE_FDI26_SURFACE_ASSET_MISSING_FALLBACK")
+	if fallback_label.get_child_count() != 1 or not (fallback_label.get_child(0) is Label3D):
+		_fail("FDI26 fallback lacks labelled asset absence")
+		return
+	missing_crown.free()
 	app.call("_reset_progress")
-	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases plus separately loaded FDI36 Dundee surface mesh and labelled fallback; headless only, no real pixels/GPU claimed")
+	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases plus separately loaded FDI36 and FDI26 Dundee surface meshes with labelled fallbacks; headless only, no real pixels/GPU claimed")
 	quit(0)
