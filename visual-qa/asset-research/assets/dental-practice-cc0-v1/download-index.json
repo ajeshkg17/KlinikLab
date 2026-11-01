@@ -1,0 +1,542 @@
+[
+  {
+    "id": "34371",
+    "title": "Dental Chair (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34371/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 41804,
+    "sha256": "360AB5F97393F2CF0C8BA99E4D776D1A5D3E50D33889EC633F8EEE03919BCFDD",
+    "file": "Dental Chair (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34370",
+    "title": "Dental Chair Blue (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34370/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 42628,
+    "sha256": "551A7283CA8A9F9A6EB3E03CB1B33DE79B966F7030C59CECDEEAD32CD34CDEFF",
+    "file": "Dental Chair Blue (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34372",
+    "title": "Dental Chair Reclined (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34372/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 40532,
+    "sha256": "5B7DE2D87CB83651E6C84072F2C3CBF13138B6D121398A0A5E28EACE3565823F",
+    "file": "Dental Chair Reclined (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34373",
+    "title": "Delivery Unit (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34373/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 43272,
+    "sha256": "B791EABDD63447D8C209F451A37D919E0C6ABC3E562C0204E2EB35A6FE691EA5",
+    "file": "Delivery Unit (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34374",
+    "title": "Operating Light (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34374/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 31948,
+    "sha256": "F7906BA732C9B7ECE0FFF6907E5567AFF77A2E4F6F58395F7245CE997FD89CFD",
+    "file": "Operating Light (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34375",
+    "title": "Surgery Monitor Arm (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34375/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 17088,
+    "sha256": "6BFCFE8101F290B873411DBF504D2E4FC1B219B3FDFD7F88BFB893585D4719FB",
+    "file": "Surgery Monitor Arm (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34376",
+    "title": "Intraoral Xray Arm (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34376/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 23036,
+    "sha256": "1A8293950EC115063A61B85663709AD1DA9A891D38AC6ADC78D2C34FD83E6E22",
+    "file": "Intraoral Xray Arm (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34377",
+    "title": "Spittoon Unit (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34377/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 30160,
+    "sha256": "6C3EC118FAB0826229A1AB28D6983695EBEEB9D3FD5470028E5E6691155AE495",
+    "file": "Spittoon Unit (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34378",
+    "title": "Suction Unit (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34378/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 21024,
+    "sha256": "14425C3E714EC741DAE1AD2AF5E2B36984DB5C05FB80834E3AD869E09A207018",
+    "file": "Suction Unit (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34379",
+    "title": "Dentists Stool (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34379/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 36732,
+    "sha256": "1260D45E9CC881E6ED72812482F12AF4A42AD4977DA25CCEFD7766438B653D5C",
+    "file": "Dentists Stool (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34380",
+    "title": "Nurses Stool (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34380/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 43592,
+    "sha256": "53B465C2A968D65B13D5DE744A47AD68B506CC7065E0062B1E7D1966FE9CA45E",
+    "file": "Nurses Stool (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34381",
+    "title": "Cabinet Run Module (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34381/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 19524,
+    "sha256": "3F2167F006DEB5BC98065BD58B0854A86FC58BAF1A2990822CAEF5530B3E69F2",
+    "file": "Cabinet Run Module (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34382",
+    "title": "Cabinet Run Sink Module (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34382/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 30760,
+    "sha256": "D070D406E0753BF41D312B6C16415F4470FCE0A502ED11A9A1F26019613BD3E0",
+    "file": "Cabinet Run Sink Module (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34383",
+    "title": "Instrument Tray (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34383/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 30452,
+    "sha256": "63E3396B7CCD5C5227A8464473B25ACB2CF79E5797AC7518B16F16C8F6228036",
+    "file": "Instrument Tray (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34384",
+    "title": "Ultrasonic Scaler (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34384/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 28284,
+    "sha256": "5E83A4F0BE8C36C40D77997A6F9DFE0D406F6EA9F427F41079CEE405D7354BD1",
+    "file": "Ultrasonic Scaler (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34385",
+    "title": "Curing Light (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34385/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 22728,
+    "sha256": "59C21274E9BED7B1C1239A7A04091685F1EB41DEDF4A9ACDB4CFDD864CB500F7",
+    "file": "Curing Light (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34386",
+    "title": "Glove And Mask Dispenser (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34386/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 38044,
+    "sha256": "F49131519F3C2FB0D808372818C35C8945361A63DE1F340493D94F6260A836FF",
+    "file": "Glove And Mask Dispenser (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34387",
+    "title": "Sharps Bin (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34387/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 10168,
+    "sha256": "87F35018032DE3217A9936CDE8F59DE0E27EAC0608DF9D8641B935AB0E2A32D1",
+    "file": "Sharps Bin (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34389",
+    "title": "Pedal Waste Bin (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34389/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 25264,
+    "sha256": "6D11084EA10671CF7E54862CA35ABCD4BD1F1B8F50E867E51CE1575E2ABE8FE3",
+    "file": "Pedal Waste Bin (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34388",
+    "title": "Xray Sensor Tray (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34388/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 16072,
+    "sha256": "82481E8A1DEFDB16FBCC32570C02E27E11743DE32A9F29AB6E07D0A491D38E46",
+    "file": "Xray Sensor Tray (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34390",
+    "title": "Autoclave Bench (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34390/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 49632,
+    "sha256": "701EAF4853EF2E2C5C8150D169A65F65B6A3D244727A17D8A346240B5E46C05D",
+    "file": "Autoclave Bench (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34391",
+    "title": "Autoclave Bench Open (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34391/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 49836,
+    "sha256": "70BF9F10392E5C028AC51D4C6AD02E99ACFEA45628F3160BF53849456C5D921B",
+    "file": "Autoclave Bench Open (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34392",
+    "title": "Instrument Washer (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34392/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 19496,
+    "sha256": "87C766997AED6CE96D84FF327D6E5EE930359A642878198908F2499D3C524554",
+    "file": "Instrument Washer (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34393",
+    "title": "Ultrasonic Cleaner Bath (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34393/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 21352,
+    "sha256": "090A49B1C7BFB186458FCEACE6C5DADE85DC510921BE8BB5B78DCB042086539D",
+    "file": "Ultrasonic Cleaner Bath (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34394",
+    "title": "Sterile Pouch Rack (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34394/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 26412,
+    "sha256": "B622AC2E25FDD62A170A970F040AEC8A64039A77ADF89BBE57869A36C46E575C",
+    "file": "Sterile Pouch Rack (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34395",
+    "title": "Sterile Store Cabinet (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34395/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 55356,
+    "sha256": "E49668DC5FC6E592D448BA0DE2F8374588BBD038F4DF1E513F86659A2980DF2C",
+    "file": "Sterile Store Cabinet (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34396",
+    "title": "Sterile Store Cabinet Open (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34396/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 57880,
+    "sha256": "D03F3C6F739034105B9F320530BC0C0F29C7A9DEF1C464D66D95A7E7F2B2B222",
+    "file": "Sterile Store Cabinet Open (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34397",
+    "title": "Plaster Model On Stand (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34397/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 24768,
+    "sha256": "5017EB24B223105F124F25F78C88AC3BA751F1736E1F6C4C6315DA6FFED9BD8E",
+    "file": "Plaster Model On Stand (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34398",
+    "title": "Articulator With Model (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34398/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 43732,
+    "sha256": "5F548D4EFE6D27AA518B97393270DF36222A07537BA4827DD232E4D35D5ED2D9",
+    "file": "Articulator With Model (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34399",
+    "title": "Lab Bench (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34399/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 52872,
+    "sha256": "699252966A65DF2331D489C6E42E5173EB6B9FA6BCBF84735ACF2B92C4372215",
+    "file": "Lab Bench (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34400",
+    "title": "Impression Tray Set (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34400/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 31412,
+    "sha256": "3554076056979242BC95C42B5E324A685F46CBFB85C32A99C2D16D911612784E",
+    "file": "Impression Tray Set (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34401",
+    "title": "Model Box Stack (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34401/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 27180,
+    "sha256": "AAB3580F1F22441ECA19D3EBD8E123C98DFE6F6D715AFE5B010862A728EA68A4",
+    "file": "Model Box Stack (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34402",
+    "title": "Reception Desk (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34402/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 36596,
+    "sha256": "B286F6052430DF3596985F919669A9F71C9716E86492D7537516983D5F6D97E1",
+    "file": "Reception Desk (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34403",
+    "title": "Waiting Chairs Run (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34403/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 34016,
+    "sha256": "9CCCFD6CB190F4D90126C18FA6DD1A95782A0BF0CBC2B6DB590BE0524A5C73B0",
+    "file": "Waiting Chairs Run (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34404",
+    "title": "Waiting Chairs Run Coral (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34404/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 34076,
+    "sha256": "000B0998E0946CFE10FDEA7825709550CAEC056E59A0380155D0ED827FB32087",
+    "file": "Waiting Chairs Run Coral (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34405",
+    "title": "Low Table With Magazines (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34405/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 21104,
+    "sha256": "94BB5D3301D7B30A1CA450D101B8FE17ADA43E37F8AA797976784F89E5C88447",
+    "file": "Low Table With Magazines (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34406",
+    "title": "Water Cooler (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34406/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 30996,
+    "sha256": "D00A5C858775F29C0B3D9527052C74F3071E495C09D21528A51E5F3CF6691E6E",
+    "file": "Water Cooler (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34407",
+    "title": "Childrens Play Corner (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34407/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 45992,
+    "sha256": "788BA9F7BAFA0A3E4D6D5484BCA8FA423098804D7CCC87A0C38E2A677325C4AB",
+    "file": "Childrens Play Corner (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34408",
+    "title": "Coat Stand (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34408/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 30732,
+    "sha256": "2F9A9C712FB4761D7945B6DA2A98C82D4EA616093D7FFBBC95AE47D2CC72790B",
+    "file": "Coat Stand (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34409",
+    "title": "Appointment Screen (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34409/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 11660,
+    "sha256": "4F0554B250E1D22167FB091F6AB912DC255867F3647F02864CA3FA3B0D376EED",
+    "file": "Appointment Screen (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34410",
+    "title": "Notice Board (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34410/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 17912,
+    "sha256": "665310937E021859FF81C0CBD39D48353798B043E90C6EEA03574EDE3B2A46A4",
+    "file": "Notice Board (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34411",
+    "title": "Corridor Wall Module (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34411/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 7664,
+    "sha256": "7DF2D529B02F44C61BE85509031964BB3BFAA39ED954BE42411275FA7C44BD11",
+    "file": "Corridor Wall Module (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34413",
+    "title": "Corridor Wall Module Blue (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34413/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 7708,
+    "sha256": "149488C04F5304632ECDCEF61C5E0882CC0599B2E6E94225348B9ABC7B305C57",
+    "file": "Corridor Wall Module Blue (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34412",
+    "title": "Surgery Door Module (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34412/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 32940,
+    "sha256": "ED3BB5B2334052B3B43006A68789D957F7545C43580E1DC563C65DFEC615B1E0",
+    "file": "Surgery Door Module (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34414",
+    "title": "Surgery Door Module Open (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34414/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 32408,
+    "sha256": "785BA6C8775A1B66A694C0FDB11F0758E194B551DEF20BEBCA98B3502E66399F",
+    "file": "Surgery Door Module Open (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34415",
+    "title": "Glazed Partition Module (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34415/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 17040,
+    "sha256": "39A94182D71E0CE7996B4B6813F9FC9A7B3DF714980CC019A2BF6599186BD23C",
+    "file": "Glazed Partition Module (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34417",
+    "title": "Clinical Floor Tile (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34417/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 6176,
+    "sha256": "8B3517486775580E05DEEBEC42A04C51725F665B619B1708A51635EA244BF798",
+    "file": "Clinical Floor Tile (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34416",
+    "title": "Clinical Floor Tile Blue (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34416/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 6408,
+    "sha256": "EF27D92E4F2973CA5AAE4F5404CA4D6A191EBD9EA278E32E0191A18D45D9E9C1",
+    "file": "Clinical Floor Tile Blue (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34418",
+    "title": "Ceiling Light Panel (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34418/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 14608,
+    "sha256": "A0FFA2CC22CA026A0D5242001E7D3EABD27F8EDE2251CD37DDEA0E8E29E37A9D",
+    "file": "Ceiling Light Panel (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34419",
+    "title": "Wall Hand Gel (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34419/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 15168,
+    "sha256": "6A7B909C2B4C1A10823554E69A239E7A3E971AA11999FB3C6BD4352704E677E3",
+    "file": "Wall Hand Gel (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34420",
+    "title": "Radiator (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34420/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 24692,
+    "sha256": "FC3009C11B854D68522A7B8FA5C35CA8B3EC4E108FE434467BA9D545B76EAF96",
+    "file": "Radiator (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34421",
+    "title": "Skirting Run (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34421/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 7700,
+    "sha256": "3C7F3332C7E3CF333817F554AF0891809194EBC2842E7B2A71F431F93D78ECF1",
+    "file": "Skirting Run (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34423",
+    "title": "Dental practice floor (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34423/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 1177948,
+    "sha256": "9AF6DD52D96BF94D50EDA63EE888DB975FADABB230A5DCD2FF98A11A518DB77A",
+    "file": "Dental practice floor (Dental Practice and Surgery).glb"
+  },
+  {
+    "id": "34422",
+    "title": "Surgery, mid appointment (Dental Practice and Surgery)",
+    "source": "https://cdn.3dassets.dev/assets/34422/v1/model.glb",
+    "license": "CC0 1.0 Universal",
+    "attribution": "3dassets",
+    "bytes": 526852,
+    "sha256": "B122B2ADEB75C408226B53ADD1DFF017D987416F03EAF74293AB1F0DA8692D1D",
+    "file": "Surgery, mid appointment (Dental Practice and Surgery).glb"
+  }
+]
