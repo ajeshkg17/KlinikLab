@@ -1,5 +1,27 @@
 # Engine decision override — 31 October 2026: Godot 4.7.2 native local render FIRST; Unreal paused
 
+## SR2 — complete interactive KlinikLab application migration (1 November 2026)
+
+**User direction:** prepare the **entire native application**, not merely a tooth pair, clinic still frame, or synthetic case/station preview. Godot 4.7.2 remains the **primary target**; Unity and Unreal are separately bounded GPU/scene comparison experiments, not parallel full-app implementations. The existing full-feature browser implementation is the source-of-truth and remains available until a native functional-parity migration passes.
+
+**First merged-capable implementation (native-godot/):** standalone Godot application project assembled by `native-godot/build-app.mjs` from one exact original production Git commit. Independent source manifests, original FDI16 before/after five tissue meshes, a schematic whole operatory, all six case records, all seven learning stations, four original source quiz families, interactive responses/explanations, German draft editing, original instrument terminology and local-only source-bound progress. Switchable clinic overview vs tooth close-up camera. Godot's official 4.7.2 parser and source content/geometry tests must pass; no GPU/clinical/full-application acceptance derives from this. The app exposes missing functionality visibly under **Coverage**.
+
+**Mandatory native full-parity gates**, in implementation order:
+1. Real source-equivalent case/station FSM with clinical prompts, dialogue, case variants, completed station state, undo and accessibility.
+2. Native CPU editable volumetric source-derived tooth solid and live user-driven bur subtraction, mesher rebuild, cut history, reset, 3D ray picking and safety boundaries; more teeth only with real source provenance.
+3. Complete B2/C1 German FSP/KP free-text formative feedback/rubric, case-specific practice, treatment planning and structured report export.
+4. Jaw/anatomy atlas with independent licensed data provenance, 3D orientation/selection/camera/instrument/tissue-shader parity.
+5. Synthetic radiographic projection and interpretation, local STL/OBJ scan import, normalization and uncertainty disclosure, virtual bur controls.
+6. Optional secure AI integration with explicit consent and credential isolation, offline fallback, no real patient records or secrets.
+7. Tracked controller/Quest VR locomotion/tool/ray interaction, device/comfort QA and real headset evidence.
+8. Whole-user-experience release QA: persistence across restarts, language/accessibility, original native screenshots that assistant directly inspects, actual engine-PID RTX5060 3D PDH periods plus matching DXGI LUID, crash/restart, no foreground switching during automation, independent curriculum review.
+
+**Non-negotiable status:** SR2 is **APPLICATION FOUNDATION — FUNCTIONAL PARITY INCOMPLETE**, not a completed port. Current browser application remains the only complete-feature reference, and no user-specific patient information, clinical device validation or physical Quest acceptance may be inferred. Do not modify old job07/job08 ledgers or visual-feedback as part of software porting.
+
+See `native-godot/README.md` for build and exact acceptance boundaries.
+
+---
+
 ## SR1P/Q — job08 ledger discrepancy and Unity real-GPU owner-PC attempt (1 November 2026)
 
 **Observed external state:** GitHub `visual-feedback` already contains the original owner-PC job08 `godot-job-result.json` (`EVIDENCE_INCOMPLETE`), original `godot-background-capture.json`, actual PID **41820** Windows PDH samples with **34 distinct positive RTX5060 LUID-matched 3D periods**, six-case/seven-station FDI16→FDI36 workflow report, and source-exact FDI16 before/cut topology. Its native Godot capture report independently names **two original 1600×900 PNGs and their SHA-256**, generated after **42.006 seconds**. The *original GitHub publication* omitted PNG bytes due to the fixed **34-second PDH / 42-second producer completion race**. The owner subsequently found only job01–job07 entries in their inspected local `godot-ledger.json`, even though the original job08 capture folder and JSON/PNG files exist. The cause of this persistence/location discrepancy is **not established** from GitHub, and should not be guessed. No missing job08 ledger entry may be fabricated.
