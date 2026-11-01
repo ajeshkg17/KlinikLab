@@ -56,6 +56,8 @@ public static class KlinikLabUnityClinicRender
         public bool sourceCasesStationsVerified=false;
         public bool graphicsDevicePresent=false;
         public bool screenshotsCreated=false;
+        public bool nativeCaseStationSelectionPreviewVerified=false;
+        public WorkflowSelectionEvent[] workflowSelectionEvents;
         public bool privateDesktopConfirmedByLauncher=false;
         public bool independentProcessGpuCorroborated=false;
         public bool imageIndependentlyReviewed=false;
@@ -77,6 +79,12 @@ public static class KlinikLabUnityClinicRender
         public StationInfo[] stations;
     }
     [Serializable] class CaseInfo {public string id,fdi,title;}
+    [Serializable] class WorkflowSelectionEvent
+    {
+        public string caseId,fdi,stationId;
+        public bool sourceFDI16GeometryApplicable;
+        public bool caseSpecificFDI36MeshPorted=false;
+    }
     [Serializable] class StationInfo {public string id,title;}
     static string Arg(string name)
     {
@@ -204,6 +212,10 @@ public static class KlinikLabUnityClinicRender
     }
     static void CreateCaseStations(Transform root,NativeCases data)
     {
+        Label(root,"KL_ACTIVE_CASE_STATUS","ACTIVE FDI 16 / MOLAR - ORIGINAL FDI16 MESH",
+            new Vector3(0,1.7f,8.59f),.15f,TEAL);
+        Label(root,"KL_ACTIVE_STATION_STATUS","STATION 1/7: INTERVIEW",
+            new Vector3(0,1.2f,8.59f),.13f,CERAMIC);
         for(int i=0;i<data.cases.Length;i++)
         {
             string label="FDI "+data.cases[i].fdi+"  "+data.cases[i].id.ToUpperInvariant();
@@ -219,6 +231,18 @@ public static class KlinikLabUnityClinicRender
             Label(root,"KL_STATION_LABEL_"+data.stations[i].id,
                 data.stations[i].id.ToUpperInvariant(),new Vector3(x,-3.05f,-7.1f),.13f,CERAMIC);
         }
+    }
+    static WorkflowSelectionEvent PreviewSelection(NativeCases data,TextMesh caseText,
+        TextMesh stationText,int ci,int si)
+    {
+        var c=data.cases[ci];var station=data.stations[si];
+        Require(caseText!=null && stationText!=null,"Native selection text unavailable");
+        string fdi=c.fdi;
+        caseText.text="ACTIVE FDI "+fdi+" / "+c.id.ToUpperInvariant()+
+            (fdi=="16"?" - ORIGINAL FDI16 MESH":" - METADATA ONLY, NO CASE MESH");
+        stationText.text="STATION "+(si+1)+"/7: "+station.id.ToUpperInvariant();
+        return new WorkflowSelectionEvent{caseId=c.id,fdi=fdi,stationId=station.id,
+            sourceFDI16GeometryApplicable=fdi=="16",caseSpecificFDI36MeshPorted=false};
     }
     static void AddLight(Transform root,string name,Vector3 at,float intensity)
     {
@@ -306,6 +330,9 @@ public static class KlinikLabUnityClinicRender
         CreateInstruments(root.transform);
         CreateSpecimens(root.transform);
         CreateCaseStations(root.transform,data);
+        var selectedCase=GameObject.Find("KL_ACTIVE_CASE_STATUS")?.GetComponent<TextMesh>();
+        var selectedStation=GameObject.Find("KL_ACTIVE_STATION_STATUS")?.GetComponent<TextMesh>();
+        Require(selectedCase!=null && selectedStation!=null,"Native case/station selection labels missing");
         AddLight(root.transform,"KL_AREA_LIGHT",new Vector3(2,8,0),1.35f);
         var camera=Camera.main;
         Require(camera!=null,"original Unity source scene lacks main camera");
@@ -332,6 +359,8 @@ public static class KlinikLabUnityClinicRender
         string overview=Path.Combine(output,"unity-whole-clinic-overview.png");
         string angled=Path.Combine(output,"unity-whole-clinic-angled.png");
         string occlusal=Path.Combine(output,"unity-fdi16-cut-occlusal.png");
+        report.workflowSelectionEvents=new WorkflowSelectionEvent[3];
+        report.workflowSelectionEvents[0]=PreviewSelection(data,selectedCase,selectedStation,0,0);
         View(camera,new Vector3(0,7,-20),new Vector3(0,-.1f,0),56);
         report.overviewSHA256=Capture(camera,overview);report.overviewImage=Path.GetFileName(overview);
         // Maintain a non-headless, real device and a slowly evolving camera
@@ -339,18 +368,38 @@ public static class KlinikLabUnityClinicRender
         var start=DateTime.UtcNow;
         for(int i=0;i<ORBIT_SECONDS;i++)
         {
+            if(i==15) report.workflowSelectionEvents[1]=PreviewSelection(
+                data,selectedCase,selectedStation,1,4); // FDI36 practical METADATA ONLY
+            if(i==31) report.workflowSelectionEvents[2]=PreviewSelection(
+                data,selectedCase,selectedStation,0,4); // return to original FDI16 practical
             float a=-.22f+.44f*(i/(float)(ORBIT_SECONDS-1));
             View(camera,new Vector3(20f*Mathf.Sin(a),7, -20f*Mathf.Cos(a)),
                 new Vector3(0,-.1f,0),56);
             camera.Render();
             report.orbitRenderFrames++;
+            if(i==24)
+            {
+                // Angled capture explicitly shows FDI36/practical as metadata only.
+                report.angledSHA256=Capture(camera,angled);
+                report.angledImage=Path.GetFileName(angled);
+            }
             Thread.Sleep(1000);
         }
         report.elapsedSeconds=(int)(DateTime.UtcNow-start).TotalSeconds;
-        View(camera,new Vector3(9,12,-13),new Vector3(0,-1,0),56);
-        report.angledSHA256=Capture(camera,angled);report.angledImage=Path.GetFileName(angled);
+        Require(report.angledImage==Path.GetFileName(angled),
+            "Native angled FDI36 metadata preview not captured at station transition");
         View(camera,new Vector3(1.4f,4.8f,-5.2f),new Vector3(2.9f,-1.45f,-.2f),30);
         report.occlusalSHA256=Capture(camera,occlusal);report.occlusalImage=Path.GetFileName(occlusal);
+        Require(report.workflowSelectionEvents.All(e=>e!=null) &&
+            report.workflowSelectionEvents[0].fdi=="16" &&
+            report.workflowSelectionEvents[1].fdi=="36" &&
+            report.workflowSelectionEvents[2].fdi=="16" &&
+            report.workflowSelectionEvents[0].stationId=="interview" &&
+            report.workflowSelectionEvents[1].stationId=="practical" &&
+            report.workflowSelectionEvents[2].stationId=="practical" &&
+            !report.workflowSelectionEvents.Any(e=>e.caseSpecificFDI36MeshPorted),
+            "Native educational case/station preview did not advance correctly");
+        report.nativeCaseStationSelectionPreviewVerified=true;
         report.screenshotsCreated=true;
         report.status="UNITY_NATIVE_WHOLE_CLINIC_PIXELS_GPU_ATTRIBUTION_PENDING";
         File.WriteAllText(resultFile,JsonUtility.ToJson(report,true),new UTF8Encoding(false));
