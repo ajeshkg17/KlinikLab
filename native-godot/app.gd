@@ -36,6 +36,9 @@ var _progress: Dictionary = {}
 var _scene: Node3D
 var _atlas: Node3D
 var _scan: Node3D
+var _cc0: Node3D
+var _schematic_workspace: Node3D
+var _cc0_enabled := true
 var _scan_wireframe := false
 var _shell: CanvasLayer
 var _view := "clinic"
@@ -67,6 +70,24 @@ func _ready() -> void:
 	workspace.name = "KL_COMPLETE_OPERATORY_WORKSPACE"
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
+	_schematic_workspace = workspace
+	var cc0_script: GDScript = load("res://cc0-clinic.gd")
+	if cc0_script == null:
+		push_error("Required reviewed CC0 clinic native script missing")
+		_show_blocked("Required CC0 environment module missing")
+		_scene.visible = false
+		return
+	var reviewed: Node3D = cc0_script.new()
+	if not bool(reviewed.call("configure",str(_content["sourceGitSHA"]))):
+		var reason: String = str(reviewed.call("error"))
+		push_error("Required source-verified CC0 environment import failed: " + reason)
+		_show_blocked("CC0 clinic import failed: "+reason)
+		reviewed.free()
+		_scene.visible = false
+		return
+	_cc0 = reviewed
+	_scene.add_child(_cc0)
+	_schematic_workspace.visible = false
 	var atlas_script: GDScript = load("res://atlas-viewer.gd")
 	if atlas_script != null:
 		var atlas: Node3D = atlas_script.new()
@@ -85,7 +106,8 @@ func _ready() -> void:
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
-	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
+	print("SR13_NATIVE_GODOT_REVIEWED_CC0_ACTUAL_APP_LOADED", " CC0=", _cc0 != null,
+		" six_case_FDI=16,36,11,26,48,46; native workstation GPU evidence pending")
 
 func _load_source() -> bool:
 	var sha := FileAccess.get_file_as_string(SOURCE_SHA).strip_edges()
@@ -265,6 +287,9 @@ func _build_app() -> void:
 		var camera_button := _button(mode.capitalize() + " camera")
 		camera_button.pressed.connect(_set_camera_mode.bind(mode))
 		top.add_child(camera_button)
+	var cc0_button := _button("Toggle CC0 clinic / schematic")
+	cc0_button.pressed.connect(_toggle_cc0_clinic)
+	top.add_child(cc0_button)
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
@@ -396,6 +421,15 @@ func _show_case_geometry() -> void:
 	if _atlas != null:
 		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
 
+func _toggle_cc0_clinic() -> void:
+	if _cc0 == null or _schematic_workspace == null:
+		return
+	_cc0_enabled = not _cc0_enabled
+	_cc0.visible = _cc0_enabled
+	_schematic_workspace.visible = not _cc0_enabled
+	_set_camera_mode(_camera_mode)
+	_refresh()
+
 func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
 		return
@@ -405,9 +439,16 @@ func _set_camera_mode(mode: String) -> void:
 		push_warning("Godot original scene camera unavailable")
 		return
 	if mode == "overview":
-		camera.position = Vector3(0.0, 5.0, 28.0)
-		camera.fov = 60.0
-		camera.look_at(Vector3(0.0, 0.0, -2.5))
+		if _cc0 != null and _cc0_enabled:
+			# Wide, elevated perspective exposes reviewed assembled clinic behind
+			# the same source-derived FDI teaching models.
+			camera.position = Vector3(0.0, 10.0, 23.0)
+			camera.fov = 68.0
+			camera.look_at(Vector3(0.0, -1.6, -9.0))
+		else:
+			camera.position = Vector3(0.0, 5.0, 28.0)
+			camera.fov = 60.0
+			camera.look_at(Vector3(0.0, 0.0, -2.5))
 	else:
 		camera.position = Vector3(0.0, 1.7, 13.2)
 		camera.fov = 47.0
@@ -1290,6 +1331,7 @@ func _generate_report() -> String:
 				if entry.has("text"):
 					lines.append(str(entry["text"]).substr(0,6000))
 	lines.append("")
+	lines.append("Reviewed source CC0 environment loaded: "+str(_cc0 != null)+"; static visual props only; no FDI/clinical calibration.")
 	var volume_logs: Dictionary = _progress.get("volumeByCase", {})
 	for id in CASE_IDS:
 		if volume_logs.get(id, []) is Array:
@@ -1357,5 +1399,6 @@ func _show_coverage() -> void:
 		if str(id) == "fspKpFormativeRubric" and _language != null:
 			status = "4_SOURCE_CASES_16_GERMAN_TASKS_5_SOURCE_KEYWORDS_EACH__NOT_EXAM_GRADE"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
-	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
+	_page.add_child(_heading("Reviewed CC0 room/tray assets: %s, original SHA-256 checked; visual-prototype-only, no clinician acceptance or physically calibrated apparatus." % str(_cc0 != null), 14))
+	_page.add_child(_heading("Already functional here: independently loaded 3D CC0 clinic (toggle schematic), exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
 	_page.add_child(_heading("Now available: all six editable synthetic volumes with optional native direct 3D click-to-cut selection, 32-tooth preview, German source FSP/KP, guided interviews, six-stage clinical journey, offline reports and local STL/OBJ inspection. Still missing: physiological instrument forces, validated German oral/clinical assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))
