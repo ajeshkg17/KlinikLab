@@ -236,6 +236,39 @@ func _rebuild() -> void:
 	if _mesh_instance != null:
 		_mesh_instance.mesh = mesh
 
+func ray_hit(world_origin: Vector3, world_direction: Vector3) -> Dictionary:
+	# Use intersections with the ACTUAL current triangle surfaces, not
+	# a sphere / schematic click target or another tooth's preview.
+	# The mesh is displayed in local -Z while source grid uses +Z.
+	if not world_origin.is_finite() or not world_direction.is_finite() or world_direction.length_squared()<0.5 or world_direction.length_squared()>1.5:
+		return {"found":false}
+	if _mesh_instance == null or _mesh_instance.mesh == null or not visible:
+		return {"found":false}
+	var origin := to_local(world_origin)
+	var end := to_local(world_origin + world_direction.normalized()*50.0)
+	var mesh: ArrayMesh = _mesh_instance.mesh as ArrayMesh
+	var distance := INF
+	var nearest := Vector3.ZERO
+	for surface in range(mesh.get_surface_count()):
+		var arrays: Array = mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for idx in range(0,vertices.size()-2,3):
+			var intersection: Variant = Geometry3D.segment_intersects_triangle(
+				origin,end,vertices[idx],vertices[idx+1],vertices[idx+2])
+			if intersection is Vector3:
+				var at: Vector3 = intersection
+				var d := origin.distance_squared_to(at)
+				if d < distance:
+					nearest = at
+					distance = d
+	if not is_finite(distance):
+		return {"found":false}
+	var field := Vector3(nearest.x,nearest.y,-nearest.z)
+	# Native editable volume bounds and original case-specific identity.
+	if field.x < -1.15 or field.x > 1.15 or field.y < -1.5 or field.y > 1.3 or field.z < -1.0 or field.z > 1.0:
+		return {"found":false}
+	return {"found":true,"at":field,"distance":sqrt(distance),"fdi":_fdi,"caseId":_case_id}
+
 func cut_to(p: Vector3, radius: float) -> bool:
 	if not p.is_finite() or not is_finite(radius) or radius < 0.06 or radius > 0.35:
 		return false
