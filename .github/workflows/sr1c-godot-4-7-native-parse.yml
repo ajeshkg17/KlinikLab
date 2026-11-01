@@ -192,6 +192,22 @@ jobs:
           node --test tests/sr14_native_exported_watcher.test.mjs
           node --test tests/sr14_unique_native_pc_job09.test.mjs
           node --test tests/sr16_unique_native_pc_job10.test.mjs
+      - name: SR18 app-integrated capture entrypoint/headless fail-closed regression (NOT GPU pixels)
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/sr18-native-qa-headless"
+          mkdir -p "$output"
+          set +e
+          KLINIKLAB_PC_CAPTURE_DIR="$output" KLINIKLAB_PC_EXPECTED_SHA="$GITHUB_SHA" timeout 95 "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" -- --kliniklab-exported-pc-qa > "$RUNNER_TEMP/sr18-capture-node-headless.log" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/sr18-capture-node-headless.log"
+          test "$status" -eq 3
+          test -s "$output/native-exported-app-result.json"
+          node -e 'const r=JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8"));if(r.status!=="EVIDENCE_INCOMPLETE"||r.stage!=="blocked"||!r.blocker?.includes("headless"))process.exit(1);' "$output/native-exported-app-result.json"
+          grep -F "SR18_CAPTURE_NODE_STARTED" "$RUNNER_TEMP/sr18-capture-node-headless.log"
+          grep -F "SR18_CAPTURE_NODE_BLOCKED" "$RUNNER_TEMP/sr18-capture-node-headless.log"
+
       - name: Exact original OBJ/MTL and CC0 native raw source checks before Windows sidecar packaging
         run: |
           set -euo pipefail

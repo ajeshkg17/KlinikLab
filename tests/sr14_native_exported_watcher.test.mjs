@@ -46,7 +46,15 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  assert.match(worker,/NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW/);
  const launch=read('visual-qa/sr1c-private-desktop.ps1');
  assert.match(launch,/function Start-KLPrivateDesktopExportedApp/);
- assert.match(launch,/--script res:\/\/exported-app-capture\.gd/);
+ assert.match(launch,/-- --kliniklab-exported-pc-qa/);
+ assert.doesNotMatch(launch,/--script res:\/\/exported-app-capture\.gd/);
+ const nodeCapture=read('native-godot/exported-app-capture-node.gd');
+ assert.match(nodeCapture,/extends Node/);
+ assert.match(nodeCapture,/native-exported-app-result\.json/);
+ assert.match(nodeCapture,/CAPTURE_NODE_STARTED/);
+ assert.match(nodeCapture,/kliniklab-exported-cc0-environment\.png/);
+ assert.match(nodeCapture,/kliniklab-exported-fdi36-practical\.png/);
+ assert.doesNotMatch(nodeCapture,/HTTPRequest|OS\.shell_open|API_KEY/);
  const capture=read('visual-qa/sr1x-capture-native-exported-app-pc.ps1');
  assert.match(capture,/process3DPositiveRtx5060DistinctPeriods/);
  assert.match(capture,/gpuAdapterLuidMatchedToNvidia/);

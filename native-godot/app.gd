@@ -122,6 +122,18 @@ func _ready() -> void:
 			add_child(reporter)
 			reporter.call_deferred("run",self,job_id)
 			break
+	# SR18: explicit CLI user flag + watcher-provided SHA/absolute output path.
+	# Trigger capture INSIDE the verified exported main scene, not --script.
+	# Normal learners never have this flag; no uploads or external services.
+	if OS.get_cmdline_user_args().has("--kliniklab-exported-pc-qa"):
+		var qa_script: GDScript = load("res://exported-app-capture-node.gd")
+		if qa_script == null:
+			push_error("SR18_CAPTURE_ENTRYPOINT_MISSING compiled native capture node")
+			get_tree().quit(7)
+			return
+		var qa_node: Node = qa_script.new()
+		add_child(qa_node)
+		qa_node.call_deferred("run",self)
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
 
 func _load_source() -> bool:

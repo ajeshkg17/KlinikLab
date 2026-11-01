@@ -192,7 +192,7 @@ function Start-KLPrivateDesktopExportedApp {
  # Fixed capture GDScript is inside SHA-pinned compiled application.
  $cmd='"'+$Executable+'" --windowed --resolution 1600x900'+
    ' --rendering-method forward_plus --rendering-driver vulkan --audio-driver Dummy'+
-   ' --script res://exported-app-capture.gd --verbose --log-file "'+$LogPath+'"'
+   ' --verbose --log-file "'+$LogPath+'" -- --kliniklab-exported-pc-qa'
  $buffer=New-Object System.Text.StringBuilder($cmd)
  $ok=[KlinikLab.PrivateDesktop]::CreateProcess($Executable,$buffer,
   [IntPtr]::Zero,[IntPtr]::Zero,$false,[uint32]0,[IntPtr]::Zero,
