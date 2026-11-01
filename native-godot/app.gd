@@ -25,6 +25,7 @@ var _progress: Dictionary = {}
 var _scene: Node3D
 var _shell: CanvasLayer
 var _view := "clinic"
+var _camera_mode := "overview"
 var _page: VBoxContainer
 var _progress_label: Label
 var _middle: Control
@@ -47,6 +48,7 @@ func _ready() -> void:
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
 	_build_app()
+	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
@@ -179,6 +181,10 @@ func _build_app() -> void:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
+	for mode in ["overview", "teeth"]:
+		var camera_button := _button(mode.capitalize() + " camera")
+		camera_button.pressed.connect(_set_camera_mode.bind(mode))
+		top.add_child(camera_button)
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
@@ -267,6 +273,24 @@ func _show_case_geometry() -> void:
 		var original: Node3D = _scene.get_node_or_null(node_name)
 		if original != null:
 			original.visible = show_original
+
+func _set_camera_mode(mode: String) -> void:
+	if _scene == null or not (mode in ["overview", "teeth"]):
+		return
+	_camera_mode = mode
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null:
+		push_warning("Godot original scene camera unavailable")
+		return
+	if mode == "overview":
+		camera.position = Vector3(0.0, 5.0, 28.0)
+		camera.fov = 60.0
+		camera.look_at(Vector3(0.0, 0.0, -2.5))
+	else:
+		camera.position = Vector3(0.0, 1.7, 13.2)
+		camera.fov = 47.0
+		camera.look_at(Vector3(0.0, 0.5, 0.0))
+	camera.current = true
 
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "learning", "progress", "coverage"]):
