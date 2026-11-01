@@ -899,6 +899,8 @@ func _show_practical() -> void:
 					_page.add_child(t)
 			"tool":
 				var menu := OptionButton.new()
+				# Do not let the longest bilingual instrument expand the entire notes pane.
+				menu.fit_to_longest_item = false
 				_style_action(menu)
 				menu.custom_minimum_size = Vector2(0,44)
 				menu.add_item("Select original instrument", 0)
