@@ -40,6 +40,8 @@ try{
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
  run(path.join(root,'native-godot/export-volume.mjs'),
   ['--source-dir='+src,'--output='+path.join(exported,'fdi16-volume-field.bin'),'--expected-sha='+sha]);
+ run(path.join(root,'native-godot/export-pathway.mjs'),
+  ['--source-dir='+src,'--output='+path.join(exported,'clinical-pathways.json'),'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'expected-sha.txt'),sha+'\n',{flag:'wx'});
  const hash=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-export-manifest.json'),'utf8'));
  const content=JSON.parse(fs.readFileSync(path.join(exported,'app-content.json'),'utf8'));
@@ -51,7 +53,7 @@ try{
   schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
   sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
   nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
-  sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,
+  sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,nativeSourceClinicalJourneySixCases:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:false,
   fullInteractiveAppMigrated:false,verifiedNativeGpu:false,
   buildStatus:'NATIVE_GODOT_APP_PROJECT_BUILT_NEEDS_NATIVE_RUNTIME_QA',

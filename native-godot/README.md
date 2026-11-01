@@ -58,3 +58,9 @@ Headless volume smoke: `godot --headless --path <built-project> --script res://v
 The six original source cases each provide the fictional patient's name, age and seven reply messages exported from `app.js`. A correct guided interview response reveals the corresponding source reply. This is NOT a free-form patient simulation or certified FSP assessment.
 
 The Progress panel now supports **Export local learning report (.txt)** to a user-selected local file. It includes exact source SHA, source case/station identifiers, studied status, formative answer counts, saved drafts and optional FDI16 voxel sample statistics (never mm³). The export never uploads data, but users should not enter real patient details. Reports do not constitute clinical documentation or official examination results.
+
+## SR5 — Native six-stage clinical pathway
+
+The native **Journey** tab uses the original six fictional cases in `clinical-pathway.js`, exported under an exact-source SHA contract. For each case, learners can ask scripted history questions, request original tests, choose a working diagnosis, compare two distinct treatment options, acknowledge discussion of consent, order the original procedure steps and review the source clinical-safety notes. Selections are saved per case locally and included in formative learning reports. Distractors are present and the system does not grade clinical competence or replace an examiner.
+
+This is a real, persistent native state machine with separate clinical pathway source provenance, not a 3D rendering label. It remains a scripted educational scenario, **not** a live patient simulator, validated diagnostic tool, calibrated operative trainer or authoritative medical guidance.

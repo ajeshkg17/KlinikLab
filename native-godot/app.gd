@@ -6,6 +6,7 @@ extends Node3D
 
 const CONTENT := "res://source/app-content.json"
 const CASES := "res://source/kliniklab-native-cases.json"
+const PATHWAYS := "res://source/clinical-pathways.json"
 const SOURCE_SHA := "res://source/expected-sha.txt"
 const PROGRESS := "user://kliniklab-native-progress-v2.json"
 const CASE_IDS := ["molar", "endo", "anterior", "crown", "surgery", "perio"]
@@ -18,6 +19,8 @@ const PAPER := Color("#eaf2f0")
 var _content: Dictionary = {}
 var _cases: Array = []
 var _stations: Array = []
+var _pathways: Dictionary = {}
+var _journey_stage := 0
 var _case_index := 0
 var _station_index := 0
 var _quiz_index := 0
@@ -129,11 +132,31 @@ func _load_source() -> bool:
 	if (_content.get("tools", []) as Array).size() < 15:
 		_boot_error = "Source instrument catalog missing"
 		return false
+	var pathways: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATHWAYS))
+	if not (pathways is Dictionary):
+		_boot_error = "Source clinical journey manifest missing"
+		return false
+	var manifest: Dictionary = pathways
+	if str(manifest.get("sourceGitSHA","")) != sha or str(manifest.get("kind","")) != "SYNTHETIC_SOURCE_CLINICAL_PATHWAYS_NOT_CERTIFIED" or manifest.get("clinicalAssessmentValidated",true) != false:
+		_boot_error = "Unapproved clinical pathway provenance"
+		return false
+	_pathways = manifest.get("cases",{})
+	if _pathways.size() != 6:
+		_boot_error = "Clinical pathway case count mismatch"
+		return false
+	for id in CASE_IDS:
+		if not _pathways.has(id):
+			_boot_error = "Missing clinical source pathway " + id
+			return false
+		var journey: Dictionary = _pathways[id]
+		if (journey.get("history",[]) as Array).size() < 4 or (journey.get("tests",[]) as Array).size() < 4 or (journey.get("procedure",[]) as Array).size() < 3:
+			_boot_error = "Clinical pathway stages incomplete: " + id
+			return false
 	return true
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [], "selectedCase": 0, "selectedStation": 0}
+		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [], "journey": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -145,6 +168,10 @@ func _load_progress() -> void:
 		if not (raw.get(key, null) is Dictionary):
 			return
 	_progress = raw
+	if not (_progress.get("journey",{}) is Dictionary):
+		_progress["journey"] = {}
+	if not _progress.has("journey"):
+		_progress["journey"] = {}
 	_case_index = clampi(int(_progress.get("selectedCase", 0)), 0, 5)
 	_station_index = clampi(int(_progress.get("selectedStation", 0)), 0, 6)
 
@@ -196,7 +223,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -273,6 +300,7 @@ func _select_case(index: int) -> void:
 		return
 	_case_index = index
 	_quiz_index = 0
+	_journey_stage = 0
 	_show_case_geometry()
 	_save_progress()
 	_refresh()
@@ -315,7 +343,7 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
@@ -333,6 +361,8 @@ func _refresh() -> void:
 	_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
 	if _view == "progress":
 		_show_progress()
+	elif _view == "journey":
+		_show_journey()
 	elif _view == "coverage":
 		_show_coverage()
 	else:
@@ -567,6 +597,158 @@ func _mark_studied() -> void:
 	_save_progress()
 	_refresh()
 
+
+func _journey_state() -> Dictionary:
+	var saved: Dictionary = _progress["journey"]
+	var id: String = CASE_IDS[_case_index]
+	if not saved.has(id):
+		saved[id] = {
+			"history": [], "tests": [], "diagnosis": -1,
+			"primary": -1, "alternative": -1, "consent": false,
+			"ordered": 0, "errors": 0
+		}
+	return saved[id]
+
+func _journey_page_change(delta: int) -> void:
+	_journey_stage = clampi(_journey_stage + delta, 0, 5)
+	_refresh()
+
+func _journey_ask(kind: String, index: int) -> void:
+	if kind not in ["history", "tests"]:
+		return
+	var rows: Array = _pathways[CASE_IDS[_case_index]][kind]
+	if index < 0 or index >= rows.size():
+		return
+	var row: Array = rows[index]
+	var state := _journey_state()
+	if str(row[3]) == "bad":
+		state["errors"] = int(state["errors"]) + 1
+	else:
+		var selected: Array = state[kind]
+		if not selected.has(str(row[0])):
+			selected.append(str(row[0]))
+	_save_progress()
+	_refresh()
+
+func _journey_diagnosis(index: int) -> void:
+	var d: Dictionary = _pathways[CASE_IDS[_case_index]]
+	if index < 0 or index >= (d["differential"] as Array).size():
+		return
+	_journey_state()["diagnosis"] = index
+	_save_progress()
+	_refresh()
+
+func _journey_plan(kind: String, index: int) -> void:
+	if kind not in ["primary", "alternative"]:
+		return
+	var d: Dictionary = _pathways[CASE_IDS[_case_index]]
+	if index < 0 or index >= (d["options"] as Array).size():
+		return
+	var state := _journey_state()
+	var other := "alternative" if kind == "primary" else "primary"
+	if int(state[other]) == index:
+		push_warning("Primary and alternative treatment choices must be distinct")
+		return
+	state[kind] = index
+	_save_progress()
+	_refresh()
+
+func _journey_set_consent(value: bool) -> void:
+	_journey_state()["consent"] = value
+	_save_progress()
+
+func _journey_procedure(index: int) -> void:
+	var d: Dictionary = _pathways[CASE_IDS[_case_index]]
+	if index < 0 or index >= (d["procedure"] as Array).size():
+		return
+	var state := _journey_state()
+	if index == int(state["ordered"]):
+		state["ordered"] = index + 1
+	else:
+		state["errors"] = int(state["errors"]) + 1
+	_save_progress()
+	_refresh()
+
+func _show_journey() -> void:
+	var d: Dictionary = _pathways[CASE_IDS[_case_index]]
+	var state := _journey_state()
+	var titles := ["Anamnese", "Untersuchung", "Arbeitsdiagnose", "Therapieplanung", "Ablauf & Sicherheit", "Auswertung"]
+	_page.add_child(_heading("Source-derived clinical pathway · %s" % titles[_journey_stage], 18))
+	_page.add_child(_heading("Fictitious patient: " + str(d["chief"]), 14))
+	_page.add_child(_heading("These are original educational scenarios. No patient data, clinical calibration, treatment order certification or official exam grading.", 12))
+	if _journey_stage <= 1:
+		var kind := "history" if _journey_stage == 0 else "tests"
+		var rows: Array = d[kind]
+		var selected: Array = state[kind]
+		_page.add_child(_heading("Select a question or requested test to reveal its original scripted response.", 14))
+		for i in range(rows.size()):
+			var row: Array = rows[i]
+			var chosen: bool = selected.has(str(row[0]))
+			var button := _button(("✓ " if chosen else "") + str(row[1]))
+			button.pressed.connect(_journey_ask.bind(kind, i))
+			_page.add_child(button)
+			if chosen:
+				_page.add_child(_heading("Patient / source finding: " + str(row[2]), 13))
+			elif str(row[3]) == "bad":
+				_page.add_child(_heading("This is a distractor; not a diagnostic substitute.", 12))
+	elif _journey_stage == 2:
+		_page.add_child(_heading("Choose a working diagnosis; the source still requires integrated history, tests, and uncertainty.", 14))
+		var diagnoses: Array = d["differential"]
+		for i in range(diagnoses.size()):
+			var button := _button(("✓ " if int(state["diagnosis"]) == i else "") + str(diagnoses[i]))
+			button.pressed.connect(_journey_diagnosis.bind(i))
+			_page.add_child(button)
+		if int(state["diagnosis"]) >= 0:
+			_page.add_child(_heading(("Source choice matched. " if int(state["diagnosis"]) == int(d["correct"]) else "Review the diagnostic reasoning. ") + str(d["why"]), 13))
+	elif _journey_stage == 3:
+		_page.add_child(_heading("Select TWO distinct treatment choices. Some alternatives are intentionally invalid distractors.", 14))
+		var options: Array = d["options"]
+		for kind in ["primary", "alternative"]:
+			_page.add_child(_heading(kind.capitalize() + " treatment choice:", 15))
+			for i in range(options.size()):
+				var button := _button(("✓ " if int(state[kind]) == i else "") + str(options[i]))
+				button.pressed.connect(_journey_plan.bind(kind, i))
+				_page.add_child(button)
+		var consent := CheckBox.new()
+		consent.text = "I would explain risks, alternatives and request informed consent (exercise acknowledgment only)"
+		consent.button_pressed = bool(state["consent"])
+		consent.toggled.connect(_journey_set_consent)
+		_page.add_child(consent)
+	elif _journey_stage == 4:
+		_page.add_child(_heading("Select the educational procedure steps in their original source order.", 14))
+		var steps: Array = d["procedure"]
+		for i in range(steps.size()):
+			var button := _button(("✓ " if i < int(state["ordered"]) else "") + "%d. %s" % [i+1,str(steps[i])])
+			button.pressed.connect(_journey_procedure.bind(i))
+			_page.add_child(button)
+		_page.add_child(_heading("Ordered %d/%d; practice sequence errors %d" %
+			[int(state["ordered"]),steps.size(),int(state["errors"])], 13))
+		_page.add_child(_heading("Original clinical safety note: " + str(d["safety"]), 14))
+	else:
+		_page.add_child(_heading("Source-guided exercise summary, NOT certified clinical competence.", 15))
+		_page.add_child(_heading("History items %d/%d | tests %d/%d" %
+			[(state["history"] as Array).size(),(d["history"] as Array).size(),
+			(state["tests"] as Array).size(),(d["tests"] as Array).size()], 13))
+		_page.add_child(_heading("Working diagnosis index: %d; source option %d" %
+			[int(state["diagnosis"]),int(d["correct"])], 13))
+		_page.add_child(_heading("Treatment choices: %d / %d | source examples %d / %d" %
+			[int(state["primary"]),int(state["alternative"]),int(d["primary"]),int(d["alternative"])], 13))
+		_page.add_child(_heading("Consent discussed: %s | ordered steps %d | mistakes %d" %
+			[str(bool(state["consent"])),int(state["ordered"]),int(state["errors"])], 13))
+		_page.add_child(_heading("Reasoning reference: " + str(d["why"]), 13))
+		_page.add_child(_heading("Safety: " + str(d["safety"]), 13))
+	_page.add_child(_heading("Clinical journey stage %d / 6" % (_journey_stage + 1), 13))
+	var nav := HBoxContainer.new()
+	var back := _button("Previous stage")
+	back.disabled = _journey_stage == 0
+	back.pressed.connect(_journey_page_change.bind(-1))
+	nav.add_child(back)
+	var forward := _button("Next stage")
+	forward.disabled = _journey_stage == 5
+	forward.pressed.connect(_journey_page_change.bind(1))
+	nav.add_child(forward)
+	_page.add_child(nav)
+
 func _show_progress() -> void:
 	_page.add_child(_heading("Personal local progress (not an official exam score)", 17))
 	for c in _cases:
@@ -578,6 +760,8 @@ func _show_progress() -> void:
 	var export_button := _button("Export local learning report (.txt)")
 	export_button.pressed.connect(_choose_report_path)
 	_page.add_child(export_button)
+	var clinical_states: Dictionary = _progress.get("journey",{})
+	_page.add_child(_heading("Case-specific clinical journey sessions: %d/6" % clinical_states.size(), 14))
 	var reset := _button("Reset saved educational progress")
 	reset.pressed.connect(_reset_progress)
 	_page.add_child(reset)
@@ -613,6 +797,14 @@ func _generate_report() -> String:
 			if notes.has(key):
 				lines.append("  Saved draft (no automated correctness assessment):")
 				lines.append(str(notes[key]).substr(0,10000))
+		var all_journeys: Dictionary = _progress.get("journey",{})
+		if all_journeys.has(str(c["id"])):
+			var j: Dictionary = all_journeys[str(c["id"])]
+			lines.append("  Native clinical journey: history=%s; tests=%s; workingDiagnosisIndex=%s" %
+				[str(j.get("history",[])),str(j.get("tests",[])),str(j.get("diagnosis",-1))])
+			lines.append("  Treatment indices A/B=%s/%s; consentExercise=%s; ordered=%s; errors=%s" %
+				[str(j.get("primary",-1)),str(j.get("alternative",-1)),str(j.get("consent",false)),
+				str(j.get("ordered",0)),str(j.get("errors",0))])
 		lines.append("")
 	if _volume != null:
 		var v: Dictionary = _volume.call("summary")
@@ -649,6 +841,7 @@ func _reset_progress() -> void:
 	_progress["notes"] = {}
 	_progress["studied"] = {}
 	_progress["volumeFDI16"] = []
+	_progress["journey"] = {}
 	if _volume != null:
 		_volume.call("reset")
 	_save_progress()
@@ -663,6 +856,8 @@ func _show_coverage() -> void:
 			status = "FDI16_LIVE_SAMPLED_VOLUME_ONLY__OTHER_CASES_NOT_PORTED"
 		if str(id) == "reportingAndExport":
 			status = "LOCAL_TEXT_LEARNING_REPORT_ONLY__NO_VALIDATED_GRADING"
+		if str(id) == "clinicalCases":
+			status = "SIX_CASES_AND_NATIVE_SIX_STAGE_SOURCE_CLINICAL_JOURNEY"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
 	_page.add_child(_heading("FDI16 live synthetic cutting, seven original guided interview replies per case and local learning-report export are available. Still missing: free-form patient dialogue, full anatomy, native scan/radiography, XR/Quest, AI and validated assessment. Browser app remains reference.", 15))
