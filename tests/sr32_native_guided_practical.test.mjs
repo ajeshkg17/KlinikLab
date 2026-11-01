@@ -48,3 +48,18 @@ test('SR32 ships source-exact Godot regression and no owner-PC worker/queue muta
   assert.ok(smoke.includes(marker),marker);
  assert.doesNotMatch(smoke,/(?:OS\.execute|HTTPRequest|KLINIKLAB_PC_CAPTURE|exported-app-capture|godot-worker)/);
 });
+
+test('SR33 review-first action skips correct source tasks without scoring or cutting',()=>{
+ for(const marker of ['func _procedure_jump_to_review() -> bool:', 'KEY_R',
+   'review_button.pressed.connect(_procedure_jump_to_review)',
+   'review_button.disabled = needs_review == 0',
+   'var candidate: int = (_procedure_step_index + offset) % steps.size()',
+   'if not bool(record.get("correct", false)):'])
+  assert.ok(app.includes(marker),marker);
+ const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _handle_procedure_input('));
+ assert.match(navigation,/_direct_bur_mode = false/);
+ assert.doesNotMatch(navigation,/(?:_record_practical|_save_progress|cut_to|_direct_cut_world_ray|_mark_studied)\(/);
+ const smoke=read('native-godot/guided-practical-smoke.gd');
+ for(const marker of ['KEY_R','sole review task','All-correct source tasks','wrap-around','removedSamplePoints'])
+  assert.ok(smoke.toLowerCase().includes(marker.toLowerCase()),marker);
+});
