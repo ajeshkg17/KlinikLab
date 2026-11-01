@@ -262,7 +262,7 @@ func _select_station(index: int) -> void:
 func _show_case_geometry() -> void:
 	if _scene == null:
 		return
-	var show_original := CASE_IDS[_case_index] == "molar"
+	var show_original: bool = CASE_IDS[_case_index] == "molar"
 	for node_name in ["KL_FDI16_BEFORE", "KL_FDI16_AFTER"]:
 		var original: Node3D = _scene.get_node_or_null(node_name)
 		if original != null:
@@ -303,7 +303,7 @@ func _refresh() -> void:
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
 
 func _show_station() -> void:
-	var station := STATION_IDS[_station_index]
+	var station: String = str(STATION_IDS[_station_index])
 	if station in ["interview", "handover", "viva", "clinic"]:
 		_show_quiz(station)
 	elif station == "practical":
