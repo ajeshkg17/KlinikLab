@@ -36,7 +36,8 @@ if(!doc||!bin||!doc.extensionsRequired?.includes('KHR_draco_mesh_compression'))
  throw Error('Expected source GLB with required Draco mesh compression');
 const primitive=doc.meshes?.[0]?.primitives?.[0];
 const draco=primitive?.extensions?.KHR_draco_mesh_compression;
-if(!draco||Object.keys(primitive.attributes||{}).sort().join(',')!=='COLOR_0,NORMAL,POSITION,TEXCOORD_0')
+const expectedLayout=expected==='0948d093089c5921281185a103b323c513365502'?'COLOR_0,NORMAL,POSITION,TANGENT,TEXCOORD_0':'COLOR_0,NORMAL,POSITION,TEXCOORD_0';
+if(!draco||Object.keys(primitive.attributes||{}).sort().join(',')!==expectedLayout)
  throw Error('Unexpected source FDI36 primitive layout');
 const compressedView=doc.bufferViews?.[draco.bufferView];
 if(!compressedView||compressedView.buffer!==0)throw Error('Draco buffer view missing');
@@ -77,7 +78,7 @@ try{
  };
  const typeNames={1:'SCALAR',2:'VEC2',3:'VEC3',4:'VEC4'};
  const enumNames={POSITION:moduleApi.POSITION,NORMAL:moduleApi.NORMAL,
-  TEXCOORD_0:moduleApi.TEX_COORD,COLOR_0:moduleApi.COLOR};
+  TEXCOORD_0:moduleApi.TEX_COORD,COLOR_0:moduleApi.COLOR,TANGENT:moduleApi.GENERIC};
  const attrs={};
  for(const semantic of Object.keys(primitive.attributes)){
   stage='attribute '+semantic;
@@ -85,7 +86,7 @@ try{
   const attribute=decoder.GetAttribute(mesh,attrId);
   if(!attribute)throw Error('Missing decoded source attribute '+semantic);
   const components=attribute.num_components();
-  if(!typeNames[components]||enumNames[semantic]===undefined)throw Error('Unsupported FDI36 attribute '+semantic);
+  if(!typeNames[components]||!Object.hasOwn(enumNames,semantic))throw Error('Unsupported FDI36 attribute '+semantic);
   const values=new moduleApi.DracoFloat32Array();
   stage='GetAttributeFloatForAllPoints '+semantic;
   if(!decoder.GetAttributeFloatForAllPoints(mesh,attribute,values))
