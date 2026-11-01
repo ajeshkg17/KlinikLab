@@ -74,6 +74,36 @@ func _run() -> void:
 		if feedback == null or not feedback.text.contains("Correct response recorded"):
 			_fail("Persisted answer not restored in guided UI for "+FDIS[i])
 			return
+		# SR33: next-review skips correct source tasks, includes wrong answers,
+		# wraps, and never edits volume samples or FSP/KP draft content.
+		var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
+		for j in range(1,original_steps.size()):
+			answers[IDS[i]+":practical:"+str(j)] = {"selected":"test","correct":true,"sourceQuestion":j}
+		answers[IDS[i]+":practical:3"]["correct"] = false
+		if int(app.get("_procedure_step_index")) != 0:
+			_fail("Review setup lost first source task")
+			return
+		_send_key(app,KEY_R)
+		if int(app.get("_procedure_step_index")) != 3:
+			_fail("R did not skip correct answers to next incorrect source task for "+FDIS[i])
+			return
+		if bool(app.call("_procedure_jump_to_review")):
+			_fail("Sole review task must not falsely move or record an answer")
+			return
+		answers[IDS[i]+":practical:3"]["correct"] = true
+		if bool(app.call("_procedure_jump_to_review")):
+			_fail("All-correct source tasks must have no pending review")
+			return
+		answers[IDS[i]+":practical:1"]["correct"] = false
+		_send_key(app,KEY_R)
+		if int(app.get("_procedure_step_index")) != 1:
+			_fail("Review action failed wrap-around for "+FDIS[i])
+			return
+		for j in range(1,original_steps.size()):
+			answers.erase(IDS[i]+":practical:"+str(j))
+		if bool(app.get("_direct_bur_mode")):
+			_fail("Review navigation enabled bur")
+			return
 		for j in range(original_steps.size()+3):
 			app.call("_procedure_move_step",1)
 		if int(app.get("_procedure_step_index"))!=original_steps.size()-1 or bool(app.call("_procedure_move_step",1)):
