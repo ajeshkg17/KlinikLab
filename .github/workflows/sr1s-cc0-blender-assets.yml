@@ -24,7 +24,8 @@ jobs:
       - name: Install actual Blender from Ubuntu packages (NO dummy renderer)
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq blender
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq blender python3-numpy
+          blender --background --python-exit-code 7 --python-expr 'import numpy; print("BLENDER_GLTF_NUMPY_READY", numpy.__version__)'
           blender --version | head -n 2
       - name: Download ORIGINAL pinned CC0 GLB files and hash original bytes
         env:
@@ -41,7 +42,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RENDER_ROOT"
           for id in instrument-tray whole-clinic-starter; do
-            blender --background --factory-startup --threads 2 \
+            blender --background --factory-startup --threads 2 --python-exit-code 7 \
               --python visual-qa/asset-research/render_cc0_batch.py -- \
               --input "$SOURCE_ROOT/$id.glb" --output "$RENDER_ROOT/$id" "$id"
           done
