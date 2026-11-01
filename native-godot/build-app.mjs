@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+/**
+ * Builds a completely separate runnable Godot project from original exact-Git
+ * KlinikLab source and new reviewed native code. No PC render/evidence
+ * job is reused and no published feedback is changed.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+
+const options=Object.fromEntries(process.argv.slice(2).filter(s=>s.startsWith('--')&&s.includes('=')).map(s=>{
+ const i=s.indexOf('=');return [s.slice(2,i),s.slice(i+1)];
+}));
+const sourceDir=options['source-dir'],output=options.output,sha=options['expected-sha'];
+if(!sourceDir||!output||!/^[a-f0-9]{40}$/.test(sha||''))
+ throw Error('Usage: --source-dir=PATH --output=UNUSED_FOLDER --expected-sha=40hex');
+const scriptDir=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(scriptDir,'..');
+const src=fs.realpathSync(sourceDir);
+const actual=execFileSync('git',['-C',src,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
+if(actual!==sha)throw Error('Native app requires exact original source commit; refusing source drift');
+const dest=path.resolve(output);
+if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot project');
+fs.mkdirSync(path.join(dest,'source'),{recursive:true});
+const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
+try{
+ for(const name of ['app.gd','app.tscn','project.godot'])copy('native-godot/'+name,name);
+ for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
+ for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
+ const exportSource=path.join(root,'visual-qa/sr1-local-kliniklab-export.mjs');
+ const exportCases=path.join(root,'visual-qa/sr1d-export-native-cases.mjs');
+ const exportContent=path.join(root,'native-godot/export-content.mjs');
+ function run(script,target){
+  execFileSync(process.execPath,[script,'--source-dir='+src,'--output='+target,'--expected-sha='+sha],
+   {stdio:'inherit',timeout:90000});
+ }
+ const exported=path.join(dest,'source');
+ run(exportSource,exported);
+ run(exportCases,path.join(exported,'kliniklab-native-cases.json'));
+ run(exportContent,path.join(exported,'app-content.json'));
+ fs.writeFileSync(path.join(exported,'expected-sha.txt'),sha+'\n',{flag:'wx'});
+ const hash=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-export-manifest.json'),'utf8'));
+ const content=JSON.parse(fs.readFileSync(path.join(exported,'app-content.json'),'utf8'));
+ const cases=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-native-cases.json'),'utf8'));
+ if(hash.sourceGitSHA!==sha||hash.sceneStates.before.triangles!==14856||
+   hash.sceneStates.after.triangles!==14936||content.sourceAppSHA256!==cases.sourceFileSHA256||
+   content.cases.length!==6||content.stations.length!==7)throw Error('Native export failed independent app/source parity');
+ const record={
+  schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
+  sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
+  nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
+  fullInteractiveAppMigrated:false,verifiedNativeGpu:false,
+  buildStatus:'NATIVE_GODOT_APP_PROJECT_BUILT_NEEDS_NATIVE_RUNTIME_QA',
+  limitation:'Full app browser workflows are not yet all natively implemented. No case-specific geometry except original FDI16.'
+ };
+ fs.writeFileSync(path.join(dest,'native-build-manifest.json'),JSON.stringify(record,null,2)+'\n',{flag:'wx'});
+ console.log('KLINIKLAB_NATIVE_APP_PROJECT_CREATED: '+dest);
+}catch(err){
+ console.error('Build attempt incomplete; preserve output for forensics, use NEW unique path. '+String(err.message));
+ process.exitCode=1;
+}
