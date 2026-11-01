@@ -22,6 +22,12 @@ var _content: Dictionary = {}
 var _cases: Array = []
 var _stations: Array = []
 var _pathways: Dictionary = {}
+var _language: RefCounted
+var _language_case := "endo"
+var _language_phase := "anamnese"
+var _language_draft: TextEdit
+var _language_draft_key := ""
+var _language_model_revealed := false
 var _journey_stage := 0
 var _case_index := 0
 var _station_index := 0
@@ -160,12 +166,20 @@ func _load_source() -> bool:
 		if (journey.get("history",[]) as Array).size() < 4 or (journey.get("tests",[]) as Array).size() < 4 or (journey.get("procedure",[]) as Array).size() < 3:
 			_boot_error = "Clinical pathway stages incomplete: " + id
 			return false
+	var source_language: GDScript = load("res://fsp-kp-rubric.gd")
+	if source_language == null:
+		_boot_error = "Native FSP/KP source training module unavailable"
+		return false
+	_language = source_language.new()
+	if not bool(_language.call("configure",sha)):
+		_boot_error = "Original FSP/KP training source rejected: " + str(_language.call("error"))
+		return false
 	return true
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
 		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [],
-		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "selectedCase": 0, "selectedStation": 0}
+		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -185,6 +199,8 @@ func _load_progress() -> void:
 		_progress["volumeByCase"] = {}
 	if not (_progress.get("radiologyByCase", {}) is Dictionary):
 		_progress["radiologyByCase"] = {}
+	if not (_progress.get("fspKpByTask", {}) is Dictionary):
+		_progress["fspKpByTask"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
 	var stored_volumes: Dictionary = _progress["volumeByCase"]
 	if not stored_volumes.has("molar") and _progress.get("volumeFDI16", []) is Array:
@@ -240,7 +256,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "journey", "anatomy", "radiology", "scans", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -302,11 +318,14 @@ func _show_blocked(reason: String) -> void:
 	_shell.add_child(label)
 
 func _clear_page() -> void:
+	_language_save_draft()
 	_practical_feedback.clear()
 	for c in _page.get_children():
 		_page.remove_child(c)
 		c.queue_free()
 	_draft = null
+	_language_draft = null
+	_language_draft_key = ""
 	_answer_label = null
 
 func _key() -> String:
@@ -392,7 +411,7 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "journey", "anatomy", "radiology", "scans", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
@@ -414,10 +433,15 @@ func _refresh() -> void:
 	_clear_page()
 	var c: Dictionary = _cases[_case_index]
 	var s: Dictionary = _stations[_station_index]
-	_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
-	_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
+	if _view == "language":
+		_page.add_child(_heading("FSP/KP · Original German language studio",21))
+	else:
+		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
+		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
 	if _view == "progress":
 		_show_progress()
+	elif _view == "language":
+		_show_language_studio()
 	elif _view == "journey":
 		_show_journey()
 	elif _view == "anatomy":
@@ -502,6 +526,133 @@ func _next_question() -> void:
 	var questions: Array = _content["quiz"][STATION_IDS[_station_index]]
 	_quiz_index = (_quiz_index + 1) % questions.size()
 	_refresh()
+
+
+func _language_task_key() -> String:
+	return _language_case + "|" + _language_phase
+
+func _language_save_draft() -> void:
+	if _language_draft == null or _language_draft_key.is_empty():
+		return
+	var stored: Dictionary = _progress.get("fspKpByTask", {})
+	var record: Dictionary = stored.get(_language_draft_key,{})
+	var value := _language_draft.text.substr(0,6000)
+	if str(record.get("text","")) != value:
+		record["text"] = value
+		# A changed answer invalidates earlier lexical feedback.
+		record.erase("result")
+		stored[_language_draft_key] = record
+		_progress["fspKpByTask"] = stored
+		_save_progress()
+
+func _language_switch_case(id: String) -> void:
+	if _language == null or not (_language.call("case_ids") as Array).has(id):
+		return
+	_language_save_draft()
+	_language_case = id
+	_language_model_revealed = false
+	_refresh()
+
+func _language_switch_phase(id: String) -> void:
+	if _language == null or not (_language.call("phase_ids") as Array).has(id):
+		return
+	_language_save_draft()
+	_language_phase = id
+	_language_model_revealed = false
+	_refresh()
+
+func _language_submit() -> void:
+	if _language == null or _language_draft == null:
+		return
+	var text_answer := _language_draft.text.substr(0,6000)
+	var result: Dictionary = _language.call("score",_language_case,_language_phase,text_answer)
+	if bool(result.get("invalid",true)):
+		push_warning("German formative rubric could not evaluate source question")
+		return
+	var record := {"text":text_answer,"result":result}
+	var stored: Dictionary = _progress.get("fspKpByTask",{})
+	stored[_language_task_key()] = record
+	_progress["fspKpByTask"] = stored
+	_save_progress()
+	_refresh()
+
+func _language_reveal_model() -> void:
+	_language_save_draft()
+	_language_model_revealed = not _language_model_revealed
+	_refresh()
+
+func _language_reset_exercise() -> void:
+	var stored: Dictionary = _progress.get("fspKpByTask",{})
+	stored.erase(_language_task_key())
+	_progress["fspKpByTask"] = stored
+	_language_draft = null
+	_save_progress()
+	_refresh()
+
+func _show_language_studio() -> void:
+	if _language == null:
+		_page.add_child(_heading("Original FSP/KP source not available", 14))
+		return
+	_page.add_child(_heading("Four original fictional cases × four language exercises. Separate from the six procedural dental cases. No patient records, language qualification or clinical certification.",13))
+	_page.add_child(_heading("The browser source presents patient conversation → written dental letter → colleague handover; consent is an additional patient-conversation exercise, not an official fourth exam part. Regional requirements may vary.",12))
+	_page.add_child(_heading("Original German training cases",15))
+	for id in _language.call("case_ids"):
+		var item: Dictionary = _language.call("case_data",str(id))
+		var button := _button(("✓ " if str(id)==_language_case else "") + str(item["title"]))
+		button.pressed.connect(_language_switch_case.bind(str(id)))
+		_page.add_child(button)
+	var current: Dictionary = _language.call("case_data",_language_case)
+	_page.add_child(_heading("Fictional case notes: " + str(current["facts"]),13))
+	_page.add_child(_heading("Original four-phase exercise",15))
+	var phase_ids: Array = _language.call("phase_ids")
+	for i in range(phase_ids.size()):
+		var id: String = phase_ids[i]
+		var caption: String = ["Anamnese","Aufklärung","Befund / Arztbrief","Arzt-Arzt"][i]
+		var button := _button(("✓ " if id == _language_phase else "") + caption)
+		button.pressed.connect(_language_switch_phase.bind(id))
+		_page.add_child(button)
+	var task: Dictionary = _language.call("phase_data",_language_case,_language_phase)
+	if task.is_empty():
+		_page.add_child(_heading("Original language prompt missing",14))
+		return
+	_page.add_child(_heading("Übungsaufgabe: " + str(task["prompt"]),15))
+	_page.add_child(_heading("B2 sprachliche Stütze: " + str(task["b2"]),13))
+	_page.add_child(_heading("C1 sprachliche Stütze: " + str(task["c1"]),13))
+	var stored: Dictionary = _progress.get("fspKpByTask",{})
+	var state: Dictionary = stored.get(_language_task_key(),{})
+	_language_draft = TextEdit.new()
+	_language_draft.custom_minimum_size = Vector2(480,245)
+	_language_draft.text = str(state.get("text","")).substr(0,6000)
+	_language_draft_key = _language_task_key()
+	_language_draft.focus_exited.connect(_language_save_draft)
+	_page.add_child(_language_draft)
+	var check := _button("Speichern und formativ prüfen (Stichwortabdeckung)")
+	check.pressed.connect(_language_submit)
+	_page.add_child(check)
+	if state.get("result",{}) is Dictionary and not (state.get("result",{}) as Dictionary).is_empty():
+		var result: Dictionary = state["result"]
+		if (result.get("flags",[]) as Array).is_empty():
+			_page.add_child(_heading("Lexikalische Stichwortabdeckung: %d / 10 (keine Prüfungsnote)" % int(result.get("lexicalScore",0)),15))
+		else:
+			_page.add_child(_heading("Bewertung wegen Sicherheitsformulierung ausgesetzt; automatische Stichwortabdeckung: %d/10 (keine Prüfungsnote)" % int(result.get("lexicalScore",0)),15))
+			for warning in result["flags"]:
+				_page.add_child(_heading("Fachliche Überprüfung erforderlich: " + str(warning),13))
+		for row in result.get("criteria",[]):
+			var check_record: Dictionary = row
+			_page.add_child(_heading(("✓ " if bool(check_record.get("matched",false)) else "○ ") +
+				str(check_record.get("label",""))+" — "+str(check_record.get("tip","")),12))
+		_page.add_child(_heading("Keyword matching cannot establish grammar, fluency, clinical appropriateness or proper handling of negation.",12))
+	_page.add_child(_heading("Original Deutsch–Englisch Glossar",14))
+	for pair in current["glossary"]:
+		_page.add_child(_heading(str(pair[0])+" — "+str(pair[1]),12))
+	var reveal := _button("Musterantwort anzeigen / verbergen")
+	reveal.pressed.connect(_language_reveal_model)
+	_page.add_child(reveal)
+	if _language_model_revealed:
+		_page.add_child(_heading("Originale Musterantwort (Lehrbeispiel): " + str(task["model"]),13))
+	var reset := _button("Diese FSP/KP Übungsantwort löschen")
+	reset.pressed.connect(_language_reset_exercise)
+	_page.add_child(reset)
 
 func _show_writing(station: String) -> void:
 	var c: Dictionary = _cases[_case_index]
@@ -1067,6 +1218,19 @@ func _generate_report() -> String:
 			lines.append("  Synthetic source radiography: choice=%s; marks=%d; reviewed=%s (not diagnostic)" %
 				[str(rad.get("choice","")),(rad.get("marks",[]) as Array).size(),str(bool(rad.get("reviewed",false)))])
 		lines.append("")
+	var german: Dictionary = _progress.get("fspKpByTask",{})
+	lines.append("ORIGINAL FOUR-CASE FSP/KP FORMATIVE GERMAN TRAINING (not an examination result)")
+	for id in ["perio","restoration","endo","surgery"]:
+		for phase in ["anamnese","aufklaerung","brief","kollegen"]:
+			var key: String = str(id)+"|"+str(phase)
+			if german.has(key):
+				var entry: Dictionary = german[key]
+				var result: Dictionary = entry.get("result",{})
+				lines.append("  %s / %s: source lexical coverage=%s/10; safety caution count=%d; NOT diagnostic or certified" %
+					[id,phase,str(result.get("lexicalScore","not checked")),(result.get("flags",[]) as Array).size()])
+				if entry.has("text"):
+					lines.append(str(entry["text"]).substr(0,6000))
+	lines.append("")
 	var volume_logs: Dictionary = _progress.get("volumeByCase", {})
 	for id in CASE_IDS:
 		if volume_logs.get(id, []) is Array:
@@ -1109,6 +1273,8 @@ func _reset_progress() -> void:
 	_progress["volumeByCase"] = {}
 	_progress["journey"] = {}
 	_progress["radiologyByCase"] = {}
+	_progress["fspKpByTask"] = {}
+	_language_draft = null # Do not re-save an old draft during page teardown
 	for id in _volumes:
 		(_volumes[id] as Node3D).call("reset")
 	_save_progress()
@@ -1129,6 +1295,8 @@ func _show_coverage() -> void:
 			status = "SOURCE_DERIVED_32_PERMANENT_TEETH_PREVIEW_ONLY__NOT_CLINICALLY_VALIDATED"
 		if str(id) == "scanImportAndRadiography" and _scan != null:
 			status = "LOCAL_STL_OBJ_AND_SIX_SYNTHETIC_SOURCE_XRAYS__NOT_DIAGNOSTIC"
+		if str(id) == "fspKpFormativeRubric" and _language != null:
+			status = "4_SOURCE_CASES_16_GERMAN_TASKS_5_SOURCE_KEYWORDS_EACH__NOT_EXAM_GRADE"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("Now available: all six case-specific synthetic editable volume models; 32-tooth preview; guided interviews; 6-stage clinical journey; offline report and local STL/OBJ inspection. Still missing: physiological instrument forces, validated assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))
+	_page.add_child(_heading("Now available: all six case-specific synthetic editable volume models; 32-tooth preview; guided interviews; 6-stage clinical journey; offline report and local STL/OBJ inspection. Still missing: physiological instrument forces, validated German oral/clinical assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))

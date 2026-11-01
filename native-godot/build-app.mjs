@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
@@ -46,6 +46,8 @@ try{
   ['--source-dir='+src,'--output='+path.join(exported,'atlas'),'--expected-sha='+sha]);
  run(path.join(root,'native-godot/export-radiography.mjs'),
   ['--source-dir='+src,'--output='+path.join(exported,'radiography'),'--expected-sha='+sha]);
+ run(path.join(root,'native-godot/export-fsp-kp.mjs'),
+  ['--source-dir='+src,'--output='+path.join(exported,'fsp-kp.json'),'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'expected-sha.txt'),sha+'\n',{flag:'wx'});
  const hash=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-export-manifest.json'),'utf8'));
  const content=JSON.parse(fs.readFileSync(path.join(exported,'app-content.json'),'utf8'));
@@ -79,12 +81,18 @@ try{
    !fs.existsSync(png)||fs.statSync(png).size<1000)
    throw Error('Six-case source synthetic radiography missing FDI '+fdi);
  }
+ const sourceFsp=JSON.parse(fs.readFileSync(path.join(exported,'fsp-kp.json'),'utf8'));
+ if(sourceFsp.sourceGitSHA!==sha||Object.keys(sourceFsp.cases||{}).length!==4||
+    sourceFsp.phases.length!==4||sourceFsp.parityProbes.length!==68||
+    sourceFsp.clinicalReviewPending!==true||sourceFsp.certifiedLanguageExam!==false)
+   throw Error('Source four-case sixteen-exercise FSP/KP formative parity contract failed');
  const record={
   schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
   sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
   nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
   sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,nativeSourceClinicalJourneySixCases:true,nativeProcedural32ToothAtlas:true,nativeLocalStlObjInspection:true,
   nativeSourceSyntheticRadiographySixCases:true,
+  nativeOriginalFspKpFourCasesSixteenPhases:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
   clinicalCalibrationVerified:false,
