@@ -1,0 +1,84 @@
+{
+  "catalogVersion": 1,
+  "reviewedAt": "2026-11-01",
+  "appUse": "personal",
+  "currentUsableCollection": [
+    {
+      "id": "DUNDEE-PERMANENT-TOOTH-SURFACE-MODELS",
+      "source": "https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f",
+      "license": "CC BY 4.0",
+      "licenseEvidence": "Existing local DUNDEE_ASSET_LICENSE.md",
+      "repositoryStatus": "Already present in the KlinikLab project; no duplicate upload",
+      "limitations": [
+        "surface meshes only",
+        "not segmented enamel/dentin/pulp",
+        "not validated as clinical drilling geometry",
+        "expert dental review required"
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "NIH3D-000902",
+      "title": "Upper mandible with teeth",
+      "url": "https://3d.nih.gov/entries/902",
+      "attribution": "Chris / PrintHuman (as shown on entry)",
+      "assetLicense": "not exposed on reviewed entry page; clarify before integration or redistribution",
+      "file": "GLB downloaded for local review only",
+      "geometry": {
+        "meshCount": 1,
+        "vertices": 98258,
+        "triangles": 197901
+      },
+      "localPreview": "output/kliniklab-engine-bakeoff/shared-assets/asset-candidates/NIH3D-000902/preview-upper-mandible.png",
+      "assessment": "Rough/partial scan fragment; not accepted for integration.",
+      "githubAssetUploaded": false
+    },
+    {
+      "id": "NIH3D-003003",
+      "title": "Lower dental tooth model (entry description says patient's upper teeth with printable base)",
+      "url": "https://3d.nih.gov/entries/3DPX-003003",
+      "attribution": "Michael D. Scherer, DMD, MS, FACP",
+      "assetLicense": "not exposed on reviewed entry page; clarify before integration or redistribution",
+      "file": "GLB downloaded for local review only",
+      "geometry": {
+        "meshCount": 1,
+        "vertices": 2248810,
+        "triangles": 1590098
+      },
+      "localPreview": "output/kliniklab-engine-bakeoff/shared-assets/asset-candidates/NIH3D-003003/preview-patient-derived-arch.png",
+      "assessment": "Combined scan-derived arch with a large printable base and scan artifacts; not separately addressable per FDI tooth; visual reference only.",
+      "githubAssetUploaded": false
+    },
+    {
+      "id": "SKETCHFAB-DUNDEE-PERMANENT-DENTITION",
+      "title": "Permanent Dentition",
+      "url": "https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b",
+      "attribution": "University of Dundee, School of Dentistry",
+      "assetLicense": "CC BY 4.0 listing",
+      "file": "Not downloaded; Sketchfab requires login for download and no sign-in was attempted.",
+      "assessment": "Potential anatomy candidate; inspect actual downloaded mesh before considering integration.",
+      "githubAssetUploaded": false
+    }
+  ],
+  "sourcesToSearch": [
+    {
+      "source": "GrabCAD",
+      "status": "No specific model acquired; request original creator permission where needed.",
+      "url": "https://help.grabcad.com/article/246-how-can-models-be-used-and-shared"
+    },
+    {
+      "source": "Embodi3D",
+      "status": "No individual model yet selected or license verified."
+    },
+    {
+      "source": "TurboSquid",
+      "status": "No individual model yet selected or license verified."
+    },
+    {
+      "source": "CGTrader",
+      "status": "No individual model yet selected or license verified."
+    }
+  ],
+  "policy": "Personal app use can include non-commercial assets when their licenses permit it. Public GitHub redistribution still requires explicit rights. Keep model provenance, license, attribution, source hash, transformations, and anatomy-review status with every accepted asset."
+}
