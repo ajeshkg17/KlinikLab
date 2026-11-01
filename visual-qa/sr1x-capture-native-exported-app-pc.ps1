@@ -44,7 +44,16 @@ try{
  $rawEntries=@(Get-Content -LiteralPath $rawManifest | Where-Object{$_ -ne ''})
  if($rawEntries.Count -lt 12){throw 'Incomplete raw-source sidecar list'}
  foreach($line in $rawEntries){
-  if($line -cnotmatch '^([a-f0-9]{64})  (verified-raw-source/[a-zA-Z0-9._/-]+)
+  if($line -cnotmatch '^([a-f0-9]{64})  (verified-raw-source/[a-zA-Z0-9._/-]+)$'){throw 'Unsafe raw checksum row'}
+  $want=$Matches[1];$relative=$Matches[2]
+  if($relative -match '(^|/)\.\.(/|$)'){throw 'Raw asset traversal rejected'}
+  $asset=Join-Path $release $relative
+  if(-not(Test-Path -LiteralPath $asset -PathType Leaf)){throw ('Missing raw asset '+$relative)}
+  if((Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant() -cne $want){throw ('Raw SHA mismatch '+$relative)}
+ }
+ $script:report.rawSidecarVerified=$true
+ $script:report.nativeSourceSubmissionVerified=$true
+ $script:report.exportedExeSHA256=$actual
  $env:KLINIKLAB_PC_CAPTURE_DIR=$capture
  $env:KLINIKLAB_PC_EXPECTED_SHA=$ExpectedSha
  . (Join-Path $PSScriptRoot 'sr1c-private-desktop.ps1')
