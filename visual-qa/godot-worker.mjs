@@ -615,7 +615,11 @@ async function probeNextJobWithoutExecuting(){
  if(process.platform!=='win32')throw Error('Owner Windows PC only');
  const lease=await readGodotWorkerLease(ROOT);
  const receipt=parseGodotJson(await fs.readFile(RUNTIME,'utf8'),'running watcher runtime receipt');
- const current=await currentJob();
+ // Only read the last GitHub job fetched by the lease-holder. Do not
+ // run git fetch concurrently against the watcher's shared FETCH_HEAD.
+ // Its fresh signed-by-runtime receipt proves the task checked approval.
+ const current=validateGodotJob(parseGodotJson(
+  git(['show','FETCH_HEAD:'+JOB_REF]),'last watcher-fetched GitHub job'));
  const ledger=await readLedger();
  const candidate=verifyNextJobAdmission({
   lease,receipt,current,ledger,workerSHA:workerSha()
