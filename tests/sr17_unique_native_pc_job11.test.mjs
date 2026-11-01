@@ -28,7 +28,7 @@ test('SR17 one unique job11 is pinned to successful new embedded capture export,
   Object.fromEntries(Object.entries(active).filter(([k])=>!['jobId','commit'].includes(k))),
   Object.fromEntries(Object.entries(old).filter(([k])=>!['jobId','commit'].includes(k)))
  );
- assert.throws(()=>validateGodotJob({...active,jobId:old.jobId}));
+ assert.throws(()=>validateGodotJob({...active,commit:old.commit.slice(0,30)}));
 });
 test('SR17 exact Windows artifact and independent original pixel/GPU gate are documented',()=>{
  const doc=read(DOC);
