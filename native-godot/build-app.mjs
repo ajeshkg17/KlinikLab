@@ -87,6 +87,24 @@ try{
    sourcePackName:original,
    role:file.startsWith('whole-')?'assembledStaticEnvironment':'staticInstrumentProp'});
  }
+ // Optional source-pack chair: distinct real GLB, not an anatomy model.
+ // Missing source bytes are explicit and nonfatal; mismatched present bytes fail closed.
+ const chairSource='Dental Chair (Dental Practice and Surgery).glb';
+ const chairHash='360ab5f97393f2cf0c8ba99e4d776d1a5d3e50d33889ec633f8eee03919bcfdd';
+ const chairPath=path.join(fullPack,chairSource);
+ const optionalChair={sourcePackName:chairSource,sha256:chairHash,bytes:41804,
+  name:'operatory-chair-v1.glb',godotFile:'operatory-chair-v1-godot.glb',
+  available:false,role:'staticOperatoryChair',clinicalAccuracyValidated:false};
+ if(fs.existsSync(chairPath)){
+  const bytes=fs.readFileSync(chairPath);
+  if(bytes.length!==optionalChair.bytes||sha256(bytes)!==chairHash)
+   throw Error('Optional chair source bytes differ from catalogued SHA256');
+  fs.copyFileSync(chairPath,path.join(cc0Dest,'operatory-chair-v1.glb.source'),fs.constants.COPYFILE_EXCL);
+  const compatible=convert(bytes,chairHash);
+  fs.writeFileSync(path.join(cc0Dest,optionalChair.godotFile),compatible.bytes,{flag:'wx'});
+  optionalChair.godotSha256=compatible.convertedSha256;
+  optionalChair.available=true;
+ }
  const clinicManifest={
   schemaVersion:1,kind:'REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY',
   sourceGitSHA:sha,licenseSPDX:'CC0-1.0',publisher:approved.packSource,
@@ -95,7 +113,7 @@ try{
   godotConversion:'DETERMINISTIC_FLOAT32_VERTEX_ACCESSORS_PRESERVE_ORIGINAL_KHR_QUANTIZED_GLB',
   godotConverterSHA256:sha256(fs.readFileSync(path.join(root,'native-godot/dequantize-cc0.mjs'))),
   clinicalAccuracyValidated:false,
-  fullAppParityValidated:false,assets:caseAssets
+  fullAppParityValidated:false,cataloguedSourceGLBs:54,assets:caseAssets,optionalChair
  };
  fs.writeFileSync(path.join(cc0Dest,'clinic-manifest.json'),JSON.stringify(clinicManifest,null,2)+'\n',{flag:'wx'});
  const exported=path.join(dest,'source');
@@ -160,6 +178,8 @@ try{
   nativeMeshSurfacePointerEditingOptIn:true,
   nativeCc0WholeClinicStaticEnvironment:true,
   nativeCc0InstrumentTrayProp:true,
+  nativeCc0ChairOptionalAvailable:optionalChair.available,
+  cataloguedSourceGLBs:54,requiredCC0GLBs:2,optionalRealChairGLBs:optionalChair.available?1:0,
   nativeCc0Hashes:caseAssets.map(x=>({name:x.name,sha256:x.sha256})),
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
