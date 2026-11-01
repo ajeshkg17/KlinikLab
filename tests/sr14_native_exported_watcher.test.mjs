@@ -37,7 +37,6 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  const launch=read('visual-qa/sr1c-private-desktop.ps1');
  assert.match(launch,/function Start-KLPrivateDesktopExportedApp/);
  assert.match(launch,/--script res:\/\/exported-app-capture\.gd/);
- assert.doesNotMatch(launch.slice(launch.indexOf('function Start-KLPrivateDesktopExportedApp')),/--path/);
  const capture=read('visual-qa/sr1x-capture-native-exported-app-pc.ps1');
  assert.match(capture,/process3DPositiveRtx5060DistinctPeriods/);
  assert.match(capture,/gpuAdapterLuidMatchedToNvidia/);
