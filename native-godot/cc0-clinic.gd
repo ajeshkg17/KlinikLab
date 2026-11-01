@@ -17,6 +17,9 @@ var _whole: Node3D
 var _tray: Node3D
 var _whole_meshes := 0
 var _tray_meshes := 0
+var _chair: Node3D
+var _chair_meshes := 0
+var _chair_fallback := false
 
 func error() -> String:
 	return _error
@@ -92,6 +95,39 @@ func configure(expected_sha: String) -> bool:
 			# Static decor; source-procedural instrument logic remains independent.
 			scene.position = Vector3(-8.8,-1.35,-3.0)
 		add_child(scene)
+	# Optional real CC0 chair is sourced from the same 54-model pack.
+	# Missing bytes are not silently replaced with another clinical asset.
+	var chair: Dictionary = m.get("optionalChair", {})
+	var chair_path := ROOT + "operatory-chair-v1-godot.glb"
+	var chair_ok := bool(chair.get("available", false))
+	if chair_ok:
+		var original_hash := "360ab5f97393f2cf0c8ba99e4d776d1a5d3e50d33889ec633f8eee03919bcfdd"
+		if str(chair.get("sha256","")) != original_hash or str(chair.get("godotFile","")) != "operatory-chair-v1-godot.glb" or str(chair.get("godotSha256","")).length() != 64:
+			chair_ok = false
+		elif RAW_RESOLVER.verified_path(ROOT+"operatory-chair-v1.glb.source",original_hash).is_empty() or RAW_RESOLVER.verified_path(chair_path,str(chair.get("godotSha256",""))).is_empty():
+			chair_ok = false
+	if chair_ok:
+		var chair_resource := load(chair_path)
+		if chair_resource is PackedScene:
+			var chair_node: Node = (chair_resource as PackedScene).instantiate()
+			if chair_node is Node3D and _mesh_count(chair_node) > 0:
+				_chair = chair_node as Node3D
+				_chair_meshes = _mesh_count(chair_node)
+				_chair.name = "KL_SOURCE_CC0_REAL_OPERATORY_CHAIR"
+				_chair.position = Vector3(3.0,-0.4,-18.0)
+				add_child(_chair)
+			else:
+				chair_node.free()
+	if _chair == null:
+		_chair_fallback = true
+		var fallback := Node3D.new()
+		fallback.name = "KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK"
+		fallback.position = Vector3(3.0,0.0,-18.0)
+		var label := Label3D.new()
+		label.text = "Operatory chair model unavailable (asset not loaded)"
+		label.position = Vector3(0.0,1.6,0.0)
+		fallback.add_child(label)
+		add_child(fallback)
 	_source_sha=expected_sha
 	name="KL_CC0_3DASSETS_WHOLE_CLINIC_STATIC"
 	return true
@@ -99,7 +135,10 @@ func configure(expected_sha: String) -> bool:
 func summary() -> Dictionary:
 	return {"sourceGitSHA":_source_sha,"wholeSceneLoaded":_whole!=null,
 		"wholeMeshInstances":_whole_meshes,"trayLoaded":_tray!=null,
-		"trayMeshInstances":_tray_meshes,"license":"CC0-1.0",
+		"trayMeshInstances":_tray_meshes,"cataloguedSourceGLBs":54,
+		"requiredGLBsLoaded":int(_whole!=null)+int(_tray!=null),
+		"optionalChairLoaded":_chair!=null,"optionalChairMeshes":_chair_meshes,
+		"optionalChairFallback":_chair_fallback,"license":"CC0-1.0",
 		"sourceOriginalGLBsHashVerified":not _source_sha.is_empty(),
 		"godotFloat32MeshesImported":_whole_meshes>20 and _tray_meshes>0,
 		"clinicalAccuracyValidated":false,
