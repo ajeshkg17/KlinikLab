@@ -5,6 +5,7 @@ on:
     paths:
       - 'visual-qa/run-unity-source-probe.ps1'
       - 'visual-qa/run-unity-clinic-render-pc.ps1'
+      - 'visual-qa/publish-unity-clinic-evidence.ps1'
       - 'tests/sr1i_unity_whole_clinic_render.test.mjs'
       - 'visual-qa/unity-probe/**'
       - 'tests/sr1h_unity_source_probe.test.mjs'
@@ -30,7 +31,7 @@ jobs:
       - name: Real Windows PowerShell 5.1 and 7 parser checks (do not launch Unity)
         shell: pwsh
         run: |
-          $files = @((Resolve-Path 'visual-qa/run-unity-source-probe.ps1').Path, (Resolve-Path 'visual-qa/run-unity-clinic-render-pc.ps1').Path)
+          $files = @((Resolve-Path 'visual-qa/run-unity-source-probe.ps1').Path, (Resolve-Path 'visual-qa/run-unity-clinic-render-pc.ps1').Path, (Resolve-Path 'visual-qa/publish-unity-clinic-evidence.ps1').Path)
           $check = {
             param($scriptFile)
             $tokens = $null
