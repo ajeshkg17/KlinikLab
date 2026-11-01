@@ -61,6 +61,12 @@ var _volumes: Dictionary = {}
 var _cut_position := Vector3(0.0, 1.01, 0.0)
 var _cut_radius := 0.22
 var _direct_bur_mode := false
+# Keyboard/mouse are adapters to reusable movement/look/operatory intents.
+# The walk is bounded preview navigation through uncalibrated decorative CC0.
+var _walk: RefCounted
+var _walk_active := false
+var _walk_look_dragging := false
+var _walk_near_operatory := false
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -115,6 +121,12 @@ func _ready() -> void:
 		_scan = scan_script.new()
 		add_child(_scan)
 		_scan.visible = false
+	var walk_script: GDScript = load("res://clinic-walk-intent.gd")
+	if walk_script == null:
+		_show_blocked("Native desktop clinic walk intent controller missing")
+		get_tree().quit(4)
+		return
+	_walk = walk_script.new()
 	_build_app()
 	_set_camera_mode("overview")
 	_select_case(0)
@@ -156,6 +168,98 @@ func _ready() -> void:
 			reporter.call_deferred("run",self,job_id)
 			break
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
+
+func _walk_keyboard_allowed() -> bool:
+	if not _walk_active or _view != "environment" or _walk == null:
+		return false
+	# Never move the camera when the learner is editing German FSP/KP notes
+	# or entering free text into a UI control.
+	var focused: Control = get_viewport().gui_get_focus_owner()
+	return not (focused is TextEdit or focused is LineEdit)
+
+func _process(delta: float) -> void:
+	if not _walk_keyboard_allowed():
+		return
+	var direction := Vector2.ZERO
+	if Input.is_physical_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		direction.x -= 1.0
+	if Input.is_physical_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		direction.x += 1.0
+	if Input.is_physical_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		direction.y += 1.0
+	if Input.is_physical_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		direction.y -= 1.0
+	if direction != Vector2.ZERO:
+		_walk.call("apply_move_intent", direction, delta)
+		_apply_walk_camera()
+		var now_near: bool = bool(_walk.call("in_operatory_range"))
+		if now_near != _walk_near_operatory:
+			_walk_near_operatory = now_near
+			_refresh()
+
+func _handle_walk_input(event: InputEvent) -> void:
+	if not _walk_active or _view != "environment" or _walk == null:
+		return
+	if event is InputEventMouseButton:
+		var mouse: InputEventMouseButton = event
+		if mouse.button_index == MOUSE_BUTTON_RIGHT:
+			_walk_look_dragging = mouse.pressed and _middle != null and _middle.get_global_rect().has_point(mouse.position)
+			if _walk_look_dragging:
+				get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and _walk_look_dragging:
+		_walk.call("apply_look_intent", (event as InputEventMouseMotion).relative)
+		_apply_walk_camera()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventKey and _walk_keyboard_allowed():
+		var key: InputEventKey = event
+		if key.pressed and not key.echo:
+			if key.physical_keycode == KEY_E or key.keycode == KEY_E:
+				if _walk_enter_procedure():
+					get_viewport().set_input_as_handled()
+			elif key.keycode == KEY_ESCAPE:
+				_stop_clinic_walk()
+				get_viewport().set_input_as_handled()
+
+func _start_clinic_walk() -> void:
+	if _view != "environment" or _cc0_clinic == null or _walk == null:
+		return
+	_direct_bur_mode = false
+	_walk_active = true
+	_walk_look_dragging = false
+	_walk.call("reset")
+	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
+	_apply_walk_camera()
+	_refresh()
+
+func _stop_clinic_walk() -> void:
+	_walk_active = false
+	_walk_look_dragging = false
+	if _view == "environment":
+		_set_environment_camera()
+		_refresh()
+
+func _apply_walk_camera() -> void:
+	if not _walk_active or _view != "environment" or _walk == null or _scene == null:
+		return
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null:
+		return
+	camera.position = _walk.get("position")
+	camera.rotation = Vector3(float(_walk.get("pitch")), float(_walk.get("yaw")), 0.0)
+	camera.fov = 68.0
+	camera.current = true
+
+func _walk_enter_procedure() -> bool:
+	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_operatory_range")):
+		return false
+	# E activates a station, NEVER a drill. Preserve the chosen FDI case.
+	_walk_active = false
+	_walk_look_dragging = false
+	_direct_bur_mode = false
+	_select_station(4) # original practical station from immutable source order
+	_switch_view("clinic")
+	_set_camera_mode("teeth")
+	return true
 
 func _load_source() -> bool:
 	var sha := FileAccess.get_file_as_string(SOURCE_SHA).strip_edges()
@@ -534,6 +638,9 @@ func _show_case_geometry() -> void:
 func _set_environment_camera() -> void:
 	if _scene == null:
 		return
+	if _walk_active and _view == "environment":
+		_apply_walk_camera()
+		return
 	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
 	if camera == null:
 		push_warning("Source scene camera missing for CC0 environment")
@@ -560,6 +667,21 @@ func _show_environment() -> void:
 		var report: Dictionary = _cc0_clinic.call("summary")
 		_page.add_child(_heading("Imported clinic mesh instances: %s · static tray meshes: %s · original GLB hashes: verified" % [str(report.get("wholeMeshInstances",0)),str(report.get("trayMeshInstances",0))],14))
 	_page.add_child(_heading("CC0 1.0 · 3dassets.dev / Dental Practice and Surgery. Stylized static environment; not calibrated dental anatomy, full instrument physics, a clinical procedure simulator, or a patient record.",12))
+	if not _walk_active:
+		var start_walk := _button("Walk clinic (WASD / arrows, right-drag to look)")
+		start_walk.pressed.connect(_start_clinic_walk)
+		_page.add_child(start_walk)
+	else:
+		_page.add_child(_heading("Room exploration preview: WASD / arrows move; right-drag over central 3D view to look; E enters the operatory when nearby; Esc exits walk. Bounded navigation only: no collision or clinical-scale calibration.",13))
+		var within: bool = bool(_walk.call("in_operatory_range"))
+		_page.add_child(_heading("Operatory interaction: " + ("in range" if within else "walk toward the room's operatory marker"),14))
+		var enter := _button("Enter selected FDI %s practical station (E)" % FDI[_case_index])
+		enter.disabled = not within
+		enter.pressed.connect(_walk_enter_procedure)
+		_page.add_child(enter)
+		var stop_walk := _button("Exit walk (Esc)")
+		stop_walk.pressed.connect(_stop_clinic_walk)
+		_page.add_child(stop_walk)
 	var to_clinic:=_button("Return to six-case clinical training")
 	to_clinic.pressed.connect(_switch_view.bind("clinic"))
 	_page.add_child(to_clinic)
@@ -594,6 +716,9 @@ func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	_view = view
+	if view != "environment":
+		_walk_active = false
+		_walk_look_dragging = false
 	if view != "clinic":
 		_direct_bur_mode = false
 	if _scene != null:
@@ -1005,6 +1130,9 @@ func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
+	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
+	# native direct bur still requires separate explicit practical opt-in.
+	_handle_walk_input(event)
 	if not _direct_bur_mode or _middle == null or _scene == null:
 		return
 	if not (event is InputEventMouseButton):
