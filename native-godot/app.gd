@@ -14,7 +14,7 @@ const FDI := ["16", "36", "11", "26", "48", "46"]
 const STATION_IDS := ["interview", "letter", "handover", "written", "practical", "viva", "clinic"]
 const RADIO_CHOICES := ["caries","apex","trauma","normal","impaction","bone"]
 const RADIO_LABELS := ["Radiolucency / caries","Apical radiolucency","Traumatic finding","No definitive pathology","Impacted third molar","Marginal bone loss"]
-const INK := Color("#153842")
+const INK := Color("#e9f1f6")
 const SEA := Color("#06786f")
 const PAPER := Color("#eaf2f0")
 
@@ -45,6 +45,9 @@ var _camera_mode := "overview"
 var _page: VBoxContainer
 var _progress_label: Label
 var _middle: Control
+var _left_panel: PanelContainer
+var _right_panel: PanelContainer
+var _screen_title: Label
 var _answer_label: Label
 var _draft: TextEdit
 var _practical_feedback: Dictionary = {}
@@ -65,6 +68,10 @@ func _ready() -> void:
 	_scene = load("res://main.tscn").instantiate() as Node3D
 	_scene.name = "KL_ORIGINAL_FDI16_SOURCE_SCENE"
 	add_child(_scene)
+	# Keep the source-only FDI16 fullscreen overlay out of this six-case UI.
+	var historical_overlay: CanvasLayer = _scene.get_node_or_null("KL_FDI16_PlainTextOverlay") as CanvasLayer
+	if historical_overlay != null:
+		historical_overlay.visible = false
 	var workspace := Node3D.new()
 	workspace.name = "KL_COMPLETE_OPERATORY_WORKSPACE"
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
@@ -294,12 +301,15 @@ func _button(t: String) -> Button:
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return b
 
-func _panel(col: VBoxContainer, width: int) -> PanelContainer:
-	var p := PanelContainer.new()
-	p.custom_minimum_size = Vector2(width, 0)
-	p.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(p)
-	return p
+func _style_panel(panel: PanelContainer) -> void:
+	# Fully opaque text panes prevent 3D scene geometry bleeding through UI.
+	var surface := StyleBoxFlat.new()
+	surface.bg_color = Color("#182530")
+	surface.content_margin_left = 12.0
+	surface.content_margin_right = 12.0
+	surface.content_margin_top = 8.0
+	surface.content_margin_bottom = 8.0
+	panel.add_theme_stylebox_override("panel",surface)
 
 func _build_app() -> void:
 	_shell = CanvasLayer.new()
@@ -313,28 +323,42 @@ func _build_app() -> void:
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	outer.add_theme_constant_override("separation", 5)
 	root.add_child(outer)
-	var top := HBoxContainer.new()
+	var top := VBoxContainer.new()
+	top.add_theme_constant_override("separation",4)
 	outer.add_child(top)
-	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
+	_screen_title = _heading("KlinikLab · Dental Skills", 22)
+	top.add_child(_screen_title)
+	var tab_scroll := ScrollContainer.new()
+	tab_scroll.custom_minimum_size = Vector2(0,44)
+	tab_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	tab_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	top.add_child(tab_scroll)
+	var tabs := HBoxContainer.new()
+	tab_scroll.add_child(tabs)
 	for section in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
-		top.add_child(b)
+		tabs.add_child(b)
 	for mode in ["overview", "teeth"]:
 		var camera_button := _button(mode.capitalize() + " camera")
 		camera_button.pressed.connect(_set_camera_mode.bind(mode))
-		top.add_child(camera_button)
+		tabs.add_child(camera_button)
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
 	var left := VBoxContainer.new()
-	left.custom_minimum_size = Vector2(280, 0)
+	left.custom_minimum_size = Vector2(270, 0)
 	body.add_child(left)
-	_panel(left, 280)
+	_left_panel = PanelContainer.new()
+	_style_panel(_left_panel)
+	_left_panel.custom_minimum_size = Vector2(270,0)
+	_left_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left.add_child(_left_panel)
 	var nav := ScrollContainer.new()
-	nav.custom_minimum_size = Vector2(280, 660)
+	nav.custom_minimum_size = Vector2(244, 0)
 	nav.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	left.add_child(nav)
+	_left_panel.add_child(nav)
 	var nav_col := VBoxContainer.new()
 	nav.add_child(nav_col)
 	nav_col.add_child(_heading("Cases • source-derived", 17))
@@ -354,15 +378,18 @@ func _build_app() -> void:
 	_middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_middle)
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(520, 0)
+	right.custom_minimum_size = Vector2(470, 0)
 	body.add_child(right)
-	var pane := PanelContainer.new()
-	pane.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right.add_child(pane)
+	_right_panel = PanelContainer.new()
+	_style_panel(_right_panel)
+	_right_panel.custom_minimum_size = Vector2(470,0)
+	_right_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right.add_child(_right_panel)
+	var pane := _right_panel
 	var scroll := ScrollContainer.new()
 	pane.add_child(scroll)
 	_page = VBoxContainer.new()
-	_page.custom_minimum_size = Vector2(500, 0)
+	_page.custom_minimum_size = Vector2(440, 0)
 	_page.add_theme_constant_override("separation", 10)
 	scroll.add_child(_page)
 	_progress_label = _heading("", 13)
@@ -462,9 +489,10 @@ func _set_environment_camera() -> void:
 	if camera == null:
 		push_warning("Source scene camera missing for CC0 environment")
 		return
-	camera.position=Vector3(0.0,8.5,11.0)
-	camera.fov=66.0
-	camera.look_at(Vector3(0.0,-1.5,-19.0))
+	# Move near the actual imported whole-clinic, framed inside central UI.
+	camera.position=Vector3(3.0,7.0,4.0)
+	camera.fov=58.0
+	camera.look_at(Vector3(3.0,-1.4,-19.0))
 	camera.current=true
 	# In this dedicated environment overview, avoid mistaking original
 	# source tooth podiums for anatomical objects inside the CC0 floor.
@@ -499,10 +527,16 @@ func _set_camera_mode(mode: String) -> void:
 		camera.fov = 60.0
 		camera.look_at(Vector3(0.0, 0.0, -2.5))
 	else:
-		camera.position = Vector3(0.0, 1.7, 13.2)
-		camera.fov = 47.0
-		camera.look_at(Vector3(0.0, 0.5, 0.0))
+		# Keep both practical teeth within the middle of the 1600px window.
+		camera.position = Vector3(2.2, 1.7, 16.0)
+		camera.fov = 48.0
+		camera.look_at(Vector3(2.2, 0.5, 0.0))
 	camera.current = true
+	_apply_environment_visibility()
+
+func _apply_environment_visibility() -> void:
+	if _cc0_clinic != null:
+		_cc0_clinic.call("set_environment_visible", _view == "environment" or (_view == "clinic" and _camera_mode == "overview"))
 
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
@@ -523,8 +557,7 @@ func _switch_view(view: String) -> void:
 		_show_case_geometry()
 	if view == "environment":
 		_set_environment_camera()
-	if _cc0_clinic != null:
-		_cc0_clinic.call("set_environment_visible",view in ["clinic","environment"])
+	_apply_environment_visibility()
 	if _legacy_workspace != null:
 		_legacy_workspace.visible = false
 	_middle.visible = view in ["clinic", "environment","anatomy", "scans"]
@@ -534,6 +567,13 @@ func _refresh() -> void:
 	if _page == null:
 		return
 	_clear_page()
+	if _screen_title != null:
+		if _view == "environment":
+			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
+		elif _view == "clinic":
+			_screen_title.text = "KlinikLab · FDI %s · %s" % [FDI[_case_index],str(_stations[_station_index]["title"])]
+		else:
+			_screen_title.text = "KlinikLab · %s" % _view.capitalize()
 	var c: Dictionary = _cases[_case_index]
 	var s: Dictionary = _stations[_station_index]
 	if _view == "language":
