@@ -33,7 +33,7 @@ The exact-source builder refuses reusing an existing output folder. It copies Go
 | `engine.js`, `dental-appearance.js`, `real-dental-scene.js` | FDI32 anatomical atlas, jaw/orientation, picking, material shading, geometry fidelity | FDI16 exact source plus schematic room |
 | `dental-practice.js` / `app.js getPractical` | All operative decisions, instrument sequences, dental tool states and simulated cutting | Source decisions/tools interactive and six synthetic tooth-volume sandboxes; clinical tool physics and workflow completeness not verified |
 | `fsp-kp-training.js` | Case/phase German B2/C1 response rubric, explanation and evidence-free formative scoring | Source MCQs and manual drafts |
-| `desktop-suite.js` | Synthetic X-ray with interpretation, local STL/OBJ inspection, bur response and provenance | Not ported |
+| `desktop-suite.js` | Synthetic X-ray with interpretation, local STL/OBJ inspection, bur response and provenance | Six source-procedural synthetic projections, location marks, reveal/feedback and local STL/OBJ inspection; physical bur physics and clinical radiography not ported |
 | `clinical-pathway.js` | Care workflow, handover, documentation and safety checks | Text prompts only |
 | `ai-ui.js`, `server/ai-core.mjs` | Opt-in secure local/server AI with data and credential isolation | Not ported; no API keys in native app |
 | `xr-procedure.js`, `xr-guide.js` | Tracked Meta Quest controllers, ray selection, physical headset QA | Not ported or headset verified |
@@ -92,3 +92,11 @@ In the practical station, the four restorative/endodontic/prosthodontic source t
 Local progress uses `volumeByCase[caseId]` to isolate strokes, and locally generated learning reports list each case separately. The legacy FDI16 progress entry is kept for same-source compatibility; source SHA changes still gate history recovery. Native Godot headless regressions prove all six editable geometries, FDI labels, topology changes, undo/replay and inter-case local persistence. They do **not** prove Windows GPU pixels, force feedback, bur collisions, clinical accuracy, pulp protection or official examination grading.
 
 **Remaining gaps:** complete interactive browser parity, physically meaningful dental tool interactions, current radiography, free-form patient dialogues, Quest headset XR, optional AI, and direct owner-PC Windows process/device/pixel evidence.
+
+## SR10 — Source-procedural radiography teaching (not a real X-ray)
+
+The native **Radiology** tab now shows six newly rendered, **synthetic** radiographic-style PNG projections generated from the same browser `desktop-suite.js` case table and `volumetric-lab.js` `ToothSolid` attenuation model. The source data and original source Git SHA are recorded; every PNG is SHA-256-checked at display time, with exact original case ID, FDI and simulated finding type. Godot displays the real decoded image, not a blank or static symbolic diagram. The native projection is adapted to 360×240 (with a bounded 120×80 source-ToothSolid attenuation sampling grid and interpolation) and is not a byte-for-byte browser screenshot. This interpolation makes the build reproducible and bounded but further reduces any appearance of measured clinical fidelity.
+
+Users can mark up to 20 image locations, select a suspected finding, reveal the original case's predetermined answer and explanation, reset, and save a separate local study record for each case. Radiology entries appear in the offline formative learning report. Godot CI verifies six decoded source images and case-specific interaction persistence.
+
+**All radiographs are fictional generated projections, never patient images.** No exposure physics, radiological acquisition geometry, clinically measured attenuation, certified interpretation, actionable diagnosis or actual patient health record is implied. Actual licensed dental radiographs and professional assessment would require a completely separate validation pipeline. This change does not add AI, image upload, Quest VR, true clinical diagnostics or native GPU acceptance.

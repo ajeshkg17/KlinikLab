@@ -12,6 +12,8 @@ const PROGRESS := "user://kliniklab-native-progress-v2.json"
 const CASE_IDS := ["molar", "endo", "anterior", "crown", "surgery", "perio"]
 const FDI := ["16", "36", "11", "26", "48", "46"]
 const STATION_IDS := ["interview", "letter", "handover", "written", "practical", "viva", "clinic"]
+const RADIO_CHOICES := ["caries","apex","trauma","normal","impaction","bone"]
+const RADIO_LABELS := ["Radiolucency / caries","Apical radiolucency","Traumatic finding","No definitive pathology","Impacted third molar","Marginal bone loss"]
 const INK := Color("#153842")
 const SEA := Color("#06786f")
 const PAPER := Color("#eaf2f0")
@@ -163,7 +165,7 @@ func _load_source() -> bool:
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
 		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [],
-		"volumeByCase": {}, "journey": {}, "selectedCase": 0, "selectedStation": 0}
+		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -181,6 +183,8 @@ func _load_progress() -> void:
 		_progress["journey"] = {}
 	if not (_progress.get("volumeByCase", {}) is Dictionary):
 		_progress["volumeByCase"] = {}
+	if not (_progress.get("radiologyByCase", {}) is Dictionary):
+		_progress["radiologyByCase"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
 	var stored_volumes: Dictionary = _progress["volumeByCase"]
 	if not stored_volumes.has("molar") and _progress.get("volumeFDI16", []) is Array:
@@ -236,7 +240,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "journey", "anatomy", "scans", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "anatomy", "radiology", "scans", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -388,7 +392,7 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "journey", "anatomy", "scans", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
@@ -420,6 +424,8 @@ func _refresh() -> void:
 		_show_atlas_controls()
 	elif _view == "scans":
 		_show_scan_controls()
+	elif _view == "radiology":
+		_show_radiology()
 	elif _view == "coverage":
 		_show_coverage()
 	else:
@@ -867,6 +873,87 @@ func _atlas_rotate(degrees: float) -> void:
 		_atlas.call("rotate_model",degrees)
 
 
+
+func _radiology_state() -> Dictionary:
+	var stored: Dictionary = _progress["radiologyByCase"]
+	var id: String = CASE_IDS[_case_index]
+	if not stored.has(id):
+		stored[id] = {"choice":"", "marks":[], "reviewed":false}
+	return stored[id]
+
+func _show_radiology() -> void:
+	_page.add_child(_heading("Source-generated synthetic radiography · FDI " + FDI[_case_index], 17))
+	_page.add_child(_heading("Fictional analytic attenuation model. NOT a real patient X-ray or validated diagnosis. Click the image to indicate a possible finding.", 13))
+	var script: GDScript = load("res://radiography-panel.gd")
+	if script == null:
+		_page.add_child(_heading("Radiography module unavailable", 14))
+		return
+	var viewer: TextureRect = script.new()
+	if not bool(viewer.call("configure",str(_content["sourceGitSHA"]),CASE_IDS[_case_index])):
+		_page.add_child(_heading("Radiography source rejected: " + str(viewer.call("error")), 14))
+		viewer.free()
+		return
+	var state: Dictionary = _radiology_state()
+	if not bool(viewer.call("set_marks",state.get("marks",[]))):
+		state["marks"] = []
+		viewer.call("set_marks",[])
+	viewer.call("reveal",bool(state.get("reviewed",false)))
+	viewer.connect("point_marked",_radiology_mark)
+	_page.add_child(viewer)
+	var scenario: Dictionary = viewer.call("info")
+	_page.add_child(_heading("Original fictional scenario: " + str(scenario["title"]), 14))
+	var select := OptionButton.new()
+	select.add_item("Choose a simulated interpretation",0)
+	for i in range(RADIO_CHOICES.size()):
+		select.add_item(RADIO_LABELS[i],i+1)
+	select.select(maxi(0,RADIO_CHOICES.find(str(state.get("choice","")))+1))
+	select.item_selected.connect(_radiology_choose)
+	_page.add_child(select)
+	var review := _button("Reveal original source's simulated finding")
+	review.pressed.connect(_radiology_review)
+	_page.add_child(review)
+	if bool(state.get("reviewed",false)):
+		var match_source: bool = str(state.get("choice","")) == str(scenario["kind"])
+		_page.add_child(_heading(("Matches the predetermined source label. " if match_source else "Does not match the predetermined source label. ") + str(scenario["reference"]), 14))
+		_page.add_child(_heading("This is educational source feedback, NOT clinical image interpretation.", 12))
+	var reset := _button("Clear this case's synthetic radiography answers")
+	reset.pressed.connect(_radiology_reset)
+	_page.add_child(reset)
+	_page.add_child(_heading("Local marks: %d / 20 · Source review: %s" % [
+		(state["marks"] as Array).size(), str(bool(state["reviewed"]))], 12))
+
+func _radiology_mark(point: Vector2) -> void:
+	if not point.is_finite() or point.x<0 or point.x>1 or point.y<0 or point.y>1:
+		return
+	var state := _radiology_state()
+	var marks: Array = state["marks"]
+	if marks.size() >= 20:
+		return
+	marks.append([point.x,point.y])
+	_save_progress()
+
+func _radiology_choose(index: int) -> void:
+	if index<0 or index>RADIO_CHOICES.size():
+		return
+	var state := _radiology_state()
+	state["choice"] = "" if index==0 else RADIO_CHOICES[index-1]
+	state["reviewed"] = false
+	_save_progress()
+	_refresh()
+
+func _radiology_review() -> void:
+	_radiology_state()["reviewed"] = true
+	_save_progress()
+	_refresh()
+
+func _radiology_reset() -> void:
+	var state := _radiology_state()
+	state["choice"] = ""
+	state["marks"] = []
+	state["reviewed"] = false
+	_save_progress()
+	_refresh()
+
 func _show_scan_controls() -> void:
 	_page.add_child(_heading("Local STL/OBJ surface inspection", 18))
 	_page.add_child(_heading("Choose a licensed local dental surface mesh. Remains on your computer; no upload or patient registration. Maximum 20 MB / 50,000 triangles. Original units not assumed.", 13))
@@ -974,6 +1061,11 @@ func _generate_report() -> String:
 			lines.append("  Treatment indices A/B=%s/%s; consentExercise=%s; ordered=%s; errors=%s" %
 				[str(j.get("primary",-1)),str(j.get("alternative",-1)),str(j.get("consent",false)),
 				str(j.get("ordered",0)),str(j.get("errors",0))])
+		var synthetic_rad: Dictionary = _progress.get("radiologyByCase", {})
+		if synthetic_rad.has(str(c["id"])):
+			var rad: Dictionary = synthetic_rad[str(c["id"])]
+			lines.append("  Synthetic source radiography: choice=%s; marks=%d; reviewed=%s (not diagnostic)" %
+				[str(rad.get("choice","")),(rad.get("marks",[]) as Array).size(),str(bool(rad.get("reviewed",false)))])
 		lines.append("")
 	var volume_logs: Dictionary = _progress.get("volumeByCase", {})
 	for id in CASE_IDS:
@@ -1016,6 +1108,7 @@ func _reset_progress() -> void:
 	_progress["volumeFDI16"] = []
 	_progress["volumeByCase"] = {}
 	_progress["journey"] = {}
+	_progress["radiologyByCase"] = {}
 	for id in _volumes:
 		(_volumes[id] as Node3D).call("reset")
 	_save_progress()
@@ -1035,7 +1128,7 @@ func _show_coverage() -> void:
 		if str(id) == "anatomyAtlas" and _atlas != null:
 			status = "SOURCE_DERIVED_32_PERMANENT_TEETH_PREVIEW_ONLY__NOT_CLINICALLY_VALIDATED"
 		if str(id) == "scanImportAndRadiography" and _scan != null:
-			status = "LOCAL_BOUND_3D_STL_BINARY_AND_OBJ_SURFACE_VIEWER_ONLY__XRAY_NOT_PORTED"
+			status = "LOCAL_STL_OBJ_AND_SIX_SYNTHETIC_SOURCE_XRAYS__NOT_DIAGNOSTIC"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("Now available: all six case-specific synthetic editable volume models; 32-tooth preview; guided interviews; 6-stage clinical journey; offline report and local STL/OBJ inspection. Still missing: physiological instrument forces, validated assessment, radiography, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))
+	_page.add_child(_heading("Now available: all six case-specific synthetic editable volume models; 32-tooth preview; guided interviews; 6-stage clinical journey; offline report and local STL/OBJ inspection. Still missing: physiological instrument forces, validated assessment, real radiographic diagnosis, free-form patient, XR/Quest, optional AI and full clinical parity.", 15))

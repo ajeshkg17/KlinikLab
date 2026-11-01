@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
@@ -44,6 +44,8 @@ try{
   ['--source-dir='+src,'--output='+path.join(exported,'clinical-pathways.json'),'--expected-sha='+sha]);
  run(path.join(root,'native-godot/export-atlas.mjs'),
   ['--source-dir='+src,'--output='+path.join(exported,'atlas'),'--expected-sha='+sha]);
+ run(path.join(root,'native-godot/export-radiography.mjs'),
+  ['--source-dir='+src,'--output='+path.join(exported,'radiography'),'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'expected-sha.txt'),sha+'\n',{flag:'wx'});
  const hash=JSON.parse(fs.readFileSync(path.join(exported,'kliniklab-export-manifest.json'),'utf8'));
  const content=JSON.parse(fs.readFileSync(path.join(exported,'app-content.json'),'utf8'));
@@ -66,11 +68,23 @@ try{
     fs.statSync(path.join(exported,entry.file)).size!==descriptor.sampleCount*16)
    throw Error('Six-case native volume provenance/byte count failed '+id);
  }
+ const radiography=JSON.parse(fs.readFileSync(path.join(exported,'radiography/manifest.json'),'utf8'));
+ if(radiography.sourceGitSHA!==sha||Object.keys(radiography.cases||{}).length!==6||
+   radiography.patientImage!==false||radiography.clinicalAccuracyValidated!==false)
+  throw Error('Six-case synthetic native radiography integrity contract invalid');
+ for(const [id,fdi] of expectedVolumes){
+  const row=radiography.cases[id];
+  const png=path.join(exported,'radiography','fdi'+fdi+'-synthetic.png');
+  if(!row||row.fdi!==fdi||row.file!=='fdi'+fdi+'-synthetic.png'||
+   !fs.existsSync(png)||fs.statSync(png).size<1000)
+   throw Error('Six-case source synthetic radiography missing FDI '+fdi);
+ }
  const record={
   schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
   sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
   nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
   sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,nativeSourceClinicalJourneySixCases:true,nativeProcedural32ToothAtlas:true,nativeLocalStlObjInspection:true,
+  nativeSourceSyntheticRadiographySixCases:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
   clinicalCalibrationVerified:false,
