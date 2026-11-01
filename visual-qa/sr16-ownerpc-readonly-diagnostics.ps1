@@ -38,9 +38,9 @@ if($actionArgs -match '(?i)(?:^|\s)-WorkerDirectory\s+"([^"]+)"'){$taskWorkerDir
 if($actionArgs -match '(?i)(?:^|\s)-ExpectedWorkerSha\s+([a-f0-9]{40})(?:\s|$)'){$taskWorkerSha=$Matches[1]}
 if($actionArgs -match '(?i)-File\s+"([^"]*install-godot-pc-watcher\.ps1)"'){$taskInstallScript=$Matches[1]}
 $taskWorkerDirectoryExists=($null -ne $taskWorkerDirectory -and
- Test-Path -LiteralPath $taskWorkerDirectory -PathType Container)
+ (Test-Path -LiteralPath $taskWorkerDirectory -PathType Container))
 $taskInstallScriptExists=($null -ne $taskInstallScript -and
- Test-Path -LiteralPath $taskInstallScript -PathType Leaf)
+ (Test-Path -LiteralPath $taskInstallScript -PathType Leaf))
 $taskActionExecutableExists=($null -ne $actionExe -and
  (Test-Path -LiteralPath $actionExe -PathType Leaf))
 $taskWorkerHead=$null;$taskWorkerHeadMatchesTaskSha=$false
