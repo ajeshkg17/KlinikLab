@@ -5,6 +5,7 @@ extends RefCounted
 ## collision or patient-verified operatory dimensions.
 const START := Vector3(3.0, 0.6, -12.0)
 const OPERATORY := Vector3(3.0, 0.6, -18.0)
+const LANGUAGE_STATION := Vector3(-3.0, 0.6, -18.0)
 const SPEED := 3.0
 const REACH := 2.4
 const MOUSE_SENSITIVITY := 0.0035
@@ -40,3 +41,6 @@ func apply_look_intent(relative: Vector2) -> void:
 
 func in_operatory_range() -> bool:
 	return position.distance_to(OPERATORY) <= REACH
+
+func in_language_station_range() -> bool:
+	return position.distance_to(LANGUAGE_STATION) <= REACH

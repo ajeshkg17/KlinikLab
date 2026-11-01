@@ -64,9 +64,32 @@ test('SR37 E-operatory practical station offers explicit source-only walk return
  const start=app.indexOf('func _return_to_clinic_walk() -> bool:');
  const end=app.indexOf('func _procedure_context_available()',start);
  const fn=app.slice(start,end);
- for (const marker of ['_walk_station_return_available','_station_index != 4','_switch_view("environment")','_apply_walk_camera()','_walk_active = true']) assert.ok(fn.includes(marker));
+ for (const marker of ['_walk_station_return_available','_station_index == 4','_switch_view("environment")','_apply_walk_camera()','_walk_active = true']) assert.ok(fn.includes(marker));
  assert.doesNotMatch(fn,/_walk.call\("reset"\)|_record_practical\(|_save_progress\(|_direct_cut_world_ray\(/);
  assert.match(app,/Return to clinic walk at operatory \(no grading or drilling\)/);
  assert.match(smoke,/SR37_STATION_RETURN_SAME_POSE_PASS/);
  assert.match(smoke,/resumed_pose.distance_to\(station_pose\)/);
+});
+
+test('SR38 walkable clinic exposes a distinct range-gated FSP/KP station with explicit return',()=>{
+ const app=read('native-godot/app.gd');
+ const walk=read('native-godot/clinic-walk-intent.gd');
+ const smoke=read('native-godot/clinic-walk-smoke.gd');
+ assert.match(walk,/const OPERATORY := Vector3\(3\.0, 0\.6, -18\.0\)/);
+ assert.match(walk,/const LANGUAGE_STATION := Vector3\(-3\.0, 0\.6, -18\.0\)/);
+ assert.match(walk,/func in_language_station_range\(\) -> bool:/);
+ const enter=app.slice(app.indexOf('func _walk_enter_language_station() -> bool:'),app.indexOf('func _return_to_clinic_walk() -> bool:'));
+ assert.match(enter,/in_language_station_range/);
+ assert.match(enter,/_switch_view\("language"\)/);
+ assert.match(enter,/_walk_language_return_available = true/);
+ const back=app.slice(app.indexOf('func _return_to_clinic_walk() -> bool:'),app.indexOf('func _procedure_context_available()'));
+ assert.match(back,/_view == "language"/);
+ assert.match(back,/_language_save_draft\(\)/);
+ assert.match(back,/_switch_view\("environment"\)/);
+ assert.match(app,/Enter FSP\/KP language station \(E\)/);
+ assert.match(app,/Return to clinic walk from FSP\/KP station/);
+ assert.match(app,/if _view == "language" and view != "language":\n\t\t_language_save_draft\(\)/);
+ assert.match(smoke,/SR38_RANGE_GATED_FSP_KP_STATION_DRAFT_AND_PRACTICAL_PERSISTENCE_PASS/);
+ for(const marker of ['FSP/KP station activated outside its separate range','FSP/KP draft was not saved on station entry','Practical completion was lost while switching to FSP/KP','FSP/KP draft was lost on station return','Practical progress was lost on FSP/KP station return']) assert.ok(smoke.includes(marker),marker);
+ assert.doesNotMatch(smoke,/(?:OS\.execute|HTTPRequest|exported-app-capture|godot-worker|KLINIKLAB_PC_CAPTURE)/);
 });

@@ -76,6 +76,10 @@ func _run() -> void:
 	if str((app.get("_progress") as Dictionary)["fspKpByTask"]["endo|anamnese"]["text"]) != "Synthetic German training draft":
 		_fail("Clinic walk erased FSP/KP language-state data")
 		return
+	app.call("_procedure_set_checklist",0,true)
+	if not bool(app.call("_procedure_checklist_complete",0)):
+		_fail("Practical checklist fixture did not persist before station switching")
+		return
 	var editor: Node3D = app.get("_volume")
 	if editor==null or str((editor.call("summary") as Dictionary)["fdi"])!="36" or (editor.call("summary") as Dictionary).get("removedSamplePoints",0)!=0:
 		_fail("Interaction altered synthetic tooth geometry or wrong FDI")
@@ -108,6 +112,48 @@ func _run() -> void:
 	if not bool(app.get("_walk_active")):
 		_fail("Cannot return to walk from a procedure")
 		return
+	if bool(app.call("_walk_enter_language_station")):
+		_fail("FSP/KP station activated outside its separate range")
+		return
+	for i in range(24):
+		walker.call("apply_move_intent",Vector2(-1.0,1.0),0.1)
+	if not bool(walker.call("in_language_station_range")) or bool(walker.call("in_operatory_range")):
+		_fail("Distinct FSP/KP marker is not independently reachable")
+		return
+	var language_draft := TextEdit.new()
+	language_draft.text="FSP/KP draft saved from the walkable language station"
+	app.set("_language_draft",language_draft)
+	app.set("_language_draft_key","endo|anamnese")
+	var language_pose: Vector3 = walker.get("position")
+	if not bool(app.call("_walk_enter_language_station")) or str(app.get("_view"))!="language" or bool(app.get("_walk_active")):
+		_fail("Range-gated FSP/KP station did not explicitly enter original language studio")
+		return
+	var saved: Dictionary = (app.get("_progress") as Dictionary)["fspKpByTask"]
+	if str(saved["endo|anamnese"]["text"])!="FSP/KP draft saved from the walkable language station":
+		_fail("FSP/KP draft was not saved on station entry")
+		return
+	if not bool(app.call("_procedure_checklist_complete",0)):
+		_fail("Practical completion was lost while switching to FSP/KP")
+		return
+	var live_draft: TextEdit = app.get("_language_draft")
+	live_draft.text="FSP/KP draft updated before returning to clinic"
+	if not bool(app.call("_return_to_clinic_walk")) or str(app.get("_view"))!="environment" or not bool(app.get("_walk_active")):
+		_fail("FSP/KP station did not explicitly return to clinic walk")
+		return
+	var saved_after_return: Dictionary = (app.get("_progress") as Dictionary)["fspKpByTask"]
+	if str(saved_after_return["endo|anamnese"]["text"])!="FSP/KP draft updated before returning to clinic":
+		_fail("FSP/KP draft was lost on station return")
+		return
+	if not bool(app.call("_procedure_checklist_complete",0)):
+		_fail("Practical progress was lost on FSP/KP station return")
+		return
+	var resumed_language_pose: Vector3 = walker.get("position")
+	if resumed_language_pose.distance_to(language_pose)>0.0001 or bool(app.get("_direct_bur_mode")):
+		_fail("FSP/KP station return reset walk pose or enabled bur")
+		return
+	if bool(app.call("_return_to_clinic_walk")):
+		_fail("FSP/KP station return latch remained active after exit")
+		return
 	var esc := InputEventKey.new()
 	esc.keycode=KEY_ESCAPE
 	esc.pressed=true
@@ -119,5 +165,5 @@ func _run() -> void:
 	if bool(app.get("_walk_active")) or bool(app.call("_walk_enter_procedure")):
 		_fail("Keyboard walk leaked into FSP/KP language view")
 		return
-	print("SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS SR37_STATION_RETURN_SAME_POSE_PASS no capture/Quest/clinical validation")
+	print("SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS SR37_STATION_RETURN_SAME_POSE_PASS SR38_RANGE_GATED_FSP_KP_STATION_DRAFT_AND_PRACTICAL_PERSISTENCE_PASS no capture/Quest/clinical validation")
 	quit(0)
