@@ -30,11 +30,19 @@ func _smoke() -> void:
 	if questions.size() != 7:
 		_fail("Source patient interview content mismatches original")
 		return
+	var case0: Dictionary = cases[0]
+	if str(case0.get("patientName","")).is_empty() or (case0.get("patientReply",[]) as Array).size()!=7:
+		_fail("Original guided patient dialogue not exported")
+		return
 	var correct: int = int(questions[0]["correct"])
 	app.call("_answer", "interview", 0, correct)
 	var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
 	if answers.size() < 1 or not answers["molar:interview:0"]["correct"]:
 		_fail("Native answer event and formative evaluation failed")
+		return
+	var report: String = app.call("_generate_report")
+	if not report.contains("CASE FDI 16") or not report.contains("Original production source SHA") or not report.contains("formative choices=1"):
+		_fail("Native case-based formative report or provenance incorrect")
 		return
 	app.call("_select_case", 1)
 	app.call("_select_station", 4)
@@ -70,5 +78,5 @@ func _smoke() -> void:
 	if (empty["answers"] as Dictionary).size() != 0 or 		(empty["studied"] as Dictionary).size() != 0:
 		_fail("Reset educational progress did not clear all answers")
 		return
-	print("SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS: SOURCE 6/7; CASE SWITCH; FSP QUESTION; SOURCE PRACTICAL DECISION; PERSIST; RESET; NOT GPU/FULL APP")
+	print("SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS: PATIENT REPLIES; LOCAL REPORT; SOURCE 6/7; CASE SWITCH; FSP QUESTION; SOURCE PRACTICAL DECISION; PERSIST; RESET; NOT GPU/FULL APP")
 	quit(0)
