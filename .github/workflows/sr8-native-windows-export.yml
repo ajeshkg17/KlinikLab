@@ -50,8 +50,8 @@ jobs:
           test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/fdi16-volume-field.bin"
           test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/clinical-pathways.json"
           test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/source/cc0-clinic-manifest.json"
-          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/cc0/whole-clinic-starter-v1.glb"
-          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/cc0/instrument-tray-v1.glb"
+          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/cc0/whole-clinic-starter-godot-v1.glb"
+          test -s "$RUNNER_TEMP/KlinikLab-Godot-Source/cc0/instrument-tray-godot-v1.glb"
       - name: Download verified official 4.7.2 native export templates (no unpinned binaries)
         shell: bash
         run: |
