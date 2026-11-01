@@ -43,8 +43,17 @@ if($Mode -eq 'Prepare'){
  & git -C $repo worktree add --detach $source $sha
  if($LASTEXITCODE -ne 0){throw 'Pinned original UE source worktree failed'}
  $builder=Join-Path $source 'visual-qa\sr1b-run-local-kliniklab.ps1'
- & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $builder -Mode Build -EvidenceDir $run -ExpectedSha $sha -EngineRoot $ue
- if($LASTEXITCODE -ne 0){throw 'Original source-exact UE procedural tooth level build FAILED; preserve evidence'}
+ $buildArgs='-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "'+
+  $builder+'" -Mode Build -EvidenceDir "'+$run+'" -ExpectedSha '+$sha+' -EngineRoot "'+$ue+'"'
+ $outLog=Join-Path $run 'original-source-build-stdout.log'
+ $errLog=Join-Path $run 'original-source-build-stderr.log'
+ $p=Start-Process -FilePath 'powershell.exe' -ArgumentList $buildArgs -PassThru -NoNewWindow -RedirectStandardOutput $outLog -RedirectStandardError $errLog
+ if(-not $p.WaitForExit(1800000)){
+  & taskkill.exe /PID $p.Id /T /F | Out-Null
+  throw 'Original Unreal source build exceeded 1800s bound; preserve unique attempt and logs'
+ }
+ $p.Refresh()
+ if($p.ExitCode -ne 0){throw 'Original UE procedural tooth level build failed; preserve run and original logs'}
  $node=(Get-Command node.exe -ErrorAction Stop).Source
  & $node (Join-Path $repo 'visual-qa\sr1d-export-native-cases.mjs') "--source-dir=$source" "--output=$cases" "--expected-sha=$sha"
  if($LASTEXITCODE -ne 0){throw 'Original six cases/seven stations export failed'}
@@ -52,7 +61,12 @@ if($Mode -eq 'Prepare'){
  $env:KLINIKLAB_SR1J_CASES=$cases
  $script=Join-Path $repo 'visual-qa\unreal-whole-clinic-stage.py'
  $args=@(('"' + $project + '"'),('-ExecutePythonScript="' + $script + '"'),'-d3d12','-log','-unattended')
- $proc=Start-Process -FilePath $cmdEditor -ArgumentList $args -Wait -PassThru -NoNewWindow
+ $proc=Start-Process -FilePath $cmdEditor -ArgumentList $args -PassThru -NoNewWindow
+ if(-not $proc.WaitForExit(1200000)){
+  & taskkill.exe /PID $proc.Id /T /F | Out-Null
+  throw 'Unreal source-derived whole clinic actor staging exceeded 1200s; original evidence retained'
+ }
+ $proc.Refresh()
  if(-not(Test-Path $stage)){throw 'No source-derived UE whole clinic stage report; original logs retained'}
  $s=Get-Content $stage -Raw|ConvertFrom-Json
  if($s.sourceSHA -cne $sha -or $s.status -cne 'UNREAL_WHOLE_CLINIC_SCENE_SAVED_NOT_GPU_RENDERED' -or
