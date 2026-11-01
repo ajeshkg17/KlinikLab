@@ -384,7 +384,7 @@ async function auditInterruptedOwnerWatcher(){
      if(length)await f.read(b,0,length,st.size-length);
      entry.tailRedacted=b.toString('utf8')
       .replace(/(?:github_pat_[A-Za-z0-9_]+|gh[opusr]_[A-Za-z0-9]+)/g,'[REDACTED_CREDENTIAL]')
-      .replace(/Bearer\\s+[^\\s]+/gi,'Bearer [REDACTED]')
+      .replace(/Bearer\s+[^\s]+/gi,'Bearer [REDACTED]')
       .slice(-1800);
     }finally{await f.close()}
    }else if(st.size<10_000_000){
