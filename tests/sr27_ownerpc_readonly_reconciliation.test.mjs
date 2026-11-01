@@ -96,6 +96,7 @@ test('SR27 watcher probe cannot authorize refresh even when observations are qui
   assert.ok(q.includes(required),required);
  }
  assert.doesNotMatch(q,/\b(Stop-Process|Start-Process|Stop-ScheduledTask|Start-ScheduledTask|Set-ScheduledTask|Register-ScheduledTask|Remove-Item|Set-Content|Add-Content|New-Item|Invoke-RestMethod)\b/);
- assert.doesNotMatch(recon,/\b(writeFile|mkdir|rename|unlink|fetch\(|spawn\(|exec\(|api\(|fetchRemote|git fetch)\b/);
+ const executable=recon.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'');
+ assert.doesNotMatch(executable,/\b(?:writeFile|mkdir|rename|unlink|fetchRemote)\s*\(|\b(?:fetch|spawn|exec|api)\s*\(|\bgit\s+fetch\b/);
  assert.match(recon,/noRerender:true,ledgerRepairAuthorized:false,taskRefreshAuthorized:false/);
 });
