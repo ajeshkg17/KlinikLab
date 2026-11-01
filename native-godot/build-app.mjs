@@ -71,7 +71,7 @@ try{
   fs.copyFileSync(file,originalCopy,fs.constants.COPYFILE_EXCL);
   if(hashFile(originalCopy)!==asset.sha256)
    throw Error('CC0 native original source changed in packaging '+asset.id);
-  const derivedName=asset.filename.replace(/-v1\\.glb$/,'-godot-v1.glb');
+  const derivedName=asset.filename.replace('-v1.glb','-godot-v1.glb');
   if(derivedName===asset.filename||!derivedName.endsWith('.glb'))
    throw Error('Unsafe derived CC0 model filename');
   const derived=path.join(dest,'cc0',derivedName);
