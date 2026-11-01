@@ -1,3 +1,28 @@
+## Verified new owner-PC lease holder and diagnostic caveat — 1 November 2026
+
+Owner-reported after actual Windows upgrade: worker `f41078e3fc7049adb9158f1122adca7298168df8` live as PID `37280`, previous idle watcher PID `26812` safely stopped and original lock preserved as `godot-worker-active.lock.idle-upgrade-26812`; 6/6 readiness tests, WinPS5.1 parser and actual launcher environment checks passed. The fresh live task's `--probe-next-job` returned `READY_FOR_FUTURE_UNIQUE_JOB_ADMISSION_NOT_EXECUTED`; no engine launched or existing source rendered. Original job07 remains published recovery-only `EVIDENCE_INCOMPLETE`. Do not queue a new job merely to re-prove launcher environment, and do not use probe-only ID `pc-godot-clinic-20261101-probe-never-queued-job08` as a real render job.
+
+If `godot-heartbeat.json` is still old after 20+ seconds, remember `--probe-next-job` does not write it, **but the actual watcher tick does**. Thus an indefinitely stale heartbeat is an independent consistency concern. Safely inspect the receipt and heartbeat without running any job:
+
+```powershell
+$root=Join-Path $env:LOCALAPPDATA 'KlinikLabGodotWorker'
+$receipt=Get-Content (Join-Path $root 'godot-watcher-runtime.json') -Raw|ConvertFrom-Json
+$heartbeat=Get-Content (Join-Path $root 'godot-heartbeat.json') -Raw|ConvertFrom-Json
+[pscustomobject]@{
+ ReceiptPid=$receipt.workerPid
+ ReceiptSHA=$receipt.workerGitSHA
+ ReceiptUTC=$receipt.updatedUTC
+ HeartbeatPid=$heartbeat.pid
+ HeartbeatUTC=$heartbeat.at
+ HeartbeatStatus=$heartbeat.status
+ TaskState=(Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher').State
+}
+```
+
+Do not delete/rewrite either state file or run `--once` to 'repair' a stale heartbeat. If receipt PID/SHA is current with fresh UTC, admission remains verified by the probe. Any persistent mismatched heartbeat requires log/absolute-path inspection before inferring an underlying process failure.
+
+---
+
 # SR1G task environment acceptance and non-consuming next-job probe
 
 **Distinct processes:** The PowerShell logon task receives the approved `-GodotExe` argument and assigns `$env:KLINIKLAB_GODOT_EXE=$GodotExe` before invoking Node via `Start-Process`. The user's separate interactive terminal has its OWN environment; an unconfigured `node ... --validate` previously printed a blocker, clobbered the running task's heartbeat and incorrectly exited zero. This did **not prove** the task lacked the executable. Standalone `--validate` now returns nonzero if its OWN shell lacks the path, performs a strict GitHub/publisher/module preflight otherwise, and **never writes shared heartbeat, ledger or screenshot evidence**. If running standalone validation, explicitly set the variable in that shell first.
