@@ -108,6 +108,20 @@ func _ready() -> void:
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
+	# Only an explicit unique owner-PC CLI user argument requests actual
+	# exported-app viewport evidence. Normal learners never capture/upload.
+	for arg in OS.get_cmdline_user_args():
+		var option: String = str(arg)
+		if option.begins_with("--kliniklab-native-pc-capture="):
+			var job_id: String = option.trim_prefix("--kliniklab-native-pc-capture=")
+			var capture_script: GDScript = load("res://owner-pc-capture.gd")
+			if capture_script == null:
+				push_error("Approved actual-exe PC capture code not packaged")
+				break
+			var reporter: Node = capture_script.new()
+			add_child(reporter)
+			reporter.call_deferred("run",self,job_id)
+			break
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
 
 func _load_source() -> bool:
