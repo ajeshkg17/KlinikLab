@@ -22,7 +22,7 @@ images=[
  ('unreal-whole-clinic-overview.png',3.0),
  ('unreal-whole-clinic-angled.png',24.0),
  ('unreal-fdi16-cut-occlusal.png',40.0)]
-state={'requested':set(),'done':False,'frames':0,'error':None}
+state={'requested':set(),'done':False,'frames':0,'error':None,'screenshotTasks':[]}
 _callback_handle=None
 
 def digest(file):
@@ -115,11 +115,19 @@ def _on_tick(delta):
   t=max(0.0,min(elapsed/42.0,1.0))
   yaw=-14.0 + 31.0*t
   x=-740.0*math.cos(math.radians(yaw))
-  y= 740.0*math.sin(math.radians(yaw))
-  camera.set_actor_location(unreal.Vector(x,y,210.0+180.0*t),False,False)
-  camera.set_actor_rotation(unreal.Rotator(-5.0-20.0*t,yaw,0),False)
-  sub.set_level_viewport_camera_info(camera.get_actor_location(),
-                                    camera.get_actor_rotation(),viewport)
+  y=740.0*math.sin(math.radians(yaw))
+  if elapsed>=36.0:
+   # True elevated occlusal angle of original source-derived AFTER tooth,
+   # still correctly FDI16. No other case geometry substituted.
+   at=unreal.Vector(-145.0,65.0,280.0)
+   target=unreal.Vector(0.0,65.0,74.0)
+  else:
+   at=unreal.Vector(x,y,210.0+180.0*t)
+   target=unreal.Vector(90.0,0.0,95.0)
+  camera.set_actor_location(at,False,False)
+  facing=unreal.MathLibrary.find_look_at_rotation(at,target)
+  camera.set_actor_rotation(facing,False)
+  sub.set_level_viewport_camera_info(at,facing,viewport)
   sub.editor_invalidate_viewports()
   state['frames']+=1
   for index,(name,deadline) in enumerate(images):
@@ -129,7 +137,7 @@ def _on_tick(delta):
      raise RuntimeError('Native original PNG would be overwritten: '+name)
     # Unreal native high-res capture requests actual Editor viewport/camera
     # pixels. Its output is independently verified by the WinPS collector.
-    unreal.AutomationLibrary.take_high_res_screenshot(1600,900,str(p),camera)
+    state['screenshotTasks'].append(unreal.AutomationLibrary.take_high_res_screenshot(1600,900,str(p),camera))
     state['requested'].add(name)
   if elapsed>=50.0:
    if len(state['requested'])!=3:
