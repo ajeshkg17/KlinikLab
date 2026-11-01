@@ -64,7 +64,7 @@ test('SR37 E-operatory practical station offers explicit source-only walk return
  const start=app.indexOf('func _return_to_clinic_walk() -> bool:');
  const end=app.indexOf('func _procedure_context_available()',start);
  const fn=app.slice(start,end);
- for (const marker of ['_walk_station_return_available','_station_index != 4','_switch_view("environment")','_apply_walk_camera()','_walk_active = true']) assert.ok(fn.includes(marker));
+ for (const marker of ['_walk_station_return_available','_station_index == 4','_switch_view("environment")','_apply_walk_camera()','_walk_active = true']) assert.ok(fn.includes(marker));
  assert.doesNotMatch(fn,/_walk.call\("reset"\)|_record_practical\(|_save_progress\(|_direct_cut_world_ray\(/);
  assert.match(app,/Return to clinic walk at operatory \(no grading or drilling\)/);
  assert.match(smoke,/SR37_STATION_RETURN_SAME_POSE_PASS/);
