@@ -4,14 +4,24 @@
 
 ## Build and open on Windows
 
-From a clean KlinikLab checkout (Node 22+, Git and Godot 4.7.2 installed):
+From a clean KlinikLab checkout (Node 22+, Git and Godot 4.7.2 installed), run the local launcher in PowerShell:
+
+```powershell
+& .\native-godot\launch-local.ps1
+```
+
+It finds Godot 4.7.2 from `KLINIKLAB_GODOT_EXE`, `PATH`, or the standard WinGet install folder, checks the tool versions and clean source state, creates a new unique build folder under `%LOCALAPPDATA%`, builds from the exact Git commit, then starts the native app. To open the project in the editor instead, pass `-OpenEditor`; to select a nonstandard executable, pass `-GodotExecutable 'C:\path\to\godot.exe'`. The script refuses to overwrite a prior build. It does not capture or upload images, and its launch is informal local inspection rather than native visual/GPU acceptance.
+
+The equivalent manual commands are:
 
 ```powershell
 $sha = (git rev-parse HEAD).Trim()
 $run = Join-Path $env:LOCALAPPDATA ('KlinikLabNativeApp-' + [guid]::NewGuid().ToString('N'))
 node native-godot/build-app.mjs "--source-dir=$PWD" "--expected-sha=$sha" "--output=$run"
-& 'C:\PATH\TO\godot_v4.7.2-stable_win64.exe' --path $run --editor
+& 'C:\PATH\TO\godot_v4.7.2-stable_win64.exe' --path $run
 ```
+
+Append `--editor` only when you want the Godot editor instead of the running app.
 
 The exact-source builder refuses reusing an existing output folder. It copies Godot scene/scripts, generates original FDI16 before and after-cut OBJ data from the production **volumetric-lab.js** mesher, independently exports the six synthetic production cases and seven stations, and loads original source FSP dialogue, handover, viva, clinic questions and instrument catalog. Two independent exporter digests must match. All six original synthetic cases now have source-derived case-specific editable volume fields; none is a clinically calibrated model.
 
