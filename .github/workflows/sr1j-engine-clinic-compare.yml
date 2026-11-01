@@ -7,6 +7,7 @@ on:
       - 'visual-qa/run-godot-whole-clinic-pc.ps1'
       - 'visual-qa/run-unreal-whole-clinic-pc.ps1'
       - 'visual-qa/unreal-whole-clinic-stage.py'
+      - 'visual-qa/unreal-whole-clinic-init.py'
       - 'visual-qa/unreal-whole-clinic-capture.py'
       - 'visual-qa/publish-whole-clinic-comparison-pc.ps1'
       - 'tests/sr1j_whole_clinic_engine_compare.test.mjs'
@@ -33,7 +34,7 @@ jobs:
       - name: Python syntax only, NEVER import Unreal Editor or create assets
         shell: pwsh
         run: |
-          python -m py_compile visual-qa/unreal-whole-clinic-stage.py visual-qa/unreal-whole-clinic-capture.py
+          python -m py_compile visual-qa/unreal-whole-clinic-stage.py visual-qa/unreal-whole-clinic-init.py visual-qa/unreal-whole-clinic-capture.py
           if ($LASTEXITCODE -ne 0) { throw 'Unreal whole clinic script syntax failure' }
       - name: Parse ALL PC runners with real PowerShell 5.1 and PowerShell 7, no execution
         shell: pwsh
