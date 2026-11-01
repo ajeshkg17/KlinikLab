@@ -22,8 +22,7 @@ function Get-KLOwnerTaskContext {
  $principal=[string]$task.Principal.UserId
  $taskSid=''
  try{$taskSid=([Security.Principal.SecurityIdentifier]::new($principal)).Value}catch{
-  try{$taskSid=([Security.Principal.NTAccount]::new($principal)).
-   Translate([Security.Principal.SecurityIdentifier]).Value}catch{}
+  try{$taskSid=([Security.Principal.NTAccount]::new($principal).Translate([Security.Principal.SecurityIdentifier])).Value}catch{}
  }
  $decision=Test-KLOwnerIdentityMatch -TaskSid $taskSid -LoginSid $current
  $actions=@($task.Actions)
