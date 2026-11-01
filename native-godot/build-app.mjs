@@ -6,6 +6,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
@@ -25,7 +26,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
@@ -34,7 +35,47 @@ try{
  function run(script,args){
   execFileSync(process.execPath,[script,...args],{stdio:'inherit',timeout:90000});
  }
+ // Only these two individually reviewed CC0 visual props are accepted for
+ // native packaging. Never silently import the other 52 unreviewed candidates.
+ const sourceAssets=path.join(root,'assets/cc0/3dassets-dental');
+ const sourceLicense=JSON.parse(fs.readFileSync(path.join(sourceAssets,'source-manifest.json'),'utf8'));
+ if(sourceLicense.licenseSPDX!=='CC0-1.0'||sourceLicense.status!=='REVIEWED_CC0_STATIC_VISUAL_PROTOTYPES_ONLY'||
+   sourceLicense.review?.clinicalAccepted!==false||sourceLicense.review?.anatomyFDIValidated!==false)
+   throw Error('CC0 review/license manifest not approved for native static use');
+ const selected=[
+  {id:'whole-clinic-starter',filename:'whole-clinic-starter-v1.glb',
+   sha256:'9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a'},
+  {id:'instrument-tray',filename:'instrument-tray-v1.glb',
+   sha256:'63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036'}
+ ];
+ const hashFile=(name)=>crypto.createHash('sha256').update(fs.readFileSync(name)).digest('hex');
+ const selectedManifest={schemaVersion:1,appGitSHA:sha,
+  kind:'REVIEWED_CC0_CLINIC_STATIC_VISUAL_ONLY',licenseSPDX:'CC0-1.0',
+  creator:sourceLicense.creator,licenseDeed:sourceLicense.licenseDeed,
+  originalReviewSourceCommit:sourceLicense.review.originalPreviewSourceCodeSha,
+  originalReviewRunId:sourceLicense.review.githubRunId,
+  clinicalValidated:false,fdiAnatomySupplied:false,assets:{}};
+ fs.mkdirSync(path.join(dest,'cc0'),{recursive:true});
+ for(const asset of selected){
+  const manifest=sourceLicense.files.find(f=>f.candidateId===asset.id);
+  const file=path.join(sourceAssets,asset.filename);
+  if(!manifest||manifest.licenseAccepted!==true||manifest.originalSourceBytesUnmodified!==true||
+    manifest.sha256!==asset.sha256||fs.statSync(file).size!==manifest.bytes||
+    hashFile(file)!==asset.sha256)
+   throw Error('Original reviewed CC0 source bytes/permissions drift for '+asset.id);
+  const imported=path.join(dest,'cc0',asset.filename);
+  fs.copyFileSync(file,imported,fs.constants.COPYFILE_EXCL);
+  if(hashFile(imported)!==asset.sha256)
+   throw Error('CC0 native packaging copy changed source bytes '+asset.id);
+  selectedManifest.assets[asset.id]={path:'res://cc0/'+asset.filename,
+   sha256:asset.sha256,bytes:manifest.bytes,
+   status:'STATIC_VISUAL_ONLY',publisher:manifest.sourceUrl};
+ }
+ fs.copyFileSync(path.join(sourceAssets,'README.md'),path.join(dest,'cc0','README-ORIGINAL-SOURCE.md'),fs.constants.COPYFILE_EXCL);
  const exported=path.join(dest,'source');
+ fs.mkdirSync(exported,{recursive:true});
+ fs.writeFileSync(path.join(exported,'cc0-clinic-manifest.json'),
+  JSON.stringify(selectedManifest,null,2)+'\n',{flag:'wx'});
  run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
@@ -94,12 +135,15 @@ try{
   nativeSourceSyntheticRadiographySixCases:true,
   nativeOriginalFspKpFourCasesSixteenPhases:true,
   nativeMeshSurfacePointerEditingOptIn:true,
+  nativeReviewedCC0ClinicImportedFromExactOriginals:true,
+  nativeReviewedCC0SourceSha256:selectedManifest.assets['whole-clinic-starter'].sha256,
+  nativeReviewedCC0MeshAndPixelAcceptancePending:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
   clinicalCalibrationVerified:false,
   fullInteractiveAppMigrated:false,verifiedNativeGpu:false,
   buildStatus:'NATIVE_GODOT_APP_PROJECT_BUILT_NEEDS_NATIVE_RUNTIME_QA',
-  limitation:'All six source case volumes are editable synthetic sampled geometry, NOT calibrated tissue mechanics. Full browser parity, Quest/XR, AI, radiography and clinical validation remain incomplete.'
+  limitation:'Reviewed CC0 static environment and tray are packaged and checked; six original independent FDI case volumes remain synthetic. Native renderer/RTX workstation pixels and clinical anatomy/forces are NOT accepted; full browser parity, Quest/XR and AI remain incomplete.'
  };
  fs.writeFileSync(path.join(dest,'native-build-manifest.json'),JSON.stringify(record,null,2)+'\n',{flag:'wx'});
  console.log('KLINIKLAB_NATIVE_APP_PROJECT_CREATED: '+dest);
