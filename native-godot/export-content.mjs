@@ -83,6 +83,34 @@ const quiz={
  viva:normalizedQuiz(parsed.VIVA,'viva'),
  clinic:normalizedQuiz(parsed.CLINIC,'clinic')
 };
+const practicalStart=source.indexOf('function getPractical(caseData){');
+const practicalEnd=source.indexOf('\nclass PrepCanvas',practicalStart);
+if(practicalStart<0||practicalEnd<practicalStart||practicalEnd-practicalStart>16000)
+ throw Error('No bounded production case-specific practical task function');
+const taskFunction=source.slice(practicalStart,practicalEnd);
+if(/\b(?:fetch|eval|Function|require|import|process|globalThis|document|window)\b/.test(taskFunction))
+ throw Error('Unexpected browser/runtime dependency in original practical-task builder');
+const rawPractical=vm.runInNewContext(literal('CASES')+'\n'+taskFunction+
+ '\nCASES.map(c=>getPractical(c))',Object.create(null),{timeout:1400});
+if(rawPractical.length!==6)throw Error('All six original clinical practical workflows required');
+const practical=rawPractical.map((steps,i)=>{
+ if(!Array.isArray(steps)||steps.length<5||steps.length>20)throw Error('Missing practical steps for '+expectedCases[i]);
+ return steps.map((t,j)=>{
+  if(!['tooth','tool','choice','drill'].includes(t.type)||
+     typeof t.title!=='string'||t.title.length<3||
+     typeof t.detail!=='string'||t.detail.length<5)
+   throw Error('Invalid original practical task '+expectedCases[i]+'/'+j);
+  if(t.type==='choice'&&(!Array.isArray(t.options)||t.options.length!==3||
+    !Number.isInteger(t.correct)||t.correct<0||t.correct>2||
+    typeof t.explain!=='string'))throw Error('Malformed original practical decision');
+  if(t.type==='tooth'&&String(t.target)!==expectedFDI[i])throw Error('Wrong tooth identity in original practical task');
+  if(t.type==='tool'&&(typeof t.target!=='string'||!Object.hasOwn(parsed.TOOLS,t.target)))throw Error('Unrecognized source tool target');
+  // Drill remains narrative only: exporting steps does NOT port physical or voxel behavior.
+  return plain({type:t.type,title:t.title,detail:t.detail,
+   target:t.target??'',success:t.success??'',options:t.options??[],
+   correct:t.correct??-1,explanation:t.explain??''});
+ });
+});
 const tools=Object.entries(parsed.TOOLS).map(([id,label])=>{
  if(!/^[a-z]{2,20}$/.test(id)||!Array.isArray(label)||label.length!==2)throw Error('Source instrument invalid');
  return plain({id,german:label[0],english:label[1]});
@@ -92,10 +120,11 @@ const manifest={
  schemaVersion:2,kind:'SOURCE_DERIVED_NATIVE_APP_CONTENT_NOT_FUNCTIONAL_PARITY',
  sourceGitSHA:sha,sourceAppSHA256:crypto.createHash('sha256').update(source).digest('hex'),
  syntheticCasesOnly:true,clinicalAssessmentValidated:false,
- cases,stations,quiz,tools,
+ cases,stations,quiz,tools,practical,
  migrationGates:{
   clinicalCases:'SOURCE_CONTENT_EXPORTED',
   stationExercises:'SOURCE_QUIZ_CONTENT_EXPORTED',
+  caseSpecificPracticalChoices:'SOURCE_TASKS_EXPORTED_NATIVE_INTERACTION_PARTIAL',
   interactiveThreeDPreparation:'NOT_PORTED',
   fspKpFormativeRubric:'NOT_PORTED',
   scanImportAndRadiography:'NOT_PORTED',
