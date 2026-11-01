@@ -1222,7 +1222,7 @@ func _generate_report() -> String:
 	lines.append("ORIGINAL FOUR-CASE FSP/KP FORMATIVE GERMAN TRAINING (not an examination result)")
 	for id in ["perio","restoration","endo","surgery"]:
 		for phase in ["anamnese","aufklaerung","brief","kollegen"]:
-			var key := id+"|"+phase
+			var key: String = str(id)+"|"+str(phase)
 			if german.has(key):
 				var entry: Dictionary = german[key]
 				var result: Dictionary = entry.get("result",{})
