@@ -60,7 +60,9 @@ test('SR14 actual EXPORTED EXE PC evidence path is isolated from original protot
  assert.match(embedded,/native-exported-app-result\.json/);
  assert.match(embedded,/kliniklab-exported-cc0-environment\.png/);
  assert.match(embedded,/kliniklab-exported-fdi36-practical\.png/);
- assert.match(embedded,/sourceOriginalGLBsHashVerified/);
+ assert.match(embedded,/wholeMeshInstances/);
+ assert.match(embedded,/trayMeshInstances/);
+ assert.match(embedded,/sourceGitSHA/);
  assert.match(embedded,/selectedFDI/);
  assert.match(app,/--kliniklab-exported-pc-capture/);
  assert.match(app,/load\("res:\/\/exported-app-capture-node\.gd"\)/);
