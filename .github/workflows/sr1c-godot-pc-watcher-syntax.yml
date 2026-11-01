@@ -33,6 +33,10 @@ on:
       - 'visual-qa/sr26-lease-raw-timestamp.ps1'
       - 'tests/sr26_lease_raw_timestamp_windows.ps1'
       - 'tests/sr16_ownerpc_readonly_diagnostics.test.mjs'
+      - 'visual-qa/sr27-ownerpc-observe-only.ps1'
+      - 'visual-qa/sr27-reconcile-consumed-readonly.mjs'
+      - 'tests/sr27_ownerpc_readonly_reconciliation.test.mjs'
+      - 'tests/sr27_observe_only_windows.ps1'
       - 'visual-qa/sr1d-prepare-godot-cases.ps1'
       - 'visual-qa/sr1d-export-native-cases.mjs'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -77,6 +81,7 @@ jobs:
           node --test tests/sr1n_godot_native_capture_race.test.mjs
           node --test tests/sr1p_q_job08_unity_native_workflow.test.mjs
           node --test tests/sr16_ownerpc_readonly_diagnostics.test.mjs
+          node --test tests/sr27_ownerpc_readonly_reconciliation.test.mjs
           node --check visual-qa/godot-job07-forensics.mjs
           node --test tests/sr1e_job07_forensic_recovery.test.mjs
           node --check visual-qa/godot-single-instance.mjs
@@ -106,6 +111,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'WinPS 5.1 raw UTC lease timestamp regression failed' }
           & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr26_lease_raw_timestamp_windows.ps1
           if ($LASTEXITCODE -ne 0) { throw 'PowerShell 7 raw UTC lease timestamp regression failed' }
+      - name: SR27 read-only observer parser on Windows PowerShell 5.1 and 7 (NO owner task execution)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr27_observe_only_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'WinPS5.1 read-only observer contract failed' }
+          & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr27_observe_only_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell7 read-only observer contract failed' }
       - name: Prove actual Windows PowerShell 5.1 scheduled launcher passes Godot EXE to child Node
         shell: pwsh
         run: |
@@ -149,6 +161,8 @@ jobs:
             'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1',
             'visual-qa/sr26-lease-raw-timestamp.ps1',
             'tests/sr26_lease_raw_timestamp_windows.ps1',
+            'visual-qa/sr27-ownerpc-observe-only.ps1',
+            'tests/sr27_observe_only_windows.ps1',
             'visual-qa/sr1d-prepare-godot-cases.ps1',
             'tests/sr1c_pdh_invalid_rows_windows.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1'
