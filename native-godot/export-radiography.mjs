@@ -11,6 +11,7 @@ import zlib from 'node:zlib';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {loadProductionSolid} from '../visual-qa/sr1-local-kliniklab-export.mjs';
+import {extractRadiographyInfo} from './radiography-info.mjs';
 
 const opts=Object.fromEntries(process.argv.slice(2).map(arg=>{
  const i=arg.indexOf('=');
@@ -25,10 +26,7 @@ if(execFileSync('git',['-C',root,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!=
 if(fs.existsSync(output))throw Error('Refusing radiography output overwrite');
 const js=fs.readFileSync(path.join(root,'desktop-suite.js'),'utf8');
 const vol=fs.readFileSync(path.join(root,'volumetric-lab.js'),'utf8');
-const start=js.indexOf('const info=['),end=js.indexOf('];\nlet modelFactory',start);
-if(start<0||end<start||end-start>6000||js.indexOf('const info=[',start+1)>=0)
- throw Error('Bounded browser radiography case table changed');
-const info=vm.runInNewContext(js.slice(start,end+2)+'\ninfo',Object.create(null),{timeout:1200});
+const info=vm.runInNewContext(extractRadiographyInfo(js)+'\ninfo',Object.create(null),{timeout:1200});
 const IDs=['molar','endo','anterior','crown','surgery','perio'];
 const FDIs=['16','36','11','26','48','46'];
 const KINDS=['caries','apex','trauma','normal','impaction','bone'];
