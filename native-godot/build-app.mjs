@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd'])copy('native-godot/'+name,name);
  for(const name of ['main.gd','main.tscn'])copy('visual-qa/godot-local-clinical/'+name,name);
  for(const name of ['sr1c-godot-clinic-overview.gd'])copy('visual-qa/'+name,name);
  const exportSource=path.join(src,'visual-qa/sr1-local-kliniklab-export.mjs');
