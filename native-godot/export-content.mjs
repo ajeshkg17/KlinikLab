@@ -52,10 +52,16 @@ function plain(v){
 }
 const cases=parsed.CASES.map((c,i)=>{
  if(c.id!==expectedCases[i]||String(c.num)!==expectedFDI[i])throw Error('Wrong source case/order');
- for(const k of ['title','subtitle','complaint','history','exam','risk','diagnosis','planA','planB','qp','prepType']){
+ for(const k of ['title','subtitle','complaint','history','exam','risk','diagnosis','planA','planB','qp','prepType','name']){
   if(typeof c[k]!=='string'||c[k].length<3)throw Error('Missing case field '+c.id+'/'+k);
  }
- return plain({id:c.id,fdi:String(c.num),title:c.title,subtitle:c.subtitle,complaint:c.complaint,
+ if(!Number.isInteger(c.age)||c.age<18||c.age>110||
+    !Array.isArray(c.patientReply)||c.patientReply.length!==7||
+    c.patientReply.some(t=>typeof t!=='string'||t.length<8))
+   throw Error('Original guided patient responses missing '+c.id);
+ return plain({id:c.id,fdi:String(c.num),title:c.title,subtitle:c.subtitle,
+  patientName:c.name,patientAge:c.age,patientReply:c.patientReply,
+  complaint:c.complaint,
   history:c.history,exam:c.exam,risk:c.risk,diagnosis:c.diagnosis,
   primaryPlan:c.planA,alternativePlan:c.planB,question:c.qp,prepType:c.prepType,
   vocab:c.vocab,keywords:c.keywords});
@@ -124,6 +130,7 @@ const manifest={
  migrationGates:{
   clinicalCases:'SOURCE_CONTENT_EXPORTED',
   stationExercises:'SOURCE_QUIZ_CONTENT_EXPORTED',
+  guidedPatientResponse:'ORIGINAL_PATIENT_REPLIES_EXPORTED_MCQ_TRIGGERED',
   caseSpecificPracticalChoices:'SOURCE_TASKS_EXPORTED_NATIVE_INTERACTION_PARTIAL',
   interactiveThreeDPreparation:'NOT_PORTED',
   fspKpFormativeRubric:'NOT_PORTED',
