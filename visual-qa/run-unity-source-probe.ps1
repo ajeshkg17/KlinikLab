@@ -3,7 +3,8 @@
 param(
  [string]$UnityExe,
  [Parameter(Mandatory=$true)][string]$RepositoryPath,
- [string]$ExpectedSourceSha='f4d4d4151851a08342def08d9f2e461f5f5e7109'
+ [string]$ExpectedSourceSha='f4d4d4151851a08342def08d9f2e461f5f5e7109',
+ [string]$RunReceiptPath
 )
 $ErrorActionPreference='Stop'
 if($env:OS -ne 'Windows_NT'){throw 'Windows-only local Unity source import'}
@@ -90,6 +91,25 @@ try{
   $r.processGpuVerified -ne $false -or
   $r.fullKlinikLabApplicationMigrated -ne $false){
   throw 'Unity source parity result is incomplete or mismatched'
+ }
+ # Machine-readable unique handoff to the NEXT native private-desktop
+ # GPU stage. This receipt is not a native render success claim.
+ if($RunReceiptPath){
+  if(-not [IO.Path]::IsPathRooted($RunReceiptPath)){throw 'Unity receipt path must be absolute'}
+  $dest=[IO.Path]::GetFullPath($RunReceiptPath)
+  if(Test-Path -LiteralPath $dest){throw 'Never reuse Unity source receipt'}
+  $receipt=[ordered]@{
+   schemaVersion=1;status='UNITY_SOURCE_IMPORTED_SCENE_SAVED_NO_GPU_RENDER'
+   sourceGitSHA=$ExpectedSourceSha;sourceRun=$run
+   sourceProject=$project;unityExe=$UnityExe
+   realGpuRendered=$false;fullKlinikLabApplicationMigrated=$false
+  }
+  $json=(ConvertTo-Json -InputObject $receipt -Depth 6)+[Environment]::NewLine
+  $stream=[IO.File]::Open($dest,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
+  try{
+   $bytes=[Text.UTF8Encoding]::new($false).GetBytes($json)
+   $stream.Write($bytes,0,$bytes.Length)
+  }finally{$stream.Dispose()}
  }
  Write-Host 'UNITY_SOURCE_ONLY_PASS — original FDI16 imported, no GPU render'
  Write-Host "Unity version: $($r.unityVersion)"
