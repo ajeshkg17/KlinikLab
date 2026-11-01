@@ -72,6 +72,7 @@ if($Mode -eq 'Prepare'){
  if($s.sourceSHA -cne $sha -or $s.status -cne 'UNREAL_WHOLE_CLINIC_SCENE_SAVED_NOT_GPU_RENDERED' -or
  $s.sixSourceCasesVerified -ne $true -or $s.sevenStationsVerified -ne $true -or
  $s.sourceTeethRetainedAfterLevelReload -ne $true -or
+ $s.nativeWorkflowPreviewActorsVerified -ne $true -or
  [int]$s.wholeClinicObjectCount -lt 35){
  throw "UE whole-clinic stage incomplete. Editor exit $($proc.ExitCode); do not claim native render"}
  Write-Host "UNREAL_WHOLE_CLINIC_SCENE_PREPARED_NO_GPU: $run"
@@ -83,7 +84,8 @@ if(-not(Test-Path -LiteralPath $run -PathType Container) -or -not(Test-Path -Lit
 $b=Get-Content $stage -Raw|ConvertFrom-Json
 if($b.sourceSHA -cne $sha -or
  $b.status -cne 'UNREAL_WHOLE_CLINIC_SCENE_SAVED_NOT_GPU_RENDERED' -or
- $b.sourceTeethRetainedAfterLevelReload -ne $true){throw 'Source stage incomplete: refuse render'}
+ $b.sourceTeethRetainedAfterLevelReload -ne $true -or
+ $b.nativeWorkflowPreviewActorsVerified -ne $true){throw 'Source stage incomplete: refuse render'}
 if(-not(Test-Path (Join-Path $run 'Project\Content\Maps\L_KlinikLab_WholeClinic.umap'))){
  throw 'Saved UE native whole-clinic map absent'}
 if(Get-Process UnrealEditor -ErrorAction SilentlyContinue){
@@ -202,6 +204,8 @@ try {
  if($render.sourceSHA -cne $sha -or [int]$render.unrealPid -ne $session.pid -or
  [int]$render.sourceTrianglesBefore -ne 14856 -or [int]$render.sourceTrianglesAfter -ne 14936 -or
  $render.status -cne 'UNREAL_NATIVE_THREE_IMAGES_PENDING_PID_DXGI_GPU_AND_PIXEL_REVIEW' -or
+ $render.workflowNativeSelectionVerified -ne $true -or
+ [int]@($render.workflowSelectionEvents).Count -ne 3 -or
  [double]$render.elapsedSeconds -lt 40 -or [int]$render.orbitViewportTicks -lt 30){
   throw 'Native screenshot/report, source parity or real camera orbit incomplete'}
  $files=@('unreal-whole-clinic-overview.png','unreal-whole-clinic-angled.png',
