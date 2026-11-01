@@ -54,9 +54,11 @@ test('export rejects incorrect production revision and never writes a manifest',
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
 
-test('job07 is unique, strictly native and not full app; historical schema6 remains valid',()=>{
+test('new job08 is never-reused native clinic case/station job; archived job07 remains a distinct immutable historical ID',()=>{
  assert.equal(job.schemaVersion,7);
- assert.equal(job.jobId,'pc-godot-clinic-20261101-job07');
+ assert.equal(job.jobId,'pc-godot-clinic-20261101-job08');
+ assert.notEqual(job.jobId,'pc-godot-clinic-20261101-job07');
+ assert.notEqual(job.jobId,'pc-godot-clinic-20261101-probe-never-queued-job08');
  assert.equal(job.sceneMode,'clinic-cases');
  assert.equal(job.suite,'sr1d-clinic-case-station-migration');
  assert.equal(job.commit,'f4d4d4151851a08342def08d9f2e461f5f5e7109');
