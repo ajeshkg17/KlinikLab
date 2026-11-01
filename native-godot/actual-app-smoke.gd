@@ -14,9 +14,9 @@ func _run() -> void:
 		_fail("Expected actual Windows capture code absent")
 		return
 	var capture: Node = capture_script.new()
-	if not bool(capture.call("accepted_id","pc-kliniklab-native-cc0-20261101-job09-1234")) or
+	if (not bool(capture.call("accepted_id","pc-kliniklab-native-cc0-20261101-job09-1234")) or
 		bool(capture.call("accepted_id","pc-kliniklab-native-cc0-../../../")) or
-		bool(capture.call("accepted_id","pc-kliniklab-native-cc0-old")):
+		bool(capture.call("accepted_id","pc-kliniklab-native-cc0-old"))):
 		_fail("Unique immutable PC capture path validator ineffective")
 		return
 	capture.free()
@@ -39,13 +39,13 @@ func _run() -> void:
 		_fail("Real app's CC0 room visibility or duplicate schematic is wrong")
 		return
 	var summary: Dictionary = clinic.call("summary")
-	if not bool(summary.get("sourceOriginalGLBsHashVerified",false)) or
+	if (not bool(summary.get("sourceOriginalGLBsHashVerified",false)) or
 		not bool(summary.get("godotFloat32MeshesImported",false)) or
-		int(summary.get("wholeMeshInstances",0))<20:
+		int(summary.get("wholeMeshInstances",0))<20):
 		_fail("Actual app did not load verified source/dequantized CC0 geometry")
 		return
-	if original.get_node_or_null("KL_FDI16_BEFORE")==null or
-		original.get_node_or_null("KL_FDI16_AFTER")==null:
+	if (original.get_node_or_null("KL_FDI16_BEFORE")==null or
+		original.get_node_or_null("KL_FDI16_AFTER")==null):
 		_fail("Immutable source FDI16 before/after removed")
 		return
 	var app_content: Dictionary = app.get("_content")
@@ -59,9 +59,9 @@ func _run() -> void:
 			return
 		var info: Dictionary = volume.call("summary")
 		var case: Dictionary = (app_content["cases"] as Array)[i]
-		if str(info.get("fdi",""))!=FDIS[i] or str(info.get("caseId",""))!=IDS[i] or
+		if (str(info.get("fdi",""))!=FDIS[i] or str(info.get("caseId",""))!=IDS[i] or
 			str(case.get("fdi",""))!=FDIS[i] or not pathways.has(IDS[i]) or
-			(app_content["practical"][i] as Array).size()<5 or not clinic.visible:
+			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
 			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
 			return
 	app.call("_reset_progress")
