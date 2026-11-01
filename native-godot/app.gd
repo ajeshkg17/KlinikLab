@@ -296,6 +296,27 @@ func _procedure_move_step(delta: int) -> bool:
 	_refresh()
 	return true
 
+# Find the next unanswered or incorrect original task, wrapping once through
+# the selected case. This is navigation only: no grading or volume mutation.
+func _procedure_jump_to_review() -> bool:
+	if not _procedure_guided or not _procedure_context_available():
+		return false
+	var steps: Array = _content["practical"][_case_index]
+	if steps.is_empty():
+		return false
+	var answers: Dictionary = _progress["answers"]
+	for offset in range(1, steps.size() + 1):
+		var candidate: int = (_procedure_step_index + offset) % steps.size()
+		var record: Dictionary = answers.get(_key() + ":" + str(candidate), {})
+		if not bool(record.get("correct", false)):
+			if candidate == _procedure_step_index:
+				return false
+			_procedure_step_index = candidate
+			_direct_bur_mode = false
+			_refresh()
+			return true
+	return false
+
 func _handle_procedure_input(event: InputEvent) -> void:
 	if not _procedure_guided or not _procedure_context_available() or not (event is InputEventKey):
 		return
@@ -311,6 +332,8 @@ func _handle_procedure_input(event: InputEvent) -> void:
 		moved = _procedure_move_step(1)
 	elif code == KEY_P:
 		moved = _procedure_move_step(-1)
+	elif code == KEY_R:
+		moved = _procedure_jump_to_review()
 	if moved:
 		get_viewport().set_input_as_handled()
 
@@ -1077,7 +1100,7 @@ func _show_practical() -> void:
 				answered += 1
 		_page.add_child(_heading("Guided practical: task %d/%d · %d/%d responses recorded for this FDI case" % [
 			_procedure_step_index + 1, steps.size(), answered, steps.size()], 16))
-		_page.add_child(_heading("N = next · P = previous. You can revisit any source task; navigation does not answer, certify, score or cut. Bur use always needs independent explicit opt-in.", 13))
+		_page.add_child(_heading("N = next · P = previous · R = next unanswered/incorrect task. Review navigation never answers, certifies, scores or cuts. Bur use needs independent opt-in.", 13))
 		var previous := _button("Previous task (P)")
 		previous.disabled = _procedure_step_index == 0
 		previous.pressed.connect(_procedure_move_step.bind(-1))
@@ -1086,6 +1109,15 @@ func _show_practical() -> void:
 		next_task.disabled = _procedure_step_index >= steps.size() - 1
 		next_task.pressed.connect(_procedure_move_step.bind(1))
 		_page.add_child(next_task)
+		var needs_review: int = 0
+		for i in range(steps.size()):
+			var saved_step: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(i), {})
+			if not bool(saved_step.get("correct", false)):
+				needs_review += 1
+		var review_button := _button("Next task to review (R) · %d remaining" % needs_review)
+		review_button.disabled = needs_review == 0
+		review_button.pressed.connect(_procedure_jump_to_review)
+		_page.add_child(review_button)
 		var show_all := _button("Show all original practical tasks")
 		show_all.pressed.connect(_set_procedure_guided.bind(false))
 		_page.add_child(show_all)
