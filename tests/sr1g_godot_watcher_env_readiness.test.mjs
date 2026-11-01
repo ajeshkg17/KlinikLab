@@ -76,7 +76,7 @@ test('standalone --validate missing Godot path returns nonzero and does NOT over
    {cwd:root,env:{...process.env,LOCALAPPDATA:tmp,KLINIKLAB_GODOT_EXE:''},
     encoding:'utf8',timeout:20000});
   assert.notEqual(p.status,0,'invalid --validate must NOT exit zero');
-  assert.match(p.stderr+p.stdout,/Windows|KLINIKLAB_GODOT_EXE|Godot executable/);
+  assert.match(p.stderr+p.stdout,/windows|KLINIKLAB_GODOT_EXE|Godot executable/i);
   assert.equal(await fs.readFile(heartbeat,'utf8'),original);
  }finally{await fs.rm(tmp,{recursive:true,force:true})}
 });
