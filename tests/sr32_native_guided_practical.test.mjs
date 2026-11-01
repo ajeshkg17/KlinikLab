@@ -56,7 +56,7 @@ test('SR33 review-first action skips correct source tasks without scoring or cut
    'var candidate: int = (_procedure_step_index + offset) % steps.size()',
    'if not bool(record.get("correct", false)):'])
   assert.ok(app.includes(marker),marker);
- const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _handle_procedure_input('));
+ const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _procedure_checklist_complete('));
  assert.match(navigation,/_direct_bur_mode = false/);
  assert.doesNotMatch(navigation,/(?:_record_practical|_save_progress|cut_to|_direct_cut_world_ray|_mark_studied)\(/);
  const smoke=read('native-godot/guided-practical-smoke.gd');
