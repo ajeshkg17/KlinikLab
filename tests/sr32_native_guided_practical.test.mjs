@@ -68,7 +68,7 @@ test('SR33 review-first action skips correct source tasks without scoring or cut
 test('SR34 manual practical checklist is persisted, per-case, and distinct from answers and cutting',()=>{
  for(const marker of ['"practicalChecklist": {}','func _procedure_checklist_complete(step_index: int) -> bool:',
   'func _procedure_set_checklist(step_index: int, completed: bool) -> void:',
-  'checklist_state.toggled.connect(_procedure_set_checklist.bind(step_index))',
+  'checklist_state.toggled.connect(_procedure_toggle_checklist.bind(step_index))',
   '_save_progress()','Learner checklist: %d/%d manually completed']) assert.ok(app.includes(marker),marker);
  const impl=app.slice(app.indexOf('func _procedure_checklist_complete('),app.indexOf('func _handle_procedure_input('));
  assert.doesNotMatch(impl,/(?:_record_practical|_direct_cut_world_ray|_apply_cut|cut_to|_journey_procedure|_mark_studied)\\(/);
