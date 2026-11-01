@@ -608,7 +608,11 @@ func _show_drill_controls() -> void:
 	_page.add_child(_heading("No clinical units, scan anatomy, pulp safety or calibrated target score. Changes stored locally for this original-source build.", 12))
 
 func _apply_cut(x: HSlider, y: HSlider, z: HSlider, radius: HSlider) -> void:
-	if _volume == null or str(_volume.call("summary").get("fdi","")) != FDI[_case_index]:
+	if _volume == null:
+		return
+	var selected_volume: Dictionary = _volume.call("summary")
+	if str(selected_volume.get("fdi","")) != FDI[_case_index]:
+		push_warning("Case/FDI mismatch; refusing to cut wrong model")
 		return
 	_cut_position = Vector3(x.value,y.value,z.value)
 	_cut_radius = radius.value
