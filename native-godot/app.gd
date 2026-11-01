@@ -303,7 +303,7 @@ func _handle_procedure_input(event: InputEvent) -> void:
 	if not key.pressed or key.echo or key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
 		return
 	var focused: Control = get_viewport().gui_get_focus_owner()
-	if focused is LineEdit or focused is TextEdit or focused is OptionButton or focused is PopupMenu:
+	if focused is LineEdit or focused is TextEdit or focused is OptionButton:
 		return
 	var code: Key = key.physical_keycode if key.physical_keycode != KEY_NONE else key.keycode
 	var moved := false
