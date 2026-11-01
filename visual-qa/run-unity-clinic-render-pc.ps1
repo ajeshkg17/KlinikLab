@@ -1,7 +1,9 @@
 # Real Unity clinic GPU test: a NEW WinSta0 private desktop, never foreground.
 param([Parameter(Mandatory=$true)][string]$SourceProbeRun,
       [Parameter(Mandatory=$true)][string]$RepositoryPath,
-      [string]$UnityExe)
+      [string]$UnityExe,
+      [string]$RunReceiptPath,
+      [string]$ExpectedCodeSha)
 $ErrorActionPreference='Stop'
 if($env:OS -ne 'Windows_NT'){throw 'Windows owner PC only'}
 $src=[IO.Path]::GetFullPath($SourceProbeRun)
@@ -102,6 +104,42 @@ try{
  [IO.File]::WriteAllText((Join-Path $cap 'unity-gpu-pdh.json'),(ConvertTo-Json -InputObject $gpu -Depth 12),[Text.UTF8Encoding]::new($false))
  $result=[ordered]@{status=$(if($gpuOK){'NATIVE_PIXELS_GPU_CORROBORATED_PENDING_PIXEL_REVIEW'}else{'EVIDENCE_INCOMPLETE'});unityPid=$session.pid;sourceSHA=$sha;originalNativePngs=$pngs;originalPngHashesVerified=$true;privateDesktopCreated=$true;foregroundActivationRequested=$false;headlessDummyRendererUsed=$false;positiveUnityPidRtx5060DistinctPeriods=$validPeriods.Count;processGpuCorroborated=$gpuOK;imageIndependentPixelReviewAccepted=$false;fullKlinikLabApplicationMigrated=$false;clinicalAccuracyVerified=$false;questVerified=$false}
  [IO.File]::WriteAllText((Join-Path $cap 'unity-owner-pc-result.json'),(ConvertTo-Json -InputObject $result -Depth 8),[Text.UTF8Encoding]::new($false))
+ if($RunReceiptPath){
+  if(-not [IO.Path]::IsPathRooted($RunReceiptPath) -or
+   -not $ExpectedCodeSha -or $ExpectedCodeSha -cnotmatch '^[a-f0-9]{40}
+}finally{
+ if($session){
+  if($session.handle -ne [IntPtr]::Zero){
+   if($proc -and -not $proc.HasExited){[void][KlinikLab.PrivateDesktop]::TerminateProcess($session.handle,[uint32]1)}
+   [void][KlinikLab.PrivateDesktop]::CloseHandle($session.handle)
+  }
+  if($session.desktop -ne [IntPtr]::Zero){[void][KlinikLab.PrivateDesktop]::CloseDesktop($session.desktop)}
+ }
+ Write-Host "Original unique Unity run retained: $run"
+}
+){
+   throw 'Exact source-linked native Unity receipt location and code SHA required'
+  }
+  $actual=(& git -C $repo rev-parse HEAD).Trim()
+  if($LASTEXITCODE -ne 0 -or $actual -cne $ExpectedCodeSha){
+   throw 'Native Unity runner code SHA differs from approved original invocation'
+  }
+  $dest=[IO.Path]::GetFullPath($RunReceiptPath)
+  if(Test-Path -LiteralPath $dest){throw 'Native Unity receipt already attempted; refuse reuse'}
+  $receipt=[ordered]@{
+   schemaVersion=1;sourceRun=$src;nativeRun=$run
+   sourceGitSHA=$sha;codeGitSHA=$actual
+   nativePid=[int]$session.pid;nativeResultStatus=$result.status
+   nativePngHashesVerified=$true;nativePixelIndependentReview=$false
+   fullKlinikLabApplicationMigrated=$false
+  }
+  $json=(ConvertTo-Json -InputObject $receipt -Depth 7)+[Environment]::NewLine
+  $stream=[IO.File]::Open($dest,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
+  try{
+   $bytes=[Text.UTF8Encoding]::new($false).GetBytes($json)
+   $stream.Write($bytes,0,$bytes.Length)
+  }finally{$stream.Dispose()}
+ }
  Write-Host "UNITY_CLINIC_GPU_EVIDENCE: $($result.status), PID $($session.pid), GPU periods $($validPeriods.Count)"
 }finally{
  if($session){
