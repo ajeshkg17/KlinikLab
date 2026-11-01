@@ -18,6 +18,8 @@ test('Only two immutable CC0 official CDN sources can be acquired; NIH is exclud
  ]);
  assert(acquire.includes("ORIGINAL_SHA256_CHANGED"));
  assert(render.includes("use_denoising=False"));
+ assert(render.includes("scene.view_settings.exposure=-0.6"));
+ assert(publish.includes("BLOWN_OUT_NATIVE_PREVIEW"));
  assert.deepEqual(m.items.map(x=>x.id),['instrument-tray','whole-clinic-starter']);
  assert.deepEqual(m.items.map(x=>x.sourceUrl),[
   'https://cdn.3dassets.dev/assets/34383/v1/model.glb',

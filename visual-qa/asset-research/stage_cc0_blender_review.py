@@ -7,6 +7,7 @@ import json
 import pathlib
 import shutil
 import struct
+from PIL import Image
 
 def digest(path):
     h=hashlib.sha256()
@@ -63,11 +64,20 @@ def main():
                 raise RuntimeError("Native Blender preview dimensions incorrect")
             if digest(src)!=png["sha256"]:
                 raise RuntimeError("Original native Blender self-reported PNG SHA256 mismatch")
+            with Image.open(src) as pic:
+                im=pic.convert("RGB")
+                sample=im.resize((240,160))
+                clipped=sum(1 for r,g,b in sample.getdata() if r>=245 and g>=245 and b>=245)
+                clipped_fraction=clipped/(240*160)
+            if clipped_fraction>0.23:
+                raise RuntimeError("BLOWN_OUT_NATIVE_PREVIEW: clipped near-white pixel share %.3f for %s" %
+                                   (clipped_fraction,src.name))
+            png["nearlyWhitePixelFraction"]=round(clipped_fraction,5)
             dst=target/png["filename"]
             with dst.open("xb") as out:out.write(data)
             if digest(dst)!=png["sha256"]:
                 raise RuntimeError("PNG modified during publication staging")
-            images.append({"filename":dst.name,"sha256":png["sha256"],"bytes":len(data)})
+            images.append({"filename":dst.name,"sha256":png["sha256"],"bytes":len(data),"nearlyWhitePixelFraction":png["nearlyWhitePixelFraction"]})
         details_dst=target/(item["id"]+"-blender-inspection.json")
         details_dst.write_text(json.dumps(details,indent=2)+"\n")
         result["items"].append({

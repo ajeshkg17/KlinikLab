@@ -67,12 +67,15 @@ def main():
     bpy.context.scene.world=world
     world.use_nodes=True
     background=world.node_tree.nodes.get("Background")
-    background.inputs["Color"].default_value=(0.21,0.235,0.27,1)
-    background.inputs["Strength"].default_value=0.9
+    background.inputs["Color"].default_value=(0.12,0.14,0.16,1)
+    background.inputs["Strength"].default_value=0.45
     scale=max(diameter,0.1)
-    area_light("Review key",center+Vector((scale*0.8,-scale*1.15,scale*1.7)),max(180,350*diameter*diameter),scale)
-    area_light("Review fill",center+Vector((-scale*1.2,scale*0.6,scale*0.9)),max(100,200*diameter*diameter),scale)
-    area_light("Review rim",center+Vector((scale*0.2,scale*0.9,scale*1.3)),max(100,240*diameter*diameter),scale)
+    # Scale AREA power by real scene size, without the previous minimum
+    # 180 W on a 28 cm tray or 90 kW on a 16 m clinic. The prior immutable
+    # first run was visually rejected as strongly overexposed.
+    area_light("Review key",center+Vector((scale*0.8,-scale*1.15,scale*1.7)),max(0.2,24*diameter*diameter),scale)
+    area_light("Review fill",center+Vector((-scale*1.2,scale*0.6,scale*0.9)),max(0.12,8*diameter*diameter),scale)
+    area_light("Review rim",center+Vector((scale*0.2,scale*0.9,scale*1.3)),max(0.12,12*diameter*diameter),scale)
     cam_data=bpy.data.cameras.new("Source candidate inspection")
     camera=bpy.data.objects.new("Source candidate inspection",cam_data)
     bpy.context.collection.objects.link(camera)
@@ -101,6 +104,7 @@ def main():
     scene.render.threads=2
     scene.render.image_settings.color_depth="8"
     scene.view_settings.view_transform="Standard"
+    scene.view_settings.exposure=-0.6
     scene.camera.data.lens=40
     images=[]
     for label,offset in (
