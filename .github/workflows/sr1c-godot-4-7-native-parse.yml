@@ -200,6 +200,8 @@ jobs:
           node --test tests/sr14_native_exported_watcher.test.mjs
           node --test tests/sr14_unique_native_pc_job09.test.mjs
           node --test tests/sr16_unique_native_pc_job10.test.mjs
+          node --test tests/sr17_unique_native_pc_job11.test.mjs
+          node --test tests/sr20_unique_native_pc_job12.test.mjs
       - name: SR20 actual source startup emits early immutable capture checkpoint and fails closed headlessly (NO GPU)
         run: |
           set -euo pipefail

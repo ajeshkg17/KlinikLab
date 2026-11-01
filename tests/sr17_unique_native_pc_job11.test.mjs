@@ -10,7 +10,7 @@ const SOURCE='a33c31a9e1c364463f96c29a6004a7e625cd4e89';
 const ID='pc-godot-exported-20261101-cc0-job11-a33c31';
 const DOC='visual-qa/SR17_OWNER_PC_EXPORTED_APP_JOB11.md';
 test('SR17 one unique job11 is pinned to successful new embedded capture export, not consumed job10',()=>{
- const active=job('visual-qa/jobs/godot-current.json');
+ const active=job('visual-qa/jobs/godot-job11-original.json');
  const old=job('visual-qa/jobs/godot-job10-original.json');
  const old09=job('visual-qa/jobs/godot-job09-original.json');
  assert.equal(active.schemaVersion,8);
