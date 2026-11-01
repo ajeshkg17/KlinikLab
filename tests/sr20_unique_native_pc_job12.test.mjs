@@ -7,7 +7,7 @@ const root=path.resolve(import.meta.dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const j=p=>validateGodotJob(JSON.parse(read(p)));
 test('SR20 job12 source-unique schema8 from verified Windows export, preserving consumed job11',()=>{
- const active=j('visual-qa/jobs/godot-current.json'),archived=j('visual-qa/jobs/godot-job11-original.json');
+ const active=j('visual-qa/jobs/godot-job12-original.json'),archived=j('visual-qa/jobs/godot-job11-original.json');
  assert.equal(active.jobId,'pc-godot-exported-20261101-cc0-job12-approved-678f92');assert.equal(active.commit,'678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec');
  assert.equal(archived.jobId,'pc-godot-exported-20261101-cc0-job11-a33c31');
  assert.equal(archived.commit,'a33c31a9e1c364463f96c29a6004a7e625cd4e89');

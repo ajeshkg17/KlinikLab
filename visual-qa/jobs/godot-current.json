@@ -1,7 +1,7 @@
 {
   "schemaVersion": 8,
-  "jobId": "pc-godot-exported-20261101-cc0-job12-approved-678f92",
-  "commit": "678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec",
+  "jobId": "pc-godot-exported-20261101-cc0-job13-6a077f",
+  "commit": "6a077fc8781d9b51ea34a751986a0187cd163764",
   "suite": "sr14-native-exported-cc0-six-case",
   "sceneMode": "native-exported-cc0",
   "graphics": "forward_plus-vulkan",
