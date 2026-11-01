@@ -40,8 +40,24 @@ func _smoke() -> void:
 	if answers.size() < 1 or not answers["molar:interview:0"]["correct"]:
 		_fail("Native answer event and formative evaluation failed")
 		return
+	var journeys: Dictionary = app.get("_pathways")
+	if journeys.size()!=6 or (journeys["molar"]["procedure"] as Array).size()<3:
+		_fail("Original source clinical journey cases/steps unavailable")
+		return
+	app.call("_journey_ask","history",0)
+	app.call("_journey_ask","tests",0)
+	app.call("_journey_diagnosis",int(journeys["molar"]["correct"]))
+	app.call("_journey_plan","primary",int(journeys["molar"]["primary"]))
+	app.call("_journey_plan","alternative",int(journeys["molar"]["alternative"]))
+	app.call("_journey_set_consent",true)
+	for i in range((journeys["molar"]["procedure"] as Array).size()):
+		app.call("_journey_procedure",i)
+	var clinical_state: Dictionary = (app.get("_progress") as Dictionary)["journey"]["molar"]
+	if (clinical_state["history"] as Array).size()!=1 or (clinical_state["tests"] as Array).size()!=1 or not bool(clinical_state["consent"]) or int(clinical_state["ordered"])!=(journeys["molar"]["procedure"] as Array).size():
+		_fail("Native original six-stage clinical pathway state transitions failed")
+		return
 	var report: String = app.call("_generate_report")
-	if not report.contains("CASE FDI 16") or not report.contains("Original production source SHA") or not report.contains("formative choices=1"):
+	if not report.contains("CASE FDI 16") or not report.contains("Original production source SHA") or not report.contains("formative choices=1") or not report.contains("Native clinical journey: history="):
 		_fail("Native case-based formative report or provenance incorrect")
 		return
 	app.call("_select_case", 1)
