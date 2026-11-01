@@ -1,0 +1,94 @@
+name: SR1S licensed CC0 dental assets: download, native Blender render, immutable pixel evidence
+on:
+  push:
+    branches:
+      - asset-research/cc0-blender-batch-20261101
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  source-exact-cc0-blender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit CC0 batch allowlist and no unreviewed binaries
+        run: |
+          node --test tests/sr1s_cc0_native_blender_batch.test.mjs
+          python3 -m py_compile visual-qa/asset-research/acquire_cc0_batch.py visual-qa/asset-research/render_cc0_batch.py visual-qa/asset-research/stage_cc0_blender_review.py
+      - name: Install actual Blender from Ubuntu packages (NO dummy renderer)
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq blender
+          blender --version | head -n 2
+      - name: Download ORIGINAL pinned CC0 GLB files and hash original bytes
+        env:
+          SOURCE_ROOT: ${{ runner.temp }}/cc0-source-originals
+        run: |
+          python3 visual-qa/asset-research/acquire_cc0_batch.py \
+            --manifest visual-qa/asset-research/cc0-render-batch-v1.json \
+            --out "$SOURCE_ROOT"
+      - name: Render four REAL headless Blender PNG views with native glTF importer
+        env:
+          SOURCE_ROOT: ${{ runner.temp }}/cc0-source-originals
+          RENDER_ROOT: ${{ runner.temp }}/cc0-blender-renders
+        run: |
+          set -euo pipefail
+          mkdir -p "$RENDER_ROOT"
+          for id in instrument-tray whole-clinic-starter; do
+            blender --background --factory-startup --threads 2 \
+              --python visual-qa/asset-research/render_cc0_batch.py -- \
+              --input "$SOURCE_ROOT/$id.glb" --output "$RENDER_ROOT/$id" "$id"
+          done
+      - name: Verify original PNG bytes and stage previews-only publication
+        env:
+          SOURCE_ROOT: ${{ runner.temp }}/cc0-source-originals
+          RENDER_ROOT: ${{ runner.temp }}/cc0-blender-renders
+          STAGED_ROOT: ${{ runner.temp }}/cc0-staged-previews
+        run: |
+          python3 visual-qa/asset-research/stage_cc0_blender_review.py \
+            --batch visual-qa/asset-research/cc0-render-batch-v1.json \
+            --source "$SOURCE_ROOT" --renders "$RENDER_ROOT" \
+            --target "$STAGED_ROOT" \
+            --source-code-sha "$GITHUB_SHA" \
+            --workflow-run "$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
+      - name: Preserve original CC0 previews as GitHub Actions workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cc0-clinic-blender-native-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cc0-staged-previews/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish immutable original CC0 preview PNGs to visual-feedback without any GLB binaries
+        env:
+          STAGED_ROOT: ${{ runner.temp }}/cc0-staged-previews
+          GH_RUN: ${{ github.run_id }}
+          GH_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          git fetch origin visual-feedback
+          fb="$RUNNER_TEMP/asset-feedback-worktree"
+          git worktree add --detach "$fb" FETCH_HEAD
+          id="cc0-dental-blender-${GITHUB_SHA:0:12}-run${GH_RUN}-attempt${GH_ATTEMPT}"
+          path="runs/asset-research-$id"
+          if test -e "$fb/$path"; then
+            echo "Immutable original asset preview evidence already exists: $path" >&2
+            exit 1
+          fi
+          mkdir -p "$fb/$path"
+          cp -a "$STAGED_ROOT/." "$fb/$path/"
+          test -z "$(find "$fb/$path" -type f -name '*.glb' -print -quit)"
+          printf '# Latest CC0 dental Blender asset candidate images\n\n[Review native Blender pixels](./%s/README.md)\n\nEvidence is *pending direct pixel and clinical review*. No original model GLBs were committed.\n' "$path" > "$fb/ASSET_CC0_BLENDER_LATEST.md"
+          git -C "$fb" config user.name 'KlinikLab Asset Evidence Bot'
+          git -C "$fb" config user.email 'asset-evidence@users.noreply.github.com'
+          git -C "$fb" add -- "$path" ASSET_CC0_BLENDER_LATEST.md
+          git -C "$fb" commit -m "Publish licensed CC0 actual Blender candidate previews $id"
+          git -C "$fb" push origin HEAD:refs/heads/visual-feedback
+          echo "BATCH_PUBLISHED_NO_BINARY https://github.com/${GITHUB_REPOSITORY}/blob/visual-feedback/$path/README.md"
+          echo "## Native Blender licensed candidates (NOT visually/clinically accepted)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Immutable URL: https://github.com/${GITHUB_REPOSITORY}/blob/visual-feedback/$path/README.md" >> "$GITHUB_STEP_SUMMARY"
