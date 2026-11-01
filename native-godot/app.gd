@@ -33,6 +33,9 @@ var _answer_label: Label
 var _draft: TextEdit
 var _practical_feedback: Dictionary = {}
 var _boot_error := ""
+var _volume: Node3D
+var _cut_position := Vector3(0.0, 1.01, 0.0)
+var _cut_radius := 0.22
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -48,6 +51,18 @@ func _ready() -> void:
 	workspace.name = "KL_COMPLETE_OPERATORY_WORKSPACE"
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
+	var editor_script: GDScript = load("res://volume-cut.gd")
+	if editor_script != null:
+		var editable: Node3D = editor_script.new()
+		if bool(editable.call("configure",str(_content["sourceGitSHA"]))):
+			_volume = editable
+			_scene.add_child(editable)
+			var saved: Variant = _progress.get("volumeFDI16",[])
+			if not bool(_volume.call("restore_strokes",saved)):
+				push_warning("Saved synthetic bur strokes invalid; editable volume was reset")
+				_volume.call("reset")
+		else:
+			push_warning("Source-pinned FDI16 editable volume blocked: " + str(editable.call("error")))
 	_build_app()
 	_set_camera_mode("overview")
 	_select_case(0)
@@ -115,7 +130,7 @@ func _load_source() -> bool:
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "selectedCase": 0, "selectedStation": 0}
+		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [], "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -274,7 +289,9 @@ func _show_case_geometry() -> void:
 	for node_name in ["KL_FDI16_BEFORE", "KL_FDI16_AFTER"]:
 		var original: Node3D = _scene.get_node_or_null(node_name)
 		if original != null:
-			original.visible = show_original
+			original.visible = show_original and (node_name != "KL_FDI16_AFTER" or _volume == null)
+	if _volume != null:
+		_volume.visible = show_original
 
 func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
@@ -323,7 +340,10 @@ func _refresh() -> void:
 		if CASE_IDS[_case_index] != "molar":
 			_page.add_child(_heading("FDI %s: source case content is real; original drillable case geometry NOT PORTED. FDI16 is hidden." % FDI[_case_index], 14))
 		else:
-			_page.add_child(_heading("Original FDI16 BEFORE / simulated-cut meshes visible. These are static source states, not real-time bur subtraction.", 14))
+			if _volume != null:
+				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
+			else:
+				_page.add_child(_heading("FDI16 original immutable mesh states only. Editable source field unavailable or failed integrity checks.", 14))
 		_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
@@ -401,7 +421,7 @@ func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
-	_page.add_child(_heading("Original case-specific practical learning tasks. Selecting answers is formative. A drill task is NOT a ported voxel cutter.", 14))
+	_page.add_child(_heading("Source-derived practical tasks. FDI16 has a native editable procedural tooth; other cases still lack validated drillable models.", 14))
 	var steps: Array = _content["practical"][_case_index]
 	for step_index in range(steps.size()):
 		var step: Dictionary = steps[step_index]
@@ -427,10 +447,76 @@ func _show_practical() -> void:
 				menu.item_selected.connect(_practical_tool.bind(step_index))
 				_page.add_child(menu)
 			"drill":
-				_page.add_child(_heading("Original drill task retained as an educational instruction. Real-time bur subtraction, collision and scoring NOT YET PORTED.", 13))
+				if _case_index == 0 and _volume != null:
+					_show_drill_controls()
+				else:
+					_page.add_child(_heading("No native editable case-specific tooth for FDI %s. Task narrative only; live drilling is unavailable." % FDI[_case_index], 13))
 		var feedback := _heading("Not answered", 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
+
+
+func _make_cut_slider(title: String, low: float, high: float, start: float) -> HSlider:
+	var row := HBoxContainer.new()
+	var label := _heading(title, 13)
+	label.custom_minimum_size = Vector2(130, 0)
+	label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	row.add_child(label)
+	var slider := HSlider.new()
+	slider.min_value = low
+	slider.max_value = high
+	slider.step = 0.01
+	slider.value = clampf(start, low, high)
+	slider.custom_minimum_size = Vector2(300, 20)
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(slider)
+	_page.add_child(row)
+	return slider
+
+func _show_drill_controls() -> void:
+	_page.add_child(_heading("Editable FDI16 source-derived 3D volume | native bur simulation", 15))
+	_page.add_child(_heading("Set x/y/z in uncalibrated source model coordinates. Apply creates a 3D sphere/swept stroke, not a painted surface mark. Follow movements with nearby positions. No collision/safety grading.", 12))
+	var x := _make_cut_slider("Mesial / distal X", -1.15, 1.15, _cut_position.x)
+	var y := _make_cut_slider("Height Y", -1.50, 1.30, _cut_position.y)
+	var z := _make_cut_slider("Buccal / lingual Z", -1.00, 1.00, _cut_position.z)
+	var radius := _make_cut_slider("Bur radius (model)", 0.06, 0.35, _cut_radius)
+	var apply := _button("Apply 3D bur stroke")
+	apply.pressed.connect(_apply_cut.bind(x,y,z,radius))
+	_page.add_child(apply)
+	var undo_button := _button("Undo last bur stroke")
+	undo_button.pressed.connect(_undo_cut)
+	_page.add_child(undo_button)
+	var reset_button := _button("Reset editable FDI16 tooth")
+	reset_button.pressed.connect(_reset_cut)
+	_page.add_child(reset_button)
+	var stats: Dictionary = _volume.call("summary")
+	_page.add_child(_heading("Bur strokes %d/32 | %d native triangles | approximately %.1f%% of original occupied grid samples removed" %
+		[int(stats["strokes"]),int(stats["triangles"]),float(stats["removedPercentApprox"])], 13))
+	_page.add_child(_heading("No clinical units, scan anatomy, pulp safety or calibrated target score. Changes stored locally for this original-source build.", 12))
+
+func _apply_cut(x: HSlider, y: HSlider, z: HSlider, radius: HSlider) -> void:
+	if _volume == null or _case_index != 0:
+		return
+	_cut_position = Vector3(x.value,y.value,z.value)
+	_cut_radius = radius.value
+	if not bool(_volume.call("cut_to",_cut_position,_cut_radius)):
+		push_warning("Bur stroke rejected: outside volume, no material removed, or 32-stroke limit")
+		return
+	_store_cut()
+
+func _undo_cut() -> void:
+	if _volume != null and bool(_volume.call("undo")):
+		_store_cut()
+
+func _reset_cut() -> void:
+	if _volume != null:
+		_volume.call("reset")
+		_store_cut()
+
+func _store_cut() -> void:
+	_progress["volumeFDI16"] = _volume.call("export_strokes")
+	_save_progress()
+	_refresh()
 
 func _practical_choice(step_index: int, choice: int) -> void:
 	var step: Dictionary = _content["practical"][_case_index][step_index]
@@ -482,6 +568,9 @@ func _reset_progress() -> void:
 	_progress["answers"] = {}
 	_progress["notes"] = {}
 	_progress["studied"] = {}
+	_progress["volumeFDI16"] = []
+	if _volume != null:
+		_volume.call("reset")
 	_save_progress()
 	_refresh()
 
@@ -489,6 +578,9 @@ func _show_coverage() -> void:
 	_page.add_child(_heading("MIGRATION STATUS · Functional parity is NOT complete", 18))
 	var gates: Dictionary = _content.get("migrationGates", {})
 	for id in gates:
-		_page.add_child(_heading(str(id) + "  —  " + str(gates[id]), 14))
+		var status := str(gates[id])
+		if str(id) == "interactiveThreeDPreparation" and _volume != null:
+			status = "FDI16_LIVE_SAMPLED_VOLUME_ONLY__OTHER_CASES_NOT_PORTED"
+		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("Not ported: live voxel cutting, licensed 32-tooth atlas, intraoral STL/OBJ import, radiography, XR/Quest, server Gemini AI, validated grading and complete reports. Continue using original browser app for these functions.", 15))
+	_page.add_child(_heading("FDI16 source-pinned editable 3D volumetric cutting: available when grid hash verified; sampled synthetic geometry, no clinical grading. Still missing: all-case 32-tooth native anatomy, STL/OBJ import, radiography, XR/Quest, opt-in AI, validated FSP assessment and complete reports. The browser app remains reference.", 15))
