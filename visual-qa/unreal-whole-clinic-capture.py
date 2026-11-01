@@ -22,7 +22,12 @@ images=[
  ('unreal-whole-clinic-overview.png',3.0),
  ('unreal-whole-clinic-angled.png',24.0),
  ('unreal-fdi16-cut-occlusal.png',40.0)]
-state={'requested':set(),'done':False,'frames':0,'error':None,'screenshotTasks':[]}
+state={'requested':set(),'done':False,'frames':0,'error':None,'screenshotTasks':[],
+ 'selectionEvents':[],'captureContexts':{},'selectionIndex':-1}
+active_case_actor=None
+active_station_actor=None
+case_rows=[]
+station_rows=[]
 _callback_handle=None
 
 def digest(file):
@@ -31,6 +36,26 @@ def digest(file):
   for block in iter(lambda:f.read(1048576),b''):
    h.update(block)
  return h.hexdigest()
+
+def select_workflow_preview(index,elapsed):
+ """Native displayed selection preview; never modifies original tooth geometry."""
+ ci,si=((0,0),(1,4),(0,4))[index]  # FDI16, FDI36 metadata, FDI16 cut
+ c=case_rows[ci]
+ station=station_rows[si]
+ case_comp=active_case_actor.get_component_by_class(unreal.TextRenderComponent)
+ station_comp=active_station_actor.get_component_by_class(unreal.TextRenderComponent)
+ if case_comp is None or station_comp is None:
+  raise RuntimeError('Native case/station status TextRender components missing')
+ fdi=str(c['fdi'])
+ case_comp.set_text('ACTIVE FDI '+fdi+' / '+str(c['id']).upper()+
+  (' - ORIGINAL FDI16 MESH' if fdi=='16' else ' - METADATA ONLY, NO CASE MESH'))
+ station_comp.set_text('STATION '+str(si+1)+'/7: '+str(station['id']).upper())
+ state['selectionEvents'].append({
+  'timeSec':round(elapsed,3),'caseId':str(c['id']),'selectedFDI':fdi,
+  'stationId':str(station['id']),
+  'originalFDI16GeometryCorrectlyAttributed':fdi=='16',
+  'caseSpecificFDI36GeometryClaimed':False})
+ state['selectionIndex']=index
 
 def write_and_quit():
  if state['done']:
@@ -49,6 +74,13 @@ def write_and_quit():
   'unrealPid':os.getpid(),
   'nativeScreenshotFiles':list(pngs),
   'originalNativePngs':pngs,
+  'workflowSelectionEvents':state['selectionEvents'],
+  'workflowCaptureContexts':state['captureContexts'],
+  'workflowNativeSelectionVerified':(len(state['selectionEvents'])==3 and
+    [v['selectedFDI'] for v in state['selectionEvents']]==['16','36','16'] and
+    [v['stationId'] for v in state['selectionEvents']]==['interview','practical','practical'] and
+    len(state['captureContexts'])==3 and
+    [state['captureContexts'].get(n,{}).get('selectedFDI') for n,_ in images]==['16','36','16']),
   'threeViewImageFilesPresent':len(pngs)==3,
   'elapsedSeconds':round(durations,3),
   'orbitViewportTicks':state['frames'],
@@ -62,7 +94,7 @@ def write_and_quit():
   'captureError':state['error'],
   'limitation':'Unreal schematic operatory with original FDI16, not the full application'
  }
- if len(pngs)==3 and durations>=40 and state['frames']>=30 and not state['error']:
+ if len(pngs)==3 and durations>=40 and state['frames']>=30 and not state['error'] and report['workflowNativeSelectionVerified']:
   report['status']='UNREAL_NATIVE_THREE_IMAGES_PENDING_PID_DXGI_GPU_AND_PIXEL_REVIEW'
  report_path.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
  unreal.log('KL_SR1J_NATIVE_RENDER_STATUS='+report['status']+' pid='+str(os.getpid()))
@@ -92,6 +124,19 @@ try:
  if camera is None:
   raise RuntimeError('Source-provenance native clinic camera actor absent')
  labels={a.get_actor_label() for a in actors}
+ manifest=json.loads((run/'original-cases-stations.json').read_text('utf-8-sig'))
+ case_rows=manifest.get('cases',[])
+ station_rows=manifest.get('stations',[])
+ if (manifest.get('sourceGitSHA')!=SOURCE or
+     [x.get('id') for x in case_rows]!=['molar','endo','anterior','crown','surgery','perio'] or
+     [str(x.get('fdi')) for x in case_rows]!=['16','36','11','26','48','46'] or
+     [x.get('id') for x in station_rows]!=['interview','letter','handover','written','practical','viva','clinic']):
+  raise RuntimeError('Original source six cases/seven stations mismatch')
+ active_case_actor=next((a for a in actors if a.get_actor_label()=='KL_ACTIVE_CASE_STATUS'),None)
+ active_station_actor=next((a for a in actors if a.get_actor_label()=='KL_ACTIVE_STATION_STATUS'),None)
+ if active_case_actor is None or active_station_actor is None:
+  raise RuntimeError('Whole clinic native active case/station status actors missing')
+ select_workflow_preview(0,0.0)
  for label in ('KL_DENTAL_CHAIR_SEAT','KL_PROCEDURE_LIGHT_DIFFUSER',
   'KL_INSTRUMENT_TRAY','KL_FDI16_BEFORE_SOURCE_MESH',
   'KL_FDI16_AFTER_SIMULATED_CUT_SOURCE_MESH','KL_TRAINING_STATION_clinic'):
@@ -111,6 +156,11 @@ def _on_tick(delta):
   return
  try:
   elapsed=time.monotonic()-start
+  # Native state transitions bracket the original image captures.
+  if elapsed>=31.0 and state['selectionIndex']<2:
+   select_workflow_preview(2,elapsed)
+  elif elapsed>=15.0 and state['selectionIndex']<1:
+   select_workflow_preview(1,elapsed)
   # sustained revolving live UE editor view on private WinSta0 desktop
   t=max(0.0,min(elapsed/42.0,1.0))
   yaw=-14.0 + 31.0*t
@@ -139,6 +189,10 @@ def _on_tick(delta):
     # pixels. Its output is independently verified by the WinPS collector.
     state['screenshotTasks'].append(unreal.AutomationLibrary.take_high_res_screenshot(1600,900,str(p),camera))
     state['requested'].add(name)
+    event=state['selectionEvents'][-1]
+    state['captureContexts'][name]={
+     'caseId':event['caseId'],'selectedFDI':event['selectedFDI'],
+     'stationId':event['stationId'],'atSec':round(elapsed,3)}
   if elapsed>=50.0:
    if len(state['requested'])!=3:
     raise RuntimeError('Native camera missed one or more automated capture requests')
