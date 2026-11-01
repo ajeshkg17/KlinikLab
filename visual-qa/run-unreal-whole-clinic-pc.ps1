@@ -122,11 +122,22 @@ try {
  $si.lpDesktop='WinSta0\'+$deskName
  $si.dwFlags=1;$si.wShowWindow=4
  $pi=New-Object KlinikLab.PrivateDesktop+PROCESS_INFORMATION
+ # Unreal's official -ExecutePythonScript launch AUTO-QUITS when Python
+ # returns; callbacks would never render. Use the persistent project-local
+ # Content/Python/init_unreal.py startup hook instead (Epic 5.8 docs).
  $env:KLINIKLAB_SR1J_EVIDENCE_DIR=$run
- $script=Join-Path $repo 'visual-qa\unreal-whole-clinic-capture.py'
- if(-not(Test-Path $script)){throw 'Missing reviewed native UE automated pixel script'}
+ $env:KLINIKLAB_SR1J_CAPTURE_ENABLED='1'
+ $python=Join-Path (Split-Path -Parent $project) 'Content\Python'
+ New-Item -ItemType Directory -Path $python -Force|Out-Null
+ $initDest=Join-Path $python 'init_unreal.py'
+ $captureDest=Join-Path $python 'kl_sr1j_capture.py'
+ if((Test-Path $initDest) -or (Test-Path $captureDest)){
+  throw 'Private native UE Editor startup hook already exists; never rerun this attempt'
+ }
+ Copy-Item -LiteralPath (Join-Path $repo 'visual-qa\unreal-whole-clinic-init.py') -Destination $initDest -ErrorAction Stop
+ Copy-Item -LiteralPath (Join-Path $repo 'visual-qa\unreal-whole-clinic-capture.py') -Destination $captureDest -ErrorAction Stop
  $commandLine='"'+$editor+'" "'+$project+'" /Game/Maps/L_KlinikLab_WholeClinic -d3d12 -log -NoSplash'+
-  ' -ExecutePythonScript="'+$script+'" -abslog="'+$engineLog+'"'
+  ' -abslog="'+$engineLog+'"'
  $command=New-Object Text.StringBuilder($commandLine)
  $created=[KlinikLab.PrivateDesktop]::CreateProcess($editor,$command,
   [IntPtr]::Zero,[IntPtr]::Zero,$false,[uint32]0,[IntPtr]::Zero,
@@ -138,7 +149,22 @@ try {
  $owner.unrealPid=$session.pid
  $owner.privateDesktopCreated=$true
  $proc=[System.Diagnostics.Process]::GetProcessById($session.pid)
- Start-Sleep -Seconds 5
+ # Wait until the REAL Unreal Editor Python startup hook has loaded the
+ # whole clinic and registered its camera tick. No pre-start GPU sample claims.
+ $readyFile=Join-Path $cap 'unreal-native-capture-ready.json'
+ $readyFound=$false
+ for($attempt=0;$attempt -lt 90;$attempt++){
+  if(Test-Path -LiteralPath $readyFile){$readyFound=$true;break}
+  $proc.Refresh()
+  if($proc.HasExited){throw 'Private UnrealEditor terminated before native capture-ready signal'}
+  Start-Sleep -Seconds 1
+ }
+ if(-not $readyFound){throw 'Unreal native camera startup callback not ready within 90s'}
+ $ready=Get-Content -LiteralPath $readyFile -Raw|ConvertFrom-Json
+ if([int]$ready.unrealPid -ne $session.pid -or $ready.sourceSHA -cne $sha -or
+  $ready.status -cne 'NATIVE_UNREAL_EDITOR_CALLBACK_REGISTERED'){
+  throw 'Native Unreal Editor ready marker PID/source identity mismatch'
+ }
  # Exactly ONE persistent Windows PDH GPU Engine wildcard query, 1s intervals.
  $snapshots=@();$warnings=@()
  try{
