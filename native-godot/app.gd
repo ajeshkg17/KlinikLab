@@ -6,6 +6,7 @@ extends Node3D
 
 const CONTENT := "res://source/app-content.json"
 const CASES := "res://source/kliniklab-native-cases.json"
+const PATHWAYS := "res://source/clinical-pathways.json"
 const SOURCE_SHA := "res://source/expected-sha.txt"
 const PROGRESS := "user://kliniklab-native-progress-v2.json"
 const CASE_IDS := ["molar", "endo", "anterior", "crown", "surgery", "perio"]
@@ -18,6 +19,8 @@ const PAPER := Color("#eaf2f0")
 var _content: Dictionary = {}
 var _cases: Array = []
 var _stations: Array = []
+var _pathways: Dictionary = {}
+var _journey_stage := 0
 var _case_index := 0
 var _station_index := 0
 var _quiz_index := 0
@@ -129,11 +132,31 @@ func _load_source() -> bool:
 	if (_content.get("tools", []) as Array).size() < 15:
 		_boot_error = "Source instrument catalog missing"
 		return false
+	var pathways: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATHWAYS))
+	if not (pathways is Dictionary):
+		_boot_error = "Source clinical journey manifest missing"
+		return false
+	var manifest: Dictionary = pathways
+	if str(manifest.get("sourceGitSHA","")) != sha or str(manifest.get("kind","")) != "SYNTHETIC_SOURCE_CLINICAL_PATHWAYS_NOT_CERTIFIED" or manifest.get("clinicalAssessmentValidated",true) != false:
+		_boot_error = "Unapproved clinical pathway provenance"
+		return false
+	_pathways = manifest.get("cases",{})
+	if _pathways.size() != 6:
+		_boot_error = "Clinical pathway case count mismatch"
+		return false
+	for id in CASE_IDS:
+		if not _pathways.has(id):
+			_boot_error = "Missing clinical source pathway " + id
+			return false
+		var journey: Dictionary = _pathways[id]
+		if (journey.get("history",[]) as Array).size() < 4 or (journey.get("tests",[]) as Array).size() < 4 or (journey.get("procedure",[]) as Array).size() < 3:
+			_boot_error = "Clinical pathway stages incomplete: " + id
+			return false
 	return true
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [], "selectedCase": 0, "selectedStation": 0}
+		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [], "journey": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
@@ -145,6 +168,10 @@ func _load_progress() -> void:
 		if not (raw.get(key, null) is Dictionary):
 			return
 	_progress = raw
+	if not (_progress.get("journey",{}) is Dictionary):
+		_progress["journey"] = {}
+	if not _progress.has("journey"):
+		_progress["journey"] = {}
 	_case_index = clampi(int(_progress.get("selectedCase", 0)), 0, 5)
 	_station_index = clampi(int(_progress.get("selectedStation", 0)), 0, 6)
 
@@ -196,7 +223,7 @@ func _build_app() -> void:
 	var top := HBoxContainer.new()
 	outer.add_child(top)
 	top.add_child(_heading("KLINIKLAB • NATIVE APPLICATION", 22))
-	for section in ["clinic", "learning", "progress", "coverage"]:
+	for section in ["clinic", "learning", "journey", "progress", "coverage"]:
 		var b := _button(section.capitalize())
 		b.pressed.connect(_switch_view.bind(section))
 		top.add_child(b)
@@ -273,6 +300,7 @@ func _select_case(index: int) -> void:
 		return
 	_case_index = index
 	_quiz_index = 0
+	_journey_stage = 0
 	_show_case_geometry()
 	_save_progress()
 	_refresh()
@@ -315,7 +343,7 @@ func _set_camera_mode(mode: String) -> void:
 	camera.current = true
 
 func _switch_view(view: String) -> void:
-	if not (view in ["clinic", "learning", "progress", "coverage"]):
+	if not (view in ["clinic", "learning", "journey", "progress", "coverage"]):
 		return
 	_view = view
 	if _scene != null:
@@ -333,6 +361,8 @@ func _refresh() -> void:
 	_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
 	if _view == "progress":
 		_show_progress()
+	elif _view == "journey":
+		_show_journey()
 	elif _view == "coverage":
 		_show_coverage()
 	else:
@@ -649,6 +679,7 @@ func _reset_progress() -> void:
 	_progress["notes"] = {}
 	_progress["studied"] = {}
 	_progress["volumeFDI16"] = []
+	_progress["journey"] = {}
 	if _volume != null:
 		_volume.call("reset")
 	_save_progress()
@@ -663,6 +694,8 @@ func _show_coverage() -> void:
 			status = "FDI16_LIVE_SAMPLED_VOLUME_ONLY__OTHER_CASES_NOT_PORTED"
 		if str(id) == "reportingAndExport":
 			status = "LOCAL_TEXT_LEARNING_REPORT_ONLY__NO_VALIDATED_GRADING"
+		if str(id) == "clinicalCases":
+			status = "SIX_CASES_AND_NATIVE_SIX_STAGE_SOURCE_CLINICAL_JOURNEY"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
 	_page.add_child(_heading("FDI16 live synthetic cutting, seven original guided interview replies per case and local learning-report export are available. Still missing: free-form patient dialogue, full anatomy, native scan/radiography, XR/Quest, AI and validated assessment. Browser app remains reference.", 15))
