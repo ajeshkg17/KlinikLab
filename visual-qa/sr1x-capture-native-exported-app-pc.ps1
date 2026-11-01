@@ -14,7 +14,7 @@ New-Item -Path $release,$capture -ItemType Directory -Force | Out-Null
 $reportPath=Join-Path $capture 'godot-owner-pc-result.json'
 $script:report=[ordered]@{
  schemaVersion=8;sourceGitSHA=$ExpectedSha;nativeSceneMode='native-exported-cc0'
- nativeSourceSubmissionVerified=$false;nativeCaseWorkflowVerified=$false
+ nativeSourceSubmissionVerified=$false;nativeCaseWorkflowVerified=$false;rawSidecarVerified=$false
  nativeImagePresent=$false;nativeAngledImagePresent=$false
  nativeScreenshotFile=$null;nativeAngledScreenshotFile=$null
  godotProcessGPUCorroborated=$false;gpuAdapterLuidMatchedToNvidia=$false
@@ -38,6 +38,20 @@ try{
  $manifest.nativeCc0WholeClinicStaticEnvironment -ne $true -or $manifest.nativeCases -ne 6){
   throw 'Exported EXE SHA/source/CC0 manifest does not match target job'
  }
+ # Godot remaps OBJ/GLB resources: verify original portable raw bytes before launch.
+ $rawManifest=Join-Path $release 'RAW-SOURCE-SHA256SUMS.txt'
+ if(-not(Test-Path -LiteralPath $rawManifest -PathType Leaf)){throw 'Portable raw-source SHA manifest missing'}
+ $rawEntries=@(Get-Content -LiteralPath $rawManifest | Where-Object{$_ -ne ''})
+ if($rawEntries.Count -lt 12){throw 'Incomplete raw-source sidecar list'}
+ foreach($line in $rawEntries){
+  if($line -cnotmatch '^([a-f0-9]{64})  (verified-raw-source/[a-zA-Z0-9._/-]+)$'){throw 'Unsafe raw checksum row'}
+  $want=$Matches[1];$relative=$Matches[2]
+  if($relative -match '(^|/)\.\.(/|$)'){throw 'Raw asset traversal rejected'}
+  $asset=Join-Path $release $relative
+  if(-not(Test-Path -LiteralPath $asset -PathType Leaf)){throw ('Missing raw asset '+$relative)}
+  if((Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant() -cne $want){throw ('Raw SHA mismatch '+$relative)}
+ }
+ $script:report.rawSidecarVerified=$true
  $script:report.nativeSourceSubmissionVerified=$true
  $script:report.exportedExeSHA256=$actual
  $env:KLINIKLAB_PC_CAPTURE_DIR=$capture
@@ -51,11 +65,26 @@ try{
  . (Join-Path $PSScriptRoot 'sr1c-pdh-filter.ps1')
  Start-Sleep -Seconds 3
  $pdhErrors=@()
+ $pdhAliveStart=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhErrors)
+ $pdhAliveEnd=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
  $rows=@($parsed.rows)
  [IO.File]::WriteAllText((Join-Path $capture 'godot-gpu-3d-counters.json'),(ConvertTo-Json -InputObject $rows -Depth 12),(New-Object Text.UTF8Encoding($false)))
  $valid=@($rows | Where-Object{$_.usable -eq $true -and $_.utilizationPercent -gt 0.05})
+ # PDH 0xC0000BC6 (3221228486) is INVALID DATA, not 0% utilization.
+ $pdhDiagnostics=[ordered]@{
+  sourceGitSHA=$ExpectedSha;godotPid=[int]$session.Pid
+  processAliveAtSamplingStart=$pdhAliveStart;processAliveAtSamplingEnd=$pdhAliveEnd
+  sampleSnapshots=[int]$snapshots.Count;pid3dRows=[int]$rows.Count
+  positiveUsablePid3dRows=[int]$valid.Count
+  pid3dStatuses=@($rows | Group-Object status | ForEach-Object{@{status=[string]$_.Name;count=[int]$_.Count}})
+  invalidCode='0xC0000BC6';invalidDataNeverCountsAsGpu=$true
+  counterErrorTypes=@($pdhErrors | Select-Object -First 8 | ForEach-Object{[string]$_.CategoryInfo.Reason})
+  independentPixelReviewAccepted=$false
+ }
+ [IO.File]::WriteAllText((Join-Path $capture 'godot-gpu-pdh-diagnostics.json'),(ConvertTo-Json -InputObject $pdhDiagnostics -Depth 12),(New-Object Text.UTF8Encoding($false)))
+ if($rows.Count -gt 0 -and $valid.Count -eq 0){Block 'No positive valid same-PID GPU 3D rows; inspect PDH statuses and early process exit'}
  $nvidia=@([KlinikLab.DxgiEvidence]::Enumerate() | Where-Object{$_.vendorId -eq 4318 -and $_.name -match '(?i)RTX\s*5060'})
  if($nvidia.Count -eq 1){
   $script:report.rtx5060DxgiLuid=[string]$nvidia[0].luid

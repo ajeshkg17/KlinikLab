@@ -8,7 +8,7 @@ const get=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const SHA='525457796d0339d807de61293bc5ef65c15040fd';
 const JOB='pc-godot-exported-20261101-cc0-job10-525457';
 test('SR16: job10 requests exact successful repaired Windows export, not a job09 replay',()=>{
- const current=validateGodotJob(get('visual-qa/jobs/godot-current.json'));
+ const current=validateGodotJob(get('visual-qa/jobs/godot-job10-original.json'));
  const prior=validateGodotJob(get('visual-qa/jobs/godot-job09-original.json'));
  assert.equal(current.schemaVersion,8);
  assert.equal(current.jobId,JOB);assert.equal(current.commit,SHA);

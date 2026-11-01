@@ -104,6 +104,14 @@ jobs:
           if grep -Ei 'SCRIPT ERROR|Parse Error|Parser Error|Failed to load script' "$RUNNER_TEMP/native-app-import.log" "$RUNNER_TEMP/native-app-parse.log"; then
             echo 'Godot native app parser failed'; exit 1
           fi
+      - name: SR17 parse opt-in actual exported-app capture node (GDScript only; NOT GPU/pixels)
+        run: |
+          set -euo pipefail
+          test -s "$RUNNER_TEMP/native-kliniklab-app/exported-app-capture-node.gd"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://exported-app-capture-node.gd > "$RUNNER_TEMP/exported-capture-node-parse.log" 2>&1 || { cat "$RUNNER_TEMP/exported-capture-node-parse.log"; exit 1; }
+          cat "$RUNNER_TEMP/exported-capture-node-parse.log"
+          ! grep -Ei 'SCRIPT ERROR|Parse Error|Parser Error|Failed to load script' "$RUNNER_TEMP/exported-capture-node-parse.log"
+          node --test tests/sr14_native_exported_watcher.test.mjs
       - name: Execute source-backed native application interaction and local persistence in Godot 4.7.2 (HEADLESS, not GPU)
         run: |
           set -euo pipefail
@@ -206,13 +214,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://pulp-sample-smoke.gd > "$RUNNER_TEMP/pulp-model-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/pulp-model-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/pulp-model-smoke.log"
           grep -F "SR15_NATIVE_SIX_CASE_PULP_SAMPLE_INDICATOR_PASS" "$RUNNER_TEMP/pulp-model-smoke.log"
-      - name: Geometric CC0 room viewport frustum and all 6 case close-up cameras (headless, not pixels)
+      - name: SR19 geometric CC0 camera frustum and six editable FDI close-ups (HEADLESS, no GPU/pixels)
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://cc0-framing-smoke.gd > "$RUNNER_TEMP/cc0-frame-parse.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-frame-parse.log"; exit 1; }
-          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://cc0-framing-smoke.gd > "$RUNNER_TEMP/cc0-frustum.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-frustum.log"; exit 1; }
-          cat "$RUNNER_TEMP/cc0-frustum.log"
-          grep -F "SR15_CC0_CAMERA_FRUSTUM_AND_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/cc0-frustum.log"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://cc0-framing-smoke.gd > "$RUNNER_TEMP/cc0-frame-test.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-frame-test.log"; exit 1; }
+          cat "$RUNNER_TEMP/cc0-frame-test.log"
+          grep -F "SR15_CC0_CAMERA_FRUSTUM_AND_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/cc0-frame-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |

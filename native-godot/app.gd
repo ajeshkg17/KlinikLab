@@ -108,6 +108,21 @@ func _ready() -> void:
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
+	# SR17 exported Windows EXE starts its embedded main scene; --script is
+	# ignored by the standalone export. A private-desktop watcher can explicitly
+	# request the same live app's native captured pixels through Godot user args.
+	# No normal learner session activates this path; evidence remains local.
+	for arg in OS.get_cmdline_user_args():
+		if str(arg)=="--kliniklab-exported-pc-capture":
+			var export_capture: GDScript = load("res://exported-app-capture-node.gd")
+			if export_capture == null:
+				push_error("SR17 exported native capture Node not packaged in embedded PCK")
+				get_tree().quit(4)
+				return
+			var capture_runner: Node = export_capture.new()
+			add_child(capture_runner)
+			capture_runner.call_deferred("run",self)
+			break
 	# Only an explicit unique owner-PC CLI user argument requests actual
 	# exported-app viewport evidence. Normal learners never capture/upload.
 	for arg in OS.get_cmdline_user_args():

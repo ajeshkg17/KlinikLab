@@ -189,10 +189,11 @@ function Start-KLPrivateDesktopExportedApp {
  $start.dwFlags=0x1;$start.wShowWindow=4
  $pi=New-Object KlinikLab.PrivateDesktop+PROCESS_INFORMATION
  # No source project override: exported executable must load embedded PCK.
- # Fixed capture GDScript is inside SHA-pinned compiled application.
+ # A fixed opt-in CLI user arg activates the embedded app's capture Node.
+ # Standalone export ignores --script; it loads app.tscn from embedded PCK.
  $cmd='"'+$Executable+'" --windowed --resolution 1600x900'+
    ' --rendering-method forward_plus --rendering-driver vulkan --audio-driver Dummy'+
-   ' --script res://exported-app-capture.gd --verbose --log-file "'+$LogPath+'"'
+   ' --verbose --log-file "'+$LogPath+'" -- --kliniklab-exported-pc-capture'
  $buffer=New-Object System.Text.StringBuilder($cmd)
  $ok=[KlinikLab.PrivateDesktop]::CreateProcess($Executable,$buffer,
   [IntPtr]::Zero,[IntPtr]::Zero,$false,[uint32]0,[IntPtr]::Zero,
