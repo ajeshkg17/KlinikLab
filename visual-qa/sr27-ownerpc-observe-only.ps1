@@ -9,6 +9,34 @@ $root=Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::Local
 $leasePath=Join-Path $root 'godot-worker-active.lock'
 $ledgerPath=Join-Path $root 'godot-ledger.json'
 $taskName='KlinikLab-Godot-PC-Watcher'
+# SR28: gate the entire bounded observation on the actual scheduled-task owner
+# SID, not only on the name of the current login. Wrong-owner samples cannot
+# even look at a different profile's lease or be called owner-context evidence.
+. (Join-Path $PSScriptRoot 'sr28-owner-identity-core.ps1')
+$ownerGate=$null;$ownerGateError=$null
+try{$ownerGate=Get-KLOwnerTaskContext -TaskName $taskName}
+catch{$ownerGateError=$_.Exception.GetType().Name}
+if($null -eq $ownerGate -or -not $ownerGate.currentLoginMatchesTaskPrincipal -or
+ -not $ownerGate.localAppDataKnownFolderPresent -or
+ ($ownerGate.localAppDataEnvironmentPresent -and
+  -not $ownerGate.localAppDataEnvironmentMatchesKnownFolder)){
+ [ordered]@{
+  mode='SR28_OWNER_GATED_READ_ONLY_WATCHER_OBSERVATION'
+  ownerContextChecked=($null -ne $ownerGate)
+  ownerContextErrorType=$ownerGateError
+  currentLoginMatchesTaskPrincipal=if($null -ne $ownerGate){[bool]$ownerGate.currentLoginMatchesTaskPrincipal}else{$false}
+  taskPrincipalSidResolved=if($null -ne $ownerGate){[bool]$ownerGate.taskPrincipalSidResolved}else{$false}
+  localAppDataEnvironmentMatchesKnownFolder=if($null -ne $ownerGate){[bool]$ownerGate.localAppDataEnvironmentMatchesKnownFolder}else{$false}
+  first=$null;second=$null;observationSeconds=0
+  classification='OWNER_CONTEXT_NOT_VERIFIED__NO_LEASE_READ_NO_OBSERVATION__HOLD'
+  watcherQuiescenceCertified=$false
+  taskRefreshSafetyHold=$true;taskRefreshAuthorized=$false
+  noLedgerWrite=$true;noLeaseWrite=$true;noHeartbeatWrite=$true
+  noTaskOrProcessChange=$true;noGodotLaunch=$true;noNetwork=$true;noJobQueueChange=$true
+ }|ConvertTo-Json -Depth 8
+ return
+}
+
 function Get-KLUtcString($stamp){
  if($null -eq $stamp){return $null}
  return ([datetime]$stamp).ToUniversalTime().ToString('o')
@@ -41,16 +69,27 @@ function Get-KLWatchSnapshot {
  try{
   if(Test-Path -LiteralPath $leasePath -PathType Leaf){
    $observation.leaseExists=$true
-   $observation.leaseSha256=(Get-FileHash -LiteralPath $leasePath -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
-   $raw=Get-Content -LiteralPath $leasePath -Raw -ErrorAction Stop
-   $lease=$raw|ConvertFrom-Json -ErrorAction Stop
-   $observation.leaseStartedAt=Get-KLRawLeaseTimestamp -JsonText $raw
-   $observation.leaseProcessPid=[int]$lease.pid
-   if([string]$lease.jobPoller -cne 'visual-qa/godot-worker.mjs'){
-    $observation.errorCategories+='LEASE_POLLER_MISMATCH'
+   # Stage raw lease read before the hash API: Get-FileHash can throw a
+   # sharing/ACL WriteErrorException against the live Node file handle.
+   # Keep that failure visible, but do not erase a successful raw identity read.
+   $raw=$null
+   try{$raw=Get-Content -LiteralPath $leasePath -Raw -ErrorAction Stop}
+   catch{$observation.errorCategories+=('LEASE_RAW_'+$_.Exception.GetType().Name)}
+   if($null -ne $raw){
+    try{
+     $lease=$raw|ConvertFrom-Json -ErrorAction Stop
+     $observation.leaseStartedAt=Get-KLRawLeaseTimestamp -JsonText $raw
+     $observation.leaseProcessPid=[int]$lease.pid
+     if([string]$lease.jobPoller -cne 'visual-qa/godot-worker.mjs'){
+      $observation.errorCategories+='LEASE_POLLER_MISMATCH'
+     }
+    }catch{$observation.errorCategories+=('LEASE_PARSE_'+$_.Exception.GetType().Name)}
    }
+   try{
+    $observation.leaseSha256=(Get-FileHash -LiteralPath $leasePath -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+   }catch{$observation.errorCategories+=('LEASE_HASH_'+$_.Exception.GetType().Name)}
   }
- }catch{$observation.errorCategories+=('LEASE_'+$_.Exception.GetType().Name)}
+ }catch{$observation.errorCategories+=('LEASE_PRESENCE_'+$_.Exception.GetType().Name)}
  try{
   $all=@(Get-CimInstance -ClassName Win32_Process -ErrorAction Stop)
   $observation.processEnumerationComplete=$true

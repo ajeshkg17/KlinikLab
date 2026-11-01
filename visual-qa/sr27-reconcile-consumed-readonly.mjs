@@ -114,6 +114,13 @@ export async function inspectPublication(root,anchors=PUBLISHED_ANCHORS){
     'ORIGINAL_BYTES_CORROBORATED__TERMINAL_LEDGER_ABSENT__NO_REPAIR_AUTHORIZED')
    ?'HISTORICAL_REMOTE_PUBLICATIONS_WITH_LOCAL_LEDGER_GAP__NO_REPLAY'
    :'STATE_MISMATCH_OR_PARTIAL_RECONCILIATION__FAIL_CLOSED';
+ report.historicalPublicationDisposition=
+  report.reconciliationStatus==='HISTORICAL_REMOTE_PUBLICATIONS_WITH_LOCAL_LEDGER_GAP__NO_REPLAY'
+   ?'REMOTE_PUBLISHED_ORIGINALS_CORROBORATED__LOCAL_LEDGER_GAP__NO_REPLAY__NO_REPAIR'
+   :'NOT_ELIGIBLE_FOR_HISTORICAL_DISPOSITION__FAIL_CLOSED';
+ report.dispositionIsOnlyAnOfflineAnalyticalClassification=true;
+ report.consumedJobIdsRemainImmutable=true;
+ report.originalPixelsVisualAcceptanceClaimed=false;
  return report;
 }
 const isMain=process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url);
