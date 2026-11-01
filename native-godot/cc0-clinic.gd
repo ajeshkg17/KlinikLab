@@ -77,8 +77,9 @@ func configure(source_sha: String) -> bool:
 		if not FileAccess.file_exists(original_path) or FileAccess.get_sha256(original_path)!=str(item["sha"]):
 			_error = "Missing/mutated ORIGINAL CC0 GLB bytes for " + id
 			return false
-		if not FileAccess.file_exists(import_path) or FileAccess.get_sha256(import_path) != str(row.get("importSha256","")) or
-			str(row.get("importSha256","")).length()!=64:
+		if (not FileAccess.file_exists(import_path) or
+			FileAccess.get_sha256(import_path) != str(row.get("importSha256","")) or
+			str(row.get("importSha256","")).length()!=64):
 			_error = "Missing/mutated COMPATIBILITY-DERIVED Godot CC0 GLB for " + id
 			return false
 	_clinic = _load_glb(CLINIC)
