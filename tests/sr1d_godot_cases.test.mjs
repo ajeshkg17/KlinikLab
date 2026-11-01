@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const job=JSON.parse(read('visual-qa/jobs/godot-current.json'));
+const job=JSON.parse(read('visual-qa/jobs/godot-job08-original.json'));
 const worker=read('visual-qa/godot-worker.mjs');
 const bg=read('visual-qa/sr1c-godot-background-capture.gd');
 const panel=read('visual-qa/sr1d-godot-case-workflow.gd');
