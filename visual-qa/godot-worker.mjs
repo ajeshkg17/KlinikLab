@@ -22,6 +22,7 @@ const ROOT=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'.local','
 const REPO=path.join(ROOT,'source-repo');
 const LEDGER=path.join(ROOT,'godot-ledger.json');
 const HEARTBEAT=path.join(ROOT,'godot-heartbeat.json');
+const RUNTIME=path.join(ROOT,'godot-watcher-runtime.json');
 const EVIDENCE=path.join(ROOT,'godot-evidence');
 const OWNER='ajeshkg17/KlinikLab';
 const sourceDir=path.dirname(fileURLToPath(import.meta.url));
@@ -526,6 +527,101 @@ async function retireArchivedJob07StaleLease(){
   '; job07 remains immutable EVIDENCE_INCOMPLETE. New watcher may be separately installed.');
 }
 
+
+/** The scheduled-task wrapper sets KLINIKLAB_GODOT_EXE in its own process,
+ * just before Start-Process. An interactive --validate does not inherit it.
+ * Only the lease-holding watcher writes the per-PID runtime receipt.
+ */
+function workerSha(){return git(['rev-parse','HEAD'],path.resolve(sourceDir,'..'))}
+async function writeRuntimeReceipt(job,publisherPermissionVerified){
+ const exe=process.env.KLINIKLAB_GODOT_EXE;
+ if(!exe||!path.win32.isAbsolute(exe))throw Error('Watcher Godot executable environment not absolute');
+ await fs.access(exe);
+ const lease=await readGodotWorkerLease(ROOT);
+ if(!lease.exists||lease.pid!==process.pid||lease.processAlive!==true)
+  throw Error('Cannot attest runtime without the OWNED live watcher lease');
+ const receipt={
+  schemaVersion:1,workerPid:process.pid,workerGitSHA:workerSha(),
+  parentPid:process.ppid,updatedUTC:new Date().toISOString(),
+  godotExecutablePath:path.win32.normalize(exe),
+  executableExists:true,executableEnvironmentInherited:true,
+  childPowerShellHashModuleVerified:true,
+  githubPublisherPermissionVerified:publisherPermissionVerified,
+  currentApprovedJob:job.jobId,sourceGitSHA:job.commit,
+  githubJobApprovalVerified:true,
+  privateDesktopOnly:true,fullKlinikLabApplicationMigrated:false,
+  noJobExecutedByReceipt:true
+ };
+ const tmp=RUNTIME+'.'+process.pid+'.tmp';
+ await fs.writeFile(tmp,jsonWithoutBom(receipt));
+ await fs.rename(tmp,RUNTIME);
+}
+async function validateWithoutHeartbeat(){
+ // Real preflight MUST fail nonzero, and NEVER touch another process heartbeat.
+ await initialize();
+ const ps=verifyChildHashModule();
+ const job=await currentJob();
+ const ledger=await readLedger();
+ if(ledger.completed?.[job.jobId]?.commit &&
+    ledger.completed[job.jobId].commit!==job.commit)throw Error('Job ID reused with another source commit');
+ await permission();
+ console.log(JSON.stringify({status:'VALIDATED_NO_EXECUTION',jobId:job.jobId,
+  jobAlreadyTerminal:['published','failed'].includes(ledger.completed?.[job.jobId]?.status),
+  sourceSHA:job.commit,workerGitSHA:workerSha(),
+  godotExecutablePath:path.win32.normalize(process.env.KLINIKLAB_GODOT_EXE),
+  childPowerShell:ps,heartbeatUntouched:true,noGodotLaunched:true},null,2));
+}
+async function probeNextJobWithoutExecuting(){
+ // This is a proof of queue *admission*, not a future RTX render/launch.
+ // Reads the LIVE watcher's environment receipt. No Godot path is required
+ // in this diagnostic terminal; no heartbeat, lock or ledger is written.
+ if(process.platform!=='win32')throw Error('Owner Windows PC only');
+ const lease=await readGodotWorkerLease(ROOT);
+ if(!lease.exists||lease.malformed||lease.processAlive!==true)
+  throw Error('No active, live Godot watcher lease for readiness probe');
+ const receipt=parseGodotJson(await fs.readFile(RUNTIME,'utf8'),'running watcher runtime receipt');
+ if(receipt.workerPid!==lease.pid||receipt.workerGitSHA!==workerSha()||
+    receipt.executableEnvironmentInherited!==true||receipt.executableExists!==true||
+    receipt.childPowerShellHashModuleVerified!==true||
+    receipt.githubPublisherPermissionVerified!==true||
+    receipt.githubJobApprovalVerified!==true)
+  throw Error('Running watcher receipt does not prove inherited Godot / GitHub readiness');
+ if(Date.now()-Date.parse(receipt.updatedUTC)>40000||
+    !Number.isFinite(Date.parse(receipt.updatedUTC)))
+  throw Error('Running watcher environment receipt is stale; current poller not proven');
+ if(!path.win32.isAbsolute(receipt.godotExecutablePath))throw Error('Runtime Godot path not absolute');
+ await fs.access(receipt.godotExecutablePath);
+ const current=await currentJob();
+ const ledger=await readLedger();
+ if(current.jobId!==JOB07_ID||current.commit!==JOB07_SOURCE)
+  throw Error('Active GitHub request changed: examine new request before probing, do not run anything');
+ const job07=ledger.completed?.[JOB07_ID];
+ if(job07?.status!=='published'||job07?.recoveryOnly!==true||
+    job07?.commit!==JOB07_SOURCE||job07?.result?.reexecuted!==false||
+    job07?.result?.gpuProcessCorroborated!==false)
+  throw Error('Immutable job07 archive not safely terminal in owner PC ledger');
+ // Validate admission of a unique, NEVER-QUEUED schema7 job ID.
+ // This ID is a probe marker, NOT a request committed to GitHub.
+ const candidate=validateGodotJob({...current,
+  jobId:'pc-godot-clinic-20261101-probe-never-queued-job08'});
+ if(ledger.completed?.[candidate.jobId])
+  throw Error('Probe-only identity was unexpectedly used in the ledger');
+ const run=path.join(EVIDENCE,candidate.jobId+'-'+candidate.commit.slice(0,10));
+ try{await fs.access(run);throw Error('Probe-only evidence folder exists')}
+ catch(e){if(e.code!=='ENOENT')throw e}
+ console.log(JSON.stringify({
+  status:'READY_FOR_FUTURE_UNIQUE_JOB_ADMISSION_NOT_EXECUTED',
+  watcherPid:lease.pid,workerGitSHA:receipt.workerGitSHA,
+  inheritedGodotExePath:receipt.godotExecutablePath,
+  publisherPermissionVerifiedInWatcher:true,
+  sourceGitSHA:candidate.commit,approvedSchema:candidate.schemaVersion,
+  candidateIdExampleOnly:candidate.jobId,
+  job07PreservedPublishedIncomplete:true,
+  noGodotLaunch:true,noLedgerWrite:true,noHeartbeatWrite:true,
+  limitation:'Actual execution and GPU/PNG proof require a separately approved NEW GitHub job, never job07'
+ },null,2));
+}
+
 let busy=false;
 async function tick(){
  if(busy)return;busy=true;
@@ -537,15 +633,14 @@ async function tick(){
   j=await currentJob();
   const state=await readLedger(),previous=state.completed[j.jobId];
   if(previous?.commit&&previous.commit!==j.commit)throw Error('Job ID reused with different commit');
-  if(process.argv.includes('--validate')){
-   await permission();
-   textLog('Godot job valid; PC and GitHub permissions ready',j.jobId,previous?.status||'new');
-   await heartbeat('validated',j.jobId);return;
-  }
+  // Always check publisher permissions from the actual LEASE-HOLDING
+  // task environment, even when the currently queued job is terminal.
+  // A terminal job must never be rerendered.
+  await permission();
+  await writeRuntimeReceipt(j,true);
   if(previous?.status==='published'||previous?.status==='failed'){
    await heartbeat(previous.status,j.jobId,previous);return;
   }
-  await permission();
   if(!previous){
    state.completed[j.jobId]={commit:j.commit,status:'executing',startedAt:new Date().toISOString()};
    await saveLedger(state);await heartbeat('executing',j.jobId);
@@ -572,10 +667,12 @@ function textLog(...x){console.log(...x)}
 // --validate is read-only/preflight, never captures, and does not take the
 // rendering lease. --once, --watch and repair mutually exclude one another.
 const args=process.argv.slice(2);
-const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--diagnose-job07','--archive-job07','--retire-archived-job07-lock'].filter(x=>args.includes(x));
+const modes=['--watch','--once','--validate','--recover-incomplete','--lock-status','--probe-next-job','--diagnose-job07','--archive-job07','--retire-archived-job07-lock'].filter(x=>args.includes(x));
 if(modes.length>1)throw Error('Select only one approved Godot worker mode');
 if(args.some(x=>!modes.includes(x)))throw Error('Unknown Godot worker argument');
-if(modes.includes('--retire-archived-job07-lock')){
+if(modes.includes('--probe-next-job')){
+ await probeNextJobWithoutExecuting();
+}else if(modes.includes('--retire-archived-job07-lock')){
  await retireArchivedJob07StaleLease();
 }else if(modes.includes('--diagnose-job07')){
  await recoverRawJob07({diagnoseOnly:true});
@@ -585,7 +682,7 @@ if(modes.includes('--retire-archived-job07-lock')){
  const info=await readGodotWorkerLease(ROOT);
  console.log(JSON.stringify({workerLease:info,heartbeat:HEARTBEAT,ledger:LEDGER},null,2));
 }else if(modes.includes('--validate')){
- await tick(); // no render, safe even while a watcher is already polling
+ await validateWithoutHeartbeat(); // thrown preflight errors exit nonzero; no heartbeat writes
 }else if(modes.includes('--recover-incomplete')){
  const lease=await acquireGodotWorkerLease(ROOT);
  try{await recoverIncompleteAttempts()}finally{await lease.release()}
