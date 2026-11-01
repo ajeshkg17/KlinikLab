@@ -58,7 +58,7 @@ test('invalid wildcard PDH statuses are filtered without fabricating RTX utiliza
  const pc=read('../visual-qa/sr1c-capture-godot-background-pc.ps1');
  const regression=read('./sr1c_pdh_invalid_rows_windows.ps1');
  assert(filter.includes('function ConvertTo-KLGodotGpu3DRows'));
- for(const condition of ["$statusName -eq 'ValidData'","$statusName -eq '0'",
+ for(const condition of ["$statusName -in @('ValidData','NewData','0','1')",
   '[double]::IsNaN','[double]::IsInfinity','-ge 0','-le 100','-notmatch',
   '$GetEngineLuid'])
   assert(filter.includes(condition),condition);

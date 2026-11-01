@@ -41,4 +41,13 @@ $allInvalid=@(
 )
 $blocked=ConvertTo-KLGodotGpu3DRows -Snapshots $allInvalid -GodotPid $pidToCheck -GetEngineLuid {param($p) $rtxLuid}
 assert ($blocked.validRows.Count -eq 0 -and $blocked.invalidRows.Count -eq 1) 'All-invalid must fail closed'
+
+$newData=@(
+ [PSCustomObject]@{Timestamp=$at;CounterSamples=@(
+  (sample $rtx 2.3 'NewData'),(sample $rtx 4.2 1),(sample $rtx 99 3221228486))}
+)
+$newResult=ConvertTo-KLGodotGpu3DRows -Snapshots $newData -GodotPid $pidToCheck -GetEngineLuid {param($p) $rtxLuid}
+assert ($newResult.validRows.Count -eq 2) 'PDH NEW_DATA and status 1 are valid as specified by Microsoft'
+assert ($newResult.invalidRows.Count -eq 1) '0xC0000BC6 PDH_INVALID_DATA must never prove GPU activity'
+
 Write-Host 'PASS: exact Godot-PID 3D PDH status/finite/range/LUID filter tolerates invalid wildcard rows, retains rejected diagnostics and counts distinct UTC periods.'

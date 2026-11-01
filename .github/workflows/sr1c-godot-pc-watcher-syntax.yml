@@ -28,6 +28,8 @@ on:
       - 'visual-qa/sr1c-private-desktop.ps1'
       - 'visual-qa/sr1c-dxgi-luid.cs'
       - 'visual-qa/sr1c-pdh-filter.ps1'
+      - 'visual-qa/sr1x-capture-native-exported-app-pc.ps1'
+      - 'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1'
       - 'visual-qa/sr1d-prepare-godot-cases.ps1'
       - 'visual-qa/sr1d-export-native-cases.mjs'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -132,6 +134,8 @@ jobs:
             'tests/sr1p_job08_ledger_reconciliation_windows.ps1',
             'visual-qa/sr1c-private-desktop.ps1',
             'visual-qa/sr1c-pdh-filter.ps1',
+            'visual-qa/sr1x-capture-native-exported-app-pc.ps1',
+            'visual-qa/sr16-ownerpc-readonly-diagnostics.ps1',
             'visual-qa/sr1d-prepare-godot-cases.ps1',
             'tests/sr1c_pdh_invalid_rows_windows.ps1',
             'visual-qa/sr1c-capture-godot-background-pc.ps1'
