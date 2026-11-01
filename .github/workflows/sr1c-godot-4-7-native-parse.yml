@@ -88,6 +88,11 @@ jobs:
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/app-content.json"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field.bin"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field-manifest.json"
+          test -f "$RUNNER_TEMP/native-kliniklab-app/source/editable-case-volumes.json"
+          for tooth in 16 36 11 26 48 46; do
+            test -s "$RUNNER_TEMP/native-kliniklab-app/source/fdi${tooth}-volume-field.bin"
+            test -s "$RUNNER_TEMP/native-kliniklab-app/source/fdi${tooth}-volume-field-manifest.json"
+          done
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/clinical-pathways.json"
       - name: Parse full-app Godot scene and interactive app GDScript through real Godot 4.7.2
         run: |
@@ -112,6 +117,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://volume-cut-smoke.gd > "$RUNNER_TEMP/volume-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/volume-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/volume-smoke.log"
           grep -F "SR3_NATIVE_FDI16_VOLUME_LOGIC_PASS" "$RUNNER_TEMP/volume-smoke.log"
+      - name: Six original clinical cases have separate source-verified editable native 3D volumes
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://multi-case-volume-smoke.gd > "$RUNNER_TEMP/multivolume-parse.log" 2>&1 || { cat "$RUNNER_TEMP/multivolume-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://multi-case-volume-smoke.gd > "$RUNNER_TEMP/multivolume-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/multivolume-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/multivolume-runtime.log"
+          grep -F "SR9_NATIVE_ALL_SIX_CASE_EDITABLE_VOLUMES_PASS" "$RUNNER_TEMP/multivolume-runtime.log"
       - name: Source-derived 32-tooth atlas native mesh test (HEADLESS, no GPU/clinical acceptance)
         run: |
           set -euo pipefail
