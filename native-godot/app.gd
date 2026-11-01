@@ -107,6 +107,20 @@ func _ready() -> void:
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
+	# Explicit owner-PC-only evidence hook. The actual exported Windows app,
+	# never a Linux headless test or Blender preview, captures real viewport PNGs.
+	for arg in OS.get_cmdline_user_args():
+		var value: String = str(arg)
+		if value.begins_with("--kliniklab-native-pc-capture="):
+			var job_id: String = value.trim_prefix("--kliniklab-native-pc-capture=")
+			var capture_script: GDScript = load("res://owner-pc-capture.gd")
+			if capture_script == null:
+				push_error("Approved immutable PC capture module missing from exported application")
+				break
+			var capture: Node = capture_script.new()
+			add_child(capture)
+			capture.call_deferred("run",self,job_id)
+			break
 	print("SR13_NATIVE_GODOT_REVIEWED_CC0_ACTUAL_APP_LOADED", " CC0=", _cc0 != null,
 		" six_case_FDI=16,36,11,26,48,46; native workstation GPU evidence pending")
 
