@@ -31,9 +31,17 @@ $ledger=Get-Content (Join-Path $root 'godot-ledger.json') -Raw|ConvertFrom-Json
 $old=$ledger.completed.PSObject.Properties['pc-godot-clinic-20261101-job07'].Value
 $now=$ledger.completed.PSObject.Properties['pc-godot-clinic-20261101-job08'].Value
 if(-not $old -or $old.status -ne 'published' -or $old.recoveryOnly -ne $true -or
- $old.result.reexecuted -ne $false -or $old.result.overallStatus -cne 'EVIDENCE_INCOMPLETE' -or
- -not $now -or $now.status -ne 'published' -or $now.result.overallStatus -cne 'EVIDENCE_INCOMPLETE'){
- throw 'Immutable original job07/job08 terminal evidence gates not met; STOP'}
+ $old.result.reexecuted -ne $false -or $old.result.gpuProcessCorroborated -ne $false -or
+ $old.result.overallStatus -cne 'EVIDENCE_INCOMPLETE'){
+ throw 'Immutable original job07 archive gate not met; STOP'
+}
+# Job08 ledger can be absent after the historical publication despite local
+# original captures. The publication-only tool proves the canonical remote
+# job08 result plus byte-exact local original files; never synthesize ledger.
+if($null -ne $now -and ($now.status -cne 'published' -or
+ $now.result.overallStatus -cne 'EVIDENCE_INCOMPLETE')){
+ throw 'Present job08 ledger conflicts with published original, STOP'
+}
 $task=Get-ScheduledTask -TaskName 'KlinikLab-Godot-PC-Watcher' -ErrorAction Stop
 if($task.State -ne 'Running'){throw 'Owner Godot watcher task not Running; do not force a second worker'}
 # Verify the source image bytes and native PID/DXGI report BEFORE publication.
