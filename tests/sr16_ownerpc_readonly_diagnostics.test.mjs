@@ -41,3 +41,26 @@ test('SR16 owner-PC diagnostics is strictly read-only and never launches the app
  assert.doesNotMatch(diagnostic,/\b(Register-ScheduledTask|Set-ScheduledTask|Start-ScheduledTask|Start-Process|CreateProcessW|Set-Content|Add-Content)\b/);
  assert.match(diagnostic,/systemWidePdhDoesNotProveSamePidRtx3d=\$true/);
 });
+
+test('SR24: recycled heartbeat PID is never treated as a live watcher without exact identity and start-time correlation',()=>{
+ assert.match(diagnostic,/Get-KLSanitizedWatcherProcess/);
+ assert.match(diagnostic,/Get-CimInstance -ClassName Win32_Process/);
+ assert.match(diagnostic,/\$expectedWatchScript/);
+ assert.match(diagnostic,/\$cmd\.IndexOf\(\$expectedWatchScript,/);
+ assert.match(diagnostic,/\$base -ieq 'node\.exe'/);
+ assert.match(diagnostic,/--watch/);
+ assert.match(diagnostic,/\$p\.CreationDate/);
+ assert.match(diagnostic,/createdBeforeRecordedAt/);
+ assert.match(diagnostic,/startNearRecordedAt/);
+ assert.match(diagnostic,/\$heartbeatProcessAlive=\[bool\]\$heartbeatPidIdentity\.identityVerified/);
+ assert.match(diagnostic,/workerLeaseIdentity/);
+ assert.match(diagnostic,/workerLeaseJobPollerMatched/);
+ assert.match(diagnostic,/processEnumerationComplete/);
+ assert.match(diagnostic,/matchingWatcherProcesses/);
+ assert.match(diagnostic,/taskLauncherProcesses/);
+ assert.match(diagnostic,/taskRefreshSafetyHold/);
+ assert.match(diagnostic,/localOriginalEvidenceWithoutTerminalLedger/);
+ assert.match(diagnostic,/ledgerRepairAuthorized=\$false/);
+ assert.doesNotMatch(diagnostic,/heartbeatProcessAlive=\(\$null -ne \(Get-Process/);
+ assert.doesNotMatch(diagnostic,/CommandLine=\$cmd|commandLine=\$cmd|rawCommandLine=/);
+});
