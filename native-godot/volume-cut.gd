@@ -27,7 +27,9 @@ var _signed := PackedFloat32Array()
 var _strokes: Array = []
 var _mesh_instance: MeshInstance3D
 var _initial_inside := 0
+var _original_pulp_samples := 0
 var _removed := 0
+var _removed_pulp_samples := 0
 var _triangle_count := 0
 var _error := ""
 var _fdi := ""
@@ -98,6 +100,8 @@ func configure(expected_sha: String, case_id: String = "molar") -> bool:
 					MIN_POS.z + k * (MAX_POS.z - MIN_POS.z) / GRID)
 				if _source_fields[id] < 0.0:
 					_initial_inside += 1
+					if _source_fields[2 * TOTAL + id] < 0.0:
+						_original_pulp_samples += 1
 	_mesh_instance = MeshInstance3D.new()
 	_mesh_instance.name = "KL_FDI" + fdi + "_REGENERATED_TISSUE_MESH"
 	add_child(_mesh_instance)
@@ -166,6 +170,7 @@ func _append_triangle(p: Array, verts: Array, norms: Array) -> void:
 
 func _rebuild() -> void:
 	_removed = 0
+	_removed_pulp_samples = 0
 	for idx in range(TOTAL):
 		var p := _points[idx]
 		var value := _source_fields[idx]
@@ -176,6 +181,8 @@ func _rebuild() -> void:
 		_signed[idx] = value
 		if _source_fields[idx] < 0.0 and value >= 0.0:
 			_removed += 1
+			if _source_fields[2 * TOTAL + idx] < 0.0:
+				_removed_pulp_samples += 1
 	var vertices: Array = [[], [], [], [], []]
 	var normals: Array = [[], [], [], [], []]
 	_triangle_count = 0
@@ -341,6 +348,10 @@ func summary() -> Dictionary:
 		"triangles":_triangle_count,
 		"removedSamplePoints":_removed,
 		"originalInsideSamplePoints":_initial_inside,
+		"originalModelPulpSamplePoints":_original_pulp_samples,
+		"removedModelPulpSamplePoints":_removed_pulp_samples,
+		"syntheticPulpRegionContact":_removed_pulp_samples > 0,
+		"modelPulpRemovedPercentApprox":100.0*_removed_pulp_samples/maxf(1.0,float(_original_pulp_samples)),
 		"removedPercentApprox":100.0*_removed/maxf(1.0,float(_initial_inside)),
 		"units":"synthetic sampling grid, not clinical millimeters"
 	}
