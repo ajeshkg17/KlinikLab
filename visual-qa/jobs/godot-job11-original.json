@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 8,
+  "jobId": "pc-godot-exported-20261101-cc0-job11-a33c31",
+  "commit": "a33c31a9e1c364463f96c29a6004a7e625cd4e89",
+  "suite": "sr14-native-exported-cc0-six-case",
+  "sceneMode": "native-exported-cc0",
+  "graphics": "forward_plus-vulkan",
+  "timeoutSec": 180,
+  "capture": "native-exported-cc0-and-fdi36-two-pngs",
+  "launcherContract": "winps51-clear-psmodulepath-sha256-preflight",
+  "backgroundContract": "private-winsta0-vulkan-autocapture-no-foreground",
+  "desktopApiContract": "raw-utf16-createdesktopw-bom-safe-recovery",
+  "telemetryContract": "persistent-pdh-valid-rows-dxgi-luid-42s-orbit-v2"
+}

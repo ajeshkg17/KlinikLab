@@ -1,0 +1,9 @@
+# SR20 owner-PC unique real exported capture job12
+
+Job ID: `pc-godot-exported-20261101-cc0-job12-678f92`. Exact Windows application/source SHA: `678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec` (merged PR #69); successful source-matched [Windows Actions run 41308852512](https://github.com/ajeshkg17/KlinikLab/actions/runs/41308852512), artifact **13084885466**, name `KlinikLab-Windows-x64-678f92e28dd3a1e1bb98c4d94e58028eefa5d9ec` (~48MB).
+
+Prior job09, job10, job11 consumed and immutable; job11 GPU Vulkan + RTX5060 34 positive PID 3D periods but zero original screenshots or app-native report. This source app synchronously records capture opt-in `SR20_NATIVE_CAPTURE_APP_BOOTSTRAP` and early `SR20_NATIVE_CAPTURE_SYNC_REPORT_WRITTEN`, writing `native-exported-app-result.json` even before any deferred frame, then stage checkpoints for original viewport PNGs.
+
+Owner-PC helper: run the single existing private WinSta0 watcher once only for job12; never rerun jobs09/10/11. Extract FULL exact artifact with `verified-raw-source/`, `SHA256SUMS.txt`, `RAW-SOURCE-SHA256SUMS.txt`, verify each hash; launch **actual exported** `KlinikLab.exe` with opt-in `-- --kliniklab-exported-pc-capture`, never source Godot or foreground/manual screenshot. Preserve original `native-exported-app-result.json`, `kliniklab-exported-cc0-environment.png` and `kliniklab-exported-fdi36-practical.png` (when produced), Godot log, PID, native result, RTX5060 DXGI-LUID matched 3D positive sample telemetry. On failure, report entry-marker presence, JSON stage and blocker and process shutdown cause. Publish original evidence and link issue #44.
+
+**Current EVIDENCE_INCOMPLETE**; even successful PNG publication is **NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW** until a reviewer independently inspects original pixels and GPU evidence. Synthetic educational exercise only, no clinical or Quest validation.
