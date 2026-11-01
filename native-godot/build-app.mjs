@@ -53,6 +53,7 @@ try{
   throw Error('CC0 license or native review contract drift');
  const cc0Dest=path.join(dest,'assets/cc0/3dassets-dental');
  fs.mkdirSync(cc0Dest,{recursive:true});
+ const {convert}=await import('./dequantize-cc0.mjs');
  const caseAssets=[];
  for(const [file,original,hash,bytes] of approvedFiles){
   const row=approved.files.find(x=>x.destFilename===file);
@@ -67,14 +68,28 @@ try{
   const destFile=path.join(cc0Dest,file);
   fs.copyFileSync(reviewedPath,destFile,fs.constants.COPYFILE_EXCL);
   if(sha256(fs.readFileSync(destFile))!==hash)throw Error('Native GLB package corruption: '+file);
-  caseAssets.push({name:file,sha256:hash,bytes,sourcePackName:original,
+  // Godot 4.7.2 does not parse the original KHR_mesh_quantization extension.
+  // Dequantize mesh vertex attributes into float32, leaving original file
+  // untouched. Preserve exact original GLB hashes, nodal transforms, materials.
+  const compatible=convert(fs.readFileSync(reviewedPath),hash);
+  const convertedName=file.replace(/\.glb$/, '-godot.glb');
+  fs.writeFileSync(path.join(cc0Dest,convertedName),compatible.bytes,{flag:'wx'});
+  if(sha256(fs.readFileSync(path.join(cc0Dest,convertedName)))!==compatible.convertedSha256 ||
+    compatible.convertedAccessors<1)throw Error('CC0 Godot GLB compatibility export failed');
+  caseAssets.push({name:file,sha256:hash,bytes,
+   godotFile:convertedName,godotSha256:compatible.convertedSha256,
+   godotBytes:compatible.bytes.length,godotFloat32Accessors:compatible.convertedAccessors,
+   sourcePackName:original,
    role:file.startsWith('whole-')?'assembledStaticEnvironment':'staticInstrumentProp'});
  }
  const clinicManifest={
   schemaVersion:1,kind:'REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY',
   sourceGitSHA:sha,licenseSPDX:'CC0-1.0',publisher:approved.packSource,
   reviewedAssetManifestSHA256:sha256(fs.readFileSync(path.join(cc0Path,'source-manifest.json'))),
-  sourcePackReconciledBySHA256:true,clinicalAccuracyValidated:false,
+  sourcePackReconciledBySHA256:true,
+  godotConversion:'DETERMINISTIC_FLOAT32_VERTEX_ACCESSORS_PRESERVE_ORIGINAL_KHR_QUANTIZED_GLB',
+  godotConverterSHA256:sha256(fs.readFileSync(path.join(root,'native-godot/dequantize-cc0.mjs'))),
+  clinicalAccuracyValidated:false,
   fullAppParityValidated:false,assets:caseAssets
  };
  fs.writeFileSync(path.join(cc0Dest,'clinic-manifest.json'),JSON.stringify(clinicManifest,null,2)+'\n',{flag:'wx'});
