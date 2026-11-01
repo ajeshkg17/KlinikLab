@@ -84,10 +84,10 @@ func run(app: Node3D) -> void:
     }
     _save()
     print("SR18_CAPTURE_NODE_STARTED sha=",expected_sha," pid=",OS.get_process_id())
-    DisplayServer.register_additional_output(self)
     if DisplayServer.get_name()=="headless":
         _fail("headless renderer is not physical exported-app RTX evidence")
         return
+    DisplayServer.register_additional_output(self)
     if _report["renderingMethod"]!="forward_plus" or _report["renderingDriver"]!="vulkan":
         _fail("Native Vulkan Forward+ required; no graphics fallback")
         return
