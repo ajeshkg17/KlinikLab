@@ -38,6 +38,20 @@ func _smoke() -> void:
 		return
 	app.call("_select_case", 1)
 	app.call("_select_station", 4)
+	var practical: Array = content["practical"][1]
+	var practical_choice := -1
+	for i in range(practical.size()):
+		if str(practical[i]["type"]) == "choice":
+			practical_choice = i
+			break
+	if practical_choice < 0:
+		_fail("Original endodontic practical choice missing")
+		return
+	app.call("_practical_choice", practical_choice, int(practical[practical_choice]["correct"]))
+	var practical_progress: Dictionary = (app.get("_progress") as Dictionary)["answers"]
+	if not practical_progress["endo:practical:" + str(practical_choice)]["correct"]:
+		_fail("Native original practical decision did not record correct formative answer")
+		return
 	var progress: Dictionary = app.get("_progress")
 	if int(progress["selectedCase"]) != 1 or int(progress["selectedStation"]) != 4:
 		_fail("Native FDI36 and practical station selection didn't persist")
@@ -56,5 +70,5 @@ func _smoke() -> void:
 	if (empty["answers"] as Dictionary).size() != 0 or 		(empty["studied"] as Dictionary).size() != 0:
 		_fail("Reset educational progress did not clear all answers")
 		return
-	print("SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS: SOURCE 6/7; CASE SWITCH; FSP QUESTION; PERSIST; RESET; NOT GPU/FULL APP")
+	print("SR2_NATIVE_FULL_APP_FOUNDATION_LOGIC_PASS: SOURCE 6/7; CASE SWITCH; FSP QUESTION; SOURCE PRACTICAL DECISION; PERSIST; RESET; NOT GPU/FULL APP")
 	quit(0)
