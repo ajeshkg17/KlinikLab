@@ -177,6 +177,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --script res://cc0-clinic-smoke.gd > "$RUNNER_TEMP/cc0-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/cc0-smoke.log"
           grep -F "SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS" "$RUNNER_TEMP/cc0-smoke.log"
+      - name: Real complete native app startup, reviewed CC0 clinic plus six FDI treatments (headless only)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://owner-pc-capture.gd > "$RUNNER_TEMP/pc-capture-parse.log" 2>&1 || { cat "$RUNNER_TEMP/pc-capture-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://actual-app-smoke.gd > "$RUNNER_TEMP/actual-cc0-app-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+          grep -F "SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
