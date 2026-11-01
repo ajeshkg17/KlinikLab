@@ -133,6 +133,14 @@ Capture output is **local only** at `user://owner-pc-captures/<unique-job-id>`; 
 
 Old job07/job08 images or Blender model previews are not substitutes for these new run-specific images. A newly generated Windows executable with this hook still requires owner-PC execution, fresh evidence publication and independent review.
 
+## SR15 — Sampled synthetic pulp-region contact indicator (not dental safety grading)
+
+The source-derived voxel model already contains four spatial scalar channels (outer shape, dentin, pulp and caries) for each of the six case-specific FDI teeth. The live cutter now keeps a separate integer count of source occupied grid samples satisfying both **outer inside** and **model pulp inside**. When the rebuilt signed-distance volume removes those samples, it reports `removedModelPulpSamplePoints` as a subset of total removed samples, plus `syntheticPulpRegionContact` and an approximate proportion of model pulp-grid samples. This is derived entirely from the original four signed-distance source fields; no anatomical threshold, pseudo-volumes or clinical depth conversion are fabricated.
+
+The Practical station shows the model-only pulp indicator, case-specific FDI and explicit warnings that **absence of sampled contact does not demonstrate safety**. The offline educational report records the loaded case's sampled pulp-contact indicator. Original stroke journals remain unchanged and per-case: undo, reset and source-identical replay recompute all samples deterministically rather than trusting user-submitted feedback values.
+
+New real Godot 4.7.2 headless tests require each of the six FDI volumes to have a source-model pulp sample, cut a source-verified sample inside allowed synthetic bounds, detect model pulp removal, undo, replay and reset. Clinical pulpal exposure, operative feasibility, pulp protection, treatment score and Windows RTX visual/pixel evidence are **not** inferred from these sampling counts.
+
 ## SR16 — Fix the actual exported Windows raw OBJ and GLB bytes gap (job09 failed)
 
 **Job09 forensic trigger:** actual Windows executable started in private WinSta0 but exited before captured pixels because Godot's source scene reported `Original source SHA-256 mismatch for fdi16-before.obj` and the CC0 loader could not read the raw converted GLB. Godot's `--editor --import` and `--export-release` remap recognized `.obj` and `.glb` source resources to internal native mesh/`PackedScene` files. The *imported meshes* can render while `FileAccess.get_sha256("res://original.obj")` no longer returns original file bytes. The correct response is not to relax source provenance.

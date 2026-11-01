@@ -198,6 +198,13 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://raw-source-smoke.gd > "$RUNNER_TEMP/raw-resolver-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/raw-resolver-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/raw-resolver-smoke.log"
           grep -F "SR16_EDITOR_ORIGINAL_FDI16_AND_CC0_RAW_SHA_RESOLVER_PASS" "$RUNNER_TEMP/raw-resolver-smoke.log"
+      - name: Source-defined synthetic pulp-region contact and deterministic undo/replay for six editable teeth (HEADLESS)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://pulp-sample-smoke.gd > "$RUNNER_TEMP/pulp-model-parse.log" 2>&1 || { cat "$RUNNER_TEMP/pulp-model-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://pulp-sample-smoke.gd > "$RUNNER_TEMP/pulp-model-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/pulp-model-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/pulp-model-smoke.log"
+          grep -F "SR15_NATIVE_SIX_CASE_PULP_SAMPLE_INDICATOR_PASS" "$RUNNER_TEMP/pulp-model-smoke.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
