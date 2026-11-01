@@ -880,6 +880,7 @@ func _switch_view(view: String) -> void:
 	if _view == "language" and view != "language":
 		_language_save_draft()
 	_view = view
+	_update_fdi36_reference_visibility()
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
