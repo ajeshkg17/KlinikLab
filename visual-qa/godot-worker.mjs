@@ -37,7 +37,9 @@ function git(args,cwd=REPO){
 async function initialize(){
  if(process.platform!=='win32')throw Error('Godot worker is WINDOWS ONLY; Linux CI cannot substitute for RTX rendering');
  if(!process.env.KLINIKLAB_GODOT_EXE||!path.win32.isAbsolute(process.env.KLINIKLAB_GODOT_EXE))
-  throw Error('Set KLINIKLAB_GODOT_EXE to installed Windows Godot 4.7.2 executable');
+  throw Error(process.argv.includes('--validate')?
+   'Standalone --validate does not inherit the scheduled-task environment. Set KLINIKLAB_GODOT_EXE in THIS shell to the installed Godot 4.7.2 path, or use --probe-next-job to inspect the live watcher receipt.':
+   'Scheduled watcher Node process lacks an absolute KLINIKLAB_GODOT_EXE inherited from the task launcher; do not execute any new job');
  await fs.access(process.env.KLINIKLAB_GODOT_EXE);
  await fs.mkdir(ROOT,{recursive:true});
  try{await fs.access(path.join(REPO,'.git'))}
