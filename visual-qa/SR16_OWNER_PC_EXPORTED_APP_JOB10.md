@@ -1,0 +1,13 @@
+# SR16 — one unique owner-PC exported-app test: job10
+
+**Exact source SHA:** `525457796d0339d807de61293bc5ef65c15040fd` (PR #61 merged after 11/11 checks). **Unique queue job:** `pc-godot-exported-20261101-cc0-job10-525457`.
+
+**Successful GitHub Actions Windows export:** [run 41306484755](https://github.com/ajeshkg17/KlinikLab/actions/runs/41306484755), artifact **13082973437**, immutable name `KlinikLab-Windows-x64-525457796d0339d807de61293bc5ef65c15040fd`. This export's release verifier checked original FDI16 OBJ+MTL and original/dequantized CC0 clinic+tray SHA256 byte streams packaged in `verified-raw-source/` beside `KlinikLab.exe`; `RAW-SOURCE-SHA256SUMS.txt` independently records all raw release files. This is SOURCE/EXPORT validation only, **not** owner-PC pixels or GPU.
+
+The helper monitoring issue [#44](https://github.com/ajeshkg17/KlinikLab/issues/44) should let the **single existing** `KlinikLab-Godot-PC-Watcher` process this one schema8 request **once**; do not create another watcher, change task desktop, run in foreground, use source Godot or reuse any job ID. Extract the **entire** verified ZIP, keeping `KlinikLab.exe`, `verified-raw-source/`, `SHA256SUMS.txt`, `RAW-SOURCE-SHA256SUMS.txt` and `native-build-manifest.json` together. Verify both SHA manifests and manifest source SHA before launch. Run actual embedded-PCK exported EXE from the **private WinSta0** desktop via original approved capture script; no fallback/historical screenshots.
+
+Expected original captured evidence: `kliniklab-exported-cc0-environment.png` and `kliniklab-exported-fdi36-practical.png`; `native-exported-app-result.json`; local `godot-owner-pc-result.json`, exported Godot stdout/stderr, real exe PID, EXE SHA256, and 3D PDH samples tied to that PID and **NVIDIA RTX 5060 DXGI LUID** with at least **three distinct strictly positive valid 3D periods**. Publish originals and report immutable evidence folder to issue #44. The developer independently inspects original PNG pixels and GPU evidence; publication by itself never implies acceptance.
+
+Prior job09 `pc-godot-exported-20261101-cc0-job09-ed3239` at `ed3239c85a499205bf76b13395dc54c87b8ffe75`, run `41304091271`, artifact `13082771261` remains **EVIDENCE_INCOMPLETE** and immutable; its missing PNGs and invalid 34 PDH samples are not accepted. Job07/job08 also immutable. Investigate missing job09 local ledger and GPU counter status separately; do not duplicate already executed work.
+
+**Current owner-PC status: EVIDENCE_INCOMPLETE / NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW** until original job10 images and valid GPU evidence are independently reviewed. The exported app and test are fictional educational simulations; not clinical, anatomical, instrument-force or Quest acceptance.

@@ -8,7 +8,7 @@ const get=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const NEW_SHA='ed3239c85a499205bf76b13395dc54c87b8ffe75';
 const JOB='pc-godot-exported-20261101-cc0-job09-ed3239';
 test('SR14: unique immutable exported-app queue is pinned to successful Windows artifact SHA; old job08 preserved',()=>{
- const current=get('visual-qa/jobs/godot-current.json');
+ const current=get('visual-qa/jobs/godot-job09-original.json');
  const previous=get('visual-qa/jobs/godot-job08-original.json');
  assert.equal(validateGodotJob(current).commit,NEW_SHA);
  assert.equal(current.jobId,JOB);
@@ -27,7 +27,7 @@ test('SR14: unique immutable exported-app queue is pinned to successful Windows 
  assert.throws(()=>validateGodotJob({...current,timeoutSec:420}));
 });
 test('SR14: job request cannot insert commands or use unknown external artifact',()=>{
- const current=get('visual-qa/jobs/godot-current.json');
+ const current=get('visual-qa/jobs/godot-job09-original.json');
  assert.throws(()=>validateGodotJob({...current,command:'powershell.exe'}));
  assert.throws(()=>validateGodotJob({...current,downloadUrl:'https://example.invalid/'}));
  assert.throws(()=>validateGodotJob({...current,suite:'source-only-prototype'}));
