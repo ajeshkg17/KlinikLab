@@ -20,6 +20,7 @@ The exact-source builder refuses reusing an existing output folder. It copies Go
 - One running desktop app with real Godot native controls, a schematic **whole dental clinic** and the original five-tissue FDI16 before/after-cut 3D meshes.
 - Six source-derived educational cases (FDI 16, 36, 11, 26, 48, 46), seven stations, and case/station navigation. FDI16 geometry hides when other cases are selected; no false FDI36 anatomy attribution.
 - Original training question text and choices for patient interview, clinician handover, viva and everyday clinic with formative feedback.
+- All six original **case-specific practical workflow task lists** exported from the bounded pure source `getPractical` function: choose FDI target, answer clinical decisions, select original named instrument, view drill instructions clearly labeled as **not yet a live cutter**.
 - German FSP letter / written clinical-plan drafting, source-derived primary/alternative plans, instrument vocabulary selection.
 - Local **user://** progress per case/station and answer and note recording; reset controls. Synthetic cases only. No network storage or patient backend.
 
@@ -30,7 +31,7 @@ The exact-source builder refuses reusing an existing output folder. It copies Go
 | `app.js` journeys and dialogue | Case-specific state machine, patient response progression and session history for all six cases | Quiz/navigation foundation only |
 | `volumetric-lab.js` | Live bur-swept 3D volume subtraction, mesh reconstruction, undo/reset, metrics/cross sections | Immutable source before/cut render ONLY |
 | `engine.js`, `dental-appearance.js`, `real-dental-scene.js` | FDI32 anatomical atlas, jaw/orientation, picking, material shading, geometry fidelity | FDI16 exact source plus schematic room |
-| `dental-practice.js` | All case-specific operative decisions, dental tool sequences, scoring and simulation state | Tool labels only |
+| `dental-practice.js` / `app.js getPractical` | All operative decisions, instrument sequences, dental tool states and simulated cutting | Original case-specific tooth/tool/choice decisions interactive; drill simulation not yet ported |
 | `fsp-kp-training.js` | Case/phase German B2/C1 response rubric, explanation and evidence-free formative scoring | Source MCQs and manual drafts |
 | `desktop-suite.js` | Synthetic X-ray with interpretation, local STL/OBJ inspection, bur response and provenance | Not ported |
 | `clinical-pathway.js` | Care workflow, handover, documentation and safety checks | Text prompts only |
