@@ -1,0 +1,113 @@
+name: Native KlinikLab Windows x64 export (UNTESTED workstation GPU)
+
+on:
+  push:
+    branches: [integration/single-chat-validation-2026-10-30]
+    paths:
+      - 'native-godot/**'
+      - 'visual-qa/godot-local-clinical/**'
+      - 'visual-qa/sr1c-godot-clinic-overview.gd'
+      - 'visual-qa/sr1-local-kliniklab-export.mjs'
+      - 'visual-qa/sr1d-export-native-cases.mjs'
+      - 'app.js'
+      - 'volumetric-lab.js'
+      - 'clinical-pathway.js'
+      - '.github/workflows/sr8-native-windows-export.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-windows-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download and pin official Godot 4.7.2 Linux editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 3 -fsSL "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot-editor.zip"
+          echo "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  $RUNNER_TEMP/godot-editor.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/godot-editor.zip" -d "$RUNNER_TEMP"
+          chmod +x "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64"
+      - name: Export source-exact Godot application from current commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/KlinikLab-Godot-Source"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/KlinikLab-Godot-Source" --editor --import --quit > "$RUNNER_TEMP/godot-import.log" 2>&1 || { cat "$RUNNER_TEMP/godot-import.log"; exit 1; }
+          cat "$RUNNER_TEMP/godot-import.log"
+          if grep -Ei 'SCRIPT ERROR|Parse Error|Parser Error|Failed to load script' "$RUNNER_TEMP/godot-import.log"; then
+            exit 1
+          fi
+          test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/atlas/atlas.json"
+          test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/fdi16-volume-field.bin"
+          test -f "$RUNNER_TEMP/KlinikLab-Godot-Source/source/clinical-pathways.json"
+      - name: Download verified official 4.7.2 native export templates (no unpinned binaries)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 3 --retry-all-errors -fsSL "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz" -o "$RUNNER_TEMP/export-templates.tpz"
+          echo "f298490b8d44d934be425a5a65a51bf15f422428b229a06a6e11d9ffea248011  $RUNNER_TEMP/export-templates.tpz" | sha256sum -c -
+          member="$(unzip -Z1 "$RUNNER_TEMP/export-templates.tpz" | grep -E '(^|/)windows_release_x86_64.exe$' | head -n 1)"
+          if [[ -z "$member" ]]; then
+            echo "Expected official Windows release template not found"; exit 1
+          fi
+          unzip -p "$RUNNER_TEMP/export-templates.tpz" "$member" > "$RUNNER_TEMP/windows_release_x86_64.exe"
+          test "$(stat -c '%s' "$RUNNER_TEMP/windows_release_x86_64.exe")" -gt 10000000
+      - name: Export portable Windows executable with source JSON/binaries included
+        shell: bash
+        run: |
+          set -euo pipefail
+          project="$RUNNER_TEMP/KlinikLab-Godot-Source"
+          mkdir -p "$RUNNER_TEMP/release"
+          cat > "$project/export_presets.cfg" <<EOF
+          [preset.0]
+          name="Windows Desktop"
+          platform="Windows Desktop"
+          runnable=true
+          advanced_options=false
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter="source/**"
+          exclude_filter=""
+          export_path=""
+          patches=PackedStringArray()
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          encrypt_pck=false
+          encrypt_directory=false
+
+          [preset.0.options]
+          custom_template/debug=""
+          custom_template/release="$RUNNER_TEMP/windows_release_x86_64.exe"
+          debug/export_console_wrapper=0
+          binary_format/architecture="x86_64"
+          binary_format/embed_pck=true
+          application/modify_resources=false
+          codesign/enable=false
+          EOF
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --export-release "Windows Desktop" "$RUNNER_TEMP/release/KlinikLab.exe" > "$RUNNER_TEMP/export-windows.log" 2>&1 || { cat "$RUNNER_TEMP/export-windows.log"; exit 1; }
+          cat "$RUNNER_TEMP/export-windows.log"
+          test -s "$RUNNER_TEMP/release/KlinikLab.exe"
+          test "$(stat -c '%s' "$RUNNER_TEMP/release/KlinikLab.exe")" -gt 10000000
+          printf '%s\n' "KlinikLab native Windows x64 Godot 4.7.2" "Git source SHA: $GITHUB_SHA" "Educational synthetic data only; not clinically validated." "Portable build, NOT tested on Windows RTX or Quest." "Launch KlinikLab.exe. Keep any generated .pck alongside the .exe." "Original source geometry, clinic/stations and local study functions." "No network or patient-data upload in the native project." > "$RUNNER_TEMP/release/README-FIRST.txt"
+          cp "$project/native-build-manifest.json" "$RUNNER_TEMP/release/native-build-manifest.json"
+          (cd "$RUNNER_TEMP/release" && sha256sum KlinikLab.exe > SHA256SUMS.txt)
+      - name: Publish immutable portable Windows x64 release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KlinikLab-Windows-x64-${{ github.sha }}
+          path: ${{ runner.temp }}/release/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Explicit native testing limitations
+        if: always()
+        run: |
+          echo 'This is cross-exported from Linux via verified official Godot engine/templates. It is NOT a Windows workstation launch, real GPU process attribution, user screenshot acceptance, Quest VR validation, or completed functional parity.' >> "$GITHUB_STEP_SUMMARY"
