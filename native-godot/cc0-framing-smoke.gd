@@ -47,8 +47,8 @@ func _framed(meshes: Array, camera: Camera3D, view_size: Vector2) -> Dictionary:
 				continue
 			front = true
 			var pixel: Vector2 = camera.unproject_position(world)
-			if is_finite(pixel.x) and is_finite(pixel.y) and pixel.x>=0.0 and
-				pixel.y>=0.0 and pixel.x<=view_size.x and pixel.y<=view_size.y:
+			if (is_finite(pixel.x) and is_finite(pixel.y) and pixel.x>=0.0 and
+				pixel.y>=0.0 and pixel.x<=view_size.x and pixel.y<=view_size.y):
 				seen=true
 		if front:
 			in_front += 1
@@ -111,8 +111,8 @@ func _run() -> void:
 			_fail("Case tooth behind clinic close-up camera FDI "+EXPECTED_FDI[i])
 			return
 		var projected: Vector2 = cam.unproject_position(model_world)
-		if projected.x<0 or projected.x>get_root().size.x or
-			projected.y<0 or projected.y>get_root().size.y:
+		if (projected.x<0 or projected.x>get_root().size.x or
+			projected.y<0 or projected.y>get_root().size.y):
 			_fail("Case model source center outside clinic viewport FDI "+EXPECTED_FDI[i]+": "+str(projected))
 			return
 	app.call("_switch_view","environment")
