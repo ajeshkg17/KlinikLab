@@ -65,7 +65,10 @@ try{
      fs.statSync(reviewedPath).size!==bytes||fs.statSync(packPath).size!==bytes||
      sha256(fs.readFileSync(reviewedPath))!==hash||sha256(fs.readFileSync(packPath))!==hash)
     throw Error('Reviewed GLB differs from same-source 54-model pack: '+file);
-  const destFile=path.join(cc0Dest,file);
+  // Keep original binary byte-for-byte, but avoid Godot trying to import
+  // the unsupported quantized GLB as a resource. .source is raw evidence.
+  const originalName=file+'.source';
+  const destFile=path.join(cc0Dest,originalName);
   fs.copyFileSync(reviewedPath,destFile,fs.constants.COPYFILE_EXCL);
   if(sha256(fs.readFileSync(destFile))!==hash)throw Error('Native GLB package corruption: '+file);
   // Godot 4.7.2 does not parse the original KHR_mesh_quantization extension.
@@ -76,7 +79,7 @@ try{
   fs.writeFileSync(path.join(cc0Dest,convertedName),compatible.bytes,{flag:'wx'});
   if(sha256(fs.readFileSync(path.join(cc0Dest,convertedName)))!==compatible.convertedSha256 ||
     compatible.convertedAccessors<1)throw Error('CC0 Godot GLB compatibility export failed');
-  caseAssets.push({name:file,sha256:hash,bytes,
+  caseAssets.push({name:file,originalFile:originalName,sha256:hash,bytes,
    godotFile:convertedName,godotSha256:compatible.convertedSha256,
    godotBytes:compatible.bytes.length,godotFloat32Accessors:compatible.convertedAccessors,
    sourcePackName:original,
