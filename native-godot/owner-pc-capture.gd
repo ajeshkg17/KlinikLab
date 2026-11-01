@@ -49,7 +49,7 @@ func run(app: Node3D, job_id: String) -> void:
 	if DirAccess.make_dir_recursive_absolute(dir)!=OK:
 		_capture_failure("Could not create unique evidence folder")
 		return
-	var started: int = Time.get_unix_time_from_system()
+	var started: int = int(Time.get_unix_time_from_system())
 	var screenshots: Array = []
 	var entries := [
 		{"case":0,"station":4,"camera":"overview"},
