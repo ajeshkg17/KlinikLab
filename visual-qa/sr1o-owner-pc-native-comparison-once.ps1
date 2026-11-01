@@ -15,8 +15,8 @@ $repo=[IO.Path]::GetFullPath($RepositoryPath)
 $approved=(& git -C $repo rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $approved -cne $ExpectedCodeSha -or
  $approved -cnotmatch '^[0-9a-f]{40}$'){throw 'Exact immutable experiment checkout SHA mismatch'}
-if(@(& git -C $repo status --porcelain --untracked-files=no).Count -ne 0 -or
- $LASTEXITCODE -ne 0){throw 'Experiment checkout has tracked modifications'}
+$changes=@(& git -C $repo status --porcelain --untracked-files=no)
+if($LASTEXITCODE -ne 0 -or $changes.Count -ne 0){throw 'Experiment checkout has tracked modifications'}
 $ps51=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
 if(-not(Test-Path -LiteralPath $ps51)){throw 'Missing native Windows PowerShell 5.1'}
 $recovery=Join-Path $repo 'visual-qa\sr1n-publish-original-job08-images.ps1'
@@ -42,8 +42,9 @@ if($LASTEXITCODE -ne 0){throw 'Original local Godot job08 PNG verification faile
 $env:GIT_TERMINAL_PROMPT='0'
 & git -C $repo fetch origin visual-feedback
 if($LASTEXITCODE -ne 0){throw 'Cannot check existing original image publication'}
-& git -C $repo cat-file -e 'FETCH_HEAD:GODOT_JOB08_ORIGINALS.md' 2>$null
-$already=($LASTEXITCODE -eq 0)
+$remotePointer=@(& git -C $repo ls-tree --name-only FETCH_HEAD -- GODOT_JOB08_ORIGINALS.md)
+if($LASTEXITCODE -ne 0){throw 'Cannot inspect feedback original-image pointer'}
+$already=($remotePointer -contains 'GODOT_JOB08_ORIGINALS.md')
 if(-not $already){
  & $ps51 -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $recovery -RepositoryPath $repo -Publish
  if($LASTEXITCODE -ne 0){throw 'Original job08 pixel publication failed; no rerender, inspect preserved local files'}
