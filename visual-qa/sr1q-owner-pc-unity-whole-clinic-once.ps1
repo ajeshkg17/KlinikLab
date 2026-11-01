@@ -65,14 +65,14 @@ if($r.status -cne 'UNITY_SOURCE_IMPORTED_SCENE_SAVED_NO_GPU_RENDER' -or
 # Step 2: a separate NEW immutable WinSta0 private desktop real-D3D11
 # Unity process. The sampler must corroborate UNITY PID, 3D engine, actual
 # RTX5060 DXGI LUID and original three PNG hashes; never infer from source stage.
+$nativeReceipt=Join-Path $receipts ('unity-native-'+$id+'.json')
 Write-Host ('UNITY_NATIVE_D3D11_SOURCE_RUN='+[string]$r.sourceRun)
-& $ps51 -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $renderScript -RepositoryPath $repo -SourceProbeRun ([string]$r.sourceRun) -UnityExe $UnityExe
+& $ps51 -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $renderScript -RepositoryPath $repo -SourceProbeRun ([string]$r.sourceRun) -UnityExe $UnityExe -RunReceiptPath $nativeReceipt -ExpectedCodeSha $ExpectedCodeSha
 if($LASTEXITCODE -ne 0){
  throw 'UNITY_NATIVE_GPU_RENDER_FAILED: original run preserved in LOCALAPPDATA; do not rerun any attempted native run ID'}
 # The native runner creates one unique clinic folder, but its identity
 # must be handed off to the publisher without guessing or selecting a
 # pre-existing run. A NEW receipt is written by the render runner.
-$nativeReceipt=Join-Path $receipts ('unity-native-'+$id+'.json')
 if(-not(Test-Path -LiteralPath $nativeReceipt -PathType Leaf)){
  throw 'Unity GPU stage completed without an exact source-linked native receipt; do not select a folder by timestamp or rerender'}
 $n=Get-Content -LiteralPath $nativeReceipt -Raw|ConvertFrom-Json
