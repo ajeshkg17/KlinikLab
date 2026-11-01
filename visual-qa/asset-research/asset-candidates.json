@@ -1,5 +1,5 @@
 {
-  "catalogVersion": 1,
+  "catalogVersion": 2,
   "reviewedAt": "2026-11-01",
   "appUse": "personal",
   "currentUsableCollection": [
@@ -14,6 +14,120 @@
         "not segmented enamel/dentin/pulp",
         "not validated as clinical drilling geometry",
         "expert dental review required"
+      ],
+      "attribution": "3D tooth models © University of Dundee, School of Dentistry",
+      "licenseSPDX": "CC-BY-4.0",
+      "licenseEvidenceUrl": "https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f",
+      "immediateSource": "https://github.com/sameralseedbth-Dental/dental-3d-models",
+      "immediateSourceCommit": "4f0ffb651998a4641ddf45c7632ea236cc164fcb",
+      "repoSourceNotice": "assets/dundee/README.md",
+      "repoFiles": [
+        {
+          "file": "mandibular_first_molar.glb",
+          "githubBlobSHA1": "73e9f3029d770c6b4052ebbaba708283de4c47fd",
+          "bytes": 13860
+        },
+        {
+          "file": "mandibular_first_premolar.glb",
+          "githubBlobSHA1": "a2e449ba2776df8b741124c8fef87f07c560184e",
+          "bytes": 13108
+        },
+        {
+          "file": "mandibular_left_canine.glb",
+          "githubBlobSHA1": "caa9f97305522d3dc9f46f219e9c7039d727a8ca",
+          "bytes": 13400
+        },
+        {
+          "file": "mandibular_left_central_incisor.glb",
+          "githubBlobSHA1": "2fce2c70c1836ea23bab5a683582d85f56a513a3",
+          "bytes": 10064
+        },
+        {
+          "file": "mandibular_left_lateral_incisor.glb",
+          "githubBlobSHA1": "aa4672b8777195bff70b52bd72716bffd542b5b0",
+          "bytes": 9508
+        },
+        {
+          "file": "mandibular_left_second_premolar.glb",
+          "githubBlobSHA1": "892db94359877442300a6eac7a496dc85cdcaf98",
+          "bytes": 10140
+        },
+        {
+          "file": "mandibular_second_molar.glb",
+          "githubBlobSHA1": "947e90e80a7adb1d30f9cd09e84c9eacc8fc03f0",
+          "bytes": 17376
+        },
+        {
+          "file": "mandibular_third_molar.glb",
+          "githubBlobSHA1": "031daa517d639cf3289b6f14c6c48e02442ab93e",
+          "bytes": 17468
+        },
+        {
+          "file": "maxillary_canine.glb",
+          "githubBlobSHA1": "158b7ba171be479849291f3b97195d5e4f5ac448",
+          "bytes": 10088
+        },
+        {
+          "file": "maxillary_first_molar.glb",
+          "githubBlobSHA1": "0948d093089c5921281185a103b323c513365502",
+          "bytes": 18736
+        },
+        {
+          "file": "maxillary_first_premolar.glb",
+          "githubBlobSHA1": "4b9e625e41cc015b3618a53a1a5a5b7b7a9768fa",
+          "bytes": 12040
+        },
+        {
+          "file": "maxillary_lateral_incisor.glb",
+          "githubBlobSHA1": "bde8a64270ea3a0effad09b09b648c1924a32320",
+          "bytes": 12972
+        },
+        {
+          "file": "maxillary_left_central_incisor.glb",
+          "githubBlobSHA1": "e3a77e6a90cdf80dab4e0b8ace658ad92aa50db7",
+          "bytes": 13132
+        },
+        {
+          "file": "maxillary_second_molar.glb",
+          "githubBlobSHA1": "882b7a333f3884751303cec9bccf796b4f3fc02f",
+          "bytes": 13536
+        },
+        {
+          "file": "maxillary_second_premolar.glb",
+          "githubBlobSHA1": "d27f8ec34fc85ab98b1ef862ab567ea4feb0b9a8",
+          "bytes": 14140
+        },
+        {
+          "file": "maxillary_third_molar.glb",
+          "githubBlobSHA1": "dec9cd6886c9c88ab20de205fa9ca48b49152915",
+          "bytes": 12728
+        }
+      ],
+      "leftPermanentFDI": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "conversion": "Mirrored unchanged from intermediary Draco-compressed/512px-WebP GLBs; runtime recenter/lighting only",
+      "clinicalReviewStatus": "not clinically validated",
+      "blenderCleanupNeeded": [
+        "check FDI-specific crown/cusps/root configuration",
+        "axis/unit verification",
+        "verify surface manifold and texture orientation",
+        "do not invent enamel/dentin/pulp segmentation"
       ]
     }
   ],
@@ -32,7 +146,12 @@
       },
       "localPreview": "output/kliniklab-engine-bakeoff/shared-assets/asset-candidates/NIH3D-000902/preview-upper-mandible.png",
       "assessment": "Rough/partial scan fragment; not accepted for integration.",
-      "githubAssetUploaded": false
+      "githubAssetUploaded": false,
+      "sourceFileSHA256": null,
+      "sourceFileHashStatus": "not provided in PR; require SHA256 of original local downloaded GLB",
+      "blenderVisualInspection": "reported by owner-PC Blender 5.1.1; review assistant cannot view C:\\ Windows paths in this environment; originals not uploaded",
+      "clinicalReviewStatus": "not independently reviewed",
+      "publicBinaryUploadApproved": false
     },
     {
       "id": "NIH3D-003003",
@@ -48,7 +167,12 @@
       },
       "localPreview": "output/kliniklab-engine-bakeoff/shared-assets/asset-candidates/NIH3D-003003/preview-patient-derived-arch.png",
       "assessment": "Combined scan-derived arch with a large printable base and scan artifacts; not separately addressable per FDI tooth; visual reference only.",
-      "githubAssetUploaded": false
+      "githubAssetUploaded": false,
+      "sourceFileSHA256": null,
+      "sourceFileHashStatus": "not provided in PR; require SHA256 of original local downloaded GLB",
+      "blenderVisualInspection": "reported by owner-PC Blender 5.1.1; review assistant cannot view C:\\ Windows paths in this environment; originals not uploaded",
+      "clinicalReviewStatus": "not independently reviewed",
+      "publicBinaryUploadApproved": false
     },
     {
       "id": "SKETCHFAB-DUNDEE-PERMANENT-DENTITION",
@@ -58,7 +182,372 @@
       "assetLicense": "CC BY 4.0 listing",
       "file": "Not downloaded; Sketchfab requires login for download and no sign-in was attempted.",
       "assessment": "Potential anatomy candidate; inspect actual downloaded mesh before considering integration.",
-      "githubAssetUploaded": false
+      "githubAssetUploaded": false,
+      "sourceFileSHA256": null,
+      "sourceFileHashStatus": "not provided in PR; require SHA256 of original local downloaded GLB",
+      "blenderVisualInspection": "reported by owner-PC Blender 5.1.1; review assistant cannot view C:\\ Windows paths in this environment; originals not uploaded",
+      "clinicalReviewStatus": "not independently reviewed",
+      "publicBinaryUploadApproved": false
+    },
+    {
+      "id": "MENDELEY-97C3PF8H2H-V1",
+      "title": "Human jaw with 14 teeth, PDL and cortical/cancellous bone",
+      "url": "https://data.mendeley.com/datasets/97c3pf8h2h/1",
+      "attribution": "Cristian Diaz; Carlos Andres Ferro Sanchez; Oscar Campo",
+      "assetLicense": "CC BY 4.0",
+      "licenseEvidenceUrl": "https://data.mendeley.com/datasets/97c3pf8h2h/1",
+      "sourceVersion": "v1 DOI 10.17632/97c3pf8h2h.1",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "jaw/PDL/individually separated tooth assets",
+      "fdiSuitability": "Potential separate mandibular FDI tooth files; check D/L filenames and anatomical orientation",
+      "blenderCleanupPlan": [
+        "download STL subset + source hash",
+        "import one tooth and bone subset into Blender",
+        "confirm tooth label/FDI naming; unit normalization",
+        "inspect open borders/PDL shells and patient-derived geometry"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Patient-derived input; 0.25 mm PDL layer is modeled, not segmented biological measurement. Attribution and consent/provenance review before public binary publishing."
+    },
+    {
+      "id": "MENDELEY-XJSX7NFHJ8-V1",
+      "title": "Synthetic jaw FE assembly with separate teeth and 14 PDLs",
+      "url": "https://data.mendeley.com/datasets/xjsx7nfhj8/1",
+      "attribution": "Cristian Diaz; Carlos Andres Ferro Sanchez; Oscar Campo",
+      "assetLicense": "CC BY 4.0",
+      "licenseEvidenceUrl": "https://data.mendeley.com/datasets/xjsx7nfhj8/1",
+      "sourceVersion": "v1 DOI 10.17632/xjsx7nfhj8.1",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "jaw/PDL/FE separated teeth",
+      "fdiSuitability": "Separate teeth identified D.. and ligament L..; check real list, FDI, number of individual files",
+      "blenderCleanupPlan": [
+        "check version and file-list geometry",
+        "STL import one tooth+PDL, assess per-tooth object boundaries",
+        "scale mm to engine units and inspect topology",
+        "decimate only if silhouette error checked"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Source says synthetic, but methods describe patient DICOM+intraoral scan; independent anatomical/ethics review. Dataset text says 14 teeth while 37..47 sequence is inconsistent if read literally; do not assert exact mapping before file inspection."
+    },
+    {
+      "id": "DUNDEE-MAXILLA-PALATINE",
+      "title": "Maxilla and Palatine",
+      "url": "https://sketchfab.com/3d-models/maxilla-and-palatine-15695c339e1743ae982879462280687b",
+      "attribution": "University of Dundee School of Dentistry; production Emily McDougall; reviewers Dr Andrew Mason and Paulina Poblete Pancheco; initial prep Mark Roughley",
+      "assetLicense": "CC BY 4.0",
+      "licenseEvidenceUrl": "https://sketchfab.com/3d-models/maxilla-and-palatine-15695c339e1743ae982879462280687b",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "maxillary bone / arch base",
+      "fdiSuitability": "Jaw support reference; separate individual teeth not established",
+      "blenderCleanupPlan": [
+        "login-required download if applicable; no sign-in attempted",
+        "inspect 702.9k upstream triangles, open borders and anatomical seams",
+        "remove no clinically relevant bone without dental review",
+        "reduce polygon count for real-time separately"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Dundee source item itself shows CC Attribution. Preserve full creator list and modifications."
+    },
+    {
+      "id": "DUNDEE-MANDIBLE-CC-BY-NC",
+      "title": "Mandible with teeth",
+      "url": "https://sketchfab.com/3d-models/mandible-7a3c3b99916e481197e6f18fda107c15",
+      "attribution": "University of Dundee School of Dentistry",
+      "assetLicense": "CC BY-NC (version not established from public listing)",
+      "licenseEvidenceUrl": "https://sketchfab.com/3d-models/mandible-7a3c3b99916e481197e6f18fda107c15",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "mandibular reference only",
+      "fdiSuitability": "Whole jaw; 82.6k triangles; FDI separation not verified",
+      "blenderCleanupPlan": [
+        "do not copy as if CC BY 4.0",
+        "non-commercial project permission and attribution before use",
+        "check specific BY-NC version, dental correctness, bone/teeth objects"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P2",
+      "notes": "IMPORTANT existing Dundee 16 tooth GLBs are CC BY; Dundee mandible is explicitly CC BY-NC, not the same terms."
+    },
+    {
+      "id": "DUNDEE-PULP-CHAMBER-COLLECTION",
+      "title": "Permanent tooth pulp chamber/endodontic morphology (18-model collection)",
+      "url": "https://sketchfab.com/DundeeDental/collections/permanant-teeth-pulp-chamber-morphology-e68043adf8664ea1addc10c7cb56c525",
+      "attribution": "University of Dundee School of Dentistry",
+      "assetLicense": "UNCONFIRMED at item level",
+      "licenseEvidenceUrl": "https://sketchfab.com/DundeeDental/collections/permanant-teeth-pulp-chamber-morphology-e68043adf8664ea1addc10c7cb56c525",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "BLOCKED pending per-item license",
+      "targetRole": "pulp chamber / endodontic anatomical reference",
+      "fdiSuitability": "Titles per tooth class; per-file pulp cavity meshes and FDI geometry must be checked",
+      "blenderCleanupPlan": [
+        "review per-item licensing and login requirements",
+        "inspect separate internal canal surfaces and mesh topology",
+        "map a case to exact FDI and verify canal morphology",
+        "clinician reviews root/canal geometry"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Collection title does not provide one blanket license. Do not assume source surface CC BY extends to all endodontic models."
+    },
+    {
+      "id": "DUNDEE-PRIMARY-DENTITION",
+      "title": "Primary dentition collection of 10 left-quadrant teeth",
+      "url": "https://sketchfab.com/DundeeDental/collections/primary-dentition-bc922887f72d4f1e85cb540dfb8cf040",
+      "attribution": "University of Dundee School of Dentistry",
+      "assetLicense": "UNCONFIRMED at item level",
+      "licenseEvidenceUrl": "https://sketchfab.com/DundeeDental/collections/primary-dentition-bc922887f72d4f1e85cb540dfb8cf040",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "BLOCKED pending per-item license",
+      "targetRole": "primary dental teeth education",
+      "fdiSuitability": "FDI 61-65 and 71-75 explicitly listed; remaining sides would need disclosure/mirroring",
+      "blenderCleanupPlan": [
+        "verify item-by-item license",
+        "download where permitted",
+        "inspect resorption/age-appropriate crown and root shapes",
+        "separate/align by source FDI"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P2",
+      "notes": "Useful to expand later; not substitute for adult 32-tooth array."
+    },
+    {
+      "id": "FIGSHARE-KANG-24591537-V1",
+      "title": "Immature first permanent molar, pulp cavity, PDL and space maintainer STEP solids",
+      "url": "https://doi.org/10.6084/m9.figshare.24591537.v1",
+      "attribution": "Fang Fang Kang (2024); linked article Shi, Kang and Liu",
+      "assetLicense": "CC BY 4.0",
+      "licenseEvidenceUrl": "https://doi.org/10.6084/m9.figshare.24591537.v1",
+      "sourceVersion": "v1 DOI 10.6084/m9.figshare.24591537.v1",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "multi-part tissue/endodontic example",
+      "fdiSuitability": "Immature mandibular first permanent molar, pediatric single-tooth rather than adult generalized FDI",
+      "blenderCleanupPlan": [
+        "record 163.48MB source ZIP SHA256",
+        "inspect original STEP solids and mesh tessellation",
+        "separate pulp, outer tooth, PDL, appliance",
+        "keep age-specific label; do not claim enamel/dentin differentiation"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Open-source derivative from OMFAtlas exists but keep attribution and conversion provenance distinct. Clinical review required."
+    },
+    {
+      "id": "DENTAL-3DASSETS-CC0-PACK-54",
+      "title": "Dental Practice and Surgery 54-piece pack",
+      "url": "https://3dassets.dev/packs/dental-practice-and-surgery",
+      "attribution": "3D Assets (AI-assisted, reported Claude Opus 5)",
+      "assetLicense": "CC0 1.0 Universal",
+      "licenseEvidenceUrl": "https://3dassets.dev/packs/dental-practice-and-surgery",
+      "sourceVersion": "v1 / assets/34423",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "whole dental clinic furniture, equipment, reception, tray, light, chair",
+      "fdiSuitability": "Not FDI-addressable; equipment/operatory visual assets only",
+      "blenderCleanupPlan": [
+        "download pack source 34423/v1; checksum",
+        "inspect separate scene nodes/rotations and real dimensions 16.002 x 2.761 x 14.074m",
+        "Blender shaded+wireframe overview, check plausibility and texture orientation",
+        "fix collisions, equipment ergonomics and inaccessible objects"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "54 objects, creator reports 117172 triangles total; assembled starter scene 46988 triangles. AI-made and simplified schematic; source rights stated CC0 but clinical/functional dimensions unvalidated. Good visual reference, not a substitute for case workflow."
+    },
+    {
+      "id": "DENTAL-3DASSETS-CC0-INSTRUMENT-TRAY",
+      "title": "Dental tray with mouth mirror, probe, college tweezers and cotton rolls",
+      "url": "https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c",
+      "attribution": "3D Assets (AI-assisted)",
+      "assetLicense": "CC0 1.0 Universal",
+      "licenseEvidenceUrl": "https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c",
+      "sourceVersion": "v1 / assets/34383",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "dental instruments / tray",
+      "fdiSuitability": "Not anatomical FDI mesh; separable instrument solids are claimed by creator",
+      "blenderCleanupPlan": [
+        "download pinned https://cdn.3dassets.dev/assets/34383/v1/model.glb and checksum",
+        "inspect 728 triangle node hierarchy, scale and grip details",
+        "Blender render top/angled/wireframe",
+        "isolate mirror/probe/tweezers for interaction and instrument clearance"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Creator reports 0.28x0.039x0.213m and CC0. Container CDN DNS unavailable in current session; no original file hash or Blender preview."
+    },
+    {
+      "id": "SKETCHFAB-SDEO-DENTAL-MIRROR",
+      "title": "Dental Mirror instrument",
+      "url": "https://sketchfab.com/3d-models/dental-mirror-d5d02ef50e9d4981b7a0315f0b9568d2",
+      "attribution": "SDEO",
+      "assetLicense": "CC BY (Sketchfab listing; typically 4.0, verify actual license-deed link)",
+      "licenseEvidenceUrl": "https://sketchfab.com/3d-models/dental-mirror-d5d02ef50e9d4981b7a0315f0b9568d2",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "dental hand instrument",
+      "fdiSuitability": "Not anatomy; independent handpiece interaction target",
+      "blenderCleanupPlan": [
+        "check exact CC BY license version and download access",
+        "Blender handle/mirror normal orientation and scale check",
+        "separate reflective glass/metal materials",
+        "add collision proxy"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P2",
+      "notes": "Listing gives about 5k triangles and 2.6k vertices; no Blender or owner-PC preview yet."
+    },
+    {
+      "id": "SKETCHFAB-HANDPIECE-MSH1970",
+      "title": "Dental High Speed Handpiece",
+      "url": "https://sketchfab.com/3d-models/dental-high-speed-handpiece-bf2321e3b9a440e894539fc711aeb37c",
+      "attribution": "M.S.H1970",
+      "assetLicense": "CC BY (Sketchfab listing; verify exact deed)",
+      "licenseEvidenceUrl": "https://sketchfab.com/3d-models/dental-high-speed-handpiece-bf2321e3b9a440e894539fc711aeb37c",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "turbine drill handpiece visualization",
+      "fdiSuitability": "Tool only; drilling interactions still need calibrated simulation",
+      "blenderCleanupPlan": [
+        "1.5 million triangles too dense for real-time; Blender evaluate materials, decimate with silhouette comparison",
+        "separate tool body, turbine head and bit",
+        "independent bur rotation/collision rig; functional dimensions must be verified"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P3",
+      "notes": "Author says illustrative, not accurate technical replica. No original download/Blender inspection."
+    },
+    {
+      "id": "3DENTES-CBCT-PERSONAL-NC",
+      "title": "3Dentes CBCT oral anatomy atlas",
+      "url": "https://github.com/NateSaindon/3Dentes",
+      "attribution": "Nate Saindon; subject's own scan with explicit publication consent",
+      "assetLicense": "CC BY-NC 4.0 (anatomy); MIT (code)",
+      "licenseEvidenceUrl": "https://github.com/NateSaindon/3Dentes",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "28 selectable teeth, maxilla/mandible, gums, pulp, PDL, nerves",
+      "fdiSuitability": "High potential per-tooth selection; verify actual per-FDI names and segment quality",
+      "blenderCleanupPlan": [
+        "pin exact source commit and original binary SHA",
+        "exclude code/asset license confusion",
+        "inspect FDI segmentation and patient-level representativeness",
+        "separately evaluate per-tooth/tissue mesh and non-commercial attribution"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P1",
+      "notes": "Explicit anatomy redistribution permitted only non-commercially with attribution. Public repo allowed only if non-commercial reuse restriction/attribution preserved and dependencies independently cleared; safest default metadata link until reviewed."
+    },
+    {
+      "id": "Z-ANATOMY-HEAD-NECK",
+      "title": "Z-Anatomy human head/neck atlas",
+      "url": "https://github.com/Z-Anatomy/Models-of-human-anatomy",
+      "attribution": "Gauthier Kervyn and contributing Z-Anatomy/BodyParts3D creators",
+      "assetLicense": "CC BY-SA 4.0 (Z-Anatomy model derivative; underlying components may differ)",
+      "licenseEvidenceUrl": "https://www.spi-inc.org/projects/z-anatomy/",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "jaw, nerves, soft tissue anatomical context",
+      "fdiSuitability": "Atlas separated by named structures; tooth-level FDI needs explicit mapping",
+      "blenderCleanupPlan": [
+        "audit each asset license including upstream BodyParts3D and noncommercial exceptions",
+        "Blender crop/reorient and preserve share-alike on derivative geometry",
+        "check nerve/jaw labels and anatomy"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P2",
+      "notes": "Do not bulk-mirror an entire mixed-license atlas; isolate explicitly verified components."
+    },
+    {
+      "id": "ZENODO-REYMUS-DENTAL-TRAUMA",
+      "title": "DentalEmergencyModel trauma splint/surface anatomy STLs and BLENDs",
+      "url": "https://zenodo.org/records/20303324",
+      "attribution": "Marcel Reymus (2026), DentalEmergencyTraining project",
+      "assetLicense": "Free use/modify/distribute described; formal license identifier BLANK",
+      "licenseEvidenceUrl": "https://zenodo.org/records/20303324",
+      "sourceVersion": null,
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "targetRole": "anterior trauma training/FDI 11,12,21,22",
+      "fdiSuitability": "File naming FDI-compatible but actual physical components require validation",
+      "blenderCleanupPlan": [
+        "verify formal permission details, check BLEND linked models and STL structure",
+        "MD5 per-file provided by Zenodo; record SHA256 after download",
+        "render before/after fracture/apex separately"
+      ],
+      "clinicalReviewStatus": "not clinically reviewed",
+      "priority": "P2",
+      "notes": "Zenodo page states free use modification distribution but license metadata field empty. Get specific explicit author permission/terms before public binary GitHub upload."
     }
   ],
   "sourcesToSearch": [
@@ -80,5 +569,16 @@
       "status": "No individual model yet selected or license verified."
     }
   ],
-  "policy": "Personal app use can include non-commercial assets when their licenses permit it. Public GitHub redistribution still requires explicit rights. Keep model provenance, license, attribution, source hash, transformations, and anatomy-review status with every accepted asset."
+  "policy": "Personal app use can include non-commercial assets when their licenses permit it. Public GitHub redistribution still requires explicit rights. Keep model provenance, license, attribution, source hash, transformations, and anatomy-review status with every accepted asset.",
+  "independentlyReviewedBlenderPreviews": false,
+  "previewAccessLimitation": {
+    "pathsOnWindowsOnly": true,
+    "attemptedPath": "C:\\Users\\ajesh\\OneDrive\\study and learn\\coworker\\output\\kliniklab-engine-bakeoff\\shared-assets\\asset-candidates\\NIH3D-000902\\preview-upper-mandible.png",
+    "observedError": "No such file or directory from current container; Windows C: drive is not mounted",
+    "blenderInstalledInReviewContainer": false,
+    "nihPreviewsProvidedInGitHubPR": false,
+    "visualConclusionsAreOwnerPCOnly": true
+  },
+  "sourceHashRule": "New downloadable assets have null SHA256 until actual bytes downloaded and checksummed. GitHub blob SHA-1 for existing Dundee assets is not SHA-256. Original author/version/DOI/license evidence is recorded independently.",
+  "assetBinariesAddedInThisPR": []
 }
