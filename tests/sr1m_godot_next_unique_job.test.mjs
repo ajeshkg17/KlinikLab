@@ -5,7 +5,7 @@ import {validateGodotJob,EXACT_SOURCE_SHA} from '../visual-qa/godot-job-core.mjs
 import {JOB07_ID,JOB07_SOURCE} from '../visual-qa/godot-job07-forensics.mjs';
 import {PROBE_JOB_ID} from '../visual-qa/godot-next-job-admission.mjs';
 
-const job=JSON.parse(readFileSync(new URL('../visual-qa/jobs/godot-current.json',import.meta.url),'utf8'));
+const job=JSON.parse(readFileSync(new URL('../visual-qa/jobs/godot-job08-original.json',import.meta.url),'utf8'));
 const reserved='pc-godot-clinic-20261101-job08';
 test('SR1M: unique new job08 is ONLY a schema7 private-desktop native clinic request',()=>{
  const j=validateGodotJob(job);
