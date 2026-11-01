@@ -1,0 +1,56 @@
+{
+  "candidateId": "instrument-tray",
+  "nativeBlenderVersion": "4.0.2",
+  "sourceOriginalFilename": "instrument-tray.glb",
+  "sourceOriginalSha256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036",
+  "importedMeshObjectCount": 4,
+  "objectNames": [
+    "instrument-tray_0",
+    "instrument-tray_1",
+    "instrument-tray_2",
+    "instrument-tray_3"
+  ],
+  "importedVertexCount": 1401,
+  "importedFaceCount": 728,
+  "importedTriangleCount": 728,
+  "sourceWorldBoundsXYZMeters": [
+    0.28,
+    0.212995,
+    0.039445
+  ],
+  "sourceBoundsCenter": [
+    0.0,
+    -0.011501,
+    0.019723
+  ],
+  "nativePreviewImages": [
+    {
+      "filename": "instrument-tray-overview.png",
+      "sha256": "840cd6e377882efb686aa5a64ab419781acde1a7cae2029916e6b185f030f907",
+      "bytes": 1216923,
+      "view": "overview",
+      "width": 1200,
+      "height": 800,
+      "nearlyWhitePixelFraction": 0.00956
+    },
+    {
+      "filename": "instrument-tray-angled.png",
+      "sha256": "4548bbc127e4789778a39509bf4cd6753a5ed583b7e57b3dc1821cb9569373a2",
+      "bytes": 1311028,
+      "view": "angled",
+      "width": 1200,
+      "height": 800,
+      "nearlyWhitePixelFraction": 0.01323
+    }
+  ],
+  "sceneGeometryModified": false,
+  "fdIValidated": false,
+  "independentlyReviewedPixels": false,
+  "clinicalAccepted": false,
+  "assetVisualStatus": "RENDERED_AWAITING_DIRECT_PIXEL_INSPECTION",
+  "possibleIssues": [
+    "Synthetic/AI-assisted schematic geometry; inspect actual pixels",
+    "Dimensions, dental ergonomics and functional tool mechanism unverified"
+  ],
+  "license": "CC0-1.0"
+}

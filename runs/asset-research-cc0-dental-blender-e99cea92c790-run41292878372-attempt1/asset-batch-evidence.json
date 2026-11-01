@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "NATIVE_BLENDER_PREVIEWS_PENDING_ASSISTANT_PIXEL_REVIEW",
+  "workflowRun": "41292878372/1",
+  "exactSourceCodeSHA": "e99cea92c7903894c4364d69577c0be4c1c87692",
+  "publisher": "3DAssets.dev",
+  "license": "CC0-1.0",
+  "licenseDeed": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sourcePack": "https://3dassets.dev/packs/dental-practice-and-surgery",
+  "visualAccepted": false,
+  "clinicalAccepted": false,
+  "binaryModelsPublished": false,
+  "items": [
+    {
+      "candidateId": "instrument-tray",
+      "title": "Instrument Tray (Dental Practice and Surgery)",
+      "sourcePage": "https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c",
+      "sourceOriginalUrl": "https://cdn.3dassets.dev/assets/34383/v1/model.glb",
+      "version": "v1 / 34383",
+      "originalSha256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036",
+      "originalBytes": 30452,
+      "blenderVersion": "4.0.2",
+      "importedMeshCount": 4,
+      "importedTriangles": 728,
+      "originalPreviews": [
+        {
+          "filename": "instrument-tray-overview.png",
+          "sha256": "840cd6e377882efb686aa5a64ab419781acde1a7cae2029916e6b185f030f907",
+          "bytes": 1216923,
+          "nearlyWhitePixelFraction": 0.00956
+        },
+        {
+          "filename": "instrument-tray-angled.png",
+          "sha256": "4548bbc127e4789778a39509bf4cd6753a5ed583b7e57b3dc1821cb9569373a2",
+          "bytes": 1311028,
+          "nearlyWhitePixelFraction": 0.01323
+        }
+      ],
+      "fdIValidated": false,
+      "visualAccepted": false,
+      "clinicalAccepted": false
+    },
+    {
+      "candidateId": "whole-clinic-starter",
+      "title": "Dental Practice and Surgery starter scene",
+      "sourcePage": "https://3dassets.dev/packs/dental-practice-and-surgery",
+      "sourceOriginalUrl": "https://cdn.3dassets.dev/assets/34423/v1/model.glb",
+      "version": "v1 / 34423",
+      "originalSha256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a",
+      "originalBytes": 1177948,
+      "blenderVersion": "4.0.2",
+      "importedMeshCount": 1042,
+      "importedTriangles": 121536,
+      "originalPreviews": [
+        {
+          "filename": "whole-clinic-starter-overview.png",
+          "sha256": "08224b3485f5484e467b798eb46776b64e2e12d19d8df0fef23ca2eb2f5679f0",
+          "bytes": 1480545,
+          "nearlyWhitePixelFraction": 3e-05
+        },
+        {
+          "filename": "whole-clinic-starter-angled.png",
+          "sha256": "868a69345e99fdb97a11511c97c5774ca659cc9d13612bc284a24e842181980a",
+          "bytes": 1614958,
+          "nearlyWhitePixelFraction": 0.0
+        }
+      ],
+      "fdIValidated": false,
+      "visualAccepted": false,
+      "clinicalAccepted": false
+    }
+  ]
+}
