@@ -149,6 +149,14 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://radiography-smoke.gd > "$RUNNER_TEMP/radiography-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/radiography-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/radiography-smoke.log"
           grep -F "SR10_NATIVE_SIX_SYNTHETIC_RADIOGRAPHS_PASS" "$RUNNER_TEMP/radiography-smoke.log"
+      - name: Original 4-case FSP/KP German formative source scorer parity (HEADLESS, not exam acceptance)
+        run: |
+          set -euo pipefail
+          test -s "$RUNNER_TEMP/native-kliniklab-app/source/fsp-kp.json"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://fsp-kp-rubric.gd > "$RUNNER_TEMP/fsp-kp-parse.log" 2>&1 || { cat "$RUNNER_TEMP/fsp-kp-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://fsp-kp-smoke.gd > "$RUNNER_TEMP/fsp-kp-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/fsp-kp-smoke.log"; exit 1; }
+          cat "$RUNNER_TEMP/fsp-kp-smoke.log"
+          grep -F "SR11_NATIVE_FSP_KP_68_SOURCE_SCORER_PARITY_PASS" "$RUNNER_TEMP/fsp-kp-smoke.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
