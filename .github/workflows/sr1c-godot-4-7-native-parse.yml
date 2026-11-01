@@ -88,6 +88,7 @@ jobs:
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/app-content.json"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field.bin"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field-manifest.json"
+          test -f "$RUNNER_TEMP/native-kliniklab-app/source/clinical-pathways.json"
       - name: Parse full-app Godot scene and interactive app GDScript through real Godot 4.7.2
         run: |
           set -euo pipefail
