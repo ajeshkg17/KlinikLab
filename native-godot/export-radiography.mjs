@@ -57,7 +57,7 @@ function pngFromRGB(pixels){
 }
 const manifest={schemaVersion:1,kind:'SOURCE_SYNTHETIC_RADIOGRAPHY_EDUCATIONAL_PROJECTION_NOT_PATIENT_DATA',
  sourceGitSHA:sha,sourceDesktopSuiteSHA256:sha256(js),sourceToothSolidSHA256:sha256(vol),
- imageSize:[W,H],model:'SAMPLED_TOOTHSOLID_WITH_BROWSER_DESKTOP_SUITE_CASE_FINDING',
+ imageSize:[W,H],attenuationSampleGrid:[120,80],model:'SAMPLED_TOOTHSOLID_WITH_BROWSER_DESKTOP_SUITE_CASE_FINDING',
  clinicalAccuracyValidated:false,patientImage:false,cases:{}};
 fs.mkdirSync(output,{recursive:true});
 for(let c=0;c<6;c++){
@@ -69,9 +69,12 @@ for(let c=0;c<6;c++){
  const solid=new ToothSolid(id,fdi);
  if(solid.fdi!==fdi)throw Error('FDI source anatomy identity mismatch');
  const rgb=Buffer.alloc(W*H*3);
- let lowest=255,highest=0,sum=0;
- for(let yPix=0;yPix<H;yPix++)for(let xPix=0;xPix<W;xPix++){
-  const x=(xPix/W-.5)*6.0,y=1.45-yPix/H*3.45;
+ const SW=120, SH=80;
+ // Compute expensive original ToothSolid attenuation only once per source
+ // grid point, then interpolate. Full output raster remains 360x240 pixels.
+ const attenuation=new Float32Array(SW*SH);
+ for(let j=0;j<SH;j++)for(let i=0;i<SW;i++){
+  const x=(i/(SW-1)-.5)*6.0,y=1.45-j/(SH-1)*3.45;
   let tau=0;
   for(const dx of [-2.05,0,2.05]){
    const xx=x-dx;
@@ -83,6 +86,16 @@ for(let c=0;c<6;c++){
     tau+=t==='enamel'?.150:t==='dentin'?.079:t==='pulp'?.025:t==='caries'?.023:.071;
    }
   }
+  attenuation[j*SW+i]=tau;
+ }
+ let lowest=255,highest=0,sum=0;
+ for(let yPix=0;yPix<H;yPix++)for(let xPix=0;xPix<W;xPix++){
+  const ux=xPix*(SW-1)/(W-1),uy=yPix*(SH-1)/(H-1);
+  const x0=Math.min(SW-2,Math.floor(ux)),y0=Math.min(SH-2,Math.floor(uy));
+  const fx=ux-x0,fy=uy-y0,k0=y0*SW+x0,k1=k0+SW;
+  const tau=(1-fy)*((1-fx)*attenuation[k0]+fx*attenuation[k0+1])+
+     fy*((1-fx)*attenuation[k1]+fx*attenuation[k1+1]);
+  const x=(xPix/W-.5)*6.0,y=1.45-yPix/H*3.45;
   let density=32+190*(1-Math.exp(-tau));
   const noise=(Math.sin(xPix*12.9898+yPix*78.233)*43758.5453)%1;
   density+=Math.abs(noise)*11-5;
