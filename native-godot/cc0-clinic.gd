@@ -48,7 +48,7 @@ func configure(expected_sha: String) -> bool:
 		if str(row.get("name",""))!=file or str(row.get("sha256",""))!=str(HASHES[file]) or int(row.get("bytes",-1))!=int(BYTES[file]):
 			_error = "Reviewed CC0 asset identity/hash mismatch "+file
 			return false
-		var filepath := ROOT+file
+		var filepath := ROOT+file+".source"
 		if not FileAccess.file_exists(filepath) or FileAccess.get_sha256(filepath)!=str(HASHES[file]):
 			_error = "Missing/corrupt original CC0 GLB "+file
 			return false
