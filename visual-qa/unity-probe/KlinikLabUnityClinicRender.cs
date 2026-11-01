@@ -119,6 +119,8 @@ public static class KlinikLabUnityClinicRender
         var go=new GameObject(name);
         go.transform.SetParent(parent,false);
         go.transform.localPosition=at;
+        // Unity TextMesh faces +Z by default; clinic camera looks from -Z.
+        go.transform.localRotation=Quaternion.Euler(0,180,0);
         var t=go.AddComponent<TextMesh>();
         t.text=text;t.characterSize=characterSize;t.fontSize=36;
         t.color=color;t.anchor=TextAnchor.MiddleCenter;
