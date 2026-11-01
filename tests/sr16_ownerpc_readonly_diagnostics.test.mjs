@@ -24,6 +24,15 @@ test('SR16 owner-PC diagnostics compares the scheduled task identity, worker che
   assert.match(diagnostic,new RegExp(field));
  assert.match(diagnostic,/godot-watcher-\*-stdout\.log/);
  assert.match(diagnostic,/godot-watcher-\*-stderr\.log/);
+ assert.match(diagnostic,/SecurityIdentifier\]::new\(\$principal\)/);
+ assert.match(diagnostic,/NTAccount\]::new\(\$principal\)/);
+ assert.match(diagnostic,/currentLoginMatchesTaskPrincipal=\(\$taskPrincipalSidResolved/);
+ assert.doesNotMatch(diagnostic,/\$me -ieq \$principal/);
+ for(const field of ['taskPrincipalSidResolved','heartbeatPid','heartbeatAt','heartbeatProcessAlive',
+  'runtimeUpdatedUTC','latestWorkerStdoutLastWriteUTC','latestWorkerStderrLastWriteUTC',
+  'latestWorkerStdoutExistingEvidenceReconciliationMessage','ledgerCompletedEntryCount'])
+  assert.match(diagnostic,new RegExp(field));
+ assert.match(diagnostic,/existing-original-evidence-ledger-reconciliation-required/);
 });
 
 test('SR16 owner-PC diagnostics is strictly read-only and never launches the app or repairs the ledger',()=>{
