@@ -32,6 +32,7 @@ func _run() -> void:
 		if not bool(tooth.call("configure",sha,IDS[i])):
 			_fail("Native source-verified tooth unavailable "+IDS[i])
 			return
+		get_root().add_child(tooth)
 		var before: Dictionary = tooth.call("summary")
 		var hit := _find_hit(tooth)
 		if not bool(hit.get("found",false)) or str(hit.get("fdi","")) != FDIs[i] or str(hit.get("caseId","")) != IDS[i]:
@@ -54,6 +55,8 @@ func _run() -> void:
 		if bool((tooth.call("ray_hit",Vector3(2.9,0.6,12.0),Vector3(0,0,-1)) as Dictionary).get("found",false)):
 			_fail("Hidden wrong-case tooth still selectable")
 			return
+		get_root().remove_child(tooth)
+		tooth.free()
 	var app_script: GDScript = load("res://app.gd")
 	if app_script == null:
 		_fail("App script missing")
@@ -64,6 +67,7 @@ func _run() -> void:
 		return
 	app.call("_load_progress")
 	app.set("_scene",Node3D.new())
+	get_root().add_child(app.get("_scene"))
 	app.call("_select_case",1)
 	app.call("_select_station",4)
 	app.set("_view","clinic")
@@ -76,7 +80,6 @@ func _run() -> void:
 	if not bool(source_hit.get("found",false)):
 		_fail("App FDI36 native surface could not be picked")
 		return
-	var ray_origin := Vector3(source_hit["at"].x+2.9,source_hit["at"].y,12.0)
 	# The test's candidate ray uses the same XY world coordinates as the hit.
 	var actual_ray_origin := Vector3(2.9,0.6,12.0)
 	var found_origin := false
