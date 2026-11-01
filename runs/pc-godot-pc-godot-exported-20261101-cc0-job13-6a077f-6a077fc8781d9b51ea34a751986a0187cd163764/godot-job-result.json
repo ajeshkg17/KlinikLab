@@ -1,0 +1,31 @@
+{
+  "jobId": "pc-godot-exported-20261101-cc0-job13-6a077f",
+  "sourceGitSHA": "6a077fc8781d9b51ea34a751986a0187cd163764",
+  "watcherSuite": "sr14-native-exported-cc0-six-case",
+  "workerGitSHA": "033fb0520212fe696df02bf2a0c5aca12ad3e848",
+  "nativeSceneMode": "native-exported-cc0",
+  "fullKlinikLabApplicationMigrated": false,
+  "executedOn": "owner Windows PC (actual exported EXE watcher)",
+  "originalArtifact": {
+    "runId": 41310806861,
+    "id": 13085058617,
+    "name": "KlinikLab-Windows-x64-6a077fc8781d9b51ea34a751986a0187cd163764"
+  },
+  "generatedAt": "2026-11-01T13:26:15.945Z",
+  "nativeReportStatus": "EXPORTED_APP_RENDER_EVIDENCE_PENDING_INDEPENDENT_PIXEL_REVIEW",
+  "nativeWorkflowVerified": true,
+  "imageExists": true,
+  "angledImageExists": true,
+  "distinctRtx5060Gpu3DPeriods": 33,
+  "rtx5060DxgiLuid": "0x00000000_0x00013049",
+  "dxgiLuidMatchesGodotProcess": true,
+  "sourceMeshVerified": true,
+  "gpuProcessCorroborated": true,
+  "backgroundPrivateDesktopRenderRequested": true,
+  "foregroundActivationRequested": false,
+  "headlessDummyRendererAllowed": false,
+  "imageIndependentPixelReviewAccepted": false,
+  "overallStatus": "NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW",
+  "errors": [],
+  "blockers": []
+}

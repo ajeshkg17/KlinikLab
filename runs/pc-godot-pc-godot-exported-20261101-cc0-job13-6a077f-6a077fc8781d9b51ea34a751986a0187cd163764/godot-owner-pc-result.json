@@ -1,0 +1,34 @@
+{
+    "schemaVersion":  8,
+    "sourceGitSHA":  "6a077fc8781d9b51ea34a751986a0187cd163764",
+    "nativeSceneMode":  "native-exported-cc0",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeCaseWorkflowVerified":  true,
+    "rawSidecarVerified":  true,
+    "nativeImagePresent":  true,
+    "nativeAngledImagePresent":  true,
+    "nativeScreenshotFile":  "kliniklab-exported-cc0-environment.png",
+    "nativeAngledScreenshotFile":  "kliniklab-exported-fdi36-practical.png",
+    "godotProcessGPUCorroborated":  true,
+    "gpuAdapterLuidMatchedToNvidia":  true,
+    "process3DPositiveRtx5060DistinctPeriods":  33,
+    "rtx5060DxgiLuid":  "0x00000000_0x00013049",
+    "godotPid":  37408,
+    "renderingMethod":  "forward_plus",
+    "renderingDriver":  "vulkan",
+    "videoAdapterName":  "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "videoAdapterVendor":  "NVIDIA",
+    "privateDesktopCreated":  true,
+    "headlessUsed":  false,
+    "userDesktopActivationRequested":  false,
+    "imageIndependentPixelReviewAccepted":  false,
+    "status":  "EXPORTED_APP_RENDER_EVIDENCE_PENDING_INDEPENDENT_PIXEL_REVIEW",
+    "artifactZipSHA256":  "f8d3871b2a284dfa731029170b744aacfada0a3f43792ba95f86b24cb94faa51",
+    "errors":  [
+
+               ],
+    "blockers":  [
+
+                 ],
+    "exportedExeSHA256":  "f7ea55e660c9300a80bbbbb8be44c42ba849ae69b3060d565f75095de3749588"
+}

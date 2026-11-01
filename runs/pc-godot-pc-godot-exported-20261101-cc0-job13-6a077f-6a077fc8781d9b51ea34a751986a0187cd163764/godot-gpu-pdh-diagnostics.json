@@ -1,0 +1,25 @@
+{
+    "sourceGitSHA":  "6a077fc8781d9b51ea34a751986a0187cd163764",
+    "godotPid":  37408,
+    "processAliveAtSamplingStart":  true,
+    "processAliveAtSamplingEnd":  false,
+    "sampleSnapshots":  34,
+    "pid3dRows":  918,
+    "positiveUsablePid3dRows":  33,
+    "pid3dStatuses":  [
+                          {
+                              "count":  891,
+                              "status":  "0"
+                          },
+                          {
+                              "count":  27,
+                              "status":  "3221228486"
+                          }
+                      ],
+    "invalidCode":  "0xC0000BC6",
+    "invalidDataNeverCountsAsGpu":  true,
+    "counterErrorTypes":  [
+                              "Exception"
+                          ],
+    "independentPixelReviewAccepted":  false
+}
