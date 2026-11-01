@@ -89,7 +89,8 @@ func _run() -> void:
 	if str(app.get("_view")) != "environment" or not bool(app.get("_walk_active")) or bool(app.get("_direct_bur_mode")):
 		_fail("Returning to clinic walk left station active or enabled cutting")
 		return
-	if walker.get("position").distance_to(station_pose)>0.0001 or absf(float(walker.get("yaw"))-station_yaw)>0.0001:
+	var resumed_pose: Vector3 = walker.get("position")
+	if resumed_pose.distance_to(station_pose)>0.0001 or absf(float(walker.get("yaw"))-station_yaw)>0.0001:
 		_fail("Station exit reset walker position or heading")
 		return
 	if bool(app.call("_return_to_clinic_walk")):
