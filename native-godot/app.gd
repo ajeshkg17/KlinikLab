@@ -66,6 +66,7 @@ var _direct_bur_mode := false
 var _walk: RefCounted
 var _walk_active := false
 var _walk_look_dragging := false
+var _walk_near_operatory := false
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -191,6 +192,10 @@ func _process(delta: float) -> void:
 	if direction != Vector2.ZERO:
 		_walk.call("apply_move_intent", direction, delta)
 		_apply_walk_camera()
+		var now_near: bool = bool(_walk.call("in_operatory_range"))
+		if now_near != _walk_near_operatory:
+			_walk_near_operatory = now_near
+			_refresh()
 
 func _input(event: InputEvent) -> void:
 	if not _walk_active or _view != "environment" or _walk == null:
@@ -222,6 +227,7 @@ func _start_clinic_walk() -> void:
 	_walk_active = true
 	_walk_look_dragging = false
 	_walk.call("reset")
+	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
 	_apply_walk_camera()
 	_refresh()
 
