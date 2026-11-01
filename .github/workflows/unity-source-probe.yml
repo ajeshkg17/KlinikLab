@@ -1,10 +1,12 @@
-name: Unity FDI16 source-only experiment (NO UNITY/GPU RENDER)
+name: Unity whole-clinic native owner-PC launcher source/safety contract (NO GPU IN CI)
 on:
   pull_request:
     branches: [integration/single-chat-validation-2026-10-30]
     paths:
       - 'visual-qa/run-unity-source-probe.ps1'
       - 'visual-qa/run-unity-clinic-render-pc.ps1'
+      - 'visual-qa/sr1q-owner-pc-unity-whole-clinic-once.ps1'
+      - 'tests/sr1p_q_job08_unity_native_workflow.test.mjs'
       - 'visual-qa/publish-unity-clinic-evidence.ps1'
       - 'tests/sr1i_unity_whole_clinic_render.test.mjs'
       - 'visual-qa/unity-probe/**'
@@ -28,10 +30,11 @@ jobs:
         shell: pwsh
         run: |
           node --test tests/sr1h_unity_source_probe.test.mjs tests/sr1i_unity_whole_clinic_render.test.mjs
+          node --test tests/sr1p_q_job08_unity_native_workflow.test.mjs
       - name: Real Windows PowerShell 5.1 and 7 parser checks (do not launch Unity)
         shell: pwsh
         run: |
-          $files = @((Resolve-Path 'visual-qa/run-unity-source-probe.ps1').Path, (Resolve-Path 'visual-qa/run-unity-clinic-render-pc.ps1').Path, (Resolve-Path 'visual-qa/publish-unity-clinic-evidence.ps1').Path)
+          $files = @((Resolve-Path 'visual-qa/run-unity-source-probe.ps1').Path, (Resolve-Path 'visual-qa/run-unity-clinic-render-pc.ps1').Path, (Resolve-Path 'visual-qa/publish-unity-clinic-evidence.ps1').Path, (Resolve-Path 'visual-qa/sr1q-owner-pc-unity-whole-clinic-once.ps1').Path)
           $check = {
             param($scriptFile)
             $tokens = $null
