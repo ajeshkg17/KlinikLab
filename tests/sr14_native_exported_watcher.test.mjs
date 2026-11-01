@@ -22,9 +22,19 @@ test('SR14 independently identifies exact new exported app SHA and preserves his
  assert.throws(()=>validateGodotJob({...job,commit:EXACT_SOURCE_SHA.slice(0,30)}));
  assert.throws(()=>validateGodotJob({...job,graphics:'compatibility'}));
  assert.throws(()=>validateGodotJob({...job,requestUrl:'https://untrusted.invalid/'}));
- const original=JSON.parse(read('visual-qa/jobs/godot-current.json'));
- assert.equal(original.schemaVersion,7);
- assert.equal(original.commit,EXACT_SOURCE_SHA);
+ const archived=JSON.parse(read('visual-qa/jobs/godot-job08-original.json'));
+ assert.equal(archived.schemaVersion,7);
+ assert.equal(archived.commit,EXACT_SOURCE_SHA);
+ assert.equal(archived.jobId,'pc-godot-clinic-20261101-job08');
+ const active=JSON.parse(read('visual-qa/jobs/godot-current.json'));
+ validateGodotJob(active);
+ if(active.schemaVersion===8){
+  assert.notEqual(active.commit,EXACT_SOURCE_SHA);
+  assert.notEqual(active.jobId,archived.jobId);
+ }else{
+  assert.equal(active.schemaVersion,7);
+  assert.deepEqual(active,archived);
+ }
 });
 test('SR14 actual EXPORTED EXE PC evidence path is isolated from original prototype job07/08',()=>{
  const worker=read('visual-qa/godot-worker.mjs');
