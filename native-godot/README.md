@@ -52,3 +52,9 @@ The build now exports a four-channel float32 grid sampled **directly from produc
 The native sampled grid is a **new computational mesh**, not the immutable original OBJ or a medical scan. Rendering details and cervical tissue boundaries can differ from the source JS mesher (native trilinear material classification). Approximate removed-sample percentage is not a clinical cut-depth, volume in mm³, pulp proximity score, or competency grade. The 32-stroke cap bounds runtime cost. No other case has editable native geometry. Hash mismatch blocks the editor rather than silently substituting a model.
 
 Headless volume smoke: `godot --headless --path <built-project> --script res://volume-cut-smoke.gd`. A successful smoke verifies source grid loading, 3D changed mesh, undo/replay/reset and invalid parameter rejection; it is **not** a Windows RTX or clinical acceptance.
+
+## SR4 — Original fictional patient replies and local formative reports
+
+The six original source cases each provide the fictional patient's name, age and seven reply messages exported from `app.js`. A correct guided interview response reveals the corresponding source reply. This is NOT a free-form patient simulation or certified FSP assessment.
+
+The Progress panel now supports **Export local learning report (.txt)** to a user-selected local file. It includes exact source SHA, source case/station identifiers, studied status, formative answer counts, saved drafts and optional FDI16 voxel sample statistics (never mm³). The export never uploads data, but users should not enter real patient details. Reports do not constitute clinical documentation or official examination results.
