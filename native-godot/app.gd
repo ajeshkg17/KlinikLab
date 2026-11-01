@@ -67,6 +67,8 @@ var _walk: RefCounted
 var _walk_active := false
 var _walk_look_dragging := false
 var _walk_near_operatory := false
+# A practical station entered through walk may return to the same safe camera pose.
+var _walk_station_return_available := false
 # SR32: optional source-derived practical stepper. Navigation is never treatment
 # scoring or a tool/cut action; answers remain in the original progress journal.
 var _procedure_guided := false
@@ -231,6 +233,7 @@ func _start_clinic_walk() -> void:
 	_walk_active = true
 	_walk_look_dragging = false
 	_walk.call("reset")
+	_walk_station_return_available = false
 	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
 	_apply_walk_camera()
 	_refresh()
@@ -260,10 +263,25 @@ func _walk_enter_procedure() -> bool:
 	_walk_active = false
 	_walk_look_dragging = false
 	_direct_bur_mode = false
+	_walk_station_return_available = true
 	_select_station(4) # original practical station from immutable source order
 	_switch_view("clinic")
 	_set_camera_mode("teeth")
 	_set_procedure_guided(true) # Enter from walk starts at original task 1.
+	return true
+
+# An explicit station exit restores the bounded walk without restarting at spawn.
+# Never enable the bur, grade, or rewrite learner progress.
+func _return_to_clinic_walk() -> bool:
+	if not _walk_station_return_available or _view != "clinic" or _station_index != 4 or _walk == null or _cc0_clinic == null:
+		return false
+	_direct_bur_mode = false
+	_switch_view("environment")
+	_walk_active = true
+	_walk_look_dragging = false
+	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
+	_apply_walk_camera()
+	_refresh()
 	return true
 
 func _procedure_context_available() -> bool:
@@ -914,6 +932,10 @@ func _show_station() -> void:
 		_show_practical()
 	else:
 		_show_writing(station)
+	if _view == "clinic" and station == "practical" and _walk_station_return_available:
+		var return_walk := _button("Return to clinic walk at operatory (no grading or drilling)")
+		return_walk.pressed.connect(_return_to_clinic_walk)
+		_page.add_child(return_walk)
 	var studied := _button("Mark this case/station studied (formative only)")
 	studied.pressed.connect(_mark_studied)
 	_page.add_child(studied)
