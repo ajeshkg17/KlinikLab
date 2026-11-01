@@ -87,7 +87,7 @@ async function one(root,ledger,anchor){
  return detail;
 }
 
-export async function inspectPublication(root){
+export async function inspectPublication(root,anchors=PUBLISHED_ANCHORS){
  const report={
   mode:'SR27_OFFLINE_CONSUMED_PUBLICATION_RECONCILIATION_READ_ONLY',
   noGodotLaunch:true,noGitFetch:true,noNetwork:true,noLedgerWrite:true,
@@ -108,7 +108,7 @@ export async function inspectPublication(root){
   report.nonterminalLedgerCount=Object.values(ledger.completed).filter(v=>
     v && ['executing','publish-pending'].includes(v.status)).length;
  }catch(e){report.ledgerError=safeError(e)==='UNREADABLE'?'INVALID_OR_UNREADABLE_LEDGER':safeError(e)}
- for(const anchor of PUBLISHED_ANCHORS)report.jobs.push(await one(root,ledger,anchor));
+ for(const anchor of anchors)report.jobs.push(await one(root,ledger,anchor));
  report.reconciliationStatus=report.ledgerParseAccepted &&
    report.jobs.every(j=>j.readOnlyPublicationAssessment===
     'ORIGINAL_BYTES_CORROBORATED__TERMINAL_LEDGER_ABSENT__NO_REPAIR_AUTHORIZED')
