@@ -132,3 +132,10 @@ test('third original Godot GPU image is focused on FDI16 cut BEFORE the FDI36 ca
  assert.match(publish,/cutFocusedImageSHA256/);
  assert.match(publish,/godot-native-fdi16-\(frontal\|occlusal\|cut-focused\)/);
 });
+
+test('Unreal third image actually looks down onto source-exact FDI16 AFTER tooth rather than clinic overview',()=>{
+ assert.match(capture,/if elapsed>=36\.0:/);
+ assert.match(capture,/target=unreal\.Vector\(0\.0,65\.0,74\.0\)/);
+ assert.match(capture,/MathLibrary\.find_look_at_rotation/);
+ assert.match(capture,/screenshotTasks'\]\.append/);
+});
