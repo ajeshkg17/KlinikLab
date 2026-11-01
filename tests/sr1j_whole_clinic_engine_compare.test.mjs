@@ -55,7 +55,7 @@ test('Unreal native 3-view image collection is real 42-second Editor viewport an
   assert.ok(capture.includes(phrase),phrase);
  }
  assert.match(capture,/elapsed>=50\.0/);
- assert.match(capture,/report\['status'\]='EVIDENCE_INCOMPLETE'/);
+ assert.match(capture,/'status':'EVIDENCE_INCOMPLETE'/);
  assert.match(capture,/nativePixelsIndependentlyReviewed.*False/);
  assert.match(capture,/fullKlinikLabApplicationMigrated.*False/);
  assert.ok(!capture.includes('pyautogui'));
