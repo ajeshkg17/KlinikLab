@@ -35,7 +35,7 @@ func configure(expected_sha: String) -> bool:
 		_error = "CC0 clinic manifest missing"
 		return false
 	var m: Dictionary = source
-	if str(m.get("sourceGitSHA",""))!=expected_sha or str(m.get("licenseSPDX",""))!="CC0-1.0" or str(m.get("kind",""))!="REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY" or m.get("sourcePackReconciledBySHA256",false)!=true or m.get("clinicalAccuracyValidated",true)!=false:
+	if str(m.get("sourceGitSHA",""))!=expected_sha or str(m.get("licenseSPDX",""))!="CC0-1.0" or str(m.get("kind",""))!="REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY" or m.get("sourcePackReconciledBySHA256",false)!=true or str(m.get("godotConversion",""))!="DETERMINISTIC_FLOAT32_VERTEX_ACCESSORS_PRESERVE_ORIGINAL_KHR_QUANTIZED_GLB" or m.get("clinicalAccuracyValidated",true)!=false:
 		_error = "CC0 static clinic license or source SHA contract rejected"
 		return false
 	var assets: Array = m.get("assets",[])
@@ -52,7 +52,17 @@ func configure(expected_sha: String) -> bool:
 		if not FileAccess.file_exists(filepath) or FileAccess.get_sha256(filepath)!=str(HASHES[file]):
 			_error = "Missing/corrupt original CC0 GLB "+file
 			return false
-		var resource := load(filepath)
+		# Original source GLB uses KHR_mesh_quantization. Stock Godot
+		# requires the separately hashed, deterministic float32 conversion.
+		var compatible: String = file.replace(".glb","-godot.glb")
+		if str(row.get("godotFile","")) != compatible or str(row.get("godotSha256","")).length()!=64:
+			_error = "Godot compatibility source manifest missing "+file
+			return false
+		var native_path := ROOT+compatible
+		if not FileAccess.file_exists(native_path) or FileAccess.get_sha256(native_path)!=str(row.get("godotSha256","")):
+			_error = "Missing/corrupt Godot-compatible converted CC0 GLB "+file
+			return false
+		var resource := load(native_path)
 		if not (resource is PackedScene):
 			_error = "Godot did not import original CC0 GLB into a PackedScene: "+file
 			return false
@@ -90,6 +100,7 @@ func summary() -> Dictionary:
 		"wholeMeshInstances":_whole_meshes,"trayLoaded":_tray!=null,
 		"trayMeshInstances":_tray_meshes,"license":"CC0-1.0",
 		"sourceOriginalGLBsHashVerified":not _source_sha.is_empty(),
+		"godotFloat32MeshesImported":_whole_meshes>20 and _tray_meshes>0,
 		"clinicalAccuracyValidated":false,
 		"patientFDIAnatomyProvided":false,
 		"workflowProvided":false,
