@@ -18,6 +18,8 @@ $script:report=[ordered]@{
  nativeImagePresent=$false;nativeAngledImagePresent=$false
  nativeScreenshotFile=$null;nativeAngledScreenshotFile=$null
  godotProcessGPUCorroborated=$false;gpuAdapterLuidMatchedToNvidia=$false
+ processAliveAtGpuSamplingStart=$false;processAliveAtGpuSamplingEnd=$false
+ gpuProcessCorroborationReason='NOT_YET_SAMPLED';rendererReportConfirmsNvidiaRtx5060=$false
  process3DPositiveRtx5060DistinctPeriods=0;rtx5060DxgiLuid=$null
  godotPid=$null;renderingMethod=$null;renderingDriver=$null
  videoAdapterName=$null;videoAdapterVendor=$null;privateDesktopCreated=$false
@@ -56,6 +58,8 @@ try{
  $script:report.exportedExeSHA256=$actual
  $env:KLINIKLAB_PC_CAPTURE_DIR=$capture
  $env:KLINIKLAB_PC_EXPECTED_SHA=$ExpectedSha
+# Also route the legacy source-scene provenance report into this job folder.
+$env:KLINIKLAB_SR1C_CAPTURE_DIR=$capture
  . (Join-Path $PSScriptRoot 'sr1c-private-desktop.ps1')
  $session=Start-KLPrivateDesktopExportedApp -Executable $exe -WorkingDir $release -LogPath (Join-Path $capture 'native-exported-app.log')
  $script:report.privateDesktopCreated=$true
@@ -68,6 +72,8 @@ try{
  $pdhAliveStart=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
  $snapshots=@(Get-Counter -Counter '\GPU Engine(*)\Utilization Percentage' -SampleInterval 1 -MaxSamples 34 -ErrorAction Continue -ErrorVariable +pdhErrors)
  $pdhAliveEnd=[bool](Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)
+ $script:report.processAliveAtGpuSamplingStart=$pdhAliveStart
+ $script:report.processAliveAtGpuSamplingEnd=$pdhAliveEnd
  $parsed=ConvertTo-KLGodotGpu3DRows -Snapshots $snapshots -GodotPid ([int]$session.Pid) -GetEngineLuid {param($path) [KlinikLab.DxgiEvidence]::FromGpuEnginePath([string]$path)}
  $rows=@($parsed.rows)
  [IO.File]::WriteAllText((Join-Path $capture 'godot-gpu-3d-counters.json'),(ConvertTo-Json -InputObject $rows -Depth 12),(New-Object Text.UTF8Encoding($false)))
@@ -93,11 +99,44 @@ try{
   $script:report.gpuAdapterLuidMatchedToNvidia=($script:report.process3DPositiveRtx5060DistinctPeriods -ge 3)
  }else{Block 'Not exactly one RTX 5060 DXGI adapter'}
  if(-not $script:report.gpuAdapterLuidMatchedToNvidia){Block 'Fewer than three independent positive exact exported-app PID GPU 3D periods on RTX5060 LUID'}
+ # GPU process attribution is independent of capture/report delivery. It requires
+ # the launched EXE PID alive at both sample boundaries and >=3 positive valid
+ # engtype_3d periods on the enumerated RTX 5060 DXGI LUID.
+ $gpuProcessConfirmed=[bool]($pdhAliveStart -and $pdhAliveEnd -and
+  $script:report.gpuAdapterLuidMatchedToNvidia -and
+  ([int]$script:report.process3DPositiveRtx5060DistinctPeriods -ge 3))
+ $script:report.godotProcessGPUCorroborated=$gpuProcessConfirmed
+ if($gpuProcessConfirmed){
+  $script:report.gpuProcessCorroborationReason='Same launched Godot PID alive across sampling; >=3 positive valid same-PID 3D PDH periods match enumerated NVIDIA RTX 5060 DXGI LUID'
+ }else{
+  $script:report.gpuProcessCorroborationReason='Failed closed: require process alive at both sampling boundaries and >=3 positive valid same-PID RTX5060 3D periods'
+  Block $script:report.gpuProcessCorroborationReason
+ }
  $nativeFile=Join-Path $capture 'native-exported-app-result.json'
- $until=[DateTime]::UtcNow.AddSeconds(75)
- while(-not(Test-Path -LiteralPath $nativeFile -PathType Leaf) -and [DateTime]::UtcNow -lt $until){Start-Sleep -Milliseconds 500}
- if(-not(Test-Path -LiteralPath $nativeFile -PathType Leaf)){throw 'Exported exe did not publish its own capture report; check --script embedded-PCK launch'}
- $native=Get-Content -LiteralPath $nativeFile -Raw | ConvertFrom-Json
+ # The app writes early checkpoints. Do NOT mistake file existence for completed
+ # capture: wait for a terminal stage, or preserve the last checkpoint on timeout.
+ $until=[DateTime]::UtcNow.AddSeconds(90)
+ $native=$null;$lastCaptureStage=$null
+ while([DateTime]::UtcNow -lt $until){
+  if(Test-Path -LiteralPath $nativeFile -PathType Leaf){
+   try{
+    $candidate=Get-Content -LiteralPath $nativeFile -Raw | ConvertFrom-Json -ErrorAction Stop
+    $native=$candidate;$lastCaptureStage=[string]$candidate.stage
+    if($lastCaptureStage -in @('completed','blocked')){break}
+   }catch{}
+  }
+  if(-not(Get-Process -Id $session.Pid -ErrorAction SilentlyContinue)){break}
+  Start-Sleep -Milliseconds 500
+ }
+ if($null -eq $native){throw 'Exported app did not write its first embedded capture checkpoint; inspect launcher/app bootstrap'}
+ if([string]$native.stage -notin @('completed','blocked')){
+  Block ('Capture did not reach terminal stage; last checkpoint='+[string]$lastCaptureStage)
+  throw ('Exported app capture incomplete at stage '+[string]$lastCaptureStage)
+ }
+ if([string]$native.stage -eq 'blocked'){
+  Block ('Embedded capture blocked: '+[string]$native.blocker)
+ }
+
  $script:report.renderingMethod=[string]$native.renderingMethod
  $script:report.renderingDriver=[string]$native.renderingDriver
  $script:report.videoAdapterName=[string]$native.videoAdapterName
@@ -129,8 +168,9 @@ try{
   $script:report[$item.out]=$true
   $script:report[$item.name]=$file
  }
- $script:report.godotProcessGPUCorroborated=($script:report.gpuAdapterLuidMatchedToNvidia -and
- $script:report.renderingDriver -eq 'vulkan' -and $script:report.videoAdapterName -match '(?i)RTX\s*5060')
+ $script:report.rendererReportConfirmsNvidiaRtx5060=($script:report.renderingMethod -eq 'forward_plus' -and
+ $script:report.renderingDriver -eq 'vulkan' -and $script:report.videoAdapterName -match '(?i)RTX\s*5060' -and
+ $script:report.videoAdapterVendor -match '(?i)NVIDIA')
  if($script:report.nativeImagePresent -and $script:report.nativeAngledImagePresent -and
  $script:report.nativeCaseWorkflowVerified -and $script:report.godotProcessGPUCorroborated){
   $script:report.status='EXPORTED_APP_RENDER_EVIDENCE_PENDING_INDEPENDENT_PIXEL_REVIEW'
@@ -143,5 +183,6 @@ try{
  [IO.File]::WriteAllText($reportPath,((ConvertTo-Json -InputObject $script:report -Depth 16)+[Environment]::NewLine),(New-Object Text.UTF8Encoding($false)))
  Remove-Item Env:KLINIKLAB_PC_CAPTURE_DIR -ErrorAction SilentlyContinue
  Remove-Item Env:KLINIKLAB_PC_EXPECTED_SHA -ErrorAction SilentlyContinue
+ Remove-Item Env:KLINIKLAB_SR1C_CAPTURE_DIR -ErrorAction SilentlyContinue
 }
 Write-Host ('SR14 exact exported-app evidence status='+$script:report.status)
