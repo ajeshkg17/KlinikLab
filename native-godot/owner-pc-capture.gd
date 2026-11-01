@@ -42,7 +42,16 @@ func run(app: Node3D, job_id: String) -> void:
 	if int(cc0_summary.get("wholeMeshInstances",0))<20 or int(cc0_summary.get("trayMeshInstances",0))<1:
 		_capture_failure("Actual CC0 mesh import missing")
 		return
+	# For the dedicated single-instance owner-PC watcher only, permit an
+	# absolute externally supplied evidence root. Ordinary app users keep
+	# the original user:// location, with no network/file upload.
+	var watcher_root: String = OS.get_environment("KLINIKLAB_PC_CAPTURE_DIR")
 	var dir: String = ProjectSettings.globalize_path("user://owner-pc-captures").path_join(job_id)
+	if not watcher_root.is_empty():
+		if not watcher_root.is_absolute_path() or watcher_root.contains(".."):
+			_capture_failure("Owner-PC capture root not absolute or unsafe")
+			return
+		dir = watcher_root.path_join(job_id)
 	if DirAccess.dir_exists_absolute(dir):
 		_capture_failure("Immutable job evidence folder already exists: "+dir)
 		return
