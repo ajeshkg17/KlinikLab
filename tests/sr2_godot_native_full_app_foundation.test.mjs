@@ -58,6 +58,6 @@ test('SR2: source exporter does not evaluate full browser application or import 
  assert.match(exporter,/const names=\['CASES','STATIONS','TOOLS','FSP_DIALOGUE','HANDOVER','VIVA','CLINIC'\]/);
  assert.match(exporter,/syntheticCasesOnly:true,clinicalAssessmentValidated:false/);
  assert.match(exporter,/sourceAppSHA256/);
- assert.match(read('native-godot/app.gd'),/full app port IN PROGRESS/);
+ assert.match(read('native-godot/app.gd'),/FULL APP NOT YET PORTED/);
  assert.doesNotMatch(read('native-godot/app.gd'),/HTTPRequest|OS\.shell_open|API_KEY|fetch\(/);
 });
