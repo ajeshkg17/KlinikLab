@@ -149,7 +149,81 @@ function powershell(script,args,timeoutMs=180000){
    '; child stdout: '+childStdout.slice(-900))));
  });
 }
+async function executeNativeExport(j){
+ const run=path.join(EVIDENCE,j.jobId+'-'+j.commit.slice(0,10));
+ if(await fs.stat(run).then(()=>true,()=>false))
+  throw Error('SR14 refusing previously used exported app evidence directory '+run);
+ await fs.mkdir(path.join(run,'Captures'),{recursive:true});
+ const token=await permission();
+ let artifactInfo=null,downloadProblem=null;
+ try{
+  const runs=await api(token,'/actions/runs?head_sha='+j.commit+'&per_page=100');
+  const candidates=(runs.workflow_runs||[]).filter(x=>x.name===
+   'Native KlinikLab Windows x64 export (UNTESTED workstation GPU)' &&
+    x.head_sha===j.commit&&x.status==='completed'&&x.conclusion==='success');
+  for(const candidate of candidates){
+   const rows=await api(token,'/actions/runs/'+candidate.id+'/artifacts');
+   const item=(rows.artifacts||[]).find(x=>x.name==='KlinikLab-Windows-x64-'+j.commit &&
+    x.expired===false&&x.size_in_bytes>20000000);
+   if(item){artifactInfo={runId:candidate.id,id:item.id,name:item.name};break}
+  }
+  if(!artifactInfo)throw Error('No completed exact source SHA Windows .exe CI artifact: '+j.commit);
+  const url='https://api.github.com/repos/'+OWNER+'/actions/artifacts/'+artifactInfo.id+'/zip';
+  const response=await fetch(url,{headers:{Authorization:'Bearer '+token,
+   Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(120000)});
+  if(!response.ok)throw Error('Exact Windows export ZIP HTTP '+response.status);
+  const blob=Buffer.from(await response.arrayBuffer());
+  if(blob.length<20000000||blob.length>120000000||blob.toString('ascii',0,2)!=='PK')
+   throw Error('Incomplete/unsupported exact GitHub Actions Windows artifact ZIP');
+  const zip=path.join(run,'KlinikLab-exact-source.zip');
+  await fs.writeFile(zip,blob,{flag:'wx'});
+  await fs.writeFile(path.join(run,'native-export-provenance.json'),jsonWithoutBom({
+   kind:'EXACT_GITHUB_ACTIONS_PORTABLE_WINDOWS_EXECUTABLE',
+   sourceGitSHA:j.commit,artifact:artifactInfo,
+   downloadedZipSHA256:createHash('sha256').update(blob).digest('hex'),
+   originalGitHubArchiveBytes:blob.length,noLocalRebuild:true
+  }));
+  await powershell(path.join(sourceDir,'sr1x-capture-native-exported-app-pc.ps1'),
+   ['-EvidenceDir',run,'-ExpectedSha',j.commit,'-ArtifactZip',zip,
+    '-CaptureId','pc-kliniklab-native-cc0-'+j.jobId.slice('pc-godot-exported-'.length)],j.timeoutSec*1000);
+ }catch(e){downloadProblem=String(e.message)}
+ const reportFile=path.join(run,'Captures','godot-owner-pc-result.json');
+ let native=null;
+ try{native=parseGodotJson(await fs.readFile(reportFile,'utf8'),
+   'original exported app Windows PID/PNG/XR evidence')}
+ catch(e){downloadProblem=[downloadProblem,String(e.message)].filter(Boolean).join('; ')}
+ const result={
+  jobId:j.jobId,sourceGitSHA:j.commit,watcherSuite:j.suite,
+  workerGitSHA:git(['rev-parse','HEAD'],path.resolve(sourceDir,'..')),
+  nativeSceneMode:'native-exported-cc0',fullKlinikLabApplicationMigrated:false,
+  executedOn:'owner Windows PC (actual exported EXE watcher)',
+  originalArtifact:artifactInfo,generatedAt:new Date().toISOString(),
+  nativeReportStatus:native?.status||'EVIDENCE_INCOMPLETE',
+  nativeWorkflowVerified:!!native?.nativeCaseWorkflowVerified,
+  imageExists:!!native?.nativeImagePresent,
+  angledImageExists:!!native?.nativeAngledImagePresent,
+  thirdImageExists:!!native?.thirdImagePresent,
+  distinctRtx5060Gpu3DPeriods:Number(native?.process3DPositiveRtx5060DistinctPeriods||0),
+  rtx5060DxgiLuid:native?.rtx5060DxgiLuid||null,
+  dxgiLuidMatchesGodotProcess:!!native?.gpuAdapterLuidMatchedToNvidia,
+  sourceMeshVerified:!!native?.nativeSourceSubmissionVerified,
+  gpuProcessCorroborated:!!native?.godotProcessGPUCorroborated,
+  backgroundPrivateDesktopRenderRequested:true,
+  foregroundActivationRequested:false,headlessDummyRendererAllowed:false,
+  imageIndependentPixelReviewAccepted:false,overallStatus:'EVIDENCE_INCOMPLETE',
+  errors:[downloadProblem].filter(Boolean),
+  blockers:native?.blockers||[downloadProblem||'Exact native EXE PC result absent']
+ };
+ if(result.imageExists&&result.angledImageExists&&result.thirdImageExists&&result.nativeWorkflowVerified&&
+   result.gpuProcessCorroborated&&result.dxgiLuidMatchesGodotProcess&&
+   result.distinctRtx5060Gpu3DPeriods>=3)
+   result.overallStatus='NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW';
+ await fs.writeFile(path.join(run,'Captures','godot-job-result.json'),jsonWithoutBom(result));
+ return {run,result};
+}
+
 async function execute(j){
+ if(j.schemaVersion===8)return await executeNativeExport(j);
  const run=path.join(EVIDENCE,j.jobId+'-'+j.commit.slice(0,10));
  const worktree=path.join(ROOT,'worktrees',j.jobId+'-'+j.commit.slice(0,8));
  await fs.mkdir(path.dirname(worktree),{recursive:true});
@@ -234,6 +308,9 @@ async function publish(j,run,result){
   ['godot-owner-pc-result.json',path.join(capture,'godot-owner-pc-result.json')],
   ['native-source-submission.json',path.join(capture,'native-source-submission.json')],
   ['godot-source-prepare.json',path.join(run,'godot-source-prepare.json')],
+  ['native-export-provenance.json',path.join(run,'native-export-provenance.json')],
+  ['native-exported-app.log',path.join(capture,'native-exported-app.log')],
+  ['exported-app-native-capture.json',path.join(capture,'godot-owner-pc-result.json')],
   ['godot-native-cases-prepare.json',path.join(run,'godot-native-cases-prepare.json')],
   ['godot-native-workflow-state.json',path.join(capture,'godot-native-workflow-state.json')],
   ['godot-gpu-3d-counters.json',path.join(capture,'godot-gpu-3d-counters.json')],
@@ -256,12 +333,26 @@ async function publish(j,run,result){
    native=parseGodotJson(await fs.readFile(path.join(capture,'godot-owner-pc-result.json'),'utf8'),'published original owner-PC JSON');
   }
   const name=native.nativeScreenshotFile;
-  if(!/^godot-native-fdi16-frontal-[0-9]+\.png$/.test(name||''))throw Error('Unsupported original frontal PNG name');
-  selected.push(['godot-native-fdi16.png',path.join(capture,name)]);
-  if(native.nativeAngledImagePresent){
-   const angle=native.nativeAngledScreenshotFile;
-   if(!/^godot-native-fdi16-occlusal-[0-9]+\.png$/.test(angle||''))throw Error('Unsupported original occlusal PNG name');
-   selected.push(['godot-native-fdi16-occlusal.png',path.join(capture,angle)]);
+  if(j.schemaVersion===8){
+   if(name!=='kliniklab-exported-cc0-environment.png'||
+      native.nativeAngledScreenshotFile!=='kliniklab-exported-fdi36-practical.png'||
+      native.thirdScreenshotFile!=='kliniklab-exported-fdi26-practical.png')
+     throw Error('Unrecognized exact three exported-app PNG names');
+   selected.push(['kliniklab-exported-cc0-environment.png',path.join(capture,name)]);
+   if(native.nativeAngledImagePresent)
+     selected.push(['kliniklab-exported-fdi36-practical.png',path.join(capture,native.nativeAngledScreenshotFile)]);
+   if(native.thirdImagePresent)
+     selected.push(['kliniklab-exported-fdi26-practical.png',path.join(capture,native.thirdScreenshotFile)]);
+  }else{
+   if(!/^godot-native-fdi16-frontal-[0-9]+\.png$/.test(name||''))
+    throw Error('Unsupported original frontal PNG name');
+   selected.push(['godot-native-fdi16.png',path.join(capture,name)]);
+   if(native.nativeAngledImagePresent){
+    const angle=native.nativeAngledScreenshotFile;
+    if(!/^godot-native-fdi16-occlusal-[0-9]+\.png$/.test(angle||''))
+      throw Error('Unsupported original occlusal PNG name');
+    selected.push(['godot-native-fdi16-occlusal.png',path.join(capture,angle)]);
+   }
   }
  }
  const artifacts=[];
@@ -276,7 +367,7 @@ async function publish(j,run,result){
   'Request ID: '+j.jobId,'Source pinned SHA: '+j.commit,
   'Worker SHA: '+result.workerGitSHA,
   'Native scene mode: '+result.nativeSceneMode,
-  'Full browser application migrated to Godot: NO (clinic workspace prototype only)',
+  'Full browser application migrated to Godot: NO ('+(j.schemaVersion===8?'actual EXPORTED CC0 partial application':'clinic workspace prototype')+')',
   'Status: '+result.overallStatus,'',
   'Evidence captured by dedicated Godot PC worker, **not** by GitHub Actions or Linux.',
   'Source hash and screenshot pixel verification are independent tests.',
@@ -284,7 +375,7 @@ async function publish(j,run,result){
   'No Quest/streaming success is claimed.','',
   ...artifacts.flatMap(a=>[a.name+': SHA256 '+a.sha256,'']),
   'If present, original native PNG requires independent pixel review:','',
-  artifacts.some(a=>a.name==='godot-native-fdi16.png')?'![Native Godot FDI16 frontal](./godot-native-fdi16.png)':'No original frontal native PNG was returned.',
+  artifacts.some(a=>a.name==='kliniklab-exported-cc0-environment.png')?'![Actual EXPORTED CC0 clinic](./kliniklab-exported-cc0-environment.png)':(artifacts.some(a=>a.name==='godot-native-fdi16.png')?'![Native Godot FDI16 frontal](./godot-native-fdi16.png)':'No original native frontal PNG returned.'),
   artifacts.some(a=>a.name==='godot-native-fdi16-occlusal.png')?'![Native Godot FDI16 elevated/occlusal](./godot-native-fdi16-occlusal.png)':'No original occlusal native PNG was returned.',''];
  artifacts.push({name:'README.md',bytes:Buffer.from(lines.join('\n')),sha256:null});
  const items=[];
