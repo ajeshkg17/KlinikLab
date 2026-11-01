@@ -56,30 +56,19 @@ try {
  $summary.privateDesktopCreated=[bool]$r.privateDesktopCreated
  $summary.gpuProcessCorroborated=[bool]$r.godotProcessGPUCorroborated
  $summary.positiveGodotPidRtx5060DistinctPeriods=[int]$r.process3DPositiveRtx5060DistinctPeriods
- # Third native Godot GPU cut-focused PNG is captured while FDI16
- # geometry is genuinely visible, BEFORE the source-derived FDI36 selection.
- $background=Get-Content (Join-Path $cap 'godot-background-capture.json') -Raw|ConvertFrom-Json
+ # Third actual FDI16 native screenshot BEFORE the FDI36 case switch.
+ $background=Get-Content (Join-Path $cap 'godot-background-capture.json') -Raw | ConvertFrom-Json
  $focusedName=[string]$background.cutFocusedImageFile
- if($focusedName -cnotmatch '^godot-native-fdi16-cut-focused-[0-9]+\.png'NATIVE_GODOT_CLINIC_GPU_EVIDENCE_PENDING_PIXEL_REVIEW'}else{'EVIDENCE_INCOMPLETE'})
-} catch {
- $summary.errors=@([string]$_.Exception.Message)
- throw
-} finally {
- New-Item -ItemType Directory -Path $run -Force|Out-Null
- [IO.File]::WriteAllText($report,(ConvertTo-Json -InputObject $summary -Depth 9)+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
- Write-Host "Immutable independent Godot clinic run: $run"
- Write-Host "Status: $($summary.status); original job07 UNTOUCHED"
-}
-){
-  throw 'Actual new FDI16 before-switch cut-focused image missing'
+ if($focusedName -cnotmatch '^godot-native-fdi16-cut-focused-[0-9]+\.png$'){
+  throw 'New native FDI16 cut-focused PNG was not returned'
  }
  $focusedFile=Join-Path $cap $focusedName
  if(-not(Test-Path $focusedFile -PathType Leaf) -or (Get-Item $focusedFile).Length -lt 25000){
-  throw 'Native original Godot cut-focused PNG missing or implausibly small'
+  throw 'Native cut-focused original PNG missing or unexpectedly tiny'
  }
  $focusedHash=(Get-FileHash $focusedFile -Algorithm SHA256).Hash.ToLowerInvariant()
  if($focusedHash -cne [string]$background.cutFocusedImageSHA256){
-  throw 'Actual Godot cut-focused PNG bytes differ from native renderer report'
+  throw 'Native Godot focused-cut original PNG SHA256 mismatch'
  }
  $summary.nativeCutFocusedImageSHA256=$focusedHash
  $summary.nativeImageFiles=@([string]$r.nativeScreenshotFile,$focusedName,[string]$r.nativeAngledScreenshotFile)
