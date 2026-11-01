@@ -44,7 +44,7 @@ test('SR17 exact Windows artifact and independent original pixel/GPU gate are do
  assert(exported.includes('-- --kliniklab-exported-pc-capture'));
  assert(!exported.includes('--script res://exported-app-capture.gd'));
  const script=read('native-godot/exported-app-capture-node.gd');
- assert(script.includes('SR17_EXPORTED_APP_CAPTURE_NODE_ENTERED'));
+ assert(script.includes('SR18_CAPTURE_NODE_STARTED'));
  assert(script.includes('EXPORTED_APP_TWO_NATIVE_PNGS_PENDING_INDEPENDENT_PIXEL_GPU_REVIEW'));
  const app=read('native-godot/app.gd');
  assert(app.includes('--kliniklab-exported-pc-capture'));
