@@ -1,0 +1,12 @@
+# SR17 — unique owner-PC exported KlinikLab app job11 (after SR16 job10 failed)
+
+**Exact exported app source SHA:** `a33c31a9e1c364463f96c29a6004a7e625cd4e89` (merged PR #64). **Job11:** `pc-godot-exported-20261101-cc0-job11-a33c31`.
+**Successful Windows x64 Actions release:** [run 41307826872](https://github.com/ajeshkg17/KlinikLab/actions/runs/41307826872); GitHub artifact **13083573933**, named `KlinikLab-Windows-x64-a33c31a9e1c364463f96c29a6004a7e625cd4e89`, original verified Godot 4.7.2 export.
+
+**Why a new run:** job10 `pc-godot-exported-20261101-cc0-job10-525457` proved physical RTX5060 Forward+/Vulkan, original FDI16 and CC0 imported assets and 34 positive same-PID DXGI-LUID periods, but old exported EXE ignored the supplied standalone `--script` command. Both original image PNGs and native capture JSON were absent. PR #64 fixes the entrypoint by opt-in `-- --kliniklab-exported-pc-capture` handled inside `app.tscn` startup. Old job09 and job10 evidence/ledgers are immutable. **DO NOT RERUN EITHER OR REWRITE ANY IMAGE.**
+
+**Owner-PC helper:** The existing single scheduled `KlinikLab-Godot-PC-Watcher` is the only executor. Execute this new schema8 job **once** on private WinSta0 desktop, not active/foreground session, using the exact released `KlinikLab.exe`, no source Godot/Blender substitute. Extract full portable ZIP and SHA preflight **KlinikLab.exe**, `verified-raw-source/` and `RAW-SOURCE-SHA256SUMS.txt` + `SHA256SUMS.txt` via the updated PR #63 collector. Verify source SHA and report artifacts. The latest integration SHA is the queue SHA (different from executable SHA), which owns the watcher script and new job schema.
+
+**Mandatory published original evidence:** `native-exported-app-result.json`, `godot-owner-pc-result.json`, `native-exported-app.log`, original pixel `kliniklab-exported-cc0-environment.png` and `kliniklab-exported-fdi36-practical.png`, image per-file SHA256 dimensions >=1280x720, six-case/FDI36 identity, private WinSta0 PID, Vulkan Forward+, RTX 5060 GPU adapter and >=3 distinct valid positive PID-linked RTX5060 DXGI-LUID 3D counter periods. Preserve `godot-gpu-pdh-diagnostics.json` when generated. No historical images or screenshot replacements permitted; independent reviewer reads ORIGINAL published bytes and decides acceptance.
+
+**Current until independent review:** `EVIDENCE_INCOMPLETE` / `NOT_ACCEPTED_PENDING_INDEPENDENT_PIXEL_REVIEW`. Native app is a source-derived educational simulation, not clinical calibration, validated operative-force physics, or Quest VR acceptance.
