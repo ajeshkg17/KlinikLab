@@ -107,6 +107,9 @@ try{$latestStdout=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stdo
  Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
 try{$latestStderr=Get-ChildItem -LiteralPath $root -Filter 'godot-watcher-*-stderr.log' -File |
  Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1}catch{}
+$latestStdoutWriteUtc=$null;$latestStderrWriteUtc=$null
+if($null -ne $latestStdout){$latestStdoutWriteUtc=$latestStdout.LastWriteTimeUtc.ToString('o')}
+if($null -ne $latestStderr){$latestStderrWriteUtc=$latestStderr.LastWriteTimeUtc.ToString('o')}
 $stdoutPublished=$false;$stdoutLedgerReconciliation=$false;$stdoutExistingEvidenceReconciliation=$false
 $stdoutRemoteReconciliation=$false;$stdoutBlocked=$false
 if($null -ne $latestStdout){
@@ -159,8 +162,8 @@ $report=[ordered]@{
  heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt;heartbeatProcessAlive=$heartbeatProcessAlive
  runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
  latestWorkerStdoutExists=($null -ne $latestStdout)
- latestWorkerStdoutLastWriteUTC=if($null -ne $latestStdout){$latestStdout.LastWriteTimeUtc.ToString('o')}else{$null}
- latestWorkerStderrLastWriteUTC=if($null -ne $latestStderr){$latestStderr.LastWriteTimeUtc.ToString('o')}else{$null}
+ latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc
+ latestWorkerStderrLastWriteUTC=$latestStderrWriteUtc
  latestWorkerStdoutPublishedMessage=$stdoutPublished
  latestWorkerStdoutLedgerReconciliationMessage=$stdoutLedgerReconciliation
  latestWorkerStdoutExistingEvidenceReconciliationMessage=$stdoutExistingEvidenceReconciliation
