@@ -51,6 +51,7 @@ try{
   schemaVersion:1,originalSourceGitSHA:sha,sourceAppSHA256:content.sourceAppSHA256,
   sourceGeometryBeforeTriangles:14856,sourceGeometryAfterTriangles:14936,
   nativeCases:6,nativeStations:7,nativeQuizzes:Object.values(content.quiz).reduce((n,x)=>n+x.length,0),
+  sourcePatientReplyStagesPerCase:7,localFormativeReportExport:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:false,
   fullInteractiveAppMigrated:false,verifiedNativeGpu:false,
   buildStatus:'NATIVE_GODOT_APP_PROJECT_BUILT_NEEDS_NATIVE_RUNTIME_QA',
