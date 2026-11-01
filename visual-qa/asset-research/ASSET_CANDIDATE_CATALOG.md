@@ -1,5 +1,28 @@
 # Dental asset candidate catalog
 
+
+## Actual completed CC0 Blender acquisition and accepted prototype assets — 1 November 2026
+
+The [SR1S real native Blender batch](https://github.com/ajeshkg17/KlinikLab/actions/runs/41292878372) completed using **Blender 4.0.2, Cycles CPU**, official CC0 v1 CDN sources and original GLB SHA-256. The assistant used a supported GitHub Actions ZIP download into its container, **verified all four original 1200×800 PNG SHA-256 hashes** and **inspected all four original image pixels personally**, not merely PNG metadata. The earlier immutable [run 41292601531](https://github.com/ajeshkg17/KlinikLab/actions/runs/41292601531) was visually rejected for overexposure; corrected [run 41292878372](https://github.com/ajeshkg17/KlinikLab/actions/runs/41292878372) passed clipping QA and is independently viewable at [the original immutable four-image GitHub evidence](https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/runs/asset-research-cc0-dental-blender-e99cea92c790-run41292878372-attempt1/README.md).
+
+The two **source-exact original CC0 binaries** are now in the opt-in directory [assets/cc0/3dassets-dental/](../../assets/cc0/3dassets-dental/README.md), with their per-asset source/license/version/hash and **separate prototype-visual / clinical-NOT-validated statuses**. The source-files PR #39 required 11 GitHub integration checks plus a separate successful native binary publisher (workflow run `41293540647`); no clinic application code or repository visibility was changed.
+
+| Candidate | Creator / license | Source SHA-256 / native Blender geometry | My *direct-pixel* visual result | Clinical/functional result |
+| --- | --- | --- | --- | --- |
+| [Instrument tray](../../assets/cc0/3dassets-dental/instrument-tray-v1.glb) | 3D Assets, **CC0 1.0**, [upstream item](https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c), immutable `34383/v1` | `63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036`; 4 mesh objects, 728 tris, 30,452 B | **Accept as static schematic background prop**: mirror, probe and tweezers recognizable; low detail and unexplained three edge protrusions | **NOT VALIDATED**; individual tool separation, grips, sterility, surgical/tool training and physics not accepted |
+| [Whole-clinic starter](../../assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb) | 3D Assets, **CC0 1.0**, [upstream pack](https://3dassets.dev/packs/dental-practice-and-surgery), immutable `34423/v1` | `9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a`; 1,042 mesh-object instances, 121,536 instance-summed tris, 1,177,948 B | **Accept as stylized clinic layout reference**: multiple treatment rooms, chairs, working surfaces, cabinetry and waiting/reception seating visible in two original angles | **NOT VALIDATED**; no intended interactive case/station workflow, FDI geometry, calibrated procedure simulation, or complete-app migration |
+
+The publisher quotes **46,988 triangles** for the assembled scene; Blender reports **121,536 instance-summed triangles**. These are not necessarily the same metric: Blender counted the triangles in every placed mesh instance. A subsequent source review must quantify **unique shared mesh datablocks vs placed instance geometry** before claiming a topology discrepancy. The scene is a visually usable **environment/reference**, *not* a finished full-clinic KlinikLab application.
+
+**Practical cleanup:** extract individual operatory sub-scenes, make equipment pivots/colliders, inspect procedural-light height, dental chair motion and dental tray placement, establish LODs and verified real-world scale, and leave original FDI16 teeth and case/station logic in their independently source-pinned pipeline. The tray needs its unexplained side protrusions understood/removed and a dentist to assess individual instrument fidelity before any procedural teaching interaction. All license, geometry, Blender, clinical, FDI and app-migration gate outcomes remain distinct.
+
+### Further FDI-aware volumetric research candidate — license discrepancy
+
+[STS-3D-Tooth](https://huggingface.co/datasets/MedOtter/STS-3D-Tooth) describes labeled **ROI tooth-instance masks using FDI classes**, with 22 labeled ROI volumes among a much larger CBCT dataset. Its Hugging Face mirror lists **CC BY 4.0**, but the [original Zenodo v1 page](https://zenodo.org/records/10597292) displays a **blank license metadata field** in the reviewed view. This discrepancy and patient/consent provenance require resolution **before download for public republishing or 3D mesh extraction**. It is a **research lead only**: the ~31.8 GB original comprises patient CBCT, not ready-to-use separated GLBs. No binary or patient medical dataset is copied into KlinikLab. Mendeley's versioned **CC BY 4.0 separate tooth + PDL jaw STL datasets** remain the stronger near-term anatomical Blender candidates.
+
+---
+
+
 Reviewed for the personal-use KlinikLab training app on 2026-11-01. This is an asset research record, not clinical approval.
 
 ## Current usable collection

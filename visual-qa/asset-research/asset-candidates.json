@@ -1,5 +1,5 @@
 {
-  "catalogVersion": 2,
+  "catalogVersion": 3,
   "reviewedAt": "2026-11-01",
   "appUse": "personal",
   "currentUsableCollection": [
@@ -377,24 +377,45 @@
       "attribution": "3D Assets (AI-assisted, reported Claude Opus 5)",
       "assetLicense": "CC0 1.0 Universal",
       "licenseEvidenceUrl": "https://3dassets.dev/packs/dental-practice-and-surgery",
-      "sourceVersion": "v1 / assets/34423",
-      "sourceFileSHA256": null,
-      "downloaded": false,
-      "blenderRendered": false,
-      "githubAssetUploaded": false,
-      "publicBinaryUploadApproved": false,
-      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "sourceVersion": "v1 / immutable assets/34423 (assembled starter only)",
+      "sourceFileSHA256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a",
+      "downloaded": true,
+      "blenderRendered": true,
+      "githubAssetUploaded": true,
+      "publicBinaryUploadApproved": true,
+      "publicationAssessment": "SOURCE_HASH + CC0 LICENSE + 4 ORIGINAL NATIVE BLENDER PIXELS VERIFIED; accepted ONLY as a separate schematic clinic layout reference.",
       "targetRole": "whole dental clinic furniture, equipment, reception, tray, light, chair",
       "fdiSuitability": "Not FDI-addressable; equipment/operatory visual assets only",
       "blenderCleanupPlan": [
-        "download pack source 34423/v1; checksum",
-        "inspect separate scene nodes/rotations and real dimensions 16.002 x 2.761 x 14.074m",
-        "Blender shaded+wireframe overview, check plausibility and texture orientation",
-        "fix collisions, equipment ergonomics and inaccessible objects"
+        "Determine unique shared Blender mesh datablocks vs 1042 mesh-object instances",
+        "Separate dental operatories vs reception and sterilization components with stable anchors",
+        "Create LODs and collision geometry; inspect patient/operator ergonomic layout",
+        "Keep case/station workflow and FDI simulation outside this schematic source mesh"
       ],
-      "clinicalReviewStatus": "not clinically reviewed",
+      "clinicalReviewStatus": "NOT_VALIDATED; visual prototype only; no functional/clinical instrumentation or FDI.",
       "priority": "P1",
-      "notes": "54 objects, creator reports 117172 triangles total; assembled starter scene 46988 triangles. AI-made and simplified schematic; source rights stated CC0 but clinical/functional dimensions unvalidated. Good visual reference, not a substitute for case workflow."
+      "notes": "54 objects, creator reports 117172 triangles total; assembled starter scene 46988 triangles. AI-made and simplified schematic; source rights stated CC0 but clinical/functional dimensions unvalidated. Good visual reference, not a substitute for case workflow.",
+      "publicBinaryLicenseDecision": "CC0 1.0 explicitly permits public copy; exact original bytes under assets/cc0/3dassets-dental, source integrity verified.",
+      "visualReviewEvidence": "https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/runs/asset-research-cc0-dental-blender-e99cea92c790-run41292878372-attempt1/README.md",
+      "visualReviewRunId": 41292878372,
+      "visualReviewCodeSHA": "e99cea92c7903894c4364d69577c0be4c1c87692",
+      "blenderVersion": "4.0.2",
+      "visualPrototypesAccepted": true,
+      "sourceFileHashStatus": "Exact original SHA256 and byte count validated via hosted download, Blender import and reviewed evidence; unmodified public copy",
+      "assetScopeClarification": "Only assembled whole-clinic starter v1 GLB uploaded; the other 53 individual pack asset GLBs were not acquired/published.",
+      "repositoryFile": "assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb",
+      "visualReviewStatus": "PASS as low-poly clinic layout reference, not as interactive station or accurate dental clinic",
+      "blenderGeometry": {
+        "meshInstances": 1042,
+        "instanceSummedTriangles": 121536,
+        "worldBoundsMeters": [
+          16.002399,
+          14.074177,
+          2.76123
+        ],
+        "publisherClaimedTriangles": 46988,
+        "triangleMetricComparison": "PENDING UNIQUE-MESH VS INSTANCE COUNT RECONCILIATION"
+      }
     },
     {
       "id": "DENTAL-3DASSETS-CC0-INSTRUMENT-TRAY",
@@ -403,24 +424,43 @@
       "attribution": "3D Assets (AI-assisted)",
       "assetLicense": "CC0 1.0 Universal",
       "licenseEvidenceUrl": "https://3dassets.dev/assets/dental-practice-and-surgery-instrument-tray-33b4d81c",
-      "sourceVersion": "v1 / assets/34383",
-      "sourceFileSHA256": null,
-      "downloaded": false,
-      "blenderRendered": false,
-      "githubAssetUploaded": false,
-      "publicBinaryUploadApproved": false,
-      "publicationAssessment": "LICENSE-CANDIDATE-ONLY: license stated at linked upstream; obtain original file, SHA256 and inspect before public binary PR",
+      "sourceVersion": "v1 / immutable assets/34383",
+      "sourceFileSHA256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036",
+      "downloaded": true,
+      "blenderRendered": true,
+      "githubAssetUploaded": true,
+      "publicBinaryUploadApproved": true,
+      "publicationAssessment": "SOURCE_HASH + CC0 LICENSE + 4 ORIGINAL NATIVE BLENDER PIXELS VERIFIED; static decorative prop only.",
       "targetRole": "dental instruments / tray",
       "fdiSuitability": "Not anatomical FDI mesh; separable instrument solids are claimed by creator",
       "blenderCleanupPlan": [
-        "download pinned https://cdn.3dassets.dev/assets/34383/v1/model.glb and checksum",
-        "inspect 728 triangle node hierarchy, scale and grip details",
-        "Blender render top/angled/wireframe",
-        "isolate mirror/probe/tweezers for interaction and instrument clearance"
+        "Determine and correct unexplained cylindrical edge protrusions",
+        "Separate mirror, probe and tweezers as independent meshes, if topology allows",
+        "Check normals, handle lengths, material roughness and real-life scale",
+        "Do not add collision/manipulation or grade instrument use before dentist review"
       ],
-      "clinicalReviewStatus": "not clinically reviewed",
+      "clinicalReviewStatus": "NOT_VALIDATED; visual prototype only; no functional/clinical instrumentation or FDI.",
       "priority": "P1",
-      "notes": "Creator reports 0.28x0.039x0.213m and CC0. Container CDN DNS unavailable in current session; no original file hash or Blender preview."
+      "notes": "Creator reports 0.28x0.039x0.213m and CC0. Container CDN DNS unavailable in current session; no original file hash or Blender preview.",
+      "publicBinaryLicenseDecision": "CC0 1.0 explicitly permits public copy; exact original bytes under assets/cc0/3dassets-dental, source integrity verified.",
+      "visualReviewEvidence": "https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/runs/asset-research-cc0-dental-blender-e99cea92c790-run41292878372-attempt1/README.md",
+      "visualReviewRunId": 41292878372,
+      "visualReviewCodeSHA": "e99cea92c7903894c4364d69577c0be4c1c87692",
+      "blenderVersion": "4.0.2",
+      "visualPrototypesAccepted": true,
+      "sourceFileHashStatus": "Exact original SHA256 and byte count validated via hosted download, Blender import and reviewed evidence; unmodified public copy",
+      "repositoryFile": "assets/cc0/3dassets-dental/instrument-tray-v1.glb",
+      "visualReviewStatus": "PASS only as simplified static background tray; NOT instrument identification/procedural accuracy",
+      "blenderGeometry": {
+        "meshObjects": 4,
+        "triangles": 728,
+        "worldBoundsMeters": [
+          0.28,
+          0.212995,
+          0.039445
+        ],
+        "visualIssue": "Three cylindrical tabs protrude from tray side; geometry/materials stylized and low-detail"
+      }
     },
     {
       "id": "SKETCHFAB-SDEO-DENTAL-MIRROR",
@@ -548,6 +588,33 @@
       "clinicalReviewStatus": "not clinically reviewed",
       "priority": "P2",
       "notes": "Zenodo page states free use modification distribution but license metadata field empty. Get specific explicit author permission/terms before public binary GitHub upload."
+    },
+    {
+      "id": "STS-3D-TOOTH-HF-ROI-FDI-RESEARCH",
+      "title": "STS-3D-Tooth CBCT ROI labeled masks, per-tooth FDI instance classes",
+      "url": "https://huggingface.co/datasets/MedOtter/STS-3D-Tooth",
+      "attribution": "Yaqi Wang et al. (Scientific Data 2025); MedOtter hosting mirror",
+      "assetLicense": "Hugging Face mirror labels cc-by-4.0; original Zenodo record rights/license field appears blank in reviewed page — VERIFY BEFORE REDISTRIBUTION",
+      "licenseEvidenceUrl": "https://huggingface.co/datasets/MedOtter/STS-3D-Tooth",
+      "originalSource": "https://zenodo.org/records/10597292",
+      "sourceVersion": "Zenodo v1, 2024-09-29; Scientific Data 2025 / doi:10.1038/s41597-024-04306-9",
+      "sourceFileSHA256": null,
+      "downloaded": false,
+      "blenderRendered": false,
+      "githubAssetUploaded": false,
+      "publicBinaryUploadApproved": false,
+      "clinicalReviewStatus": "Research-only; patient CBCT provenance/consent and actual FDI annotation quality not independently audited",
+      "priority": "P2",
+      "targetRole": "Dental jaw/tooth volumetric segmentation research, not an immediate 3D model asset",
+      "fdiSuitability": "Hugging Face mirror documents 22 labeled ROI volumes with multi-class FDI instance masks; original 10 whole-FOV labeled sets are binary foreground masks, not individual FDI.",
+      "blenderCleanupPlan": [
+        "Verify original Zenodo rights metadata and mirror consent before any data transfer",
+        "Select small de-identified single ROI with clear usage rights, never bulk-download 31.8GB to public repo",
+        "Derive individual FDI surface meshes only after segmentation verification and user-data/privacy check",
+        "Inspect mesh watertightness/voxel spacing and label numerical mapping; clinician review required"
+      ],
+      "notes": "DO NOT acquire original patient CBCT or publicly mirror without authoritative license and patient-provenance confirmation. HF CC BY metadata vs Zenodo blank license is a material discrepancy; no model bytes or preview generated.",
+      "publicationAssessment": "RESEARCH METADATA ONLY; file acquisition and public binary release blocked pending source rights and patient-data assessment"
     }
   ],
   "sourcesToSearch": [
@@ -579,6 +646,43 @@
     "nihPreviewsProvidedInGitHubPR": false,
     "visualConclusionsAreOwnerPCOnly": true
   },
-  "sourceHashRule": "New downloadable assets have null SHA256 until actual bytes downloaded and checksummed. GitHub blob SHA-1 for existing Dundee assets is not SHA-256. Original author/version/DOI/license evidence is recorded independently.",
-  "assetBinariesAddedInThisPR": []
+  "sourceHashRule": "New candidate files without acquired bytes retain null SHA256. The two exact source CC0 GLBs have verified SHA256, original PNGs and assistant direct Blender pixel review. Dundee existing files are indexed by Git blob SHA-1, never mislabeled as SHA256.",
+  "assetBinariesAddedInThisPR": [],
+  "researchUpdatedAt": "2026-11-01",
+  "cc0NativeBlenderPixelReview": {
+    "status": "ORIGINAL_PIXELS_DIRECTLY_INSPECTED_VISUAL_PROTOTYPE_ONLY",
+    "assistantReviewed": true,
+    "githubRunId": 41292878372,
+    "exactCodeSHA": "e99cea92c7903894c4364d69577c0be4c1c87692",
+    "evidence": "https://github.com/ajeshkg17/KlinikLab/blob/visual-feedback/runs/asset-research-cc0-dental-blender-e99cea92c790-run41292878372-attempt1/README.md",
+    "priorOverexposedRun": {
+      "runId": 41292601531,
+      "status": "VISUAL_REJECTED_OVEREXPOSED"
+    },
+    "blenderVersion": "4.0.2",
+    "geometryAcceptedFor": "STATIC_PROTOTYPE_LAYOUT_AND_BACKGROUND_PROPS_ONLY",
+    "clinicalAccuracyAccepted": false,
+    "fdIAnatomyAccepted": false,
+    "fullApplicationMigrated": false,
+    "repositoryBinaryUploadPr": 39,
+    "repositoryBinaryUploadCommit": "f818e056787dcd154c70de8c2f1fb76f4cadadd2"
+  },
+  "binaryAssetsCurrentlyInRepo": [
+    {
+      "path": "assets/cc0/3dassets-dental/instrument-tray-v1.glb",
+      "sourceSHA256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036",
+      "bytes": 30452,
+      "license": "CC0-1.0",
+      "visualStatus": "STATIC_PROP_ONLY",
+      "clinicalReviewStatus": "NOT_VALIDATED"
+    },
+    {
+      "path": "assets/cc0/3dassets-dental/whole-clinic-starter-v1.glb",
+      "sourceSHA256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a",
+      "bytes": 1177948,
+      "license": "CC0-1.0",
+      "visualStatus": "SCHEMATIC_LAYOUT_REFERENCE",
+      "clinicalReviewStatus": "NOT_VALIDATED"
+    }
+  ]
 }
