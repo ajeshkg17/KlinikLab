@@ -69,3 +69,19 @@ test('Unity evidence publisher only copies native originals and separate Unity-o
  assert.match(pub,/fullKlinikLabApplicationMigrated -ne \$false/);
  assert.match(pub,/git -C \$temporary push origin HEAD:refs\/heads\/visual-feedback/);
 });
+
+test('Unity whole-clinic comparison includes actual native selection-state progression, not static labels',()=>{
+ for(const marker of ['KL_ACTIVE_CASE_STATUS','KL_ACTIVE_STATION_STATUS',
+   'PreviewSelection','workflowSelectionEvents','nativeCaseStationSelectionPreviewVerified',
+   'METADATA ONLY, NO CASE MESH']){
+  assert.ok(cs.includes(marker),marker);
+ }
+ assert.match(cs,/if\(i==15\).*workflowSelectionEvents\[1\]/);
+ assert.match(cs,/if\(i==31\).*workflowSelectionEvents\[2\]/);
+ assert.match(cs,/if\(i==24\)/);
+ assert.match(cs,/PreviewSelection\(data,selectedCase,selectedStation,0,0\)/);
+ assert.match(cs,/PreviewSelection\([\s\S]*?1,4\)/);
+ assert.match(cs,/PreviewSelection\([\s\S]*?0,4\)/);
+ assert.match(cs,/caseSpecificFDI36MeshPorted=false/);
+ assert.match(ps,/\$r\.nativeCaseStationSelectionPreviewVerified -ne \$true/);
+});
