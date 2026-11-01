@@ -6,6 +6,7 @@ on:
     paths:
       - 'visual-qa/godot-local-clinical/**'
       - 'native-godot/**'
+      - 'assets/cc0/3dassets-dental/**'
       - 'tests/sr2_godot_native_full_app_foundation.test.mjs'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
@@ -164,6 +165,18 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://direct-bur-smoke.gd > "$RUNNER_TEMP/direct-bur-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/direct-bur-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/direct-bur-smoke.log"
           grep -F "SR12_NATIVE_DIRECT_3D_TOOTH_POINTER_PASS" "$RUNNER_TEMP/direct-bur-smoke.log"
+      - name: Real reviewed CC0 clinic/tray import and actual six-case native app runtime (HEADLESS, not Windows GPU)
+        run: |
+          set -euo pipefail
+          test -s "$RUNNER_TEMP/native-kliniklab-app/cc0/whole-clinic-starter-v1.glb"
+          test -s "$RUNNER_TEMP/native-kliniklab-app/cc0/instrument-tray-v1.glb"
+          test -s "$RUNNER_TEMP/native-kliniklab-app/source/cc0-clinic-manifest.json"
+          (cd "$RUNNER_TEMP/native-kliniklab-app" && echo "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a  cc0/whole-clinic-starter-v1.glb" | sha256sum -c -)
+          (cd "$RUNNER_TEMP/native-kliniklab-app" && echo "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036  cc0/instrument-tray-v1.glb" | sha256sum -c -)
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://cc0-clinic.gd > "$RUNNER_TEMP/cc0-parse.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://cc0-clinic-smoke.gd > "$RUNNER_TEMP/cc0-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/cc0-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/cc0-runtime.log"
+          grep -F "SR13_REAL_APP_REVIEWED_CC0_CLINIC_PASS" "$RUNNER_TEMP/cc0-runtime.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
