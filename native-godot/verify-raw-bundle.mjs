@@ -59,6 +59,15 @@ if(toothBytes<1000)throw Error('FDI36 original source sidecar is implausibly sma
 const toothConvertedSidecar=sidecar+'assets/dundee/mandibular_first_molar-godot.glb.source';
 const toothConvertedBytes=validateFile(toothConvertedSidecar,tooth.convertedSha256);
 if(toothConvertedBytes<1000)throw Error('FDI36 converted source sidecar is implausibly small');
+const crown=asJson(sidecar+'source/tooth-fdi26-manifest.json');
+if(crown.sourceGitSHA!==sha||crown.caseId!=='crown'||crown.fdi!=='26'||
+   crown.originalGitBlobSha!=='0948d093089c5921281185a103b323c513365502'||
+   crown.licenseSPDX!=='CC-BY-4.0'||crown.surfaceOnly!==true||
+   crown.internalTissuesProvided!==false||crown.clinicalAccuracyValidated!==false)
+ throw Error('FDI26 Dundee source, license, or surface-only manifest mismatch');
+const crownOriginalBytes=validateFile(sidecar+'assets/dundee/maxillary_first_molar.glb.source',crown.originalSha256);
+const crownConvertedBytes=validateFile(sidecar+'assets/dundee/maxillary_first_molar-godot.glb.source',crown.convertedSha256);
+if(crownOriginalBytes<1000||crownConvertedBytes<1000)throw Error('FDI26 source or converted tooth sidecar truncated');
 const roots=[];
 for(const row of cc0.assets){
  if(!['whole-clinic-starter-v1.glb','instrument-tray-v1.glb'].includes(row.name)||
