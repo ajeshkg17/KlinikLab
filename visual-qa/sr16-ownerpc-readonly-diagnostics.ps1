@@ -85,14 +85,104 @@ if($originalEvidenceExists){
 }
 $heartbeatExists=Test-Path -LiteralPath $heartPath -PathType Leaf
 $runtimeExists=Test-Path -LiteralPath $runtimePath -PathType Leaf
-$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null;$heartbeatProcessAlive=$false
+# A bare Get-Process PID existence test is UNSAFE: Windows can recycle the PID.
+# A Chrome renderer reused the stale job13 heartbeat PID. Only attribute liveness
+# to the watcher after matching Node executable + exact task script + --watch,
+# plus process creation UTC preceding the recorded heartbeat/lease timestamp.
+# Never emit raw command lines or user-private paths to a public issue.
+$expectedWatchScript=if($taskWorkerDirectoryExists){Join-Path $taskWorkerDirectory 'visual-qa\godot-worker.mjs'}else{''}
+function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$RequireRecentStart){
+ $item=[ordered]@{pid=$ProcessId;pidPresent=$false;identityVerified=$false
+  executableIsNode=$false;scriptIsExactTaskWorker=$false;watchModeMatched=$false
+  processCreatedUTC=$null;recordedAtParsed=$false;createdBeforeRecordedAt=$false
+  startNearRecordedAt=$false;reason='PID_NOT_PRESENT_OR_CIM_UNAVAILABLE'}
+ if($ProcessId -le 0){return [pscustomobject]$item}
+ try{
+  $p=Get-CimInstance -ClassName Win32_Process -Filter ('ProcessId = '+$ProcessId) -ErrorAction Stop
+  if($null -eq $p){return [pscustomobject]$item}
+  $item.pidPresent=$true
+  $base=[IO.Path]::GetFileName([string]$p.ExecutablePath)
+  if([string]::IsNullOrWhiteSpace($base)){$base=[string]$p.Name}
+  $item.executableIsNode=($base -ieq 'node.exe')
+  $cmd=[string]$p.CommandLine
+  $item.scriptIsExactTaskWorker=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $item.watchModeMatched=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+  if($null -ne $p.CreationDate){
+   $created=([datetime]$p.CreationDate).ToUniversalTime()
+   $item.processCreatedUTC=$created.ToString('o')
+   $when=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
+       [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
+    $item.recordedAtParsed=$true
+    $item.createdBeforeRecordedAt=($created -le $when.UtcDateTime.AddSeconds(5))
+    $elapsed=($when.UtcDateTime - $created).TotalSeconds
+    $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
+   }
+  }
+  $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
+    $item.watchModeMatched -and $item.createdBeforeRecordedAt -and
+    (-not $RequireRecentStart -or $item.startNearRecordedAt))
+  $item.reason=if($item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
+ }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
+ return [pscustomobject]$item
+}
+$heartbeatJobId=$null;$heartbeatStatus=$null;$heartbeatPid=$null;$heartbeatAt=$null
+$heartbeatProcessAlive=$false;$heartbeatPidExists=$false;$heartbeatPidIdentity=$null
 if($heartbeatExists){
  try{$hb=Get-Content -LiteralPath $heartPath -Raw | ConvertFrom-Json -ErrorAction Stop
   $heartbeatJobId=[string]$hb.jobId;$heartbeatStatus=[string]$hb.status
   $heartbeatPid=[int]$hb.pid;$heartbeatAt=[string]$hb.at
-  if($heartbeatPid -gt 0){$heartbeatProcessAlive=($null -ne (Get-Process -Id $heartbeatPid -ErrorAction SilentlyContinue))}
+  $heartbeatPidIdentity=Get-KLSanitizedWatcherProcess $heartbeatPid $heartbeatAt $false
+  $heartbeatPidExists=[bool]$heartbeatPidIdentity.pidPresent
+  $heartbeatProcessAlive=[bool]$heartbeatPidIdentity.identityVerified
  }catch{}
 }
+# The worker lease is READ ONLY. A stale/mismatched lease is a hold, never
+# permission to erase it or recreate the task.
+$leaseFile=Join-Path $root 'godot-worker-active.lock'
+$workerLeaseExists=Test-Path -LiteralPath $leaseFile -PathType Leaf
+$workerLeasePid=$null;$workerLeaseStartedAt=$null;$workerLeaseIdentity=$null
+$workerLeaseJobPollerMatched=$false;$workerLeaseParseError=$null
+if($workerLeaseExists){
+ try{
+  $lease=Get-Content -LiteralPath $leaseFile -Raw | ConvertFrom-Json -ErrorAction Stop
+  $workerLeasePid=[int]$lease.pid
+  $workerLeaseStartedAt=[string]$lease.startedAt
+  $workerLeaseJobPollerMatched=([string]$lease.jobPoller -ceq 'visual-qa/godot-worker.mjs')
+  $workerLeaseIdentity=Get-KLSanitizedWatcherProcess $workerLeasePid $workerLeaseStartedAt $true
+ }catch{$workerLeaseParseError=$_.Exception.GetType().Name}
+}
+# Classify live task-related processes without publishing command lines, paths
+# or other users' process details. This is a safety inventory, not task control.
+$matchingWatcherProcesses=@();$taskLauncherProcesses=@()
+$processEnumerationComplete=$false;$nodeCommandLineUnavailableCount=0
+try{
+ $running=@(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'node.exe' OR Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction Stop)
+ $processEnumerationComplete=$true
+ foreach($proc in $running){
+  $cmd=[string]$proc.CommandLine
+  $exe=[string]$proc.Name
+  if($exe -ieq 'node.exe' -and [string]::IsNullOrWhiteSpace($cmd)){$nodeCommandLineUnavailableCount++;continue}
+  $taskScript=($expectedWatchScript.Length -gt 0 -and
+    $cmd.IndexOf($expectedWatchScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $launcher=($taskInstallScriptExists -and
+    $cmd.IndexOf($taskInstallScript,[StringComparison]::OrdinalIgnoreCase) -ge 0)
+  $createdString=if($null -ne $proc.CreationDate){([datetime]$proc.CreationDate).ToUniversalTime().ToString('o')}else{$null}
+  if($taskScript -and $exe -ieq 'node.exe'){
+   $matchingWatcherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString
+     watchMode=($cmd -match '(?i)(?:^|\s)--watch(?:\s|$)')
+     isHeartbeatPid=([int]$proc.ProcessId -eq $heartbeatPid)
+     isLeasePid=([int]$proc.ProcessId -eq $workerLeasePid)}
+  }elseif($launcher -and $exe -in @('powershell.exe','pwsh.exe')){
+   $taskLauncherProcesses+=@{pid=[int]$proc.ProcessId;createdUTC=$createdString}
+  }
+ }
+}catch{$processEnumerationComplete=$false}
+$taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -gt 0 -or
+ $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
+ $nodeCommandLineUnavailableCount -gt 0)
+
 $runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
 if($runtimeExists){
  try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
@@ -159,7 +249,18 @@ $report=[ordered]@{
  localOriginalEvidenceFolderExists=$originalEvidenceExists
  localOriginalEvidenceFileCount=$originalEvidenceFileCount
  heartbeatExists=$heartbeatExists;heartbeatJobId=$heartbeatJobId;heartbeatStatus=$heartbeatStatus
- heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPid=$heartbeatPid;heartbeatAt=$heartbeatAt
+ heartbeatPidExists=$heartbeatPidExists;heartbeatProcessAlive=$heartbeatProcessAlive
+ heartbeatPidIdentity=$heartbeatPidIdentity
+ workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
+ workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
+ workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ processEnumerationComplete=$processEnumerationComplete
+ nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
+ matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses
+ taskRefreshSafetyHold=$taskRefreshSafetyHold
+ localOriginalEvidenceWithoutTerminalLedger=($originalEvidenceExists -and -not $entryPresent)
+ ledgerRepairAuthorized=$false
  runtimeReceiptExists=$runtimeExists;runtimeWorkerSha=$runtimeWorkerSha;runtimeCurrentApprovedJob=$runtimeCurrentJob;runtimeUpdatedUTC=$runtimeUpdatedUTC
  latestWorkerStdoutExists=($null -ne $latestStdout)
  latestWorkerStdoutLastWriteUTC=$latestStdoutWriteUtc

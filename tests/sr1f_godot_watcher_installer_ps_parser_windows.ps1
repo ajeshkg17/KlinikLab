@@ -21,3 +21,16 @@ foreach($expected in @('Register-ScheduledTask','-RegisterAtLogon','-RedirectSta
  if(-not $source.Contains($expected)){throw "Expected pinned installer contract missing: $expected"}
 }
 Write-Output "INSTALLER_PARSE_OK PS=$($PSVersionTable.PSVersion) FILE=$file"
+
+# Also AST-parse the strictly read-only owner-PC diagnostics using both
+# Windows PowerShell 5.1 and PowerShell 7. Never execute the probe in CI.
+$diagnostics=Join-Path $PSScriptRoot '..\visual-qa\sr16-ownerpc-readonly-diagnostics.ps1'
+$diagnosticTokens=$null
+$diagnosticErrors=$null
+$diagnosticAst=[System.Management.Automation.Language.Parser]::ParseFile(
+ [IO.Path]::GetFullPath($diagnostics),[ref]$diagnosticTokens,[ref]$diagnosticErrors)
+if($null -eq $diagnosticAst -or @($diagnosticErrors).Count -gt 0){
+ $details=@($diagnosticErrors|ForEach-Object{$_.Message}) -join '; '
+ throw "READONLY_PROCESS_IDENTITY_DIAGNOSTIC_PARSE_FAILED PS $($PSVersionTable.PSVersion): $details"
+}
+Write-Output "READONLY_PROCESS_IDENTITY_DIAGNOSTIC_PARSE_OK PS=$($PSVersionTable.PSVersion)"
