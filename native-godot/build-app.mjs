@@ -63,12 +63,35 @@ try{
     manifest.sha256!==asset.sha256||fs.statSync(file).size!==manifest.bytes||
     hashFile(file)!==asset.sha256)
    throw Error('Original reviewed CC0 source bytes/permissions drift for '+asset.id);
-  const imported=path.join(dest,'cc0',asset.filename);
-  fs.copyFileSync(file,imported,fs.constants.COPYFILE_EXCL);
-  if(hashFile(imported)!==asset.sha256)
-   throw Error('CC0 native packaging copy changed source bytes '+asset.id);
-  selectedManifest.assets[asset.id]={path:'res://cc0/'+asset.filename,
-   sha256:asset.sha256,bytes:manifest.bytes,
+  // Godot 4.7.2 does NOT import the publisher's KHR_mesh_quantization.
+  // Keep original bytes verbatim in a non-imported .bin asset; only a
+  // separately derived, dequantized GLB is scanned as a Godot PackedScene.
+  const originalName=asset.filename+'.original.bin';
+  const originalCopy=path.join(dest,'cc0',originalName);
+  fs.copyFileSync(file,originalCopy,fs.constants.COPYFILE_EXCL);
+  if(hashFile(originalCopy)!==asset.sha256)
+   throw Error('CC0 native original source changed in packaging '+asset.id);
+  const derivedName=asset.filename.replace(/-v1\\.glb$/,'-godot-v1.glb');
+  if(derivedName===asset.filename||!derivedName.endsWith('.glb'))
+   throw Error('Unsafe derived CC0 model filename');
+  const derived=path.join(dest,'cc0',derivedName);
+  // glTF-Transform dequantize only: no decimation, editing, or added imagery.
+  const npx=process.platform==='win32'?'npx.cmd':'npx';
+  execFileSync(npx,['--yes','--package=@gltf-transform/cli@4.5.1',
+     'gltf-transform','dequantize',file,derived],{stdio:'inherit',timeout:120000});
+  if(!fs.existsSync(derived)||fs.statSync(derived).size<1000)
+   throw Error('CC0 Godot compatibility dequantization missing '+asset.id);
+  const d=fs.readFileSync(derived);
+  if(d.toString('ascii',0,4)!=='glTF'||d.readUInt32LE(4)!==2||
+     d.readUInt32LE(8)!==d.length||d.toString('ascii',16,20)!=='JSON')
+   throw Error('Godot-derived CC0 is not a valid GLB v2 container');
+  const json=JSON.parse(d.subarray(20,20+d.readUInt32LE(12)).toString('utf8'));
+  if((json.extensionsRequired||[]).includes('KHR_mesh_quantization'))
+   throw Error('CC0 derived GLB still requires unsupported mesh quantization');
+  selectedManifest.assets[asset.id]={
+   path:'res://cc0/'+originalName,sha256:asset.sha256,bytes:manifest.bytes,
+   importPath:'res://cc0/'+derivedName,importSha256:hashFile(derived),
+   importBytes:d.length,compatibilityConverter:'@gltf-transform/cli@4.5.1 dequantize',
    status:'STATIC_VISUAL_ONLY',publisher:manifest.sourceUrl};
  }
  fs.copyFileSync(path.join(sourceAssets,'README.md'),path.join(dest,'cc0','README-ORIGINAL-SOURCE.md'),fs.constants.COPYFILE_EXCL);
@@ -139,6 +162,7 @@ try{
   nativeMeshSurfacePointerEditingOptIn:true,
   nativeReviewedCC0ClinicImportedFromExactOriginals:true,
   nativeReviewedCC0SourceSha256:selectedManifest.assets['whole-clinic-starter'].sha256,
+  nativeReviewedCC0DerivedCompatibilitySha256:selectedManifest.assets['whole-clinic-starter'].importSha256,
   nativeReviewedCC0MeshAndPixelAcceptancePending:true,
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),
