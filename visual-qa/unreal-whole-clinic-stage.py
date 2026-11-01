@@ -119,6 +119,11 @@ def main():
         B('KL_WALL_SCREEN_PANEL',(416,0,225),(.2,2.8,1.27))
         T('KL_SCREEN_TITLE','KLINIKLAB / UE NATIVE CLINIC',(402,0,270),15)
         T('KL_SCREEN_SCOPE','EDUCATIONAL WORKSPACE - NOT FULL APPLICATION',(402,0,230),8)
+        # In native captures these two labels change as the educational
+        # case/station preview advances; static catalog labels alone do
+        # not demonstrate workflow selection. No simulated FDI36 mesh.
+        T('KL_ACTIVE_CASE_STATUS','ACTIVE FDI 16 / MOLAR - ORIGINAL FDI16 MESH',(403,0,210),8)
+        T('KL_ACTIVE_STATION_STATUS','STATION 1/7: INTERVIEW',(403,0,193),8)
         # Chair is a visually identified educational schematic model.
         C('KL_CHAIR_BASE',(165,330,-4),(1.7,1.7,.35))
         B('KL_DENTAL_CHAIR_SEAT',(190,330,75),(2,1.15,.28))
@@ -158,7 +163,13 @@ def main():
         check(len(objects)>=35,'whole-clinic environment actor count too small')
         check(subsystem.save_current_level(),'failed to save generated native Unreal whole clinic map')
         check(subsystem.load_level(WHOLE),'new UE level could not be reloaded')
-        proof(list(actor_api.get_all_level_actors()))
+        all_actors=list(actor_api.get_all_level_actors())
+        proof(all_actors)
+        actor_names={a.get_actor_label() for a in all_actors}
+        for required in ('KL_ACTIVE_CASE_STATUS','KL_ACTIVE_STATION_STATUS',
+                         'KL_CLINIC_OVERVIEW_CAMERA'):
+            check(required in actor_names,'case/station preview actor missing after level reload: '+required)
+        record['nativeWorkflowPreviewActorsVerified']=True
         record['sourceTeethRetainedAfterLevelReload']=True
         record['status']='UNREAL_WHOLE_CLINIC_SCENE_SAVED_NOT_GPU_RENDERED'
         unreal.log('SR1J source-provenance native whole clinic level SAVED, GPU proof pending')
