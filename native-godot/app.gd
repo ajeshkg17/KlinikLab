@@ -1,5 +1,6 @@
 extends Node3D
 ## SR2 Godot-first interactive APPLICATION FOUNDATION, not a finished full port.
+## FULL APP NOT YET PORTED: original browser parity, physical clinical scoring and Quest/XR remain pending.
 ## Runs in a standalone Godot 4.7.2 desktop app with a source-exact
 ## 3D clinic and real native case/station/exercise interaction.
 ## Source-only educational content, no patient records, no AI or calibrated drill.
