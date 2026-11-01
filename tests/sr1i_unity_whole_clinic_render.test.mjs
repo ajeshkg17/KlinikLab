@@ -50,3 +50,22 @@ test('Windows owner runner creates unique separate evidence, private desktop, li
   assert.ok(!ps.includes(forbidden),'forbidden '+forbidden);
  }
 });
+
+test('Unity evidence publisher only copies native originals and separate Unity-only GitHub pointer',()=>{
+ const pub=read('../visual-qa/publish-unity-clinic-evidence.ps1');
+ for(const token of ['visual-feedback','UNITY_PC_LATEST.md','unity-gpu-pdh.json',
+  'unity-owner-pc-result.json','unity-whole-clinic-native-report.json',
+  'Get-FileHash','GPU','originalNativePngs','New-Item',
+  'worktree add --detach','push origin HEAD:refs/heads/visual-feedback']){
+  if(token==='originalNativePngs') continue; // on-disk source PNG list is explicitly validated
+  assert.ok(pub.includes(token),token);
+ }
+ for(const forbidden of ['GODOT_PC_LATEST.md','godot-ledger.json','godot-worker.mjs',
+  'SwitchDesktop','SetForegroundWindow','--force','--headless',
+  'Start-Process','CreateProcess','Unity.exe']){
+  assert.ok(!pub.includes(forbidden),'publisher must not launch/modify '+forbidden);
+ }
+ assert.match(pub,/imageIndependentPixelReviewAccepted -ne \$false/);
+ assert.match(pub,/fullKlinikLabApplicationMigrated -ne \$false/);
+ assert.match(pub,/git -C \$temporary push origin HEAD:refs\/heads\/visual-feedback/);
+});
