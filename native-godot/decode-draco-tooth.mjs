@@ -42,7 +42,7 @@ const compressedView=doc.bufferViews?.[draco.bufferView];
 if(!compressedView||compressedView.buffer!==0)throw Error('Draco buffer view missing');
 const compressed=bin.subarray(compressedView.byteOffset||0,(compressedView.byteOffset||0)+compressedView.byteLength);
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'kliniklab-draco-'));
-let moduleApi,decoder,decoderBuffer,mesh;
+let moduleApi,decoder,decoderBuffer,mesh,stage='decoder initialization';
 try{
  const cjs=path.join(tmp,'decoder.cjs');
  fs.copyFileSync(decoderJs,cjs);
@@ -51,10 +51,13 @@ try{
  moduleApi=await factory({wasmBinary:fs.readFileSync(decoderWasm)});
  decoder=new moduleApi.Decoder();
  decoderBuffer=new moduleApi.DecoderBuffer();
+ stage='DecoderBuffer.Init';
  decoderBuffer.Init(new Int8Array(compressed.buffer,compressed.byteOffset,compressed.byteLength),compressed.byteLength);
+ stage='GetEncodedGeometryType';
  if(decoder.GetEncodedGeometryType(decoderBuffer)!==moduleApi.TRIANGULAR_MESH)
   throw Error('FDI36 source payload is not a Draco triangle mesh');
  mesh=new moduleApi.Mesh();
+ stage='DecodeBufferToMesh';
  const status=decoder.DecodeBufferToMesh(decoderBuffer,mesh);
  if(!status.ok()||mesh.num_faces()<100||mesh.num_points()<100)
   throw Error('Draco decode failed or returned implausible geometry');
@@ -77,12 +80,14 @@ try{
   TEXCOORD_0:moduleApi.TEX_COORD,COLOR_0:moduleApi.COLOR};
  const attrs={};
  for(const semantic of Object.keys(primitive.attributes)){
+  stage='attribute '+semantic;
   const attrId=draco.attributes[semantic];
   const attribute=decoder.GetAttribute(mesh,attrId);
   if(!attribute)throw Error('Missing decoded source attribute '+semantic);
   const components=attribute.num_components();
   if(!typeNames[components]||enumNames[semantic]===undefined)throw Error('Unsupported FDI36 attribute '+semantic);
   const values=new moduleApi.DracoFloat32Array();
+  stage='GetAttributeFloatForAllPoints '+semantic;
   if(!decoder.GetAttributeFloatForAllPoints(mesh,attribute,values))
    throw Error('Could not extract FDI36 '+semantic);
   const bytes=Buffer.alloc(count*components*4),lo=Array(components).fill(Infinity),hi=Array(components).fill(-Infinity);
@@ -98,6 +103,7 @@ try{
  }
  const indexBytes=Buffer.alloc(faces*3*4),face=new moduleApi.DracoInt32Array();
  let cursor=0;
+ stage='GetFaceFromMesh';
  for(let f=0;f<faces;f++){
   decoder.GetFaceFromMesh(mesh,f,face);
   for(let k=0;k<3;k++){
@@ -141,6 +147,8 @@ try{
  const convertedSha=crypto.createHash('sha256').update(out).digest('hex');
  process.stdout.write(JSON.stringify({sourceGitBlobSha:blob,convertedSha256:convertedSha,
   vertices:count,triangles:faces,attributes:Object.keys(attrs),texturePreserved:false})+'\n');
+}catch(error){
+ throw new Error('FDI36 Draco conversion stage '+stage+': '+String(error?.message||error));
 }finally{
  if(mesh)moduleApi.destroy(mesh);
  if(decoderBuffer)moduleApi.destroy(decoderBuffer);
