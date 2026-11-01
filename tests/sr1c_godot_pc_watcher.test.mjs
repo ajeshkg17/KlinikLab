@@ -18,7 +18,7 @@ test('Dedicated local Godot job pins exact requested SHA with bounded non-execut
  const validated=validateGodotJob(job);
  assert.equal(validated.commit,EXACT_SOURCE_SHA);
  assert.equal(EXACT_SOURCE_SHA,'f4d4d4151851a08342def08d9f2e461f5f5e7109');
- assert.equal(JOB_REF,'visual-qa/jobs/godot-job08-original.json');
+ assert.equal(JOB_REF,'visual-qa/jobs/godot-current.json');
  assert.equal(RESULT_BRANCH,'visual-feedback');
  assert.equal(validated.graphics,'forward_plus-vulkan');
  assert.equal(validated.schemaVersion,5);
