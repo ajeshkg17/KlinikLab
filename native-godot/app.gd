@@ -103,6 +103,9 @@ func _load_source() -> bool:
 		return false
 	for i in range(6):
 		var c: Dictionary = _cases[i]
+		if str(c.get("patientName", "")).is_empty() or int(c.get("patientAge", 0)) < 18 or (c.get("patientReply", []) as Array).size() != 7:
+			_boot_error = "Missing original fictional patient dialogue"
+			return false
 		var old: Dictionary = legacy["cases"][i]
 		if str(c.get("id", "")) != CASE_IDS[i] or str(c.get("fdi", "")) != FDI[i] or 			str(old.get("id", "")) != CASE_IDS[i] or str(old.get("fdi", "")) != FDI[i] or 			str(c.get("title", "")) != str(old.get("title", "")):
 			_boot_error = "Source case identity/content drift"
@@ -364,6 +367,10 @@ func _show_quiz(station: String) -> void:
 	var questions: Array = _content["quiz"][station]
 	_quiz_index = clampi(_quiz_index, 0, questions.size() - 1)
 	var q: Dictionary = questions[_quiz_index]
+	if station == "interview":
+		var patient: Dictionary = _cases[_case_index]
+		_page.add_child(_heading("Simulated patient: %s, %s Jahre (fictional source case)" %
+			[str(patient["patientName"]),str(patient["patientAge"])], 14))
 	_page.add_child(_heading("Practice question %d/%d: %s" % [
 		_quiz_index + 1, questions.size(), str(q["question"])], 16))
 	for i in range(3):
@@ -371,6 +378,11 @@ func _show_quiz(station: String) -> void:
 		b.pressed.connect(_answer.bind(station, _quiz_index, i))
 		_page.add_child(b)
 	_answer_label = _heading("Choose one response. Explanations are formative, not clinical grading.", 14)
+	var existing: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(_quiz_index), {})
+	if existing.get("correct", false):
+		_answer_label.text = str(q["explanation"])
+		if station == "interview":
+			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[_quiz_index])
 	_page.add_child(_answer_label)
 	var next := _button("Next source question")
 	next.pressed.connect(_next_question)
@@ -387,6 +399,8 @@ func _answer(station: String, index: int, choice: int) -> void:
 	_save_progress()
 	if _answer_label != null:
 		_answer_label.text = ("Correct. " if correct else "Review suggested. ") + str(q["explanation"])
+		if station == "interview" and correct:
+			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[index])
 
 func _next_question() -> void:
 	var questions: Array = _content["quiz"][STATION_IDS[_station_index]]
@@ -560,9 +574,75 @@ func _show_progress() -> void:
 			var k := str(c["id"]) + ":" + str(s["id"])
 			var done: bool = (_progress["studied"] as Dictionary).get(k, false)
 			_page.add_child(_heading(("✓ " if done else "○ ") + str(c["id"]) + " / " + str(s["title"]), 12))
+	_page.add_child(_heading("Reports include saved free-text drafts. Do not enter real patient information. Files stay local unless you share them.", 13))
+	var export_button := _button("Export local learning report (.txt)")
+	export_button.pressed.connect(_choose_report_path)
+	_page.add_child(export_button)
 	var reset := _button("Reset saved educational progress")
 	reset.pressed.connect(_reset_progress)
 	_page.add_child(reset)
+
+
+func _generate_report() -> String:
+	# Deterministic offline learning record, not a patient chart or validated score.
+	var lines: Array[String] = [
+		"KLINIKLAB — SYNTHETIC EDUCATIONAL LEARNING REPORT",
+		"Original production source SHA: " + str(_content.get("sourceGitSHA", "")),
+		"No patient records, official exam scores, medical diagnoses or clinical validation.",
+		"Responses and drafts are locally user-entered. Do not use real patient data.",
+		""
+	]
+	var answers: Dictionary = _progress.get("answers", {})
+	var studied: Dictionary = _progress.get("studied", {})
+	var notes: Dictionary = _progress.get("notes", {})
+	for c in _cases:
+		lines.append("CASE FDI %s — %s (fictional)" % [str(c["fdi"]),str(c["title"])])
+		for station in _stations:
+			var key := str(c["id"]) + ":" + str(station["id"])
+			var answered := 0
+			var matched := 0
+			for record_key in answers:
+				if str(record_key).begins_with(key + ":"):
+					var item: Variant = answers[record_key]
+					if item is Dictionary:
+						answered += 1
+						if bool(item.get("correct", false)):
+							matched += 1
+			lines.append("  %s: studied=%s; formative choices=%d; matched source answer=%d" %
+				[str(station["title"]),str(bool(studied.get(key,false))),answered,matched])
+			if notes.has(key):
+				lines.append("  Saved draft (no automated correctness assessment):")
+				lines.append(str(notes[key]).substr(0,10000))
+		lines.append("")
+	if _volume != null:
+		var v: Dictionary = _volume.call("summary")
+		lines.append("FDI16 synthetic bur strokes: " + str(v["strokes"]))
+		lines.append("FDI16 grid-based removed sample points (not mm³): " + str(v["removedSamplePoints"]))
+	lines.append("END OF LOCAL FORMATIVE REPORT")
+	return "\n".join(lines) + "\n"
+
+func _choose_report_path() -> void:
+	var dialog := FileDialog.new()
+	dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
+	dialog.filters = PackedStringArray(["*.txt ; Text report"])
+	dialog.current_file = "KlinikLab_Lernbericht.txt"
+	dialog.file_selected.connect(_write_report)
+	dialog.close_requested.connect(dialog.queue_free)
+	_shell.add_child(dialog)
+	dialog.popup_centered_ratio(0.65)
+
+func _write_report(path: String) -> void:
+	if not path.to_lower().ends_with(".txt"):
+		push_warning("Learning reports must be written as .txt")
+		return
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		push_warning("Could not write local report to selected file")
+		return
+	file.store_string(_generate_report())
+	file.close()
+	_page.add_child(_heading("Local report saved to: " + path, 13))
 
 func _reset_progress() -> void:
 	_progress["answers"] = {}
@@ -581,6 +661,8 @@ func _show_coverage() -> void:
 		var status := str(gates[id])
 		if str(id) == "interactiveThreeDPreparation" and _volume != null:
 			status = "FDI16_LIVE_SAMPLED_VOLUME_ONLY__OTHER_CASES_NOT_PORTED"
+		if str(id) == "reportingAndExport":
+			status = "LOCAL_TEXT_LEARNING_REPORT_ONLY__NO_VALIDATED_GRADING"
 		_page.add_child(_heading(str(id) + "  —  " + status, 14))
 	_page.add_child(_heading("Already functional here: 3D schematic clinic, exact-source FDI16 before/cut comparison, 6 cases, 7 stations, formative multiple-choice questions, German writing drafts, vocabulary, local progress.", 15))
-	_page.add_child(_heading("FDI16 source-pinned editable 3D volumetric cutting: available when grid hash verified; sampled synthetic geometry, no clinical grading. Still missing: all-case 32-tooth native anatomy, STL/OBJ import, radiography, XR/Quest, opt-in AI, validated FSP assessment and complete reports. The browser app remains reference.", 15))
+	_page.add_child(_heading("FDI16 live synthetic cutting, seven original guided interview replies per case and local learning-report export are available. Still missing: free-form patient dialogue, full anatomy, native scan/radiography, XR/Quest, AI and validated assessment. Browser app remains reference.", 15))
