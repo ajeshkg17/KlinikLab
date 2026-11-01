@@ -38,15 +38,31 @@ test('SR2: exact-source builds a standalone Godot app with real FDI16 source, 6 
    }
   }
   assert(app.tools.length>=15);
+  assert.equal(app.practical.length,6);
+  for(let i=0;i<6;i++){
+   assert(app.practical[i].length>=5,'Original case practical tasks missing');
+   assert.equal(app.practical[i][0].type,'tooth');
+   assert.equal(app.practical[i][0].target,app.cases[i].fdi);
+   assert(app.practical[i].some(x=>x.type==='choice'));
+   assert(app.practical[i].some(x=>x.type==='tool'));
+   for(const task of app.practical[i]){
+    if(task.type==='choice'){
+     assert.equal(task.options.length,3);
+     assert(task.correct>=0&&task.correct<=2);
+    }
+   }
+  }
   assert.equal(mesh.sceneStates.before.triangles,14856);
   assert.equal(mesh.sceneStates.after.triangles,14936);
   assert.equal(report.fullInteractiveAppMigrated,false);
   assert.equal(report.verifiedNativeGpu,false);
   assert.equal(app.migrationGates.interactiveThreeDPreparation,'NOT_PORTED');
+  assert.equal(app.migrationGates.caseSpecificPracticalChoices,'SOURCE_TASKS_EXPORTED_NATIVE_INTERACTION_PARTIAL');
   assert.match(read('native-godot/app.gd'),/func _save_progress\(/);
   assert.match(read('native-godot/app.gd'),/func _show_quiz\(/);
   assert.match(read('native-godot/app.gd'),/func _show_writing\(/);
   assert.match(read('native-godot/app.gd'),/func _show_practical\(/);
+  assert.match(read('native-godot/app.gd'),/func _record_practical\(/);
   assert.match(read('native-godot/app.gd'),/KL_COMPLETE_OPERATORY_WORKSPACE/);
   assert.throws(()=>execFileSync(process.execPath,[path.join(root,'native-godot/build-app.mjs'),
    '--source-dir='+root,'--expected-sha='+head,'--output='+project],{encoding:'utf8',stdio:'pipe'}));
