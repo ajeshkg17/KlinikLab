@@ -10,7 +10,7 @@ const diagnostic=read('visual-qa/sr16-ownerpc-readonly-diagnostics.ps1');
 test('SR16 owner-PC diagnostics derives the evidence directory from the exact requested source SHA',()=>{
  assert.match(diagnostic,/\[string\]\$ExpectedSha='ed3239c85a499205bf76b13395dc54c87b8ffe75'/);
  assert.match(diagnostic,/\$ExpectedSha -notmatch '\^\[a-f0-9\]\{40\}\$'/);
- assert.match(diagnostic,/\$JobId\+'-'+\$ExpectedSha\.Substring\(0,10\)/);
+ assert.match(diagnostic,/\(\$JobId\+'-'\+\$ExpectedSha\.Substring\(0,10\)\)/);
  assert.doesNotMatch(diagnostic,/\$JobId\+'-ed3239c85a'/);
  assert.match(diagnostic,/localOriginalEvidenceFolderExists/);
  assert.match(diagnostic,/localLedgerHasJob/);
