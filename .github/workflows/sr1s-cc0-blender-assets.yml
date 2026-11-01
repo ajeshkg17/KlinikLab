@@ -24,7 +24,7 @@ jobs:
       - name: Install actual Blender from Ubuntu packages (NO dummy renderer)
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq blender python3-numpy
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq blender python3-numpy libegl1 libgl1-mesa-dri libopengl0
           blender --background --python-exit-code 7 --python-expr 'import numpy; print("BLENDER_GLTF_NUMPY_READY", numpy.__version__)'
           blender --version | head -n 2
       - name: Download ORIGINAL pinned CC0 GLB files and hash original bytes
@@ -36,6 +36,8 @@ jobs:
             --out "$SOURCE_ROOT"
       - name: Render four REAL headless Blender PNG views with native glTF importer
         env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          GALLIUM_DRIVER: llvmpipe
           SOURCE_ROOT: ${{ runner.temp }}/cc0-source-originals
           RENDER_ROOT: ${{ runner.temp }}/cc0-blender-renders
         run: |
