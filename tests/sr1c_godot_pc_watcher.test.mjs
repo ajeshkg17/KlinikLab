@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {validateGodotJob,EXACT_SOURCE_SHA,JOB_REF,RESULT_BRANCH} from '../visual-qa/godot-job-core.mjs';
 
 const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
-const activeJob=JSON.parse(read('../visual-qa/jobs/godot-current.json'));
+const activeJob=JSON.parse(read('../visual-qa/jobs/godot-job08-original.json'));
 // Preserve historical schema-v5 regression fixtures without reusing the old request.
 const job={...activeJob,schemaVersion:5,jobId:'pc-godot-fdi16-20261031-job05',
  suite:'sr1c-fdi16-before-after',capture:'native-orbit-frontal-occlusal',
