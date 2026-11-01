@@ -11,7 +11,9 @@ export function validateGodotJob(job){
     job.backgroundContract!=='private-winsta0-vulkan-autocapture-no-foreground' ||
     job.launcherContract!=='winps51-clear-psmodulepath-sha256-preflight')
   throw Error('Invalid private desktop / child PowerShell contract');
- if(job.commit!==EXACT_SOURCE_SHA)throw Error('Original production FDI16 source SHA must remain exact');
+ if(job.schemaVersion!==8&&job.commit!==EXACT_SOURCE_SHA)throw Error('Original production FDI16 source SHA must remain exact');
+ if(job.schemaVersion===8&&!/^[a-f0-9]{40}$/.test(job.commit||''))
+  throw Error('Exact native exported app commit required');
  if(job.graphics!=='forward_plus-vulkan')throw Error('Native Vulkan Forward+ required');
  if(!Number.isInteger(job.timeoutSec)||job.timeoutSec<30||job.timeoutSec>180)
   throw Error('Godot timeout must be 30-180 seconds');
@@ -34,6 +36,13 @@ export function validateGodotJob(job){
    job.sceneMode!=='clinic-cases' ||
    job.capture!=='native-clinic-case-switch-orbit')
    throw Error('Unknown native clinical case migration mode');
+ }else if(job.schemaVersion===8){
+  if(job.telemetryContract!=='persistent-pdh-valid-rows-dxgi-luid-42s-orbit-v2'||
+   !/^pc-godot-exported-[a-z0-9-]{8,55}$/.test(job.jobId||'')||
+   job.suite!=='sr14-native-exported-cc0-six-case'||
+   job.sceneMode!=='native-exported-cc0'||
+   job.capture!=='native-exported-cc0-and-fdi36-two-pngs')
+   throw Error('Unknown/unapproved source-verified exported native app watcher job');
  }else throw Error('Unsupported Godot job schema');
  return Object.freeze({...job});
 }
