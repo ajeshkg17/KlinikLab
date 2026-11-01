@@ -1,0 +1,33 @@
+{
+    "schemaVersion":  8,
+    "sourceGitSHA":  "a33c31a9e1c364463f96c29a6004a7e625cd4e89",
+    "nativeSceneMode":  "native-exported-cc0",
+    "nativeSourceSubmissionVerified":  true,
+    "nativeCaseWorkflowVerified":  false,
+    "nativeImagePresent":  false,
+    "nativeAngledImagePresent":  false,
+    "nativeScreenshotFile":  null,
+    "nativeAngledScreenshotFile":  null,
+    "godotProcessGPUCorroborated":  false,
+    "gpuAdapterLuidMatchedToNvidia":  true,
+    "process3DPositiveRtx5060DistinctPeriods":  34,
+    "rtx5060DxgiLuid":  "0x00000000_0x00013049",
+    "godotPid":  4220,
+    "renderingMethod":  null,
+    "renderingDriver":  null,
+    "videoAdapterName":  null,
+    "videoAdapterVendor":  null,
+    "privateDesktopCreated":  true,
+    "headlessUsed":  false,
+    "userDesktopActivationRequested":  false,
+    "imageIndependentPixelReviewAccepted":  false,
+    "status":  "EVIDENCE_INCOMPLETE",
+    "artifactZipSHA256":  "eb1e1871bd9ae881aa0099eb30df51e7b578f8660c14eb9187bd796e6223198a",
+    "errors":  [
+                   "System.Management.Automation.RuntimeException: Exported exe did not publish its own capture report; check --script embedded-PCK launch"
+               ],
+    "blockers":  [
+                     "Exported PC evidence exception: Exported exe did not publish its own capture report; check --script embedded-PCK launch"
+                 ],
+    "exportedExeSHA256":  "7526997eb1793f4d3a11b7cfbe4726cd7df67e706a86c81423dd7a62b0c901fc"
+}
