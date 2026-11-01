@@ -94,7 +94,7 @@ $expectedWatchScript=if($taskWorkerDirectoryExists){Join-Path $taskWorkerDirecto
 function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$RequireRecentStart){
  $item=[ordered]@{pid=$ProcessId;pidPresent=$false;identityVerified=$false
   executableIsNode=$false;scriptIsExactTaskWorker=$false;watchModeMatched=$false
-  processCreatedUTC=$null;recordedAtParsed=$false;createdBeforeRecordedAt=$false
+  processCreatedUTC=$null;cimCreationDateKind=$null;recordedAtParsed=$false;createdBeforeRecordedAt=$false
   startNearRecordedAt=$false;reason='PID_NOT_PRESENT_OR_CIM_UNAVAILABLE'}
  if($ProcessId -le 0){return [pscustomobject]$item}
  try{
@@ -111,6 +111,7 @@ function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$
   if($null -ne $p.CreationDate){
    $created=([datetime]$p.CreationDate).ToUniversalTime()
    $item.processCreatedUTC=$created.ToString('o')
+   $item.cimCreationDateKind=[string]([datetime]$p.CreationDate).Kind
    $when=[DateTimeOffset]::MinValue
    if([DateTimeOffset]::TryParse($RecordAt,[Globalization.CultureInfo]::InvariantCulture,
        [Globalization.DateTimeStyles]::RoundtripKind,[ref]$when)){
@@ -120,8 +121,9 @@ function Get-KLSanitizedWatcherProcess([int]$ProcessId,[string]$RecordAt,[bool]$
     $item.startNearRecordedAt=($elapsed -ge -5 -and $elapsed -le 180)
    }
   }
+  $explicitZone=($RecordAt -match '(?i)(?:Z|[+-][0-9]{2}:[0-9]{2})$')
   $item.identityVerified=($item.executableIsNode -and $item.scriptIsExactTaskWorker -and
-    $item.watchModeMatched -and $item.createdBeforeRecordedAt -and
+    $item.watchModeMatched -and $explicitZone -and $item.createdBeforeRecordedAt -and
     (-not $RequireRecentStart -or $item.startNearRecordedAt))
   $item.reason=if($item.identityVerified){'EXACT_NODE_WORKER_AND_PROCESS_TIME_MATCH'}else{'PID_REUSED_OR_WORKER_IDENTITY_UNVERIFIED'}
  }catch{$item.reason='CIM_PROCESS_QUERY_FAILED_CLOSED'}
@@ -183,6 +185,72 @@ $taskRefreshSafetyHold=($workerLeaseExists -or $matchingWatcherProcesses.Count -
  $taskLauncherProcesses.Count -gt 0 -or -not $processEnumerationComplete -or
  $nodeCommandLineUnavailableCount -gt 0)
 
+# Diagnose lease clock ambiguity without silently accepting a different zone.
+# The producer writes toISOString() (UTC Z); older/malformed lease clocks may
+# omit the zone. Compare both hypotheses and keep either outcome read-only.
+function Get-KLClockCandidates([int]$ProcessId,[string]$RawTime){
+ $out=[ordered]@{pid=$ProcessId;hasExplicitOffset=$false;processCreatedUTC=$null
+  cimKind=$null;deltaAssumingUTCSeconds=$null;deltaAssumingLocalSeconds=$null
+  deltaFromRoundtripParseSeconds=$null;creationCrossCheckSeconds=$null
+  processLocated=$false;ambiguousZone=$false}
+ $out.hasExplicitOffset=($RawTime -match '(?i)(?:Z|[+-][0-9]{2}:[0-9]{2})$')
+ $out.ambiguousZone=(-not $out.hasExplicitOffset)
+ try{
+  $p=Get-CimInstance -ClassName Win32_Process -Filter ('ProcessId = '+$ProcessId) -ErrorAction Stop
+  if($null -eq $p){return [pscustomobject]$out}
+  $out.processLocated=$true
+  $stamp=[datetime]$p.CreationDate
+  $out.cimKind=[string]$stamp.Kind
+  $created=$stamp.ToUniversalTime()
+  $out.processCreatedUTC=$created.ToString('o')
+  try{$native=(Get-Process -Id $ProcessId -ErrorAction Stop).StartTime.ToUniversalTime()
+    $out.creationCrossCheckSeconds=[math]::Round(($native-$created).TotalSeconds,3)}catch{}
+  $parsed=[DateTimeOffset]::MinValue
+  if([DateTimeOffset]::TryParse($RawTime,[Globalization.CultureInfo]::InvariantCulture,
+   [Globalization.DateTimeStyles]::RoundtripKind,[ref]$parsed)){
+   $out.deltaFromRoundtripParseSeconds=[math]::Round(($parsed.UtcDateTime-$created).TotalSeconds,3)
+  }
+  if(-not $out.hasExplicitOffset){
+   $utc=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RawTime,[Globalization.CultureInfo]::InvariantCulture,
+    [Globalization.DateTimeStyles]::AssumeUniversal,[ref]$utc)){
+    $out.deltaAssumingUTCSeconds=[math]::Round(($utc.UtcDateTime-$created).TotalSeconds,3)
+   }
+   $local=[DateTimeOffset]::MinValue
+   if([DateTimeOffset]::TryParse($RawTime,[Globalization.CultureInfo]::InvariantCulture,
+    [Globalization.DateTimeStyles]::AssumeLocal,[ref]$local)){
+    $out.deltaAssumingLocalSeconds=[math]::Round(($local.UtcDateTime-$created).TotalSeconds,3)
+   }
+  }
+ }catch{}
+ return [pscustomobject]$out
+}
+$workerLeaseClock=$null;$workerLeaseFileCreatedUTC=$null;$workerLeaseFileModifiedUTC=$null
+$watcherDirectChildren=@();$watcherChildInspectionComplete=$false
+if($workerLeaseExists){
+ try{
+  $leaseMeta=Get-Item -LiteralPath $leaseFile -ErrorAction Stop
+  $workerLeaseFileCreatedUTC=$leaseMeta.CreationTimeUtc.ToString('o')
+  $workerLeaseFileModifiedUTC=$leaseMeta.LastWriteTimeUtc.ToString('o')
+ }catch{}
+ if($workerLeasePid -gt 0){
+  $workerLeaseClock=Get-KLClockCandidates $workerLeasePid $workerLeaseStartedAt
+  # Direct descendants only; absence does not establish that no capture is live.
+  try{
+   $children=@(Get-CimInstance -ClassName Win32_Process -Filter ('ParentProcessId = '+$workerLeasePid) -ErrorAction Stop)
+   $watcherChildInspectionComplete=$true
+   foreach($child in $children){
+    $kind='other'
+    if([string]$child.Name -match '(?i)^node[.]exe$'){$kind='node'}
+    elseif([string]$child.Name -match '(?i)^(KlinikLab|Godot).*[.]exe$'){$kind='godot_or_exported_app'}
+    elseif([string]$child.Name -match '(?i)^(powershell|pwsh)[.]exe$'){$kind='powershell'}
+    $created=$null
+    if($null -ne $child.CreationDate){$created=([datetime]$child.CreationDate).ToUniversalTime().ToString('o')}
+    $watcherDirectChildren+=@{pid=[int]$child.ProcessId;kind=$kind;createdUTC=$created}
+   }
+  }catch{$watcherChildInspectionComplete=$false}
+ }
+}
 $runtimeWorkerSha=$null;$runtimeCurrentJob=$null;$runtimeUpdatedUTC=$null
 if($runtimeExists){
  try{$receipt=Get-Content -LiteralPath $runtimePath -Raw | ConvertFrom-Json -ErrorAction Stop
@@ -255,6 +323,11 @@ $report=[ordered]@{
  workerLeaseExists=$workerLeaseExists;workerLeasePid=$workerLeasePid
  workerLeaseStartedAt=$workerLeaseStartedAt;workerLeaseJobPollerMatched=$workerLeaseJobPollerMatched
  workerLeaseIdentity=$workerLeaseIdentity;workerLeaseParseError=$workerLeaseParseError
+ workerLeaseClock=$workerLeaseClock
+ workerLeaseFileCreatedUTC=$workerLeaseFileCreatedUTC
+ workerLeaseFileModifiedUTC=$workerLeaseFileModifiedUTC
+ watcherDirectChildren=$watcherDirectChildren
+ watcherChildInspectionComplete=$watcherChildInspectionComplete
  processEnumerationComplete=$processEnumerationComplete
  nodeCommandLineUnavailableCount=$nodeCommandLineUnavailableCount
  matchingWatcherProcesses=$matchingWatcherProcesses;taskLauncherProcesses=$taskLauncherProcesses

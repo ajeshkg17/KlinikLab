@@ -64,3 +64,22 @@ test('SR24: recycled heartbeat PID is never treated as a live watcher without ex
  assert.doesNotMatch(diagnostic,/heartbeatProcessAlive=\(\$null -ne \(Get-Process/);
  assert.doesNotMatch(diagnostic,/CommandLine=\$cmd|commandLine=\$cmd|rawCommandLine=/);
 });
+
+test('SR25: UTC-versus-local ambiguous lease clock is diagnosed, not trusted for task refresh',()=>{
+ assert.match(diagnostic,/function Get-KLClockCandidates/);
+ assert.match(diagnostic,/hasExplicitOffset/);
+ assert.match(diagnostic,/deltaAssumingUTCSeconds/);
+ assert.match(diagnostic,/deltaAssumingLocalSeconds/);
+ assert.match(diagnostic,/deltaFromRoundtripParseSeconds/);
+ assert.match(diagnostic,/creationCrossCheckSeconds/);
+ assert.match(diagnostic,/DateTimeStyles\]::AssumeUniversal/);
+ assert.match(diagnostic,/DateTimeStyles\]::AssumeLocal/);
+ assert.match(diagnostic,/\$explicitZone -and \$item\.createdBeforeRecordedAt/);
+ assert.match(diagnostic,/workerLeaseFileCreatedUTC/);
+ assert.match(diagnostic,/workerLeaseFileModifiedUTC/);
+ assert.match(diagnostic,/watcherDirectChildren/);
+ assert.match(diagnostic,/watcherChildInspectionComplete/);
+ assert.match(diagnostic,/ParentProcessId = /);
+ assert.match(diagnostic,/taskRefreshSafetyHold=\$taskRefreshSafetyHold/);
+ assert.doesNotMatch(diagnostic,/\b(Remove-Item|Stop-Process|Stop-ScheduledTask|Set-ScheduledTask|Register-ScheduledTask)\b/);
+});
