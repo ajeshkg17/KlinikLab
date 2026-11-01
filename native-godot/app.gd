@@ -59,6 +59,7 @@ var _boot_error := ""
 var _volume: Node3D
 var _volumes: Dictionary = {}
 var _tooth36_reference: Node3D
+var _tooth26_reference: Node3D
 var _cut_position := Vector3(0.0, 1.01, 0.0)
 var _cut_radius := 0.22
 var _direct_bur_mode := false
@@ -789,6 +790,7 @@ func _show_case_geometry() -> void:
 	if _atlas != null:
 		_atlas.visible = _view == "anatomy" or (_view == "clinic" and not show_original)
 	_update_fdi36_reference_visibility()
+	_update_fdi26_reference_visibility()
 
 func _set_environment_camera() -> void:
 	if _scene == null:
@@ -881,6 +883,7 @@ func _switch_view(view: String) -> void:
 		_language_save_draft()
 	_view = view
 	_update_fdi36_reference_visibility()
+	_update_fdi26_reference_visibility()
 	if view != "environment":
 		_walk_active = false
 		_walk_look_dragging = false
@@ -986,6 +989,33 @@ func _update_fdi36_reference_visibility() -> void:
 	if _tooth36_reference == null:
 		return
 	_tooth36_reference.visible = _view == "clinic" and _station_index == 4 and _case_index == 1
+
+func _ensure_fdi26_reference() -> void:
+	if _tooth26_reference != null or _scene == null:
+		return
+	var script: GDScript = load("res://tooth26-reference.gd")
+	if script == null:
+		var fallback := Node3D.new()
+		fallback.name = "KL_DUNDEE_FDI26_SOURCE_SURFACE_REFERENCE"
+		var label := Label3D.new()
+		label.text = "FDI 26 source surface asset unavailable"
+		fallback.add_child(label)
+		_scene.add_child(fallback)
+		_tooth26_reference = fallback
+		return
+	var reference: Node3D = script.new()
+	if not bool(reference.call("configure",str(_content.get("sourceGitSHA","")))):
+		push_warning("FDI26 source reference loader rejected: "+str(reference.call("summary")))
+		_scene.add_child(reference)
+		_tooth26_reference = reference
+		return
+	_scene.add_child(reference)
+	_tooth26_reference = reference
+
+func _update_fdi26_reference_visibility() -> void:
+	if _tooth26_reference == null:
+		return
+	_tooth26_reference.visible = _view == "clinic" and _station_index == 4 and _case_index == 3
 
 func _show_station() -> void:
 	var station: String = str(STATION_IDS[_station_index])
@@ -1204,6 +1234,12 @@ func _save_draft() -> void:
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
+	if _case_index == 3:
+		_ensure_fdi26_reference()
+		_update_fdi26_reference_visibility()
+		var crown_report: Dictionary = _tooth26_reference.call("summary") if _tooth26_reference != null else {}
+		var crown_status := "source surface mesh loaded" if bool(crown_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
+		_page.add_child(_heading("FDI 26 source reference: %s · University of Dundee, School of Dentistry · CC BY 4.0. External surface mesh only; no internal tissue or clinically validated crown-preparation geometry. Synthetic working volume remains separate." % crown_status,13))
 	if _case_index == 1:
 		_ensure_fdi36_reference()
 		_update_fdi36_reference_visibility()
