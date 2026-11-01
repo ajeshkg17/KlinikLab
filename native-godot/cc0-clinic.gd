@@ -119,18 +119,23 @@ func configure(expected_sha: String) -> bool:
 			else:
 				chair_node.free()
 	if _chair == null:
-		_chair_fallback = true
-		var fallback := Node3D.new()
-		fallback.name = "KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK"
-		fallback.position = Vector3(3.0,0.0,-18.0)
-		var label := Label3D.new()
-		label.text = "Operatory chair model unavailable (asset not loaded)"
-		label.position = Vector3(0.0,1.6,0.0)
-		fallback.add_child(label)
-		add_child(fallback)
+		_show_chair_fallback()
 	_source_sha=expected_sha
 	name="KL_CC0_3DASSETS_WHOLE_CLINIC_STATIC"
 	return true
+
+func _show_chair_fallback() -> void:
+	if _chair != null or _chair_fallback:
+		return
+	_chair_fallback = true
+	var fallback := Node3D.new()
+	fallback.name = "KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK"
+	fallback.position = Vector3(3.0,0.0,-18.0)
+	var label := Label3D.new()
+	label.text = "Operatory chair model unavailable (asset not loaded)"
+	label.position = Vector3(0.0,1.6,0.0)
+	fallback.add_child(label)
+	add_child(fallback)
 
 func summary() -> Dictionary:
 	return {"sourceGitSHA":_source_sha,"wholeSceneLoaded":_whole!=null,
