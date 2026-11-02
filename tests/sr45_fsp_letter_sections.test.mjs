@@ -22,7 +22,7 @@ test('SR45 letter autosaves before switching case/station/view and remains local
  assert.match(app,/sections\)\.substr\(0,10000\)/);
  assert.match(app,/func _select_case\(index: int\) -> void:[\s\S]{0,130}_save_draft\(\)/);
  assert.match(app,/func _select_station\(index: int\) -> void:[\s\S]{0,130}_save_draft\(\)/);
- assert.match(app,/func _clear_page\(\) -> void:\n\t_save_quiz_recall\(\)\n\t_language_save_draft\(\)\n\t_save_draft\(\)/);
+ assert.match(app,/func _clear_page\(\) -> void:\n\t_language_save_draft\(\)\n\t_save_draft\(\)\n\t_save_quiz_recall\(\)/);
  assert.match(app,/_progress\["letterSectionsByCase"\] = \{\}/);
  const smoke=read('native-godot/actual-app-smoke.gd');
  assert.match(smoke,/SR45_FSP_FOUR_SECTION_LETTER_SIX_CASES_PASS/);
