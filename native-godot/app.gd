@@ -1264,7 +1264,7 @@ func _save_draft() -> void:
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
-	if FDI[_case_index] in ["11", "48", "46"]:
+	if FDI[_case_index] in ["16", "11", "48", "46"]:
 		var clearance_script: GDScript = load("res://fdi-reference-clearance.gd")
 		if clearance_script != null:
 			var disclosure: String = str(clearance_script.call("disclosure",str(FDI[_case_index])))
@@ -1275,19 +1275,19 @@ func _show_practical() -> void:
 		_update_fdi16_mirror_visibility()
 		var mirrored_report: Dictionary = _tooth16_mirror.call("summary") if _tooth16_mirror != null else {}
 		var mirrored_state := "illustrative mirrored surface loaded" if bool(mirrored_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
-		_page.add_child(_heading("FDI 16 illustrative surface: %s. MIRRORED FROM SOURCE FDI 26 (University of Dundee, School of Dentistry; CC BY 4.0). NOT verified right-side anatomy; no pulp/canals or calibrated drilling. Synthetic editable working volume remains independent." % mirrored_state,13))
+		_page.add_child(_heading("MODEL STATUS: ILLUSTRATIVE ONLY — FDI 16 surface: %s. MIRRORED FROM SOURCE FDI 26 (University of Dundee, School of Dentistry; CC BY 4.0). NOT source-verified right-side anatomy. Exact-side DTU/3Shape FDI16 scan candidate is not bundled pending CC BY-NC-SA 4.0 distribution/derivative review. No pulp/canals or calibrated drilling. Synthetic editable working volume remains independent." % mirrored_state,13))
 	if _case_index == 3:
 		_ensure_fdi26_reference()
 		_update_fdi26_reference_visibility()
 		var crown_report: Dictionary = _tooth26_reference.call("summary") if _tooth26_reference != null else {}
 		var crown_status := "source surface mesh loaded" if bool(crown_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
-		_page.add_child(_heading("FDI 26 source reference: %s · University of Dundee, School of Dentistry · CC BY 4.0. External surface mesh only; no internal tissue or clinically validated crown-preparation geometry. Synthetic working volume remains separate." % crown_status,13))
+		_page.add_child(_heading("MODEL STATUS: SOURCE-VERIFIED SURFACE REFERENCE — FDI 26: %s · University of Dundee, School of Dentistry · CC BY 4.0. Source identity and licence are verified; this is an external surface mesh only, not clinically validated crown-preparation geometry or internal anatomy. Synthetic working volume remains separate." % crown_status,13))
 	if _case_index == 1:
 		_ensure_fdi36_reference()
 		_update_fdi36_reference_visibility()
 		var tooth_report: Dictionary = _tooth36_reference.call("summary") if _tooth36_reference != null else {}
 		var tooth_status := "source surface mesh loaded" if bool(tooth_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
-		_page.add_child(_heading("FDI 36 source reference: %s · University of Dundee, School of Dentistry · CC BY 4.0. External surface mesh only; internal tissues/canals are not supplied. Editable synthetic working volume remains separate." % tooth_status,13))
+		_page.add_child(_heading("MODEL STATUS: SOURCE-VERIFIED SURFACE REFERENCE — FDI 36: %s · University of Dundee, School of Dentistry · CC BY 4.0. Source identity and licence are verified; this is an external surface mesh only, not validated internal tissue/canal anatomy. Editable synthetic working volume remains separate." % tooth_status,13))
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
 	_page.add_child(_heading("Original case-specific practical tasks. All six cases have distinct local editable synthetic volume states when source checks pass; these are NOT validated operative simulations.", 14))
