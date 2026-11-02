@@ -187,6 +187,47 @@ func _run() -> void:
 			return
 	print("SR44_ANATOMY_REFERENCE_FOUR_SECTIONS_SIX_FDI_PASS headless only; no GPU or clinical validation")
 	print("SR43_FDI_REFERENCE_CLEARANCE_DISCLOSURE_PASS FDI16 exact-side NC-SA candidate and FDI11/48/46 NC-SA candidates disclosed; no unapproved GLB imported")
+	# SR45: The browser's four-section FSP Arztbrief survives switching cases/stations.
+	for case_i in range(6):
+		app.call("_select_case",case_i)
+		app.call("_select_station",1) # Arztbrief
+		var letter_fields: Dictionary = app.get("_letter_fields")
+		if letter_fields.size() != 4:
+			_fail("SR45 four-section FSP letter missing for case "+str(case_i))
+			return
+		for field_name in ["anamnese","befund","diagnose","therapie"]:
+			var field: TextEdit = letter_fields.get(field_name)
+			if field == null:
+				_fail("SR45 missing letter editor "+field_name)
+				return
+			field.text = "SR45 "+str(case_i)+" "+field_name
+		app.call("_select_station",3) # written plan, must not overwrite FSP letter
+		app.call("_select_case",(case_i+1)%6)
+		app.call("_select_case",case_i)
+		app.call("_select_station",1)
+		var restored: Dictionary = app.get("_letter_fields")
+		for field_name in ["anamnese","befund","diagnose","therapie"]:
+			if str((restored[field_name] as TextEdit).text) != "SR45 "+str(case_i)+" "+field_name:
+				_fail("SR45 letter section lost on case/station navigation "+str(case_i)+"/"+field_name)
+				return
+		var notes: Dictionary = (app.get("_progress") as Dictionary).get("notes",{})
+		if not str(notes.get(IDS[case_i]+":letter","")).contains("Therapie / weiteres Vorgehen"):
+			_fail("SR45 report-compatible letter text not preserved")
+			return
+	# Old one-field notes must remain available rather than silently disappearing.
+	app.call("_select_case",0)
+	app.call("_select_station",3)
+	var progress: Dictionary = app.get("_progress")
+	(progress["letterSectionsByCase"] as Dictionary).erase("molar")
+	(progress["notes"] as Dictionary)["molar:letter"] = "Existing legacy Arztbrief draft"
+	app.call("_select_station",1)
+	if not str(((app.get("_letter_fields") as Dictionary)["anamnese"] as TextEdit).text).contains("Existing legacy Arztbrief draft"):
+		_fail("SR45 legacy single-field draft was lost")
+		return
 	app.call("_reset_progress")
+	if not (app.get("_progress") as Dictionary).get("letterSectionsByCase",{}).is_empty():
+		_fail("SR45 reset left old letter sections")
+		return
+	print("SR45_FSP_FOUR_SECTION_LETTER_SIX_CASES_PASS source headings, per-case restore, legacy migration, report and reset; headless only")
 	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")
 	quit(0)
