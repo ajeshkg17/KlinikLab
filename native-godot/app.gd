@@ -723,9 +723,9 @@ func _show_blocked(reason: String) -> void:
 	_shell.add_child(label)
 
 func _clear_page() -> void:
-	_save_quiz_recall()
 	_language_save_draft()
 	_save_draft()
+	_save_quiz_recall()
 	_practical_feedback.clear()
 	for c in _page.get_children():
 		_page.remove_child(c)
