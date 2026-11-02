@@ -225,3 +225,14 @@ Exact-side FDI 11, 48, and 46 models are listed by OPEN DENTISTRY / UFSC, but ea
 A further [Japanese tooth-shape database](https://a-kato.agu.ac.jp/English/bottom.html) identifies an FDI 46 STL/OBJ, but the accessible source page does not grant a clearly applicable redistribution license. It is likewise not imported. The existing Dundee GLBs are left-sided, and must not be silently relabeled as exact-side FDI 11/48/46 anatomy.
 
 The native practical station now visibly distinguishes **external surface reference unavailable** from its synthetic editable educational volume for FDI 11/48/46, with candidate credits and explicit licence status from `fdi-reference-clearance.gd`. This is a metadata-only workflow enhancement: no new downloaded binaries, user data, clinical claims, changes to browser cases or FSP/KP, or automatic requests to third-party hosts. Node contract and Godot headless UI regressions enforce disclosure; graphical visual/GPU verification and dental morphology review are still pending.
+
+
+## SR43 — learner-visible model provenance states
+
+The practical stations now label the status of every available tooth surface reference:
+
+- **SOURCE-VERIFIED SURFACE REFERENCE — FDI 36 and FDI 26:** source Git blob, upstream commit and CC BY 4.0 attribution are pinned and checked. This verifies provenance and reuse terms only. The GLBs are external surface meshes, not validated internal anatomy, calibrated cutting volumes or clinically reviewed treatment models.
+- **ILLUSTRATIVE ONLY — FDI 16:** the visible mesh is a negative-X illustrative mirror of source-verified FDI 26. The station explicitly says it is not source-verified right-side anatomy. An exact-side DTU/3Shape FDI16 intraoral-scan candidate is disclosed but not bundled pending review of its CC BY-NC-SA 4.0 NonCommercial and ShareAlike conditions.
+- **UNAVAILABLE / LICENCE REVIEW BLOCKED — FDI 11, 48 and 46:** exact-side Open Dentistry / UFSC candidates are disclosed with their CC BY-NC-SA terms and source links. No candidate GLB is included in the native build while intended distribution and derivative licensing remain unreviewed. The Japanese FDI46 database lead remains excluded because redistribution terms are not verified.
+
+The source-clearance helper only presents descriptive metadata and URLs; it does not download candidate meshes or assert anatomical validation. Each station continues to use its separate editable synthetic training volume, which is not a calibrated operative simulation. Browser practical workflows and FSP/KP content are unchanged. Regression tests verify all three learner-facing status categories and ensure no unlicensed candidate files enter the standalone build.
