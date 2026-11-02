@@ -210,3 +210,29 @@ The native FDI26 reference is Draco decoded at build time using an exact origina
 For FDI16 molar practical only, the app can display an **explicitly mirrored, illustrative** surface made by a negative-X scale of the already source-verified **FDI26 left maxillary first molar**. The underlying original Dundee GLB remains FDI26: upstream original Git blob SHA `0948d093089c5921281185a103b323c513365502`, University of Dundee, School of Dentistry, **CC BY 4.0**. No new exact-side/right-tooth original is present and no independent right-side morphology is claimed. Runtime reporting includes `sourceFdi=26`, `fdi=16`, `mirroredFromContralateral=true`, `exactSideSourceAvailable=false`, and `anatomicalSideValidated=false`.
 
 The mirrored surface uses the existing source-verified FDI26 original/converted sidecars with their strict hashes and a clearly labelled missing-asset fallback. No duplicate physical GLB is added: it is a third **illustrative runtime instance** but still **two distinct real source tooth GLBs (36 and 26)**. The mirrored model is separate from the source-derived synthetic editable volume; it does not replace drilling tissue, FDI scoring, FSP/KP drafts or progression. Root anatomy, normals under mirroring, scale and visual placement remain unverified on real GPU; no qualified anatomical review or clinical acceptance is implied.
+
+
+## SR43 — exact-side candidate license audit and source clearance UI
+
+Exact-side FDI 11, 48, and 46 models are listed by OPEN DENTISTRY / UFSC, but each Sketchfab entry displays Creative Commons Attribution–NonCommercial–ShareAlike. Their listing description is for research and personal teaching under the individual Creative Commons conditions; this does **not** establish compatibility with unrestricted public redistribution of a modified, bundled Godot application. The models are not imported into the native build, and no source SHA-256 or original geometry identity is claimed. The original six-case synthetic educational volumes remain unaffected.
+
+| FDI | Exact-side source listing | Source license | Native clearance |
+| --- | --- | --- | --- |
+| 11 | [OPEN DENTISTRY upper right central incisor (11a)](https://sketchfab.com/3d-models/dente-11-upper-right-central-incisor-id-11a-63be208b66214c5d9afb647bdaa8a81e) | CC BY-NC-SA (listing, exact version not independently checked) | **Not cleared; no mesh imported** |
+| 48 | [OPEN DENTISTRY lower right third molar (48a)](https://sketchfab.com/3d-models/dente-48-lower-right-third-molar-id-48a-6ab34e265b73467a94be29b3887a1c64) | CC BY-NC-SA (listing, exact version not independently checked) | **Not cleared; no mesh imported** |
+| 46 | [OPEN DENTISTRY lower right first molar (46c)](https://sketchfab.com/3d-models/dente-46-lower-right-first-molar-id-46c-79ea3b60a12441c3acb11b204bc21bea) | CC BY-NC-SA (listing, exact version not independently checked) | **Not cleared; no mesh imported** |
+
+A further [Japanese tooth-shape database](https://a-kato.agu.ac.jp/English/bottom.html) identifies an FDI 46 STL/OBJ, but the accessible source page does not grant a clearly applicable redistribution license. It is likewise not imported. The existing Dundee GLBs are left-sided, and must not be silently relabeled as exact-side FDI 11/48/46 anatomy.
+
+The native practical station now visibly distinguishes **external surface reference unavailable** from its synthetic editable educational volume for FDI 11/48/46, with candidate credits and explicit licence status from `fdi-reference-clearance.gd`. This is a metadata-only workflow enhancement: no new downloaded binaries, user data, clinical claims, changes to browser cases or FSP/KP, or automatic requests to third-party hosts. Node contract and Godot headless UI regressions enforce disclosure; graphical visual/GPU verification and dental morphology review are still pending.
+
+
+## SR43 — learner-visible model provenance states
+
+The practical stations now label the status of every available tooth surface reference:
+
+- **SOURCE-VERIFIED SURFACE REFERENCE — FDI 36 and FDI 26:** source Git blob, upstream commit and CC BY 4.0 attribution are pinned and checked. This verifies provenance and reuse terms only. The GLBs are external surface meshes, not validated internal anatomy, calibrated cutting volumes or clinically reviewed treatment models.
+- **ILLUSTRATIVE ONLY — FDI 16:** the visible mesh is a negative-X illustrative mirror of source-verified FDI 26. The station explicitly says it is not source-verified right-side anatomy. An exact-side DTU/3Shape FDI16 intraoral-scan candidate is disclosed but not bundled pending review of its CC BY-NC-SA 4.0 NonCommercial and ShareAlike conditions.
+- **UNAVAILABLE / LICENCE REVIEW BLOCKED — FDI 11, 48 and 46:** exact-side Open Dentistry / UFSC candidates are disclosed with their CC BY-NC-SA terms and source links. No candidate GLB is included in the native build while intended distribution and derivative licensing remain unreviewed. The Japanese FDI46 database lead remains excluded because redistribution terms are not verified.
+
+The source-clearance helper only presents descriptive metadata and URLs; it does not download candidate meshes or assert anatomical validation. Each station continues to use its separate editable synthetic training volume, which is not a calibrated operative simulation. Browser practical workflows and FSP/KP content are unchanged. Regression tests verify all three learner-facing status categories and ensure no unlicensed candidate files enter the standalone build.

@@ -7,7 +7,7 @@ test('SR42 FDI16 must disclose illustrative FDI26 source and must not claim sour
  const mirror=read('native-godot/tooth16-mirror-reference.gd');
  const original=read('native-godot/tooth26-reference.gd');
  assert.match(app,/MIRRORED FROM SOURCE FDI 26/);
- assert.match(app,/NOT verified right-side anatomy/);
+ assert.match(app,/NOT source-verified right-side anatomy/);
  assert.match(app,/_case_index == 0/);
  assert.match(app,/_update_fdi16_mirror_visibility/);
  assert.match(mirror,/Vector3\(-0\.72,0\.72,0\.72\)/);
