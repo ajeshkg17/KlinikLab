@@ -6,6 +6,7 @@ const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('SR43 learner-facing practical labels distinguish verified, illustrative and unavailable/licence-blocked models',()=>{
  const app=read('native-godot/app.gd');
  const registry=read('native-godot/fdi-reference-clearance.gd');
+ const smoke=read('native-godot/actual-app-smoke.gd');
  assert.match(app,/MODEL STATUS: SOURCE-VERIFIED SURFACE REFERENCE — FDI 26/);
  assert.match(app,/MODEL STATUS: SOURCE-VERIFIED SURFACE REFERENCE — FDI 36/);
  assert.match(app,/MODEL STATUS: ILLUSTRATIVE ONLY — FDI 16/);
@@ -22,6 +23,9 @@ test('SR43 learner-facing practical labels distinguish verified, illustrative an
  assert.match(registry,/DTU \/ 3Shape — 3Shape FDI 16 Meshes from Intraoral Scans/);
  assert.match(registry,/CC BY-NC-SA 4\.0/);
  assert.match(registry,/not bundled/);
+ assert.match(smoke,/clearance_cases := \{"16":"molar","11":"anterior","48":"surgery","46":"perio"\}/);
+ assert.match(smoke,/MODEL STATUS: UNAVAILABLE \/ LICENCE REVIEW BLOCKED/);
+ assert.match(smoke,/FDI %s exact-side candidate/);
 });
 test('SR43 verified labels do not imply calibrated internal anatomy or editable cutting volume',()=>{
  const app=read('native-godot/app.gd');
