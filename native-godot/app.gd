@@ -1264,6 +1264,12 @@ func _save_draft() -> void:
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
+	if FDI[_case_index] in ["11", "48", "46"]:
+		var clearance_script: GDScript = load("res://fdi-reference-clearance.gd")
+		if clearance_script != null:
+			var disclosure: String = str(clearance_script.call("disclosure",str(FDI[_case_index])))
+			if not disclosure.is_empty():
+				_page.add_child(_heading(disclosure, 13))
 	if _case_index == 0:
 		_ensure_fdi16_mirror()
 		_update_fdi16_mirror_visibility()
