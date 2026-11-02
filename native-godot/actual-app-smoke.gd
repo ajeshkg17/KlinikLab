@@ -267,6 +267,45 @@ func _run() -> void:
 	if not (app.get("_progress") as Dictionary).get("planSectionsByCase",{}).is_empty():
 		_fail("SR46 reset retained KP plan drafts")
 		return
+	# SR47: four question stations require learner-led reveal rather than immediate options.
+	for case_i in range(6):
+		for station_i in [0,2,5,6]:
+			app.call("_select_case",case_i)
+			app.call("_select_station",station_i)
+			var recall: TextEdit = app.get("_quiz_recall_edit")
+			if recall == null or recall.name != "KL_QUIZ_ACTIVE_RECALL":
+				_fail("SR47 recall editor missing "+FDIS[case_i]+"/"+str(station_i))
+				return
+			var page: VBoxContainer = app.get("_page")
+			if page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") == null or page.get_node_or_null("KL_QUIZ_OPTION_0") != null:
+				_fail("SR47 unrevealed options exposed "+FDIS[case_i]+"/"+str(station_i))
+				return
+			recall.text = "Formative eigene Antwort "+FDIS[case_i]+"/"+str(station_i)
+			app.call("_reveal_quiz_options")
+			page = app.get("_page")
+			if page.get_node_or_null("KL_QUIZ_OPTION_0") == null or page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") != null:
+				_fail("SR47 reveal did not expose source choices "+FDIS[case_i]+"/"+str(station_i))
+				return
+			var key: String = IDS[case_i]+":"+str(["interview","letter","handover","written","practical","viva","clinic"][station_i])+":0"
+			if not str(((app.get("_progress") as Dictionary)["quizRecall"] as Dictionary).get(key,"")).contains("Formative eigene Antwort"):
+				_fail("SR47 recall note not persisted before reveal "+key)
+				return
+			app.call("_next_question")
+			page = app.get("_page")
+			if page.get_node_or_null("KL_QUIZ_OPTION_0") != null or page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") == null:
+				_fail("SR47 next question must hide options again "+key)
+				return
+			app.call("_select_station",3)
+			app.call("_select_station",station_i)
+			if str((app.get("_quiz_recall_edit") as TextEdit).text) != "Formative eigene Antwort "+FDIS[case_i]+"/"+str(station_i):
+				# A new visit starts on question 0 and restores the case/station note.
+				_fail("SR47 recall text did not restore per case/station "+key)
+				return
+	app.call("_reset_progress")
+	if not ((app.get("_progress") as Dictionary)["quizRecall"] as Dictionary).is_empty():
+		_fail("SR47 reset retained active recall notes")
+		return
+	print("SR47_FOUR_QUIZ_STATIONS_SIX_FDI_ACTIVE_RECALL_PASS choices gated, notes persisted, navigation/reset source exact; headless only")
 	print("SR46_KP_FOUR_SECTION_PLAN_SIX_CASES_PASS draft restore, legacy migration, report and reset; headless only")
 	print("SR45_FSP_FOUR_SECTION_LETTER_SIX_CASES_PASS source headings, per-case restore, legacy migration, report and reset; headless only")
 	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")

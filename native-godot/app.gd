@@ -53,6 +53,9 @@ var _nav_scroll: ScrollContainer
 var _page_scroll: ScrollContainer
 var _screen_title: Label
 var _answer_label: Label
+var _quiz_recall_edit: TextEdit
+var _quiz_recall_key := ""
+var _quiz_revealed := false
 var _draft: TextEdit
 # The browser FSP Arztbrief has four named sections, not one unstructured draft.
 var _letter_fields: Dictionary = {}
@@ -507,7 +510,7 @@ func _load_source() -> bool:
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "letterSectionsByCase": {}, "planSectionsByCase": {}, "volumeFDI16": [],
+		"answers": {}, "notes": {}, "studied": {}, "letterSectionsByCase": {}, "planSectionsByCase": {}, "quizRecall": {}, "volumeFDI16": [],
 		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "practicalChecklist": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
@@ -534,6 +537,8 @@ func _load_progress() -> void:
 		_progress["letterSectionsByCase"] = {}
 	if not (_progress.get("planSectionsByCase", {}) is Dictionary):
 		_progress["planSectionsByCase"] = {}
+	if not (_progress.get("quizRecall", {}) is Dictionary):
+		_progress["quizRecall"] = {}
 	if not (_progress.get("practicalChecklist", {}) is Dictionary):
 		_progress["practicalChecklist"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
@@ -720,6 +725,7 @@ func _show_blocked(reason: String) -> void:
 func _clear_page() -> void:
 	_language_save_draft()
 	_save_draft()
+	_save_quiz_recall()
 	_practical_feedback.clear()
 	for c in _page.get_children():
 		_page.remove_child(c)
@@ -731,6 +737,8 @@ func _clear_page() -> void:
 	_language_draft = null
 	_language_draft_key = ""
 	_answer_label = null
+	_quiz_recall_edit = null
+	_quiz_recall_key = ""
 
 func _key() -> String:
 	return CASE_IDS[_case_index] + ":" + STATION_IDS[_station_index]
@@ -738,6 +746,8 @@ func _key() -> String:
 func _select_case(index: int) -> void:
 	if index < 0 or index >= _cases.size():
 		return
+	_save_quiz_recall()
+	_quiz_revealed = false
 	_save_draft()
 	_case_index = index
 	_procedure_guided = false
@@ -755,6 +765,8 @@ func _select_case(index: int) -> void:
 func _select_station(index: int) -> void:
 	if index < 0 or index >= _stations.size():
 		return
+	_save_quiz_recall()
+	_quiz_revealed = false
 	_save_draft()
 	_station_index = index
 	if STATION_IDS[index] != "practical":
@@ -898,6 +910,8 @@ func _switch_view(view: String) -> void:
 	if _view == "language" and view != "language":
 		_language_save_draft()
 	if _view == "clinic" and view != "clinic":
+		_save_quiz_recall()
+		_quiz_revealed = false
 		_save_draft()
 	_view = view
 	_update_fdi36_reference_visibility()
@@ -1079,6 +1093,22 @@ func _show_station() -> void:
 	studied.pressed.connect(_mark_studied)
 	_page.add_child(studied)
 
+func _quiz_recall_id(station: String, index: int) -> String:
+	return CASE_IDS[_case_index] + ":" + station + ":" + str(index)
+
+func _save_quiz_recall() -> void:
+	if _quiz_recall_edit == null or _quiz_recall_key.is_empty():
+		return
+	var drafts: Dictionary = _progress.get("quizRecall", {})
+	drafts[_quiz_recall_key] = _quiz_recall_edit.text.substr(0,2400)
+	_progress["quizRecall"] = drafts
+	_save_progress()
+
+func _reveal_quiz_options() -> void:
+	_save_quiz_recall()
+	_quiz_revealed = true
+	_refresh()
+
 func _show_quiz(station: String) -> void:
 	var questions: Array = _content["quiz"][station]
 	_quiz_index = clampi(_quiz_index, 0, questions.size() - 1)
@@ -1089,12 +1119,28 @@ func _show_quiz(station: String) -> void:
 			[str(patient["patientName"]),str(patient["patientAge"])], 14))
 	_page.add_child(_heading("Practice question %d/%d: %s" % [
 		_quiz_index + 1, questions.size(), str(q["question"])], 16))
-	for i in range(3):
-		var b := _button("%d. %s" % [i + 1, str(q["options"][i])])
-		b.pressed.connect(_answer.bind(station, _quiz_index, i))
-		_page.add_child(b)
-	_answer_label = _heading("Choose one response. Explanations are formative, not clinical grading.", 14)
+	# Browser expert-mode parity: formulate German reasoning before the answer reveal.
+	_quiz_recall_key = _quiz_recall_id(station,_quiz_index)
+	_page.add_child(_heading("Freie Antwort · zuerst selbst formulieren (formative active recall)",14))
+	_page.add_child(_heading("Answer aloud in German and write a short reasoning note before revealing the suggested responses. This is not an official FSP/KP examination grade.",13))
+	_quiz_recall_edit = TextEdit.new()
+	_quiz_recall_edit.name = "KL_QUIZ_ACTIVE_RECALL"
+	_quiz_recall_edit.custom_minimum_size = Vector2(475,105)
+	_quiz_recall_edit.text = str((_progress.get("quizRecall",{}) as Dictionary).get(_quiz_recall_key,""))
+	_page.add_child(_quiz_recall_edit)
 	var existing: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(_quiz_index), {})
+	if not _quiz_revealed and existing.is_empty():
+		var reveal := _button("Reveal response choices (does not grade the note)")
+		reveal.name = "KL_QUIZ_REVEAL_CHOICES"
+		reveal.pressed.connect(_reveal_quiz_options)
+		_page.add_child(reveal)
+	else:
+		for i in range(3):
+			var b := _button("%d. %s" % [i + 1, str(q["options"][i])])
+			b.name = "KL_QUIZ_OPTION_" + str(i)
+			b.pressed.connect(_answer.bind(station, _quiz_index, i))
+			_page.add_child(b)
+	_answer_label = _heading("Options are shown only after your active recall reveal. Explanations remain formative, not clinical grading.", 14)
 	if existing.get("correct", false):
 		_answer_label.text = str(q["explanation"])
 		if station == "interview":
@@ -1119,6 +1165,8 @@ func _answer(station: String, index: int, choice: int) -> void:
 			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[index])
 
 func _next_question() -> void:
+	_save_quiz_recall()
+	_quiz_revealed = false
 	var questions: Array = _content["quiz"][STATION_IDS[_station_index]]
 	_quiz_index = (_quiz_index + 1) % questions.size()
 	_refresh()
@@ -2109,6 +2157,10 @@ func _write_report(path: String) -> void:
 	_page.add_child(_heading("Local report saved to: " + path, 13))
 
 func _reset_progress() -> void:
+	_quiz_recall_edit = null
+	_quiz_recall_key = ""
+	_quiz_revealed = false
+	_progress["quizRecall"] = {}
 	# Reset is intentional; do not restore currently visible letter fields on redraw.
 	_letter_fields.clear()
 	_plan_fields.clear()

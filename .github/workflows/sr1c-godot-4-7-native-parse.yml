@@ -92,6 +92,7 @@ jobs:
           node --test tests/sr44_anatomy_reference_panel.test.mjs
           node --test tests/sr45_fsp_letter_sections.test.mjs
           node --test tests/sr46_kp_plan_sections.test.mjs
+          node --test tests/sr47_active_recall_quiz.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
