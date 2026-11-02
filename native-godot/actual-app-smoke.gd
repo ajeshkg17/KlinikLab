@@ -145,6 +145,29 @@ func _run() -> void:
 		_fail("FDI16 fallback has no clear Label3D")
 		return
 	missing_mirror.free()
+	var clearance_script: GDScript = load("res://fdi-reference-clearance.gd")
+	if clearance_script == null:
+		_fail("FDI source clearance registry not bundled in native app")
+		return
+	var clearance_cases := {"11":"anterior","48":"surgery","46":"perio"}
+	for case_fdi in clearance_cases:
+		var status: Dictionary = clearance_script.call("status_for",case_fdi)
+		var disclosure: String = str(clearance_script.call("disclosure",case_fdi))
+		if str(status.get("caseId","")) != str(clearance_cases[case_fdi]) or str(status.get("status","")) != "not-cleared" or not disclosure.contains("CC BY-NC-SA") or not disclosure.contains("no imported mesh") or not disclosure.contains("NOT clinically validated"):
+			_fail("FDI candidate status failed closed for "+str(case_fdi))
+			return
+	for index in [2,4,5]:
+		app.call("_select_case",index)
+		app.call("_select_station",4)
+		var headings: Array[String] = []
+		var page: VBoxContainer = app.get("_page")
+		for child in page.get_children():
+			if child is Label:
+				headings.append((child as Label).text)
+		if not " ".join(headings).contains("FDI %s external surface reference unavailable" % str(FDIS[index])):
+			_fail("Native practical lacks visible FDI source-clearance disclosure "+str(FDIS[index]))
+			return
+	print("SR43_FDI_REFERENCE_CLEARANCE_DISCLOSURE_PASS three exact-side candidate licenses shown; no unapproved GLB imported")
 	app.call("_reset_progress")
 	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")
 	quit(0)
