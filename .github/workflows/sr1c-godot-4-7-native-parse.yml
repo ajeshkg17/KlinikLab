@@ -89,6 +89,7 @@ jobs:
           node --test tests/sr41_dundee_remaining_fdi.test.mjs
           node --test tests/sr42_fdi16_mirror_disclosure.test.mjs
           node --test tests/sr43_native_fdi_model_provenance.test.mjs
+          node --test tests/sr44_anatomy_reference_panel.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
