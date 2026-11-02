@@ -1288,6 +1288,28 @@ func _show_practical() -> void:
 		var tooth_report: Dictionary = _tooth36_reference.call("summary") if _tooth36_reference != null else {}
 		var tooth_status := "source surface mesh loaded" if bool(tooth_report.get("assetLoaded",false)) else "labelled missing-asset fallback"
 		_page.add_child(_heading("MODEL STATUS: SOURCE-VERIFIED SURFACE REFERENCE — FDI 36: %s · University of Dundee, School of Dentistry · CC BY 4.0. Source identity and licence are verified; this is an external surface mesh only, not validated internal tissue/canal anatomy. Editable synthetic working volume remains separate." % tooth_status,13))
+	# Read-only, source-grounded anatomy reference; no grading or volume mutation.
+	var panel_script: GDScript = load("res://anatomy-reference-panel.gd")
+	if panel_script != null:
+		var source_tasks: Array = _content["practical"][_case_index]
+		var current_fdi: String = str(FDI[_case_index])
+		var loaded_reference := false
+		match current_fdi:
+			"16":
+				loaded_reference = _tooth16_mirror != null and bool(_tooth16_mirror.call("summary").get("assetLoaded",false))
+			"36":
+				loaded_reference = _tooth36_reference != null and bool(_tooth36_reference.call("summary").get("assetLoaded",false))
+			"26":
+				loaded_reference = _tooth26_reference != null and bool(_tooth26_reference.call("summary").get("assetLoaded",false))
+		var clearance: Dictionary = {}
+		if current_fdi in ["11","48","46"]:
+			var clearance_script: GDScript = load("res://fdi-reference-clearance.gd")
+			if clearance_script != null:
+				clearance = clearance_script.call("status_for",current_fdi)
+		var sections: Array = panel_script.call("sections",str(CASE_IDS[_case_index]),current_fdi,source_tasks,loaded_reference,clearance)
+		_page.add_child(_heading("ANATOMY REFERENCE — educational provenance, NOT clinical validation",16))
+		for section in sections:
+			_page.add_child(_heading(str(section["heading"]) + ": " + str(section["body"]),13))
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
 	_page.add_child(_heading("Original case-specific practical tasks. All six cases have distinct local editable synthetic volume states when source checks pass; these are NOT validated operative simulations.", 14))
