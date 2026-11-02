@@ -1343,12 +1343,12 @@ func _save_draft() -> void:
 				return
 			var value: String = field.text.substr(0, 2400)
 			saved[id] = value
-			sections.append(str(PLAN_LABELS[i]) + ":\\n" + value)
+			sections.append(str(PLAN_LABELS[i]) + ":\n" + value)
 		var case_id: String = _writing_key.get_slice(":",0)
 		var records: Dictionary = _progress.get("planSectionsByCase", {})
 		records[case_id] = saved
 		_progress["planSectionsByCase"] = records
-		(_progress["notes"] as Dictionary)[_writing_key] = "\\n\\n".join(sections).substr(0,10000)
+		(_progress["notes"] as Dictionary)[_writing_key] = "\n\n".join(sections).substr(0,10000)
 		_save_progress()
 		return
 	if _draft != null:
