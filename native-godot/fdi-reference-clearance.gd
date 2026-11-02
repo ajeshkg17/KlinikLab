@@ -8,12 +8,12 @@ const STATUS := {
 }
 
 static func status_for(fdi: String) -> Dictionary:
- if not STATUS.has(fdi):
-  return {}
- return (STATUS[fdi] as Dictionary).duplicate(true)
+	if not STATUS.has(fdi):
+		return {}
+	return (STATUS[fdi] as Dictionary).duplicate(true)
 
 static func disclosure(fdi: String) -> String:
- var meta: Dictionary = status_for(fdi)
- if meta.is_empty():
-  return ""
- return "FDI %s external surface reference unavailable in native build. %s; %s. %s. SOURCE: %s. Synthetic editable training geometry is separate and NOT clinically validated." % [fdi,str(meta["source"]),str(meta["license"]),str(meta["reason"]),str(meta["url"])]
+	var meta: Dictionary = status_for(fdi)
+	if meta.is_empty():
+		return ""
+	return "FDI %s external surface reference unavailable in native build. %s; %s. %s. SOURCE: %s. Synthetic editable training geometry is separate and NOT clinically validated." % [fdi,str(meta["source"]),str(meta["license"]),str(meta["reason"]),str(meta["url"])]
