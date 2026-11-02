@@ -54,6 +54,9 @@ var _page_scroll: ScrollContainer
 var _screen_title: Label
 var _answer_label: Label
 var _draft: TextEdit
+# The browser FSP Arztbrief has four named sections, not one unstructured draft.
+var _letter_fields: Dictionary = {}
+var _writing_key := ""
 var _practical_feedback: Dictionary = {}
 var _boot_error := ""
 var _volume: Node3D
@@ -503,7 +506,7 @@ func _load_source() -> bool:
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "volumeFDI16": [],
+		"answers": {}, "notes": {}, "studied": {}, "letterSectionsByCase": {}, "volumeFDI16": [],
 		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "practicalChecklist": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
@@ -526,6 +529,8 @@ func _load_progress() -> void:
 		_progress["radiologyByCase"] = {}
 	if not (_progress.get("fspKpByTask", {}) is Dictionary):
 		_progress["fspKpByTask"] = {}
+	if not (_progress.get("letterSectionsByCase", {}) is Dictionary):
+		_progress["letterSectionsByCase"] = {}
 	if not (_progress.get("practicalChecklist", {}) is Dictionary):
 		_progress["practicalChecklist"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
@@ -711,11 +716,14 @@ func _show_blocked(reason: String) -> void:
 
 func _clear_page() -> void:
 	_language_save_draft()
+	_save_draft()
 	_practical_feedback.clear()
 	for c in _page.get_children():
 		_page.remove_child(c)
 		c.queue_free()
 	_draft = null
+	_letter_fields.clear()
+	_writing_key = ""
 	_language_draft = null
 	_language_draft_key = ""
 	_answer_label = null
@@ -726,6 +734,7 @@ func _key() -> String:
 func _select_case(index: int) -> void:
 	if index < 0 or index >= _cases.size():
 		return
+	_save_draft()
 	_case_index = index
 	_procedure_guided = false
 	_procedure_step_index = 0
@@ -742,6 +751,7 @@ func _select_case(index: int) -> void:
 func _select_station(index: int) -> void:
 	if index < 0 or index >= _stations.size():
 		return
+	_save_draft()
 	_station_index = index
 	if STATION_IDS[index] != "practical":
 		_procedure_guided = false
@@ -883,6 +893,8 @@ func _switch_view(view: String) -> void:
 		return
 	if _view == "language" and view != "language":
 		_language_save_draft()
+	if _view == "clinic" and view != "clinic":
+		_save_draft()
 	_view = view
 	_update_fdi36_reference_visibility()
 	_update_fdi26_reference_visibility()
@@ -1238,29 +1250,71 @@ func _show_language_studio() -> void:
 	reset.pressed.connect(_language_reset_exercise)
 	_page.add_child(reset)
 
+const LETTER_SECTIONS := ["anamnese", "befund", "diagnose", "therapie"]
+const LETTER_LABELS := ["Anamnese und Leitsymptom", "Untersuchungsbefund", "Verdachts-/Differenzialdiagnose", "Therapie / weiteres Vorgehen"]
+
 func _show_writing(station: String) -> void:
 	var c: Dictionary = _cases[_case_index]
-	var prompt := "Write a German FSP clinical letter using the history, examination, uncertainty and plan." if station == "letter" else 		"Create a reasoned differential diagnosis and compare TWO treatment choices; include consent and safety checks."
+	var prompt := "Write a German FSP clinical letter using the history, examination, uncertainty and plan." if station == "letter" else "Create a reasoned differential diagnosis and compare TWO treatment choices; include consent and safety checks."
 	_page.add_child(_heading(prompt, 15))
 	_page.add_child(_heading("Working diagnosis: " + str(c["diagnosis"]), 14))
 	_page.add_child(_heading("Option A: " + str(c["primaryPlan"]), 14))
 	_page.add_child(_heading("Option B: " + str(c["alternativePlan"]), 14))
-	_draft = TextEdit.new()
-	_draft.custom_minimum_size = Vector2(475, 240)
-	_draft.text = str((_progress["notes"] as Dictionary).get(_key(), ""))
-	_page.add_child(_draft)
+	_writing_key = _key()
+	if station == "letter":
+		_page.add_child(_heading("FSP Arztbrief · four source-aligned sections; handwritten practice remains separate.", 14))
+		_page.add_child(_heading("Fictional case history: " + str(c["history"]) + " · Examination: " + str(c["exam"]), 13))
+		var section_store: Dictionary = _progress.get("letterSectionsByCase", {})
+		var record: Dictionary = section_store.get(CASE_IDS[_case_index], {})
+		if record.is_empty():
+			var legacy := str((_progress["notes"] as Dictionary).get(_writing_key, ""))
+			if not legacy.is_empty():
+				record = {"anamnese": legacy}
+				_page.add_child(_heading("Existing single-field draft retained in first section. Review and redistribute manually.", 13))
+		for section_index in range(LETTER_SECTIONS.size()):
+			var id: String = LETTER_SECTIONS[section_index]
+			_page.add_child(_heading(str(LETTER_LABELS[section_index]), 14))
+			var field := TextEdit.new()
+			field.name = "KL_FSP_LETTER_" + id
+			field.custom_minimum_size = Vector2(475, 115)
+			field.text = str(record.get(id, ""))
+			_letter_fields[id] = field
+			_page.add_child(field)
+		_page.add_child(_heading("Self-review: neutral language · findings · stated uncertainty · justified alternatives · consent. Not handwriting or FSP certification.", 13))
+	else:
+		_draft = TextEdit.new()
+		_draft.custom_minimum_size = Vector2(475, 240)
+		_draft.text = str((_progress["notes"] as Dictionary).get(_writing_key, ""))
+		_page.add_child(_draft)
 	var save := _button("Save draft on this computer")
 	save.pressed.connect(_save_draft)
 	_page.add_child(save)
 	_page.add_child(_heading("Self-study note only. No automatic validated FSP/KP grading.", 13))
 
 func _save_draft() -> void:
-	if _draft == null:
+	if _writing_key.is_empty():
 		return
-	if _draft.text.length() > 10000:
-		_draft.text = _draft.text.substr(0, 10000)
-	(_progress["notes"] as Dictionary)[_key()] = _draft.text
-	_save_progress()
+	if not _letter_fields.is_empty():
+		var saved: Dictionary = {}
+		var sections: Array[String] = []
+		for i in range(LETTER_SECTIONS.size()):
+			var id: String = LETTER_SECTIONS[i]
+			var field: TextEdit = _letter_fields.get(id)
+			if field == null:
+				return
+			var value: String = field.text.substr(0, 2400)
+			saved[id] = value
+			sections.append(str(LETTER_LABELS[i]) + ":\n" + value)
+		var case_id: String = _writing_key.get_slice(":",0)
+		var records: Dictionary = _progress.get("letterSectionsByCase", {})
+		records[case_id] = saved
+		_progress["letterSectionsByCase"] = records
+		(_progress["notes"] as Dictionary)[_writing_key] = "\n\n".join(sections).substr(0,10000)
+		_save_progress()
+		return
+	if _draft != null:
+		(_progress["notes"] as Dictionary)[_writing_key] = _draft.text.substr(0, 10000)
+		_save_progress()
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
@@ -2016,6 +2070,11 @@ func _write_report(path: String) -> void:
 	_page.add_child(_heading("Local report saved to: " + path, 13))
 
 func _reset_progress() -> void:
+	# Reset is intentional; do not restore currently visible letter fields on redraw.
+	_letter_fields.clear()
+	_draft = null
+	_writing_key = ""
+	_progress["letterSectionsByCase"] = {}
 	_progress["answers"] = {}
 	_progress["notes"] = {}
 	_progress["studied"] = {}
