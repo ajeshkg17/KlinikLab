@@ -56,6 +56,7 @@ var _answer_label: Label
 var _draft: TextEdit
 # The browser FSP Arztbrief has four named sections, not one unstructured draft.
 var _letter_fields: Dictionary = {}
+var _plan_fields: Dictionary = {}
 var _writing_key := ""
 var _practical_feedback: Dictionary = {}
 var _boot_error := ""
@@ -506,7 +507,7 @@ func _load_source() -> bool:
 
 func _load_progress() -> void:
 	_progress = {"schemaVersion": 2, "sourceGitSHA": str(_content["sourceGitSHA"]),
-		"answers": {}, "notes": {}, "studied": {}, "letterSectionsByCase": {}, "volumeFDI16": [],
+		"answers": {}, "notes": {}, "studied": {}, "letterSectionsByCase": {}, "planSectionsByCase": {}, "volumeFDI16": [],
 		"volumeByCase": {}, "journey": {}, "radiologyByCase": {}, "fspKpByTask": {}, "practicalChecklist": {}, "selectedCase": 0, "selectedStation": 0}
 	if not FileAccess.file_exists(PROGRESS):
 		return
@@ -531,6 +532,8 @@ func _load_progress() -> void:
 		_progress["fspKpByTask"] = {}
 	if not (_progress.get("letterSectionsByCase", {}) is Dictionary):
 		_progress["letterSectionsByCase"] = {}
+	if not (_progress.get("planSectionsByCase", {}) is Dictionary):
+		_progress["planSectionsByCase"] = {}
 	if not (_progress.get("practicalChecklist", {}) is Dictionary):
 		_progress["practicalChecklist"] = {}
 	# Convert same-source FDI16-only progress without mixing case histories.
@@ -723,6 +726,7 @@ func _clear_page() -> void:
 		c.queue_free()
 	_draft = null
 	_letter_fields.clear()
+	_plan_fields.clear()
 	_writing_key = ""
 	_language_draft = null
 	_language_draft_key = ""
@@ -1252,6 +1256,8 @@ func _show_language_studio() -> void:
 
 const LETTER_SECTIONS := ["anamnese", "befund", "diagnose", "therapie"]
 const LETTER_LABELS := ["Anamnese und Leitsymptom", "Untersuchungsbefund", "Verdachts-/Differenzialdiagnose", "Therapie / weiteres Vorgehen"]
+const PLAN_SECTIONS := ["diagnosis", "planA", "planB", "followup"]
+const PLAN_LABELS := ["Arbeitsdiagnose und erforderliche Zusatzbefunde", "Behandlungsplan A — Zahnerhalt / bevorzugte Option", "Behandlungsplan B — Alternative", "Aufklärung, Einwilligung, Nachsorge"]
 
 func _show_writing(station: String) -> void:
 	var c: Dictionary = _cases[_case_index]
@@ -1282,10 +1288,25 @@ func _show_writing(station: String) -> void:
 			_page.add_child(field)
 		_page.add_child(_heading("Self-review: neutral language · findings · stated uncertainty · justified alternatives · consent. Not handwriting or FSP certification.", 13))
 	else:
-		_draft = TextEdit.new()
-		_draft.custom_minimum_size = Vector2(475, 240)
-		_draft.text = str((_progress["notes"] as Dictionary).get(_writing_key, ""))
-		_page.add_child(_draft)
+		_page.add_child(_heading("KP schriftliche Planung · four independent case-specific reasoning fields.", 14))
+		_page.add_child(_heading("Fictional case history: " + str(c["history"]) + " · Examination: " + str(c["exam"]), 13))
+		var plan_store: Dictionary = _progress.get("planSectionsByCase", {})
+		var plan_record: Dictionary = plan_store.get(CASE_IDS[_case_index], {})
+		if plan_record.is_empty():
+			var legacy_plan := str((_progress["notes"] as Dictionary).get(_writing_key, ""))
+			if not legacy_plan.is_empty():
+				plan_record = {"diagnosis": legacy_plan}
+				_page.add_child(_heading("Existing one-field KP plan retained under diagnosis for manual redistribution.", 13))
+		for i in range(PLAN_SECTIONS.size()):
+			var id: String = PLAN_SECTIONS[i]
+			_page.add_child(_heading(str(PLAN_LABELS[i]), 14))
+			var field := TextEdit.new()
+			field.name = "KL_KP_PLAN_" + id
+			field.custom_minimum_size = Vector2(475, 115)
+			field.text = str(plan_record.get(id, ""))
+			_plan_fields[id] = field
+			_page.add_child(field)
+		_page.add_child(_heading("Compare indication, prognosis, benefits, risks, consent and follow-up. Sample plans are illustrative, not treatment advice.", 13))
 	var save := _button("Save draft on this computer")
 	save.pressed.connect(_save_draft)
 	_page.add_child(save)
@@ -1310,6 +1331,24 @@ func _save_draft() -> void:
 		records[case_id] = saved
 		_progress["letterSectionsByCase"] = records
 		(_progress["notes"] as Dictionary)[_writing_key] = "\n\n".join(sections).substr(0,10000)
+		_save_progress()
+		return
+	if not _plan_fields.is_empty():
+		var saved: Dictionary = {}
+		var sections: Array[String] = []
+		for i in range(PLAN_SECTIONS.size()):
+			var id: String = PLAN_SECTIONS[i]
+			var field: TextEdit = _plan_fields.get(id)
+			if field == null:
+				return
+			var value: String = field.text.substr(0, 2400)
+			saved[id] = value
+			sections.append(str(PLAN_LABELS[i]) + ":\\n" + value)
+		var case_id: String = _writing_key.get_slice(":",0)
+		var records: Dictionary = _progress.get("planSectionsByCase", {})
+		records[case_id] = saved
+		_progress["planSectionsByCase"] = records
+		(_progress["notes"] as Dictionary)[_writing_key] = "\\n\\n".join(sections).substr(0,10000)
 		_save_progress()
 		return
 	if _draft != null:
@@ -2072,9 +2111,11 @@ func _write_report(path: String) -> void:
 func _reset_progress() -> void:
 	# Reset is intentional; do not restore currently visible letter fields on redraw.
 	_letter_fields.clear()
+	_plan_fields.clear()
 	_draft = null
 	_writing_key = ""
 	_progress["letterSectionsByCase"] = {}
+	_progress["planSectionsByCase"] = {}
 	_progress["answers"] = {}
 	_progress["notes"] = {}
 	_progress["studied"] = {}
