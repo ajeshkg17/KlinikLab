@@ -64,6 +64,24 @@ func _run() -> void:
 			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
 			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
 			return
+		# Source-grounded anatomy reference is visible for every case, never actionable.
+		var section_names := ["External morphology / model provenance", "Internal structures / clinical anatomy", "Source-supported facts / original practical", "Illustrative and synthetic educational content"]
+		var section_texts: Array[String] = []
+		var page: VBoxContainer = app.get("_page")
+		for child in page.get_children():
+			if child is Label:
+				section_texts.append((child as Label).text)
+		var panel_text := " ".join(section_texts)
+		for heading in section_names:
+			if not panel_text.contains(heading):
+				_fail("Source anatomy panel missing "+heading+" in FDI "+FDIS[i])
+				return
+		if not panel_text.contains("Source case "+IDS[i]+" · FDI "+FDIS[i]) or not panel_text.contains("synthetic sampled geometry"):
+			_fail("Source anatomy panel lost case identity or synthetic training distinction FDI "+FDIS[i])
+			return
+		if i in [2,4,5] and not panel_text.contains("NO CLEARED EXTERNAL SURFACE"):
+			_fail("Anatomy panel implies licensed asset for blocked FDI "+FDIS[i])
+			return
 		if i == 0:
 			var mirrored_ref: Node3D = app.get("_tooth16_mirror")
 			if mirrored_ref == null:
@@ -167,6 +185,7 @@ func _run() -> void:
 		if not " ".join(headings).contains("MODEL STATUS: UNAVAILABLE / LICENCE REVIEW BLOCKED") or not " ".join(headings).contains("FDI %s exact-side candidate" % str(FDIS[index])):
 			_fail("Native practical lacks visible FDI source-clearance disclosure "+str(FDIS[index]))
 			return
+	print("SR44_ANATOMY_REFERENCE_FOUR_SECTIONS_SIX_FDI_PASS headless only; no GPU or clinical validation")
 	print("SR43_FDI_REFERENCE_CLEARANCE_DISCLOSURE_PASS FDI16 exact-side NC-SA candidate and FDI11/48/46 NC-SA candidates disclosed; no unapproved GLB imported")
 	app.call("_reset_progress")
 	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")
