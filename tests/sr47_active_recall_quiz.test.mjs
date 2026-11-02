@@ -19,7 +19,7 @@ test('SR47 formative recall survives navigation but never grades or cuts',()=>{
  const app=read('native-godot/app.gd'),smoke=read('native-godot/actual-app-smoke.gd');
  assert.match(app,/"quizRecall": \{\}/);
  assert.match(app,/_progress\["quizRecall"\] = drafts/);
- assert.match(app,/func _clear_page\(\) -> void:\n\t_save_quiz_recall\(\)/);
+ assert.match(app,/func _clear_page\(\) -> void:\n\t_language_save_draft\(\)\n\t_save_draft\(\)\n\t_save_quiz_recall\(\)/);
  assert.match(app,/func _next_question\(\) -> void:\n\t_save_quiz_recall\(\)\n\t_quiz_revealed = false/);
  assert.match(app,/_progress\["quizRecall"\] = \{\}/);
  assert.match(app,/not an official FSP\/KP examination grade/);
