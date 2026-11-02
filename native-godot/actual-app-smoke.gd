@@ -228,6 +228,46 @@ func _run() -> void:
 	if not (app.get("_progress") as Dictionary).get("letterSectionsByCase",{}).is_empty():
 		_fail("SR45 reset left old letter sections")
 		return
+	# SR46: KP written planning matches browser four-field structure for every case.
+	for case_i in range(6):
+		app.call("_select_case",case_i)
+		app.call("_select_station",3)
+		var plan_fields: Dictionary = app.get("_plan_fields")
+		if plan_fields.size() != 4:
+			_fail("SR46 KP four-section plan not created for FDI "+FDIS[case_i])
+			return
+		for field_id in ["diagnosis","planA","planB","followup"]:
+			var field: TextEdit = plan_fields.get(field_id)
+			if field == null:
+				_fail("SR46 KP plan editor missing "+field_id)
+				return
+			field.text = "SR46 "+str(case_i)+" "+field_id
+		app.call("_select_station",1)
+		app.call("_select_case",(case_i+1)%6)
+		app.call("_select_case",case_i)
+		app.call("_select_station",3)
+		var restored: Dictionary = app.get("_plan_fields")
+		for field_id in ["diagnosis","planA","planB","followup"]:
+			if str((restored[field_id] as TextEdit).text) != "SR46 "+str(case_i)+" "+field_id:
+				_fail("SR46 KP plan section lost on navigation "+FDIS[case_i]+"/"+field_id)
+				return
+		if not str(((app.get("_progress") as Dictionary)["notes"] as Dictionary).get(IDS[case_i]+":written","")).contains("Aufklärung, Einwilligung, Nachsorge"):
+			_fail("SR46 KP note report is missing headed section "+FDIS[case_i])
+			return
+	app.call("_select_station",1)
+	var saved_progress: Dictionary = app.get("_progress")
+	(saved_progress["planSectionsByCase"] as Dictionary).erase("molar")
+	(saved_progress["notes"] as Dictionary)["molar:written"] = "Existing KP single-field note"
+	app.call("_select_case",0)
+	app.call("_select_station",3)
+	if not str(((app.get("_plan_fields") as Dictionary)["diagnosis"] as TextEdit).text).contains("Existing KP single-field note"):
+		_fail("SR46 existing one-field KP note not carried into diagnosis")
+		return
+	app.call("_reset_progress")
+	if not (app.get("_progress") as Dictionary).get("planSectionsByCase",{}).is_empty():
+		_fail("SR46 reset retained KP plan drafts")
+		return
+	print("SR46_KP_FOUR_SECTION_PLAN_SIX_CASES_PASS draft restore, legacy migration, report and reset; headless only")
 	print("SR45_FSP_FOUR_SECTION_LETTER_SIX_CASES_PASS source headings, per-case restore, legacy migration, report and reset; headless only")
 	print("SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS all six exact-source cases, FDI36/FDI26 surface meshes and FDI16 explicitly mirrored illustrative reference with labelled fallbacks; headless only, no real pixels/GPU claimed")
 	quit(0)
