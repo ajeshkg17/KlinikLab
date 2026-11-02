@@ -23,7 +23,7 @@ test('SR43 native practical displays clearance without modifying source browser 
  const app=read('native-godot/app.gd');
  const build=read('native-godot/build-app.mjs');
  const smoke=read('native-godot/actual-app-smoke.gd');
- assert.match(app,/FDI\[_case_index\] in \["11", "48", "46"\]/);
+ assert.match(app,/FDI\[_case_index\] in \["16", "11", "48", "46"\]/);
  assert.match(app,/res:\/\/fdi-reference-clearance\.gd/);
  assert.match(app,/_page\.add_child\(_heading\(disclosure, 13\)\)/);
  assert.match(build,/'fdi-reference-clearance\.gd'/);
