@@ -1328,6 +1328,10 @@ func _answer(station: String, index: int, choice: int) -> void:
 		return
 	var q: Dictionary = _content["quiz"][station][index]
 	var answer_key := _key() + ":" + str(index)
+	# Native expert mode requires the answer choices to have been deliberately
+	# revealed. Previously wrong source answers remain available for retries.
+	if not _quiz_revealed and not (_progress["answers"] as Dictionary).has(answer_key):
+		return
 	# Once solved, source browser disallows replacing a correct recorded choice.
 	if bool(((_progress["answers"] as Dictionary).get(answer_key, {}) as Dictionary).get("correct", false)):
 		return
