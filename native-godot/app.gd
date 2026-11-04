@@ -15,6 +15,11 @@ const STATION_IDS := ["interview", "letter", "handover", "written", "practical",
 # Compact nav labels only. The complete source station titles remain available as
 # tooltips and are unchanged in the clinical task pane, export and progress keys.
 const NAV_STATION_SHORT := ["FSP · Anamnese", "FSP · Arztbrief", "FSP · Übergabe", "KP · Plan", "KP · Praxis", "KP · Mündlich", "Praxis · Alltag"]
+# SR51: perspective framing envelopes describe display space only, not anatomy.
+# These surround the unmodified source-derived synthetic field at x=+2.9,
+# and (for FDI16/36/26) the original or source surface at x≈-2.9.
+const CAMERA_FOV := 40.0
+const CAMERA_ENV_FOV := 42.0
 const RADIO_CHOICES := ["caries","apex","trauma","normal","impaction","bone"]
 const RADIO_LABELS := ["Radiolucency / caries","Apical radiolucency","Traumatic finding","No definitive pathology","Impacted third molar","Marginal bone loss"]
 const INK := Color("#e9f1f6")
@@ -638,6 +643,85 @@ func _update_responsive_layout() -> void:
 	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus else Control.SIZE_FILL
 	_right_column.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 	_right_panel.custom_minimum_size.x = 460.0 if writing_focus else notes_width
+	# Godot resolves HBoxContainer widths on the next frame. Never use a stale
+	# full-screen camera center when the side panes resize.
+	if _scene != null and _view in ["clinic", "environment"]:
+		call_deferred("_frame_visible_camera")
+
+func _camera_content_rect() -> Rect2:
+	if _middle == null or not _middle.visible:
+		return Rect2()
+	var bounds: Rect2 = _middle.get_global_rect()
+	var inset_x := maxf(14.0, bounds.size.x * 0.075)
+	var inset_y := maxf(16.0, bounds.size.y * 0.085)
+	return Rect2(bounds.position + Vector2(inset_x, inset_y),
+		bounds.size - Vector2(2.0 * inset_x, 2.0 * inset_y))
+
+func _practical_camera_bounds() -> AABB:
+	# FDI11/48/46 have no source-cleared left reference: center the real,
+	# independently editable case-specific volume, not another tooth.
+	# Overview also frames the source/illustrative left mesh only where it
+	# exists (FDI16, FDI36, FDI26); Teeth zooms on the selected editable FDI.
+	var compare_pair: bool = _camera_mode == "overview" and _case_index in [0, 1, 3]
+	var low_x := -4.55 if compare_pair else 1.25
+	return AABB(Vector3(low_x, -1.95, -1.65), Vector3(4.55 - low_x, 3.95, 3.30))
+
+func _frame_visible_camera() -> void:
+	if _scene == null or _middle == null:
+		return
+	if _view == "environment":
+		_frame_environment_camera()
+		return
+	if _view != "clinic" or not _middle.visible or _writing_focus_active():
+		return
+	var content: Rect2 = _camera_content_rect()
+	if content.size.x < 190.0 or content.size.y < 200.0:
+		return
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null:
+		return
+	var screen: Vector2 = get_viewport().get_visible_rect().size
+	camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	camera.fov = CAMERA_FOV
+	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_FOV) * 0.5))
+	var target: AABB = _practical_camera_bounds()
+	var world_center: Vector3 = target.get_center()
+	# Depth from nearest target face; bounds never depend on unavailable or
+	# licensing-blocked GLBs. No source/synthetic mesh is moved or rescaled.
+	var depth := maxf(4.0, maxf(
+		focal * target.size.x / (content.size.x * 0.92),
+		focal * target.size.y / (content.size.y * 0.92)))
+	var eye_z := target.end.z + depth
+	var center_depth := eye_z - world_center.z
+	var screen_center: Vector2 = content.get_center()
+	var eye_x := world_center.x - (screen_center.x - 0.5 * screen.x) * center_depth / focal
+	var eye_y := world_center.y + (screen_center.y - 0.5 * screen.y) * center_depth / focal
+	# Camera looks along -Z so projected AABB corners stay predictably inside
+	# the *middle* column (rather than the screen behind opaque notes/nav).
+	camera.position = Vector3(eye_x, eye_y, eye_z)
+	camera.rotation = Vector3.ZERO
+	camera.current = true
+
+func _frame_environment_camera() -> void:
+	# Never interfere with direct learner-controlled walk pose/recovery.
+	if _view != "environment" or _walk_active or _scene == null:
+		return
+	var content: Rect2 = _camera_content_rect()
+	if content.size.x < 190.0 or content.size.y < 200.0:
+		return
+	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if camera == null:
+		return
+	var screen: Vector2 = get_viewport().get_visible_rect().size
+	camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	camera.fov = CAMERA_ENV_FOV
+	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_ENV_FOV) * 0.5))
+	var world_center := Vector3(3.0, -1.8, -19.0)
+	var depth := 12.0
+	var aim_x := world_center.x - (content.get_center().x - 0.5 * screen.x) * depth / focal
+	camera.position = Vector3(aim_x, 3.4, -7.0)
+	camera.look_at(Vector3(aim_x, world_center.y, world_center.z))
+	camera.current = true
 
 func _build_app() -> void:
 	_shell = CanvasLayer.new()
@@ -806,6 +890,7 @@ func _select_case(index: int) -> void:
 		_page_scroll.scroll_vertical = 0
 	_ensure_case_volume(index)
 	_show_case_geometry()
+	call_deferred("_frame_visible_camera")
 	if _atlas != null:
 		_atlas.call("select_tooth",FDI[index])
 	_save_progress()
@@ -817,7 +902,13 @@ func _select_station(index: int) -> void:
 	_save_quiz_recall()
 	_quiz_revealed = false
 	_save_draft()
+	var entering_practical := _station_index != 4 and index == 4 and _view == "clinic"
 	_station_index = index
+	# Practical defaults to a useful FDI-specific close-up. Existing camera
+	# buttons can still request the wider comparison/clinic overview.
+	if entering_practical:
+		_camera_mode = "teeth"
+		_apply_environment_visibility()
 	if STATION_IDS[index] != "practical":
 		_procedure_guided = false
 		_procedure_step_index = 0
@@ -827,6 +918,7 @@ func _select_station(index: int) -> void:
 		_page_scroll.scroll_vertical = 0
 	_save_progress()
 	_refresh()
+	call_deferred("_frame_visible_camera")
 
 func _ensure_case_volume(index: int) -> void:
 	if _scene == null or index < 0 or index >= CASE_IDS.size():
@@ -881,12 +973,10 @@ func _set_environment_camera() -> void:
 	if camera == null:
 		push_warning("Source scene camera missing for CC0 environment")
 		return
-	# SR23: bring the loaded CC0 environment forward in the usable center.
-	# The room is a decorative static background; no anatomy is rescaled.
-	camera.position=Vector3(3.0,4.2,-4.5)
-	camera.fov=46.0
-	camera.look_at(Vector3(3.0,-1.8,-20.0))
-	camera.current=true
+	# SR51: use the unobscured central column and draw the static CC0 room
+	# closer without changing imported scene transforms or walk controls.
+	_frame_environment_camera()
+	call_deferred("_frame_visible_camera")
 	# In this dedicated environment overview, avoid mistaking original
 	# source tooth podiums for anatomical objects inside the CC0 floor.
 	for id in _volumes:
@@ -933,23 +1023,9 @@ func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
 		return
 	_camera_mode = mode
-	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
-	if camera == null:
-		push_warning("Godot original scene camera unavailable")
-		return
-	if mode == "overview":
-		camera.position = Vector3(0.0, 5.0, 28.0)
-		camera.fov = 60.0
-		camera.look_at(Vector3(0.0, 0.0, -2.5))
-	else:
-		# Enlarge FDI36 practical anatomy without moving the underlying meshes.
-		# Center slightly to the right so the visible tooth falls inside the
-		# wider central column rather than under the clinical notes pane.
-		camera.position = Vector3(2.2, 1.7, 12.5)
-		camera.fov = 44.0
-		camera.look_at(Vector3(2.2, 0.5, 0.0))
-	camera.current = true
 	_apply_environment_visibility()
+	_frame_visible_camera()
+	call_deferred("_frame_visible_camera")
 
 func _apply_environment_visibility() -> void:
 	if _cc0_clinic != null:
