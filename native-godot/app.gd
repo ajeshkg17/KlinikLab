@@ -1347,10 +1347,11 @@ func _answer(station: String, index: int, choice: int) -> void:
 		# Keep the learner's unsaved active-recall note and unlock Next in place.
 		if _quiz_next_button != null:
 			_quiz_next_button.disabled = false
-		for i in range(3):
-			var option: Button = _page.get_node_or_null("KL_QUIZ_OPTION_" + str(i)) as Button
-			if option != null:
-				option.disabled = true
+		if _page != null:
+			for i in range(3):
+				var option: Button = _page.get_node_or_null("KL_QUIZ_OPTION_" + str(i)) as Button
+				if option != null:
+					option.disabled = true
 
 func _next_question() -> void:
 	if not (STATION_IDS[_station_index] in ["interview", "handover", "viva", "clinic"]):
