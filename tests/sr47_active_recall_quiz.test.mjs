@@ -20,7 +20,10 @@ test('SR47 formative recall survives navigation but never grades or cuts',()=>{
  assert.match(app,/"quizRecall": \{\}/);
  assert.match(app,/_progress\["quizRecall"\] = drafts/);
  assert.match(app,/func _clear_page\(\) -> void:\n\t_language_save_draft\(\)\n\t_save_draft\(\)\n\t_save_quiz_recall\(\)/);
- assert.match(app,/func _next_question\(\) -> void:\n\t_save_quiz_recall\(\)\n\t_quiz_revealed = false/);
+ // SR52 now guards advancement until the source choice has been answered.
+ assert.match(app,/func _next_question\(\) -> void:/);
+ assert.match(app,/if not bool\(\(\(_progress\["answers"\] as Dictionary\)\.get\(key, \{\}\) as Dictionary\)\.get\("correct", false\)\):/);
+ assert.match(app,/\t_save_quiz_recall\(\)\n\t_quiz_revealed = false/);
  assert.match(app,/_progress\["quizRecall"\] = \{\}/);
  assert.match(app,/not an official FSP\/KP examination grade/);
  assert.match(smoke,/SR47_FOUR_QUIZ_STATIONS_SIX_FDI_ACTIVE_RECALL_PASS/);
