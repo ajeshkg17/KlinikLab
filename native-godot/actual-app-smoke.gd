@@ -454,6 +454,95 @@ func _run() -> void:
 			if button == null or button.button_pressed != (i == station_i) or not button.tooltip_text.contains(str((source_stations[i] as Dictionary)["title"])):
 				_fail("SR50 station selection/source title lost at " + str(station_i) + "/" + str(i))
 				return
+	# SR52: source browser's completed-question gate and final station Finish.
+	# Exercise 6 fictional FDI cases x 4 quiz stations, including wrong retries,
+	# per-case progress restoration and no wraparound after the final answer.
+	app.call("_switch_view","clinic")
+	var station_ids := ["interview","letter","handover","written","practical","viva","clinic"]
+	var quiz_content: Dictionary = (app.get("_content") as Dictionary)["quiz"]
+	for case_i in range(6):
+		app.call("_select_case",case_i)
+		for station_i in [0,2,5,6]:
+			app.call("_select_station",station_i)
+			var track: String = station_ids[station_i]
+			var questions: Array = quiz_content[track]
+			var key: String = IDS[case_i] + ":" + track
+			var next_control: Button = app.get("_quiz_next_button")
+			if next_control == null or next_control.name != "KL_QUIZ_NEXT" or not next_control.disabled:
+				_fail("SR52 unanswered Next not disabled " + key)
+				return
+			app.call("_next_question")
+			if int(app.get("_quiz_index")) != 0 or bool(((app.get("_progress") as Dictionary)["studied"] as Dictionary).get(key,false)):
+				_fail("SR52 unanswered question skipped/completed " + key)
+				return
+			var note: TextEdit = app.get("_quiz_recall_edit")
+			note.text = "Original learner reasoning FDI " + FDIS[case_i] + " " + track
+			app.call("_reveal_quiz_options")
+			for question_i in range(questions.size()):
+				if int(app.get("_quiz_index")) != question_i:
+					_fail("SR52 quiz sequence index mismatch " + key)
+					return
+				var q: Dictionary = questions[question_i]
+				var correct_idx: int = int(q["correct"])
+				var response_key := key + ":" + str(question_i)
+				var quiz_page: VBoxContainer = app.get("_page")
+				var current_next: Button = app.get("_quiz_next_button")
+				if current_next == null or not current_next.disabled:
+					_fail("SR52 source question not gated before answer " + response_key)
+					return
+				if question_i == 0:
+					var wrong_idx: int = (correct_idx + 1) % 3
+					app.call("_answer",track,question_i,wrong_idx)
+					app.call("_next_question")
+					if int(app.get("_quiz_index")) != question_i or not (app.get("_quiz_next_button") as Button).disabled:
+						_fail("SR52 wrong source answer unexpectedly advanced " + response_key)
+						return
+					if bool((((app.get("_progress") as Dictionary)["answers"] as Dictionary)[response_key] as Dictionary)["correct"]):
+						_fail("SR52 wrong source response falsely correct " + response_key)
+						return
+				app.call("_answer",track,question_i,correct_idx)
+				if (app.get("_quiz_next_button") as Button).disabled:
+					_fail("SR52 correct source answer did not unlock Next " + response_key)
+					return
+				for choice_i in range(3):
+					var option_button: Button = quiz_page.get_node_or_null("KL_QUIZ_OPTION_" + str(choice_i)) as Button
+					if option_button == null or not option_button.disabled:
+						_fail("SR52 solved source question remains mutable " + response_key)
+						return
+				if track == "interview" and not (app.get("_answer_label") as Label).text.contains(str(((app.get("_cases") as Array)[case_i]["patientReply"] as Array)[question_i])):
+					_fail("SR52 correct German interview lost fictional source patient reply " + response_key)
+					return
+				if question_i == questions.size() - 1 and not (app.get("_quiz_next_button") as Button).text.contains("Finish station"):
+					_fail("SR52 final quiz step missing Finish station " + response_key)
+					return
+				app.call("_next_question")
+				if question_i < questions.size() - 1 and int(app.get("_quiz_index")) != question_i + 1:
+					_fail("SR52 source quiz did not advance sequentially " + response_key)
+					return
+			if not bool(((app.get("_progress") as Dictionary)["studied"] as Dictionary).get(key,false)):
+				_fail("SR52 final correct question did not complete station " + key)
+				return
+			if int(app.get("_quiz_index")) != questions.size() - 1:
+				_fail("SR52 final question wrapped to beginning " + key)
+				return
+			app.call("_next_question")
+			if int(app.get("_quiz_index")) != questions.size() - 1:
+				_fail("SR52 repeated Finish wrapped quiz " + key)
+				return
+			app.call("_select_station",3)
+			app.call("_select_station",station_i)
+			if int(app.get("_quiz_index")) != 0 or (app.get("_quiz_next_button") as Button).disabled:
+				_fail("SR52 completed case/station did not restore first solved question " + key)
+				return
+			if not (app.get("_quiz_recall_edit") as TextEdit).text.contains("Original learner reasoning FDI " + FDIS[case_i]):
+				_fail("SR52 active-recall note lost through finished station navigation " + key)
+				return
+	app.call("_reset_progress")
+	for key in ["answers","studied","quizRecall"]:
+		if not ((app.get("_progress") as Dictionary)[key] as Dictionary).is_empty():
+			_fail("SR52 reset retained quiz record " + key)
+			return
+	print("SR52_SIX_FDI_FOUR_QUIZ_FINISH_GATING_PASS wrong retry, current answer lock, final finish, restored recall, reset; headless only")
 	print("SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS source tooltips, exclusive active state, two-column mapping; headless only")
 	print("SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS incomplete/FDI/alternative/persistence/reset; structure-only and headless")
 	print("SR47_FOUR_QUIZ_STATIONS_SIX_FDI_ACTIVE_RECALL_PASS choices gated, notes persisted, navigation/reset source exact; headless only")
