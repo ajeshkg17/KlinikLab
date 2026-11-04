@@ -99,11 +99,14 @@ jobs:
           node --test tests/sr51_native_camera_framing.test.mjs
           node --test tests/sr52_native_quiz_finish_gating.test.mjs
           node --test tests/sr53_native_fdi_practical_chart.test.mjs
+          node --test tests/sr54_native_launcher.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/native-kliniklab-app"
           test -f "$RUNNER_TEMP/native-kliniklab-app/app.tscn"
+          # Fresh build must NOT already contain the Godot importer cache.
+          test ! -d "$RUNNER_TEMP/native-kliniklab-app/.godot"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/app-content.json"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field.bin"
           test -f "$RUNNER_TEMP/native-kliniklab-app/source/fdi16-volume-field-manifest.json"
@@ -118,6 +121,10 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --editor --import --quit > "$RUNNER_TEMP/native-app-import.log" 2>&1 || { cat "$RUNNER_TEMP/native-app-import.log"; exit 1; }
           cat "$RUNNER_TEMP/native-app-import.log"
+          # SR54 real loader regression: import-created PackedScene exists.
+          test -d "$RUNNER_TEMP/native-kliniklab-app/.godot/imported"
+          test "$(find "$RUNNER_TEMP/native-kliniklab-app/.godot/imported" -maxdepth 1 -type f -name 'whole-clinic-starter-v1-godot.glb*' | wc -l)" -ge 1
+          echo 'SR54_FRESH_GODOT_CC0_IMPORT_BEFORE_NATIVE_RUN_PASS'
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://app.gd > "$RUNNER_TEMP/native-app-parse.log" 2>&1 || { cat "$RUNNER_TEMP/native-app-parse.log"; exit 1; }
           cat "$RUNNER_TEMP/native-app-parse.log"
           if grep -Ei 'SCRIPT ERROR|Parse Error|Parser Error|Failed to load script' "$RUNNER_TEMP/native-app-import.log" "$RUNNER_TEMP/native-app-parse.log"; then
