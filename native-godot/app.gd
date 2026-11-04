@@ -109,6 +109,14 @@ var _walk_active := false
 var _walk_look_dragging := false
 var _walk_near_operatory := false
 var _walk_near_language_station := false
+# SR57: read-only first-person HUD inside the unobscured center pane.
+# It never captures input or changes saved progress, models or cutting.
+var _walk_hud: Control
+var _walk_hud_top: PanelContainer
+var _walk_hud_title: Label
+var _walk_hud_guide: Label
+var _walk_hud_panel: PanelContainer
+var _walk_hud_reticle: Label
 # A practical station entered through walk may return to the same safe camera pose.
 var _walk_station_return_available := false
 var _walk_language_return_available := false
@@ -218,6 +226,93 @@ func _ready() -> void:
 			break
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
 
+func _build_walk_hud() -> void:
+	_walk_hud = Control.new()
+	_walk_hud.name = "KL_WALK_HUD"
+	_walk_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_walk_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud.visible = false
+	_middle.add_child(_walk_hud)
+	_walk_hud_top = PanelContainer.new()
+	_walk_hud_top.name = "KL_WALK_MODE_BANNER"
+	_walk_hud_top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud_top.anchor_left = 0.0
+	_walk_hud_top.anchor_right = 0.0
+	_walk_hud_top.offset_left = 10.0
+	_walk_hud_top.offset_top = 10.0
+	_walk_hud_top.offset_bottom = 64.0
+	_walk_hud_top.add_theme_stylebox_override("panel", _walk_hud_style())
+	_walk_hud.add_child(_walk_hud_top)
+	_walk_hud_title = Label.new()
+	_walk_hud_title.name = "KL_WALK_MODE_TEXT"
+	_walk_hud_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_walk_hud_title.add_theme_font_size_override("font_size", 13)
+	_walk_hud_title.add_theme_color_override("font_color", Color("#f3fbff"))
+	_walk_hud_top.add_child(_walk_hud_title)
+	_walk_hud_reticle = Label.new()
+	_walk_hud_reticle.name = "KL_WALK_CENTER_RETICLE"
+	_walk_hud_reticle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud_reticle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_walk_hud_reticle.offset_left = -12.0
+	_walk_hud_reticle.offset_top = -16.0
+	_walk_hud_reticle.offset_right = 12.0
+	_walk_hud_reticle.offset_bottom = 16.0
+	_walk_hud_reticle.text = "+"
+	_walk_hud_reticle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_walk_hud_reticle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_walk_hud_reticle.add_theme_font_size_override("font_size", 25)
+	_walk_hud_reticle.add_theme_color_override("font_color", Color("#e6fbff"))
+	_walk_hud.add_child(_walk_hud_reticle)
+	_walk_hud_panel = PanelContainer.new()
+	_walk_hud_panel.name = "KL_WALK_GUIDANCE_PANEL"
+	_walk_hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud_panel.anchor_top = 1.0
+	_walk_hud_panel.anchor_bottom = 1.0
+	_walk_hud_panel.offset_left = 10.0
+	_walk_hud_panel.offset_top = -111.0
+	_walk_hud_panel.offset_bottom = -12.0
+	_walk_hud_panel.add_theme_stylebox_override("panel", _walk_hud_style())
+	_walk_hud.add_child(_walk_hud_panel)
+	_walk_hud_guide = Label.new()
+	_walk_hud_guide.name = "KL_WALK_STATION_GUIDANCE"
+	_walk_hud_guide.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_walk_hud_guide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_walk_hud_guide.add_theme_color_override("font_color", Color("#e8f7ff"))
+	_walk_hud_guide.add_theme_font_size_override("font_size", 13)
+	_walk_hud_panel.add_child(_walk_hud_guide)
+
+func _walk_hud_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.035, 0.105, 0.16, 0.89)
+	style.border_color = Color("#5bb7b9")
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(8)
+	return style
+
+func _update_walk_hud() -> void:
+	if _walk_hud == null:
+		return
+	var active: bool = _walk_active and _view == "environment" and _walk != null and _middle != null and _middle.visible
+	_walk_hud.visible = active
+	if not active:
+		return
+	# A HUD anchored to the visible middle panel cannot hide behind case/nav or
+	# notes sidebars. Cues remain legible at the supported 1024px desktop width.
+	var width: float = maxf(180.0, _middle.size.x - 22.0)
+	_walk_hud_top.offset_right = minf(width, 316.0)
+	_walk_hud_panel.offset_right = minf(width, 336.0)
+	_walk_hud_title.text = "WALK PREVIEW · FDI %s\nWASD / arrows move · Shift quicker · right-drag look" % FDI[_case_index]
+	var op: Dictionary = _walk.call("operatory_guidance")
+	var language: Dictionary = _walk.call("language_guidance")
+	var op_status := "E · ENTER OPERATORY" if bool(op.get("inRange",false)) else "toward operatory"
+	var lang_status := "E · ENTER FSP/KP" if bool(language.get("inRange",false)) else "toward language station"
+	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · %s · Esc exits" % [
+		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), op_status, lang_status]
+	# Units and range cues come exclusively from the uncalibrated walk intent.
+	# No new score, patient mapping, geometry, or clinical accuracy claim.
+
 func _walk_keyboard_allowed() -> bool:
 	if not _walk_active or _view != "environment" or _walk == null:
 		return false
@@ -239,7 +334,8 @@ func _process(delta: float) -> void:
 	if Input.is_physical_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 		direction.y -= 1.0
 	if direction != Vector2.ZERO:
-		_walk.call("apply_move_intent", direction, delta)
+		var fast: bool = Input.is_physical_key_pressed(KEY_SHIFT) or Input.is_key_pressed(KEY_SHIFT)
+		_walk.call("apply_move_intent", direction, delta, fast)
 		_apply_walk_camera()
 		var now_near: bool = bool(_walk.call("in_operatory_range"))
 		var now_language_near: bool = bool(_walk.call("in_language_station_range"))
@@ -300,8 +396,10 @@ func _apply_walk_camera() -> void:
 		return
 	camera.position = _walk.get("position")
 	camera.rotation = Vector3(float(_walk.get("pitch")), float(_walk.get("yaw")), 0.0)
-	camera.fov = 68.0
+	camera.fov = 64.0 # restrained first-person preview FOV; no physical scale claim
+	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.current = true
+	_update_walk_hud()
 
 func _walk_enter_procedure() -> bool:
 	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_operatory_range")):
@@ -911,6 +1009,7 @@ func _build_app() -> void:
 	_middle.custom_minimum_size = Vector2(270,0)
 	_middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_middle)
+	_build_walk_hud() # Transparent, non-interactive overlay; only shown while walking.
 	_right_column = VBoxContainer.new()
 	body.add_child(_right_column)
 	_right_panel = PanelContainer.new()
@@ -1081,19 +1180,23 @@ func _set_environment_camera() -> void:
 			tooth.visible=false
 
 func _show_environment() -> void:
-	_page.add_child(_heading("Imported CC0 3DAssets.dev dental practice • native scene",18))
+	_page.add_child(_heading("Explore the clinic · first-person preview",18))
+	if not _walk_active:
+		var start_walk := _button("Start clinic walkthrough · WASD / arrows")
+		start_walk.pressed.connect(_start_clinic_walk)
+		_page.add_child(start_walk)
+		_page.add_child(_heading("WASD / arrows move · hold Shift for quicker movement · right-drag over the central scene to look · E interacts when nearby · Esc returns to overview.",13))
+	else:
+		_page.add_child(_heading("WALK ACTIVE · follow the on-screen operatory and language cues. Hold right mouse button over the scene and drag to look.",13))
+	_page.add_child(_heading("Imported CC0 3DAssets.dev dental practice • native scene",16))
 	_page.add_child(_heading("The assembled whole-clinic starter and a separate instrument tray are imported GLB meshes, instantiated in the REAL Godot application. The schematic background is disabled; the original source-identified six FDI/tooth/training flows remain independent.",14))
 	if _cc0_clinic!=null:
 		var report: Dictionary = _cc0_clinic.call("summary")
 		_page.add_child(_heading("Imported clinic mesh instances: %s · static tray meshes: %s · original GLB hashes: verified" % [str(report.get("wholeMeshInstances",0)),str(report.get("trayMeshInstances",0))],14))
 		_page.add_child(_heading("CC0 source pack: %d GLB models catalogued; %d original scene assets loaded + %d separately imported operatory chair = %d runtime GLBs. Chair: %s." % [int(report.get("cataloguedSourceGLBs",0)),int(report.get("requiredGLBsLoaded",0)),int(bool(report.get("optionalChairLoaded",false))),int(report.get("requiredGLBsLoaded",0))+int(bool(report.get("optionalChairLoaded",false))),"real CC0 model loaded" if bool(report.get("optionalChairLoaded",false)) else "asset unavailable; labelled fallback"],14))
 	_page.add_child(_heading("CC0 1.0 · 3dassets.dev / Dental Practice and Surgery. Stylized static environment; not calibrated dental anatomy, full instrument physics, a clinical procedure simulator, or a patient record.",12))
-	if not _walk_active:
-		var start_walk := _button("Walk clinic (WASD / arrows, right-drag to look)")
-		start_walk.pressed.connect(_start_clinic_walk)
-		_page.add_child(start_walk)
-	else:
-		_page.add_child(_heading("Room exploration preview: WASD / arrows move; right-drag over central 3D view to look; E enters the operatory when nearby; Esc exits walk. Bounded navigation only: no collision or clinical-scale calibration.",13))
+	if _walk_active:
+		_page.add_child(_heading("Room exploration only: bounded, synthetic scene-unit navigation; NO collision, verified room dimensions or clinical-scale calibration.",13))
 		var within: bool = bool(_walk.call("in_operatory_range"))
 		var language_within: bool = bool(_walk.call("in_language_station_range"))
 		_page.add_child(_heading("Dental practical operatory: " + ("in range" if within else "walk toward the operatory marker"),14))
@@ -1180,6 +1283,7 @@ func _refresh() -> void:
 	_update_responsive_layout()
 	_sync_navigation_selection()
 	_sync_toolbar_selection()
+	_update_walk_hud()
 	if _screen_title != null:
 		if _view == "environment":
 			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
