@@ -111,6 +111,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Windows PowerShell 5.1 installer parser failed' }
           & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr1f_godot_watcher_installer_ps_parser_windows.ps1
           if ($LASTEXITCODE -ne 0) { throw 'PowerShell 7 installer parser failed' }
+      - name: SR54 mocked fresh-project import and early desktop exit (WinPS 5.1 + PS7; NO GODOT LAUNCH)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests/sr54_native_launcher_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'WinPS 5.1 SR54 import/launch contract failed' }
+          & (Get-Command pwsh.exe -ErrorAction Stop).Source -NoLogo -NoProfile -NonInteractive -File tests/sr54_native_launcher_windows.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell 7 SR54 import/launch contract failed' }
       - name: Reconcile original published job08 with absent local ledger (WinPS5.1 + PS7; zero real jobs)
         shell: pwsh
         run: |
