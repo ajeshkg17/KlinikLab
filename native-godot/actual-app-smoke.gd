@@ -305,6 +305,71 @@ func _run() -> void:
 	if not ((app.get("_progress") as Dictionary)["quizRecall"] as Dictionary).is_empty():
 		_fail("SR47 reset retained active recall notes")
 		return
+	# SR48: source-aligned structure-only self-review, never a clinical or language grade.
+	for case_i in range(6):
+		app.call("_select_case", case_i)
+		app.call("_select_station", 1) # FSP Arztbrief
+		var page: VBoxContainer = app.get("_page")
+		if page.get_node_or_null("KL_WRITING_STRUCTURE_REVIEW") == null or page.get_node_or_null("KL_WRITING_STRUCTURE_FEEDBACK") == null:
+			_fail("SR48 FSP review controls absent " + FDIS[case_i])
+			return
+		var letter: Dictionary = app.get("_letter_fields")
+		for id in ["anamnese", "befund", "diagnose"]:
+			(letter[id] as TextEdit).text = "Meaningful fictional educational German draft for " + id + " and case " + IDS[case_i]
+		app.call("_review_writing", "letter")
+		var review: Label = app.get("_writing_review_label")
+		if review == null or not review.text.contains("Draft coverage 3/4"):
+			_fail("SR48 FSP incomplete-section coverage missing " + FDIS[case_i])
+			return
+		(letter["therapie"] as TextEdit).text = "Detailed fictional treatment proposal with follow-up; no definitive diagnosis."
+		app.call("_review_writing", "letter")
+		if not review.text.contains("Structure check passed (4/4 sections)") or not review.text.contains("Check that tooth " + FDIS[case_i]):
+			_fail("SR48 FSP FDI reference caution missing " + FDIS[case_i])
+			return
+		(letter["therapie"] as TextEdit).text += " FDI " + FDIS[case_i]
+		app.call("_review_writing", "letter")
+		if not review.text.contains("FDI tooth reference present.") or not review.text.contains("NOT a formal FSP"):
+			_fail("SR48 FSP FDI affirmation or assessment boundary missing " + FDIS[case_i])
+			return
+		app.call("_select_station", 3) # KP written plans
+		page = app.get("_page")
+		if page.get_node_or_null("KL_WRITING_STRUCTURE_REVIEW") == null or page.get_node_or_null("KL_WRITING_STRUCTURE_FEEDBACK") == null:
+			_fail("SR48 KP review controls absent " + FDIS[case_i])
+			return
+		var kp: Dictionary = app.get("_plan_fields")
+		for id in ["diagnosis", "planA", "planB"]:
+			(kp[id] as TextEdit).text = "Detailed fictional educational KP plan with explanatory reasoning for " + id
+		app.call("_review_writing", "written")
+		review = app.get("_writing_review_label")
+		if review == null or not review.text.contains("Written plan draft 3/4"):
+			_fail("SR48 KP incomplete-section coverage missing " + FDIS[case_i])
+			return
+		(kp["followup"] as TextEdit).text = "Detailed fictional patient consent, discussion of risks and follow-up."
+		(kp["planB"] as TextEdit).text = (kp["planA"] as TextEdit).text
+		app.call("_review_writing", "written")
+		if not review.text.contains("must describe two different alternatives"):
+			_fail("SR48 KP duplicate-treatment warning missing " + FDIS[case_i])
+			return
+		(kp["planB"] as TextEdit).text = "Alternative option B: conservative approach and follow-up for this case."
+		app.call("_review_writing", "written")
+		if not review.text.contains("two distinct written plans") or not review.text.contains("NOT a formal KP"):
+			_fail("SR48 KP structure completion or assessment boundary missing " + FDIS[case_i])
+			return
+		app.call("_select_station", 1)
+		var saved_letter: Dictionary = app.get("_letter_fields")
+		if not (saved_letter["therapie"] as TextEdit).text.contains("FDI " + FDIS[case_i]):
+			_fail("SR48 review disrupted FSP draft persistence " + FDIS[case_i])
+			return
+		app.call("_select_station", 3)
+		var saved_kp: Dictionary = app.get("_plan_fields")
+		if not (saved_kp["planB"] as TextEdit).text.contains("Alternative option B"):
+			_fail("SR48 review disrupted KP draft persistence " + FDIS[case_i])
+			return
+	app.call("_reset_progress")
+	if not ((app.get("_progress") as Dictionary)["letterSectionsByCase"] as Dictionary).is_empty() or not ((app.get("_progress") as Dictionary)["planSectionsByCase"] as Dictionary).is_empty():
+		_fail("SR48 reset kept reviewed writing drafts")
+		return
+	print("SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS incomplete/FDI/alternative/persistence/reset; structure-only and headless")
 	print("SR47_FOUR_QUIZ_STATIONS_SIX_FDI_ACTIVE_RECALL_PASS choices gated, notes persisted, navigation/reset source exact; headless only")
 	print("SR46_KP_FOUR_SECTION_PLAN_SIX_CASES_PASS draft restore, legacy migration, report and reset; headless only")
 	print("SR45_FSP_FOUR_SECTION_LETTER_SIX_CASES_PASS source headings, per-case restore, legacy migration, report and reset; headless only")
