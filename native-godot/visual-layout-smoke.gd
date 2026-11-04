@@ -383,10 +383,19 @@ func _validate_walk_hud(app: Node3D, window_width: int, window_height: int) -> b
 		return false
 	if not _expect(cursor_rect.get_center().distance_to(viewport.get_center())<8.0 and cursor_rect.position.y>top_rect.end.y and cursor_rect.end.y<guide_rect.position.y, "SR57 center reticle not aligned inside first-person view %dx%d" % [window_width,window_height]):
 		return false
-	if not _expect(not title.text.is_empty() and title.text.contains("right-drag") and cues.text.contains("OPERATORY") and cues.text.contains("FSP/KP") and cues.text.contains("Esc exits"), "SR57 visible game controls/station range cues missing"):
+	if not _expect(not title.text.is_empty() and title.text.contains("Click 3D") and cues.text.contains("OPERATORY") and cues.text.contains("FSP/KP") and cues.text.contains("Esc exits"), "SR57 visible game controls/station range cues missing"):
 		return false
 	var viewport_width: float = viewport.size.x
 	if not _expect(top_rect.size.x >= minf(180.0,viewport_width-22.0) and guide_rect.size.x <= viewport_width-8.0 and guide_rect.size.y >= 88.0, "SR57 panel unexpectedly thin/clipped at %dx%d" % [window_width,window_height]):
+		return false
+	# SR61 checks both visible and captured help text in the same real
+	# Godot center-pane HUD; no owner Windows screenshot claim.
+	app.call("_capture_walk_mouse")
+	if not _expect(bool(app.get("_walk_mouse_captured")) and title.text.contains("Mouse captured") and cues.text.contains("Esc releases") and banner.get_global_rect().end.x <= viewport.end.x-2.0,
+		"SR61 FPS capture HUD clipped or release instructions missing at %dx%d" % [window_width,window_height]):
+		return false
+	app.call("_release_walk_mouse")
+	if not _expect(not bool(app.get("_walk_mouse_captured")) and title.text.contains("Click 3D"),"SR61 release HUD did not restore click-to-capture prompt"):
 		return false
 	app.call("_stop_clinic_walk")
 	if not _expect(not hud.visible and camera.current, "SR57 HUD leaked after exiting walk"):
@@ -631,10 +640,11 @@ func _run() -> void:
 	print("SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS real labels, four geometries, active view/camera, no clipping; headless only")
 	# SR57 overlays remain in the true central 3D pane with clear movement
 	# controls and no mouse capture across owner-reviewed and compact windows.
-	for size in [[1600,900],[1280,900],[1024,900],[1280,720]]:
+	for size in [[1600,900],[1536,864],[1280,900],[1280,720],[1024,900],[1024,720]]:
 		if not await _validate_walk_hud(app,size[0],size[1]):
 			return
 	print("SR57_WALK_HUD_1600_1280_1024_720_LAYOUT_PASS center reticle, source station cues, legible input-free panels; headless only")
+	print("SR61_FPS_POINTER_HUD_SIX_DESKTOP_SIZES_PASS captured/released help, center-pane fit; HEADLESS NOT PIXELS")
 	# SR58 task-first source practical is tested at both prior headless and
 	# actual owner-PC window sizes. No pixels or GPU status inferred.
 	for size in [[1600,900],[1280,900],[1024,900],[1280,720]]:
