@@ -459,6 +459,8 @@ func _set_procedure_guided(enabled: bool) -> void:
 	# Even toggling the guide off is not permission to cut. Bur remains
 	# separate and requires explicit opt-in for the selected FDI model.
 	_direct_bur_mode = false
+	if _page_scroll != null:
+		_page_scroll.scroll_vertical = 0
 	_refresh()
 
 func _procedure_move_step(delta: int) -> bool:
@@ -1317,6 +1319,12 @@ func _refresh() -> void:
 		# Source/browser text-first FSP/KP writing: show fields before long reference notes.
 		_show_station()
 	else:
+		# SR58: practical task controls are the primary learner workflow.
+		# The same fictional case notes remain after the task, rather than
+		# hiding Start guided practical below long clinical/provenance prose.
+		var practical_first: bool = _view == "clinic" and STATION_IDS[_station_index] == "practical"
+		if practical_first:
+			_show_station()
 		_page.add_child(_heading("Complaint: " + str(c["complaint"]), 15))
 		_page.add_child(_heading("Medical history: " + str(c["history"]), 14))
 		_page.add_child(_heading("Exam: " + str(c["exam"]), 14))
@@ -1331,7 +1339,8 @@ func _refresh() -> void:
 				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
 			else:
 				_page.add_child(_heading("FDI16 original immutable mesh states only. Editable source field unavailable or failed integrity checks.", 14))
-		_show_station()
+		if not practical_first:
+			_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
 
@@ -1842,6 +1851,10 @@ func _review_writing(station: String) -> void:
 	_writing_review_label.text = _writing_structure_feedback(station)
 
 func _show_practical() -> void:
+	# Preserve the full source case/model/anatomy disclosures as ordinary
+	# visible labels, but present the source practical actions before them.
+	# No hidden provenance, source metadata mutation or new clinical grading.
+	var provenance_start_index: int = _page.get_child_count()
 	var c: Dictionary = _cases[_case_index]
 	if FDI[_case_index] in ["16", "11", "48", "46"]:
 		var clearance_script: GDScript = load("res://fdi-reference-clearance.gd")
@@ -1892,9 +1905,12 @@ func _show_practical() -> void:
 	_page.add_child(_heading("Treatment: " + str(c["primaryPlan"]), 15))
 	_page.add_child(_heading("Alternative: " + str(c["alternativePlan"]), 15))
 	_page.add_child(_heading("Original case-specific practical tasks. All six cases have distinct local editable synthetic volume states when source checks pass; these are NOT validated operative simulations.", 14))
+	var provenance_child_count: int = _page.get_child_count() - provenance_start_index
+	_page.add_child(_heading("SOURCE PRACTICAL · FDI %s · educational tasks only (not a clinical grade or calibrated procedure)" % FDI[_case_index], 15))
 	var steps: Array = _content["practical"][_case_index]
 	if not _procedure_guided:
 		var start_guide := _button("Start guided practical (keyboard N/P to navigate original tasks)")
+		start_guide.name = "KL_PRACTICAL_START_GUIDE"
 		start_guide.pressed.connect(_set_procedure_guided.bind(true))
 		_page.add_child(start_guide)
 	else:
@@ -1985,6 +2001,12 @@ func _show_practical() -> void:
 			_show_drill_controls()
 		else:
 			_page.add_child(_heading("Source-verified case tooth unavailable.", 13))
+	# Move already constructed source disclosures after the usable original
+	# practical task controls, retaining the same top-level Label controls so
+	# anatomy/FDI provenance regression checks still find their exact text.
+	_page.add_child(_heading("SOURCE / LICENSING / ANATOMY REFERENCE · always available below the practical task", 14))
+	for source_item in range(provenance_child_count):
+		_page.move_child(_page.get_child(provenance_start_index), _page.get_child_count() - 1)
 
 
 func _make_cut_slider(title: String, low: float, high: float, start: float) -> HSlider:
