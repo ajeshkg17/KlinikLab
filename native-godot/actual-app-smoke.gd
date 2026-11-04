@@ -317,7 +317,7 @@ func _run() -> void:
 				return
 			var fields: Dictionary = app.get("_letter_fields") if station_i == 1 else app.get("_plan_fields")
 			var first: TextEdit = fields["anamnese"] if station_i == 1 else fields["diagnosis"]
-			if first == null or first.custom_minimum_size.x > 0.1 or first.line_wrapping_mode != TextEdit.LINE_WRAPPING_BOUNDARY:
+			if first == null or first.custom_minimum_size.x > 0.1 or first.wrap_mode != TextEdit.LINE_WRAPPING_BOUNDARY:
 				_fail("SR49 writing editor still fixed width or nonwrapping " + FDIS[case_i])
 				return
 			if page.get_children().find(first) < 0 or page.get_children().find(source_reference) <= page.get_children().find(first):
