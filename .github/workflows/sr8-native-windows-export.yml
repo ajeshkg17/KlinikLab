@@ -15,6 +15,8 @@ on:
       - 'volumetric-lab.js'
       - 'clinical-pathway.js'
       - '.github/workflows/sr8-native-windows-export.yml'
+  pull_request:
+    branches: [integration/single-chat-validation-2026-10-30]
   workflow_dispatch:
 
 permissions:
@@ -111,8 +113,17 @@ jobs:
           # The app uses these ONLY if res:// raw SHA cannot be verified.
           mkdir -p "$RUNNER_TEMP/release/verified-raw-source/source"
           mkdir -p "$RUNNER_TEMP/release/verified-raw-source/assets/cc0/3dassets-dental"
+          mkdir -p "$RUNNER_TEMP/release/verified-raw-source/assets/dundee"
           cp -a "$project/source/." "$RUNNER_TEMP/release/verified-raw-source/source/"
           cp -a "$project/assets/cc0/3dassets-dental/." "$RUNNER_TEMP/release/verified-raw-source/assets/cc0/3dassets-dental/"
+          # Preserve the ORIGINAL SHA-audited Dundee molar GLBs and their
+          # Godot-compatible derived copies for FDI36 and FDI26. Runtime
+          # fail-closed verification requires all four alongside the EXE;
+          # Godot packed scenes alone cannot provide their original bytes.
+          cp -a "$project/assets/dundee/." "$RUNNER_TEMP/release/verified-raw-source/assets/dundee/"
+          for file in mandibular_first_molar.glb.source mandibular_first_molar-godot.glb.source maxillary_first_molar.glb.source maxillary_first_molar-godot.glb.source; do
+            test -s "$RUNNER_TEMP/release/verified-raw-source/assets/dundee/$file"
+          done
           printf '%s\n' "KlinikLab native Windows x64 Godot 4.7.2" "Git source SHA: $GITHUB_SHA" "Educational synthetic data only; not clinically validated." "Portable build, NOT tested on Windows RTX or Quest." "Run KlinikLab.exe from this extracted folder. Keep the entire verified-raw-source folder BESIDE the exe, unchanged; otherwise the SHA-verified original geometry and CC0 scene fail closed." "The executable embeds Godot imported 3D scene resources, while this sidecar preserves original immutable source byte streams for runtime SHA checks." "No network or patient-data upload in the native project." > "$RUNNER_TEMP/release/README-FIRST.txt"
           cp "$project/native-build-manifest.json" "$RUNNER_TEMP/release/native-build-manifest.json"
           node native-godot/verify-raw-bundle.mjs "--release-dir=$RUNNER_TEMP/release" "--expected-sha=$GITHUB_SHA"
