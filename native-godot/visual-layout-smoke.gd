@@ -139,7 +139,12 @@ func _validate_fdi_camera(app: Node3D, width: int) -> bool:
 			return false
 		var rect: Rect2 = center.get_global_rect()
 		var pixels: Rect2 = _projected_bounds(mesh,camera)
-		if not _expect(pixels.size.x > rect.size.x * 0.20 and pixels.size.y > rect.size.y * 0.28, "SR51 selected FDI too small in 3D center " + CAMERA_FDI[case_index] + "@" + str(width)):
+		# Physical incisor FDI 11 has a narrower crown silhouette than a
+		# molar; require a useful vertical size rather than forcing tooth
+		# widths to match. Every source FDI still has a nontrivial x extent.
+		var min_width_fraction := 0.105 if case_index == 2 else 0.20
+		if not _expect(pixels.size.x > rect.size.x * min_width_fraction and pixels.size.y > rect.size.y * 0.28,
+			"SR51 selected FDI too small in 3D center " + CAMERA_FDI[case_index] + "@" + str(width) + " projected=" + str(pixels.size) + " area=" + str(rect.size)):
 			return false
 		if not _expect(pixels.position.x >= rect.position.x + 2.0 and pixels.end.x <= rect.end.x - 2.0 and pixels.position.y >= rect.position.y + 2.0 and pixels.end.y <= rect.end.y - 2.0, "SR51 FDI close-up hidden under side panels " + CAMERA_FDI[case_index] + "@" + str(width)):
 			return false
