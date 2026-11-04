@@ -35,8 +35,18 @@ func _run() -> void:
 	if clinic==null or original==null or legacy==null or not clinic.is_inside_tree():
 		_fail("Actual app._ready never mounted imported CC0 original scene")
 		return
-	if not clinic.visible or legacy.visible:
-		_fail("Real app's CC0 room visibility or duplicate schematic is wrong")
+	# SR60: real imported CC0 room is loaded but MUST NOT overlay the
+	# foreground Clinic tooth comparison with a distant bright floor band.
+	if clinic.visible or legacy.visible:
+		_fail("CC0 room or duplicate schematic bleeds over initial Clinic tooth view")
+		return
+	app.call("_switch_view","environment")
+	if not clinic.visible:
+		_fail("Real CC0 room lost from its Environment/walk workspace")
+		return
+	app.call("_switch_view","clinic")
+	if clinic.visible:
+		_fail("Returning from Environment leaves room strip over Clinic")
 		return
 	var summary: Dictionary = clinic.call("summary")
 	if (not bool(summary.get("sourceOriginalGLBsHashVerified",false)) or
