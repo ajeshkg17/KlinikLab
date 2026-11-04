@@ -921,11 +921,13 @@ func _frame_visible_camera() -> void:
 	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_FOV) * 0.5))
 	var target: AABB = _practical_camera_bounds()
 	var world_center: Vector3 = target.get_center()
-	# Depth from nearest target face; bounds never depend on unavailable or
-	# licensing-blocked GLBs. No source/synthetic mesh is moved or rescaled.
+	# Depth from nearest target face, using nearly all of the already inset
+	# center-safe rectangle (2.5% inner room). Avoid shrinking the two
+	# visible teeth merely to satisfy a stale fixed-comparison envelope.
+	# No source/synthetic mesh is moved or rescaled.
 	var depth := maxf(4.0, maxf(
-		focal * target.size.x / (content.size.x * 0.92),
-		focal * target.size.y / (content.size.y * 0.92)))
+		focal * target.size.x / (content.size.x * 0.975),
+		focal * target.size.y / (content.size.y * 0.975)))
 	var eye_z := target.end.z + depth
 	var center_depth := eye_z - world_center.z
 	var screen_center: Vector2 = content.get_center()
