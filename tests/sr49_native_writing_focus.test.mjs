@@ -19,7 +19,7 @@ test('SR49 native FSP/KP text-first layout matches browser hidden source sample 
  assert.match(app,/_writing_reference_panel\.visible = false/);
  assert.match(app,/func _toggle_writing_reference\(\) -> void:/);
  assert.match(app,/field\.custom_minimum_size = Vector2\(0, 130\)/);
- assert.match(app,/field\.line_wrapping_mode = TextEdit\.LINE_WRAPPING_BOUNDARY/);
+ assert.match(app,/field\.wrap_mode = TextEdit\.LINE_WRAPPING_BOUNDARY/);
 });
 
 test('SR49 whole app tests writing focus, reveal, retained drafts and practical scene restoration', () => {
