@@ -306,10 +306,9 @@ func _update_walk_hud() -> void:
 	_walk_hud_title.text = "WALK PREVIEW · FDI %s\nWASD / arrows move · Shift quicker · right-drag look" % FDI[_case_index]
 	var op: Dictionary = _walk.call("operatory_guidance")
 	var language: Dictionary = _walk.call("language_guidance")
-	var op_status := "E · ENTER OPERATORY" if bool(op.get("inRange",false)) else "toward operatory"
-	var lang_status := "E · ENTER FSP/KP" if bool(language.get("inRange",false)) else "toward language station"
-	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · %s · Esc exits" % [
-		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), op_status, lang_status]
+	var action := "E · Enter operatory" if bool(op.get("inRange",false)) else "E · Enter FSP/KP" if bool(language.get("inRange",false)) else "Approach station · E interacts"
+	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · Esc exits" % [
+		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), action]
 	# Units and range cues come exclusively from the uncalibrated walk intent.
 	# No new score, patient mapping, geometry, or clinical accuracy claim.
 
