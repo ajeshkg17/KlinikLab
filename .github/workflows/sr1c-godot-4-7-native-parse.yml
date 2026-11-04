@@ -11,6 +11,7 @@ on:
       - 'tests/sr32_native_guided_practical.test.mjs'
       - 'tests/source-contract-text.mjs'
       - 'tests/sr63_windows_crlf_source_contract.test.mjs'
+      - 'tests/sr64_ownerpc_reset_room_input.test.mjs'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -110,6 +111,7 @@ jobs:
           node --test tests/sr61_desktop_fps_mouse_capture.test.mjs
           node --test tests/sr62_quiz_feedback_parity.test.mjs
           node --test tests/sr63_windows_crlf_source_contract.test.mjs
+          node --test tests/sr64_ownerpc_reset_room_input.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -233,6 +235,7 @@ jobs:
           grep -F "SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR52_SIX_FDI_FOUR_QUIZ_FINISH_GATING_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR62_SIX_FDI_FOUR_QUIZ_PERSISTENT_FEEDBACK_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+          grep -F "SR64_REAL_USER_DISK_RESET_RELOAD_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR53_ALL_32_FDI_SIX_CASE_PRACTICAL_CHART_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
       - name: SR31 real native desktop walk and selected FDI operatory input (HEADLESS, NO PC PIXELS)
         run: |
@@ -244,6 +247,7 @@ jobs:
           grep -F "SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
           grep -F "SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
           grep -F "SR61_DESKTOP_FPS_MOUSE_CAPTURE_RELEASE_FOCUS_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
+          grep -F "SR64_FPS_DELTA_DRAG_FOCUS_HUD_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
       - name: SR32 guided desktop practical, all six FDI cases and FSP/KP preserved (HEADLESS only)
         run: |
           set -euo pipefail
@@ -312,6 +316,7 @@ jobs:
           grep -F "SR60_SIX_FDI_OWNER_1536_864_RIGHT_EDGE_AND_SCENE_COMPOSITION_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR61_FPS_POINTER_HUD_SIX_DESKTOP_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR62_TASK_FIRST_QUIZ_FEEDBACK_SIX_DESKTOP_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR64_REAL_CC0_ROOM_CENTERED_FIT_AND_LIGHTING_FIVE_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
@@ -359,4 +364,4 @@ jobs:
       - name: Run real source contracts against CRLF working tree (no Godot render)
         shell: pwsh
         run: |
-          node --test tests/sr31_desktop_clinic_walk.test.mjs tests/sr32_native_guided_practical.test.mjs tests/sr45_fsp_letter_sections.test.mjs tests/sr46_kp_plan_sections.test.mjs tests/sr47_active_recall_quiz.test.mjs tests/sr49_native_writing_focus.test.mjs tests/sr53_native_fdi_practical_chart.test.mjs tests/sr55_native_responsive_toolbar.test.mjs tests/sr57_game_style_walk_hud.test.mjs tests/sr58_native_practical_task_first.test.mjs tests/sr61_desktop_fps_mouse_capture.test.mjs tests/sr62_quiz_feedback_parity.test.mjs tests/sr63_windows_crlf_source_contract.test.mjs
+          node --test tests/sr31_desktop_clinic_walk.test.mjs tests/sr32_native_guided_practical.test.mjs tests/sr45_fsp_letter_sections.test.mjs tests/sr46_kp_plan_sections.test.mjs tests/sr47_active_recall_quiz.test.mjs tests/sr49_native_writing_focus.test.mjs tests/sr53_native_fdi_practical_chart.test.mjs tests/sr55_native_responsive_toolbar.test.mjs tests/sr57_game_style_walk_hud.test.mjs tests/sr58_native_practical_task_first.test.mjs tests/sr61_desktop_fps_mouse_capture.test.mjs tests/sr62_quiz_feedback_parity.test.mjs tests/sr63_windows_crlf_source_contract.test.mjs tests/sr64_ownerpc_reset_room_input.test.mjs

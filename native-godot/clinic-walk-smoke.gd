@@ -90,6 +90,18 @@ func _run() -> void:
 	if not hud_title.text.contains("Mouse captured") or not hud_guide.text.contains("Esc releases"):
 		_fail("SR61 captured HUD does not explain pointer release")
 		return
+	# SR64: a real Windows captured event can have screen_relative == (0,0)
+	# while relative contains motion. In that case use relative exactly once,
+	# and verify rotation reaches the visible native scene camera.
+	var fallback_motion := InputEventMouseMotion.new()
+	fallback_motion.position = scene_click.position
+	fallback_motion.screen_relative = Vector2.ZERO
+	fallback_motion.relative = Vector2(85.0, -18.0)
+	var old_yaw: float = float(walker.get("yaw"))
+	app.call("_input",fallback_motion)
+	if absf(float(walker.get("yaw")) - (old_yaw - 85.0 * 0.0035)) > 0.0001 or absf(preview_camera.rotation.y - float(walker.get("yaw"))) > 0.0001:
+		_fail("SR64 captured zero-screen-delta fallback did not visibly rotate scene camera")
+		return
 	var release_key := InputEventKey.new()
 	release_key.keycode = KEY_ESCAPE
 	release_key.pressed = true
@@ -102,13 +114,49 @@ func _run() -> void:
 	if absf(float(walker.get("yaw"))-released_yaw) > 0.0001:
 		_fail("SR61 mouse motion still rotates camera after Escape release")
 		return
+	# SR64: alternative right-button look must work even when pointer is not
+	# captured, and stop when the button is released.
+	var right_press := InputEventMouseButton.new()
+	right_press.button_index = MOUSE_BUTTON_RIGHT
+	right_press.pressed = true
+	right_press.position = scene_click.position
+	app.call("_input",right_press)
+	var drag_before: float = float(walker.get("yaw"))
+	var drag_motion := InputEventMouseMotion.new()
+	drag_motion.position = scene_click.position
+	drag_motion.relative = Vector2(-70.0, 0.0)
+	app.call("_input",drag_motion)
+	if absf(float(walker.get("yaw")) - (drag_before + 70.0 * 0.0035)) > 0.0001 or absf(preview_camera.rotation.y - float(walker.get("yaw"))) > 0.0001:
+		_fail("SR64 uncaptured right-button drag failed to rotate actual 3D camera")
+		return
+	var right_release := InputEventMouseButton.new()
+	right_release.button_index = MOUSE_BUTTON_RIGHT
+	right_release.pressed = false
+	right_release.position = scene_click.position
+	app.call("_input",right_release)
+	var drag_after: float = float(walker.get("yaw"))
+	app.call("_input",drag_motion)
+	if bool(app.get("_walk_look_dragging")) or absf(float(walker.get("yaw")) - drag_after) > 0.0001:
+		_fail("SR64 right-button release did not stop camera dragging")
+		return
 	app.call("_input",scene_click)
 	if not bool(app.get("_walk_mouse_captured")):
 		_fail("SR61 cannot re-capture FPS mouse after Escape")
 		return
-	# Simulates OS/window focus loss; must release and stay released on return.
+	# SR64 window focus-exited signal path is independently connected, and
+	# releasing it must synchronise the visible pointer AND the FPS HUD.
+	var window: Window = app.get_window()
+	if not window.focus_exited.is_connected(Callable(app,"_on_walk_focus_lost")):
+		_fail("SR64 native window did not connect focus-exited release handler")
+		return
+	app.call("_on_walk_focus_lost")
+	if bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE or not bool(app.get("_walk_active")) or hud_title.text.contains("Mouse captured") or not hud_title.text.contains("Click 3D to look"):
+		_fail("SR64 focus-exited release left captured HUD or invisible cursor")
+		return
+	app.call("_input",scene_click)
+	# Simulates OS/Node notification; the fallback also releases safely.
 	app.call("_notification",1005) # Node.NOTIFICATION_WM_WINDOW_FOCUS_OUT
-	if bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE or not bool(app.get("_walk_active")):
+	if bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE or not bool(app.get("_walk_active")) or hud_title.text.contains("Mouse captured"):
 		_fail("SR61 Alt-Tab/window defocus left mouse captured or stopped the walk")
 		return
 	walker.call("reset")
@@ -274,6 +322,7 @@ func _run() -> void:
 	if (app.get("_walk_hud") as Control).visible:
 		_fail("SR57 non-interactive walk HUD remained visible after Esc")
 		return
+	print("SR64_FPS_DELTA_DRAG_FOCUS_HUD_PASS captured relative fallback, right-drag/release, true scene camera yaw and window focus signal release; HEADLESS ONLY")
 	print("SR61_DESKTOP_FPS_MOUSE_CAPTURE_RELEASE_FOCUS_PASS click-only capture, physical-pixel look, Escape, defocus, no tool activation; HEADLESS ONLY")
 	print("SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS bounded movement, look, scene cues, no cutting; headless only")
 	app.call("_switch_view","language")

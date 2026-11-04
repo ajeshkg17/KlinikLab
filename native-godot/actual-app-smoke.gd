@@ -700,6 +700,55 @@ func _run() -> void:
 	if not ((app.get("_progress") as Dictionary)["answers"] as Dictionary).is_empty():
 		_fail("SR53 reset retained tooth-selection practice answers")
 		return
+	# SR64: owner-PC SR62 observed zero answers in UI after Reset, but the
+	# isolated JSON file retained a completed record and its old timestamp.
+	# The old smoke asserted ONLY in-memory dictionaries. Reproduce the full
+	# stored-answer -> actual user:// disk -> reset -> reload lifecycle.
+	app.call("_switch_view", "clinic")
+	app.call("_select_case", 0)
+	app.call("_select_station", 0)
+	app.call("_reveal_quiz_options")
+	var sr64_question: Dictionary = (((app.get("_content") as Dictionary)["quiz"] as Dictionary)["interview"] as Array)[0]
+	app.call("_answer", "interview", 0, int(sr64_question["correct"]))
+	var sr64_path: String = ProjectSettings.globalize_path("user://kliniklab-native-progress-v2.json")
+	var sr64_before: Variant = JSON.parse_string(FileAccess.get_file_as_string(sr64_path))
+	if not (sr64_before is Dictionary) or not ((sr64_before as Dictionary).get("answers", {}) as Dictionary).has("molar:interview:0"):
+		_fail("SR64 before reset: correct answer did not reach the actual resolved user:// JSON")
+		return
+	var sr64_progress: Dictionary = app.get("_progress")
+	(sr64_progress["practicalChecklist"] as Dictionary)["molar:practical:0"] = true
+	(sr64_progress["quizRecall"] as Dictionary)["molar:interview:0"] = "Own German reasoning"
+	if not bool(app.call("_save_progress")):
+		_fail("SR64 failed to persist source answer/checklist fixtures")
+		return
+	app.call("_switch_view", "progress")
+	app.call("_reset_progress")
+	if not bool(app.call("_reset_progress_on_disk")):
+		_fail("SR64 reset rendered empty UI but persisted file still held records at " + sr64_path)
+		return
+	var sr64_after: Variant = JSON.parse_string(FileAccess.get_file_as_string(sr64_path))
+	if not (sr64_after is Dictionary) or not ((sr64_after as Dictionary)["answers"] as Dictionary).is_empty() or not ((sr64_after as Dictionary)["practicalChecklist"] as Dictionary).is_empty():
+		_fail("SR64 reset file read-back has stale answer or checklist")
+		return
+	if not str(app.get("_progress_persistence_status")).contains("Reset confirmed on disk"):
+		_fail("SR64 UI claimed reset without verified disk status")
+		return
+	var sr64_progress_page: VBoxContainer = app.get("_page") as VBoxContainer
+	var sr64_shows_path := false
+	for row in sr64_progress_page.get_children():
+		if row is Label and (row as Label).text.contains(sr64_path):
+			sr64_shows_path = true
+	if not sr64_shows_path:
+		_fail("SR64 progress screen does not disclose its actual local JSON path")
+		return
+	# Simulate a full process reopening the same source-scoped file: loader
+	# must not resurrect an answer, German note or self-report checklist.
+	app.call("_load_progress")
+	for name in ["answers", "quizRecall", "practicalChecklist"]:
+		if not ((app.get("_progress") as Dictionary)[name] as Dictionary).is_empty():
+			_fail("SR64 persisted reset resurrected old " + name + " after reload")
+			return
+	print("SR64_REAL_USER_DISK_RESET_RELOAD_PASS correct answer persisted, reset cleared exact user:// path, read-back, checklist, UI status and reloaded profile; HEADLESS ONLY")
 	print("SR53_ALL_32_FDI_SIX_CASE_PRACTICAL_CHART_PASS source quadrant order, wrong/correct/retry, guided/all tasks, no cut, reset; headless only")
 	print("SR52_SIX_FDI_FOUR_QUIZ_FINISH_GATING_PASS wrong retry, current answer lock, final finish, restored recall, reset; headless only")
 	print("SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS source tooltips, exclusive active state, two-column mapping; headless only")

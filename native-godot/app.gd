@@ -53,6 +53,8 @@ var _case_index := 0
 var _station_index := 0
 var _quiz_index := 0
 var _progress: Dictionary = {}
+# SR64: reset must not claim durable success without a read-back of user://.
+var _progress_persistence_status := ""
 var _scene: Node3D
 var _atlas: Node3D
 var _scan: Node3D
@@ -198,6 +200,10 @@ func _ready() -> void:
 		return
 	_walk = walk_script.new()
 	_build_app()
+	# SR64: Window signals are more reliable than a Node notification alone
+	# when Win32 minimizes/restores an already captured mouse.
+	get_window().focus_exited.connect(_on_walk_focus_lost)
+	get_window().visibility_changed.connect(_on_walk_visibility_changed)
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
@@ -355,6 +361,15 @@ func _release_walk_mouse() -> void:
 	if is_instance_valid(_walk_hud):
 		_update_walk_hud()
 
+func _on_walk_focus_lost() -> void:
+	# Win32 focus_exited fires on Alt-Tab and many minimize paths. Keep
+	# HUD state synchronized with the now-visible mouse; never auto-recapture.
+	_release_walk_mouse()
+
+func _on_walk_visibility_changed() -> void:
+	if not get_window().visible or get_window().mode == Window.MODE_MINIMIZED:
+		_release_walk_mouse()
+
 # Alt-Tab/window focus loss must never retain a hidden, locked pointer.
 # Regaining focus does not re-capture: the learner must click 3D again.
 func _notification(what: int) -> void:
@@ -365,6 +380,12 @@ func _exit_tree() -> void:
 	_release_walk_mouse()
 
 func _process(delta: float) -> void:
+	# Defensive Windows check if focus signals arrive in a different order
+	# during minimize/restore. Headless CI has no real OS pointer to inspect.
+	if _walk_mouse_captured and DisplayServer.get_name() != "headless":
+		var window: Window = get_window()
+		if not window.has_focus() or window.mode == Window.MODE_MINIMIZED or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+			_release_walk_mouse()
 	if not _walk_keyboard_allowed():
 		return
 	var direction := Vector2.ZERO
@@ -420,6 +441,13 @@ func _handle_walk_input(event: InputEvent) -> void:
 		# Godot 4.7: screen_relative is physical pixels, invariant under
 		# canvas_items stretch (logical viewport 1600x900 at multiple Windows sizes).
 		var look_delta: Vector2 = motion.screen_relative if _walk_mouse_captured else motion.relative
+		# SR64 Windows: some captured mouse events provide a zero physical delta
+		# while carrying nonzero relative motion. Fall back only in that case;
+		# never add the two measurements or double-rotate the scene.
+		if _walk_mouse_captured and look_delta == Vector2.ZERO:
+			look_delta = motion.relative
+		if look_delta == Vector2.ZERO:
+			return
 		_walk.call("apply_look_intent", look_delta)
 		_apply_walk_camera()
 		get_viewport().set_input_as_handled()
@@ -736,15 +764,46 @@ func _load_progress() -> void:
 	_case_index = clampi(int(_progress.get("selectedCase", 0)), 0, 5)
 	_station_index = clampi(int(_progress.get("selectedStation", 0)), 0, 6)
 
-func _save_progress() -> void:
+func _save_progress() -> bool:
 	_progress["selectedCase"] = _case_index
 	_progress["selectedStation"] = _station_index
+	# Windows user:// may resolve to a different profile than expected. Treat
+	# any failed open/write as a persistence error rather than a silent UI reset.
+	var absolute_path: String = ProjectSettings.globalize_path(PROGRESS)
+	var make_dir: Error = DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
+	if make_dir != OK:
+		push_error("SR64_PROGRESS_WRITE_FAILED create-directory error=" + str(make_dir) + " path=" + absolute_path)
+		return false
 	var file := FileAccess.open(PROGRESS, FileAccess.WRITE)
 	if file == null:
-		push_warning("Local educational progress could not be saved")
-		return
+		push_error("SR64_PROGRESS_WRITE_FAILED open error=" + str(FileAccess.get_open_error()) + " path=" + absolute_path)
+		return false
 	file.store_string(JSON.stringify(_progress, "  ") + "\n")
+	file.flush()
+	var write_error: Error = file.get_error()
 	file.close()
+	if write_error != OK:
+		push_error("SR64_PROGRESS_WRITE_FAILED flush error=" + str(write_error) + " path=" + absolute_path)
+		return false
+	return true
+
+func _reset_progress_on_disk() -> bool:
+	# Verify the precise Godot user:// file, not only the dictionaries rendered
+	# by the Progress pane. This is deliberately read-only and source-scoped.
+	var disk: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
+	if not (disk is Dictionary):
+		return false
+	var row: Dictionary = disk
+	if int(row.get("schemaVersion", -1)) != 2 or str(row.get("sourceGitSHA", "")) != str(_content.get("sourceGitSHA", "")):
+		return false
+	for key in ["answers", "notes", "studied", "quizRecall", "letterSectionsByCase",
+		"planSectionsByCase", "volumeByCase", "journey", "radiologyByCase",
+		"fspKpByTask", "practicalChecklist"]:
+		if not (row.get(key, null) is Dictionary) or not (row[key] as Dictionary).is_empty():
+			return false
+	if not (row.get("volumeFDI16", null) is Array) or not (row["volumeFDI16"] as Array).is_empty():
+		return false
+	return true
 
 func _heading(t: String, pts: int = 20) -> Label:
 	var l := Label.new()
@@ -1002,6 +1061,21 @@ func _frame_visible_camera() -> void:
 	camera.rotation = Vector3.ZERO
 	camera.current = true
 
+func _environment_room_bounds() -> AABB:
+	if _cc0_clinic == null or not _cc0_clinic.is_visible_in_tree():
+		return AABB()
+	# Imported meshes, not the hard-coded room/chair coordinates, determine
+	# the environment overview. Keep the standalone tray decoration out of
+	# the camera's framing envelope so it cannot shift the room off-center.
+	var extrema: Dictionary = {"found": false}
+	for node_name in ["KL_SOURCE_CC0_WHOLE_CLINIC", "KL_SOURCE_CC0_REAL_OPERATORY_CHAIR"]:
+		var room_part: Node3D = _cc0_clinic.get_node_or_null(node_name) as Node3D
+		if room_part != null:
+			_expand_visible_mesh_bounds(room_part, extrema)
+	if not bool(extrema["found"]):
+		return AABB()
+	return AABB(extrema["lo"], (extrema["hi"] as Vector3) - (extrema["lo"] as Vector3))
+
 func _frame_environment_camera() -> void:
 	# Never interfere with direct learner-controlled walk pose/recovery.
 	if _view != "environment" or _walk_active or _scene == null:
@@ -1012,15 +1086,28 @@ func _frame_environment_camera() -> void:
 	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
 	if camera == null:
 		return
+	var target: AABB = _environment_room_bounds()
+	if target.size.length_squared() < 0.00001:
+		push_warning("SR64 clinic overview: source room meshes have no visible bounds")
+		return
 	var screen: Vector2 = get_viewport().get_visible_rect().size
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.fov = CAMERA_ENV_FOV
 	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_ENV_FOV) * 0.5))
-	var world_center := Vector3(3.0, -1.8, -19.0)
-	var depth := 12.0
-	var aim_x := world_center.x - (content.get_center().x - 0.5 * screen.x) * depth / focal
-	camera.position = Vector3(aim_x, 3.4, -7.0)
-	camera.look_at(Vector3(aim_x, world_center.y, world_center.z))
+	var center: Vector3 = target.get_center()
+	# Full imported-room + chair envelope projected into the actual unobscured
+	# central column. Avoid a tilted hard-coded camera aimed below the floor:
+	# that produced a washed-out narrow horizontal room band on owner Windows.
+	var near_depth := maxf(5.0, maxf(
+		focal * target.size.x / (content.size.x * 0.92),
+		focal * target.size.y / (content.size.y * 0.92)))
+	var eye_z := target.end.z + near_depth
+	var center_depth := eye_z - center.z
+	var content_center: Vector2 = content.get_center()
+	var eye_x := center.x - (content_center.x - 0.5 * screen.x) * center_depth / focal
+	var eye_y := center.y + (content_center.y - 0.5 * screen.y) * center_depth / focal
+	camera.position = Vector3(eye_x, eye_y, eye_z)
+	camera.rotation = Vector3.ZERO
 	camera.current = true
 
 func _build_app() -> void:
@@ -1369,12 +1456,23 @@ func _set_camera_mode(mode: String) -> void:
 	call_deferred("_frame_visible_camera")
 
 func _apply_environment_visibility() -> void:
+	var show_room: bool = _view == "environment"
 	if _cc0_clinic != null:
-		# SR60: the CC0 room at z~-20 read as a narrow bright floor strip
-		# behind the much closer tooth meshes in the Clinic overview.
-		# Clinic is the focused six-case 3D tooth workspace in both cameras;
-		# the real CC0 room is retained unchanged in Environment / Walk.
-		_cc0_clinic.call("set_environment_visible", _view == "environment")
+		# SR60: whole CC0 room is environment-only, never overlaid on FDI.
+		_cc0_clinic.call("set_environment_visible", show_room)
+	# SR64: the FDI16 comparison's strong three-light rig was also illuminating
+	# bright imported CC0 room surfaces. Retune only for the room, restoring
+	# the EXACT original tooth-view values when returning to Clinic.
+	if _scene != null:
+		var world: WorldEnvironment = _scene.get_node_or_null("KL_ClinicBackground") as WorldEnvironment
+		if world != null and world.environment != null:
+			world.environment.ambient_light_energy = 0.36 if show_room else 0.85
+		var key: DirectionalLight3D = _scene.get_node_or_null("KL_ClinicKeyLight") as DirectionalLight3D
+		if key != null:
+			key.light_energy = 0.65 if show_room else 1.6
+		var fill: OmniLight3D = _scene.get_node_or_null("KL_ClinicFillLight") as OmniLight3D
+		if fill != null:
+			fill.light_energy = 0.42 if show_room else 1.2
 
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
@@ -1408,6 +1506,8 @@ func _switch_view(view: String) -> void:
 		_set_camera_mode(_camera_mode)
 		_show_case_geometry()
 	if view == "environment":
+		# Make imported room visible before computing actual mesh bounds.
+		_apply_environment_visibility()
 		_set_environment_camera()
 	_apply_environment_visibility()
 	if _legacy_workspace != null:
@@ -2735,6 +2835,9 @@ func _scan_set_wireframe(enabled: bool) -> void:
 
 func _show_progress() -> void:
 	_page.add_child(_heading("Personal local progress (not an official exam score)", 17))
+	_page.add_child(_heading("Active local progress file: " + ProjectSettings.globalize_path(PROGRESS), 12))
+	if not _progress_persistence_status.is_empty():
+		_page.add_child(_heading(_progress_persistence_status, 14))
 	for c in _cases:
 		for s in _stations:
 			var k := str(c["id"]) + ":" + str(s["id"])
@@ -2868,10 +2971,18 @@ func _reset_progress() -> void:
 	_progress["journey"] = {}
 	_progress["radiologyByCase"] = {}
 	_progress["fspKpByTask"] = {}
+	_progress["practicalChecklist"] = {}
 	_language_draft = null # Do not re-save an old draft during page teardown
 	for id in _volumes:
 		(_volumes[id] as Node3D).call("reset")
-	_save_progress()
+	# Persist, re-open and validate the *exact* user:// progress file. If the
+	# disk is stale, show a failure with its actual resolved path; never claim
+	# the empty in-memory answer counter proves durable reset.
+	var reset_write_ok: bool = _save_progress()
+	var reset_disk_ok: bool = reset_write_ok and _reset_progress_on_disk()
+	_progress_persistence_status = "Reset confirmed on disk (all educational records cleared)." if reset_disk_ok else "RESET NOT CONFIRMED ON DISK — check file access and local progress path."
+	if not reset_disk_ok:
+		push_error("SR64_RESET_DISK_MISMATCH " + ProjectSettings.globalize_path(PROGRESS))
 	_refresh()
 
 func _show_coverage() -> void:

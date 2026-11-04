@@ -23,7 +23,8 @@ test('SR60 real owner 1536x864 clipping: 12 actions remain within bounded toolba
 test('SR60: clinic overview no longer renders distant room floor as a bright narrow band behind six tooth models',()=>{
   const app=read('native-godot/app.gd');
   const scene=app.slice(app.indexOf('func _apply_environment_visibility() -> void:'),app.indexOf('func _switch_view(',app.indexOf('func _apply_environment_visibility() -> void:')));
-  assert.match(scene,/set_environment_visible", _view == "environment"/);
+  assert.match(scene,/var show_room: bool = _view == "environment"/);
+  assert.match(scene,/_cc0_clinic\.call\("set_environment_visible", show_room\)/);
   assert.doesNotMatch(scene,/\(_view == "clinic" and _camera_mode == "overview"\)/);
   assert.match(app,/func _visible_practical_reference_bounds\(\) -> AABB:/);
   assert.match(app,/bounds = bounds\.merge\(reference\.grow\(0\.28\)\)/);
