@@ -10,7 +10,7 @@ From a clean KlinikLab checkout (Node 22+, Git and Godot 4.7.2 installed), run t
 & .\native-godot\launch-local.ps1
 ```
 
-It finds Godot 4.7.2 from `KLINIKLAB_GODOT_EXE`, `PATH`, or the standard WinGet install folder, checks the tool versions and clean source state, creates a new unique build folder under `%LOCALAPPDATA%`, builds from the exact Git commit, then starts the native app. To open the project in the editor instead, pass `-OpenEditor`; to select a nonstandard executable, pass `-GodotExecutable 'C:\path\to\godot.exe'`. The script refuses to overwrite a prior build. It does not capture or upload images, and its launch is informal local inspection rather than native visual/GPU acceptance.
+It locates Godot 4.7.2 using `KLINIKLAB_GODOT_EXE`, versioned or generic executables on `PATH`, or the WinGet install folder. It checks versions and the clean source state, builds into a **new unique** folder under `%LOCALAPPDATA%`, then **waits for `--headless --editor --import` to finish** and checks for the imported CC0 whole-clinic PackedScene before launching the desktop app. A failed import or an app process exiting within five seconds raises an error. New `launcher-logs` record stdout/stderr, exact source SHA, executable, import status and PID. Pass `-OpenEditor` for the editor or `-GodotExecutable` for a custom executable. Existing folders are never overwritten; no captures, watchers or uploads are triggered. **Launch from the actual unrestricted interactive Windows desktop session**, as a restricted/private session may have an invisible window handle.
 
 The equivalent manual commands are:
 
@@ -18,10 +18,14 @@ The equivalent manual commands are:
 $sha = (git rev-parse HEAD).Trim()
 $run = Join-Path $env:LOCALAPPDATA ('KlinikLabNativeApp-' + [guid]::NewGuid().ToString('N'))
 node native-godot/build-app.mjs "--source-dir=$PWD" "--expected-sha=$sha" "--output=$run"
-& 'C:\PATH\TO\godot_v4.7.2-stable_win64.exe' --path $run
+& 'C:\PATH\TO\Godot_v4.7.2-stable_win64.exe' --headless --editor --path $run --import
+if ($LASTEXITCODE -ne 0) { throw 'Godot import failed; do not launch.' }
+& 'C:\PATH\TO\Godot_v4.7.2-stable_win64.exe' --path $run
 ```
 
-Append `--editor` only when you want the Godot editor instead of the running app.
+Append `--editor` to the **second** Godot command only to open the editor. Never skip the import pass for a fresh build: `build-app.mjs` deliberately leaves no `.godot` imports, and directly opening the app can exit 4 with `No loader found for whole-clinic-starter-v1-godot.glb`.
+
+**SR54 owner-PC diagnosis (4 November 2026):** The exact earlier SR51 merge `431acc9036bab5d01f7be7bab8a55fca0ec1b6f7` failed before import. The unchanged build opened after a successful import when invoked from an unrestricted interactive desktop. The visible process reported **Vulkan 1.4.325 Forward+ on NVIDIA GeForce RTX 5060 Laptop GPU**; OS inventory reported driver 591.86. **GPU visual acceptance remains NOT ACCEPTED** due to malformed narrow toolbar controls at 1280×720 and incomplete engine-counter/DXGI verification. The prior owner-PC diagnostic logs/patches and held evidence are untouched; this does not claim new visual acceptance for a later SHA.
 
 The exact-source builder refuses reusing an existing output folder. It copies Godot scene/scripts, generates original FDI16 before and after-cut OBJ data from the production **volumetric-lab.js** mesher, independently exports the six synthetic production cases and seven stations, and loads original source FSP dialogue, handover, viva, clinic questions and instrument catalog. Two independent exporter digests must match. All six original synthetic cases now have source-derived case-specific editable volume fields; none is a clinically calibrated model.
 
