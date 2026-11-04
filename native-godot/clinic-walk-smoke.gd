@@ -38,6 +38,57 @@ func _run() -> void:
 		return
 	var walker: RefCounted = app.get("_walk")
 	var start: Vector3 = walker.get("position")
+	# SR57: actual native HUD stays in the unobscured 3D pane, is read-only,
+	# and identifies both virtual stations without claiming physical scale.
+	var hud: Control = app.get("_walk_hud")
+	var hud_title: Label = app.get("_walk_hud_title")
+	var hud_guide: Label = app.get("_walk_hud_guide")
+	var reticle: Label = app.get("_walk_hud_reticle")
+	if hud == null or not hud.visible or hud_title == null or hud_guide == null or reticle == null:
+		_fail("SR57 walk HUD not mounted and shown at scene start")
+		return
+	if not hud_title.text.contains("FDI 36") or not hud_guide.text.contains("OPERATORY") or not hud_guide.text.contains("FSP/KP") or reticle.text != "+":
+		_fail("SR57 HUD loses FDI identity, movement guidance or center reticle")
+		return
+	var preview_camera: Camera3D = (app.get("_scene") as Node3D).get_node("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if preview_camera == null or not preview_camera.current or absf(preview_camera.fov - 64.0) > 0.01:
+		_fail("SR57 gameplay preview camera FOV or visibility wrong")
+		return
+	var op_guidance: Dictionary = walker.call("operatory_guidance")
+	var language_guidance: Dictionary = walker.call("language_guidance")
+	if str(op_guidance.get("bearing","")) != "AHEAD" or bool(op_guidance.get("inRange",true)) or bool(language_guidance.get("inRange",true)):
+		_fail("SR57 initial view bearings/proximity are misleading")
+		return
+	# Optional Shift pace must still normalize diagonals, clamp frame jumps and
+	# respect existing uncalibrated room bounds. Restore original spawn after.
+	walker.call("reset")
+	walker.call("apply_move_intent",Vector2(0.0,1.0),0.1,false)
+	var normal_stride: float = ((walker.get("position") as Vector3) - start).length()
+	walker.call("reset")
+	walker.call("apply_move_intent",Vector2(0.0,1.0),0.1,true)
+	var quick_stride: float = ((walker.get("position") as Vector3) - start).length()
+	if normal_stride <= 0.0 or quick_stride <= normal_stride * 1.35 or quick_stride > normal_stride * 1.51:
+		_fail("SR57 Shift intent did not accelerate within bounded safe pace")
+		return
+	walker.call("reset")
+	walker.call("apply_move_intent",Vector2(1.0,1.0),999.0,true)
+	if ((walker.get("position") as Vector3) - start).length() > quick_stride + 0.0001:
+		_fail("SR57 long frame/diagonal input teleported first-person camera")
+		return
+	walker.call("reset")
+	walker.call("apply_move_intent",Vector2(INF,0.0),0.1,true)
+	if ((walker.get("position") as Vector3).distance_to(start)) > 0.0001:
+		_fail("SR57 nonfinite movement must be ignored")
+		return
+	walker.call("reset")
+	app.call("_apply_walk_camera")
+	walker.call("apply_look_intent", Vector2(-400.0,0.0))
+	app.call("_apply_walk_camera")
+	if not hud_guide.text.contains("OPERATORY") or not (hud_guide.text.contains("LEFT") or hud_guide.text.contains("RIGHT") or hud_guide.text.contains("BEHIND")):
+		_fail("SR57 visible wayfinding did not react to camera heading")
+		return
+	walker.call("reset")
+	app.call("_apply_walk_camera")
 	if bool(walker.call("in_operatory_range")) or bool(app.call("_walk_enter_procedure")):
 		_fail("Cannot activate procedure while outside operatory range")
 		return
@@ -161,6 +212,10 @@ func _run() -> void:
 	if bool(app.get("_walk_active")) or str(app.get("_view"))!="environment":
 		_fail("Escape did not restore the clinic overview")
 		return
+	if (app.get("_walk_hud") as Control).visible:
+		_fail("SR57 non-interactive walk HUD remained visible after Esc")
+		return
+	print("SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS bounded movement, look, scene cues, no cutting; headless only")
 	app.call("_switch_view","language")
 	if bool(app.get("_walk_active")) or bool(app.call("_walk_enter_procedure")):
 		_fail("Keyboard walk leaked into FSP/KP language view")
