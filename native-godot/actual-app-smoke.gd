@@ -553,6 +553,78 @@ func _run() -> void:
 		if not ((app.get("_progress") as Dictionary)[key] as Dictionary).is_empty():
 			_fail("SR52 reset retained quiz record " + key)
 			return
+	# SR53: browser chart shows all 32 permanent FDI numbers, not only
+	# six source training cases. Chart is a label/choice control, NOT 32
+	# source-backed surface models or a clinical odontogram validation.
+	var chart_quadrants: Array = [
+		["18","17","16","15","14","13","12","11"],
+		["21","22","23","24","25","26","27","28"],
+		["48","47","46","45","44","43","42","41"],
+		["31","32","33","34","35","36","37","38"]
+	]
+	app.call("_reset_progress")
+	for case_i in range(6):
+		app.call("_select_case",case_i)
+		app.call("_select_station",4)
+		app.call("_set_procedure_guided",true)
+		var case_page: VBoxContainer = app.get("_page")
+		var source_step: Dictionary = (((app.get("_content") as Dictionary)["practical"] as Array)[case_i] as Array)[0]
+		if str(source_step.get("type","")) != "tooth" or str(source_step.get("target","")) != FDIS[case_i]:
+			_fail("SR53 source first task FDI identity mismatch " + FDIS[case_i])
+			return
+		if case_page.find_children("KL_FDI_TOOTH_*","Button",true,false).size() != 32:
+			_fail("SR53 full 32-tooth selector missing for " + FDIS[case_i])
+			return
+		var seen: Dictionary = {}
+		for quadrant_index in range(4):
+			var group: VBoxContainer = case_page.find_child("KL_FDI_QUADRANT_" + str(quadrant_index),true,false) as VBoxContainer
+			var grid: GridContainer = case_page.find_child("KL_FDI_QUADRANT_GRID_" + str(quadrant_index),true,false) as GridContainer
+			var title: Label = case_page.find_child("KL_FDI_QUADRANT_LABEL_" + str(quadrant_index),true,false) as Label
+			if group == null or grid == null or title == null or grid.columns != 4 or grid.get_child_count() != 8:
+				_fail("SR53 source quadrant group missing or wrong size " + FDIS[case_i] + "/" + str(quadrant_index))
+				return
+			for tooth_index in range(8):
+				var tooth: String = chart_quadrants[quadrant_index][tooth_index]
+				var button: Button = grid.get_child(tooth_index) as Button
+				if button == null or button.text != tooth or button.name != "KL_FDI_TOOTH_" + tooth or not button.tooltip_text.contains("selection only") or seen.has(tooth):
+					_fail("SR53 FDI wrong quadrant order/identity/duplicate " + tooth)
+					return
+				seen[tooth] = true
+		if seen.size() != 32 or not seen.has(FDIS[case_i]):
+			_fail("SR53 32 permanent FDI keys/case tooth missing " + FDIS[case_i])
+			return
+		var volume: Node3D = app.get("_volume")
+		var unchanged_strokes: int = (volume.call("export_strokes") as Array).size()
+		var result_key: String = IDS[case_i] + ":practical:0"
+		app.call("_practical_target",0,"99")
+		if ((app.get("_progress") as Dictionary)["answers"] as Dictionary).has(result_key):
+			_fail("SR53 out-of-chart invalid FDI persisted " + FDIS[case_i])
+			return
+		var wrong_button: Button = case_page.find_child("KL_FDI_TOOTH_18",true,false) as Button
+		wrong_button.pressed.emit()
+		var wrong: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(result_key,{})
+		var feedback: Label = (app.get("_practical_feedback") as Dictionary).get(0)
+		if bool(wrong.get("correct",true)) or str(wrong.get("selected","")) != "18" or feedback == null or not feedback.text.contains("Incorrect FDI selection"):
+			_fail("SR53 wrong cross-quadrant tooth not rejected with usable feedback " + FDIS[case_i])
+			return
+		var correct_button: Button = case_page.find_child("KL_FDI_TOOTH_" + FDIS[case_i],true,false) as Button
+		correct_button.pressed.emit()
+		var correct: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(result_key,{})
+		if not bool(correct.get("correct",false)) or str(correct.get("selected","")) != FDIS[case_i] or not feedback.text.contains("Correct"):
+			_fail("SR53 correct FDI source target did not record " + FDIS[case_i])
+			return
+		if (volume.call("export_strokes") as Array).size() != unchanged_strokes or int(app.get("_case_index")) != case_i or int(app.get("_station_index")) != 4:
+			_fail("SR53 chart selection cut a model or changed the source case/station " + FDIS[case_i])
+			return
+		app.call("_set_procedure_guided",false)
+		if (app.get("_page") as VBoxContainer).find_children("KL_FDI_TOOTH_*","Button",true,false).size() != 32:
+			_fail("SR53 full selector missing from all-tasks mode " + FDIS[case_i])
+			return
+	app.call("_reset_progress")
+	if not ((app.get("_progress") as Dictionary)["answers"] as Dictionary).is_empty():
+		_fail("SR53 reset retained tooth-selection practice answers")
+		return
+	print("SR53_ALL_32_FDI_SIX_CASE_PRACTICAL_CHART_PASS source quadrant order, wrong/correct/retry, guided/all tasks, no cut, reset; headless only")
 	print("SR52_SIX_FDI_FOUR_QUIZ_FINISH_GATING_PASS wrong retry, current answer lock, final finish, restored recall, reset; headless only")
 	print("SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS source tooltips, exclusive active state, two-column mapping; headless only")
 	print("SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS incomplete/FDI/alternative/persistence/reset; structure-only and headless")

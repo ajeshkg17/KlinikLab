@@ -171,6 +171,34 @@ func _validate_fdi_camera(app: Node3D, width: int) -> bool:
 		return false
 	return true
 
+# SR53: 32 FDI label selectors must not force a horizontally overflowing
+# practical notes panel at the owner-PC and supported compact desktop widths.
+# This is headless Control geometry, never an on-screen RTX screenshot.
+func _validate_practical_fdi_chart(app: Node3D, window_width: int) -> bool:
+	root.size = Vector2i(window_width,900)
+	app.call("_switch_view","clinic")
+	app.call("_select_case",0)
+	app.call("_select_station",4)
+	app.call("_set_procedure_guided",true)
+	await process_frame
+	await process_frame
+	var page: VBoxContainer = app.get("_page")
+	var scroll: ScrollContainer = app.get("_page_scroll")
+	if not _expect(scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED and page.find_children("KL_FDI_TOOTH_*","Button",true,false).size() == 32, "SR53 chart missing or horizontal overflow permitted at " + str(window_width)):
+		return false
+	var width: float = scroll.size.x
+	for quadrant_index in range(4):
+		var grid: GridContainer = page.find_child("KL_FDI_QUADRANT_GRID_" + str(quadrant_index),true,false) as GridContainer
+		if not _expect(grid != null and grid.columns == 4 and grid.size.x <= width + 2.0, "SR53 quadrant grid wider than scroll pane at " + str(window_width)):
+			return false
+		if not _expect(grid.get_child(0).position.y == grid.get_child(3).position.y and grid.get_child(4).position.y > grid.get_child(0).position.y, "SR53 chart not four columns / two rows at " + str(window_width)):
+			return false
+		for node in grid.get_children():
+			var b: Button = node as Button
+			if not _expect(b != null and b.size.y <= 44.0 and b.size.x >= 35.0 and b.autowrap_mode == TextServer.AUTOWRAP_OFF and b.get_global_rect().end.x <= scroll.get_global_rect().end.x + 2.0, "SR53 FDI chip clipped or unreadably narrow at " + str(window_width)):
+				return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -280,5 +308,11 @@ func _run() -> void:
 		"SR51 writing-to-practical navigation or FDI 36 focus lost"):
 		return
 	print("SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS true center projection, close-up/overview, environment, navigation; headless only")
+	# SR53 separately validates that the 32-FDI practice selector remains
+	# compact in the right panel without stealing the central camera.
+	for window_width in [1600,1280,1024]:
+		if not await _validate_practical_fdi_chart(app,window_width):
+			return
+	print("SR53_FDI_CHART_1600_1280_1024_LAYOUT_PASS four quadrants, two-row grids, no clipping; headless only")
 	print("SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS")
 	quit(0)
