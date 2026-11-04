@@ -142,7 +142,11 @@ func _validate_fdi_camera(app: Node3D, width: int) -> bool:
 		# Physical incisor FDI 11 has a narrower crown silhouette than a
 		# molar; require a useful vertical size rather than forcing tooth
 		# widths to match. Every source FDI still has a nontrivial x extent.
-		var min_width_fraction := 0.105 if case_index == 2 else 0.20
+		# SR59: paired source-verified surface and editable tooth must BOTH fit
+		# the unoccluded center without navigation overlap. A selected tooth
+		# can be slightly narrower than the isolated close-up while preserving
+		# substantial visibility; below we check the COMPLETE left mesh AABB.
+		var min_width_fraction := 0.105 if case_index == 2 else 0.18 if case_index in [0,1,3] else 0.20
 		if not _expect(pixels.size.x > rect.size.x * min_width_fraction and pixels.size.y > rect.size.y * 0.28,
 			"SR51 selected FDI too small in 3D center " + CAMERA_FDI[case_index] + "@" + str(width) + " projected=" + str(pixels.size) + " area=" + str(rect.size)):
 			return false
@@ -168,6 +172,88 @@ func _validate_fdi_camera(app: Node3D, width: int) -> bool:
 	var room_rect: Rect2 = (app.get("_middle") as Control).get_global_rect()
 	var room_anchor: Vector2 = room_cam.unproject_position(Vector3(3.0, -1.8, -19.0))
 	if not _expect(room_cam.current and room_cam.fov <= 43.0 and room_rect.has_point(room_anchor), "SR51 imported clinic operatory not centered at " + str(width)):
+		return false
+	return true
+
+# SR59: all corners of the true imported left/reference mesh footprint,
+# not merely its x=-2.9 anchor, must project inside the unoccluded central
+# Control with a margin. Rects are headless projected pixels, not GPU pixels.
+func _project_world_box(box: AABB, camera: Camera3D) -> Rect2:
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for x in [0.0, 1.0]:
+		for y in [0.0, 1.0]:
+			for z in [0.0, 1.0]:
+				var world: Vector3 = box.position + box.size * Vector3(x,y,z)
+				if camera.is_position_behind(world):
+					return Rect2()
+				var projected: Vector2 = camera.unproject_position(world)
+				lo = lo.min(projected)
+				hi = hi.max(projected)
+	return Rect2(lo, hi - lo)
+
+func _validate_six_fdi_full_reference_fit(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width,physical_height)
+	app.call("_switch_view", "clinic")
+	for case_i in range(6):
+		app.call("_select_case", case_i)
+		app.call("_select_station", 4)
+		for mode in ["overview", "teeth"]:
+			app.call("_set_camera_mode", mode)
+			await process_frame
+			await process_frame
+			await process_frame
+			var cam: Camera3D = (app.get("_scene") as Node3D).get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+			var center: Rect2 = (app.get("_middle") as Control).get_global_rect()
+			var safe: Rect2 = app.call("_camera_content_rect")
+			var actual_ref: AABB = app.call("_visible_practical_reference_bounds")
+			if not _expect(cam != null and cam.current and center.has_point(safe.get_center()), "SR59 source camera missing " + CAMERA_FDI[case_i] + " at " + str(physical_width)):
+				return false
+			if case_i in [0,1,3]:
+				# Source-verified (FDI36/26) or clearly labelled mirror
+				# (FDI16) must have a REAL rendered geometry footprint.
+				if not _expect(actual_ref.size.length_squared() > 0.000001, "SR59 reference mesh missing / no bounds FDI" + CAMERA_FDI[case_i] + " " + mode):
+					return false
+				var ref_pixels := _project_world_box(actual_ref,cam)
+				if not _expect(ref_pixels.size.x > 8.0 and ref_pixels.size.y > 8.0 and
+					ref_pixels.position.x >= safe.position.x + 1.0 and ref_pixels.end.x <= safe.end.x - 1.0 and
+					ref_pixels.position.y >= safe.position.y + 1.0 and ref_pixels.end.y <= safe.end.y - 1.0,
+					"SR59 entire imported reference TOOTH clipped under navigation FDI" + CAMERA_FDI[case_i] + " " + mode + " at " + str(physical_width) + "x" + str(physical_height) + " projected=" + str(ref_pixels) + " safe=" + str(safe)):
+					return false
+			else:
+				if not _expect(actual_ref.size.length_squared() < 0.000001, "SR59 fabricated outside-source reference FDI" + CAMERA_FDI[case_i]):
+					return false
+			var editable: Node3D = app.get("_volume")
+			var mesh: MeshInstance3D = editable.get_node_or_null("KL_FDI%s_REGENERATED_TISSUE_MESH" % CAMERA_FDI[case_i]) as MeshInstance3D
+			var native_rect := _projected_bounds(mesh,cam) if mesh != null else Rect2()
+			if not _expect(native_rect.size.x > 8.0 and native_rect.size.y > 8.0 and
+				native_rect.position.x >= safe.position.x+1.0 and native_rect.end.x <= safe.end.x-1.0 and
+				native_rect.position.y >= safe.position.y+1.0 and native_rect.end.y <= safe.end.y-1.0,
+				"SR59 editable FDI rendered under opaque sidebar " + CAMERA_FDI[case_i] + " " + mode + " at " + str(physical_width)):
+				return false
+	return true
+
+func _validate_header_separation(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width,physical_height)
+	app.call("_update_responsive_layout")
+	await process_frame
+	await process_frame
+	await process_frame
+	var old_status: CanvasLayer = (app.get("_legacy_workspace") as Node3D).get_node_or_null("KL_NATIVE_WORKSPACE_STATUS_HUD") as CanvasLayer
+	var footer: Label = app.get("_status_footer") as Label
+	var grid: GridContainer = app.get("_toolbar") as GridContainer
+	var title: Label = app.get("_screen_title") as Label
+	if not _expect(old_status != null and not old_status.visible and footer != null and
+		footer.text.contains("not clinical or exam validated") and grid != null and title != null,
+		"SR59 old fixed-position prototype CanvasLayer still overlays camera controls"):
+		return false
+	var top_rect: Rect2 = grid.get_global_rect()
+	var title_rect: Rect2 = title.get_global_rect()
+	var footer_rect: Rect2 = footer.get_global_rect()
+	if not _expect(title_rect.end.y+2.0 <= top_rect.position.y and
+		footer_rect.position.y >= top_rect.end.y+10.0 and
+		footer_rect.end.y <= app.get_viewport().get_visible_rect().size.y+2.0,
+		"SR59 application status/header intersects responsive 12-action camera row " + str(physical_width) + "x" + str(physical_height)):
 		return false
 	return true
 
@@ -481,6 +567,14 @@ func _run() -> void:
 		if not await _validate_practical_task_first(app,size[0],size[1]):
 			return
 	print("SR58_PRACTICAL_START_1600_1280_1024_720_LAYOUT_PASS first task above long provenance; headless only")
+	# SR59 reproduces SR58 owner-PC FDI36 left reference under the opaque
+	# sidebar, and verifies all six sources × both modes × supported sizes.
+	for size in [[1600,900],[1280,900],[1024,900],[1280,720]]:
+		if not await _validate_header_separation(app,size[0],size[1]):
+			return
+		if not await _validate_six_fdi_full_reference_fit(app,size[0],size[1]):
+			return
+	print("SR59_ALL_SIX_FDI_REAL_REFERENCE_FULL_BOUNDS_AND_HEADER_FOUR_SIZES_PASS source meshes, margin, no prototype header overlap; headless projected pixels only")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:

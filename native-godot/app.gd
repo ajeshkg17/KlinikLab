@@ -76,6 +76,8 @@ var _nav_case_buttons: Array[Button] = []
 var _nav_station_buttons: Array[Button] = []
 var _page_scroll: ScrollContainer
 var _screen_title: Label
+# SR59: truthful app scope belongs in the shell footer, never over camera tabs.
+var _status_footer: Label
 # SR55: fixed readable toolbar chips in a responsive multi-row grid.
 var _toolbar: GridContainer
 var _toolbar_view_buttons: Dictionary = {}
@@ -144,6 +146,12 @@ func _ready() -> void:
 	workspace.set_script(load("res://sr1c-godot-clinic-overview.gd"))
 	_scene.add_child(workspace)
 	_legacy_workspace=workspace
+	# The hidden historical schematic creates its own screen-space CanvasLayer.
+	# Node3D.visible=false does NOT hide CanvasLayer children, so the old
+	# fixed-position prototype label overlapped the real SR55 camera row.
+	var obsolete_hud: CanvasLayer = _legacy_workspace.get_node_or_null("KL_NATIVE_WORKSPACE_STATUS_HUD") as CanvasLayer
+	if obsolete_hud != null:
+		obsolete_hud.visible = false
 	var clinic_script: GDScript = load("res://cc0-clinic.gd")
 	if clinic_script == null:
 		_show_blocked("Required source-pinned reviewed CC0 clinic runtime script unavailable")
@@ -837,13 +845,61 @@ func _editable_camera_bounds() -> AABB:
 	# caller separately displays provenance and missing-geometry status.
 	return AABB(Vector3(1.25, -1.95, -1.65), Vector3(3.30, 3.95, 3.30))
 
+# SR59: source-facing reference footprint is determined from the ACTUAL
+# visible GLB MeshInstance3D descendants and their full world-space AABBs.
+# The previous single x=-2.9 anchor and fixed x=-4.55 envelope did not
+# bound imported reference meshes, causing sidebar clipping on owner-PC.
+func _expand_visible_mesh_bounds(root: Node, extrema: Dictionary) -> void:
+	if root is Node3D and not (root as Node3D).is_visible_in_tree():
+		return
+	if root is MeshInstance3D:
+		var instance: MeshInstance3D = root as MeshInstance3D
+		if instance.mesh != null:
+			var local: AABB = instance.get_aabb()
+			for x in [0.0, 1.0]:
+				for y in [0.0, 1.0]:
+					for z in [0.0, 1.0]:
+						var p: Vector3 = instance.global_transform * (local.position + local.size * Vector3(x,y,z))
+						if not bool(extrema.get("found", false)):
+							extrema["lo"] = p
+							extrema["hi"] = p
+							extrema["found"] = true
+						else:
+							extrema["lo"] = (extrema["lo"] as Vector3).min(p)
+							extrema["hi"] = (extrema["hi"] as Vector3).max(p)
+	for child in root.get_children():
+		_expand_visible_mesh_bounds(child, extrema)
+
+func _visible_practical_reference_bounds() -> AABB:
+	var roots: Array[Node3D] = []
+	if _case_index == 0:
+		if _tooth16_mirror != null:
+			roots.append(_tooth16_mirror)
+		# Source FDI16 untouched before/after geometry may also be shown.
+		for original_name in ["KL_FDI16_BEFORE", "KL_FDI16_AFTER"]:
+			var original: Node3D = _scene.get_node_or_null(original_name) as Node3D
+			if original != null:
+				roots.append(original)
+	elif _case_index == 1 and _tooth36_reference != null:
+		roots.append(_tooth36_reference)
+	elif _case_index == 3 and _tooth26_reference != null:
+		roots.append(_tooth26_reference)
+	var extrema: Dictionary = {"found": false}
+	for root in roots:
+		_expand_visible_mesh_bounds(root, extrema)
+	if not bool(extrema["found"]):
+		return AABB()
+	return AABB(extrema["lo"], (extrema["hi"] as Vector3) - (extrema["lo"] as Vector3))
+
 func _practical_camera_bounds() -> AABB:
-	# FDI11/48/46 have no source-cleared left reference. Overview includes
-	# the original/source left object only for FDI16/36/26.
-	var compare_pair: bool = _camera_mode == "overview" and _case_index in [0, 1, 3]
-	if compare_pair:
-		return AABB(Vector3(-4.55, -1.95, -1.65), Vector3(9.10, 3.95, 3.30))
-	return _editable_camera_bounds()
+	# Never infer a 3D mesh from the other three licensing-blocked FDI refs.
+	# Both displayed objects are fitted whenever both are actually visible,
+	# regardless of whether the toolbar selects Teeth or Overview camera.
+	var bounds: AABB = _editable_camera_bounds()
+	var reference: AABB = _visible_practical_reference_bounds()
+	if reference.size.length_squared() > 0.000001:
+		bounds = bounds.merge(reference.grow(0.28))
+	return bounds
 
 func _frame_visible_camera() -> void:
 	if _scene == null or _middle == null:
@@ -865,11 +921,13 @@ func _frame_visible_camera() -> void:
 	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_FOV) * 0.5))
 	var target: AABB = _practical_camera_bounds()
 	var world_center: Vector3 = target.get_center()
-	# Depth from nearest target face; bounds never depend on unavailable or
-	# licensing-blocked GLBs. No source/synthetic mesh is moved or rescaled.
+	# Depth from nearest target face, using nearly all of the already inset
+	# center-safe rectangle (2.5% inner room). Avoid shrinking the two
+	# visible teeth merely to satisfy a stale fixed-comparison envelope.
+	# No source/synthetic mesh is moved or rescaled.
 	var depth := maxf(4.0, maxf(
-		focal * target.size.x / (content.size.x * 0.92),
-		focal * target.size.y / (content.size.y * 0.92)))
+		focal * target.size.x / (content.size.x * 0.975),
+		focal * target.size.y / (content.size.y * 0.975)))
 	var eye_z := target.end.z + depth
 	var center_depth := eye_z - world_center.z
 	var screen_center: Vector2 = content.get_center()
@@ -1030,7 +1088,10 @@ func _build_app() -> void:
 	_page_scroll.add_child(_page)
 	_progress_label = _heading("", 13)
 	outer.add_child(_progress_label)
-	outer.add_child(_heading("Synthetic educational cases · local only · no medical-device/clinical/exam validation · complete app port IN PROGRESS", 12))
+	_status_footer = _heading("NATIVE LEARNING PREVIEW · fictional cases · not clinical or exam validated · migration in progress", 12)
+	_status_footer.name = "KL_NATIVE_STATUS_FOOTER"
+	_status_footer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	outer.add_child(_status_footer)
 	_update_responsive_layout()
 	get_viewport().size_changed.connect(_update_responsive_layout)
 
@@ -1343,6 +1404,10 @@ func _refresh() -> void:
 			_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
+	# References can first be loaded by _show_practical inside this refresh;
+	# frame only after those real imported meshes and the panels exist.
+	if _view == "clinic" and _station_index == 4:
+		call_deferred("_frame_visible_camera")
 
 func _ensure_fdi36_reference() -> void:
 	if _tooth36_reference != null or _scene == null:

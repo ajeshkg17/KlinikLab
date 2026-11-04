@@ -103,6 +103,7 @@ jobs:
           node --test tests/sr55_native_responsive_toolbar.test.mjs
           node --test tests/sr57_game_style_walk_hud.test.mjs
           node --test tests/sr58_native_practical_task_first.test.mjs
+          node --test tests/sr59_reference_viewport_header.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -299,6 +300,7 @@ jobs:
           grep -F "SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR57_WALK_HUD_1600_1280_1024_720_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR58_PRACTICAL_START_1600_1280_1024_720_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR59_ALL_SIX_FDI_REAL_REFERENCE_FULL_BOUNDS_AND_HEADER_FOUR_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
