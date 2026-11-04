@@ -620,10 +620,23 @@ func _toolbar_button(title: String) -> Button:
 func _update_toolbar_columns() -> void:
 	if _toolbar == null:
 		return
-	# Preserve a >=142px label chip at common 1280x720/1536x864 and 1024
-	# compact desktop widths. All actions remain visible in multiple rows.
-	var width := float(get_viewport().get_visible_rect().size.x)
-	_toolbar.columns = clampi(int(floor((width - 24.0) / 150.0)), 4, 10)
+	# project.godot uses canvas_items stretch: the *logical* viewport stays
+	# 1600x900 even when the real owner-PC window is 1280x720 or 1536x864.
+	# Select columns from the real Windows desktop window width, not the
+	# fixed logical get_visible_rect() size which caused ten tiny strips.
+	var physical_width := maxf(320.0, float(get_window().size.x))
+	var logical_width := maxf(1.0, float(get_viewport().get_visible_rect().size.x))
+	_toolbar.columns = clampi(int(floor((physical_width - 24.0) / 150.0)), 4, 10)
+	# Keep label size and vertical click target legible after Godot applies
+	# its canvas-items stretch to the 1600x900 logical interface.
+	var inverse_canvas_scale := logical_width / physical_width
+	var toolbar_font_size := clampi(int(ceil(14.0 * inverse_canvas_scale)), 14, 22)
+	var toolbar_height := maxf(42.0, ceil(40.0 * inverse_canvas_scale))
+	for node in _toolbar.get_children():
+		var b: Button = node as Button
+		if b != null:
+			b.add_theme_font_size_override("font_size", toolbar_font_size)
+			b.custom_minimum_size.y = toolbar_height
 
 func _sync_toolbar_selection() -> void:
 	# Visual indicator only; _view/_camera_mode remain the authoritative
