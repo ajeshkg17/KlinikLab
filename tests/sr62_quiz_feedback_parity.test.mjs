@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
 
-const read = name => fs.readFileSync(new URL('../' + name, import.meta.url), 'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 
 test('SR62 browser quiz answer parity: selected response and feedback become visible without changing grading', () => {
  const browser = read('app.js');

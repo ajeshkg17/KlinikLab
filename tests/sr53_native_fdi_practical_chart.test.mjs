@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
-const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 
 const sourceQuadrants=[
   ['18','17','16','15','14','13','12','11'],

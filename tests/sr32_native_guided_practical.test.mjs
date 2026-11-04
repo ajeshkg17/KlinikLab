@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
 
-const read=name=>fs.readFileSync(new URL('../'+name,import.meta.url),'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 const app=read('native-godot/app.gd');
 test('SR32 original six FDI and seven stations remain unchanged',()=>{
  assert.match(app,/const CASE_IDS := \["molar", "endo", "anterior", "crown", "surgery", "perio"\]/);

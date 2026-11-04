@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
-const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 test('SR47 browser expert active recall precedes multiple-choice reveal in four quiz tracks',()=>{
  const browser=read('app.js'),app=read('native-godot/app.gd');
  assert.match(browser,/Freie Antwort · zuerst selbst formulieren/);

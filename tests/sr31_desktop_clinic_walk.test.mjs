@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
-const read = name => fs.readFileSync(new URL('../'+name,import.meta.url),'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 
 test('SR31 desktop walk is explicit keyboard/mouse input mapped to reusable movement/look intents',()=>{
  const app=read('native-godot/app.gd');
