@@ -1061,6 +1061,21 @@ func _frame_visible_camera() -> void:
 	camera.rotation = Vector3.ZERO
 	camera.current = true
 
+func _environment_room_bounds() -> AABB:
+	if _cc0_clinic == null or not _cc0_clinic.is_visible_in_tree():
+		return AABB()
+	# Imported meshes, not the hard-coded room/chair coordinates, determine
+	# the environment overview. Keep the standalone tray decoration out of
+	# the camera's framing envelope so it cannot shift the room off-center.
+	var extrema: Dictionary = {"found": false}
+	for node_name in ["KL_SOURCE_CC0_WHOLE_CLINIC", "KL_SOURCE_CC0_REAL_OPERATORY_CHAIR"]:
+		var room_part: Node3D = _cc0_clinic.get_node_or_null(node_name) as Node3D
+		if room_part != null:
+			_expand_visible_mesh_bounds(room_part, extrema)
+	if not bool(extrema["found"]):
+		return AABB()
+	return AABB(extrema["lo"], (extrema["hi"] as Vector3) - (extrema["lo"] as Vector3))
+
 func _frame_environment_camera() -> void:
 	# Never interfere with direct learner-controlled walk pose/recovery.
 	if _view != "environment" or _walk_active or _scene == null:
@@ -1071,15 +1086,28 @@ func _frame_environment_camera() -> void:
 	var camera: Camera3D = _scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
 	if camera == null:
 		return
+	var target: AABB = _environment_room_bounds()
+	if target.size.length_squared() < 0.00001:
+		push_warning("SR64 clinic overview: source room meshes have no visible bounds")
+		return
 	var screen: Vector2 = get_viewport().get_visible_rect().size
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.fov = CAMERA_ENV_FOV
 	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_ENV_FOV) * 0.5))
-	var world_center := Vector3(3.0, -1.8, -19.0)
-	var depth := 12.0
-	var aim_x := world_center.x - (content.get_center().x - 0.5 * screen.x) * depth / focal
-	camera.position = Vector3(aim_x, 3.4, -7.0)
-	camera.look_at(Vector3(aim_x, world_center.y, world_center.z))
+	var center: Vector3 = target.get_center()
+	# Full imported-room + chair envelope projected into the actual unobscured
+	# central column. Avoid a tilted hard-coded camera aimed below the floor:
+	# that produced a washed-out narrow horizontal room band on owner Windows.
+	var near_depth := maxf(5.0, maxf(
+		focal * target.size.x / (content.size.x * 0.92),
+		focal * target.size.y / (content.size.y * 0.92)))
+	var eye_z := target.end.z + near_depth
+	var center_depth := eye_z - center.z
+	var content_center: Vector2 = content.get_center()
+	var eye_x := center.x - (content_center.x - 0.5 * screen.x) * center_depth / focal
+	var eye_y := center.y + (content_center.y - 0.5 * screen.y) * center_depth / focal
+	camera.position = Vector3(eye_x, eye_y, eye_z)
+	camera.rotation = Vector3.ZERO
 	camera.current = true
 
 func _build_app() -> void:
@@ -1428,12 +1456,23 @@ func _set_camera_mode(mode: String) -> void:
 	call_deferred("_frame_visible_camera")
 
 func _apply_environment_visibility() -> void:
+	var show_room: bool = _view == "environment"
 	if _cc0_clinic != null:
-		# SR60: the CC0 room at z~-20 read as a narrow bright floor strip
-		# behind the much closer tooth meshes in the Clinic overview.
-		# Clinic is the focused six-case 3D tooth workspace in both cameras;
-		# the real CC0 room is retained unchanged in Environment / Walk.
-		_cc0_clinic.call("set_environment_visible", _view == "environment")
+		# SR60: whole CC0 room is environment-only, never overlaid on FDI.
+		_cc0_clinic.call("set_environment_visible", show_room)
+	# SR64: the FDI16 comparison's strong three-light rig was also illuminating
+	# bright imported CC0 room surfaces. Retune only for the room, restoring
+	# the EXACT original tooth-view values when returning to Clinic.
+	if _scene != null:
+		var world: WorldEnvironment = _scene.get_node_or_null("KL_ClinicBackground") as WorldEnvironment
+		if world != null and world.environment != null:
+			world.environment.ambient_light_energy = 0.36 if show_room else 0.85
+		var key: DirectionalLight3D = _scene.get_node_or_null("KL_ClinicKeyLight") as DirectionalLight3D
+		if key != null:
+			key.light_energy = 0.65 if show_room else 1.6
+		var fill: OmniLight3D = _scene.get_node_or_null("KL_ClinicFillLight") as OmniLight3D
+		if fill != null:
+			fill.light_energy = 0.42 if show_room else 1.2
 
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
@@ -1467,6 +1506,8 @@ func _switch_view(view: String) -> void:
 		_set_camera_mode(_camera_mode)
 		_show_case_geometry()
 	if view == "environment":
+		# Make imported room visible before computing actual mesh bounds.
+		_apply_environment_visibility()
 		_set_environment_camera()
 	_apply_environment_visibility()
 	if _legacy_workspace != null:
