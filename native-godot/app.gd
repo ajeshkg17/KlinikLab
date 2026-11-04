@@ -83,6 +83,8 @@ var _toolbar: GridContainer
 var _toolbar_view_buttons: Dictionary = {}
 var _toolbar_camera_buttons: Dictionary = {}
 var _answer_label: Label
+# SR62: persistent, readable source-answer status at the question itself.
+var _quiz_feedback_status: Label
 var _quiz_recall_edit: TextEdit
 var _quiz_recall_key := ""
 var _quiz_revealed := false
@@ -1198,6 +1200,7 @@ func _clear_page() -> void:
 	_language_draft = null
 	_language_draft_key = ""
 	_answer_label = null
+	_quiz_feedback_status = null
 	_quiz_recall_edit = null
 	_quiz_recall_key = ""
 	_quiz_next_button = null
@@ -1466,7 +1469,13 @@ func _refresh() -> void:
 		# The same fictional case notes remain after the task, rather than
 		# hiding Start guided practical below long clinical/provenance prose.
 		var practical_first: bool = _view == "clinic" and STATION_IDS[_station_index] == "practical"
+		# SR62: mirror the browser's task-first multiple-choice pane. Keep all
+		# original clinical/source notes, but place the question, feedback and
+		# answer controls above the long history/anatomy disclosures.
+		var quiz_first: bool = _view == "clinic" and STATION_IDS[_station_index] in ["interview", "handover", "viva", "clinic"]
 		if practical_first:
+			_show_station()
+		if quiz_first:
 			_show_station()
 		_page.add_child(_heading("Complaint: " + str(c["complaint"]), 15))
 		_page.add_child(_heading("Medical history: " + str(c["history"]), 14))
@@ -1482,7 +1491,7 @@ func _refresh() -> void:
 				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
 			else:
 				_page.add_child(_heading("FDI16 original immutable mesh states only. Editable source field unavailable or failed integrity checks.", 14))
-		if not practical_first:
+		if not practical_first and not quiz_first:
 			_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
@@ -1604,6 +1613,34 @@ func _reveal_quiz_options() -> void:
 	_quiz_revealed = true
 	_refresh()
 
+# SR62: reconstruct source-backed feedback from the existing saved answer,
+# without inventing grades, losing recall text, or revealing a new answer key.
+func _sync_quiz_feedback(station: String, index: int) -> void:
+	if _page == null or _quiz_feedback_status == null or _answer_label == null or station != STATION_IDS[_station_index] or index != _quiz_index:
+		return
+	var q: Dictionary = _content["quiz"][station][index]
+	var record: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(index), {})
+	var selected: int = int(record.get("selected", -1))
+	var has_choice: bool = selected >= 0 and selected < 3
+	var correct: bool = has_choice and bool(record.get("correct", false))
+	if has_choice:
+		_quiz_feedback_status.text = "✓ Correct source response · next question unlocked" if correct else "↻ Review suggested · choose another response"
+		_answer_label.text = ("Correct. " if correct else "Review suggested. ") + str(q["explanation"])
+		if station == "interview" and correct:
+			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[index])
+	else:
+		_quiz_feedback_status.text = "Not answered yet · formulate your German reasoning before choosing"
+		_answer_label.text = "Options are shown only after your active recall reveal. Explanations remain formative, not clinical grading."
+	for i in range(3):
+		var option: Button = _page.get_node_or_null("KL_QUIZ_OPTION_" + str(i)) as Button
+		if option == null:
+			continue
+		# Preserve source option order/text, and label the previous selection with
+		# words as well as a symbol (not dependent on color alone).
+		var marker := "✓ Correct selection · " if has_choice and selected == i and correct else "↻ Review selection · " if has_choice and selected == i else ""
+		option.text = marker + "%d. %s" % [i + 1, str(q["options"][i])]
+		option.disabled = correct
+
 func _show_quiz(station: String) -> void:
 	var questions: Array = _content["quiz"][station]
 	_quiz_index = clampi(_quiz_index, 0, questions.size() - 1)
@@ -1614,6 +1651,9 @@ func _show_quiz(station: String) -> void:
 			[str(patient["patientName"]),str(patient["patientAge"])], 14))
 	_page.add_child(_heading("Practice question %d/%d: %s" % [
 		_quiz_index + 1, questions.size(), str(q["question"])], 16))
+	_quiz_feedback_status = _heading("Not answered yet · formulate your German reasoning before choosing", 14)
+	_quiz_feedback_status.name = "KL_QUIZ_FEEDBACK_STATUS"
+	_page.add_child(_quiz_feedback_status)
 	# Browser expert-mode parity: formulate German reasoning before the answer reveal.
 	_quiz_recall_key = _quiz_recall_id(station,_quiz_index)
 	_page.add_child(_heading("Freie Antwort · zuerst selbst formulieren (formative active recall)",14))
@@ -1637,11 +1677,9 @@ func _show_quiz(station: String) -> void:
 			b.pressed.connect(_answer.bind(station, _quiz_index, i))
 			_page.add_child(b)
 	_answer_label = _heading("Options are shown only after your active recall reveal. Explanations remain formative, not clinical grading.", 14)
-	if existing.get("correct", false):
-		_answer_label.text = str(q["explanation"])
-		if station == "interview":
-			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[_quiz_index])
+	_answer_label.name = "KL_QUIZ_FEEDBACK_DETAIL"
 	_page.add_child(_answer_label)
+	_sync_quiz_feedback(station, _quiz_index)
 	# Browser parity: advancement requires the current source question correct.
 	# Returning to a previously solved case restores this state without regrading.
 	_quiz_next_button = _button("Finish station ✓" if _quiz_index == questions.size() - 1 else "Next source question")
@@ -1668,10 +1706,9 @@ func _answer(station: String, index: int, choice: int) -> void:
 	(_progress["answers"] as Dictionary)[answer_key] = {
 		"selected": choice, "correct": correct, "sourceQuestion": index}
 	_save_progress()
-	if _answer_label != null:
-		_answer_label.text = ("Correct. " if correct else "Review suggested. ") + str(q["explanation"])
-		if station == "interview" and correct:
-			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[index])
+	# Update the near-question status, detailed explanation and selected option
+	# in place. A full refresh would discard an unsaved recall editor draft.
+	_sync_quiz_feedback(station, index)
 	if correct:
 		# Keep the learner's unsaved active-recall note and unlock Next in place.
 		if _quiz_next_button != null:

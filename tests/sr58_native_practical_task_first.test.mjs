@@ -19,7 +19,7 @@ test('SR58 native practical puts real source task controls before model/anatomy/
   const practical = app.slice(app.indexOf('func _show_practical() -> void:'), app.indexOf('func _make_cut_slider(', app.indexOf('func _show_practical() -> void:')));
   assert.match(refresh, /var practical_first: bool = _view == "clinic" and STATION_IDS\[_station_index\] == "practical"/);
   assert.match(refresh, /if practical_first:\n\t\t\t_show_station\(\)/);
-  assert.match(refresh, /if not practical_first:\n\t\t\t_show_station\(\)/);
+  assert.match(refresh, /if not practical_first and not quiz_first:\n\t\t\t_show_station\(\)/);
   assert.match(practical, /var provenance_start_index: int = _page\.get_child_count\(\)/);
   assert.match(practical, /var provenance_child_count: int = _page\.get_child_count\(\) - provenance_start_index/);
   assert.match(practical, /start_guide\.name = "KL_PRACTICAL_START_GUIDE"/);
