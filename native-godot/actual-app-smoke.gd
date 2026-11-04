@@ -464,6 +464,72 @@ func _run() -> void:
 			if button == null or button.button_pressed != (i == station_i) or not button.tooltip_text.contains(str((source_stations[i] as Dictionary)["title"])):
 				_fail("SR50 station selection/source title lost at " + str(station_i) + "/" + str(i))
 				return
+	# SR62: the browser highlights a selected wrong/right option and supplies
+	# formative feedback. The native app must restore that same information
+	# from the EXISTING answer record after case/station navigation, without
+	# auto-revealing any new unsolved question or changing source scoring.
+	app.call("_reset_progress")
+	app.call("_switch_view", "clinic")
+	var sr62_tracks := ["interview", "letter", "handover", "written", "practical", "viva", "clinic"]
+	var sr62_questions: Dictionary = (app.get("_content") as Dictionary)["quiz"]
+	for case_i in range(6):
+		app.call("_select_case", case_i)
+		for station_i in [0,2,5,6]:
+			app.call("_select_station", station_i)
+			var track: String = sr62_tracks[station_i]
+			var source_q: Dictionary = (sr62_questions[track] as Array)[0]
+			var correct_idx: int = int(source_q["correct"])
+			var wrong_idx: int = (correct_idx + 1) % 3
+			var status: Label = app.get("_quiz_feedback_status")
+			var detail: Label = app.get("_answer_label")
+			var page: VBoxContainer = app.get("_page")
+			if status == null or status.name != "KL_QUIZ_FEEDBACK_STATUS" or detail == null or not status.text.contains("Not answered") or page.get_children().find(status) >= page.get_children().find(app.get("_quiz_recall_edit")):
+				_fail("SR62 initial near-question status not visible before recall " + FDIS[case_i] + "/" + track)
+				return
+			app.call("_reveal_quiz_options")
+			app.call("_answer", track, 0, wrong_idx)
+			status = app.get("_quiz_feedback_status")
+			detail = app.get("_answer_label")
+			page = app.get("_page")
+			var wrong_button: Button = page.get_node_or_null("KL_QUIZ_OPTION_" + str(wrong_idx)) as Button
+			var response_key: String = IDS[case_i] + ":" + track + ":0"
+			var stored_wrong: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(response_key, {})
+			if status == null or not status.text.contains("Review suggested") or detail == null or not detail.text.contains(str(source_q["explanation"])) or wrong_button == null or not wrong_button.text.contains("Review selection") or wrong_button.disabled or not (app.get("_quiz_next_button") as Button).disabled or bool(stored_wrong.get("correct",true)) or int(stored_wrong.get("selected",-1)) != wrong_idx:
+				_fail("SR62 wrong-choice feedback/retry/record not immediately visible " + response_key)
+				return
+			app.call("_select_station", 3) # safely leave for KP plan view
+			app.call("_select_station", station_i)
+			status = app.get("_quiz_feedback_status")
+			page = app.get("_page")
+			wrong_button = page.get_node_or_null("KL_QUIZ_OPTION_" + str(wrong_idx)) as Button
+			if status == null or not status.text.contains("Review suggested") or wrong_button == null or not wrong_button.text.contains("Review selection") or page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") != null:
+				_fail("SR62 saved wrong response was hidden after station re-entry " + response_key)
+				return
+			app.call("_answer", track, 0, correct_idx)
+			status = app.get("_quiz_feedback_status")
+			detail = app.get("_answer_label")
+			page = app.get("_page")
+			var correct_button: Button = page.get_node_or_null("KL_QUIZ_OPTION_" + str(correct_idx)) as Button
+			var stored_correct: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(response_key, {})
+			if status == null or not status.text.contains("Correct source response") or detail == null or not detail.text.contains(str(source_q["explanation"])) or correct_button == null or not correct_button.text.contains("Correct selection") or not correct_button.disabled or (app.get("_quiz_next_button") as Button).disabled or not bool(stored_correct.get("correct",false)):
+				_fail("SR62 solved feedback, locked options or Next state wrong " + response_key)
+				return
+			if track == "interview" and not detail.text.contains(str(((app.get("_cases") as Array)[case_i]["patientReply"] as Array)[0])):
+				_fail("SR62 source fictional patient reply absent after correct interview " + response_key)
+				return
+			app.call("_select_station", 3)
+			app.call("_select_station", station_i)
+			status = app.get("_quiz_feedback_status")
+			page = app.get("_page")
+			correct_button = page.get_node_or_null("KL_QUIZ_OPTION_" + str(correct_idx)) as Button
+			if status == null or not status.text.contains("Correct source response") or correct_button == null or not correct_button.disabled or not correct_button.text.contains("Correct selection") or (app.get("_quiz_next_button") as Button).disabled:
+				_fail("SR62 saved correct feedback and Next did not restore " + response_key)
+				return
+	app.call("_reset_progress")
+	if not ((app.get("_progress") as Dictionary)["answers"] as Dictionary).is_empty():
+		_fail("SR62 reset retained formative choice records")
+		return
+	print("SR62_SIX_FDI_FOUR_QUIZ_PERSISTENT_FEEDBACK_PASS 24 source tracks: incorrect retry, correct lock, navigation and reset; HEADLESS ONLY")
 	# SR52: source browser's completed-question gate and final station Finish.
 	# Exercise 6 fictional FDI cases x 4 quiz stations, including wrong retries,
 	# per-case progress restoration and no wraparound after the final answer.
