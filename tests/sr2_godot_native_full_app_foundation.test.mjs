@@ -94,7 +94,8 @@ test('SR23: native app fixes captured job13 overflow and dark action labels with
  assert.match(app,/func _frame_environment_camera\(\) -> void:/);
  assert.match(app,/func _frame_visible_camera\(\) -> void:/);
  assert.match(app,/camera\.position = Vector3\(eye_x, eye_y, eye_z\)/);
- assert.match(app,/camera\.position = Vector3\(aim_x, 3\.4, -7\.0\)/);
+ assert.match(app,/var target: AABB = _environment_room_bounds\(\)/);
+ assert.doesNotMatch(app,/camera\.position = Vector3\(aim_x, 3\.4, -7\.0\)/);
  assert.match(layout,/_validate_columns\(app,1600\)/);
  assert.match(layout,/_validate_columns\(app,1280\)/);
  assert.match(layout,/unlabelled dark action bar/);
