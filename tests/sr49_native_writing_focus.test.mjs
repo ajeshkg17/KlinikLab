@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import fs from 'node:fs';
 
-const read = path => fs.readFileSync(new URL('../' + path,import.meta.url),'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 
 test('SR49 native FSP/KP text-first layout matches browser hidden source sample reasoning', () => {
  const browser=read('app.js'), app=read('native-godot/app.gd');
