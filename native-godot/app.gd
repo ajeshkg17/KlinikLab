@@ -903,11 +903,13 @@ func _select_station(index: int) -> void:
 	_quiz_revealed = false
 	_save_draft()
 	var entering_practical := _station_index != 4 and index == 4 and _view == "clinic"
+	var leaving_practical := _station_index == 4 and index != 4 and _view == "clinic"
 	_station_index = index
-	# Practical defaults to a useful FDI-specific close-up. Existing camera
-	# buttons can still request the wider comparison/clinic overview.
-	if entering_practical:
-		_camera_mode = "teeth"
+	# Practical defaults to a useful FDI-specific close-up. Leaving it
+	# restores room overview; neither transition affects case/FDI identity.
+	# Camera buttons still allow deliberate manual overview/teeth switching.
+	if entering_practical or leaving_practical:
+		_camera_mode = "teeth" if entering_practical else "overview"
 		_apply_environment_visibility()
 	if STATION_IDS[index] != "practical":
 		_procedure_guided = false
