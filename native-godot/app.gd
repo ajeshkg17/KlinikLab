@@ -61,6 +61,7 @@ var _draft: TextEdit
 var _letter_fields: Dictionary = {}
 var _plan_fields: Dictionary = {}
 var _writing_review_label: Label
+var _writing_reference_panel: VBoxContainer
 var _writing_key := ""
 var _practical_feedback: Dictionary = {}
 var _boot_error := ""
@@ -610,18 +611,24 @@ func _style_action(button: Button) -> void:
 		style.set_content_margin_all(7)
 		button.add_theme_stylebox_override(state,style)
 
+func _writing_focus_active() -> bool:
+	return _view == "clinic" and STATION_IDS[_station_index] in ["letter", "written"]
+
 func _update_responsive_layout() -> void:
 	if _left_column == null or _right_column == null:
 		return
-	# Keep a genuinely usable central 3D view at desktop/windowed widths.
-	# At <800 px the current three-column workflow is not yet phone-ready.
+	# FSP/KP writing is a text-first learner workflow, not an operative 3D station.
+	# Expand its editor instead of squeezing it into a narrow overlay beside 3D.
 	var width := float(get_viewport().get_visible_rect().size.x)
 	var nav_width := clampf(width * 0.147, 174.0, 238.0)
 	var notes_width := clampf(width * 0.25, 310.0, 420.0)
+	var writing_focus := _writing_focus_active()
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
-	_right_column.custom_minimum_size.x = notes_width
-	_right_panel.custom_minimum_size.x = notes_width
+	_middle.visible = _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus
+	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus else Control.SIZE_FILL
+	_right_column.custom_minimum_size.x = 460.0 if writing_focus else notes_width
+	_right_panel.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 
 func _build_app() -> void:
 	_shell = CanvasLayer.new()
@@ -735,6 +742,7 @@ func _clear_page() -> void:
 	_letter_fields.clear()
 	_plan_fields.clear()
 	_writing_review_label = null
+	_writing_reference_panel = null
 	_writing_key = ""
 	_language_draft = null
 	_language_draft_key = ""
@@ -757,6 +765,8 @@ func _select_case(index: int) -> void:
 	_direct_bur_mode = false # explicitly opt in for every new tooth
 	_quiz_index = 0
 	_journey_stage = 0
+	if _page_scroll != null:
+		_page_scroll.scroll_vertical = 0
 	_ensure_case_volume(index)
 	_show_case_geometry()
 	if _atlas != null:
@@ -776,6 +786,8 @@ func _select_station(index: int) -> void:
 		_procedure_step_index = 0
 		_direct_bur_mode = false
 	_quiz_index = 0
+	if _page_scroll != null:
+		_page_scroll.scroll_vertical = 0
 	_save_progress()
 	_refresh()
 
@@ -942,13 +954,14 @@ func _switch_view(view: String) -> void:
 	_apply_environment_visibility()
 	if _legacy_workspace != null:
 		_legacy_workspace.visible = false
-	_middle.visible = view in ["clinic", "environment","anatomy", "scans"]
+	_update_responsive_layout()
 	_refresh()
 
 func _refresh() -> void:
 	if _page == null:
 		return
 	_clear_page()
+	_update_responsive_layout()
 	if _screen_title != null:
 		if _view == "environment":
 			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
@@ -979,6 +992,9 @@ func _refresh() -> void:
 		_show_radiology()
 	elif _view == "coverage":
 		_show_coverage()
+	elif _writing_focus_active():
+		# Source/browser text-first FSP/KP writing: show fields before long reference notes.
+		_show_station()
 	else:
 		_page.add_child(_heading("Complaint: " + str(c["complaint"]), 15))
 		_page.add_child(_heading("Medical history: " + str(c["history"]), 14))
@@ -1313,9 +1329,7 @@ func _show_writing(station: String) -> void:
 	var c: Dictionary = _cases[_case_index]
 	var prompt := "Write a German FSP clinical letter using the history, examination, uncertainty and plan." if station == "letter" else "Create a reasoned differential diagnosis and compare TWO treatment choices; include consent and safety checks."
 	_page.add_child(_heading(prompt, 15))
-	_page.add_child(_heading("Working diagnosis: " + str(c["diagnosis"]), 14))
-	_page.add_child(_heading("Option A: " + str(c["primaryPlan"]), 14))
-	_page.add_child(_heading("Option B: " + str(c["alternativePlan"]), 14))
+	_page.add_child(_heading("Fictional presenting complaint: " + str(c["complaint"]), 14))
 	_writing_key = _key()
 	if station == "letter":
 		_page.add_child(_heading("FSP Arztbrief · four source-aligned sections; handwritten practice remains separate.", 14))
@@ -1332,7 +1346,9 @@ func _show_writing(station: String) -> void:
 			_page.add_child(_heading(str(LETTER_LABELS[section_index]), 14))
 			var field := TextEdit.new()
 			field.name = "KL_FSP_LETTER_" + id
-			field.custom_minimum_size = Vector2(475, 115)
+			field.custom_minimum_size = Vector2(0, 130)
+			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			field.line_wrapping_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 			field.text = str(record.get(id, ""))
 			_letter_fields[id] = field
 			_page.add_child(field)
@@ -1352,7 +1368,9 @@ func _show_writing(station: String) -> void:
 			_page.add_child(_heading(str(PLAN_LABELS[i]), 14))
 			var field := TextEdit.new()
 			field.name = "KL_KP_PLAN_" + id
-			field.custom_minimum_size = Vector2(475, 115)
+			field.custom_minimum_size = Vector2(0, 130)
+			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			field.line_wrapping_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 			field.text = str(plan_record.get(id, ""))
 			_plan_fields[id] = field
 			_page.add_child(field)
@@ -1367,7 +1385,25 @@ func _show_writing(station: String) -> void:
 	_writing_review_label = _heading("Structural self-review not yet run. Content, safety, language and clinical quality must be assessed separately.", 13)
 	_writing_review_label.name = "KL_WRITING_STRUCTURE_FEEDBACK"
 	_page.add_child(_writing_review_label)
+	# Browser KP uses a closed "Reveal sample reasoning" detail. Keep sample
+	# diagnoses/treatment plans hidden until the learner opts to compare them.
+	var reveal := _button("Show fictional source diagnosis and illustrative plans (optional)")
+	reveal.name = "KL_WRITING_REVEAL_SOURCE"
+	reveal.pressed.connect(_toggle_writing_reference)
+	_page.add_child(reveal)
+	_writing_reference_panel = VBoxContainer.new()
+	_writing_reference_panel.name = "KL_WRITING_SOURCE_REFERENCE"
+	_writing_reference_panel.visible = false
+	_writing_reference_panel.add_child(_heading("Source reference · educational examples only, not a clinical answer key", 14))
+	_writing_reference_panel.add_child(_heading("Working diagnosis: " + str(c["diagnosis"]), 14))
+	_writing_reference_panel.add_child(_heading("Option A: " + str(c["primaryPlan"]), 14))
+	_writing_reference_panel.add_child(_heading("Option B: " + str(c["alternativePlan"]), 14))
+	_page.add_child(_writing_reference_panel)
 	_page.add_child(_heading("Self-study note only. No automatic validated FSP/KP grading.", 13))
+
+func _toggle_writing_reference() -> void:
+	if _writing_reference_panel != null:
+		_writing_reference_panel.visible = not _writing_reference_panel.visible
 
 func _save_draft() -> void:
 	if _writing_key.is_empty():
@@ -2212,6 +2248,7 @@ func _reset_progress() -> void:
 	_letter_fields.clear()
 	_plan_fields.clear()
 	_writing_review_label = null
+	_writing_reference_panel = null
 	_draft = null
 	_writing_key = ""
 	_progress["letterSectionsByCase"] = {}
