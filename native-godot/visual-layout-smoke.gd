@@ -211,6 +211,13 @@ func _validate_toolbar(app: Node3D, window_width: int, window_height: int, expec
 	var grid: GridContainer = app.get("_toolbar") as GridContainer
 	var view_buttons: Dictionary = app.get("_toolbar_view_buttons")
 	var camera_buttons: Dictionary = app.get("_toolbar_camera_buttons")
+	print("SR55_DIAGNOSTIC viewport=%s root=%s requested=%dx%d grid=%s gridName=%s columns=%d wanted=%d count=%d min=%s size=%s" % [
+		str(app.get_viewport().get_visible_rect().size),str(root.size),window_width,window_height,
+		str(grid != null),grid.name if grid != null else "NULL",
+		grid.columns if grid != null else -1,expected_columns,
+		grid.get_child_count() if grid != null else -1,
+		str(grid.get_combined_minimum_size()) if grid != null else "NULL",
+		str(grid.size) if grid != null else "NULL"])
 	if not _expect(grid != null and grid.name == "KL_NATIVE_RESPONSIVE_TOOLBAR" and grid.columns == expected_columns and grid.get_child_count() == 12, "SR55 toolbar missing/adaptive columns wrong at %dx%d" % [window_width,window_height]):
 		return false
 	if not _expect(view_buttons.size() == 10 and camera_buttons.size() == 2, "SR55 some source views or camera controls lost"):
