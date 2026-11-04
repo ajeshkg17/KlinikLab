@@ -51,6 +51,29 @@ func _validate_columns(app: Node3D, window_width: int) -> bool:
 		return false
 	return true
 
+func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
+	root.size = Vector2i(window_width,900)
+	app.call("_select_station",station_index)
+	await process_frame
+	await process_frame
+	var middle: Control = app.get("_middle")
+	var right: PanelContainer = app.get("_right_panel")
+	var page: VBoxContainer = app.get("_page")
+	var source_reference: VBoxContainer = page.get_node_or_null("KL_WRITING_SOURCE_REFERENCE") as VBoxContainer
+	var fields: Dictionary = app.get("_letter_fields") if station_index == 1 else app.get("_plan_fields")
+	var editor: TextEdit = fields.get("anamnese") if station_index == 1 else fields.get("diagnosis")
+	if not _expect(not middle.visible,"3D canvas still steals space from textual writing exercise"):
+		return false
+	if not _expect(right.size.x > float(window_width)*0.65,"writing workspace is still a squeezed side panel"):
+		return false
+	if not _expect(editor != null and editor.size.x > 600.0,"first writing editor did not expand within available width"):
+		return false
+	if not _expect(editor.get_global_rect().position.y < 730.0,"first editor remains buried below long case notes"):
+		return false
+	if not _expect(source_reference != null and not source_reference.visible,"sample reasoning exposed by default"):
+		return false
+	return true
+
 func _run() -> void:
 	root.size=Vector2i(1600,900)
 	var packed: PackedScene=load("res://app.tscn")
@@ -102,5 +125,18 @@ func _run() -> void:
 		return
 	if not await _validate_columns(app,1600):
 		return
+	# SR49 writing focus at owner-review 1600x900 and smaller 1280x900; no pixel evidence.
+	app.call("_switch_view","clinic")
+	for station_i in [1,3]:
+		if not await _validate_writing_focus(app,1600,station_i):
+			return
+		if not await _validate_writing_focus(app,1280,station_i):
+			return
+	app.call("_select_station",4)
+	await process_frame
+	await process_frame
+	if not _expect((app.get("_middle") as Control).visible,"native practical 3D viewport not restored"):
+		return
+	print("SR49_NATIVE_WRITING_FOCUS_1600_1280_LAYOUT_PASS expanded editors, top visibility, reference gate; headless not GPU")
 	print("SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS")
 	quit(0)
