@@ -1469,7 +1469,13 @@ func _refresh() -> void:
 		# The same fictional case notes remain after the task, rather than
 		# hiding Start guided practical below long clinical/provenance prose.
 		var practical_first: bool = _view == "clinic" and STATION_IDS[_station_index] == "practical"
+		# SR62: mirror the browser's task-first multiple-choice pane. Keep all
+		# original clinical/source notes, but place the question, feedback and
+		# answer controls above the long history/anatomy disclosures.
+		var quiz_first: bool = _view == "clinic" and STATION_IDS[_station_index] in ["interview", "handover", "viva", "clinic"]
 		if practical_first:
+			_show_station()
+		if quiz_first:
 			_show_station()
 		_page.add_child(_heading("Complaint: " + str(c["complaint"]), 15))
 		_page.add_child(_heading("Medical history: " + str(c["history"]), 14))
@@ -1485,7 +1491,7 @@ func _refresh() -> void:
 				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
 			else:
 				_page.add_child(_heading("FDI16 original immutable mesh states only. Editable source field unavailable or failed integrity checks.", 14))
-		if not practical_first:
+		if not practical_first and not quiz_first:
 			_show_station()
 	_progress_label.text = "Completed study records: %d · Answer records: %d · Offline educational progress" % [
 		(_progress["studied"] as Dictionary).size(), (_progress["answers"] as Dictionary).size()]
