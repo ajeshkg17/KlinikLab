@@ -68,6 +68,7 @@ var _answer_label: Label
 var _quiz_recall_edit: TextEdit
 var _quiz_recall_key := ""
 var _quiz_revealed := false
+var _quiz_next_button: Button
 var _draft: TextEdit
 # The browser FSP Arztbrief has four named sections, not one unstructured draft.
 var _letter_fields: Dictionary = {}
@@ -892,6 +893,7 @@ func _clear_page() -> void:
 	_answer_label = null
 	_quiz_recall_edit = null
 	_quiz_recall_key = ""
+	_quiz_next_button = null
 
 func _key() -> String:
 	return CASE_IDS[_case_index] + ":" + STATION_IDS[_station_index]
@@ -1302,6 +1304,7 @@ func _show_quiz(station: String) -> void:
 		for i in range(3):
 			var b := _button("%d. %s" % [i + 1, str(q["options"][i])])
 			b.name = "KL_QUIZ_OPTION_" + str(i)
+			b.disabled = bool(existing.get("correct", false))
 			b.pressed.connect(_answer.bind(station, _quiz_index, i))
 			_page.add_child(b)
 	_answer_label = _heading("Options are shown only after your active recall reveal. Explanations remain formative, not clinical grading.", 14)
@@ -1310,16 +1313,25 @@ func _show_quiz(station: String) -> void:
 		if station == "interview":
 			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[_quiz_index])
 	_page.add_child(_answer_label)
-	var next := _button("Next source question")
-	next.pressed.connect(_next_question)
-	_page.add_child(next)
+	# Browser parity: advancement requires the current source question correct.
+	# Returning to a previously solved case restores this state without regrading.
+	_quiz_next_button = _button("Finish station ✓" if _quiz_index == questions.size() - 1 else "Next source question")
+	_quiz_next_button.name = "KL_QUIZ_NEXT"
+	_quiz_next_button.disabled = not bool(existing.get("correct", false))
+	_quiz_next_button.pressed.connect(_next_question)
+	_page.add_child(_quiz_next_button)
+	if bool((_progress["studied"] as Dictionary).get(_key(), false)):
+		_page.add_child(_heading("Station previously completed · local formative record only.", 13))
 
 func _answer(station: String, index: int, choice: int) -> void:
-	if choice < 0 or choice > 2:
+	if choice < 0 or choice > 2 or station != STATION_IDS[_station_index] or index != _quiz_index:
 		return
 	var q: Dictionary = _content["quiz"][station][index]
-	var correct := choice == int(q["correct"])
 	var answer_key := _key() + ":" + str(index)
+	# Once solved, source browser disallows replacing a correct recorded choice.
+	if bool(((_progress["answers"] as Dictionary).get(answer_key, {}) as Dictionary).get("correct", false)):
+		return
+	var correct := choice == int(q["correct"])
 	(_progress["answers"] as Dictionary)[answer_key] = {
 		"selected": choice, "correct": correct, "sourceQuestion": index}
 	_save_progress()
@@ -1327,14 +1339,33 @@ func _answer(station: String, index: int, choice: int) -> void:
 		_answer_label.text = ("Correct. " if correct else "Review suggested. ") + str(q["explanation"])
 		if station == "interview" and correct:
 			_answer_label.text += "\nPatient: " + str((_cases[_case_index]["patientReply"] as Array)[index])
+	if correct:
+		# Keep the learner's unsaved active-recall note and unlock Next in place.
+		if _quiz_next_button != null:
+			_quiz_next_button.disabled = false
+		for i in range(3):
+			var option: Button = _page.get_node_or_null("KL_QUIZ_OPTION_" + str(i)) as Button
+			if option != null:
+				option.disabled = true
 
 func _next_question() -> void:
+	if not (STATION_IDS[_station_index] in ["interview", "handover", "viva", "clinic"]):
+		return
+	var key := _key() + ":" + str(_quiz_index)
+	if not bool(((_progress["answers"] as Dictionary).get(key, {}) as Dictionary).get("correct", false)):
+		# A direct method call must not bypass disabled UI controls.
+		return
 	_save_quiz_recall()
 	_quiz_revealed = false
 	var questions: Array = _content["quiz"][STATION_IDS[_station_index]]
-	_quiz_index = (_quiz_index + 1) % questions.size()
+	if _quiz_index >= questions.size() - 1:
+		# Last correct source question: browser Finish marks this case/station
+		# complete. This is a formative record, not an official exam score.
+		(_progress["studied"] as Dictionary)[_key()] = true
+		_save_progress()
+	else:
+		_quiz_index += 1
 	_refresh()
-
 
 func _language_task_key() -> String:
 	return _language_case + "|" + _language_phase
