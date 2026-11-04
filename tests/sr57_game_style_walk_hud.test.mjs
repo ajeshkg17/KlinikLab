@@ -23,7 +23,7 @@ test('SR57 game-like HUD is explicit, readable, within the center pane and point
  assert.match(app,/camera\.fov = 64\.0/);
  assert.match(app,/func _apply_walk_camera\(\) -> void:[\s\S]*?_update_walk_hud\(\)/);
  assert.match(app,/if not _walk_active or _view != "environment" or _walk == null:/);
- assert.doesNotMatch(app,/func _build_walk_hud\(\)[\s\S]*?func _walk_keyboard_allowed\(\)[\s\S]*?_direct_cut_world_ray/); // no direct cutting calls in HUD segment
+ const hudSection=app.slice(app.indexOf("func _build_walk_hud()"),app.indexOf("func _walk_keyboard_allowed()"));\n assert.doesNotMatch(hudSection,/cut_to|_direct_cut_world_ray|_record_practical/);
 });
 
 test('SR57 walk controller preserves movement bounds and adds optional limited pace plus station bearings',()=>{
@@ -36,7 +36,7 @@ test('SR57 walk controller preserves movement bounds and adds optional limited p
  assert.match(walk,/minf\(delta, 0\.1\)/);
  assert.match(walk,/clampf\(next\.x, WORLD_MIN\.x, WORLD_MAX\.x\)/);
  assert.match(walk,/clampf\(next\.z, WORLD_MIN\.y, WORLD_MAX\.y\)/);
- assert.match(walk,/NO\s*\n?#?/i); // documentation explicit about no calibrated collision
+ assert.match(walk,/no collision model/i); // no calibration claim
  assert.match(app,/Input\.is_physical_key_pressed\(KEY_SHIFT\)/);
  assert.match(app,/_walk\.call\("apply_move_intent", direction, delta, fast\)/);
  assert.match(app,/_walk\.call\("operatory_guidance"\)/);
