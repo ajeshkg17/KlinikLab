@@ -1348,7 +1348,7 @@ func _show_writing(station: String) -> void:
 			field.name = "KL_FSP_LETTER_" + id
 			field.custom_minimum_size = Vector2(0, 130)
 			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			field.line_wrapping_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+			field.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 			field.text = str(record.get(id, ""))
 			_letter_fields[id] = field
 			_page.add_child(field)
@@ -1370,7 +1370,7 @@ func _show_writing(station: String) -> void:
 			field.name = "KL_KP_PLAN_" + id
 			field.custom_minimum_size = Vector2(0, 130)
 			field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			field.line_wrapping_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+			field.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 			field.text = str(plan_record.get(id, ""))
 			_plan_fields[id] = field
 			_page.add_child(field)
