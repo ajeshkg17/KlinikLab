@@ -19,7 +19,9 @@ test('SR51 FDI case camera targets unmodified synthetic and source geometry in t
   assert.match(app,/content\.get_center\(\)/);
   assert.match(app,/call_deferred\("_frame_visible_camera"\)/);
   assert.match(app,/var entering_practical := _station_index != 4 and index == 4 and _view == "clinic"/);
-  assert.match(app,/if entering_practical:\n\t\t_camera_mode = "teeth"/);
+  assert.match(app,/var leaving_practical := _station_index == 4 and index != 4 and _view == "clinic"/);
+  assert.match(app,/if entering_practical or leaving_practical:/);
+  assert.match(app,/_camera_mode = "teeth" if entering_practical else "overview"/);
   assert.match(app,/if _view != "environment" or _walk_active or _scene == null:/);
   assert.match(app,/func _frame_environment_camera\(\) -> void:/);
 });
