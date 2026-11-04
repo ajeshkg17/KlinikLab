@@ -546,6 +546,51 @@ func _validate_writing_focus(app: Node3D, window_width: int, station_index: int)
 		return false
 	return true
 
+# SR62: real Godot Control hierarchy at supported desktop sizes. Quiz task
+# and an explicit answer-status label must be visible above long case notes.
+# These are HEADLESS geometry assertions, not owner-PC rendered pixels.
+func _validate_sr62_quiz_feedback(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width, physical_height)
+	app.call("_switch_view","clinic")
+	app.call("_select_case",1) # FDI36, same fictional source case as SR59 owner report
+	app.call("_select_station",0) # German patient interview, a native quiz
+	await process_frame
+	await process_frame
+	var notes: ScrollContainer = app.get("_page_scroll") as ScrollContainer
+	var page: VBoxContainer = app.get("_page") as VBoxContainer
+	var status: Label = app.get("_quiz_feedback_status") as Label
+	if not _expect(notes != null and page != null and status != null and status.text.contains("Not answered"),
+		"SR62 question status unavailable at %dx%d" % [physical_width,physical_height]):
+		return false
+	var question: Label = null
+	var case_notes: Label = null
+	for child in page.get_children():
+		if child is Label:
+			var heading: Label = child as Label
+			if heading.text.begins_with("Practice question 1/"):
+				question = heading
+			if heading.text.begins_with("Complaint: "):
+				case_notes = heading
+	if not _expect(question != null and case_notes != null and page.get_children().find(question) < page.get_children().find(status) and page.get_children().find(status) < page.get_children().find(case_notes),
+		"SR62 quiz not task-first before original case prose at %dx%d" % [physical_width,physical_height]):
+		return false
+	var viewport: Rect2 = notes.get_global_rect()
+	var feedback: Rect2 = status.get_global_rect()
+	if not _expect(feedback.position.x >= viewport.position.x - 1.0 and feedback.end.x <= viewport.end.x + 1.0 and feedback.position.y >= viewport.position.y - 1.0 and feedback.end.y <= viewport.end.y - 1.0 and feedback.size.y >= 15.0,
+		"SR62 near-question feedback outside visible notes viewport at %dx%d feedback=%s notes=%s" % [physical_width,physical_height,str(feedback),str(viewport)]):
+		return false
+	app.call("_reveal_quiz_options")
+	var quiz: Dictionary = ((app.get("_content") as Dictionary)["quiz"] as Dictionary)["interview"][0]
+	app.call("_answer","interview",0,(int(quiz["correct"])+1)%3)
+	await process_frame
+	await process_frame
+	status = app.get("_quiz_feedback_status") as Label
+	if not _expect(status != null and status.text.contains("Review suggested") and status.get_global_rect().end.y <= notes.get_global_rect().end.y + 1.0,
+		"SR62 answer feedback not visible after incorrect source choice at %dx%d" % [physical_width,physical_height]):
+		return false
+	app.call("_reset_progress")
+	return true
+
 func _run() -> void:
 	root.size=Vector2i(1600,900)
 	var packed: PackedScene=load("res://app.tscn")
@@ -665,6 +710,12 @@ func _run() -> void:
 		if not await _validate_sr60_owner_composition(app,size[0],size[1]):
 			return
 	print("SR60_SIX_FDI_OWNER_1536_864_RIGHT_EDGE_AND_SCENE_COMPOSITION_PASS full shell/button rectangles, CC0 environment isolation, useful 3D projected area; HEADLESS NOT GPU PIXELS")
+	# SR62 browser-native answer-feedback parity: task-first and visibly
+	# restored label across physical sizes, while owner-pixel review is pending.
+	for size in [[1600,900],[1536,864],[1280,900],[1280,720],[1024,900],[1024,720]]:
+		if not await _validate_sr62_quiz_feedback(app,size[0],size[1]):
+			return
+	print("SR62_TASK_FIRST_QUIZ_FEEDBACK_SIX_DESKTOP_SIZES_PASS task order and readable inline source feedback; HEADLESS NOT PIXELS")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:
