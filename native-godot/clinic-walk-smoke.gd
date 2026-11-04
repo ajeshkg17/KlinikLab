@@ -54,6 +54,61 @@ func _run() -> void:
 	if preview_camera == null or not preview_camera.current or absf(preview_camera.fov - 64.0) > 0.01:
 		_fail("SR57 gameplay preview camera FOV or visibility wrong")
 		return
+	# SR61: opt-in capture must not start hidden, and clicking the notes/sidebar
+	# must never grab the pointer or activate a simulated dental tool.
+	if bool(app.get("_walk_mouse_captured")) or Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_fail("SR61 walkthrough captured mouse without a deliberate scene click")
+		return
+	var outside_click := InputEventMouseButton.new()
+	outside_click.button_index = MOUSE_BUTTON_LEFT
+	outside_click.pressed = true
+	outside_click.position = Vector2(2.0,2.0)
+	app.call("_input",outside_click)
+	if bool(app.get("_walk_mouse_captured")):
+		_fail("SR61 clicking outside the 3D pane captured mouse")
+		return
+	var scene_click := InputEventMouseButton.new()
+	scene_click.button_index = MOUSE_BUTTON_LEFT
+	scene_click.pressed = true
+	scene_click.position = (app.get("_middle") as Control).get_global_rect().get_center()
+	app.call("_input",scene_click)
+	if not bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		_fail("SR61 left click inside the central 3D pane failed to capture mouse")
+		return
+	var mouse_move := InputEventMouseMotion.new()
+	mouse_move.position = scene_click.position
+	mouse_move.relative = Vector2(1.0,1.0)
+	mouse_move.screen_relative = Vector2(120.0,-20.0)
+	app.call("_input",mouse_move)
+	if absf(float(walker.get("yaw")) + 120.0 * 0.0035) > 0.0001 or float(walker.get("pitch")) <= -0.08:
+		_fail("SR61 captured FPS mouse look did not use unscaled screen_relative yaw/pitch")
+		return
+	if not hud_title.text.contains("Mouse captured") or not hud_guide.text.contains("Esc releases"):
+		_fail("SR61 captured HUD does not explain pointer release")
+		return
+	var release_key := InputEventKey.new()
+	release_key.keycode = KEY_ESCAPE
+	release_key.pressed = true
+	app.call("_input",release_key)
+	if not bool(app.get("_walk_active")) or bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
+		_fail("SR61 first Escape must release cursor without leaving walk")
+		return
+	var released_yaw: float = float(walker.get("yaw"))
+	app.call("_input",mouse_move)
+	if absf(float(walker.get("yaw"))-released_yaw) > 0.0001:
+		_fail("SR61 mouse motion still rotates camera after Escape release")
+		return
+	app.call("_input",scene_click)
+	if not bool(app.get("_walk_mouse_captured")):
+		_fail("SR61 cannot re-capture FPS mouse after Escape")
+		return
+	# Simulates OS/window focus loss; must release and stay released on return.
+	app.call("_notification",1005) # Node.NOTIFICATION_WM_WINDOW_FOCUS_OUT
+	if bool(app.get("_walk_mouse_captured")) or Input.mouse_mode != Input.MOUSE_MODE_VISIBLE or not bool(app.get("_walk_active")):
+		_fail("SR61 Alt-Tab/window defocus left mouse captured or stopped the walk")
+		return
+	walker.call("reset")
+	app.call("_apply_walk_camera")
 	var op_guidance: Dictionary = walker.call("operatory_guidance")
 	var language_guidance: Dictionary = walker.call("language_guidance")
 	if str(op_guidance.get("bearing","")) != "AHEAD" or bool(op_guidance.get("inRange",true)) or bool(language_guidance.get("inRange",true)):
@@ -215,6 +270,7 @@ func _run() -> void:
 	if (app.get("_walk_hud") as Control).visible:
 		_fail("SR57 non-interactive walk HUD remained visible after Esc")
 		return
+	print("SR61_DESKTOP_FPS_MOUSE_CAPTURE_RELEASE_FOCUS_PASS click-only capture, physical-pixel look, Escape, defocus, no tool activation; HEADLESS ONLY")
 	print("SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS bounded movement, look, scene cues, no cutting; headless only")
 	app.call("_switch_view","language")
 	if bool(app.get("_walk_active")) or bool(app.call("_walk_enter_procedure")):
