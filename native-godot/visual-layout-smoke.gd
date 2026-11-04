@@ -440,6 +440,80 @@ func _validate_practical_task_first(app: Node3D, width: int, height: int) -> boo
 	app.call("_set_procedure_guided",false)
 	return true
 
+# SR60: owner-PC 1536x864 screenshot showed right-edge clipping and a
+# bright CC0 floor band behind Clinic tooth training. Validate actual
+# laid-out Godot Control rectangles and projected case-mesh coordinates.
+# This is logical->physical pixel-space geometry in headless Godot, NOT
+# a screenshot from the owner's Windows renderer.
+func _validate_sr60_owner_composition(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width,physical_height)
+	app.call("_switch_view","clinic")
+	await process_frame
+	await process_frame
+	var viewport_size: Vector2 = app.get_viewport().get_visible_rect().size
+	var screen_rect := Rect2(Vector2.ZERO,viewport_size)
+	var grid: GridContainer = app.get("_toolbar") as GridContainer
+	var left: PanelContainer = app.get("_left_panel") as PanelContainer
+	var right: PanelContainer = app.get("_right_panel") as PanelContainer
+	var middle: Control = app.get("_middle") as Control
+	var notes: ScrollContainer = app.get("_page_scroll") as ScrollContainer
+	var environment: Node3D = app.get("_cc0_clinic") as Node3D
+	if not _expect(grid != null and left != null and right != null and middle != null and notes != null and environment != null, "SR60 missing native columns"):
+		return false
+	for i in range(6):
+		app.call("_select_case",i)
+		app.call("_select_station",4)
+		for mode in ["overview","teeth"]:
+			app.call("_set_camera_mode",mode)
+			await process_frame
+			await process_frame
+			await process_frame
+			var left_rect: Rect2 = left.get_global_rect()
+			var right_rect: Rect2 = right.get_global_rect()
+			var mid_rect: Rect2 = middle.get_global_rect()
+			var toolbar_rect: Rect2 = grid.get_global_rect()
+			var notes_rect: Rect2 = notes.get_global_rect()
+			if not _expect(toolbar_rect.position.x >= -1.0 and toolbar_rect.end.x <= viewport_size.x - 4.0 and
+				left_rect.position.x >= -1.0 and right_rect.end.x <= viewport_size.x - 4.0 and
+				left_rect.end.x <= mid_rect.position.x + 2.0 and mid_rect.end.x <= right_rect.position.x + 2.0 and
+				right_rect.end.y <= viewport_size.y + 2.0 and
+				notes_rect.end.x <= viewport_size.x - 4.0,
+				"SR60 right-edge case-pane/toolbar clipped FDI"+CAMERA_FDI[i]+" "+mode+" at "+str(physical_width)+"x"+str(physical_height)+" right="+str(right_rect)+" toolbar="+str(toolbar_rect)+" screen="+str(screen_rect)):
+				return false
+			if not _expect(grid.columns <= 8 and grid.get_child_count() == 12 and not environment.visible,
+				"SR60 responsive toolbar lost controls or CC0 floor still bleeds through Clinic "+CAMERA_FDI[i]+" "+mode):
+				return false
+			for control in grid.get_children():
+				var chip: Control = control as Control
+				var bounds: Rect2 = chip.get_global_rect()
+				if not _expect(bounds.position.x >= toolbar_rect.position.x - 2.0 and
+					bounds.end.x <= toolbar_rect.end.x + 2.0 and
+					bounds.end.x <= viewport_size.x - 4.0,
+					"SR60 camera/tab clipped at physical right edge "+str(physical_width)+" / "+str(chip.name)):
+					return false
+			if not _expect(mid_rect.size.x >= viewport_size.x * 0.54 and mid_rect.size.y >= 340.0 and
+				mid_rect.position.y >= toolbar_rect.end.y + 2.0,
+				"SR60 center canvas remains a narrow strip at "+str(physical_width)+"x"+str(physical_height)+" middle="+str(mid_rect)):
+				return false
+			var mesh: MeshInstance3D = (app.get("_volume") as Node3D).get_node_or_null("KL_FDI%s_REGENERATED_TISSUE_MESH" % CAMERA_FDI[i]) as MeshInstance3D
+			var camera: Camera3D = (app.get("_scene") as Node3D).get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+			var projected: Rect2 = _projected_bounds(mesh,camera) if mesh != null else Rect2()
+			if not _expect(projected.size.y >= mid_rect.size.y * 0.27 and
+				projected.position.y >= mid_rect.position.y and projected.end.y <= mid_rect.end.y,
+				"SR60 tooth does not occupy useful vertical center space FDI"+CAMERA_FDI[i]+" "+mode+"@"+str(physical_width)+" project="+str(projected)):
+				return false
+			var page: VBoxContainer = app.get("_page") as VBoxContainer
+			if not _expect(page.size.x <= notes.size.x + 2.0,
+				"SR60 source case-content pane requires horizontal overflow FDI"+CAMERA_FDI[i]+" "+mode+"@"+str(physical_width)):
+				return false
+	# The CC0 room is still present, unmodified and explicitly viewable
+	# in Environment, including SR57 walk mode.
+	app.call("_switch_view","environment")
+	await process_frame
+	if not _expect(environment.visible, "SR60 erroneously removed the imported CC0 clinic from Environment"):
+		return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -551,7 +625,7 @@ func _run() -> void:
 	print("SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS true center projection, close-up/overview, environment, navigation; headless only")
 	# SR55 exact owner-PC rejected widths/heights plus 1024px compact and
 	# prior 1600x900 layout: all twelve actions must remain readable.
-	for size_and_columns in [[1280,720,8],[1536,864,10],[1024,720,6],[1600,900,10]]:
+	for size_and_columns in [[1280,720,7],[1536,864,8],[1024,720,6],[1600,900,8]]:
 		if not await _validate_toolbar(app,size_and_columns[0],size_and_columns[1],size_and_columns[2]):
 			return
 	print("SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS real labels, four geometries, active view/camera, no clipping; headless only")
@@ -575,6 +649,12 @@ func _run() -> void:
 		if not await _validate_six_fdi_full_reference_fit(app,size[0],size[1]):
 			return
 	print("SR59_ALL_SIX_FDI_REAL_REFERENCE_FULL_BOUNDS_AND_HEADER_FOUR_SIZES_PASS source meshes, margin, no prototype header overlap; headless projected pixels only")
+	# SR60 includes the exact owner-PC maximized 1536x864 case in addition
+	# to compact and previously checked dimensions.
+	for size in [[1600,900],[1536,864],[1280,900],[1280,720],[1024,900],[1024,720]]:
+		if not await _validate_sr60_owner_composition(app,size[0],size[1]):
+			return
+	print("SR60_SIX_FDI_OWNER_1536_864_RIGHT_EDGE_AND_SCENE_COMPOSITION_PASS full shell/button rectangles, CC0 environment isolation, useful 3D projected area; HEADLESS NOT GPU PIXELS")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:
