@@ -95,6 +95,7 @@ jobs:
           node --test tests/sr47_active_recall_quiz.test.mjs
           node --test tests/sr48_fsp_kp_writing_review.test.mjs
           node --test tests/sr49_native_writing_focus.test.mjs
+          node --test tests/sr50_native_navigation_responsive.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -209,6 +210,7 @@ jobs:
           grep -F "SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR49_FSP_KP_WRITING_FOCUS_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+          grep -F "SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
       - name: SR31 real native desktop walk and selected FDI operatory input (HEADLESS, NO PC PIXELS)
         run: |
           set -euo pipefail
@@ -274,6 +276,7 @@ jobs:
           cat "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR49_NATIVE_WRITING_FOCUS_1600_1280_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR50_FDI_NAV_1600_1280_1024_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
