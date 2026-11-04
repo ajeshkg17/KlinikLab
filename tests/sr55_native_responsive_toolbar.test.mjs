@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readSourceContract } from './source-contract-text.mjs';
 import { readFileSync } from 'node:fs';
-const read = path => readFileSync(new URL('../'+path, import.meta.url), 'utf8');
+const read = path => readSourceContract('../'+path, import.meta.url);
 const app=read('native-godot/app.gd');
 const visual=read('native-godot/visual-layout-smoke.gd');
 const workflow=read('.github/workflows/sr1c-godot-4-7-native-parse.yml');
