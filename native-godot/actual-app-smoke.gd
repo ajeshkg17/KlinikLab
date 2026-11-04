@@ -61,8 +61,8 @@ func _run() -> void:
 		var case: Dictionary = (app_content["cases"] as Array)[i]
 		if (str(info.get("fdi",""))!=FDIS[i] or str(info.get("caseId",""))!=IDS[i] or
 			str(case.get("fdi",""))!=FDIS[i] or not pathways.has(IDS[i]) or
-			(app_content["practical"][i] as Array).size()<5 or not clinic.visible):
-			_fail("Real app CC0 scene regressed source case FDI/treatment "+str(i))
+			(app_content["practical"][i] as Array).size()<5 or clinic.visible or not clinic.is_inside_tree() or str(app.get("_camera_mode"))!="teeth"):
+			_fail("Real app source FDI or intentional loaded-but-hidden CC0 room regressed at "+str(i))
 			return
 		# Source-grounded anatomy reference is visible for every case, never actionable.
 		var section_names := ["External morphology / model provenance", "Internal structures / clinical anatomy", "Source-supported facts / original practical", "Illustrative and synthetic educational content"]

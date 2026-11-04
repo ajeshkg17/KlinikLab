@@ -89,8 +89,12 @@ test('SR23: native app fixes captured job13 overflow and dark action labels with
  assert.match(app,/button\.add_theme_color_override\("font_color",Color\("#f5fbff"\)\)/);
  assert.match(app,/button\.autowrap_mode = TextServer\.AUTOWRAP_WORD_SMART/);
  assert.match(app,/_style_action\(menu\)/);
- assert.match(app,/camera\.position=Vector3\(3\.0,4\.2,-4\.5\)/);
- assert.match(app,/camera\.position = Vector3\(2\.2, 1\.7, 12\.5\)/);
+ // SR51 replaces obsolete fixed camera coordinates with viewport-safe camera
+ // geometry, while SR23 still requires responsive text panes and contrast.
+ assert.match(app,/func _frame_environment_camera\(\) -> void:/);
+ assert.match(app,/func _frame_visible_camera\(\) -> void:/);
+ assert.match(app,/camera\.position = Vector3\(eye_x, eye_y, eye_z\)/);
+ assert.match(app,/camera\.position = Vector3\(aim_x, 3\.4, -7\.0\)/);
  assert.match(layout,/_validate_columns\(app,1600\)/);
  assert.match(layout,/_validate_columns\(app,1280\)/);
  assert.match(layout,/unlabelled dark action bar/);

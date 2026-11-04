@@ -23,13 +23,13 @@ test('SR50 compact native six-FDI navigation preserves source station identity a
  assert.doesNotMatch(native,/var btn := _button\("%d · %s" % \[i \+ 1, str\(st\["title"\]\)\]\)/);
 });
 
-test('SR50 responsive headless regression leaves camera framing for later', () => {
+test('SR50 responsive FDI navigation remains separate from SR51 viewport camera framing', () => {
  const native = read('native-godot/app.gd');
  const layout = read('native-godot/visual-layout-smoke.gd');
  const app = read('native-godot/actual-app-smoke.gd');
  const workflow = read('.github/workflows/sr1c-godot-4-7-native-parse.yml');
- assert.match(native,/camera\.position = Vector3\(2\.2, 1\.7, 12\.5\)/);
- assert.match(native,/camera\.fov = 44\.0/);
+ assert.match(native,/func _practical_camera_bounds\(\) -> AABB:/);
+ assert.match(native,/func _frame_visible_camera\(\) -> void:/);
  assert.match(layout,/SR50_FDI_NAV_1600_1280_1024_LAYOUT_PASS/);
  assert.match(layout,/for nav_width in \[1600,1280,1024\]:/);
  assert.match(layout,/grid\.get_child\(0\)\.position\.y == grid\.get_child\(1\)\.position\.y/);

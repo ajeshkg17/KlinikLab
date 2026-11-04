@@ -96,6 +96,7 @@ jobs:
           node --test tests/sr48_fsp_kp_writing_review.test.mjs
           node --test tests/sr49_native_writing_focus.test.mjs
           node --test tests/sr50_native_navigation_responsive.test.mjs
+          node --test tests/sr51_native_camera_framing.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -277,6 +278,7 @@ jobs:
           grep -F "SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR49_NATIVE_WRITING_FOCUS_1600_1280_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR50_FDI_NAV_1600_1280_1024_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |

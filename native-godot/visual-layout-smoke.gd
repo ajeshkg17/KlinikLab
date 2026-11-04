@@ -88,6 +88,89 @@ func _validate_navigation(app: Node3D, window_width: int) -> bool:
 		return false
 	return true
 
+# SR51: projection geometry of the *actual* six editable meshes into the
+# unoccluded middle pane. Headless math, never native GPU pixels or acceptance.
+const CAMERA_FDI := ["16", "36", "11", "26", "48", "46"]
+
+func _projected_bounds(mesh: MeshInstance3D, cam: Camera3D) -> Rect2:
+	var region: AABB = mesh.get_aabb()
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for xx in [0.0, 1.0]:
+		for yy in [0.0, 1.0]:
+			for zz in [0.0, 1.0]:
+				var local: Vector3 = region.position + region.size * Vector3(xx, yy, zz)
+				var world: Vector3 = mesh.global_transform * local
+				if cam.is_position_behind(world):
+					return Rect2()
+				var pixel: Vector2 = cam.unproject_position(world)
+				lo.x = minf(lo.x, pixel.x)
+				lo.y = minf(lo.y, pixel.y)
+				hi.x = maxf(hi.x, pixel.x)
+				hi.y = maxf(hi.y, pixel.y)
+	if not is_finite(lo.x) or not is_finite(hi.x):
+		return Rect2()
+	return Rect2(lo, hi - lo)
+
+func _validate_fdi_camera(app: Node3D, width: int) -> bool:
+	root.size = Vector2i(width, 900)
+	app.call("_switch_view", "clinic")
+	for case_index in range(6):
+		app.call("_select_case", case_index)
+		app.call("_select_station", 4)
+		app.call("_set_camera_mode", "teeth")
+		await process_frame
+		await process_frame
+		await process_frame
+		var scene: Node3D = app.get("_scene")
+		var camera: Camera3D = scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+		var center: Control = app.get("_middle")
+		var source: Node3D = app.get("_volume")
+		var nav_cases: Array = app.get("_nav_case_buttons")
+		var nav_stations: Array = app.get("_nav_station_buttons")
+		if not _expect(camera != null and camera.current and camera.fov <= 42.0 and center.visible, "SR51 selected practical close-up camera absent"):
+			return false
+		if not _expect(source != null and source.visible and source.name == "KL_FDI%s_EDITABLE_CUT" % CAMERA_FDI[case_index], "SR51 wrong FDI volume used to frame " + CAMERA_FDI[case_index]):
+			return false
+		if not _expect(nav_cases[case_index].button_pressed and nav_stations[4].button_pressed and int(app.get("_case_index")) == case_index and int(app.get("_station_index")) == 4, "SR51 framing changed case or station navigation"):
+			return false
+		var mesh: MeshInstance3D = source.get_node_or_null("KL_FDI%s_REGENERATED_TISSUE_MESH" % CAMERA_FDI[case_index]) as MeshInstance3D
+		if not _expect(mesh != null and mesh.mesh != null, "SR51 synthetic source-derived geometry missing " + CAMERA_FDI[case_index]):
+			return false
+		var rect: Rect2 = center.get_global_rect()
+		var pixels: Rect2 = _projected_bounds(mesh,camera)
+		# Physical incisor FDI 11 has a narrower crown silhouette than a
+		# molar; require a useful vertical size rather than forcing tooth
+		# widths to match. Every source FDI still has a nontrivial x extent.
+		var min_width_fraction := 0.105 if case_index == 2 else 0.20
+		if not _expect(pixels.size.x > rect.size.x * min_width_fraction and pixels.size.y > rect.size.y * 0.28,
+			"SR51 selected FDI too small in 3D center " + CAMERA_FDI[case_index] + "@" + str(width) + " projected=" + str(pixels.size) + " area=" + str(rect.size)):
+			return false
+		if not _expect(pixels.position.x >= rect.position.x + 2.0 and pixels.end.x <= rect.end.x - 2.0 and pixels.position.y >= rect.position.y + 2.0 and pixels.end.y <= rect.end.y - 2.0, "SR51 FDI close-up hidden under side panels " + CAMERA_FDI[case_index] + "@" + str(width)):
+			return false
+		app.call("_set_camera_mode", "overview")
+		await process_frame
+		await process_frame
+		var wide: Rect2 = _projected_bounds(mesh,camera)
+		if not _expect(wide.size.x > rect.size.x * 0.095 and wide.position.x > rect.position.x and wide.end.x < rect.end.x and wide.position.y > rect.position.y and wide.end.y < rect.end.y, "SR51 overview clipped selected FDI " + CAMERA_FDI[case_index] + "@" + str(width)):
+			return false
+		if case_index in [0,1,3]:
+			# FDI16 untouched original, FDI36/26 source meshes occupy the left.
+			# A compare view must not push that source side under navigation.
+			var left_anchor: Vector2 = camera.unproject_position(Vector3(-2.9, 0.0, 0.0))
+			if not _expect(rect.has_point(left_anchor), "SR51 source comparison side hidden " + CAMERA_FDI[case_index] + "@" + str(width)):
+				return false
+	# Ensure the standalone environment overview is also in the actual middle.
+	app.call("_switch_view", "environment")
+	await process_frame
+	await process_frame
+	var room_cam: Camera3D = (app.get("_scene") as Node3D).get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	var room_rect: Rect2 = (app.get("_middle") as Control).get_global_rect()
+	var room_anchor: Vector2 = room_cam.unproject_position(Vector3(3.0, -1.8, -19.0))
+	if not _expect(room_cam.current and room_cam.fov <= 43.0 and room_rect.has_point(room_anchor), "SR51 imported clinic operatory not centered at " + str(width)):
+		return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -152,7 +235,7 @@ func _run() -> void:
 	print("SR50_FDI_NAV_1600_1280_1024_LAYOUT_PASS compact two-column cases, one-line stations; headless only")
 	app.call("_set_camera_mode","teeth")
 	var cam: Camera3D=scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
-	if not _expect(cam!=null and cam.current and cam.position.z>11.0 and cam.position.z<14.0 and cam.fov<=44.0,"practical teeth still undersized or camera invalid"):
+	if not _expect(cam!=null and cam.current and cam.fov<=42.0,"SR51 practical perspective camera missing or invalid"):
 		return
 	var env: Node3D=app.get("_cc0_clinic")
 	if not _expect(env!=null and not env.visible,"clinic room obstructs practical cut"):
@@ -181,5 +264,21 @@ func _run() -> void:
 	if not _expect((app.get("_middle") as Control).visible,"native practical 3D viewport not restored"):
 		return
 	print("SR49_NATIVE_WRITING_FOCUS_1600_1280_LAYOUT_PASS expanded editors, top visibility, reference gate; headless not GPU")
+	# All original six FDI cases at the exact 1600px owner-review window,
+	# smaller 1280px desktop, and 1024px compact supported desktop.
+	for window_width in [1600, 1280, 1024]:
+		if not await _validate_fdi_camera(app, window_width):
+			return
+	# Switching through SR49 writing must restore a close-up without changing FDI.
+	app.call("_switch_view", "clinic")
+	app.call("_select_case", 1)
+	app.call("_select_station", 3)
+	app.call("_select_station", 4)
+	await process_frame
+	await process_frame
+	if not _expect(str(app.get("_camera_mode")) == "teeth" and int(app.get("_case_index")) == 1 and int(app.get("_station_index")) == 4 and (app.get("_middle") as Control).visible,
+		"SR51 writing-to-practical navigation or FDI 36 focus lost"):
+		return
+	print("SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS true center projection, close-up/overview, environment, navigation; headless only")
 	print("SR23_GODOT_SIX_CASE_RESPONSIVE_LAYOUT_AND_CONTRAST_PASS")
 	quit(0)
