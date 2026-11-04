@@ -35,8 +35,16 @@ func _smoke() -> void:
 		_fail("Original guided patient dialogue not exported")
 		return
 	var correct: int = int(questions[0]["correct"])
+	# SR52: this source-only runner does not construct native UI. Reject the
+	# unanswered/unrevealed direct call, then explicitly model the learner's
+	# reveal action before testing correct-answer persistence.
 	app.call("_answer", "interview", 0, correct)
 	var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
+	if answers.has("molar:interview:0"):
+		_fail("Native expert-mode accepted an unrevealed answer")
+		return
+	app.set("_quiz_revealed", true)
+	app.call("_answer", "interview", 0, correct)
 	if answers.size() < 1 or not answers["molar:interview:0"]["correct"]:
 		_fail("Native answer event and formative evaluation failed")
 		return
