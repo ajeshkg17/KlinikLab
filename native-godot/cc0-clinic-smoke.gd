@@ -76,8 +76,12 @@ func _run() -> void:
 		if str(source_case["id"])!=CASES[i] or str(source_case["fdi"])!=FDIS[i] or (content["practical"][i] as Array).size()<5:
 			_fail("Original case treatment and practical tasks changed")
 			return
-		if not env.visible or not bool((env.call("summary") as Dictionary)["wholeSceneLoaded"]):
-			_fail("Clinic background unloaded during case navigation")
+		# SR51: real FDI practical close-up intentionally hides decorative
+		# room, then other stations restore the overview. The original CC0
+		# imported mesh must remain loaded and its source SHA untouched.
+		var background_expected: bool = i != 4
+		if not bool((env.call("summary") as Dictionary)["wholeSceneLoaded"]) or env.visible != background_expected:
+			_fail("Clinic background unloaded or camera-mode visibility wrong at FDI " + FDIS[i])
 			return
 	app.call("_reset_progress")
 	print("SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS real PackedScene meshes; 54 catalogued GLBs / 3 loaded (2 baseline + chair); labelled missing-chair fallback; static only, NO WINDOWS PIXELS/GPU/CLINICAL QA")
