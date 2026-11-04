@@ -591,6 +591,44 @@ func _validate_sr62_quiz_feedback(app: Node3D, physical_width: int, physical_hei
 	app.call("_reset_progress")
 	return true
 
+# SR64: actual imported CC0 meshes (excluding detached tray), not hard-coded
+# screen position, define the room overview. Validate true 3D projection and
+# environment-only light state; no rendered Windows pixels claimed.
+func _validate_sr64_environment_overview(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width, physical_height)
+	app.call("_switch_view", "environment")
+	await process_frame
+	await process_frame
+	await process_frame
+	var scene: Node3D = app.get("_scene") as Node3D
+	var camera: Camera3D = scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	var middle: Control = app.get("_middle") as Control
+	var room: Node3D = app.get("_cc0_clinic") as Node3D
+	var bounds: AABB = app.call("_environment_room_bounds")
+	if not _expect(room != null and room.visible and bounds.size.length_squared() > 1.0 and camera != null and middle != null,
+		"SR64 imported CC0 room bounds/camera unavailable at %dx%d" % [physical_width, physical_height]):
+		return false
+	var projected: Rect2 = _project_world_box(bounds, camera)
+	var visible: Rect2 = middle.get_global_rect()
+	if not _expect(projected.size.x > visible.size.x * 0.15 and projected.size.y > visible.size.y * 0.15 and
+		projected.position.x >= visible.position.x - 8.0 and projected.end.x <= visible.end.x + 8.0 and
+		projected.position.y >= visible.position.y - 8.0 and projected.end.y <= visible.end.y + 8.0,
+		"SR64 imported clinic off-center/outside 3D pane at %dx%d room=%s drawn=%s center=%s" % [physical_width, physical_height, str(bounds), str(projected), str(visible)]):
+		return false
+	var world: WorldEnvironment = scene.get_node_or_null("KL_ClinicBackground") as WorldEnvironment
+	var key: DirectionalLight3D = scene.get_node_or_null("KL_ClinicKeyLight") as DirectionalLight3D
+	var fill: OmniLight3D = scene.get_node_or_null("KL_ClinicFillLight") as OmniLight3D
+	if not _expect(world != null and world.environment != null and key != null and fill != null and
+		world.environment.ambient_light_energy <= 0.37 and key.light_energy <= 0.66 and fill.light_energy <= 0.43,
+		"SR64 strong original tooth lighting still overexposes clinic room"):
+		return false
+	app.call("_switch_view", "clinic")
+	if not _expect(not room.visible and absf(world.environment.ambient_light_energy - 0.85) < 0.001 and
+		absf(key.light_energy - 1.6) < 0.001 and absf(fill.light_energy - 1.2) < 0.001,
+		"SR64 environment lighting spilled into six-case tooth training"):
+		return false
+	return true
+
 func _run() -> void:
 	root.size=Vector2i(1600,900)
 	var packed: PackedScene=load("res://app.tscn")
@@ -710,6 +748,12 @@ func _run() -> void:
 		if not await _validate_sr60_owner_composition(app,size[0],size[1]):
 			return
 	print("SR60_SIX_FDI_OWNER_1536_864_RIGHT_EDGE_AND_SCENE_COMPOSITION_PASS full shell/button rectangles, CC0 environment isolation, useful 3D projected area; HEADLESS NOT GPU PIXELS")
+	# SR64 new owner-PC 1536x816 client-size report is now tested alongside
+	# the previous 1536x864 physical desktop, 1280x720 and compact controls.
+	for size in [[1280,720],[1536,816],[1536,864],[1600,900],[1024,720]]:
+		if not await _validate_sr64_environment_overview(app,size[0],size[1]):
+			return
+	print("SR64_REAL_CC0_ROOM_CENTERED_FIT_AND_LIGHTING_FIVE_SIZES_PASS actual mesh envelope and restored clinic lighting; HEADLESS NOT PIXELS")
 	# SR62 browser-native answer-feedback parity: task-first and visibly
 	# restored label across physical sizes, while owner-pixel review is pending.
 	for size in [[1600,900],[1536,864],[1280,900],[1280,720],[1024,900],[1024,720]]:
