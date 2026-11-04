@@ -305,6 +305,53 @@ func _run() -> void:
 	if not ((app.get("_progress") as Dictionary)["quizRecall"] as Dictionary).is_empty():
 		_fail("SR47 reset retained active recall notes")
 		return
+	# SR49: writing source answers must not precede free-form drafts.
+	for case_i in range(6):
+		app.call("_select_case",case_i)
+		for station_i in [1,3]:
+			app.call("_select_station",station_i)
+			var page: VBoxContainer = app.get("_page")
+			var source_reference: VBoxContainer = page.get_node_or_null("KL_WRITING_SOURCE_REFERENCE") as VBoxContainer
+			if source_reference == null or source_reference.visible or page.get_node_or_null("KL_WRITING_REVEAL_SOURCE") == null:
+				_fail("SR49 hidden source-reference gate absent " + FDIS[case_i] + "/" + str(station_i))
+				return
+			var fields: Dictionary = app.get("_letter_fields") if station_i == 1 else app.get("_plan_fields")
+			var first: TextEdit = fields["anamnese"] if station_i == 1 else fields["diagnosis"]
+			if first == null or first.custom_minimum_size.x > 0.1 or first.line_wrapping_mode != TextEdit.LINE_WRAPPING_BOUNDARY:
+				_fail("SR49 writing editor still fixed width or nonwrapping " + FDIS[case_i])
+				return
+			if page.get_children().find(first) < 0 or page.get_children().find(source_reference) <= page.get_children().find(first):
+				_fail("SR49 source answers leaked ahead of editor " + FDIS[case_i])
+				return
+			if not bool(app.call("_writing_focus_active")) or (app.get("_middle") as Control).visible:
+				_fail("SR49 text-first writing focus inactive " + FDIS[case_i])
+				return
+			app.call("_toggle_writing_reference")
+			if not source_reference.visible:
+				_fail("SR49 reference cannot be explicitly revealed " + FDIS[case_i])
+				return
+			app.call("_toggle_writing_reference")
+			if source_reference.visible:
+				_fail("SR49 reference cannot be concealed " + FDIS[case_i])
+				return
+			var example: String = "Independent own draft " + FDIS[case_i] + "/" + str(station_i)
+			first.text = example
+			app.call("_save_draft")
+			app.call("_select_station",4)
+			if not (app.get("_middle") as Control).visible:
+				_fail("SR49 practical scene not restored after writing " + FDIS[case_i])
+				return
+			app.call("_select_station",station_i)
+			var restored: Dictionary = app.get("_letter_fields") if station_i == 1 else app.get("_plan_fields")
+			var field: TextEdit = restored["anamnese"] if station_i == 1 else restored["diagnosis"]
+			if field.text != example or (app.get("_writing_reference_panel") as VBoxContainer).visible:
+				_fail("SR49 draft lost or revealed reference persisted " + FDIS[case_i])
+				return
+	app.call("_reset_progress")
+	if not ((app.get("_progress") as Dictionary)["letterSectionsByCase"] as Dictionary).is_empty() or not ((app.get("_progress") as Dictionary)["planSectionsByCase"] as Dictionary).is_empty():
+		_fail("SR49 reviewed writing drafts survived reset")
+		return
+	print("SR49_FSP_KP_WRITING_FOCUS_SIX_CASES_PASS reveal gate, field order, compact width, persistence, practical restoration, reset; headless only")
 	# SR48: source-aligned structure-only self-review, never a clinical or language grade.
 	for case_i in range(6):
 		app.call("_select_case", case_i)
