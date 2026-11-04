@@ -142,7 +142,11 @@ func _validate_fdi_camera(app: Node3D, width: int) -> bool:
 		# Physical incisor FDI 11 has a narrower crown silhouette than a
 		# molar; require a useful vertical size rather than forcing tooth
 		# widths to match. Every source FDI still has a nontrivial x extent.
-		var min_width_fraction := 0.105 if case_index == 2 else 0.20
+		# SR59: paired source-verified surface and editable tooth must BOTH fit
+		# the unoccluded center without navigation overlap. A selected tooth
+		# can be slightly narrower than the isolated close-up while preserving
+		# substantial visibility; below we check the COMPLETE left mesh AABB.
+		var min_width_fraction := 0.105 if case_index == 2 else 0.18 if case_index in [0,1,3] else 0.20
 		if not _expect(pixels.size.x > rect.size.x * min_width_fraction and pixels.size.y > rect.size.y * 0.28,
 			"SR51 selected FDI too small in 3D center " + CAMERA_FDI[case_index] + "@" + str(width) + " projected=" + str(pixels.size) + " area=" + str(rect.size)):
 			return false
