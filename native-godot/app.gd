@@ -76,6 +76,10 @@ var _nav_case_buttons: Array[Button] = []
 var _nav_station_buttons: Array[Button] = []
 var _page_scroll: ScrollContainer
 var _screen_title: Label
+# SR55: fixed readable toolbar chips in a responsive multi-row grid.
+var _toolbar: GridContainer
+var _toolbar_view_buttons: Dictionary = {}
+var _toolbar_camera_buttons: Dictionary = {}
 var _answer_label: Label
 var _quiz_recall_edit: TextEdit
 var _quiz_recall_key := ""
@@ -602,6 +606,46 @@ func _button(t: String) -> Button:
 	_style_action(b)
 	return b
 
+func _toolbar_button(title: String) -> Button:
+	var b := _button(title)
+	# Source browser has named tabs; preserve all 12 accessible actions.
+	b.custom_minimum_size = Vector2(142, 42)
+	b.autowrap_mode = TextServer.AUTOWRAP_OFF
+	b.clip_text = false
+	b.add_theme_font_size_override("font_size", 14)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.toggle_mode = true
+	return b
+
+func _update_toolbar_columns() -> void:
+	if _toolbar == null:
+		return
+	# project.godot uses canvas_items stretch: the *logical* viewport stays
+	# 1600x900 even when the real owner-PC window is 1280x720 or 1536x864.
+	# Select columns from the real Windows desktop window width, not the
+	# fixed logical get_visible_rect() size which caused ten tiny strips.
+	var physical_width := maxf(320.0, float(get_window().size.x))
+	var logical_width := maxf(1.0, float(get_viewport().get_visible_rect().size.x))
+	_toolbar.columns = clampi(int(floor((physical_width - 24.0) / 150.0)), 4, 10)
+	# Keep label size and vertical click target legible after Godot applies
+	# its canvas-items stretch to the 1600x900 logical interface.
+	var inverse_canvas_scale := logical_width / physical_width
+	var toolbar_font_size := clampi(int(ceil(14.0 * inverse_canvas_scale)), 14, 22)
+	var toolbar_height := maxf(42.0, ceil(40.0 * inverse_canvas_scale))
+	for node in _toolbar.get_children():
+		var b: Button = node as Button
+		if b != null:
+			b.add_theme_font_size_override("font_size", toolbar_font_size)
+			b.custom_minimum_size.y = toolbar_height
+
+func _sync_toolbar_selection() -> void:
+	# Visual indicator only; _view/_camera_mode remain the authoritative
+	# source-backed view/camera state. No additional progress or grading.
+	for id in _toolbar_view_buttons:
+		(_toolbar_view_buttons[id] as Button).set_pressed_no_signal(id == _view)
+	for mode in _toolbar_camera_buttons:
+		(_toolbar_camera_buttons[mode] as Button).set_pressed_no_signal(mode == _camera_mode)
+
 func _style_panel(panel: PanelContainer) -> void:
 	# Fully opaque text panes prevent 3D scene geometry bleeding through UI.
 	var surface := StyleBoxFlat.new()
@@ -640,6 +684,7 @@ func _writing_focus_active() -> bool:
 	return _view == "clinic" and STATION_IDS[_station_index] in ["letter", "written"]
 
 func _update_responsive_layout() -> void:
+	_update_toolbar_columns()
 	if _left_column == null or _right_column == null:
 		return
 	# FSP/KP writing is a text-first learner workflow, not an operative 3D station.
@@ -775,22 +820,33 @@ func _build_app() -> void:
 	outer.add_child(top)
 	_screen_title = _heading("KlinikLab · Dental Skills", 22)
 	top.add_child(_screen_title)
-	var tab_scroll := ScrollContainer.new()
-	tab_scroll.custom_minimum_size = Vector2(0,44)
-	tab_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	tab_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	top.add_child(tab_scroll)
-	var tabs := HBoxContainer.new()
-	tab_scroll.add_child(tabs)
+	# SR55: ten views and two camera actions could shrink to vertical strips
+	# inside the old single-row ScrollContainer at 1280x720 / 1536x864.
+	# Use real allocated columns and rows, not clipped zero-width buttons.
+	_toolbar = GridContainer.new()
+	_toolbar.name = "KL_NATIVE_RESPONSIVE_TOOLBAR"
+	_toolbar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_toolbar.add_theme_constant_override("h_separation", 6)
+	_toolbar.add_theme_constant_override("v_separation", 5)
+	top.add_child(_toolbar)
+	_toolbar_view_buttons.clear()
+	_toolbar_camera_buttons.clear()
 	for section in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
-		var b := _button(section.capitalize())
+		var b := _toolbar_button(section.capitalize())
+		b.name = "KL_TOOLBAR_VIEW_" + section
+		b.tooltip_text = section.capitalize() + " · native educational workspace"
 		b.pressed.connect(_switch_view.bind(section))
-		tabs.add_child(b)
+		_toolbar_view_buttons[section] = b
+		_toolbar.add_child(b)
 	for mode in ["overview", "teeth"]:
-		var camera_button := _button(mode.capitalize() + " camera")
+		var camera_button := _toolbar_button(mode.capitalize() + " camera")
+		camera_button.name = "KL_TOOLBAR_CAMERA_" + mode
+		camera_button.tooltip_text = mode.capitalize() + " · switch source-native 3D camera (Clinic or Environment)"
 		camera_button.pressed.connect(_set_camera_mode.bind(mode))
-		tabs.add_child(camera_button)
+		_toolbar_camera_buttons[mode] = camera_button
+		_toolbar.add_child(camera_button)
+	_update_toolbar_columns()
+	_sync_toolbar_selection()
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(body)
@@ -1061,6 +1117,7 @@ func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
 		return
 	_camera_mode = mode
+	_sync_toolbar_selection()
 	_apply_environment_visibility()
 	_frame_visible_camera()
 	call_deferred("_frame_visible_camera")
@@ -1122,6 +1179,7 @@ func _refresh() -> void:
 	_clear_page()
 	_update_responsive_layout()
 	_sync_navigation_selection()
+	_sync_toolbar_selection()
 	if _screen_title != null:
 		if _view == "environment":
 			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
