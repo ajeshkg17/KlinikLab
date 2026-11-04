@@ -11,6 +11,18 @@ const SOURCE_SHA := "res://source/expected-sha.txt"
 const PROGRESS := "user://kliniklab-native-progress-v2.json"
 const CASE_IDS := ["molar", "endo", "anterior", "crown", "surgery", "perio"]
 const FDI := ["16", "36", "11", "26", "48", "46"]
+# SR53: exact permanent-dentition FDI display groups from browser renderChart().
+# Tooth labels in this selector are NOT 3D model availability claims.
+const FDI_CHART_QUADRANTS := [
+	["18", "17", "16", "15", "14", "13", "12", "11"],
+	["21", "22", "23", "24", "25", "26", "27", "28"],
+	["48", "47", "46", "45", "44", "43", "42", "41"],
+	["31", "32", "33", "34", "35", "36", "37", "38"]
+]
+const FDI_CHART_HEADERS := [
+	"MAXILLA · right", "MAXILLA · left",
+	"MANDIBLE · right", "MANDIBLE · left"
+]
 const STATION_IDS := ["interview", "letter", "handover", "written", "practical", "viva", "clinic"]
 # Compact nav labels only. The complete source station titles remain available as
 # tooltips and are unchanged in the clinical task pane, export and progress keys.
@@ -1778,10 +1790,7 @@ func _show_practical() -> void:
 					b.pressed.connect(_practical_choice.bind(step_index, choice))
 					_page.add_child(b)
 			"tooth":
-				for tooth in FDI:
-					var t := _button("FDI " + str(tooth))
-					t.pressed.connect(_practical_target.bind(step_index, str(tooth)))
-					_page.add_child(t)
+				_show_practical_fdi_chart(step_index)
 			"tool":
 				var menu := OptionButton.new()
 				# Do not let the longest bilingual instrument expand the entire notes pane.
@@ -1955,10 +1964,56 @@ func _practical_choice(step_index: int, choice: int) -> void:
 	var correct := choice == int(step.get("correct", -1))
 	_record_practical(step_index, choice, correct, str(step.get("explanation", "")))
 
+func _fdichart_contains(tooth: String) -> bool:
+	for quadrant in FDI_CHART_QUADRANTS:
+		if (quadrant as Array).has(tooth):
+			return true
+	return false
+
+func _show_practical_fdi_chart(step_index: int) -> void:
+	_page.add_child(_heading("Permanent dentition · FDI tooth selection (source browser chart)", 15))
+	_page.add_child(_heading("Choose a two-digit FDI number; this chart is a selection control, NOT 32 source-verified tooth models or anatomical/clinical validation.", 12))
+	for quadrant_index in range(FDI_CHART_QUADRANTS.size()):
+		var quadrant: Array = FDI_CHART_QUADRANTS[quadrant_index]
+		var group := VBoxContainer.new()
+		group.name = "KL_FDI_QUADRANT_" + str(quadrant_index)
+		group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		group.add_theme_constant_override("separation", 3)
+		var title := _heading(FDI_CHART_HEADERS[quadrant_index] + " · FDI", 13)
+		title.name = "KL_FDI_QUADRANT_LABEL_" + str(quadrant_index)
+		group.add_child(title)
+		var grid := GridContainer.new()
+		grid.name = "KL_FDI_QUADRANT_GRID_" + str(quadrant_index)
+		grid.columns = 4
+		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_theme_constant_override("h_separation", 4)
+		grid.add_theme_constant_override("v_separation", 4)
+		group.add_child(grid)
+		for tooth in quadrant:
+			var code: String = str(tooth)
+			var tooth_button := _button(code)
+			tooth_button.name = "KL_FDI_TOOTH_" + code
+			tooth_button.tooltip_text = "FDI " + code + " · " + FDI_CHART_HEADERS[quadrant_index] + " · permanent dentition; selection only"
+			tooth_button.custom_minimum_size = Vector2(0, 38)
+			tooth_button.autowrap_mode = TextServer.AUTOWRAP_OFF
+			tooth_button.add_theme_font_size_override("font_size", 14)
+			if code == FDI[_case_index]:
+				tooth_button.tooltip_text += " · highlighted training case tooth"
+				var active_border: StyleBoxFlat = tooth_button.get_theme_stylebox("normal") as StyleBoxFlat
+				if active_border != null:
+					active_border.border_color = Color("#eec680")
+					active_border.set_border_width_all(2)
+			tooth_button.pressed.connect(_practical_target.bind(step_index, code))
+			grid.add_child(tooth_button)
+		_page.add_child(group)
+
 func _practical_target(step_index: int, tooth: String) -> void:
+	if not _fdichart_contains(tooth):
+		return # no fabricated dentition values, no answer mutation
 	var step: Dictionary = _content["practical"][_case_index][step_index]
 	var correct := tooth == str(step.get("target", ""))
-	_record_practical(step_index, tooth, correct, str(step.get("success", "FDI target confirmed")))
+	var detail := str(step.get("success", "FDI target confirmed")) if correct else "Incorrect FDI selection. Recheck the fictional case and try again."
+	_record_practical(step_index, tooth, correct, detail)
 
 func _practical_tool(index: int, step_index: int) -> void:
 	if index < 1:
