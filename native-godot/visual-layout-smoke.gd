@@ -682,7 +682,9 @@ func _run() -> void:
 	app.call("_switch_view","environment")
 	if not _expect(env.visible and title.text.contains("Clinic Environment"),"CC0 environment not exposed"):
 		return
-	if not _expect(cam.position.z< -2.0 and cam.fov<=46.0,"room camera remained far away"):
+	var real_room: AABB = app.call("_environment_room_bounds")
+	if not _expect(real_room.size.length_squared() > 1.0 and cam.position.z > real_room.end.z and cam.fov <= 46.0,
+		"SR23/SR64 imported room has no valid front-facing overview camera"):
 		return
 	if not await _validate_columns(app,1600):
 		return
