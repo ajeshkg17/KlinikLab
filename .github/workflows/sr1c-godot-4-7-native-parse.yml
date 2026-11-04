@@ -101,6 +101,7 @@ jobs:
           node --test tests/sr53_native_fdi_practical_chart.test.mjs
           node --test tests/sr54_native_launcher.test.mjs
           node --test tests/sr55_native_responsive_toolbar.test.mjs
+          node --test tests/sr57_game_style_walk_hud.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -232,6 +233,7 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://clinic-walk-smoke.gd > "$RUNNER_TEMP/sr31-walk-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/sr31-walk-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/sr31-walk-smoke.log"
           grep -F "SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
+          grep -F "SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
       - name: SR32 guided desktop practical, all six FDI cases and FSP/KP preserved (HEADLESS only)
         run: |
           set -euo pipefail
@@ -293,6 +295,7 @@ jobs:
           grep -F "SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR53_FDI_CHART_1600_1280_1024_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR57_WALK_HUD_1600_1280_1024_720_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |
