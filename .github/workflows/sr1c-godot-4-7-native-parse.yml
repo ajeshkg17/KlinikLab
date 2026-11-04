@@ -93,6 +93,7 @@ jobs:
           node --test tests/sr45_fsp_letter_sections.test.mjs
           node --test tests/sr46_kp_plan_sections.test.mjs
           node --test tests/sr47_active_recall_quiz.test.mjs
+          node --test tests/sr48_fsp_kp_writing_review.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -205,6 +206,7 @@ jobs:
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://actual-app-smoke.gd > "$RUNNER_TEMP/actual-cc0-app-smoke.log" 2>&1 || { cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"; exit 1; }
           cat "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR14_ACTUAL_NATIVE_APP_CC0_FDI_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+          grep -F "SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
       - name: SR31 real native desktop walk and selected FDI operatory input (HEADLESS, NO PC PIXELS)
         run: |
           set -euo pipefail
