@@ -265,6 +265,48 @@ func _validate_toolbar(app: Node3D, window_width: int, window_height: int, expec
 		return false
 	return true
 
+# SR57: overlay has readable game-style navigation UI over the *actual*
+# unobscured 3D center without intercepting existing mouse look or controls.
+# Headless Control geometry only; never workstation pixels/GPU acceptance.
+func _validate_walk_hud(app: Node3D, window_width: int, window_height: int) -> bool:
+	root.size = Vector2i(window_width,window_height)
+	app.call("_switch_view","environment")
+	app.call("_start_clinic_walk")
+	await process_frame
+	await process_frame
+	var middle: Control = app.get("_middle")
+	var hud: Control = app.get("_walk_hud")
+	var banner: PanelContainer = app.get("_walk_hud_top")
+	var guidance: PanelContainer = app.get("_walk_hud_panel")
+	var title: Label = app.get("_walk_hud_title")
+	var cues: Label = app.get("_walk_hud_guide")
+	var reticle: Label = app.get("_walk_hud_reticle")
+	var camera: Camera3D = (app.get("_scene") as Node3D).get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	if not _expect(middle != null and middle.visible and hud != null and hud.visible and banner != null and guidance != null and reticle != null and camera != null and camera.current and absf(camera.fov-64.0)<0.01, "SR57 FPS HUD or perspective missing at %dx%d" % [window_width,window_height]):
+		return false
+	for node in [hud,banner,guidance,reticle,title,cues]:
+		if not _expect(node != null and node.mouse_filter == Control.MOUSE_FILTER_IGNORE, "SR57 UI overlay steals right-drag or other input"):
+			return false
+	var viewport: Rect2 = middle.get_global_rect()
+	var top_rect: Rect2 = banner.get_global_rect()
+	var guide_rect: Rect2 = guidance.get_global_rect()
+	var cursor_rect: Rect2 = reticle.get_global_rect()
+	if not _expect(top_rect.position.x >= viewport.position.x+4.0 and top_rect.end.x <= viewport.end.x-2.0 and top_rect.position.y >= viewport.position.y+4.0, "SR57 banner overlaps sidebar or toolbar at %dx%d" % [window_width,window_height]):
+		return false
+	if not _expect(guide_rect.position.x >= viewport.position.x+4.0 and guide_rect.end.x <= viewport.end.x-2.0 and guide_rect.end.y <= viewport.end.y-2.0 and top_rect.end.y+30.0 < guide_rect.position.y, "SR57 guidance outside visible first-person window at %dx%d" % [window_width,window_height]):
+		return false
+	if not _expect(cursor_rect.get_center().distance_to(viewport.get_center())<8.0 and cursor_rect.position.y>top_rect.end.y and cursor_rect.end.y<guide_rect.position.y, "SR57 center reticle not aligned inside first-person view %dx%d" % [window_width,window_height]):
+		return false
+	if not _expect(not title.text.is_empty() and title.text.contains("right-drag") and cues.text.contains("OPERATORY") and cues.text.contains("FSP/KP") and cues.text.contains("Esc exits"), "SR57 visible game controls/station range cues missing"):
+		return false
+	var viewport_width: float = viewport.size.x
+	if not _expect(top_rect.size.x >= minf(180.0,viewport_width-22.0) and guide_rect.size.x <= viewport_width-8.0 and guide_rect.size.y >= 88.0, "SR57 panel unexpectedly thin/clipped at %dx%d" % [window_width,window_height]):
+		return false
+	app.call("_stop_clinic_walk")
+	if not _expect(not hud.visible and camera.current, "SR57 HUD leaked after exiting walk"):
+		return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -380,6 +422,12 @@ func _run() -> void:
 		if not await _validate_toolbar(app,size_and_columns[0],size_and_columns[1],size_and_columns[2]):
 			return
 	print("SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS real labels, four geometries, active view/camera, no clipping; headless only")
+	# SR57 overlays remain in the true central 3D pane with clear movement
+	# controls and no mouse capture across owner-reviewed and compact windows.
+	for size in [[1600,900],[1280,900],[1024,900],[1280,720]]:
+		if not await _validate_walk_hud(app,size[0],size[1]):
+			return
+	print("SR57_WALK_HUD_1600_1280_1024_720_LAYOUT_PASS center reticle, source station cues, legible input-free panels; headless only")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:
