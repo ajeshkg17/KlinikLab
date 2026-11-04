@@ -51,6 +51,43 @@ func _validate_columns(app: Node3D, window_width: int) -> bool:
 		return false
 	return true
 
+# SR50: real headless Godot Control geometry only; no RTX pixel claim.
+func _validate_navigation(app: Node3D, window_width: int) -> bool:
+	root.size = Vector2i(window_width,900)
+	app.call("_update_responsive_layout")
+	await process_frame
+	await process_frame
+	var panel: PanelContainer = app.get("_left_panel")
+	var nav: ScrollContainer = app.get("_nav_scroll")
+	var grid: GridContainer = app.get("_nav_case_grid")
+	var stations: VBoxContainer = app.get("_nav_station_list")
+	var case_buttons: Array = app.get("_nav_case_buttons")
+	var station_buttons: Array = app.get("_nav_station_buttons")
+	if not _expect(panel != null and nav != null and grid != null and stations != null, "SR50 left navigator controls missing"):
+		return false
+	if not _expect(panel.size.x >= 222.0 and panel.size.x <= 305.0, "SR50 nav width compressed/out of bounds at " + str(window_width)):
+		return false
+	if not _expect(nav.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED, "SR50 horizontal nav scrollbar enabled"):
+		return false
+	if not _expect(grid.columns == 2 and case_buttons.size() == 6 and station_buttons.size() == 7, "SR50 six-case two-column grid or seven stations absent"):
+		return false
+	if not _expect(grid.get_child(0).position.y == grid.get_child(1).position.y and grid.get_child(2).position.y > grid.get_child(0).position.y, "SR50 case grid not two columns"):
+		return false
+	var panel_bounds: Rect2 = nav.get_global_rect()
+	for node in case_buttons + station_buttons:
+		var button: Button = node as Button
+		if not _expect(button != null and button.autowrap_mode == TextServer.AUTOWRAP_OFF and button.size.y <= 52.0, "SR50 multi-line/tall navigation button at " + str(window_width)):
+			return false
+		if not _expect(not button.tooltip_text.is_empty(), "SR50 source title tooltip lost"):
+			return false
+		if not _expect(button.get_global_rect().end.x <= panel_bounds.end.x + 2.0 and button.get_global_rect().position.x >= panel_bounds.position.x - 2.0, "SR50 FDI/station button clipped by sidebar at " + str(window_width)):
+			return false
+	# Vertical scrolling is permitted when the host app gives the sidebar less
+	# height; the regression is compact *row geometry*, not a no-scroll claim.
+	if not _expect(grid.size.y <= 165.0 and stations.size.y <= 375.0, "SR50 compact navigation rows still excessively tall at " + str(window_width)):
+		return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -107,6 +144,12 @@ func _run() -> void:
 		return
 	if not _validate_actions(app.get("_nav_scroll")):
 		return
+	# Rejected owner-PC 1600x900 view and 1280/1024 desktop widths.
+	# Navigation only; camera geometry intentionally left for a separate slice.
+	for nav_width in [1600,1280,1024]:
+		if not await _validate_navigation(app,nav_width):
+			return
+	print("SR50_FDI_NAV_1600_1280_1024_LAYOUT_PASS compact two-column cases, one-line stations; headless only")
 	app.call("_set_camera_mode","teeth")
 	var cam: Camera3D=scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
 	if not _expect(cam!=null and cam.current and cam.position.z>11.0 and cam.position.z<14.0 and cam.fov<=44.0,"practical teeth still undersized or camera invalid"):

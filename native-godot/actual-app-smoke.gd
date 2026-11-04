@@ -416,6 +416,34 @@ func _run() -> void:
 	if not ((app.get("_progress") as Dictionary)["letterSectionsByCase"] as Dictionary).is_empty() or not ((app.get("_progress") as Dictionary)["planSectionsByCase"] as Dictionary).is_empty():
 		_fail("SR48 reset kept reviewed writing drafts")
 		return
+	# SR50: compact FDI and station navigation must preserve six source mappings
+	# and expose unmodified source titles in tooltips (not a GPU/pixel review).
+	var case_buttons: Array = app.get("_nav_case_buttons")
+	var station_buttons: Array = app.get("_nav_station_buttons")
+	var source_cases: Array = app.get("_cases")
+	var source_stations: Array = app.get("_stations")
+	if case_buttons.size() != 6 or station_buttons.size() != 7:
+		_fail("SR50 navigator lost six cases / seven stations")
+		return
+	var case_grid: GridContainer = app.get("_nav_case_grid")
+	if case_grid == null or case_grid.columns != 2:
+		_fail("SR50 FDI case grid not two columns")
+		return
+	for case_i in range(6):
+		app.call("_select_case", case_i)
+		for i in range(6):
+			var button: Button = case_buttons[i] as Button
+			if button == null or button.button_pressed != (i == case_i) or not button.tooltip_text.contains(str((source_cases[i] as Dictionary)["title"])):
+				_fail("SR50 FDI selection/title mapping wrong at " + FDIS[case_i] + "/" + str(i))
+				return
+	for station_i in range(7):
+		app.call("_select_station", station_i)
+		for i in range(7):
+			var button: Button = station_buttons[i] as Button
+			if button == null or button.button_pressed != (i == station_i) or not button.tooltip_text.contains(str((source_stations[i] as Dictionary)["title"])):
+				_fail("SR50 station selection/source title lost at " + str(station_i) + "/" + str(i))
+				return
+	print("SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS source tooltips, exclusive active state, two-column mapping; headless only")
 	print("SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS incomplete/FDI/alternative/persistence/reset; structure-only and headless")
 	print("SR47_FOUR_QUIZ_STATIONS_SIX_FDI_ACTIVE_RECALL_PASS choices gated, notes persisted, navigation/reset source exact; headless only")
 	print("SR46_KP_FOUR_SECTION_PLAN_SIX_CASES_PASS draft restore, legacy migration, report and reset; headless only")

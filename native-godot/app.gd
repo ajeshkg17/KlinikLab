@@ -12,6 +12,9 @@ const PROGRESS := "user://kliniklab-native-progress-v2.json"
 const CASE_IDS := ["molar", "endo", "anterior", "crown", "surgery", "perio"]
 const FDI := ["16", "36", "11", "26", "48", "46"]
 const STATION_IDS := ["interview", "letter", "handover", "written", "practical", "viva", "clinic"]
+# Compact nav labels only. The complete source station titles remain available as
+# tooltips and are unchanged in the clinical task pane, export and progress keys.
+const NAV_STATION_SHORT := ["FSP · Anamnese", "FSP · Arztbrief", "FSP · Übergabe", "KP · Plan", "KP · Praxis", "KP · Mündlich", "Praxis · Alltag"]
 const RADIO_CHOICES := ["caries","apex","trauma","normal","impaction","bone"]
 const RADIO_LABELS := ["Radiolucency / caries","Apical radiolucency","Traumatic finding","No definitive pathology","Impacted third molar","Marginal bone loss"]
 const INK := Color("#e9f1f6")
@@ -50,6 +53,10 @@ var _right_panel: PanelContainer
 var _left_column: VBoxContainer
 var _right_column: VBoxContainer
 var _nav_scroll: ScrollContainer
+var _nav_case_grid: GridContainer
+var _nav_station_list: VBoxContainer
+var _nav_case_buttons: Array[Button] = []
+var _nav_station_buttons: Array[Button] = []
 var _page_scroll: ScrollContainer
 var _screen_title: Label
 var _answer_label: Label
@@ -620,7 +627,9 @@ func _update_responsive_layout() -> void:
 	# FSP/KP writing is a text-first learner workflow, not an operative 3D station.
 	# Expand its editor instead of squeezing it into a narrow overlay beside 3D.
 	var width := float(get_viewport().get_visible_rect().size.x)
-	var nav_width := clampf(width * 0.147, 174.0, 238.0)
+	# SR50: room for two legible FDI chips and single-line station navigation.
+	# The existing 174–238 px sidebar created narrow wrapped vertical labels.
+	var nav_width := clampf(width * 0.18, 224.0, 288.0)
 	var notes_width := clampf(width * 0.25, 310.0, 420.0)
 	var writing_focus := _writing_focus_active()
 	_left_column.custom_minimum_size.x = nav_width
@@ -682,18 +691,46 @@ func _build_app() -> void:
 	var nav_col := VBoxContainer.new()
 	nav_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_nav_scroll.add_child(nav_col)
-	nav_col.add_child(_heading("Cases • source-derived", 17))
+	nav_col.add_child(_heading("Case teeth · FDI", 16))
+	_nav_case_grid = GridContainer.new()
+	_nav_case_grid.name = "KL_FDI_CASE_GRID"
+	_nav_case_grid.columns = 2
+	_nav_case_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_nav_case_grid.add_theme_constant_override("h_separation", 5)
+	_nav_case_grid.add_theme_constant_override("v_separation", 5)
+	nav_col.add_child(_nav_case_grid)
+	_nav_case_buttons.clear()
 	for i in range(_cases.size()):
 		var c: Dictionary = _cases[i]
-		var btn := _button("FDI " + str(c["fdi"]) + "  " + str(c["id"]).capitalize())
+		var btn := _button("FDI " + str(c["fdi"]))
+		btn.name = "KL_FDI_CASE_" + str(c["fdi"])
+		btn.tooltip_text = "FDI %s · %s · %s" % [str(c["fdi"]), str(c["id"]).capitalize(), str(c["title"])]
+		btn.toggle_mode = true
+		btn.autowrap_mode = TextServer.AUTOWRAP_OFF
+		btn.add_theme_font_size_override("font_size", 14)
+		btn.custom_minimum_size = Vector2(0, 42)
 		btn.pressed.connect(_select_case.bind(i))
-		nav_col.add_child(btn)
-	nav_col.add_child(_heading("Training stations", 17))
+		_nav_case_buttons.append(btn)
+		_nav_case_grid.add_child(btn)
+	nav_col.add_child(_heading("Training stations", 16))
+	_nav_station_list = VBoxContainer.new()
+	_nav_station_list.name = "KL_STATION_LIST"
+	_nav_station_list.add_theme_constant_override("separation", 5)
+	_nav_station_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nav_col.add_child(_nav_station_list)
+	_nav_station_buttons.clear()
 	for i in range(_stations.size()):
 		var st: Dictionary = _stations[i]
-		var btn := _button("%d · %s" % [i + 1, str(st["title"])])
+		var btn := _button("%d · %s" % [i + 1, NAV_STATION_SHORT[i]])
+		btn.name = "KL_STATION_" + STATION_IDS[i]
+		btn.tooltip_text = str(st["title"]) + " · " + str(st["subtitle"])
+		btn.toggle_mode = true
+		btn.autowrap_mode = TextServer.AUTOWRAP_OFF
+		btn.add_theme_font_size_override("font_size", 14)
+		btn.custom_minimum_size = Vector2(0, 42)
 		btn.pressed.connect(_select_station.bind(i))
-		nav_col.add_child(btn)
+		_nav_station_buttons.append(btn)
+		_nav_station_list.add_child(btn)
 	_middle = Control.new()
 	_middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_middle.custom_minimum_size = Vector2(270,0)
@@ -957,11 +994,20 @@ func _switch_view(view: String) -> void:
 	_update_responsive_layout()
 	_refresh()
 
+func _sync_navigation_selection() -> void:
+	# Toggle state is an indicator only: the authoritative selected indices
+	# remain the original six-case/seven-station source-backed values.
+	for i in range(_nav_case_buttons.size()):
+		_nav_case_buttons[i].set_pressed_no_signal(i == _case_index)
+	for i in range(_nav_station_buttons.size()):
+		_nav_station_buttons[i].set_pressed_no_signal(i == _station_index)
+
 func _refresh() -> void:
 	if _page == null:
 		return
 	_clear_page()
 	_update_responsive_layout()
+	_sync_navigation_selection()
 	if _screen_title != null:
 		if _view == "environment":
 			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
