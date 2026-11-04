@@ -12,7 +12,11 @@ test('SR55 source-native toolbar preserves all 10 views and two cameras without 
  assert.match(app,/var _toolbar_camera_buttons: Dictionary/);
  assert.match(app,/_toolbar = GridContainer\.new\(\)/);
  assert.match(app,/_toolbar\.name = "KL_NATIVE_RESPONSIVE_TOOLBAR"/);
- assert.match(app,/_toolbar\.columns = clampi\(int\(floor\(\(width - 24\.0\) \/ 150\.0\)\), 4, 10\)/);
+ assert.match(app,/_toolbar\.columns = clampi\(int\(floor\(\(physical_width - 24\.0\) \/ 150\.0\)\), 4, 10\)/);
+ assert.match(app,/get_window\(\)\.size\.x/);
+ assert.match(app,/logical_width \/ physical_width/);
+ assert.match(app,/toolbar_font_size := clampi\(int\(ceil\(14\.0 \* inverse_canvas_scale\)\), 14, 22\)/);
+ assert.match(app,/toolbar_height := maxf\(42\.0, ceil\(40\.0 \* inverse_canvas_scale\)\)/);
  assert.match(app,/b\.custom_minimum_size = Vector2\(142, 42\)/);
  assert.match(app,/b\.autowrap_mode = TextServer\.AUTOWRAP_OFF/);
  assert.match(app,/b\.clip_text = false/);
@@ -38,6 +42,9 @@ test('SR55 owner-rejected 1280x720 and 1536x864 included in actual headless Godo
  assert.match(visual,/\[\[1280,720,8\],\[1536,864,10\],\[1024,720,6\],\[1600,900,10\]\]/);
  assert.match(visual,/grid\.get_child_count\(\) == 12/);
  assert.match(visual,/b\.size\.x >= 142\.0/);
+ assert.match(visual,/chip_physical\.x >= 142\.0/);
+ assert.match(visual,/font_physical >= 13\.0/);
+ assert.match(visual,/app\.get_window\(\)\.size\.x == window_width/);
  assert.match(visual,/rect\.end\.x <= viewport_right \+ 2\.0/);
  assert.match(visual,/rect\.end\.y <= viewport_bottom \+ 1\.0/);
  assert.match(visual,/view_buttons\["progress"\]/);
