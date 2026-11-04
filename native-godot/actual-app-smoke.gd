@@ -290,10 +290,21 @@ func _run() -> void:
 			if not str(((app.get("_progress") as Dictionary)["quizRecall"] as Dictionary).get(key,"")).contains("Formative eigene Antwort"):
 				_fail("SR47 recall note not persisted before reveal "+key)
 				return
+			# SR52: revealing source choices does not entitle skipping a question.
+			app.call("_next_question")
+			if int(app.get("_quiz_index")) != 0 or not (app.get("_quiz_next_button") as Button).disabled:
+				_fail("SR52 revealed-only question skipped without a correct answer " + key)
+				return
+			var station_key: String = str(["interview","letter","handover","written","practical","viva","clinic"][station_i])
+			var quiz_questions: Array = ((app.get("_content") as Dictionary)["quiz"] as Dictionary)[station_key]
+			app.call("_answer",station_key,0,int((quiz_questions[0] as Dictionary)["correct"]))
+			if (app.get("_quiz_next_button") as Button).disabled:
+				_fail("SR52 correct quiz answer did not enable Next " + key)
+				return
 			app.call("_next_question")
 			page = app.get("_page")
-			if page.get_node_or_null("KL_QUIZ_OPTION_0") != null or page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") == null:
-				_fail("SR47 next question must hide options again "+key)
+			if int(app.get("_quiz_index")) != 1 or page.get_node_or_null("KL_QUIZ_OPTION_0") != null or page.get_node_or_null("KL_QUIZ_REVEAL_CHOICES") == null:
+				_fail("SR47 next question must hide options again after correct answer "+key)
 				return
 			app.call("_select_station",3)
 			app.call("_select_station",station_i)
