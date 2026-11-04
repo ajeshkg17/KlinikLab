@@ -23,7 +23,8 @@ test('SR57 game-like HUD is explicit, readable, within the center pane and point
  assert.match(app,/camera\.fov = 64\.0/);
  assert.match(app,/func _apply_walk_camera\(\) -> void:[\s\S]*?_update_walk_hud\(\)/);
  assert.match(app,/if not _walk_active or _view != "environment" or _walk == null:/);
- const hudSection=app.slice(app.indexOf("func _build_walk_hud()"),app.indexOf("func _walk_keyboard_allowed()"));\n assert.doesNotMatch(hudSection,/cut_to|_direct_cut_world_ray|_record_practical/);
+ const hudSection=app.slice(app.indexOf("func _build_walk_hud()"),app.indexOf("func _walk_keyboard_allowed()"));
+ assert.doesNotMatch(hudSection,/cut_to|_direct_cut_world_ray|_record_practical/);
 });
 
 test('SR57 walk controller preserves movement bounds and adds optional limited pace plus station bearings',()=>{
