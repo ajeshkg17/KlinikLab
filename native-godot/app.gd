@@ -733,7 +733,13 @@ func _update_toolbar_columns() -> void:
 	# fixed logical get_visible_rect() size which caused ten tiny strips.
 	var physical_width := maxf(320.0, float(get_window().size.x))
 	var logical_width := maxf(1.0, float(get_viewport().get_visible_rect().size.x))
-	_toolbar.columns = clampi(int(floor((physical_width - 24.0) / 150.0)), 4, 10)
+	# SR60: reserve a real minimum width per action plus a safety gutter,
+	# and cap at 8 so the rightmost "Overview/Teeth camera" controls do not
+	# force the root wider than the owner-PC 1536x864 physical window.
+	# All twelve actions stay visible in two or three rows, never hidden.
+	var physical_columns := int(floor((physical_width - 24.0) / 160.0))
+	var logical_columns := int(floor((logical_width - 24.0) / 148.0))
+	_toolbar.columns = clampi(mini(physical_columns, logical_columns), 4, 8)
 	# Keep label size and vertical click target legible after Godot applies
 	# its canvas-items stretch to the 1600x900 logical interface.
 	var inverse_canvas_scale := logical_width / physical_width
@@ -799,8 +805,12 @@ func _update_responsive_layout() -> void:
 	var width := float(get_viewport().get_visible_rect().size.x)
 	# SR50: room for two legible FDI chips and single-line station navigation.
 	# The existing 174–238 px sidebar created narrow wrapped vertical labels.
-	var nav_width := clampf(width * 0.18, 224.0, 288.0)
-	var notes_width := clampf(width * 0.25, 310.0, 420.0)
+	# SR60: make the 3D viewport the primary clinic workspace. At a
+	# 1600-logical canvas, the former 288+400 px sidebars left only ~900 px
+	# for the camera, with some reference teeth shrunk to a thin scene band.
+	# Keep the two-column FDI nav legible and notes >=300 px.
+	var nav_width := clampf(width * 0.15, 224.0, 248.0)
+	var notes_width := clampf(width * 0.22, 306.0, 352.0)
 	var writing_focus := _writing_focus_active()
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
@@ -817,8 +827,11 @@ func _camera_content_rect() -> Rect2:
 	if _middle == null or not _middle.visible:
 		return Rect2()
 	var bounds: Rect2 = _middle.get_global_rect()
-	var inset_x := maxf(14.0, bounds.size.x * 0.075)
-	var inset_y := maxf(16.0, bounds.size.y * 0.085)
+	# The *already* unobscured center panel is reserved by the HBox.
+	# Use most of it while retaining 5%/5.5% inset; SR59 still fits the
+	# complete reference bounding boxes inside this safe inner rectangle.
+	var inset_x := maxf(14.0, bounds.size.x * 0.05)
+	var inset_y := maxf(16.0, bounds.size.y * 0.055)
 	return Rect2(bounds.position + Vector2(inset_x, inset_y),
 		bounds.size - Vector2(2.0 * inset_x, 2.0 * inset_y))
 
@@ -1289,7 +1302,11 @@ func _set_camera_mode(mode: String) -> void:
 
 func _apply_environment_visibility() -> void:
 	if _cc0_clinic != null:
-		_cc0_clinic.call("set_environment_visible", _view == "environment" or (_view == "clinic" and _camera_mode == "overview"))
+		# SR60: the CC0 room at z~-20 read as a narrow bright floor strip
+		# behind the much closer tooth meshes in the Clinic overview.
+		# Clinic is the focused six-case 3D tooth workspace in both cameras;
+		# the real CC0 room is retained unchanged in Environment / Walk.
+		_cc0_clinic.call("set_environment_visible", _view == "environment")
 
 func _switch_view(view: String) -> void:
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
