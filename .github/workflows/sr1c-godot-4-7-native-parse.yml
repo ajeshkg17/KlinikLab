@@ -9,6 +9,8 @@ on:
       - 'tests/sr2_godot_native_full_app_foundation.test.mjs'
       - 'tests/sr31_desktop_clinic_walk.test.mjs'
       - 'tests/sr32_native_guided_practical.test.mjs'
+      - 'tests/source-contract-text.mjs'
+      - 'tests/sr63_windows_crlf_source_contract.test.mjs'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -107,6 +109,7 @@ jobs:
           node --test tests/sr60_native_responsive_clinic_composition.test.mjs
           node --test tests/sr61_desktop_fps_mouse_capture.test.mjs
           node --test tests/sr62_quiz_feedback_parity.test.mjs
+          node --test tests/sr63_windows_crlf_source_contract.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -329,3 +332,31 @@ jobs:
         if: always()
         run: |
           echo 'Godot 4.7.2 parsed source only. Headless mode provides NO visible native teeth, physical RTX GPU utilization, real viewport screenshot, or Quest proof.' >> "$GITHUB_STEP_SUMMARY"
+
+  # Separate hosted Windows CI VM: not the owner's workstation or held watcher.
+  # Explicitly materialize CRLF in the disposable checkout to reproduce the
+  # Git for Windows source-test condition without weakening structural checks.
+  source-contract-windows-crlf:
+    name: SR63 Windows CRLF source-contract regressions (NO owner-PC capture)
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recreate CRLF Godot source on isolated GitHub runner only
+        shell: pwsh
+        run: |
+          $path = 'native-godot/app.gd'
+          $original = [System.IO.File]::ReadAllText($path)
+          $lf = $original.Replace("`r`n", "`n")
+          [System.IO.File]::WriteAllText($path, $lf.Replace("`n", "`r`n"), [System.Text.UTF8Encoding]::new($false))
+          $windowsText = [System.IO.File]::ReadAllText($path)
+          if (-not $windowsText.Contains("`r`n")) { throw 'SR63 fixture did not materialize CRLF bytes' }
+          if ($windowsText.Replace("`r`n", "`n") -cne $lf) { throw 'SR63 fixture altered GDScript content beyond line endings' }
+          Write-Output 'SR63_WINDOWS_CRLF_FILE_MATERIALIZED_PASS (disposable CI workspace only)'
+      - name: Run real source contracts against CRLF working tree (no Godot render)
+        shell: pwsh
+        run: |
+          node --test tests/sr31_desktop_clinic_walk.test.mjs tests/sr32_native_guided_practical.test.mjs tests/sr45_fsp_letter_sections.test.mjs tests/sr46_kp_plan_sections.test.mjs tests/sr47_active_recall_quiz.test.mjs tests/sr49_native_writing_focus.test.mjs tests/sr53_native_fdi_practical_chart.test.mjs tests/sr55_native_responsive_toolbar.test.mjs tests/sr57_game_style_walk_hud.test.mjs tests/sr58_native_practical_task_first.test.mjs tests/sr61_desktop_fps_mouse_capture.test.mjs tests/sr62_quiz_feedback_parity.test.mjs tests/sr63_windows_crlf_source_contract.test.mjs
