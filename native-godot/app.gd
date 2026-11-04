@@ -53,6 +53,8 @@ var _case_index := 0
 var _station_index := 0
 var _quiz_index := 0
 var _progress: Dictionary = {}
+# SR64: reset must not claim durable success without a read-back of user://.
+var _progress_persistence_status := ""
 var _scene: Node3D
 var _atlas: Node3D
 var _scan: Node3D
@@ -736,15 +738,46 @@ func _load_progress() -> void:
 	_case_index = clampi(int(_progress.get("selectedCase", 0)), 0, 5)
 	_station_index = clampi(int(_progress.get("selectedStation", 0)), 0, 6)
 
-func _save_progress() -> void:
+func _save_progress() -> bool:
 	_progress["selectedCase"] = _case_index
 	_progress["selectedStation"] = _station_index
+	# Windows user:// may resolve to a different profile than expected. Treat
+	# any failed open/write as a persistence error rather than a silent UI reset.
+	var absolute_path: String = ProjectSettings.globalize_path(PROGRESS)
+	var make_dir: Error = DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
+	if make_dir != OK:
+		push_error("SR64_PROGRESS_WRITE_FAILED create-directory error=" + str(make_dir) + " path=" + absolute_path)
+		return false
 	var file := FileAccess.open(PROGRESS, FileAccess.WRITE)
 	if file == null:
-		push_warning("Local educational progress could not be saved")
-		return
+		push_error("SR64_PROGRESS_WRITE_FAILED open error=" + str(FileAccess.get_open_error()) + " path=" + absolute_path)
+		return false
 	file.store_string(JSON.stringify(_progress, "  ") + "\n")
+	file.flush()
+	var write_error: Error = file.get_error()
 	file.close()
+	if write_error != OK:
+		push_error("SR64_PROGRESS_WRITE_FAILED flush error=" + str(write_error) + " path=" + absolute_path)
+		return false
+	return true
+
+func _reset_progress_on_disk() -> bool:
+	# Verify the precise Godot user:// file, not only the dictionaries rendered
+	# by the Progress pane. This is deliberately read-only and source-scoped.
+	var disk: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROGRESS))
+	if not (disk is Dictionary):
+		return false
+	var row: Dictionary = disk
+	if int(row.get("schemaVersion", -1)) != 2 or str(row.get("sourceGitSHA", "")) != str(_content.get("sourceGitSHA", "")):
+		return false
+	for key in ["answers", "notes", "studied", "quizRecall", "letterSectionsByCase",
+		"planSectionsByCase", "volumeByCase", "journey", "radiologyByCase",
+		"fspKpByTask", "practicalChecklist"]:
+		if not (row.get(key, null) is Dictionary) or not (row[key] as Dictionary).is_empty():
+			return false
+	if not (row.get("volumeFDI16", null) is Array) or not (row["volumeFDI16"] as Array).is_empty():
+		return false
+	return true
 
 func _heading(t: String, pts: int = 20) -> Label:
 	var l := Label.new()
@@ -2735,6 +2768,9 @@ func _scan_set_wireframe(enabled: bool) -> void:
 
 func _show_progress() -> void:
 	_page.add_child(_heading("Personal local progress (not an official exam score)", 17))
+	_page.add_child(_heading("Active local progress file: " + ProjectSettings.globalize_path(PROGRESS), 12))
+	if not _progress_persistence_status.is_empty():
+		_page.add_child(_heading(_progress_persistence_status, 14))
 	for c in _cases:
 		for s in _stations:
 			var k := str(c["id"]) + ":" + str(s["id"])
@@ -2868,10 +2904,18 @@ func _reset_progress() -> void:
 	_progress["journey"] = {}
 	_progress["radiologyByCase"] = {}
 	_progress["fspKpByTask"] = {}
+	_progress["practicalChecklist"] = {}
 	_language_draft = null # Do not re-save an old draft during page teardown
 	for id in _volumes:
 		(_volumes[id] as Node3D).call("reset")
-	_save_progress()
+	# Persist, re-open and validate the *exact* user:// progress file. If the
+	# disk is stale, show a failure with its actual resolved path; never claim
+	# the empty in-memory answer counter proves durable reset.
+	var reset_write_ok: bool = _save_progress()
+	var reset_disk_ok: bool = reset_write_ok and _reset_progress_on_disk()
+	_progress_persistence_status = "Reset confirmed on disk (all educational records cleared)." if reset_disk_ok else "RESET NOT CONFIRMED ON DISK — check file access and local progress path."
+	if not reset_disk_ok:
+		push_error("SR64_RESET_DISK_MISMATCH " + ProjectSettings.globalize_path(PROGRESS))
 	_refresh()
 
 func _show_coverage() -> void:
