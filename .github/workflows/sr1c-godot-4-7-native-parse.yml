@@ -97,6 +97,7 @@ jobs:
           node --test tests/sr49_native_writing_focus.test.mjs
           node --test tests/sr50_native_navigation_responsive.test.mjs
           node --test tests/sr51_native_camera_framing.test.mjs
+          node --test tests/sr52_native_quiz_finish_gating.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -212,6 +213,7 @@ jobs:
           grep -F "SR48_FSP_KP_WRITING_REVIEW_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR49_FSP_KP_WRITING_FOCUS_SIX_CASES_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
           grep -F "SR50_FDI_NAV_SIX_CASE_SEVEN_STATION_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
+          grep -F "SR52_SIX_FDI_FOUR_QUIZ_FINISH_GATING_PASS" "$RUNNER_TEMP/actual-cc0-app-smoke.log"
       - name: SR31 real native desktop walk and selected FDI operatory input (HEADLESS, NO PC PIXELS)
         run: |
           set -euo pipefail
