@@ -12,7 +12,9 @@ test('SR55 source-native toolbar preserves all 10 views and two cameras without 
  assert.match(app,/var _toolbar_camera_buttons: Dictionary/);
  assert.match(app,/_toolbar = GridContainer\.new\(\)/);
  assert.match(app,/_toolbar\.name = "KL_NATIVE_RESPONSIVE_TOOLBAR"/);
- assert.match(app,/_toolbar\.columns = clampi\(int\(floor\(\(physical_width - 24\.0\) \/ 150\.0\)\), 4, 10\)/);
+ // SR60 retains all 12 SR55 actions with bounded adaptive columns.
+ assert.match(app,/var physical_columns := int\(floor\(\(physical_width - 24\.0\) \/ 160\.0\)\)/);
+ assert.match(app,/_toolbar\.columns = clampi\(mini\(physical_columns, logical_columns\), 4, 8\)/);
  assert.match(app,/get_window\(\)\.size\.x/);
  assert.match(app,/logical_width \/ physical_width/);
  assert.match(app,/toolbar_font_size := clampi\(int\(ceil\(14\.0 \* inverse_canvas_scale\)\), 14, 22\)/);
@@ -39,7 +41,7 @@ test('SR55 source-native toolbar preserves all 10 views and two cameras without 
 
 test('SR55 owner-rejected 1280x720 and 1536x864 included in actual headless Godot layout/interaction gates',()=>{
  assert.match(visual,/func _validate_toolbar\(app: Node3D, window_width: int, window_height: int, expected_columns: int\)/);
- assert.match(visual,/\[\[1280,720,8\],\[1536,864,10\],\[1024,720,6\],\[1600,900,10\]\]/);
+ assert.match(visual,/\[\[1280,720,7\],\[1536,864,8\],\[1024,720,6\],\[1600,900,8\]\]/);
  assert.match(visual,/grid\.get_child_count\(\) == 12/);
  assert.match(visual,/b\.size\.x >= 142\.0/);
  assert.match(visual,/chip_physical\.x >= 142\.0/);
