@@ -998,7 +998,15 @@ func _build_app() -> void:
 	_toolbar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_toolbar.add_theme_constant_override("h_separation", 6)
 	_toolbar.add_theme_constant_override("v_separation", 5)
-	top.add_child(_toolbar)
+	# SR60: use real Container margins, not merely a mathematical right-edge
+	# tolerance. The owner-PC Windows capture clipped final toolbar actions.
+	var toolbar_safe := MarginContainer.new()
+	toolbar_safe.name = "KL_TOOLBAR_SAFE_GUTTER"
+	toolbar_safe.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	toolbar_safe.add_theme_constant_override("margin_left", 8)
+	toolbar_safe.add_theme_constant_override("margin_right", 8)
+	top.add_child(toolbar_safe)
+	toolbar_safe.add_child(_toolbar)
 	_toolbar_view_buttons.clear()
 	_toolbar_camera_buttons.clear()
 	for section in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
@@ -1017,9 +1025,18 @@ func _build_app() -> void:
 		_toolbar.add_child(camera_button)
 	_update_toolbar_columns()
 	_sync_toolbar_selection()
+	# Keep the source case/notes content clear of the physical right edge.
+	var body_safe := MarginContainer.new()
+	body_safe.name = "KL_MAIN_BODY_SAFE_GUTTER"
+	body_safe.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_safe.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body_safe.add_theme_constant_override("margin_left", 8)
+	body_safe.add_theme_constant_override("margin_right", 8)
+	outer.add_child(body_safe)
 	var body := HBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	outer.add_child(body)
+	body_safe.add_child(body)
 	_left_column = VBoxContainer.new()
 	body.add_child(_left_column)
 	_left_panel = PanelContainer.new()
