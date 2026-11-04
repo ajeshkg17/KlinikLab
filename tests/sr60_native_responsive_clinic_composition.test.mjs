@@ -14,6 +14,10 @@ test('SR60 real owner 1536x864 clipping: 12 actions remain within bounded toolba
   assert.match(app,/var inset_y := maxf\(16\.0, bounds\.size\.y \* 0\.055\)/);
   assert.match(app,/_middle\.size_flags_horizontal = Control\.SIZE_EXPAND_FILL/);
   assert.match(app,/_right_column\.size_flags_horizontal = Control\.SIZE_EXPAND_FILL if writing_focus else Control\.SIZE_FILL/);
+  assert.match(app,/toolbar_safe\.add_theme_constant_override\("margin_right", 8\)/);
+  assert.match(app,/toolbar_safe\.add_child\(_toolbar\)/);
+  assert.match(app,/body_safe\.add_theme_constant_override\("margin_right", 8\)/);
+  assert.match(app,/body_safe\.add_child\(body\)/);
 });
 
 test('SR60: clinic overview no longer renders distant room floor as a bright narrow band behind six tooth models',()=>{
