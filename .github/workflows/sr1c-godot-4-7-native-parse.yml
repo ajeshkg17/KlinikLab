@@ -12,6 +12,8 @@ on:
       - 'tests/source-contract-text.mjs'
       - 'tests/sr63_windows_crlf_source_contract.test.mjs'
       - 'tests/sr64_ownerpc_reset_room_input.test.mjs'
+      - 'tests/sr65_windows_dundee_sidecar_export.test.mjs'
+      - '.github/workflows/sr8-native-windows-export.yml'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
       - 'visual-qa/sr1d-godot-case-workflow.gd'
@@ -112,6 +114,7 @@ jobs:
           node --test tests/sr62_quiz_feedback_parity.test.mjs
           node --test tests/sr63_windows_crlf_source_contract.test.mjs
           node --test tests/sr64_ownerpc_reset_room_input.test.mjs
+          node --test tests/sr65_windows_dundee_sidecar_export.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
