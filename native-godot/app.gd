@@ -200,6 +200,10 @@ func _ready() -> void:
 		return
 	_walk = walk_script.new()
 	_build_app()
+	# SR64: Window signals are more reliable than a Node notification alone
+	# when Win32 minimizes/restores an already captured mouse.
+	get_window().focus_exited.connect(_on_walk_focus_lost)
+	get_window().visibility_changed.connect(_on_walk_visibility_changed)
 	_set_camera_mode("overview")
 	_select_case(0)
 	_select_station(0)
@@ -357,6 +361,15 @@ func _release_walk_mouse() -> void:
 	if is_instance_valid(_walk_hud):
 		_update_walk_hud()
 
+func _on_walk_focus_lost() -> void:
+	# Win32 focus_exited fires on Alt-Tab and many minimize paths. Keep
+	# HUD state synchronized with the now-visible mouse; never auto-recapture.
+	_release_walk_mouse()
+
+func _on_walk_visibility_changed() -> void:
+	if not get_window().visible or get_window().mode == Window.MODE_MINIMIZED:
+		_release_walk_mouse()
+
 # Alt-Tab/window focus loss must never retain a hidden, locked pointer.
 # Regaining focus does not re-capture: the learner must click 3D again.
 func _notification(what: int) -> void:
@@ -367,6 +380,12 @@ func _exit_tree() -> void:
 	_release_walk_mouse()
 
 func _process(delta: float) -> void:
+	# Defensive Windows check if focus signals arrive in a different order
+	# during minimize/restore. Headless CI has no real OS pointer to inspect.
+	if _walk_mouse_captured and DisplayServer.get_name() != "headless":
+		var window: Window = get_window()
+		if not window.has_focus() or window.mode == Window.MODE_MINIMIZED or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+			_release_walk_mouse()
 	if not _walk_keyboard_allowed():
 		return
 	var direction := Vector2.ZERO
@@ -422,6 +441,13 @@ func _handle_walk_input(event: InputEvent) -> void:
 		# Godot 4.7: screen_relative is physical pixels, invariant under
 		# canvas_items stretch (logical viewport 1600x900 at multiple Windows sizes).
 		var look_delta: Vector2 = motion.screen_relative if _walk_mouse_captured else motion.relative
+		# SR64 Windows: some captured mouse events provide a zero physical delta
+		# while carrying nonzero relative motion. Fall back only in that case;
+		# never add the two measurements or double-rotate the scene.
+		if _walk_mouse_captured and look_delta == Vector2.ZERO:
+			look_delta = motion.relative
+		if look_delta == Vector2.ZERO:
+			return
 		_walk.call("apply_look_intent", look_delta)
 		_apply_walk_camera()
 		get_viewport().set_input_as_handled()
