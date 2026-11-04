@@ -9,7 +9,9 @@ test('SR50 compact native six-FDI navigation preserves source station identity a
  assert.match(browser,/const STATIONS=\[/);
  assert.match(native,/const STATION_IDS := \["interview", "letter", "handover", "written", "practical", "viva", "clinic"\]/);
  assert.match(native,/const NAV_STATION_SHORT := \[/);
- assert.match(native,/nav_width := clampf\(width \* 0\.18, 224\.0, 288\.0\)/);
+ // SR60 reduces excess sidebar width without changing SR50's
+ // two-chip FDI grid, source labels, or minimum readable nav width.
+ assert.match(native,/nav_width := clampf\(width \* 0\.15, 224\.0, 248\.0\)/);
  assert.match(native,/_nav_case_grid\.columns = 2/);
  assert.match(native,/btn\.name = "KL_FDI_CASE_" \+ str\(c\["fdi"\]\)/);
  assert.match(native,/btn\.name = "KL_STATION_" \+ STATION_IDS\[i\]/);

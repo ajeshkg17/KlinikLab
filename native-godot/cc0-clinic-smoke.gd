@@ -64,6 +64,9 @@ func _run() -> void:
 	get_root().add_child(scene)
 	app.set("_scene",scene)
 	app.set("_cc0_clinic",env)
+	# SR60: clinic training uses only the local source tooth camera.
+	# The original CC0 assembled clinic remains loaded for Environment.
+	app.call("_apply_environment_visibility")
 	for i in range(6):
 		app.call("_select_case",i)
 		app.call("_select_station",i)
@@ -76,13 +79,21 @@ func _run() -> void:
 		if str(source_case["id"])!=CASES[i] or str(source_case["fdi"])!=FDIS[i] or (content["practical"][i] as Array).size()<5:
 			_fail("Original case treatment and practical tasks changed")
 			return
-		# SR51: real FDI practical close-up intentionally hides decorative
-		# room, then other stations restore the overview. The original CC0
-		# imported mesh must remain loaded and its source SHA untouched.
-		var background_expected: bool = i != 4
-		if not bool((env.call("summary") as Dictionary)["wholeSceneLoaded"]) or env.visible != background_expected:
-			_fail("Clinic background unloaded or camera-mode visibility wrong at FDI " + FDIS[i])
+		# SR60: the bright distant CC0 floor never overlays Clinic tooth
+		# training, even in Overview camera. Loaded assets are untouched.
+		if not bool((env.call("summary") as Dictionary)["wholeSceneLoaded"]) or env.visible:
+			_fail("CC0 room leaked over focused Clinic FDI " + FDIS[i])
 			return
+	app.set("_view","environment")
+	app.call("_apply_environment_visibility")
+	if not env.visible or not bool((env.call("summary") as Dictionary)["wholeSceneLoaded"]):
+		_fail("Real imported CC0 room not available in Environment view")
+		return
+	app.set("_view","clinic")
+	app.call("_apply_environment_visibility")
+	if env.visible:
+		_fail("Return to Clinic restored unwanted CC0 bright floor strip")
+		return
 	app.call("_reset_progress")
 	print("SR13_NATIVE_IMPORTED_CC0_CLINIC_AND_SIX_FDI_WORKFLOWS_PASS real PackedScene meshes; 54 catalogued GLBs / 3 loaded (2 baseline + chair); labelled missing-chair fallback; static only, NO WINDOWS PIXELS/GPU/CLINICAL QA")
 	quit(0)

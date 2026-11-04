@@ -13,7 +13,9 @@ test('SR59 fixes the actual owner-pixel camera/header regression cause without r
   assert.match(app, /_status_footer\.name = "KL_NATIVE_STATUS_FOOTER"/);
   assert.match(app, /not clinical or exam validated/);
   assert.match(app, /outer\.add_child\(_status_footer\)/);
-  assert.match(app, /top\.add_child\(_toolbar\)/);
+  assert.match(app, /top\.add_child\(toolbar_safe\)/);
+  assert.match(app, /toolbar_safe\.add_child\(_toolbar\)/);
+  assert.match(app, /toolbar_safe\.add_theme_constant_override\("margin_right", 8\)/);
   assert.match(app, /_toolbar\.add_child\(camera_button\)/);
   assert.match(app, /func _update_toolbar_columns\(\) -> void:/);
 });
