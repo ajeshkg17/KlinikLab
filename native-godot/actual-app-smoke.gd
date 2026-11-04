@@ -482,6 +482,13 @@ func _run() -> void:
 				if int(app.get("_quiz_index")) != question_i:
 					_fail("SR52 quiz sequence index mismatch " + key)
 					return
+				if question_i > 0:
+					# Each new question must require an independent learner
+					# reveal, not inherit the previous one's answer choices.
+					if (app.get("_page") as VBoxContainer).get_node_or_null("KL_QUIZ_OPTION_0") != null:
+						_fail("SR52 next quiz options exposed before recall " + key)
+						return
+					app.call("_reveal_quiz_options")
 				var q: Dictionary = questions[question_i]
 				var correct_idx: int = int(q["correct"])
 				var response_key := key + ":" + str(question_i)
