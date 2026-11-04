@@ -31,7 +31,7 @@ test('SR58 native practical puts real source task controls before model/anatomy/
   assert.match(practical, /_show_practical_fdi_chart\(step_index\)/);
   assert.match(practical, /# Keep the current source task\/FDI choices above/);
   assert.match(practical, /if _procedure_guided:\n\t\tvar previous := _button\("Previous task \(P\)"\)/);
-  assert.match(practical, /_direct_bur_mode/); // never permit task-first shortcut to cutting
+  assert.match(practical, /Bur use needs independent opt-in/); // no shortcut to cutting
   assert.doesNotMatch(practical, /_practical_target\(0, FDI/); // no fabricated success
 });
 
