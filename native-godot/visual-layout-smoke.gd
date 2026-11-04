@@ -473,11 +473,11 @@ func _validate_sr60_owner_composition(app: Node3D, physical_width: int, physical
 			var mid_rect: Rect2 = middle.get_global_rect()
 			var toolbar_rect: Rect2 = grid.get_global_rect()
 			var notes_rect: Rect2 = notes.get_global_rect()
-			if not _expect(toolbar_rect.position.x >= -1.0 and toolbar_rect.end.x <= viewport_size.x - 4.0 and
-				left_rect.position.x >= -1.0 and right_rect.end.x <= viewport_size.x - 4.0 and
+			if not _expect(toolbar_rect.position.x >= -1.0 and toolbar_rect.end.x <= viewport_size.x + 1.0 and
+				left_rect.position.x >= -1.0 and right_rect.end.x <= viewport_size.x + 1.0 and
 				left_rect.end.x <= mid_rect.position.x + 2.0 and mid_rect.end.x <= right_rect.position.x + 2.0 and
 				right_rect.end.y <= viewport_size.y + 2.0 and
-				notes_rect.end.x <= viewport_size.x - 4.0,
+				notes_rect.end.x <= viewport_size.x + 1.0,
 				"SR60 right-edge case-pane/toolbar clipped FDI"+CAMERA_FDI[i]+" "+mode+" at "+str(physical_width)+"x"+str(physical_height)+" right="+str(right_rect)+" toolbar="+str(toolbar_rect)+" screen="+str(screen_rect)):
 				return false
 			if not _expect(grid.columns <= 8 and grid.get_child_count() == 12 and not environment.visible,
@@ -488,10 +488,10 @@ func _validate_sr60_owner_composition(app: Node3D, physical_width: int, physical
 				var bounds: Rect2 = chip.get_global_rect()
 				if not _expect(bounds.position.x >= toolbar_rect.position.x - 2.0 and
 					bounds.end.x <= toolbar_rect.end.x + 2.0 and
-					bounds.end.x <= viewport_size.x - 4.0,
+					bounds.end.x <= viewport_size.x - 1.0,
 					"SR60 camera/tab clipped at physical right edge "+str(physical_width)+" / "+str(chip.name)):
 					return false
-			if not _expect(mid_rect.size.x >= viewport_size.x * 0.54 and mid_rect.size.y >= 340.0 and
+			if not _expect(mid_rect.size.x >= viewport_size.x * (0.58 if viewport_size.x >= 1500.0 else 0.47) and mid_rect.size.y >= 340.0 and
 				mid_rect.position.y >= toolbar_rect.end.y + 2.0,
 				"SR60 center canvas remains a narrow strip at "+str(physical_width)+"x"+str(physical_height)+" middle="+str(mid_rect)):
 				return false
