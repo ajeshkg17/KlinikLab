@@ -105,6 +105,7 @@ jobs:
           node --test tests/sr58_native_practical_task_first.test.mjs
           node --test tests/sr59_reference_viewport_header.test.mjs
           node --test tests/sr60_native_responsive_clinic_composition.test.mjs
+          node --test tests/sr61_desktop_fps_mouse_capture.test.mjs
           node --test tests/sr43_fdi_reference_clearance.test.mjs
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
@@ -237,6 +238,7 @@ jobs:
           cat "$RUNNER_TEMP/sr31-walk-smoke.log"
           grep -F "SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
           grep -F "SR57_FIRST_PERSON_CAMERA_HUD_SPRINT_BEARING_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
+          grep -F "SR61_DESKTOP_FPS_MOUSE_CAPTURE_RELEASE_FOCUS_PASS" "$RUNNER_TEMP/sr31-walk-smoke.log"
       - name: SR32 guided desktop practical, all six FDI cases and FSP/KP preserved (HEADLESS only)
         run: |
           set -euo pipefail
@@ -303,6 +305,7 @@ jobs:
           grep -F "SR58_PRACTICAL_START_1600_1280_1024_720_LAYOUT_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR59_ALL_SIX_FDI_REAL_REFERENCE_FULL_BOUNDS_AND_HEADER_FOUR_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
           grep -F "SR60_SIX_FDI_OWNER_1536_864_RIGHT_EDGE_AND_SCENE_COMPOSITION_PASS" "$RUNNER_TEMP/visual-layout-test.log"
+          grep -F "SR61_FPS_POINTER_HUD_SIX_DESKTOP_SIZES_PASS" "$RUNNER_TEMP/visual-layout-test.log"
       - name: Package source-exact runnable Godot native app (no Windows GPU acceptance)
         if: success()
         run: |

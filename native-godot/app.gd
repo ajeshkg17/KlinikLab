@@ -109,10 +109,13 @@ var _direct_bur_mode := false
 var _walk: RefCounted
 var _walk_active := false
 var _walk_look_dragging := false
+# SR61: only an explicit click INSIDE the 3D pane captures desktop mouse look.
+var _walk_mouse_captured := false
 var _walk_near_operatory := false
 var _walk_near_language_station := false
 # SR57: read-only first-person HUD inside the unobscured center pane.
-# It never captures input or changes saved progress, models or cutting.
+# Its overlay never intercepts input; SR61 capture is an opt-in 3D-pane action.
+# Neither overlay nor capture changes saved progress, models or cutting.
 var _walk_hud: Control
 var _walk_hud_top: PanelContainer
 var _walk_hud_title: Label
@@ -311,12 +314,14 @@ func _update_walk_hud() -> void:
 	var width: float = maxf(180.0, _middle.size.x - 22.0)
 	_walk_hud_top.offset_right = minf(width, 316.0)
 	_walk_hud_panel.offset_right = minf(width, 336.0)
-	_walk_hud_title.text = "WALK PREVIEW · FDI %s\nWASD / arrows move · Shift quicker · right-drag look" % FDI[_case_index]
+	var look_help := "Mouse captured · Esc releases" if _walk_mouse_captured else "Click 3D to look · Esc exits"
+	_walk_hud_title.text = "WALK PREVIEW · FDI %s\n%s" % [FDI[_case_index],look_help]
 	var op: Dictionary = _walk.call("operatory_guidance")
 	var language: Dictionary = _walk.call("language_guidance")
 	var action := "E · Enter operatory" if bool(op.get("inRange",false)) else "E · Enter FSP/KP" if bool(language.get("inRange",false)) else "Approach station · E interacts"
-	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · Esc exits" % [
-		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), action]
+	var exit_help := "Esc releases · Esc again exits" if _walk_mouse_captured else "Esc exits"
+	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · %s" % [
+		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), action, exit_help]
 	# Units and range cues come exclusively from the uncalibrated walk intent.
 	# No new score, patient mapping, geometry, or clinical accuracy claim.
 
@@ -327,6 +332,35 @@ func _walk_keyboard_allowed() -> bool:
 	# or entering free text into a UI control.
 	var focused: Control = get_viewport().gui_get_focus_owner()
 	return not (focused is TextEdit or focused is LineEdit)
+
+# SR61: never grab the pointer on app launch or on walk start.
+# Click inside the actual center 3D pane to enable conventional FPS look.
+func _capture_walk_mouse() -> void:
+	if not _walk_active or _view != "environment" or _middle == null or not _middle.visible:
+		return
+	_walk_mouse_captured = true
+	_walk_look_dragging = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_update_walk_hud()
+
+func _release_walk_mouse() -> void:
+	var owned_capture := _walk_mouse_captured
+	_walk_mouse_captured = false
+	_walk_look_dragging = false
+	# Do not change another tool's cursor mode if this walk never acquired it.
+	if owned_capture and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if is_instance_valid(_walk_hud):
+		_update_walk_hud()
+
+# Alt-Tab/window focus loss must never retain a hidden, locked pointer.
+# Regaining focus does not re-capture: the learner must click 3D again.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_release_walk_mouse()
+
+func _exit_tree() -> void:
+	_release_walk_mouse()
 
 func _process(delta: float) -> void:
 	if not _walk_keyboard_allowed():
@@ -354,32 +388,46 @@ func _process(delta: float) -> void:
 func _handle_walk_input(event: InputEvent) -> void:
 	if not _walk_active or _view != "environment" or _walk == null:
 		return
-	if event is InputEventMouseButton:
+	if event is InputEventKey:
+		var key: InputEventKey = event
+		if not key.pressed or key.echo:
+			return
+		# Escape always works, even if a text field happens to have focus.
+		# First Escape releases FPS capture; second Escape exits the walk.
+		if key.keycode == KEY_ESCAPE or key.physical_keycode == KEY_ESCAPE:
+			if _walk_mouse_captured:
+				_release_walk_mouse()
+			else:
+				_stop_clinic_walk()
+			get_viewport().set_input_as_handled()
+		elif _walk_keyboard_allowed() and (key.physical_keycode == KEY_E or key.keycode == KEY_E):
+			if _walk_enter_language_station() or _walk_enter_procedure():
+				get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event
-		if mouse.button_index == MOUSE_BUTTON_RIGHT:
+		if mouse.button_index == MOUSE_BUTTON_LEFT and mouse.pressed and not _walk_mouse_captured and _middle != null and _middle.get_global_rect().has_point(mouse.position):
+			_capture_walk_mouse()
+			get_viewport().set_input_as_handled()
+		elif mouse.button_index == MOUSE_BUTTON_RIGHT and not _walk_mouse_captured:
+			# Preserve legacy right-drag looking as a no-capture alternative.
 			_walk_look_dragging = mouse.pressed and _middle != null and _middle.get_global_rect().has_point(mouse.position)
 			if _walk_look_dragging:
 				get_viewport().set_input_as_handled()
-	elif event is InputEventMouseMotion and _walk_look_dragging:
-		_walk.call("apply_look_intent", (event as InputEventMouseMotion).relative)
+	elif event is InputEventMouseMotion and (_walk_mouse_captured or _walk_look_dragging):
+		var motion: InputEventMouseMotion = event
+		# Godot 4.7: screen_relative is physical pixels, invariant under
+		# canvas_items stretch (logical viewport 1600x900 at multiple Windows sizes).
+		var look_delta: Vector2 = motion.screen_relative if _walk_mouse_captured else motion.relative
+		_walk.call("apply_look_intent", look_delta)
 		_apply_walk_camera()
 		get_viewport().set_input_as_handled()
-	elif event is InputEventKey and _walk_keyboard_allowed():
-		var key: InputEventKey = event
-		if key.pressed and not key.echo:
-			if key.physical_keycode == KEY_E or key.keycode == KEY_E:
-				if _walk_enter_language_station() or _walk_enter_procedure():
-					get_viewport().set_input_as_handled()
-			elif key.keycode == KEY_ESCAPE:
-				_stop_clinic_walk()
-				get_viewport().set_input_as_handled()
 
 func _start_clinic_walk() -> void:
 	if _view != "environment" or _cc0_clinic == null or _walk == null:
 		return
 	_direct_bur_mode = false
+	_release_walk_mouse()
 	_walk_active = true
-	_walk_look_dragging = false
 	_walk.call("reset")
 	_walk_station_return_available = false
 	_walk_language_return_available = false
@@ -389,8 +437,8 @@ func _start_clinic_walk() -> void:
 	_refresh()
 
 func _stop_clinic_walk() -> void:
+	_release_walk_mouse()
 	_walk_active = false
-	_walk_look_dragging = false
 	if _view == "environment":
 		_set_environment_camera()
 		_refresh()
@@ -412,8 +460,8 @@ func _walk_enter_procedure() -> bool:
 	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_operatory_range")):
 		return false
 	# E activates a station, NEVER a drill. Preserve the chosen FDI case.
+	_release_walk_mouse()
 	_walk_active = false
-	_walk_look_dragging = false
 	_direct_bur_mode = false
 	_walk_station_return_available = true
 	_select_station(4) # original practical station from immutable source order
@@ -428,8 +476,8 @@ func _walk_enter_language_station() -> bool:
 	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_language_station_range")):
 		return false
 	_language_save_draft()
+	_release_walk_mouse()
 	_walk_active = false
-	_walk_look_dragging = false
 	_walk_language_return_available = true
 	_walk_station_return_available = false
 	_switch_view("language")
@@ -446,8 +494,8 @@ func _return_to_clinic_walk() -> bool:
 	_switch_view("environment")
 	if from_language:
 		_walk_language_return_available = false
+	_release_walk_mouse()
 	_walk_active = true
-	_walk_look_dragging = false
 	_walk_near_operatory = bool(_walk.call("in_operatory_range"))
 	_walk_near_language_station = bool(_walk.call("in_language_station_range"))
 	_apply_walk_camera()
@@ -1277,9 +1325,9 @@ func _show_environment() -> void:
 		var start_walk := _button("Start clinic walkthrough · WASD / arrows")
 		start_walk.pressed.connect(_start_clinic_walk)
 		_page.add_child(start_walk)
-		_page.add_child(_heading("WASD / arrows move · hold Shift for quicker movement · right-drag over the central scene to look · E interacts when nearby · Esc returns to overview.",13))
+		_page.add_child(_heading("WASD / arrows move · Shift quicker · click the central 3D pane for FPS mouse look · Esc releases cursor, then Esc exits · right-drag also works without capture · E interacts near a station.",13))
 	else:
-		_page.add_child(_heading("WALK ACTIVE · follow the on-screen operatory and language cues. Hold right mouse button over the scene and drag to look.",13))
+		_page.add_child(_heading("WALK ACTIVE · click inside 3D to capture FPS mouse look. Esc releases, then Esc exits. The right-drag alternative remains available while released.",13))
 	_page.add_child(_heading("Imported CC0 3DAssets.dev dental practice • native scene",16))
 	_page.add_child(_heading("The assembled whole-clinic starter and a separate instrument tray are imported GLB meshes, instantiated in the REAL Godot application. The schematic background is disabled; the original source-identified six FDI/tooth/training flows remain independent.",14))
 	if _cc0_clinic!=null:
@@ -1339,8 +1387,8 @@ func _switch_view(view: String) -> void:
 	_update_fdi26_reference_visibility()
 	_update_fdi16_mirror_visibility()
 	if view != "environment":
+		_release_walk_mouse()
 		_walk_active = false
-		_walk_look_dragging = false
 	if view != "clinic":
 		_procedure_guided = false
 		_procedure_step_index = 0
