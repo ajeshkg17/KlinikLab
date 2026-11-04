@@ -475,6 +475,10 @@ func _run() -> void:
 			if int(app.get("_quiz_index")) != 0 or bool(((app.get("_progress") as Dictionary)["studied"] as Dictionary).get(key,false)):
 				_fail("SR52 unanswered question skipped/completed " + key)
 				return
+			app.call("_answer",track,0,int((questions[0] as Dictionary)["correct"]))
+			if not (app.get("_quiz_next_button") as Button).disabled or (((app.get("_progress") as Dictionary)["answers"] as Dictionary).has(key + ":0")):
+				_fail("SR52 unrevealed source choice accepted " + key)
+				return
 			var note: TextEdit = app.get("_quiz_recall_edit")
 			note.text = "Original learner reasoning FDI " + FDIS[case_i] + " " + track
 			app.call("_reveal_quiz_options")
