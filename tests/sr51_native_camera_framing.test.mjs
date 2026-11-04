@@ -11,6 +11,8 @@ test('SR51 FDI case camera targets unmodified synthetic and source geometry in t
   assert.match(app,/const CAMERA_FOV := 40\.0/);
   assert.match(app,/const CAMERA_ENV_FOV := 42\.0/);
   assert.match(app,/func _camera_content_rect\(\) -> Rect2:/);
+  assert.match(app,/func _editable_camera_bounds\(\) -> AABB:/);
+  assert.match(app,/mesh\.global_transform \* \(local\.position \+ local\.size/);
   assert.match(app,/func _practical_camera_bounds\(\) -> AABB:/);
   assert.match(app,/var compare_pair: bool = _camera_mode == "overview" and _case_index in \[0, 1, 3\]/);
   assert.match(app,/func _frame_visible_camera\(\) -> void:/);
