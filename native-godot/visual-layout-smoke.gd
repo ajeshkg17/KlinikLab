@@ -199,6 +199,58 @@ func _validate_practical_fdi_chart(app: Node3D, window_width: int) -> bool:
 				return false
 	return true
 
+# SR55: the actual owner-PC rejected 1280x720 and 1536x864 because the
+# single HBox/ScrollContainer compressed twelve tabs into unlabelled slivers.
+# This tests native Godot Control geometry, not actual RTX pixels.
+func _validate_toolbar(app: Node3D, window_width: int, window_height: int, expected_columns: int) -> bool:
+	root.size = Vector2i(window_width,window_height)
+	app.call("_update_responsive_layout")
+	await process_frame
+	await process_frame
+	await process_frame
+	var grid: GridContainer = app.get("_toolbar") as GridContainer
+	var view_buttons: Dictionary = app.get("_toolbar_view_buttons")
+	var camera_buttons: Dictionary = app.get("_toolbar_camera_buttons")
+	if not _expect(grid != null and grid.name == "KL_NATIVE_RESPONSIVE_TOOLBAR" and grid.columns == expected_columns and grid.get_child_count() == 12, "SR55 toolbar missing/adaptive columns wrong at %dx%d" % [window_width,window_height]):
+		return false
+	if not _expect(view_buttons.size() == 10 and camera_buttons.size() == 2, "SR55 some source views or camera controls lost"):
+		return false
+	if not _expect(grid.size.x <= float(window_width) + 1.0 and grid.size.y <= 145.0 and grid.get_global_rect().end.y <= 180.0, "SR55 toolbar extends outside available desktop top band"):
+		return false
+	var labels := ["Clinic","Environment","Learning","Journey","Language","Anatomy","Radiology","Scans","Progress","Coverage","Overview camera","Teeth camera"]
+	var viewport_right := float(window_width) - 1.0
+	var viewport_bottom := float(window_height) - 1.0
+	for idx in range(12):
+		var b: Button = grid.get_child(idx) as Button
+		if not _expect(b != null and b.text == labels[idx] and not b.clip_text and b.autowrap_mode == TextServer.AUTOWRAP_OFF and not b.tooltip_text.is_empty(), "SR55 toolbar label missing/truncated at %dx%d index %d" % [window_width,window_height,idx]):
+			return false
+		var rect: Rect2 = b.get_global_rect()
+		if not _expect(b.size.x >= 142.0 and b.size.y >= 40.0 and b.size.y <= 47.0, "SR55 toolbar chip collapsed to a strip at %dx%d index %d: %s" % [window_width,window_height,idx,str(b.size)]):
+			return false
+		if not _expect(rect.position.x >= 0.0 and rect.position.y >= 0.0 and rect.end.x <= viewport_right + 2.0 and rect.end.y <= viewport_bottom + 1.0, "SR55 toolbar clipped at %dx%d index %d: %s" % [window_width,window_height,idx,str(rect)]):
+			return false
+	for idx in range(expected_columns):
+		if not _expect(is_equal_approx((grid.get_child(idx) as Control).position.y, (grid.get_child(0) as Control).position.y), "SR55 first toolbar row not aligned"):
+			return false
+	if not _expect((grid.get_child(expected_columns) as Control).position.y > (grid.get_child(0) as Control).position.y + 35.0, "SR55 toolbar still compressed into one row"):
+		return false
+	# Exercise signals, source view routing, and exclusive selection (including
+	# both camera controls). No FDI switch, answer, cut, or progress mutation.
+	app.call("_switch_view","clinic")
+	(view_buttons["progress"] as Button).pressed.emit()
+	if not _expect(str(app.get("_view")) == "progress" and (view_buttons["progress"] as Button).button_pressed and not (view_buttons["clinic"] as Button).button_pressed, "SR55 Progress button failed to route and indicate active view"):
+		return false
+	(view_buttons["clinic"] as Button).pressed.emit()
+	if not _expect(str(app.get("_view")) == "clinic" and (view_buttons["clinic"] as Button).button_pressed, "SR55 Clinic toolbar failed to return to 3D"):
+		return false
+	(camera_buttons["teeth"] as Button).pressed.emit()
+	if not _expect(str(app.get("_camera_mode")) == "teeth" and (camera_buttons["teeth"] as Button).button_pressed, "SR55 Teeth camera action failed"):
+		return false
+	(camera_buttons["overview"] as Button).pressed.emit()
+	if not _expect(str(app.get("_camera_mode")) == "overview" and (camera_buttons["overview"] as Button).button_pressed and not (camera_buttons["teeth"] as Button).button_pressed, "SR55 Overview camera action failed"):
+		return false
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -308,6 +360,12 @@ func _run() -> void:
 		"SR51 writing-to-practical navigation or FDI 36 focus lost"):
 		return
 	print("SR51_SIX_FDI_THREE_WIDTH_CAMERA_FRAMING_PASS true center projection, close-up/overview, environment, navigation; headless only")
+	# SR55 exact owner-PC rejected widths/heights plus 1024px compact and
+	# prior 1600x900 layout: all twelve actions must remain readable.
+	for size_and_columns in [[1280,720,8],[1536,864,10],[1024,720,6],[1600,900,10]]:
+		if not await _validate_toolbar(app,size_and_columns[0],size_and_columns[1],size_and_columns[2]):
+			return
+	print("SR55_RESPONSIVE_TWELVE_ACTION_TOOLBAR_1280_720_1536_864_PASS real labels, four geometries, active view/camera, no clipping; headless only")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:
