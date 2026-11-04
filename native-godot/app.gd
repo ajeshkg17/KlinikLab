@@ -60,6 +60,7 @@ var _draft: TextEdit
 # The browser FSP Arztbrief has four named sections, not one unstructured draft.
 var _letter_fields: Dictionary = {}
 var _plan_fields: Dictionary = {}
+var _writing_review_label: Label
 var _writing_key := ""
 var _practical_feedback: Dictionary = {}
 var _boot_error := ""
@@ -733,6 +734,7 @@ func _clear_page() -> void:
 	_draft = null
 	_letter_fields.clear()
 	_plan_fields.clear()
+	_writing_review_label = null
 	_writing_key = ""
 	_language_draft = null
 	_language_draft_key = ""
@@ -1358,6 +1360,13 @@ func _show_writing(station: String) -> void:
 	var save := _button("Save draft on this computer")
 	save.pressed.connect(_save_draft)
 	_page.add_child(save)
+	var review := _button("Review FSP structure (formative only)" if station == "letter" else "Review KP structure (formative only)")
+	review.name = "KL_WRITING_STRUCTURE_REVIEW"
+	review.pressed.connect(_review_writing.bind(station))
+	_page.add_child(review)
+	_writing_review_label = _heading("Structural self-review not yet run. Content, safety, language and clinical quality must be assessed separately.", 13)
+	_writing_review_label.name = "KL_WRITING_STRUCTURE_FEEDBACK"
+	_page.add_child(_writing_review_label)
 	_page.add_child(_heading("Self-study note only. No automatic validated FSP/KP grading.", 13))
 
 func _save_draft() -> void:
@@ -1402,6 +1411,44 @@ func _save_draft() -> void:
 	if _draft != null:
 		(_progress["notes"] as Dictionary)[_writing_key] = _draft.text.substr(0, 10000)
 		_save_progress()
+
+
+# Mirrors the browser's deliberate *structure-only* checks (>=35 characters per
+# section, literal FDI reference, distinct alternative wording). Never a grade.
+func _writing_structure_feedback(station: String) -> String:
+	if station not in ["letter", "written"]:
+		return "No structured writing review for this station."
+	var fields: Dictionary = _letter_fields if station == "letter" else _plan_fields
+	var ids: Array = LETTER_SECTIONS if station == "letter" else PLAN_SECTIONS
+	var substantial := 0
+	var full_text := ""
+	for id in ids:
+		var field: TextEdit = fields.get(id)
+		if field == null:
+			return "Writing fields unavailable; review could not run."
+		var value: String = field.text.strip_edges()
+		full_text += " " + value
+		if value.length() >= 35:
+			substantial += 1
+	if substantial < 4:
+		if station == "letter":
+			return "Draft coverage %d/4 sections. Complete all four with meaningful clinical information before review. Character count is not a clinical grade." % substantial
+		return "Written plan draft %d/4 fields substantially completed. Document working diagnosis, two alternatives, justification and follow-up. Character count is not a clinical grade." % substantial
+	if station == "letter":
+		var fdi_reference: String = FDI[_case_index]
+		var tooth_message := "FDI tooth reference present." if full_text.contains(fdi_reference) else "Check that tooth " + fdi_reference + " is specified accurately."
+		return "Structure check passed (4/4 sections). " + tooth_message + " Review grammar, findings, clinical uncertainty, alternatives and consent yourself. NOT a formal FSP assessment."
+	var plan_a: TextEdit = fields.get("planA")
+	var plan_b: TextEdit = fields.get("planB")
+	if plan_a.text.strip_edges().to_lower() == plan_b.text.strip_edges().to_lower():
+		return "Plan A and Plan B must describe two different alternatives. This is a structure check, NOT clinical grading."
+	return "Written submission includes a working diagnosis, two distinct written plans and follow-up. Self-check indications, prognosis, risks and consent. This is a structure check, NOT a formal KP assessment."
+
+func _review_writing(station: String) -> void:
+	if _writing_review_label == null or station not in ["letter", "written"]:
+		return
+	_save_draft() # Preserve edits before the learner navigates away.
+	_writing_review_label.text = _writing_structure_feedback(station)
 
 func _show_practical() -> void:
 	var c: Dictionary = _cases[_case_index]
@@ -2164,6 +2211,7 @@ func _reset_progress() -> void:
 	# Reset is intentional; do not restore currently visible letter fields on redraw.
 	_letter_fields.clear()
 	_plan_fields.clear()
+	_writing_review_label = null
 	_draft = null
 	_writing_key = ""
 	_progress["letterSectionsByCase"] = {}
