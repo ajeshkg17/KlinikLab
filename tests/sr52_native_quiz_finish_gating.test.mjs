@@ -9,7 +9,7 @@ test('SR52 browser quiz requires correct answer before Next, and finishes final 
  assert.match(browser,/next\(\)\{if\(!this\.done\)/);
  assert.match(browser,/if\(this\.step<n-1\)/);
  assert.match(browser,/this\.local\.complete\.push\(key\)/);
- assert.match(browser,/this\.station\.id\+'_'+this\.caseData\.id/);
+ assert.ok(browser.includes("this.station.id+'_'+this.caseData.id"));
  assert.match(native,/func _show_quiz\(station: String\) -> void:/);
  assert.match(native,/_quiz_next_button = _button\("Finish station ✓" if _quiz_index == questions\.size\(\) - 1 else "Next source question"\)/);
  assert.match(native,/_quiz_next_button\.disabled = not bool\(existing\.get\("correct", false\)\)/);
