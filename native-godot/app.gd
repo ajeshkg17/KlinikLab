@@ -657,14 +657,36 @@ func _camera_content_rect() -> Rect2:
 	return Rect2(bounds.position + Vector2(inset_x, inset_y),
 		bounds.size - Vector2(2.0 * inset_x, 2.0 * inset_y))
 
+func _editable_camera_bounds() -> AABB:
+	# Fit the real current synthetic source-derived mesh, not an arbitrary
+	# fixed "molar" envelope: FDI 11 is a physically narrower incisor.
+	# The AABB is only used to place the camera, never to alter geometry.
+	if _volume != null:
+		var mesh: MeshInstance3D = _volume.get_node_or_null("KL_FDI%s_REGENERATED_TISSUE_MESH" % FDI[_case_index]) as MeshInstance3D
+		if mesh != null and mesh.mesh != null:
+			var local: AABB = mesh.get_aabb()
+			var lo := Vector3(INF, INF, INF)
+			var hi := Vector3(-INF, -INF, -INF)
+			for xx in [0.0,1.0]:
+				for yy in [0.0,1.0]:
+					for zz in [0.0,1.0]:
+						var vertex: Vector3 = mesh.global_transform * (local.position + local.size * Vector3(xx, yy, zz))
+						lo = lo.min(vertex)
+						hi = hi.max(vertex)
+			if hi.x > lo.x and hi.y > lo.y and hi.z > lo.z:
+				var pad := Vector3(0.32,0.34,0.30)
+				return AABB(lo - pad, hi - lo + pad * 2.0)
+	# Safe source-signature-based fallback on a missing/blocked model. The
+	# caller separately displays provenance and missing-geometry status.
+	return AABB(Vector3(1.25, -1.95, -1.65), Vector3(3.30, 3.95, 3.30))
+
 func _practical_camera_bounds() -> AABB:
-	# FDI11/48/46 have no source-cleared left reference: center the real,
-	# independently editable case-specific volume, not another tooth.
-	# Overview also frames the source/illustrative left mesh only where it
-	# exists (FDI16, FDI36, FDI26); Teeth zooms on the selected editable FDI.
+	# FDI11/48/46 have no source-cleared left reference. Overview includes
+	# the original/source left object only for FDI16/36/26.
 	var compare_pair: bool = _camera_mode == "overview" and _case_index in [0, 1, 3]
-	var low_x := -4.55 if compare_pair else 1.25
-	return AABB(Vector3(low_x, -1.95, -1.65), Vector3(4.55 - low_x, 3.95, 3.30))
+	if compare_pair:
+		return AABB(Vector3(-4.55, -1.95, -1.65), Vector3(9.10, 3.95, 3.30))
+	return _editable_camera_bounds()
 
 func _frame_visible_camera() -> void:
 	if _scene == null or _middle == null:
