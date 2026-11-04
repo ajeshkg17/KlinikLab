@@ -1927,26 +1927,6 @@ func _show_practical() -> void:
 				completed_count += 1
 		_page.add_child(_heading("Learner checklist: %d/%d manually completed · independent of answer correctness" % [completed_count, steps.size()], 14))
 		_page.add_child(_heading("N = next · P = previous · R = next unanswered/incorrect task. Review navigation never answers, certifies, scores or cuts. Bur use needs independent opt-in.", 13))
-		var previous := _button("Previous task (P)")
-		previous.disabled = _procedure_step_index == 0
-		previous.pressed.connect(_procedure_move_step.bind(-1))
-		_page.add_child(previous)
-		var next_task := _button("Next task (N)")
-		next_task.disabled = _procedure_step_index >= steps.size() - 1
-		next_task.pressed.connect(_procedure_move_step.bind(1))
-		_page.add_child(next_task)
-		var needs_review: int = 0
-		for i in range(steps.size()):
-			var saved_step: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(i), {})
-			if not bool(saved_step.get("correct", false)):
-				needs_review += 1
-		var review_button := _button("Next task to review (R) · %d remaining" % needs_review)
-		review_button.disabled = needs_review == 0
-		review_button.pressed.connect(_procedure_jump_to_review)
-		_page.add_child(review_button)
-		var show_all := _button("Show all original practical tasks")
-		show_all.pressed.connect(_set_procedure_guided.bind(false))
-		_page.add_child(show_all)
 	for step_index in range(steps.size()):
 		if _procedure_guided and step_index != _procedure_step_index:
 			continue
@@ -1991,6 +1971,29 @@ func _show_practical() -> void:
 		var feedback := _heading(feedback_text, 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
+	# Keep the current source task/FDI choices above the optional navigation
+	# actions. Keyboard N/P/R still works from the same guided controller.
+	if _procedure_guided:
+		var previous := _button("Previous task (P)")
+		previous.disabled = _procedure_step_index == 0
+		previous.pressed.connect(_procedure_move_step.bind(-1))
+		_page.add_child(previous)
+		var next_task := _button("Next task (N)")
+		next_task.disabled = _procedure_step_index >= steps.size() - 1
+		next_task.pressed.connect(_procedure_move_step.bind(1))
+		_page.add_child(next_task)
+		var needs_review: int = 0
+		for i in range(steps.size()):
+			var saved_step: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(i), {})
+			if not bool(saved_step.get("correct", false)):
+				needs_review += 1
+		var review_button := _button("Next task to review (R) · %d remaining" % needs_review)
+		review_button.disabled = needs_review == 0
+		review_button.pressed.connect(_procedure_jump_to_review)
+		_page.add_child(review_button)
+		var show_all := _button("Show all original practical tasks")
+		show_all.pressed.connect(_set_procedure_guided.bind(false))
+		_page.add_child(show_all)
 	# The source has no bur step for surgery/perio. Offer ONLY an explicitly
 	# separate synthetic tooth-volume experiment, never label it extraction
 	# or subgingival instrument mechanics. Hide the unrelated sandbox in a
