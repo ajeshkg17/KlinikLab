@@ -307,6 +307,53 @@ func _validate_walk_hud(app: Node3D, window_width: int, window_height: int) -> b
 		return false
 	return true
 
+# SR58: the practical station must present its source task and guided
+# start above all long clinical/model/anatomy prose at real desktop sizes.
+# These are headless Control rectangles, not owner-PC render pixels.
+func _validate_practical_task_first(app: Node3D, width: int, height: int) -> bool:
+	root.size = Vector2i(width,height)
+	app.call("_switch_view","clinic")
+	app.call("_select_case",1) # source FDI 36; full six-case identity tested in guided smoke.
+	app.call("_select_station",4)
+	await process_frame
+	await process_frame
+	var scroll: ScrollContainer = app.get("_page_scroll")
+	var page: VBoxContainer = app.get("_page")
+	var start: Button = page.get_node_or_null("KL_PRACTICAL_START_GUIDE") as Button
+	if not _expect(start != null and not start.disabled and not bool(app.get("_procedure_guided")) and scroll.scroll_vertical == 0, "SR58 start control missing or notes remain scrolled at %dx%d" % [width,height]):
+		return false
+	var visible: Rect2 = scroll.get_global_rect()
+	var button_rect: Rect2 = start.get_global_rect()
+	if not _expect(button_rect.position.x >= visible.position.x - 2.0 and button_rect.end.x <= visible.end.x + 2.0 and button_rect.position.y >= visible.position.y and button_rect.end.y < visible.end.y - 10.0, "SR58 Start guided practical not visible above fold at %dx%d" % [width,height]):
+		return false
+	var reference_index := -1
+	var start_index := start.get_index()
+	for child in page.get_children():
+		if child is Label and (child as Label).text.contains("ANATOMY REFERENCE — educational provenance"):
+			reference_index = child.get_index()
+			break
+	if not _expect(reference_index > start_index, "SR58 model/provenance still preceding primary action at %dx%d" % [width,height]):
+		return false
+	start.pressed.emit()
+	await process_frame
+	await process_frame
+	if not _expect(bool(app.get("_procedure_guided")) and not bool(app.get("_direct_bur_mode")) and (app.get("_page_scroll") as ScrollContainer).scroll_vertical == 0, "SR58 guide did not enter source task with no bur/scroll carryover"):
+		return false
+	var guided_page: VBoxContainer = app.get("_page")
+	var first_step: Label
+	var next_action: Button
+	for child in guided_page.get_children():
+		if child is Label and (child as Label).text.begins_with("1. "):
+			first_step = child as Label
+		elif child is Button and (child as Button).text.begins_with("Next task (N)"):
+			next_action = child as Button
+	if not _expect(first_step != null and next_action != null and first_step.get_index() < next_action.get_index(), "SR58 secondary N/P navigation still precedes original task at %dx%d" % [width,height]):
+		return false
+	if not _expect(first_step.get_global_rect().position.y >= visible.position.y and first_step.get_global_rect().position.y < visible.end.y, "SR58 first source prompt remains below fold at %dx%d" % [width,height]):
+		return false
+	app.call("_set_procedure_guided",false)
+	return true
+
 func _validate_writing_focus(app: Node3D, window_width: int, station_index: int) -> bool:
 	root.size = Vector2i(window_width,900)
 	app.call("_select_station",station_index)
@@ -428,6 +475,12 @@ func _run() -> void:
 		if not await _validate_walk_hud(app,size[0],size[1]):
 			return
 	print("SR57_WALK_HUD_1600_1280_1024_720_LAYOUT_PASS center reticle, source station cues, legible input-free panels; headless only")
+	# SR58 task-first source practical is tested at both prior headless and
+	# actual owner-PC window sizes. No pixels or GPU status inferred.
+	for size in [[1600,900],[1280,900],[1024,900],[1280,720]]:
+		if not await _validate_practical_task_first(app,size[0],size[1]):
+			return
+	print("SR58_PRACTICAL_START_1600_1280_1024_720_LAYOUT_PASS first task above long provenance; headless only")
 	# SR53 separately validates that the 32-FDI practice selector remains
 	# compact in the right panel without stealing the central camera.
 	for window_width in [1600,1280,1024]:

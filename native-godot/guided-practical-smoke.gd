@@ -17,6 +17,40 @@ func _send_key(app: Node3D,code: Key) -> void:
 	k.physical_keycode = code
 	app.call("_input",k)
 
+# SR58: source steps and selection controls must precede long case prose,
+# model licence and anatomy reference, not merely exist off-screen below them.
+func _sr58_task_first_order(app: Node3D, fdi: String, guided: bool) -> bool:
+	var page: VBoxContainer = app.get("_page")
+	var task_banner := -1
+	var start_button := -1
+	var first_source_step := -1
+	var navigation := -1
+	var anatomy_reference := -1
+	var case_history := -1
+	for i in range(page.get_child_count()):
+		var child: Node = page.get_child(i)
+		if child is Label:
+			var text: String = (child as Label).text
+			if text.contains("SOURCE PRACTICAL · FDI " + fdi):
+				task_banner = i
+			elif text.begins_with("1. "):
+				first_source_step = i
+			elif text.contains("ANATOMY REFERENCE — educational provenance"):
+				anatomy_reference = i
+			elif text.begins_with("Medical history: "):
+				case_history = i
+		if child is Button:
+			var button: Button = child as Button
+			if button.name == "KL_PRACTICAL_START_GUIDE":
+				start_button = i
+			elif button.text.begins_with("Next task (N)"):
+				navigation = i
+	if task_banner < 0 or first_source_step <= task_banner or anatomy_reference <= first_source_step or case_history <= anatomy_reference:
+		return false
+	if guided:
+		return start_button == -1 and navigation > first_source_step
+	return start_button > task_banner and start_button < first_source_step and navigation == -1
+
 func _run() -> void:
 	root.size = Vector2i(1600,900)
 	var scene: PackedScene = load("res://app.tscn")
@@ -37,7 +71,17 @@ func _run() -> void:
 		if bool(app.get("_procedure_guided")) or bool(app.call("_procedure_move_step",1)):
 			_fail("Guided navigation must be opt-in for default practical station")
 			return
-		app.call("_set_procedure_guided",true)
+		if not _sr58_task_first_order(app, FDIS[i], false):
+			_fail("SR58 source practical first action, anatomy or fictional case order incorrect FDI" + FDIS[i])
+			return
+		var start_guide: Button = (app.get("_page") as VBoxContainer).get_node_or_null("KL_PRACTICAL_START_GUIDE") as Button
+		if start_guide == null or start_guide.disabled:
+			_fail("SR58 primary start guide unavailable for FDI" + FDIS[i])
+			return
+		start_guide.pressed.emit() # test the real learner-visible button, not only internal method
+		if not _sr58_task_first_order(app, FDIS[i], true):
+			_fail("SR58 first guided task hidden behind navigation or licence text FDI" + FDIS[i])
+			return
 		var original_steps: Array = source_content["practical"][i]
 		if original_steps.size() < 5 or not bool(app.get("_procedure_guided")):
 			_fail("Original source tasks missing or guide not activated for FDI"+FDIS[i])
@@ -169,5 +213,6 @@ func _run() -> void:
 		_fail("Original all-tasks mode not restored")
 		return
 	print("SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS six FDI, per-case isolation, journal reload, FSP/KP, no bur")
+	print("SR58_SIX_FDI_TASK_FIRST_GUIDED_PRACTICAL_PASS real start signal, original task ahead of source references, persisted behaviour; headless only")
 	print("SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS keyboard N/P, source answers, optional all-tasks, no cutting/capture/Quest")
 	quit(0)
