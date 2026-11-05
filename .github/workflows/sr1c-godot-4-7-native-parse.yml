@@ -275,6 +275,7 @@ jobs:
           cat "$RUNNER_TEMP/sr71-tool-runtime.log"
           grep -F 'SR71_NATIVE_PRACTICAL_TOOL_LOCK_CORRECT_WRONG_FEEDBACK_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
           grep -F 'SR74_COMBINED_STALE_TOOL_RELOAD_RECALL_RETRY_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
+          grep -F 'SR75_COMBINED_MATCHING_TOOL_WRONG_SOURCE_STEP_RECOVERY_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
