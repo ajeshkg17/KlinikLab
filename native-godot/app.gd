@@ -2297,7 +2297,7 @@ func _show_practical() -> void:
 		var saved: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), {})
 		var feedback_text := "Not answered"
 		if saved.has("correct"):
-			feedback_text = "Correct response recorded" if bool(saved["correct"]) else "Review required — revisit original task"
+			feedback_text = "Correct response recorded" if _practical_source_complete(step_index) else "Review required — revisit original task"
 		var feedback := _heading(feedback_text, 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
