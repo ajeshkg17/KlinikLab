@@ -149,8 +149,16 @@ func _run() -> void:
 			var lock_before: bool = bool(app.call("_practical_tool_complete", index, step))
 			_select_real_menu(app, index, wrong_index)
 			var lock_after: bool = bool(app.call("_practical_tool_complete", index, step))
-			if JSON.stringify(_answer(app, case_i, index)) != frozen or menu.selected != correct_index:
-				_fail("Reloaded correct source tool overwritten/not projected: fdi="+FDIS[case_i]+" step="+str(index)+" lock_before="+str(lock_before)+" lock_after="+str(lock_after)+" menu="+str(menu.selected)+" expected="+str(correct_index)+" answer="+JSON.stringify(_answer(app, case_i, index))+" frozen="+frozen)
+			var restored: Dictionary = _answer(app, case_i, index)
+			# Godot JSON roundtrip represents a stored integer step as 2.0,
+			# so check typed source semantics, not JSON.stringify byte identity.
+			var restored_step: Variant = restored.get("sourceQuestion", null)
+			var step_valid := false
+			if restored_step is int or restored_step is float:
+				var number: float = float(restored_step)
+				step_valid = is_finite(number) and number == float(index)
+			if not lock_before or not lock_after or not bool(restored.get("correct", false)) or restored.get("selected", null) != target_id or not step_valid or menu.selected != correct_index:
+				_fail("Reloaded correct source tool overwritten/not projected: fdi="+FDIS[case_i]+" step="+str(index)+" lock_before="+str(lock_before)+" lock_after="+str(lock_after)+" menu="+str(menu.selected)+" expected="+str(correct_index)+" answer="+JSON.stringify(restored))
 				return
 			# A forged legacy 'correct' flag with a wrong target or wrong
 			# source step must fail closed and permit a genuine fresh attempt.
