@@ -48,7 +48,8 @@ test('SR64 CC0 environment framing uses imported mesh bounds and environment-spe
  const camera = app.slice(app.indexOf('func _frame_environment_camera()'),app.indexOf('func _build_app()'));
  assert.doesNotMatch(camera,/var world_center := Vector3\(3\.0, -1\.8, -19\.0\)/);
  assert.match(camera,/var target: AABB = _environment_room_bounds\(\)/);
- assert.match(camera,/camera\.position = Vector3\(eye_x, eye_y, eye_z\)/);
+ assert.match(camera,/camera\.position = center \+ view_basis\.z \* distance/);
+ assert.match(camera,/camera\.basis = view_basis/);
  assert.match(app,/world\.environment\.ambient_light_energy = 0\.36 if show_room else 0\.85/);
  assert.match(app,/key\.light_energy = 0\.65 if show_room else 1\.6/);
  assert.match(app,/fill\.light_energy = 0\.42 if show_room else 1\.2/);
