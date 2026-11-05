@@ -10,6 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import crypto from 'node:crypto';
+import {stripDundeeMaterialTextures} from './dundee-untextured-material.mjs';
 
 const args=Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')&&x.includes('=')).map(x=>{
  const i=x.indexOf('=');return [x.slice(2,i),x.slice(i+1)];
@@ -124,17 +125,11 @@ try{
  }
  if(!doc.extensionsUsed.length)delete doc.extensionsUsed;
  if(!doc.extensionsRequired.length)delete doc.extensionsRequired;
- // Preserve source mesh topology and vertex colours; replace WebP-only texture
- // dependency with a neutral, clearly documented surface reference material.
- delete doc.images;delete doc.textures;delete doc.samplers;
- for(const material of doc.materials||[]){
-  const pbr=material.pbrMetallicRoughness||{};
-  delete pbr.baseColorTexture;
-  pbr.baseColorFactor=[0.94,0.88,0.76,1.0];
-  pbr.metallicFactor=0.0;pbr.roughnessFactor=0.68;
-  material.pbrMetallicRoughness=pbr;
-  delete material.extensions;
- }
+ // SR67: The verified original GLB is untouched. The derived Godot GLB is
+ // explicitly untextured: remove PBR metallic/roughness, normal, occlusion,
+ // emissive and material-extension texture slots together with texture arrays.
+ // An independent fixture and emitted-GLB contract reject dangling indices.
+ stripDundeeMaterialTextures(doc);
  doc.buffers[0].byteLength=total;
  align();
  const body=Buffer.concat(parts,total);

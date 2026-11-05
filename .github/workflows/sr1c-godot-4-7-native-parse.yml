@@ -13,6 +13,7 @@ on:
       - 'tests/sr63_windows_crlf_source_contract.test.mjs'
       - 'tests/sr64_ownerpc_reset_room_input.test.mjs'
       - 'tests/sr65_windows_dundee_sidecar_export.test.mjs'
+      - 'tests/sr67_dundee_untextured_material.test.mjs'
       - '.github/workflows/sr8-native-windows-export.yml'
       - 'visual-qa/sr1c-godot-background-capture.gd'
       - 'visual-qa/sr1c-godot-clinic-overview.gd'
@@ -92,6 +93,7 @@ jobs:
           node --test tests/sr39_native_chair_inventory.test.mjs
           node --test tests/sr40_fdi36_source_tooth.test.mjs
           node --test tests/sr41_dundee_remaining_fdi.test.mjs
+          node --test tests/sr67_dundee_untextured_material.test.mjs
           node --test tests/sr42_fdi16_mirror_disclosure.test.mjs
           node --test tests/sr43_native_fdi_model_provenance.test.mjs
           node --test tests/sr44_anatomy_reference_panel.test.mjs
@@ -119,6 +121,7 @@ jobs:
           node --test tests/sr35_pathway_literal.test.mjs
           node --test tests/sr2_godot_native_full_app_foundation.test.mjs
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/native-kliniklab-app"
+          node native-godot/verify-dundee-derived.mjs "--project-dir=$RUNNER_TEMP/native-kliniklab-app" "--expected-sha=$GITHUB_SHA"
           test -f "$RUNNER_TEMP/native-kliniklab-app/app.tscn"
           # Fresh build must NOT already contain the Godot importer cache.
           test ! -d "$RUNNER_TEMP/native-kliniklab-app/.godot"
@@ -136,6 +139,10 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --editor --import --quit > "$RUNNER_TEMP/native-app-import.log" 2>&1 || { cat "$RUNNER_TEMP/native-app-import.log"; exit 1; }
           cat "$RUNNER_TEMP/native-app-import.log"
+          # SR67: fail on importer texture-index errors, not merely nonzero exit.
+          if grep -Ei 'invalid texture index|tried to read texture at index|texture index.*(invalid|out of bounds|not found)|texture with index' "$RUNNER_TEMP/native-app-import.log"; then
+            echo 'SR67_INVALID_DUNDEE_TEXTURE_INDEX_IMPORT_BLOCKED'; exit 1
+          fi
           # SR54 real loader regression: import-created PackedScene exists.
           test -d "$RUNNER_TEMP/native-kliniklab-app/.godot/imported"
           test "$(find "$RUNNER_TEMP/native-kliniklab-app/.godot/imported" -maxdepth 1 -type f -name 'whole-clinic-starter-v1-godot.glb*' | wc -l)" -ge 1
