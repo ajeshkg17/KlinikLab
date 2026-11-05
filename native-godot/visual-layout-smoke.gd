@@ -660,7 +660,7 @@ func _validate_sr66_oblique_overview(app: Node3D, physical_width: int, physical_
 	# The SR65 level-camera fit was width dominated: it made room depth
 	# invisible vertically. Compare with a conservative frontal near-face
 	# vertical envelope instead of asserting arbitrary room dimensions.
-	var screen: Vector2 = get_viewport().get_visible_rect().size
+	var screen: Vector2 = root.get_visible_rect().size
 	var focal := screen.y / (2.0 * tan(deg_to_rad(42.0) * 0.5))
 	var frontal_distance := maxf(5.0, maxf(
 		focal * target.size.x / (safe.size.x * 0.92),
