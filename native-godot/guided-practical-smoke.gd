@@ -173,7 +173,7 @@ func _run() -> void:
 				return
 		# Explicit SR73 saved-state forgery regression on real Godot app methods.
 		# A true flag cannot skip a source-wrong response or a different step.
-		var source_record_key := IDS[i]+":practical:"+str(review_index)
+		var source_record_key: String = str(IDS[i]) + ":practical:" + str(review_index)
 		var valid_record: Dictionary = answers[source_record_key].duplicate(true)
 		if not bool(app.call("_practical_source_complete", review_index)):
 			_fail("Source-correct persisted Practical record rejected FDI"+FDIS[i])
