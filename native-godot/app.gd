@@ -564,6 +564,54 @@ func _procedure_move_step(delta: int) -> bool:
 	_refresh()
 	return true
 
+# SR73: read-only original-source validation for Practical review navigation.
+# Saved correctness alone never establishes source task completion. Unscored
+# synthetic geometry tasks are excluded from formative review counts.
+func _practical_source_complete(step_index: int) -> bool:
+	if step_index < 0 or _case_index < 0 or _case_index >= CASE_IDS.size():
+		return false
+	var steps: Array = _content["practical"][_case_index]
+	if step_index >= steps.size():
+		return false
+	var step: Dictionary = steps[step_index]
+	var kind: String = str(step.get("type", ""))
+	if kind == "drill":
+		return true # not an original scored choice, FDI or instrument response
+	if kind not in ["choice", "tooth", "tool"]:
+		return false
+	var value: Variant = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), null)
+	if not (value is Dictionary):
+		return false
+	var record: Dictionary = value
+	if record.get("correct", null) != true:
+		return false
+	var source_question: Variant = record.get("sourceQuestion", null)
+	if not (source_question is int or source_question is float):
+		return false
+	var source_number: float = float(source_question)
+	if not is_finite(source_number) or source_number != floor(source_number) or int(source_number) != step_index:
+		return false
+	var selected: Variant = record.get("selected", null)
+	match kind:
+		"choice":
+			if not (selected is int or selected is float):
+				return false
+			var number: float = float(selected)
+			var options: Array = step.get("options", [])
+			return is_finite(number) and number == floor(number) and number >= 0.0 and number < float(options.size()) and int(number) == int(step.get("correct", -1))
+		"tooth":
+			return selected is String and _fdichart_contains(selected) and selected == str(step.get("target", ""))
+		"tool":
+			if not (selected is String):
+				return false
+			if selected != str(step.get("target", "")):
+				return false
+			for instrument in _content["tools"]:
+				if str(instrument.get("id", "")) == selected:
+					return true
+	return false
+
+
 # Find the next unanswered or incorrect original task, wrapping once through
 # the selected case. This is navigation only: no grading or volume mutation.
 func _procedure_jump_to_review() -> bool:
@@ -572,11 +620,9 @@ func _procedure_jump_to_review() -> bool:
 	var steps: Array = _content["practical"][_case_index]
 	if steps.is_empty():
 		return false
-	var answers: Dictionary = _progress["answers"]
 	for offset in range(1, steps.size() + 1):
 		var candidate: int = (_procedure_step_index + offset) % steps.size()
-		var record: Dictionary = answers.get(_key() + ":" + str(candidate), {})
-		if not bool(record.get("correct", false)):
+		if not _practical_source_complete(candidate):
 			if candidate == _procedure_step_index:
 				return false
 			_procedure_step_index = candidate
@@ -2268,8 +2314,7 @@ func _show_practical() -> void:
 		_page.add_child(next_task)
 		var needs_review: int = 0
 		for i in range(steps.size()):
-			var saved_step: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(i), {})
-			if not bool(saved_step.get("correct", false)):
+			if not _practical_source_complete(i):
 				needs_review += 1
 		var review_button := _button("Next task to review (R) · %d remaining" % needs_review)
 		review_button.disabled = needs_review == 0
