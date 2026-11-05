@@ -2234,6 +2234,9 @@ func _show_practical() -> void:
 				_show_practical_fdi_chart(step_index)
 			"tool":
 				var menu := OptionButton.new()
+				# SR71: stable local control identity allows a rejected post-success
+				# selection to restore the source-correct item without journal edits.
+				menu.name = "KL_PRACTICAL_TOOL_" + str(step_index)
 				# Do not let the longest bilingual instrument expand the entire notes pane.
 				menu.fit_to_longest_item = false
 				_style_action(menu)
@@ -2485,16 +2488,55 @@ func _practical_target(step_index: int, tooth: String) -> void:
 	var detail := str(step.get("success", "FDI target confirmed")) if correct else "Incorrect FDI selection. Recheck the fictional case and try again."
 	_record_practical(step_index, tooth, correct, detail)
 
-func _practical_tool(index: int, step_index: int) -> void:
-	if index < 1:
+# The browser freezes a completed Practical tool target while leaving
+# tray exploration possible. A correct flag on an invalid/stale source record
+# is never sufficient to lock an unrelated current training step.
+func _practical_tool_complete(step_index: int, step: Dictionary) -> bool:
+	var answers: Dictionary = _progress.get("answers", {})
+	var saved: Dictionary = answers.get(_key() + ":" + str(step_index), {})
+	var source_index: Variant = saved.get("sourceQuestion", null)
+	var matching_step := false
+	if source_index is int or source_index is float:
+		var numeric_index: float = float(source_index)
+		matching_step = is_finite(numeric_index) and numeric_index == float(step_index)
+	var selected: Variant = saved.get("selected", null)
+	var source_id_matches: bool = selected is String and selected == str(step.get("target", ""))
+	return matching_step and bool(saved.get("correct", false)) and source_id_matches
+
+func _restore_completed_practical_tool(step_index: int, target_id: String) -> void:
+	if _page == null:
+		return
+	var menu: OptionButton = _page.get_node_or_null("KL_PRACTICAL_TOOL_" + str(step_index)) as OptionButton
+	if menu == null:
 		return
 	var tools: Array = _content["tools"]
-	if index - 1 >= tools.size():
+	for tool_index in range(tools.size()):
+		if str((tools[tool_index] as Dictionary).get("id", "")) == target_id:
+			menu.select(tool_index + 1)
+			return
+
+func _practical_tool(index: int, step_index: int) -> void:
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size() or (_procedure_guided and _procedure_step_index != step_index):
+		return
+	var step: Dictionary = steps[step_index]
+	if str(step.get("type", "")) != "tool":
+		return
+	var tools: Array = _content["tools"]
+	if index < 1 or index > tools.size():
+		return
+	# Never overwrite an already-correct original source tool answer on a
+	# later exploratory selection or a stale UI callback.
+	if _practical_tool_complete(step_index, step):
+		_restore_completed_practical_tool(step_index, str(step.get("target", "")))
 		return
 	var chosen: Dictionary = tools[index - 1]
-	var step: Dictionary = _content["practical"][_case_index][step_index]
 	var correct := str(chosen["id"]) == str(step.get("target", ""))
-	_record_practical(step_index, str(chosen["id"]), correct, str(step.get("success", "")))
+	# Wrong instrument choices must never display the original success text.
+	var detail := str(step.get("success", "Correct instrument category.")) if correct else "Incorrect instrument category. Recheck the original task and try again."
+	_record_practical(step_index, str(chosen["id"]), correct, detail)
 
 func _record_practical(step_index: int, response: Variant, correct: bool, detail: String) -> void:
 	var answer_key := _key() + ":" + str(step_index)
