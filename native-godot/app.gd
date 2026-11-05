@@ -2228,6 +2228,9 @@ func _show_practical() -> void:
 				var choices: Array = step["options"]
 				for choice in range(choices.size()):
 					var b := _button(str(choices[choice]))
+					# SR69: source explanations and locked correct choices must survive
+					# guided navigation/journal reload without duplicating answer data.
+					b.name = "KL_PRACTICAL_CHOICE_%d_%d" % [step_index,choice]
 					b.pressed.connect(_practical_choice.bind(step_index, choice))
 					_page.add_child(b)
 			"tooth":
@@ -2255,6 +2258,8 @@ func _show_practical() -> void:
 		var feedback := _heading(feedback_text, 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
+		if str(step["type"]) == "choice":
+			_sync_practical_choice_feedback(step_index)
 	# Keep the current source task/FDI choices above the optional navigation
 	# actions. Keyboard N/P/R still works from the same guided controller.
 	if _procedure_guided:
@@ -2429,10 +2434,57 @@ func _store_cut() -> void:
 	_save_progress()
 	_refresh()
 
+# SR69: browser Practical.choice shows the original explanation and prevents
+# changing an already-correct choice. Reconstruct both from the existing
+# source-versioned answer journal; do not store duplicate explanation strings.
+func _practical_choice_record(step_index: int, step: Dictionary) -> Dictionary:
+	var saved: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), {})
+	var selected_value: Variant = saved.get("selected", null)
+	var options: Array = step.get("options", [])
+	var valid: bool = selected_value is int and int(selected_value) >= 0 and int(selected_value) < options.size() and int(saved.get("sourceQuestion", -1)) == step_index
+	return {"valid": valid, "selected": int(selected_value) if valid else -1,
+		"solved": valid and bool(saved.get("correct", false)) and int(selected_value) == int(step.get("correct", -1))}
+
+func _sync_practical_choice_feedback(step_index: int) -> void:
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size():
+		return
+	var step: Dictionary = steps[step_index]
+	if str(step.get("type", "")) != "choice":
+		return
+	var state: Dictionary = _practical_choice_record(step_index, step)
+	var selected: int = int(state["selected"])
+	var solved: bool = bool(state["solved"])
+	var options: Array = step["options"]
+	for choice in range(options.size()):
+		var b: Button = _page.get_node_or_null("KL_PRACTICAL_CHOICE_%d_%d" % [step_index,choice]) as Button
+		if b == null:
+			continue
+		var prefix := "✓ Correct selection · " if solved and selected == choice else "↻ Review selection · " if selected == choice else ""
+		b.text = prefix + str(options[choice])
+		b.disabled = solved
+	var feedback: Label = _practical_feedback.get(step_index) as Label
+	if feedback != null:
+		var original_explanation: String = str(step.get("explanation", ""))
+		feedback.text = ("Correct. " if solved else "Review required. ") + original_explanation if bool(state["valid"]) else "Not answered"
+
 func _practical_choice(step_index: int, choice: int) -> void:
-	var step: Dictionary = _content["practical"][_case_index][step_index]
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size() or (_procedure_guided and step_index != _procedure_step_index):
+		return
+	var step: Dictionary = steps[step_index]
+	var options: Array = step.get("options", [])
+	if str(step.get("type", "")) != "choice" or choice < 0 or choice >= options.size():
+		return
+	if bool(_practical_choice_record(step_index, step)["solved"]):
+		return # Browser source: completed choice is immutable even on direct signal.
 	var correct := choice == int(step.get("correct", -1))
 	_record_practical(step_index, choice, correct, str(step.get("explanation", "")))
+	_sync_practical_choice_feedback(step_index)
 
 func _fdichart_contains(tooth: String) -> bool:
 	for quadrant in FDI_CHART_QUADRANTS:
