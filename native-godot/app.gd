@@ -1077,7 +1077,11 @@ func _environment_room_bounds() -> AABB:
 	return AABB(extrema["lo"], (extrema["hi"] as Vector3) - (extrema["lo"] as Vector3))
 
 func _frame_environment_camera() -> void:
-	# Never interfere with direct learner-controlled walk pose/recovery.
+	# SR66: SR65 owner pixels showed a thin horizontal *Environment* room
+	# even though its true AABB fitted 92% of the center pane. A level, frontal
+	# camera hides nearly all world-space room depth in the screen's Y axis.
+	# Show that real depth from a modest elevated three-quarter viewpoint.
+	# Never alter source geometry, lighting or learner-controlled walk pose.
 	if _view != "environment" or _walk_active or _scene == null:
 		return
 	var content: Rect2 = _camera_content_rect()
@@ -1088,26 +1092,37 @@ func _frame_environment_camera() -> void:
 		return
 	var target: AABB = _environment_room_bounds()
 	if target.size.length_squared() < 0.00001:
-		push_warning("SR64 clinic overview: source room meshes have no visible bounds")
+		push_warning("SR66 clinic overview: source room meshes have no visible bounds")
 		return
 	var screen: Vector2 = get_viewport().get_visible_rect().size
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.fov = CAMERA_ENV_FOV
 	var focal := screen.y / (2.0 * tan(deg_to_rad(CAMERA_ENV_FOV) * 0.5))
 	var center: Vector3 = target.get_center()
-	# Full imported-room + chair envelope projected into the actual unobscured
-	# central column. Avoid a tilted hard-coded camera aimed below the floor:
-	# that produced a washed-out narrow horizontal room band on owner Windows.
-	var near_depth := maxf(5.0, maxf(
-		focal * target.size.x / (content.size.x * 0.92),
-		focal * target.size.y / (content.size.y * 0.92)))
-	var eye_z := target.end.z + near_depth
-	var center_depth := eye_z - center.z
-	var content_center: Vector2 = content.get_center()
-	var eye_x := center.x - (content_center.x - 0.5 * screen.x) * center_depth / focal
-	var eye_y := center.y + (content_center.y - 0.5 * screen.y) * center_depth / focal
-	camera.position = Vector3(eye_x, eye_y, eye_z)
-	camera.rotation = Vector3.ZERO
+	# Camera-local +Z points BACK from the room; -Z looks at the room.
+	# The elevated angle projects real room floor/depth into the image height.
+	var back: Vector3 = Vector3(0.16, 0.67, 1.0).normalized()
+	var view_basis: Basis = Basis.looking_at(-back, Vector3.UP)
+	var inv_basis: Basis = view_basis.inverse()
+	var pane_offset: Vector2 = content.get_center() - screen * 0.5
+	var distance := 5.0
+	# Perspective-fit all eight actual imported world AABB corners, including
+	# depth-dependent projection and the off-axis center-pane camera shift.
+	# Mere center/width fitting would crop closer corners on a pitched camera.
+	for xx in [0.0, 1.0]:
+		for yy in [0.0, 1.0]:
+			for zz in [0.0, 1.0]:
+				var corner: Vector3 = target.position + target.size * Vector3(xx, yy, zz)
+				var local: Vector3 = inv_basis * (corner - center)
+				var width_depth: float = absf(focal * local.x + pane_offset.x * local.z) / (0.45 * content.size.x)
+				var height_depth: float = absf(-focal * local.y + pane_offset.y * local.z) / (0.45 * content.size.y)
+				distance = maxf(distance, local.z + maxf(width_depth, height_depth), local.z + 0.5)
+	# Center the room in the unobscured middle pane rather than behind notes.
+	# This is a parallel optical-axis shift; it does not skew imported geometry.
+	camera.position = center + view_basis.z * distance \
+		- view_basis.x * (pane_offset.x * distance / focal) \
+		+ view_basis.y * (pane_offset.y * distance / focal)
+	camera.basis = view_basis
 	camera.current = true
 
 func _build_app() -> void:
