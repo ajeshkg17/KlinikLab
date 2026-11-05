@@ -629,6 +629,59 @@ func _validate_sr64_environment_overview(app: Node3D, physical_width: int, physi
 		return false
 	return true
 
+# SR66: perspective occupancy and inset containment from real Godot camera
+# and imported CC0 mesh bounds. These are projected pixels, not GPU frames.
+func _validate_sr66_oblique_overview(app: Node3D, physical_width: int, physical_height: int) -> bool:
+	root.size = Vector2i(physical_width, physical_height)
+	app.call("_switch_view", "environment")
+	await process_frame
+	await process_frame
+	await process_frame
+	var scene: Node3D = app.get("_scene") as Node3D
+	var camera: Camera3D = scene.get_node_or_null("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+	var target: AABB = app.call("_environment_room_bounds")
+	var safe: Rect2 = app.call("_camera_content_rect")
+	if not _expect(camera != null and safe.size.x > 190.0 and safe.size.y > 200.0 and target.size.length_squared() > 1.0,
+		"SR66 oblique room input invalid at %dx%d" % [physical_width, physical_height]):
+		return false
+	var pixels: Rect2 = _project_world_box(target, camera)
+	var view_back: Vector3 = camera.global_basis.z
+	# Must actually see the room from above (not the unchanged horizontal
+	# SR64 camera), while preserving a useful near-front view of the room.
+	if not _expect(view_back.y > 0.42 and view_back.y < 0.70 and view_back.z > 0.70,
+		"SR66 room camera did not elevate relative to source floor"):
+		return false
+	if not _expect(pixels.size.x > 70.0 and pixels.size.y > 70.0 and
+		pixels.position.x >= safe.position.x - 3.0 and pixels.end.x <= safe.end.x + 3.0 and
+		pixels.position.y >= safe.position.y - 3.0 and pixels.end.y <= safe.end.y + 3.0,
+		"SR66 oblique CC0 actual imported bounds clipped by notes/nav at %dx%d projected=%s safe=%s" %
+		[physical_width, physical_height, str(pixels), str(safe)]):
+		return false
+	# The SR65 level-camera fit was width dominated: it made room depth
+	# invisible vertically. Compare with a conservative frontal near-face
+	# vertical envelope instead of asserting arbitrary room dimensions.
+	var screen: Vector2 = root.get_visible_rect().size
+	var focal := screen.y / (2.0 * tan(deg_to_rad(42.0) * 0.5))
+	var frontal_distance := maxf(5.0, maxf(
+		focal * target.size.x / (safe.size.x * 0.92),
+		focal * target.size.y / (safe.size.y * 0.92)))
+	var frontal_vertical_ceiling := focal * target.size.y / frontal_distance
+	print("SR66_OVERVIEW_MEASURE width=%d height=%d actual_vertical=%.2f frontal_upper=%.2f safe_height=%.2f room_size=%s" %
+		[physical_width, physical_height, pixels.size.y, frontal_vertical_ceiling, safe.size.y, str(target.size)])
+	if target.size.z > target.size.y * 1.2:
+		if not _expect(pixels.size.y > frontal_vertical_ceiling * 1.15,
+			"SR66 elevated perspective did not improve source depth-as-screen-height at %dx%d" % [physical_width, physical_height]):
+			return false
+	# A walk camera pose is learner-controlled; environment overview only.
+	app.call("_start_clinic_walk")
+	var active_walk_camera: Transform3D = camera.global_transform
+	app.call("_frame_environment_camera")
+	if not _expect(camera.global_transform.is_equal_approx(active_walk_camera),
+		"SR66 environment overview unexpectedly reset an active FPS walk camera"):
+		return false
+	app.call("_stop_clinic_walk")
+	return true
+
 func _run() -> void:
 	root.size=Vector2i(1600,900)
 	var packed: PackedScene=load("res://app.tscn")
@@ -756,6 +809,12 @@ func _run() -> void:
 		if not await _validate_sr64_environment_overview(app,size[0],size[1]):
 			return
 	print("SR64_REAL_CC0_ROOM_CENTERED_FIT_AND_LIGHTING_FIVE_SIZES_PASS actual mesh envelope and restored clinic lighting; HEADLESS NOT PIXELS")
+	# SR66: a level room view can fit 92% horizontally yet still produce the
+	# owner-reproduced thin vertical strip. Verify oblique perspective geometry.
+	for size in [[1280,720],[1536,816],[1536,864],[1600,900],[1024,720]]:
+		if not await _validate_sr66_oblique_overview(app,size[0],size[1]):
+			return
+	print("SR66_ROOM_OBLIQUE_PERSPECTIVE_FIVE_SIZES_PASS rotated true CC0 mesh bounds; no FPS pose or lights changed; HEADLESS NOT PIXELS")
 	# SR62 browser-native answer-feedback parity: task-first and visibly
 	# restored label across physical sizes, while owner-pixel review is pending.
 	for size in [[1600,900],[1536,864],[1280,900],[1280,720],[1024,900],[1024,720]]:
