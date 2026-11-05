@@ -2255,6 +2255,8 @@ func _show_practical() -> void:
 		var feedback := _heading(feedback_text, 13)
 		_practical_feedback[step_index] = feedback
 		_page.add_child(feedback)
+		if str(step["type"]) == "tooth":
+			_sync_practical_tooth_feedback(step_index)
 	# Keep the current source task/FDI choices above the optional navigation
 	# actions. Keyboard N/P/R still works from the same guided controller.
 	if _procedure_guided:
@@ -2440,9 +2442,58 @@ func _fdichart_contains(tooth: String) -> bool:
 			return true
 	return false
 
+# SR70: browser selectTooth/processTarget keeps a completed Practical tooth
+# task solved even if a learner subsequently explores another tooth. Source
+# journal selection is separate from the always-highlighted case target.
+func _practical_tooth_record(step_index: int, step: Dictionary) -> Dictionary:
+	var record: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), {})
+	var selected_value: Variant = record.get("selected", null)
+	var source_index: Variant = record.get("sourceQuestion", null)
+	var source_matches := false
+	if source_index is int or source_index is float:
+		var numeric_index: float = float(source_index)
+		source_matches = is_finite(numeric_index) and numeric_index == float(step_index)
+	var valid: bool = selected_value is String and _fdichart_contains(str(selected_value)) and source_matches
+	var selected: String = str(selected_value) if valid else ""
+	var solved: bool = valid and bool(record.get("correct", false)) and selected == str(step.get("target", ""))
+	return {"valid":valid, "selected":selected, "solved":solved}
+
+# Reconstruct the selected FDI and source explanation after refreshing a
+# page or reading the source-versioned journal. Chart buttons remain usable
+# for educational navigation; their signal cannot undo a completed task.
+func _sync_practical_tooth_feedback(step_index: int) -> void:
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size():
+		return
+	var step: Dictionary = steps[step_index]
+	if str(step.get("type", "")) != "tooth":
+		return
+	var state: Dictionary = _practical_tooth_record(step_index, step)
+	var selected: String = str(state["selected"])
+	var valid: bool = bool(state["valid"])
+	var solved: bool = bool(state["solved"])
+	var status: Label = _page.get_node_or_null("KL_PRACTICAL_FDI_SELECTION_" + str(step_index)) as Label
+	if status != null:
+		status.text = ("Saved FDI selection: " + selected + (" · correct task completed; chart remains reference-only" if solved else " · incorrect; recheck the case and try again")) if valid else "No valid FDI answer recorded · select a tooth from the 32-tooth chart"
+	for quadrant in FDI_CHART_QUADRANTS:
+		for code_value in quadrant:
+			var code: String = str(code_value)
+			var button: Button = _page.find_child("KL_FDI_TOOTH_" + code, true, false) as Button
+			if button != null:
+				button.toggle_mode = true
+				button.button_pressed = valid and selected == code
+	var feedback: Label = _practical_feedback.get(step_index) as Label
+	if feedback != null:
+		feedback.text = ("Correct response recorded · " + str(step.get("success", "FDI target confirmed"))) if solved else ("Review required · Incorrect FDI selection. Recheck the fictional case and try again." if valid else "Not answered")
+
 func _show_practical_fdi_chart(step_index: int) -> void:
 	_page.add_child(_heading("Permanent dentition · FDI tooth selection (source browser chart)", 15))
 	_page.add_child(_heading("Choose a two-digit FDI number; this chart is a selection control, NOT 32 source-verified tooth models or anatomical/clinical validation.", 12))
+	var status: Label = _heading("No valid FDI answer recorded · select a tooth from the 32-tooth chart", 13)
+	status.name = "KL_PRACTICAL_FDI_SELECTION_" + str(step_index)
+	_page.add_child(status)
 	for quadrant_index in range(FDI_CHART_QUADRANTS.size()):
 		var quadrant: Array = FDI_CHART_QUADRANTS[quadrant_index]
 		var group := VBoxContainer.new()
@@ -2478,12 +2529,24 @@ func _show_practical_fdi_chart(step_index: int) -> void:
 		_page.add_child(group)
 
 func _practical_target(step_index: int, tooth: String) -> void:
+	if not _procedure_context_available():
+		return
+	var steps: Array = _content["practical"][_case_index]
+	if step_index < 0 or step_index >= steps.size() or (_procedure_guided and step_index != _procedure_step_index):
+		return
 	if not _fdichart_contains(tooth):
-		return # no fabricated dentition values, no answer mutation
-	var step: Dictionary = _content["practical"][_case_index][step_index]
+		return # No invented FDI identifiers or journal writes.
+	var step: Dictionary = steps[step_index]
+	if str(step.get("type", "")) != "tooth":
+		return
+	if bool(_practical_tooth_record(step_index, step)["solved"]):
+		# Like the browser completed task: chart exploration cannot unscore it.
+		_sync_practical_tooth_feedback(step_index)
+		return
 	var correct := tooth == str(step.get("target", ""))
 	var detail := str(step.get("success", "FDI target confirmed")) if correct else "Incorrect FDI selection. Recheck the fictional case and try again."
 	_record_practical(step_index, tooth, correct, detail)
+	_sync_practical_tooth_feedback(step_index)
 
 func _practical_tool(index: int, step_index: int) -> void:
 	if index < 1:
