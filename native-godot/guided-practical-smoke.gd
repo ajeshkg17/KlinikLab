@@ -51,6 +51,92 @@ func _sr58_task_first_order(app: Node3D, fdi: String, guided: bool) -> bool:
 		return start_button == -1 and navigation > first_source_step
 	return start_button > task_banner and start_button < first_source_step and navigation == -1
 
+# SR68: real native controls must show the selected *source instrument ID*
+# after navigation, refresh and source-scoped journal reload. This is not a
+# source-answer or clinical grading change, and does not touch the tooth mesh.
+func _sr68_tool_recall(app: Node3D, case_i: int, content: Dictionary) -> bool:
+	var steps: Array = content["practical"][case_i]
+	var tools: Array = content["tools"]
+	var cases: Dictionary = app.get("_progress")
+	var answers: Dictionary = cases["answers"]
+	var tool_steps: int = 0
+	for step_i in range(steps.size()):
+		var source_step: Dictionary = steps[step_i]
+		if str(source_step.get("type", "")) != "tool":
+			continue
+		tool_steps += 1
+		while int(app.get("_procedure_step_index")) < step_i:
+			app.call("_procedure_move_step", 1)
+		if int(app.get("_procedure_step_index")) != step_i:
+			_fail("SR68 could not select source tool task FDI" + FDIS[case_i])
+			return false
+		var node_name: String = "KL_PRACTICAL_TOOL_" + str(step_i)
+		var page: VBoxContainer = app.get("_page")
+		var menu: OptionButton = page.get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0 or menu.item_count != tools.size()+1:
+			_fail("SR68 source tool menu not neutral and complete FDI" + FDIS[case_i])
+			return false
+		var correct_index: int = 0
+		for t in range(tools.size()):
+			if str((tools[t] as Dictionary).get("id", "")) == str(source_step.get("target", "")):
+				correct_index = t+1
+		if correct_index <= 0 or tools.size() < 2:
+			_fail("SR68 source instrument target missing FDI" + FDIS[case_i])
+			return false
+		var wrong_index: int = 2 if correct_index == 1 else 1
+		var key: String = IDS[case_i] + ":practical:" + str(step_i)
+		menu.select(wrong_index)
+		menu.item_selected.emit(wrong_index)
+		var wrong: Dictionary = answers.get(key,{})
+		if bool(wrong.get("correct",true)) or str(wrong.get("selected","")) != str((tools[wrong_index-1] as Dictionary)["id"]):
+			_fail("SR68 wrong instrument response not recorded by original source ID " + key)
+			return false
+		app.call("_procedure_move_step", -1)
+		app.call("_procedure_move_step", 1)
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != wrong_index:
+			_fail("SR68 wrong source instrument visual choice lost after navigation " + key)
+			return false
+		menu.select(correct_index)
+		menu.item_selected.emit(correct_index)
+		var correct: Dictionary = answers.get(key,{})
+		if not bool(correct.get("correct",false)) or str(correct.get("selected","")) != str(source_step["target"]):
+			_fail("SR68 correct tool source response not recorded " + key)
+			return false
+		app.call("_load_progress")
+		app.call("_refresh")
+		answers = (app.get("_progress") as Dictionary)["answers"]
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != correct_index:
+			_fail("SR68 saved correct instrument choice lost after journal reload " + key)
+			return false
+		# Fail closed on an unknown stale ID; don't display a different
+		# instrument just because saved option indices have shifted.
+		var record: Dictionary = answers.get(key,{})
+		record["selected"] = "__invalid-source-tool-id__"
+		app.call("_refresh")
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0:
+			_fail("SR68 unknown instrument ID mapped to a fabricated option " + key)
+			return false
+		answers.erase(key)
+		app.call("_save_progress")
+		app.call("_refresh")
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0:
+			_fail("SR68 clearing practical response failed to restore neutral prompt " + key)
+			return false
+	# Crown contains both bur and impression-tray tool choices.
+	if tool_steps != (2 if case_i == 3 else 1):
+		_fail("SR68 source tool-step inventory drift for FDI" + FDIS[case_i])
+		return false
+	while int(app.get("_procedure_step_index")) > 0:
+		app.call("_procedure_move_step", -1)
+	if int(app.get("_procedure_step_index")) != 0:
+		_fail("SR68 instrument test failed to restore original guided first task")
+		return false
+	return true
+
 func _run() -> void:
 	root.size = Vector2i(1600,900)
 	var scene: PackedScene = load("res://app.tscn")
@@ -90,6 +176,8 @@ func _run() -> void:
 		if str(first_step["type"])!="tooth" or str(first_step["target"])!=FDIS[i]:
 			_fail("Wrong source FDI target "+FDIS[i])
 			return
+		if not _sr68_tool_recall(app, i, source_content):
+			return
 		if int(app.get("_procedure_step_index"))!=0 or bool(app.call("_procedure_move_step",-1)):
 			_fail("Guide navigated below source first task")
 			return
@@ -118,31 +206,98 @@ func _run() -> void:
 		if feedback == null or not feedback.text.contains("Correct response recorded"):
 			_fail("Persisted answer not restored in guided UI for "+FDIS[i])
 			return
-		# SR33: next-review skips correct source tasks, includes wrong answers,
-		# wraps, and never edits volume samples or FSP/KP draft content.
+		# SR73: review only genuinely source-correct graded answers.
+		# Drill is an unscored synthetic experiment, not a quiz answer.
 		var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
-		for j in range(1,original_steps.size()):
-			answers[IDS[i]+":practical:"+str(j)] = {"selected":"test","correct":true,"sourceQuestion":j}
-		answers[IDS[i]+":practical:3"]["correct"] = false
+		var tools: Array = source_content["tools"]
+		var review_index := -1
+		for j in range(1, original_steps.size()):
+			var source_step: Dictionary = original_steps[j]
+			var selected: Variant = null
+			match str(source_step["type"]):
+				"choice":
+					selected = int(source_step["correct"])
+				"tooth":
+					selected = str(source_step["target"])
+				"tool":
+					selected = str(source_step["target"])
+				"drill":
+					continue
+				_:
+					_fail("Unknown Practical source step type")
+					return
+			answers[IDS[i]+":practical:"+str(j)] = {"selected":selected,"correct":true,"sourceQuestion":j}
+			if review_index < 0:
+				review_index = j
+		if review_index < 0:
+			_fail("No scored source Practical review task FDI"+FDIS[i])
+			return
+		answers[IDS[i]+":practical:"+str(review_index)]["correct"] = false
 		if int(app.get("_procedure_step_index")) != 0:
 			_fail("Review setup lost first source task")
 			return
 		_send_key(app,KEY_R)
-		if int(app.get("_procedure_step_index")) != 3:
-			_fail("R did not skip correct answers to next incorrect source task for "+FDIS[i])
+		if int(app.get("_procedure_step_index")) != review_index:
+			_fail("R did not find the incorrect original source task for "+FDIS[i])
 			return
 		if bool(app.call("_procedure_jump_to_review")):
 			_fail("Sole review task must not falsely move or record an answer")
 			return
-		answers[IDS[i]+":practical:3"]["correct"] = true
+		answers[IDS[i]+":practical:"+str(review_index)]["correct"] = true
 		if bool(app.call("_procedure_jump_to_review")):
-			_fail("All-correct source tasks must have no pending review")
+			_fail("All source-validated tasks must have no pending review")
 			return
-		answers[IDS[i]+":practical:1"]["correct"] = false
-		_send_key(app,KEY_R)
-		if int(app.get("_procedure_step_index")) != 1:
-			_fail("Review action failed wrap-around for "+FDIS[i])
+		# Check wrap-around using a different graded task when available.
+		var wrap_index := -1
+		for j in range(1,original_steps.size()):
+			if j != review_index and answers.has(IDS[i]+":practical:"+str(j)):
+				wrap_index = j
+				break
+		if wrap_index >= 0:
+			answers[IDS[i]+":practical:"+str(wrap_index)]["correct"] = false
+			_send_key(app,KEY_R)
+			if int(app.get("_procedure_step_index")) != wrap_index:
+				_fail("Review wrap-around failed for "+FDIS[i])
+				return
+		# Explicit SR73 saved-state forgery regression on real Godot app methods.
+		# A true flag cannot skip a source-wrong response or a different step.
+		var source_record_key: String = str(IDS[i]) + ":practical:" + str(review_index)
+		var valid_record: Dictionary = answers[source_record_key].duplicate(true)
+		if not bool(app.call("_practical_source_complete", review_index)):
+			_fail("Source-correct persisted Practical record rejected FDI"+FDIS[i])
 			return
+		answers[source_record_key]["sourceQuestion"] = review_index + 1
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Cross-step forged Practical completion trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		match str(original_steps[review_index]["type"]):
+			"choice":
+				answers[source_record_key]["selected"] = -1
+			"tooth":
+				answers[source_record_key]["selected"] = "99"
+			"tool":
+				answers[source_record_key]["selected"] = "__not_a_source_tool__"
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Wrong selected value with correct=true trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		answers[source_record_key]["correct"] = "true"
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("String correctness flag was treated as true FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		# A JSON read-back turns integer indices into numeric whole floats;
+		# matching question identity must remain valid.
+		answers[source_record_key]["sourceQuestion"] = float(review_index)
+		if not bool(app.call("_practical_source_complete", review_index)):
+			_fail("Whole-number JSON source question rejected FDI"+FDIS[i])
+			return
+		answers[source_record_key]["sourceQuestion"] = float(review_index) + 0.25
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Fractional question identity was trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record
 		for j in range(1,original_steps.size()):
 			answers.erase(IDS[i]+":practical:"+str(j))
 		if bool(app.get("_direct_bur_mode")):
@@ -215,4 +370,6 @@ func _run() -> void:
 	print("SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS six FDI, per-case isolation, journal reload, FSP/KP, no bur")
 	print("SR58_SIX_FDI_TASK_FIRST_GUIDED_PRACTICAL_PASS real start signal, original task ahead of source references, persisted behaviour; headless only")
 	print("SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS keyboard N/P, source answers, optional all-tasks, no cutting/capture/Quest")
+	print("SR68_SIX_FDI_PRACTICAL_TOOL_RECALL_PASS source-ID restore, wrong/correct, navigation, journal reload, stale-ID neutral, crown two tools; headless only")
+	print("SR73_SIX_FDI_SOURCE_VALIDATED_PRACTICAL_REVIEW_PASS headless only")
 	quit(0)
