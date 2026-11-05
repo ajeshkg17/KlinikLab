@@ -298,6 +298,35 @@ func _run() -> void:
 			_fail("Fractional question identity was trusted FDI"+FDIS[i])
 			return
 		answers[source_record_key] = valid_record
+		# Compatibility gate: persist a stale, flagged-correct record to the actual
+		# isolated CI user:// journal; re-read it, then check visible count and R.
+		if wrap_index >= 0:
+			answers[IDS[i]+":practical:"+str(wrap_index)]["correct"] = true
+		answers[source_record_key]["selected"] = "__stale-journal-answer__"
+		if str(original_steps[review_index]["type"]) == "choice":
+			answers[source_record_key]["selected"] = -1
+		app.call("_save_progress")
+		app.call("_load_progress")
+		answers = (app.get("_progress") as Dictionary)["answers"]
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("SR73 stale disk-journal correctness flag falsely completed FDI"+FDIS[i])
+			return
+		app.call("_procedure_move_step", -original_steps.size())
+		app.call("_refresh")
+		var review_control: Button = null
+		for control in (app.get("_page") as VBoxContainer).get_children():
+			if control is Button and (control as Button).text.begins_with("Next task to review (R)"):
+				review_control = control as Button
+				break
+		if review_control == null or review_control.disabled or not review_control.text.contains("1 remaining"):
+			_fail("SR73 stale disk journal missing truthful remaining review count FDI"+FDIS[i])
+			return
+		review_control.pressed.emit()
+		if int(app.get("_procedure_step_index")) != review_index:
+			_fail("SR73 stale disk journal R navigation skipped source-invalid step FDI"+FDIS[i])
+			return
+		answers = (app.get("_progress") as Dictionary)["answers"]
+		answers[source_record_key] = valid_record
 		for j in range(1,original_steps.size()):
 			answers.erase(IDS[i]+":practical:"+str(j))
 		if bool(app.get("_direct_bur_mode")):
