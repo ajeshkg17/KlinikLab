@@ -282,4 +282,5 @@ func _run() -> void:
 	print("SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS six FDI, per-case isolation, journal reload, FSP/KP, no bur")
 	print("SR58_SIX_FDI_TASK_FIRST_GUIDED_PRACTICAL_PASS real start signal, original task ahead of source references, persisted behaviour; headless only")
 	print("SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS keyboard N/P, source answers, optional all-tasks, no cutting/capture/Quest")
+	print("SR73_SIX_FDI_SOURCE_VALIDATED_PRACTICAL_REVIEW_PASS headless only")
 	quit(0)
