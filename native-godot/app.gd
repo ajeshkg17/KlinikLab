@@ -2441,9 +2441,21 @@ func _practical_choice_record(step_index: int, step: Dictionary) -> Dictionary:
 	var saved: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(step_index), {})
 	var selected_value: Variant = saved.get("selected", null)
 	var options: Array = step.get("options", [])
-	var valid: bool = selected_value is int and int(selected_value) >= 0 and int(selected_value) < options.size() and int(saved.get("sourceQuestion", -1)) == step_index
-	return {"valid": valid, "selected": int(selected_value) if valid else -1,
-		"solved": valid and bool(saved.get("correct", false)) and int(selected_value) == int(step.get("correct", -1))}
+	var selected_index := -1
+	# Godot JSON numbers reload as floats. Accept 1.0 as saved option 1,
+	# but reject strings, NaN, fractions and out-of-range numeric values.
+	if selected_value is int or selected_value is float:
+		var numeric: float = float(selected_value)
+		if is_finite(numeric) and numeric >= 0.0 and numeric < float(options.size()) and numeric == floorf(numeric):
+			selected_index = int(numeric)
+	var source_index: Variant = saved.get("sourceQuestion", null)
+	var source_matches := false
+	if source_index is int or source_index is float:
+		var numeric_source: float = float(source_index)
+		source_matches = is_finite(numeric_source) and numeric_source == float(step_index)
+	var valid: bool = selected_index >= 0 and source_matches
+	return {"valid": valid, "selected": selected_index if valid else -1,
+		"solved": valid and bool(saved.get("correct", false)) and selected_index == int(step.get("correct", -1))}
 
 func _sync_practical_choice_feedback(step_index: int) -> void:
 	if not _procedure_context_available():
