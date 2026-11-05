@@ -2499,7 +2499,9 @@ func _practical_tool_complete(step_index: int, step: Dictionary) -> bool:
 	if source_index is int or source_index is float:
 		var numeric_index: float = float(source_index)
 		matching_step = is_finite(numeric_index) and numeric_index == float(step_index)
-	return matching_step and bool(saved.get("correct", false)) and saved.get("selected", null) is String and str(saved.get("selected", "")) == str(step.get("target", ""))
+	var selected: Variant = saved.get("selected", null)
+	var source_id_matches: bool = selected is String and selected == str(step.get("target", ""))
+	return matching_step and bool(saved.get("correct", false)) and source_id_matches
 
 func _restore_completed_practical_tool(step_index: int, target_id: String) -> void:
 	if _page == null:
