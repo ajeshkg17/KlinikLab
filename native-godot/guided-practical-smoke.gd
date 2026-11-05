@@ -118,31 +118,59 @@ func _run() -> void:
 		if feedback == null or not feedback.text.contains("Correct response recorded"):
 			_fail("Persisted answer not restored in guided UI for "+FDIS[i])
 			return
-		# SR33: next-review skips correct source tasks, includes wrong answers,
-		# wraps, and never edits volume samples or FSP/KP draft content.
+		# SR73: review only genuinely source-correct graded answers.
+		# Drill is an unscored synthetic experiment, not a quiz answer.
 		var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
-		for j in range(1,original_steps.size()):
-			answers[IDS[i]+":practical:"+str(j)] = {"selected":"test","correct":true,"sourceQuestion":j}
-		answers[IDS[i]+":practical:3"]["correct"] = false
+		var tools: Array = source_content["tools"]
+		var review_index := -1
+		for j in range(1, original_steps.size()):
+			var source_step: Dictionary = original_steps[j]
+			var selected: Variant = null
+			match str(source_step["type"]):
+				"choice":
+					selected = int(source_step["correct"])
+				"tooth":
+					selected = str(source_step["target"])
+				"tool":
+					selected = str(source_step["target"])
+				"drill":
+					continue
+				_:
+					_fail("Unknown Practical source step type")
+					return
+			answers[IDS[i]+":practical:"+str(j)] = {"selected":selected,"correct":true,"sourceQuestion":j}
+			if review_index < 0:
+				review_index = j
+		if review_index < 0:
+			_fail("No scored source Practical review task FDI"+FDIS[i])
+			return
+		answers[IDS[i]+":practical:"+str(review_index)]["correct"] = false
 		if int(app.get("_procedure_step_index")) != 0:
 			_fail("Review setup lost first source task")
 			return
 		_send_key(app,KEY_R)
-		if int(app.get("_procedure_step_index")) != 3:
-			_fail("R did not skip correct answers to next incorrect source task for "+FDIS[i])
+		if int(app.get("_procedure_step_index")) != review_index:
+			_fail("R did not find the incorrect original source task for "+FDIS[i])
 			return
 		if bool(app.call("_procedure_jump_to_review")):
 			_fail("Sole review task must not falsely move or record an answer")
 			return
-		answers[IDS[i]+":practical:3"]["correct"] = true
+		answers[IDS[i]+":practical:"+str(review_index)]["correct"] = true
 		if bool(app.call("_procedure_jump_to_review")):
-			_fail("All-correct source tasks must have no pending review")
+			_fail("All source-validated tasks must have no pending review")
 			return
-		answers[IDS[i]+":practical:1"]["correct"] = false
-		_send_key(app,KEY_R)
-		if int(app.get("_procedure_step_index")) != 1:
-			_fail("Review action failed wrap-around for "+FDIS[i])
-			return
+		# Check wrap-around using a different graded task when available.
+		var wrap_index := -1
+		for j in range(1,original_steps.size()):
+			if j != review_index and answers.has(IDS[i]+":practical:"+str(j)):
+				wrap_index = j
+				break
+		if wrap_index >= 0:
+			answers[IDS[i]+":practical:"+str(wrap_index)]["correct"] = false
+			_send_key(app,KEY_R)
+			if int(app.get("_procedure_step_index")) != wrap_index:
+				_fail("Review wrap-around failed for "+FDIS[i])
+				return
 		for j in range(1,original_steps.size()):
 			answers.erase(IDS[i]+":practical:"+str(j))
 		if bool(app.get("_direct_bur_mode")):
