@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {readDundeeGLBJson,assertDundeeUntexturedDocument} from './dundee-untextured-material.mjs';
 
 const args=Object.fromEntries(process.argv.slice(2).map(v=>{
  const pos=v.indexOf('=');
@@ -59,6 +60,7 @@ if(toothBytes<1000)throw Error('FDI36 original source sidecar is implausibly sma
 const toothConvertedSidecar=sidecar+'assets/dundee/mandibular_first_molar-godot.glb.source';
 const toothConvertedBytes=validateFile(toothConvertedSidecar,tooth.convertedSha256);
 if(toothConvertedBytes<1000)throw Error('FDI36 converted source sidecar is implausibly small');
+assertDundeeUntexturedDocument(readDundeeGLBJson(read(toothConvertedSidecar)));
 const crown=asJson(sidecar+'source/tooth-fdi26-manifest.json');
 if(crown.sourceGitSHA!==sha||crown.caseId!=='crown'||crown.fdi!=='26'||
    crown.originalGitBlobSha!=='0948d093089c5921281185a103b323c513365502'||
@@ -68,6 +70,7 @@ if(crown.sourceGitSHA!==sha||crown.caseId!=='crown'||crown.fdi!=='26'||
 const crownOriginalBytes=validateFile(sidecar+'assets/dundee/maxillary_first_molar.glb.source',crown.originalSha256);
 const crownConvertedBytes=validateFile(sidecar+'assets/dundee/maxillary_first_molar-godot.glb.source',crown.convertedSha256);
 if(crownOriginalBytes<1000||crownConvertedBytes<1000)throw Error('FDI26 source or converted tooth sidecar truncated');
+assertDundeeUntexturedDocument(readDundeeGLBJson(read(sidecar+'assets/dundee/maxillary_first_molar-godot.glb.source')));
 const roots=[];
 for(const row of cc0.assets){
  if(!['whole-clinic-starter-v1.glb','instrument-tray-v1.glb'].includes(row.name)||
@@ -84,6 +87,7 @@ for(const row of cc0.assets){
 const archivedReadme=read('README-FIRST.txt').toString('utf8');
 if(!archivedReadme.includes('verified-raw-source'))
  throw Error('Windows portability instructions omit required verified source sidecar');
+console.log('SR67_WINDOWS_DUNDEE_BOTH_UNTEXTURED_MATERIALS_AND_HASHES_PASS source_sha='+sha);
 console.log('SR16_WINDOWS_EXPORTED_RAW_ASSETS_SHA_AND_PCK_PARITY_PASS source_sha='+sha+
  ' OBJ/MTL original=3 CC0 source+dequantized=4 Dundee FDI36 original=1 '+roots.join(' ; ')+
  ' clinical accuracy NOT validated; RTX/PC pixels NOT verified');
