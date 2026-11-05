@@ -44,8 +44,12 @@ jobs:
         run: |
           set -euo pipefail
           node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/KlinikLab-Godot-Source"
+          node native-godot/verify-dundee-derived.mjs "--project-dir=$RUNNER_TEMP/KlinikLab-Godot-Source" "--expected-sha=$GITHUB_SHA"
           "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/KlinikLab-Godot-Source" --editor --import --quit > "$RUNNER_TEMP/godot-import.log" 2>&1 || { cat "$RUNNER_TEMP/godot-import.log"; exit 1; }
           cat "$RUNNER_TEMP/godot-import.log"
+          if grep -Ei 'invalid texture index|texture index.*(invalid|out of bounds|not found)|texture with index' "$RUNNER_TEMP/godot-import.log"; then
+            echo "SR67_DUNDEE_TEXTURE_INDEX_IMPORT_REJECTED"; exit 1
+          fi
           if grep -Ei 'SCRIPT ERROR|Parse Error|Parser Error|Failed to load script' "$RUNNER_TEMP/godot-import.log"; then
             exit 1
           fi
