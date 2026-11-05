@@ -116,3 +116,21 @@ test('SR67 GLB parser rejects malformed containers and parses simple padded JSON
  const wrongLength=Buffer.from(glb);wrongLength.writeUInt32LE(1234,8);
  assert.throws(()=>readDundeeGLBJson(wrongLength),/Invalid GLB/);
 });
+
+
+test('SR67 fresh Godot-import CI gates reject the literal owner-reproduced glTF texture-index error',()=>{
+ const error='ERROR: glTF import: Tried to read texture at index 1, but this glTF file does not contain any textures.';
+ const other='WARNING: unrelated import processing message';
+ for(const workflow of [
+  '.github/workflows/sr1c-godot-4-7-native-parse.yml',
+  '.github/workflows/sr8-native-windows-export.yml'
+ ]){
+  const yaml=fs.readFileSync(new URL('../'+workflow,import.meta.url),'utf8');
+  const match=yaml.match(/if grep -Ei '([^']+)' "\$RUNNER_TEMP\/(?:native-app-import|godot-import)\.log"; then/);
+  assert.ok(match,'missing case-insensitive importer warning gate in '+workflow);
+  const expression=new RegExp(match[1],'i');
+  assert.match(error,expression,'regression: literal recorded Godot importer error must be blocked');
+  assert.doesNotMatch(other,expression,'unrelated importer warnings are not the specific defect');
+  assert.match(yaml,/exit 1/,'import error gate must fail the run');
+ }
+});
