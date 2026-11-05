@@ -2234,13 +2234,24 @@ func _show_practical() -> void:
 				_show_practical_fdi_chart(step_index)
 			"tool":
 				var menu := OptionButton.new()
+				menu.name = "KL_PRACTICAL_TOOL_" + str(step_index)
 				# Do not let the longest bilingual instrument expand the entire notes pane.
 				menu.fit_to_longest_item = false
 				_style_action(menu)
 				menu.custom_minimum_size = Vector2(0,44)
 				menu.add_item("Select original instrument", 0)
+				var prior_tool_id: String = str(((_progress["answers"] as Dictionary).get(
+					_key() + ":" + str(step_index), {}) as Dictionary).get("selected", ""))
+				var saved_tool_index: int = 0
+				var tool_index: int = 0
 				for item in _content["tools"]:
 					menu.add_item(str(item["german"]) + " / " + str(item["english"]))
+					tool_index += 1
+					if not prior_tool_id.is_empty() and str(item["id"]) == prior_tool_id:
+						saved_tool_index = tool_index
+				# A source ID, not a mutable display index, is persisted. Unknown or
+				# outdated IDs stay at the neutral prompt without inventing a grade.
+				menu.select(saved_tool_index)
 				menu.item_selected.connect(_practical_tool.bind(step_index))
 				_page.add_child(menu)
 			"drill":
