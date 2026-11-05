@@ -41,6 +41,14 @@ func _select_real_menu(app: Node3D, index: int, option: int) -> void:
 
 func _run() -> void:
 	root.size = Vector2i(1536, 816)
+	# In hosted CI, require the actual Godot user:// path to resolve inside
+	# the unique SR71 profile before the app can open or write progress.
+	var ci_data_dir: String = OS.get_environment("XDG_DATA_HOME")
+	if not ci_data_dir.is_empty():
+		var progress_file: String = ProjectSettings.globalize_path("user://kliniklab-native-progress-v2.json")
+		if not progress_file.begins_with(ci_data_dir):
+			_fail("SR71 isolated CI user:// profile mismatch: "+progress_file)
+			return
 	var packed: PackedScene = load("res://app.tscn")
 	if packed == null:
 		_fail("Actual native app scene unavailable")
