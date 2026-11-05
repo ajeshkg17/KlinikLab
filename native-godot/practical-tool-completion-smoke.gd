@@ -146,9 +146,11 @@ func _run() -> void:
 			if menu == null:
 				_fail("Tool picker lost after actual disk reload")
 				return
+			var lock_before: bool = bool(app.call("_practical_tool_complete", index, step))
 			_select_real_menu(app, index, wrong_index)
+			var lock_after: bool = bool(app.call("_practical_tool_complete", index, step))
 			if JSON.stringify(_answer(app, case_i, index)) != frozen or menu.selected != correct_index:
-				_fail("Reloaded correct source tool was overwritten or not projected back to picker")
+				_fail("Reloaded correct source tool overwritten/not projected: fdi="+FDIS[case_i]+" step="+str(index)+" lock_before="+str(lock_before)+" lock_after="+str(lock_after)+" menu="+str(menu.selected)+" expected="+str(correct_index)+" answer="+JSON.stringify(_answer(app, case_i, index))+" frozen="+frozen)
 				return
 			# A forged legacy 'correct' flag with a wrong target or wrong
 			# source step must fail closed and permit a genuine fresh attempt.
