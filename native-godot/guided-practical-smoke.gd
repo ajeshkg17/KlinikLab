@@ -51,6 +51,92 @@ func _sr58_task_first_order(app: Node3D, fdi: String, guided: bool) -> bool:
 		return start_button == -1 and navigation > first_source_step
 	return start_button > task_banner and start_button < first_source_step and navigation == -1
 
+# SR68: real native controls must show the selected *source instrument ID*
+# after navigation, refresh and source-scoped journal reload. This is not a
+# source-answer or clinical grading change, and does not touch the tooth mesh.
+func _sr68_tool_recall(app: Node3D, case_i: int, content: Dictionary) -> bool:
+	var steps: Array = content["practical"][case_i]
+	var tools: Array = content["tools"]
+	var cases: Dictionary = app.get("_progress")
+	var answers: Dictionary = cases["answers"]
+	var tool_steps: int = 0
+	for step_i in range(steps.size()):
+		var source_step: Dictionary = steps[step_i]
+		if str(source_step.get("type", "")) != "tool":
+			continue
+		tool_steps += 1
+		while int(app.get("_procedure_step_index")) < step_i:
+			app.call("_procedure_move_step", 1)
+		if int(app.get("_procedure_step_index")) != step_i:
+			_fail("SR68 could not select source tool task FDI" + FDIS[case_i])
+			return false
+		var node_name: String = "KL_PRACTICAL_TOOL_" + str(step_i)
+		var page: VBoxContainer = app.get("_page")
+		var menu: OptionButton = page.get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0 or menu.item_count != tools.size()+1:
+			_fail("SR68 source tool menu not neutral and complete FDI" + FDIS[case_i])
+			return false
+		var correct_index: int = 0
+		for t in range(tools.size()):
+			if str((tools[t] as Dictionary).get("id", "")) == str(source_step.get("target", "")):
+				correct_index = t+1
+		if correct_index <= 0 or tools.size() < 2:
+			_fail("SR68 source instrument target missing FDI" + FDIS[case_i])
+			return false
+		var wrong_index: int = 2 if correct_index == 1 else 1
+		var key: String = IDS[case_i] + ":practical:" + str(step_i)
+		menu.select(wrong_index)
+		menu.item_selected.emit(wrong_index)
+		var wrong: Dictionary = answers.get(key,{})
+		if bool(wrong.get("correct",true)) or str(wrong.get("selected","")) != str((tools[wrong_index-1] as Dictionary)["id"]):
+			_fail("SR68 wrong instrument response not recorded by original source ID " + key)
+			return false
+		app.call("_procedure_move_step", -1)
+		app.call("_procedure_move_step", 1)
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != wrong_index:
+			_fail("SR68 wrong source instrument visual choice lost after navigation " + key)
+			return false
+		menu.select(correct_index)
+		menu.item_selected.emit(correct_index)
+		var correct: Dictionary = answers.get(key,{})
+		if not bool(correct.get("correct",false)) or str(correct.get("selected","")) != str(source_step["target"]):
+			_fail("SR68 correct tool source response not recorded " + key)
+			return false
+		app.call("_load_progress")
+		app.call("_refresh")
+		answers = (app.get("_progress") as Dictionary)["answers"]
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != correct_index:
+			_fail("SR68 saved correct instrument choice lost after journal reload " + key)
+			return false
+		# Fail closed on an unknown stale ID; don't display a different
+		# instrument just because saved option indices have shifted.
+		var record: Dictionary = answers.get(key,{})
+		record["selected"] = "__invalid-source-tool-id__"
+		app.call("_refresh")
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0:
+			_fail("SR68 unknown instrument ID mapped to a fabricated option " + key)
+			return false
+		answers.erase(key)
+		app.call("_save_progress")
+		app.call("_refresh")
+		menu = (app.get("_page") as VBoxContainer).get_node_or_null(node_name) as OptionButton
+		if menu == null or menu.selected != 0:
+			_fail("SR68 clearing practical response failed to restore neutral prompt " + key)
+			return false
+	# Crown contains both bur and impression-tray tool choices.
+	if tool_steps != (2 if case_i == 3 else 1):
+		_fail("SR68 source tool-step inventory drift for FDI" + FDIS[case_i])
+		return false
+	while int(app.get("_procedure_step_index")) > 0:
+		app.call("_procedure_move_step", -1)
+	if int(app.get("_procedure_step_index")) != 0:
+		_fail("SR68 instrument test failed to restore original guided first task")
+		return false
+	return true
+
 func _run() -> void:
 	root.size = Vector2i(1600,900)
 	var scene: PackedScene = load("res://app.tscn")
@@ -89,6 +175,8 @@ func _run() -> void:
 		var first_step: Dictionary = original_steps[0]
 		if str(first_step["type"])!="tooth" or str(first_step["target"])!=FDIS[i]:
 			_fail("Wrong source FDI target "+FDIS[i])
+			return
+		if not _sr68_tool_recall(app, i, source_content):
 			return
 		if int(app.get("_procedure_step_index"))!=0 or bool(app.call("_procedure_move_step",-1)):
 			_fail("Guide navigated below source first task")
@@ -212,6 +300,7 @@ func _run() -> void:
 	if bool(app.get("_procedure_guided")) or not (app.get("_practical_feedback") as Dictionary).has((source_content["practical"][1] as Array).size()-1):
 		_fail("Original all-tasks mode not restored")
 		return
+	print("SR68_SIX_FDI_PRACTICAL_TOOL_RECALL_PASS source-ID restore, wrong/correct, navigation, journal reload, stale-ID neutral, crown two tools; headless only")
 	print("SR34_NATIVE_PRACTICAL_CHECKLIST_PERSISTENCE_PASS six FDI, per-case isolation, journal reload, FSP/KP, no bur")
 	print("SR58_SIX_FDI_TASK_FIRST_GUIDED_PRACTICAL_PASS real start signal, original task ahead of source references, persisted behaviour; headless only")
 	print("SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS keyboard N/P, source answers, optional all-tasks, no cutting/capture/Quest")
