@@ -1713,16 +1713,46 @@ func _reveal_quiz_options() -> void:
 	_quiz_revealed = true
 	_refresh()
 
+# SR72: a stored 'correct' boolean alone is not proof of completing the
+# browser's current source question. Godot JSON can load integral indices as
+# floats; require exact finite/integral option and question indices, a real
+# source option, and matching source answer. Never rewrite the saved journal.
+func _quiz_source_answer(station: String, index: int) -> Dictionary:
+	var neutral := {"answered": false, "selected": -1, "solved": false}
+	var quiz: Dictionary = _content.get("quiz", {})
+	var questions: Variant = quiz.get(station, null)
+	if not (questions is Array) or index < 0 or index >= (questions as Array).size():
+		return neutral
+	var q: Dictionary = (questions as Array)[index]
+	var options: Array = q.get("options", [])
+	var raw: Variant = (_progress["answers"] as Dictionary).get(_key() + ":" + str(index), null)
+	if not (raw is Dictionary):
+		return neutral
+	var record: Dictionary = raw
+	var source_index: Variant = record.get("sourceQuestion", null)
+	var selected_value: Variant = record.get("selected", null)
+	if not (source_index is int or source_index is float) or not (selected_value is int or selected_value is float):
+		return neutral
+	var numeric_source: float = float(source_index)
+	var numeric_selected: float = float(selected_value)
+	if not is_finite(numeric_source) or numeric_source != float(index):
+		return neutral
+	if not is_finite(numeric_selected) or numeric_selected != floorf(numeric_selected) or numeric_selected < 0 or numeric_selected >= options.size():
+		return neutral
+	var selected_index := int(numeric_selected)
+	var solved: bool = record.get("correct", null) is bool and bool(record["correct"]) and selected_index == int(q["correct"])
+	return {"answered": true, "selected": selected_index, "solved": solved}
+
 # SR62: reconstruct source-backed feedback from the existing saved answer,
 # without inventing grades, losing recall text, or revealing a new answer key.
 func _sync_quiz_feedback(station: String, index: int) -> void:
 	if _page == null or _quiz_feedback_status == null or _answer_label == null or station != STATION_IDS[_station_index] or index != _quiz_index:
 		return
 	var q: Dictionary = _content["quiz"][station][index]
-	var record: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(index), {})
-	var selected: int = int(record.get("selected", -1))
-	var has_choice: bool = selected >= 0 and selected < 3
-	var correct: bool = has_choice and bool(record.get("correct", false))
+	var state: Dictionary = _quiz_source_answer(station, index)
+	var selected: int = int(state["selected"])
+	var has_choice: bool = bool(state["answered"])
+	var correct: bool = bool(state["solved"])
 	if has_choice:
 		_quiz_feedback_status.text = "✓ Correct source response · next question unlocked" if correct else "↻ Review suggested · choose another response"
 		_answer_label.text = ("Correct. " if correct else "Review suggested. ") + str(q["explanation"])
@@ -1763,8 +1793,8 @@ func _show_quiz(station: String) -> void:
 	_quiz_recall_edit.custom_minimum_size = Vector2(475,105)
 	_quiz_recall_edit.text = str((_progress.get("quizRecall",{}) as Dictionary).get(_quiz_recall_key,""))
 	_page.add_child(_quiz_recall_edit)
-	var existing: Dictionary = (_progress["answers"] as Dictionary).get(_key() + ":" + str(_quiz_index), {})
-	if not _quiz_revealed and existing.is_empty():
+	var existing: Dictionary = _quiz_source_answer(station, _quiz_index)
+	if not _quiz_revealed and not bool(existing["answered"]):
 		var reveal := _button("Reveal response choices (does not grade the note)")
 		reveal.name = "KL_QUIZ_REVEAL_CHOICES"
 		reveal.pressed.connect(_reveal_quiz_options)
@@ -1773,7 +1803,7 @@ func _show_quiz(station: String) -> void:
 		for i in range(3):
 			var b := _button("%d. %s" % [i + 1, str(q["options"][i])])
 			b.name = "KL_QUIZ_OPTION_" + str(i)
-			b.disabled = bool(existing.get("correct", false))
+			b.disabled = bool(existing["solved"])
 			b.pressed.connect(_answer.bind(station, _quiz_index, i))
 			_page.add_child(b)
 	_answer_label = _heading("Options are shown only after your active recall reveal. Explanations remain formative, not clinical grading.", 14)
@@ -1784,7 +1814,7 @@ func _show_quiz(station: String) -> void:
 	# Returning to a previously solved case restores this state without regrading.
 	_quiz_next_button = _button("Finish station ✓" if _quiz_index == questions.size() - 1 else "Next source question")
 	_quiz_next_button.name = "KL_QUIZ_NEXT"
-	_quiz_next_button.disabled = not bool(existing.get("correct", false))
+	_quiz_next_button.disabled = not bool(existing["solved"])
 	_quiz_next_button.pressed.connect(_next_question)
 	_page.add_child(_quiz_next_button)
 	if bool((_progress["studied"] as Dictionary).get(_key(), false)):
@@ -1797,10 +1827,11 @@ func _answer(station: String, index: int, choice: int) -> void:
 	var answer_key := _key() + ":" + str(index)
 	# Native expert mode requires the answer choices to have been deliberately
 	# revealed. Previously wrong source answers remain available for retries.
-	if not _quiz_revealed and not (_progress["answers"] as Dictionary).has(answer_key):
+	var source_state: Dictionary = _quiz_source_answer(station, index)
+	if not _quiz_revealed and not bool(source_state["answered"]):
 		return
-	# Once solved, source browser disallows replacing a correct recorded choice.
-	if bool(((_progress["answers"] as Dictionary).get(answer_key, {}) as Dictionary).get("correct", false)):
+	# A stale/forged correct flag cannot lock a different source answer.
+	if bool(source_state["solved"]):
 		return
 	var correct := choice == int(q["correct"])
 	(_progress["answers"] as Dictionary)[answer_key] = {
@@ -1822,9 +1853,8 @@ func _answer(station: String, index: int, choice: int) -> void:
 func _next_question() -> void:
 	if not (STATION_IDS[_station_index] in ["interview", "handover", "viva", "clinic"]):
 		return
-	var key := _key() + ":" + str(_quiz_index)
-	if not bool(((_progress["answers"] as Dictionary).get(key, {}) as Dictionary).get("correct", false)):
-		# A direct method call must not bypass disabled UI controls.
+	if not bool(_quiz_source_answer(STATION_IDS[_station_index], _quiz_index)["solved"]):
+		# A direct method call must not bypass source identity or disabled UI.
 		return
 	_save_quiz_recall()
 	_quiz_revealed = false
