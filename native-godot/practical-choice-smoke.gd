@@ -129,10 +129,16 @@ func _run() -> void:
 			# A malformed legacy/stale selection must not lock choices or
 			# invent a correct answer. Restore the real source decision.
 			var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
-			answers[key] = {"selected":999,"correct":true,"sourceQuestion":step_index}
+			for invalid_selection in [999, 1.5, str(correct)]:
+				answers[key] = {"selected":invalid_selection,"correct":true,"sourceQuestion":step_index}
+				app.call("_refresh")
+				if _choice_button(app,step_index,correct) == null or _choice_button(app,step_index,correct).disabled or _feedback(app,step_index) != "Not answered":
+					_fail("Invalid numeric/string choice falsely displayed as solved "+key+"/"+str(invalid_selection))
+					return
+			answers[key] = {"selected":correct,"correct":true,"sourceQuestion":step_index+1}
 			app.call("_refresh")
 			if _choice_button(app,step_index,correct) == null or _choice_button(app,step_index,correct).disabled or _feedback(app,step_index) != "Not answered":
-				_fail("Stale choice index falsely displayed as solved "+key)
+				_fail("Mismatched sourceQuestion falsely displayed as solved "+key)
 				return
 			answers[key] = solved
 			app.call("_refresh")
