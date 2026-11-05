@@ -21,7 +21,8 @@ test('SR62 browser quiz answer parity: selected response and feedback become vis
  assert.match(app, /_sync_quiz_feedback\(station, index\)/);
  assert.match(app, /option\.disabled = correct/);
  const model = app.slice(app.indexOf('func _sync_quiz_feedback('), app.indexOf('func _show_quiz(',app.indexOf('func _sync_quiz_feedback(')));
- assert.doesNotMatch(model, /_save_progress|_record_practical|_direct_cut_world_ray|cut_to|_answer\(/);
+ assert.doesNotMatch(model, /_save_progress|_record_practical|_direct_cut_world_ray|cut_to|(?:^|[^A-Za-z0-9_])_answer\(/m);
+ assert.match(model, /_quiz_source_answer\(station, index\)/);
 });
 
 test('SR62 multiple-choice question and saved feedback precede long clinic history on desktop', () => {
