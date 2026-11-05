@@ -200,6 +200,27 @@ func _run() -> void:
 			if bool(_answer(app, case_i, index).get("correct", true)):
 				_fail("Forged wrong-step correct flag incorrectly locked tool")
 				return
+			# Cross-PR source identity: matching tool ID with a stale question
+			# must still recall the source ID, but not display completed status
+			# or block a real retry after an actual isolated disk journal reload.
+			answers = (app.get("_progress") as Dictionary)["answers"]
+			answers[key] = {"selected": target_id, "correct": true, "sourceQuestion": index + 1}
+			app.call("_save_progress")
+			app.call("_load_progress")
+			app.call("_refresh")
+			menu = _menu(app, index)
+			if menu == null or menu.selected != correct_index or bool(app.call("_practical_tool_complete", index, step)) or bool(app.call("_practical_source_complete", index)):
+				_fail("Stale source-step journal falsely locks matching instrument FDI"+FDIS[case_i])
+				return
+			if not _feedback(app, index).begins_with("Review required"):
+				_fail("Stale source-step journal falsely displays completion FDI"+FDIS[case_i])
+				return
+			_select_real_menu(app, index, correct_index)
+			var recovered: Dictionary = _answer(app, case_i, index)
+			if not bool(recovered.get("correct", false)) or recovered.get("selected", null) != target_id or not bool(app.call("_practical_source_complete", index)) or not bool(app.call("_practical_tool_complete", index, step)):
+				_fail("Stale source-step journal could not be corrected by real menu signal FDI"+FDIS[case_i])
+				return
+			answers = (app.get("_progress") as Dictionary)["answers"]
 			answers[key] = correct_saved
 			app.call("_save_progress")
 		if tools_in_case < 1 or bool(app.get("_direct_bur_mode")):
@@ -217,5 +238,6 @@ func _run() -> void:
 		return
 	app.call("_reset_progress")
 	print("SR74_COMBINED_STALE_TOOL_RELOAD_RECALL_RETRY_SIX_FDI_PASS headless only")
+	print("SR75_COMBINED_MATCHING_TOOL_WRONG_SOURCE_STEP_RECOVERY_SIX_FDI_PASS headless only")
 	print("SR71_NATIVE_PRACTICAL_TOOL_LOCK_CORRECT_WRONG_FEEDBACK_SIX_FDI_PASS tasks=" + str(total_tools) + " crown_two; actual_OptionButton_signals, wrong_feedback, correct_lock, stale_callback, journal_reload, no_bur; HEADLESS NOT PIXELS")
 	quit(0)
