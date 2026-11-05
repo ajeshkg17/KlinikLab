@@ -172,6 +172,25 @@ func _run() -> void:
 			# source step must fail closed and permit a genuine fresh attempt.
 			var answers: Dictionary = (app.get("_progress") as Dictionary)["answers"]
 			answers[key] = {"selected": wrong_id, "correct": true, "sourceQuestion": index}
+			# Compatibility follow-up: stale flagged-correct journal must restore
+			# its actual source instrument ID, not imply completed study or lock it.
+			app.call("_save_progress")
+			app.call("_load_progress")
+			app.call("_refresh")
+			menu = _menu(app, index)
+			if menu == null or menu.selected != wrong_index or bool(app.call("_practical_source_complete", index)) or bool(app.call("_practical_tool_complete", index, step)):
+				_fail("Stale original instrument journal falsely displayed complete or locked FDI"+FDIS[case_i])
+				return
+			if not _feedback(app, index).begins_with("Review required"):
+				_fail("Stale instrument source mismatch displays false completed feedback FDI"+FDIS[case_i])
+				return
+			_select_real_menu(app, index, correct_index)
+			var corrected: Dictionary = _answer(app, case_i, index)
+			if not bool(corrected.get("correct", false)) or corrected.get("selected", null) != target_id or not bool(app.call("_practical_source_complete", index)) or menu.selected != correct_index:
+				_fail("Genuine source-correct retry blocked after stale journal FDI"+FDIS[case_i])
+				return
+			answers = (app.get("_progress") as Dictionary)["answers"]
+			answers[key] = {"selected": wrong_id, "correct": true, "sourceQuestion": index}
 			_select_real_menu(app, index, wrong_index)
 			if bool(_answer(app, case_i, index).get("correct", true)):
 				_fail("Forged wrong-target correct flag incorrectly locked tool")
@@ -197,5 +216,6 @@ func _run() -> void:
 		_fail("Original instrument task coverage incomplete: total " + str(total_tools) + ", crown " + str(crown_tools))
 		return
 	app.call("_reset_progress")
+	print("SR74_COMBINED_STALE_TOOL_RELOAD_RECALL_RETRY_SIX_FDI_PASS headless only")
 	print("SR71_NATIVE_PRACTICAL_TOOL_LOCK_CORRECT_WRONG_FEEDBACK_SIX_FDI_PASS tasks=" + str(total_tools) + " crown_two; actual_OptionButton_signals, wrong_feedback, correct_lock, stale_callback, journal_reload, no_bur; HEADLESS NOT PIXELS")
 	quit(0)
