@@ -1116,7 +1116,7 @@ func _frame_environment_camera() -> void:
 				var local: Vector3 = inv_basis * (corner - center)
 				var width_depth: float = absf(focal * local.x + pane_offset.x * local.z) / (0.45 * content.size.x)
 				var height_depth: float = absf(-focal * local.y + pane_offset.y * local.z) / (0.45 * content.size.y)
-				distance = maxf(distance, local.z + maxf(width_depth, height_depth), local.z + 0.5)
+				distance = maxf(distance, maxf(local.z + maxf(width_depth, height_depth), local.z + 0.5))
 	# Center the room in the unobscured middle pane rather than behind notes.
 	# This is a parallel optical-axis shift; it does not skew imported geometry.
 	camera.position = center + view_basis.z * distance \
