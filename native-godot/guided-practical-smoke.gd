@@ -171,6 +171,45 @@ func _run() -> void:
 			if int(app.get("_procedure_step_index")) != wrap_index:
 				_fail("Review wrap-around failed for "+FDIS[i])
 				return
+		# Explicit SR73 saved-state forgery regression on real Godot app methods.
+		# A true flag cannot skip a source-wrong response or a different step.
+		var source_record_key := IDS[i]+":practical:"+str(review_index)
+		var valid_record: Dictionary = answers[source_record_key].duplicate(true)
+		if not bool(app.call("_practical_source_complete", review_index)):
+			_fail("Source-correct persisted Practical record rejected FDI"+FDIS[i])
+			return
+		answers[source_record_key]["sourceQuestion"] = review_index + 1
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Cross-step forged Practical completion trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		match str(original_steps[review_index]["type"]):
+			"choice":
+				answers[source_record_key]["selected"] = -1
+			"tooth":
+				answers[source_record_key]["selected"] = "99"
+			"tool":
+				answers[source_record_key]["selected"] = "__not_a_source_tool__"
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Wrong selected value with correct=true trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		answers[source_record_key]["correct"] = "true"
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("String correctness flag was treated as true FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record.duplicate(true)
+		# A JSON read-back turns integer indices into numeric whole floats;
+		# matching question identity must remain valid.
+		answers[source_record_key]["sourceQuestion"] = float(review_index)
+		if not bool(app.call("_practical_source_complete", review_index)):
+			_fail("Whole-number JSON source question rejected FDI"+FDIS[i])
+			return
+		answers[source_record_key]["sourceQuestion"] = float(review_index) + 0.25
+		if bool(app.call("_practical_source_complete", review_index)):
+			_fail("Fractional question identity was trusted FDI"+FDIS[i])
+			return
+		answers[source_record_key] = valid_record
 		for j in range(1,original_steps.size()):
 			answers.erase(IDS[i]+":practical:"+str(j))
 		if bool(app.get("_direct_bur_mode")):
