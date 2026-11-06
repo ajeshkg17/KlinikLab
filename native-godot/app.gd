@@ -1592,7 +1592,10 @@ func _refresh() -> void:
 	_sync_toolbar_selection()
 	_update_walk_hud()
 	if _screen_title != null:
-		if _view == "environment":
+		if _practice_sequence != null:
+			var current: Dictionary = _practice_sequence.call("state")
+			_screen_title.text = "KlinikLab · Practice Sequence FDI %s · 3D hidden" % str(current["fdi"])
+		elif _view == "environment":
 			_screen_title.text = "KlinikLab · CC0 Clinic Environment"
 		elif _view == "clinic":
 			_screen_title.text = "KlinikLab · FDI %s · %s" % [FDI[_case_index],str(_stations[_station_index]["title"])]
