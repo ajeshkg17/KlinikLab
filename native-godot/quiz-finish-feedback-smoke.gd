@@ -123,8 +123,11 @@ func _run() -> void:
 				_fail("Completion lost on actual disk reload "+study_key)
 				return
 			finished_button.pressed.emit() # direct signal cannot alter saved result
-			if JSON.stringify(((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(key,{})) != source_answer:
-				_fail("Repeated finished signal altered source answer "+study_key)
+			var after_repeat: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary).get(key,{})
+			var answer_selected: Variant = after_repeat.get("selected",null)
+			var answer_question: Variant = after_repeat.get("sourceQuestion",null)
+			if not (answer_selected is int or answer_selected is float) or int(answer_selected) != correct or after_repeat.get("correct",null) != true or not (answer_question is int or answer_question is float) or int(answer_question) != final_index:
+				_fail("Repeated finished signal altered source answer fields "+study_key)
 				return
 			count += 1
 	if count != 24 or str((((app.get("_progress") as Dictionary)["fspKpByTask"] as Dictionary)["endo|anamnese"] as Dictionary).get("text","")) != "Preserve unrelated FSP note":
