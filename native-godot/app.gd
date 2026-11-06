@@ -977,7 +977,7 @@ func _update_responsive_layout() -> void:
 	var writing_focus := _writing_focus_active()
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
-	_middle.visible = _practice_sequence == null and _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus
+	_middle.visible = _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus and _practice_sequence == null
 	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus else Control.SIZE_FILL
 	_right_column.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 	_right_panel.custom_minimum_size.x = 460.0 if writing_focus else notes_width
@@ -1350,8 +1350,7 @@ func _key() -> String:
 	return CASE_IDS[_case_index] + ":" + STATION_IDS[_station_index]
 
 func _select_case(index: int) -> void:
-	if _practice_sequence != null:
-		return # no persistent case switch while the in-memory sequence is active
+	if _practice_sequence != null: return
 	if index < 0 or index >= _cases.size():
 		return
 	_save_quiz_recall()
@@ -1374,8 +1373,7 @@ func _select_case(index: int) -> void:
 	_refresh()
 
 func _select_station(index: int) -> void:
-	if _practice_sequence != null:
-		return # avoid journal writes or case/scene drift during the sequence
+	if _practice_sequence != null: return
 	if index < 0 or index >= _stations.size():
 		return
 	_save_quiz_recall()
