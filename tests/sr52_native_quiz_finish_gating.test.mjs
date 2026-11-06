@@ -11,8 +11,9 @@ test('SR52 browser quiz requires correct answer before Next, and finishes final 
  assert.match(browser,/this\.local\.complete\.push\(key\)/);
  assert.ok(browser.includes("this.station.id+'_'+this.caseData.id"));
  assert.match(native,/func _show_quiz\(station: String\) -> void:/);
- assert.match(native,/_quiz_next_button = _button\("Finish station ✓" if _quiz_index == questions\.size\(\) - 1 else "Next source question"\)/);
- assert.match(native,/_quiz_next_button\.disabled = not bool\(existing\.get\("correct", false\)\)/);
+ assert.match(native,/var finished_station: bool = _quiz_index == questions\.size\(\) - 1 and bool\(\(_progress\["studied"\] as Dictionary\)\.get\(_key\(\), false\)\)/);
+ assert.match(native,/_quiz_next_button = _button\("Station completed ✓" if finished_station else "Finish station ✓" if _quiz_index == questions\.size\(\) - 1 else "Next source question"\)/);
+ assert.match(native,/_quiz_next_button\.disabled = finished_station or not bool\(existing\.get\("correct", false\)\)/);
  assert.match(native,/if not _quiz_revealed and not \(_progress\["answers"\] as Dictionary\)\.has\(answer_key\):/);
  assert.match(native,/if bool\(\(\(_progress\["answers"\] as Dictionary\)\.get\(answer_key, \{\}\) as Dictionary\)\.get\("correct", false\)\):/);
  assert.match(native,/option\.disabled = true/);
