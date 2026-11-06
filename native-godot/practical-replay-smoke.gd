@@ -81,6 +81,8 @@ func _run() -> void:
 		# station legitimately persists selected-case UI metadata. This test
 		# isolates scored-run state from the saved journal byte-for-byte.
 		app.set("_case_index", case_i)
+		app.set("_station_index", 4) # native _key() scopes practical answers by station
+		app.set("_view", "clinic")
 		var steps: Array = source["practical"][case_i]
 		var scorer: RefCounted = scorer_script.new()
 		scorer.call("configure", steps, source_tools)
