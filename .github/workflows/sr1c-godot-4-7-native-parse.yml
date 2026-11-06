@@ -308,6 +308,15 @@ jobs:
           XDG_DATA_HOME="$sr77_profile/data" XDG_CONFIG_HOME="$sr77_profile/config" XDG_CACHE_HOME="$sr77_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-replay-smoke.gd > "$RUNNER_TEMP/sr77-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr77-runtime.log"; exit 1; }
           cat "$RUNNER_TEMP/sr77-runtime.log"
           grep -F 'SR77_PRACTICAL_REPLAY_TWO_RUNS_SEEDED_JOURNAL_BYTES_UNCHANGED_PASS' "$RUNNER_TEMP/sr77-runtime.log"
+      - name: SR78 actual Godot source-ordered six-case workflow navigation, journal reload and answer-integrity (HEADLESS)
+        run: |
+          set -euo pipefail
+          sr78_profile="$RUNNER_TEMP/sr78-case-order-only-profile"
+          mkdir -p "$sr78_profile/data" "$sr78_profile/config" "$sr78_profile/cache"
+          XDG_DATA_HOME="$sr78_profile/data" XDG_CONFIG_HOME="$sr78_profile/config" XDG_CACHE_HOME="$sr78_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practical-case-sequence-smoke.gd > "$RUNNER_TEMP/sr78-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr78-parse.log"; exit 1; }
+          XDG_DATA_HOME="$sr78_profile/data" XDG_CONFIG_HOME="$sr78_profile/config" XDG_CACHE_HOME="$sr78_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-case-sequence-smoke.gd > "$RUNNER_TEMP/sr78-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr78-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr78-runtime.log"
+          grep -F 'SR78_SOURCE_ORDERED_CASE_SEQUENCE_NAV_RELOAD_INTEGRITY_PASS' "$RUNNER_TEMP/sr78-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
