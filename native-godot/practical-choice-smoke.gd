@@ -142,6 +142,62 @@ func _run() -> void:
 				return
 			answers[key] = solved
 			app.call("_refresh")
+			# Reproduce the JSON disk-reloaded string truthiness conflict:
+			# source selection/step correct, but correctness is a String.
+			var saved_answers: Dictionary = answers.duplicate(true)
+			for other_i in range(steps.size()):
+				var other: Dictionary = steps[other_i]
+				var kind: String = str(other.get("type", ""))
+				if kind == "drill" or other_i == step_index:
+					continue
+				var selection: Variant = null
+				match kind:
+					"choice": selection = int(other["correct"])
+					"tooth", "tool": selection = str(other["target"])
+					_: _fail("Unknown source Practical task"); return
+				answers[IDS[case_i]+":practical:"+str(other_i)] = {"selected":selection,"correct":true,"sourceQuestion":other_i}
+			answers[key] = {"selected":correct,"correct":"true","sourceQuestion":step_index}
+			app.call("_save_progress")
+			app.call("_load_progress")
+			answers = (app.get("_progress") as Dictionary)["answers"]
+			var disk_string: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://kliniklab-native-progress-v2.json"))
+			if not (disk_string is Dictionary) or (disk_string["answers"] as Dictionary)[key].get("correct") != "true":
+				_fail("Synthetic literal-string correct flag was not actually disk reloaded "+key)
+				return
+			app.call("_refresh")
+			var state: Dictionary = app.call("_practical_choice_record",step_index,step)
+			if bool(state["solved"]) or bool(app.call("_practical_source_complete",step_index)) or _choice_button(app,step_index,correct).disabled or not _feedback(app,step_index).begins_with("Review required."):
+				_fail("Disk-reloaded string correctness falsely locked source choice "+key)
+				return
+			var review_button: Button = null
+			for node in (app.get("_page") as VBoxContainer).get_children():
+				if node is Button and (node as Button).text.begins_with("Next task to review (R)"):
+					review_button = node as Button
+					break
+			if review_button == null or review_button.disabled or not review_button.text.contains("1 remaining"):
+				_fail("String correctness did not count as pending Review task "+key)
+				return
+			var adjacent: int = step_index+1 if step_index+1 < steps.size() else step_index-1
+			if not _go_to_step(app,adjacent):
+				_fail("Cannot prepare Review navigation from adjacent step "+key)
+				return
+			app.call("_procedure_jump_to_review")
+			if int(app.get("_procedure_step_index")) != step_index:
+				_fail("Review skipped string-correctness source task "+key)
+				return
+			var retry: Button = _choice_button(app,step_index,correct)
+			if retry == null or retry.disabled:
+				_fail("String-correctness record prevented legitimate source choice retry "+key)
+				return
+			retry.pressed.emit()
+			var repaired: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary)[key]
+			if repaired.get("correct",null) != true or repaired.get("selected",null) != correct or not bool(app.call("_practical_source_complete",step_index)) or not bool(app.call("_practical_choice_record",step_index,step)["solved"]) or not _choice_button(app,step_index,correct).disabled:
+				_fail("Legitimate choice resubmission did not repair source journal and lock "+key)
+				return
+			(app.get("_progress") as Dictionary)["answers"] = saved_answers
+			answers = saved_answers
+			app.call("_save_progress")
+			app.call("_refresh")
 		if choices_this_case == 0:
 			_fail("No original choice found for "+FDIS[case_i])
 			return
@@ -159,5 +215,6 @@ func _run() -> void:
 		_fail("Practical answer matrix unexpectedly small: "+str(original_count))
 		return
 	app.call("_reset_progress")
+	print("SR76_CHOICE_STRICT_BOOLEAN_DISK_REVIEW_RETRY_SIX_FDI_PASS headless only")
 	print("SR69_NATIVE_PRACTICAL_CHOICE_SOURCE_EXPLANATION_LOCK_SIX_FDI_PASS original_choices="+str(original_count)+" wrong/retry/lock/navigation/journal_reload/stale_index/source_FDI/no_bur; HEADLESS NOT PIXELS")
 	quit(0)
