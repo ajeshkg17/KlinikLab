@@ -1762,9 +1762,10 @@ func _practice_sequence_start() -> void:
 		"view": _view, "camera_mode": _camera_mode,
 		"scene_visible": _scene != null and _scene.visible,
 		"atlas_visible": _atlas != null and _atlas.visible,
-		"volume": _volume
+		"volume": _volume, "direct_bur_mode": _direct_bur_mode
 	}
 	_practice_sequence = sequence
+	_direct_bur_mode = false # disable any pre-existing active cutter for the whole run
 	# The independently loaded Godot scene remains on the original clinic FDI.
 	# Its mesh/camera cannot claim to follow source-ordered task navigation.
 	# Do not call _select_case: it writes the learner progress journal.
@@ -1818,6 +1819,7 @@ func _practice_sequence_exit() -> void:
 	_view = str(saved.get("view", _view))
 	_camera_mode = str(saved.get("camera_mode", _camera_mode))
 	_volume = saved.get("volume", _volume) as Node3D
+	_direct_bur_mode = bool(saved.get("direct_bur_mode", false))
 	if _scene != null:
 		_scene.visible = bool(saved.get("scene_visible", true))
 	if _atlas != null:
@@ -2579,6 +2581,8 @@ func _set_direct_bur_radius(value: float) -> void:
 	_cut_radius = clampf(value,0.06,0.35)
 
 func _toggle_direct_bur() -> void:
+	if _practice_sequence != null:
+		return
 	if _view != "clinic" or STATION_IDS[_station_index] != "practical" or _volume == null:
 		_direct_bur_mode = false
 		return
@@ -2588,6 +2592,8 @@ func _toggle_direct_bur() -> void:
 	_refresh()
 
 func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
+	if _practice_sequence != null:
+		return false # hidden practice scene must never be a cutting target
 	if not _direct_bur_mode or _view != "clinic" or STATION_IDS[_station_index] != "practical" or _volume == null:
 		return false
 	var current: Dictionary = _volume.call("summary")
@@ -2605,6 +2611,8 @@ func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
+	if _practice_sequence != null:
+		return # hidden 3D cannot process pointer/procedure inputs
 	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
 	# native direct bur still requires separate explicit practical opt-in.
 	_handle_walk_input(event)
@@ -2627,6 +2635,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _apply_cut(x: HSlider, y: HSlider, z: HSlider, radius: HSlider) -> void:
+	if _practice_sequence != null:
+		return
 	if _volume == null:
 		return
 	var selected_volume: Dictionary = _volume.call("summary")
@@ -2641,15 +2651,21 @@ func _apply_cut(x: HSlider, y: HSlider, z: HSlider, radius: HSlider) -> void:
 	_store_cut()
 
 func _undo_cut() -> void:
+	if _practice_sequence != null:
+		return
 	if _volume != null and bool(_volume.call("undo")):
 		_store_cut()
 
 func _reset_cut() -> void:
+	if _practice_sequence != null:
+		return
 	if _volume != null:
 		_volume.call("reset")
 		_store_cut()
 
 func _store_cut() -> void:
+	if _practice_sequence != null:
+		return # no volume/progress save while ordered exercise is active
 	if _volume == null:
 		return
 	var progress_volumes: Dictionary = _progress.get("volumeByCase", {})
