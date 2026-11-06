@@ -55,16 +55,26 @@ test('SR33 review-first action skips correct source tasks without scoring or cut
    'review_button.pressed.connect(_procedure_jump_to_review)',
    'review_button.disabled = needs_review == 0',
    'var candidate: int = (_procedure_step_index + offset) % steps.size()',
-   'if not bool(record.get("correct", false)):'])
+   'if not _practical_source_complete(candidate):'])
   assert.ok(app.includes(marker),marker);
  const navigation=app.slice(app.indexOf('func _procedure_jump_to_review()'),app.indexOf('func _procedure_checklist_complete('));
  assert.match(navigation,/_direct_bur_mode = false/);
  assert.doesNotMatch(navigation,/(?:_record_practical|_save_progress|cut_to|_direct_cut_world_ray|_mark_studied)\(/);
  const smoke=read('native-godot/guided-practical-smoke.gd');
- for(const marker of ['KEY_R','sole review task','All-correct source tasks','wrap-around','removedSamplePoints'])
+ for(const marker of ['KEY_R','sole review task','All source-validated tasks','wrap-around','removedSamplePoints'])
   assert.ok(smoke.toLowerCase().includes(marker.toLowerCase()),marker);
 });
 
+
+test('SR73 review refuses source-mismatched saved flags and is enforced in real Godot CI',()=>{
+ const workflow=read('.github/workflows/sr1c-godot-4-7-native-parse.yml');
+ const smoke=read('native-godot/guided-practical-smoke.gd');
+ for(const marker of ['func _practical_source_complete(step_index: int) -> bool:', 'record.get("correct", null) != true', 'sourceQuestion', 'is_finite(source_number)', 'if not _practical_source_complete(i):', 'if not _practical_source_complete(candidate):']) assert.ok(app.includes(marker),marker);
+ assert.match(smoke,/SR73_SIX_FDI_SOURCE_VALIDATED_PRACTICAL_REVIEW_PASS/);
+ assert.match(smoke,/Cross-step forged Practical completion trusted/);
+ assert.match(smoke,/Wrong selected value with correct=true trusted/);
+ assert.match(workflow,/grep -F "SR73_SIX_FDI_SOURCE_VALIDATED_PRACTICAL_REVIEW_PASS"/);
+});
 
 test('SR34 manual practical checklist is persisted, per-case, and distinct from answers and cutting',()=>{
  for(const marker of ['"practicalChecklist": {}','func _procedure_checklist_complete(step_index: int) -> bool:',
