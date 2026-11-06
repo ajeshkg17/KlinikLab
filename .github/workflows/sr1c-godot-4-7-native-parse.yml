@@ -23,7 +23,8 @@ on:
       - 'visual-qa/sr1-local-kliniklab-export.mjs'
       - '.github/workflows/sr1c-godot-4-7-native-parse.yml'
   pull_request:
-    branches: [integration/single-chat-validation-2026-10-30]
+    # SR87 disposable rehearsal PR only; never target or change held owner state.
+    branches: [integration/single-chat-validation-2026-10-30, rehearsal/sr82-live-practice-sequence-20261106]
   workflow_dispatch:
 
 permissions:
