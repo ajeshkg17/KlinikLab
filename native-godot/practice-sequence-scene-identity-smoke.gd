@@ -93,6 +93,18 @@ func _run() -> void:
 		return
 	if not _hidden_identity(app,original_case,original_volume,0,snapshot,"start"):
 		return
+	# SR89: stale non-sequence callbacks must not write or even modify
+	# ordinary progress held in memory; no real owner profile is opened.
+	var memory_before: String = JSON.stringify(app.get("_progress"))
+	app.call("_record_practical",0,"16",true,"stale ordinary Practical")
+	app.call("_mark_studied")
+	app.call("_reset_progress")
+	var persisted: bool = bool(app.call("_save_progress"))
+	if persisted or JSON.stringify(app.get("_progress")) != memory_before or not _unmodified(snapshot,"stale ordinary completion/reset/save"):
+		_fail("Sequence escaped into ordinary answer, study, reset or journal write")
+		return
+	if not _hidden_identity(app,original_case,original_volume,0,snapshot,"stale callback guard"):
+		return
 	# Exercise actual hidden-scene input and all cutter entry points, not just UI labels.
 	var before_strokes: Variant = original_volume.call("export_strokes")
 	var click := InputEventMouseButton.new()
@@ -182,5 +194,5 @@ func _run() -> void:
 	if _button(app,"KL_SEQUENCE_START") == null or _button(app,"KL_SEQUENCE_EXIT") != null or not _unmodified(snapshot,"exit"):
 		_fail("Exit did not restore original ordinary Practical controls without writing")
 		return
-	print("SR87_ORDERED_FDI_3D_SCENE_HIDDEN_RESTORED_PASS actual_FDI26_loaded_volume, all_6_FDI, 37_source_tasks, 5_next_previous_FDI_boundaries, replay, original_scene_atlas_camera_volume_view_direct_bur_restored, hidden_cut_probes=6, blocked_nav, journal_bytes_identical, HEADLESS_ONLY")
+	print("SR87_ORDERED_FDI_3D_SCENE_HIDDEN_RESTORED_PASS actual_FDI26_loaded_volume, all_6_FDI, 37_source_tasks, 5_next_previous_FDI_boundaries, replay, original_scene_atlas_camera_volume_view_direct_bur_restored, hidden_cut_probes=6, blocked_nav, stale_completion_reset_save_rejected, in_memory_and_journal_bytes_identical, HEADLESS_ONLY")
 	quit(0)
