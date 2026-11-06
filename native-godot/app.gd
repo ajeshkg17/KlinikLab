@@ -2611,10 +2611,10 @@ func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
-	if _practice_sequence != null:
-		return # hidden 3D cannot process pointer/procedure inputs
 	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
 	# native direct bur still requires separate explicit practical opt-in.
+	if _practice_sequence != null:
+		return # hidden 3D cannot process pointer/procedure inputs
 	_handle_walk_input(event)
 	_handle_procedure_input(event)
 	if not _direct_bur_mode or _middle == null or _scene == null:
