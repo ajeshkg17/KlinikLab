@@ -6,6 +6,7 @@ const IDS := ["molar","endo","anterior","crown","surgery","perio"]
 const FDIS := ["16","36","11","26","48","46"]
 const JOURNAL := "user://kliniklab-native-progress-v2.json"
 var boundaries := 0
+var _cut_probes := 0
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -45,7 +46,7 @@ func _hidden_identity(app: Node3D, old_case: int, old_volume: Node3D, expected_c
 	if scene == null or scene.name != "KL_ORIGINAL_FDI16_SOURCE_SCENE" or scene.visible or atlas != null and atlas.visible:
 		_fail("Unrelated loaded scene/atlas visible at " + when)
 		return false
-	if int(app.get("_case_index")) != old_case or app.get("_volume") != old_volume or str(app.get("_view")) != "clinic":
+	if int(app.get("_case_index")) != old_case or app.get("_volume") != old_volume or str(app.get("_view")) != "clinic" or bool(app.get("_direct_bur_mode")):
 		_fail("Original 3D case/volume/view mutated while hidden at " + when)
 		return false
 	if (app.get("_middle") as Control).visible:
@@ -70,11 +71,13 @@ func _run() -> void:
 	app.call("_select_case",3) # FDI26: catch false FDI16/26/36 scene association
 	app.call("_select_station",4)
 	app.call("_set_camera_mode","teeth")
+	app.set("_direct_bur_mode",true) # previously armed cutter must be suspended, then restored
 	var original_case: int = int(app.get("_case_index"))
 	var original_station: int = int(app.get("_station_index"))
 	var original_camera: String = str(app.get("_camera_mode"))
 	var original_view: String = str(app.get("_view"))
 	var original_volume: Node3D = app.get("_volume")
+	var original_cut_mode: bool = bool(app.get("_direct_bur_mode"))
 	var scene: Node3D = app.get("_scene")
 	var atlas: Node3D = app.get("_atlas")
 	if original_case != 3 or original_station != 4 or original_view != "clinic" or scene == null or not scene.visible or original_volume == null:
@@ -89,6 +92,29 @@ func _run() -> void:
 	if not _press(app,"KL_SEQUENCE_START"):
 		return
 	if not _hidden_identity(app,original_case,original_volume,0,snapshot,"start"):
+		return
+	# Exercise actual hidden-scene input and all cutter entry points, not just UI labels.
+	var before_strokes: Variant = original_volume.call("export_strokes")
+	var click := InputEventMouseButton.new()
+	click.position = (app.get("_middle") as Control).get_global_rect().get_center()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	app.call("_input",click)
+	app.call("_toggle_direct_bur")
+	if bool(app.call("_direct_cut_world_ray",Vector3(0,2,0),Vector3.DOWN)):
+		_fail("Hidden scene direct cutting was accepted")
+		return
+	var slider := HSlider.new()
+	slider.min_value = -1.0
+	slider.max_value = 2.0
+	slider.value = 1.0
+	app.call("_apply_cut",slider,slider,slider,slider)
+	app.call("_undo_cut")
+	app.call("_reset_cut")
+	app.call("_store_cut")
+	_cut_probes += 6
+	if original_volume.call("export_strokes") != before_strokes or not _hidden_identity(app,original_case,original_volume,0,snapshot,"hidden cutting attempts"):
+		_fail("Hidden cutter altered volume or journal")
 		return
 	# Reject unrelated learner navigation while this in-memory exercise runs.
 	app.call("_select_case",1)
@@ -147,7 +173,7 @@ func _run() -> void:
 		return
 	if not _press(app,"KL_SEQUENCE_EXIT"):
 		return
-	if app.get("_practice_sequence") != null or app.get("_volume") != original_volume or int(app.get("_case_index")) != original_case or int(app.get("_station_index")) != original_station or str(app.get("_view")) != original_view or str(app.get("_camera_mode")) != original_camera:
+	if app.get("_practice_sequence") != null or app.get("_volume") != original_volume or int(app.get("_case_index")) != original_case or int(app.get("_station_index")) != original_station or str(app.get("_view")) != original_view or str(app.get("_camera_mode")) != original_camera or bool(app.get("_direct_bur_mode")) != original_cut_mode:
 		_fail("Exit failed to restore exact original clinic identity/view/camera/volume")
 		return
 	if scene.visible != prior_scene_visible or atlas != null and atlas.visible != prior_atlas_visible or not (app.get("_middle") as Control).visible:
@@ -156,5 +182,5 @@ func _run() -> void:
 	if _button(app,"KL_SEQUENCE_START") == null or _button(app,"KL_SEQUENCE_EXIT") != null or not _unmodified(snapshot,"exit"):
 		_fail("Exit did not restore original ordinary Practical controls without writing")
 		return
-	print("SR87_ORDERED_FDI_3D_SCENE_HIDDEN_RESTORED_PASS actual_FDI26_loaded_volume, all_6_FDI, 37_source_tasks, 5_next_previous_FDI_boundaries, replay, original_scene_atlas_camera_volume_view_restored, blocked_nav, journal_bytes_identical, HEADLESS_ONLY")
+	print("SR87_ORDERED_FDI_3D_SCENE_HIDDEN_RESTORED_PASS actual_FDI26_loaded_volume, all_6_FDI, 37_source_tasks, 5_next_previous_FDI_boundaries, replay, original_scene_atlas_camera_volume_view_direct_bur_restored, hidden_cut_probes=6, blocked_nav, journal_bytes_identical, HEADLESS_ONLY")
 	quit(0)
