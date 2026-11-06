@@ -29,8 +29,8 @@ func _check_all(app: Node3D, active: int) -> bool:
 		if btn.name != "KL_FDI_CASE_"+FDIS[i] or btn.text != label or btn.tooltip_text != tooltip:
 			_fail("Browser-parity source title/subtitle not on native case button "+IDS[i])
 			return false
-		if btn.autowrap_mode != TextServer.AUTOWRAP_WORD_SMART or btn.custom_minimum_size.y < 60:
-			_fail("Native case selector title not allowed multi-line presentation "+IDS[i])
+		if btn.autowrap_mode != TextServer.AUTOWRAP_OFF or btn.custom_minimum_size.y != 42:
+			_fail("Native case selector violated compact single-line responsive layout "+IDS[i])
 			return false
 		if btn.button_pressed != (i == active):
 			_fail("Case identity selection toggle changed "+IDS[i])
