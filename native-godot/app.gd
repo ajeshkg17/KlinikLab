@@ -137,6 +137,9 @@ var _procedure_step_index := 0
 # memory; no ordinary Practical completion, progress or 3D cutter is used.
 var _practice_sequence: RefCounted
 var _practice_sequence_feedback := ""
+# SR87: ordered sequence case labels are NOT wired to live 3D volume/camera.
+# Preserve the real clinic identity and hide unrelated render surfaces until Exit.
+var _practice_sequence_clinic_restore: Dictionary = {}
 
 
 func _ready() -> void:
@@ -974,7 +977,7 @@ func _update_responsive_layout() -> void:
 	var writing_focus := _writing_focus_active()
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
-	_middle.visible = _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus
+	_middle.visible = _practice_sequence == null and _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus
 	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus else Control.SIZE_FILL
 	_right_column.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 	_right_panel.custom_minimum_size.x = 460.0 if writing_focus else notes_width
@@ -1347,6 +1350,8 @@ func _key() -> String:
 	return CASE_IDS[_case_index] + ":" + STATION_IDS[_station_index]
 
 func _select_case(index: int) -> void:
+	if _practice_sequence != null:
+		return # no persistent case switch while the in-memory sequence is active
 	if index < 0 or index >= _cases.size():
 		return
 	_save_quiz_recall()
@@ -1369,6 +1374,8 @@ func _select_case(index: int) -> void:
 	_refresh()
 
 func _select_station(index: int) -> void:
+	if _practice_sequence != null:
+		return # avoid journal writes or case/scene drift during the sequence
 	if index < 0 or index >= _stations.size():
 		return
 	_save_quiz_recall()
@@ -1526,6 +1533,8 @@ func _apply_environment_visibility() -> void:
 			fill.light_energy = 0.42 if show_room else 1.2
 
 func _switch_view(view: String) -> void:
+	if _practice_sequence != null:
+		return # no unrelated camera/view transitions while the sequence is active
 	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
 		return
 	if _view == "language" and view != "language":
@@ -1591,7 +1600,9 @@ func _refresh() -> void:
 			_screen_title.text = "KlinikLab · %s" % _view.capitalize()
 	var c: Dictionary = _cases[_case_index]
 	var s: Dictionary = _stations[_station_index]
-	if _view == "language":
+	if _practice_sequence != null:
+		_page.add_child(_heading("Practice Sequence · source FDI changes in task panel; 3D scene safely hidden", 21))
+	elif _view == "language":
 		_page.add_child(_heading("FSP/KP · Original German language studio",21))
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
@@ -1745,8 +1756,22 @@ func _practice_sequence_start() -> void:
 	var sequence: RefCounted = script.new()
 	if not bool(sequence.call("configure", CASE_IDS, FDI, _content["practical"], _content["tools"])):
 		return
+	_practice_sequence_clinic_restore = {
+		"case_index": _case_index, "station_index": _station_index,
+		"view": _view, "camera_mode": _camera_mode,
+		"scene_visible": _scene != null and _scene.visible,
+		"atlas_visible": _atlas != null and _atlas.visible,
+		"volume": _volume
+	}
 	_practice_sequence = sequence
-	_practice_sequence_feedback = "Practice Sequence started · in-memory score only."
+	# The independently loaded Godot scene remains on the original clinic FDI.
+	# Its mesh/camera cannot claim to follow source-ordered task navigation.
+	# Do not call _select_case: it writes the learner progress journal.
+	if _scene != null:
+		_scene.visible = false
+	if _atlas != null:
+		_atlas.visible = false
+	_practice_sequence_feedback = "Practice Sequence started · unrelated 3D scene hidden · in-memory score only."
 	_refresh()
 
 func _practice_sequence_submit(case_id: String, step_index: int, selected: Variant) -> void:
@@ -1784,6 +1809,19 @@ func _practice_sequence_exit() -> void:
 		return
 	_practice_sequence = null
 	_practice_sequence_feedback = ""
+	# Restore original clinic case, view and loaded volume without invoking
+	# _select_case/_switch_view or touching the persisted learner journal.
+	var saved: Dictionary = _practice_sequence_clinic_restore
+	_case_index = int(saved.get("case_index", _case_index))
+	_station_index = int(saved.get("station_index", _station_index))
+	_view = str(saved.get("view", _view))
+	_camera_mode = str(saved.get("camera_mode", _camera_mode))
+	_volume = saved.get("volume", _volume) as Node3D
+	if _scene != null:
+		_scene.visible = bool(saved.get("scene_visible", true))
+	if _atlas != null:
+		_atlas.visible = bool(saved.get("atlas_visible", false))
+	_practice_sequence_clinic_restore.clear()
 	_refresh()
 
 func _show_practice_sequence() -> void:
@@ -1795,6 +1833,7 @@ func _show_practice_sequence() -> void:
 	var step_index: int = int(state["stepIndex"])
 	var kind: String = str(step.get("type", ""))
 	_page.add_child(_heading("PRACTICE SEQUENCE · OPT-IN · SOURCE ORDER · FORMATIVE ONLY", 17))
+	_page.add_child(_heading("3D surface hidden: loaded clinic tooth remains on your original FDI, not the sequence FDI. Exit restores the original clinic scene.", 14))
 	var exit_button := _button("Exit Practice Sequence · keep existing learner progress")
 	exit_button.name = "KL_SEQUENCE_EXIT"
 	exit_button.pressed.connect(_practice_sequence_exit)
