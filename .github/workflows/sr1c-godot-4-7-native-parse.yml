@@ -299,6 +299,15 @@ jobs:
           XDG_DATA_HOME="$sr76_profile/data" XDG_CONFIG_HOME="$sr76_profile/config" XDG_CACHE_HOME="$sr76_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-strict-compat-smoke.gd > "$RUNNER_TEMP/sr76-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr76-runtime.log"; exit 1; }
           cat "$RUNNER_TEMP/sr76-runtime.log"
           grep -F 'SR76_COMBINED_STRICT_CORRECT_TYPE_CHOICE_FDI_SIX_CASE_PASS' "$RUNNER_TEMP/sr76-runtime.log"
+      - name: SR77 actual Godot two independent full-score Practical replays with byte-identical seeded learner journal (HEADLESS)
+        run: |
+          set -euo pipefail
+          sr77_profile="$RUNNER_TEMP/sr77-run-only-godot-profile"
+          mkdir -p "$sr77_profile/data" "$sr77_profile/config" "$sr77_profile/cache"
+          XDG_DATA_HOME="$sr77_profile/data" XDG_CONFIG_HOME="$sr77_profile/config" XDG_CACHE_HOME="$sr77_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practical-replay-smoke.gd > "$RUNNER_TEMP/sr77-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr77-parse.log"; exit 1; }
+          XDG_DATA_HOME="$sr77_profile/data" XDG_CONFIG_HOME="$sr77_profile/config" XDG_CACHE_HOME="$sr77_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-replay-smoke.gd > "$RUNNER_TEMP/sr77-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr77-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr77-runtime.log"
+          grep -F 'SR77_PRACTICAL_REPLAY_TWO_RUNS_SEEDED_JOURNAL_BYTES_UNCHANGED_PASS' "$RUNNER_TEMP/sr77-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
