@@ -124,6 +124,61 @@ func _run() -> void:
 			return
 		answers[answer_key] = original
 		app.call("_refresh")
+		# Strict boolean compatibility: matching source FDI and sourceQuestion
+		# with a forged string 'true' must never lock or leave Review complete.
+		var saved_answers: Dictionary = answers.duplicate(true)
+		for other_i in range(1,steps.size()):
+			var other: Dictionary = steps[other_i]
+			var kind: String = str(other.get("type",""))
+			if kind == "drill":
+				continue
+			var selection: Variant = null
+			match kind:
+				"choice": selection = int(other["correct"])
+				"tooth","tool": selection = str(other["target"])
+				_: _fail("Unrecognized source Practical response"); return
+			answers[IDS[case_i]+":practical:"+str(other_i)] = {"selected":selection,"correct":true,"sourceQuestion":other_i}
+		answers[answer_key] = {"selected":target,"correct":"true","sourceQuestion":0}
+		app.call("_save_progress")
+		app.call("_load_progress")
+		answers = (app.get("_progress") as Dictionary)["answers"]
+		var disk_string: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://kliniklab-native-progress-v2.json"))
+		if not (disk_string is Dictionary) or (disk_string["answers"] as Dictionary)[answer_key].get("correct") != "true":
+			_fail("Source FDI string correctness did not survive actual disk reload "+target)
+			return
+		app.call("_refresh")
+		var state: Dictionary = app.call("_practical_tooth_record",0,steps[0])
+		if bool(state["solved"]) or bool(app.call("_practical_source_complete",0)) or _status(app).contains("correct task completed") or not _feedback(app).begins_with("Review required"):
+			_fail("String flag incorrectly locked source-correct FDI after disk reload "+target)
+			return
+		var review_button: Button = null
+		for node in (app.get("_page") as VBoxContainer).get_children():
+			if node is Button and (node as Button).text.begins_with("Next task to review (R)"):
+				review_button = node as Button
+				break
+		if review_button == null or review_button.disabled or not review_button.text.contains("1 remaining"):
+			_fail("String-correctness FDI record missing from actual Review count "+target)
+			return
+		if not bool(app.call("_procedure_move_step",1)):
+			_fail("Could not leave source FDI task before Review navigation "+target)
+			return
+		app.call("_procedure_jump_to_review")
+		if int(app.get("_procedure_step_index")) != 0:
+			_fail("Review navigation skipped string-correctness source FDI "+target)
+			return
+		var retry: Button = _button(app,target)
+		if retry == null or retry.disabled:
+			_fail("Source-correct FDI retry blocked by forged string flag "+target)
+			return
+		retry.pressed.emit()
+		var repaired: Dictionary = ((app.get("_progress") as Dictionary)["answers"] as Dictionary)[answer_key]
+		if repaired.get("correct",null) != true or repaired.get("selected",null) != target or not bool(app.call("_practical_source_complete",0)) or not bool(app.call("_practical_tooth_record",0,steps[0])["solved"]) or not _status(app).contains("correct task completed"):
+			_fail("Real source FDI resubmission failed to repair completion and lock "+target)
+			return
+		(app.get("_progress") as Dictionary)["answers"] = saved_answers
+		answers = saved_answers
+		app.call("_save_progress")
+		app.call("_refresh")
 		if not _button(app,target).button_pressed or not _status(app).contains("correct task completed"):
 			_fail("Valid source answer not restored after negative fixtures "+target)
 			return
@@ -134,5 +189,6 @@ func _run() -> void:
 			_fail("FDI chart corrupted FSP/KP note "+target)
 			return
 	app.call("_reset_progress")
+	print("SR76_FDI_STRICT_BOOLEAN_DISK_REVIEW_RETRY_SIX_FDI_PASS headless only")
 	print("SR70_SIX_FDI_PRACTICAL_TOOTH_RECALL_LOCK_PASS 32 buttons each; wrong/retry/correct/locked-source-answers/navigation/disk_reload/stale-ID/reference-only-chart/FSP-KP/no-bur; HEADLESS NOT PIXELS")
 	quit(0)
