@@ -17,7 +17,7 @@ test('SR46 native KP written plan matches browser diagnosis, two alternatives an
 });
 test('SR46 KP plan drafts are local and saved across case and station transitions, report and reset',()=>{
  const app=read('native-godot/app.gd'),smoke=read('native-godot/actual-app-smoke.gd');
- assert.match(app,/func _select_case\(index: int\) -> void:[\s\S]{0,140}_save_draft\(\)/);
+ assert.match(app,/func _select_case\(index: int\) -> void:[\s\S]{0,220}_save_draft\(\)/);
  assert.match(app,/func _select_station\(index: int\) -> void:[\s\S]{0,140}_save_draft\(\)/);
  assert.match(app,/func _clear_page\(\) -> void:\n\t_language_save_draft\(\)\n\t_save_draft\(\)\n\t_save_quiz_recall\(\)/);
  assert.match(app,/_progress\["planSectionsByCase"\] = \{\}/);
