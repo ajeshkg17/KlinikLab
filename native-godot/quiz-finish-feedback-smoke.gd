@@ -107,8 +107,14 @@ func _run() -> void:
 				return
 			var disk_answers: Dictionary = disk["answers"]
 			var disk_studied: Dictionary = disk["studied"]
-			if JSON.stringify(disk_answers.get(key,{})) != source_answer or disk_studied.get(study_key,null) != true:
-				_fail("Finish not persisted without changing source answer "+study_key)
+			var stored: Dictionary = disk_answers.get(key,{})
+			var stored_selected: Variant = stored.get("selected",null)
+			var stored_step: Variant = stored.get("sourceQuestion",null)
+			if not (stored_selected is int or stored_selected is float) or int(stored_selected) != correct or stored.get("correct",null) != true or not (stored_step is int or stored_step is float) or int(stored_step) != final_index:
+				_fail("Finish changed saved source choice/correctness/question "+study_key)
+				return
+			if disk_studied.get(study_key,null) != true:
+				_fail("Finish did not persist station-completed flag "+study_key)
 				return
 			app.call("_load_progress")
 			app.call("_refresh")
