@@ -133,6 +133,11 @@ var _walk_language_return_available := false
 # scoring or a tool/cut action; answers remain in the original progress journal.
 var _procedure_guided := false
 var _procedure_step_index := 0
+# SR82: Opt-in source-ordered Practice Sequence. Entire session stays in
+# memory; no ordinary Practical completion, progress or 3D cutter is used.
+var _practice_sequence: RefCounted
+var _practice_sequence_feedback := ""
+
 
 func _ready() -> void:
 	name = "KlinikLabNativeApplication"
@@ -1591,7 +1596,9 @@ func _refresh() -> void:
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
-	if _view == "progress":
+	if _practice_sequence != null:
+		_show_practice_sequence()
+	elif _view == "progress":
 		_show_progress()
 	elif _view == "language":
 		_show_language_studio()
@@ -1726,6 +1733,123 @@ func _update_fdi16_mirror_visibility() -> void:
 	if _tooth16_mirror == null:
 		return
 	_tooth16_mirror.visible = _view == "clinic" and _station_index == 4 and _case_index == 0
+
+# SR82 live application adapters, intentionally separate from persistent
+# _record_practical / _practical_target / _answer and from the case selector.
+func _practice_sequence_start() -> void:
+	if _practice_sequence != null or _view != "clinic" or _station_index != 4:
+		return
+	var script: GDScript = load("res://practical-case-sequence.gd")
+	if script == null:
+		return
+	var sequence: RefCounted = script.new()
+	if not bool(sequence.call("configure", CASE_IDS, FDI, _content["practical"], _content["tools"])):
+		return
+	_practice_sequence = sequence
+	_practice_sequence_feedback = "Practice Sequence started · in-memory score only."
+	_refresh()
+
+func _practice_sequence_submit(case_id: String, step_index: int, selected: Variant) -> void:
+	if _practice_sequence == null:
+		return
+	var result: Dictionary = _practice_sequence.call("submit", case_id, step_index, selected)
+	_practice_sequence_feedback = "Correct · one run point awarded." if bool(result.get("awarded", false)) else "Incorrect source response · retry." if bool(result.get("accepted", false)) else "Already completed or stale selection · no point awarded."
+	_refresh()
+
+func _practice_sequence_next() -> void:
+	if _practice_sequence == null:
+		return
+	if bool(_practice_sequence.call("next")):
+		_practice_sequence_feedback = "Next original source task."
+	else:
+		_practice_sequence_feedback = "Complete the current source task before advancing."
+	_refresh()
+
+func _practice_sequence_previous() -> void:
+	if _practice_sequence == null:
+		return
+	if bool(_practice_sequence.call("previous")):
+		_practice_sequence_feedback = "Previous original source task."
+	_refresh()
+
+func _practice_sequence_replay() -> void:
+	if _practice_sequence == null or not bool(_practice_sequence.call("complete")):
+		return
+	if bool(_practice_sequence.call("start_run")):
+		_practice_sequence_feedback = "New run · points and answers reset in memory."
+		_refresh()
+
+func _practice_sequence_exit() -> void:
+	if _practice_sequence == null:
+		return
+	_practice_sequence = null
+	_practice_sequence_feedback = ""
+	_refresh()
+
+func _show_practice_sequence() -> void:
+	if _practice_sequence == null:
+		return
+	var state: Dictionary = _practice_sequence.call("state")
+	var step: Dictionary = state["step"]
+	var case_id: String = str(state["caseId"])
+	var step_index: int = int(state["stepIndex"])
+	var kind: String = str(step.get("type", ""))
+	_page.add_child(_heading("PRACTICE SEQUENCE · OPT-IN · SOURCE ORDER · FORMATIVE ONLY", 17))
+	var exit_button := _button("Exit Practice Sequence · keep existing learner progress")
+	exit_button.name = "KL_SEQUENCE_EXIT"
+	exit_button.pressed.connect(_practice_sequence_exit)
+	_page.add_child(exit_button)
+	_page.add_child(_heading("Run %d · Case %d/6 · FDI %s · %s · Score %d/%d" % [
+		int(state["runNumber"]), int(state["caseIndex"]) + 1, str(state["fdi"]), case_id,
+		int(_practice_sequence.call("score")), int(_practice_sequence.call("total"))], 15))
+	_page.add_child(_heading("Source step %d · %s · %s" % [
+		step_index+1, kind, str(step.get("title", ""))], 15))
+	if step.has("question"):
+		_page.add_child(_heading(str(step["question"]), 14))
+	if not _practice_sequence_feedback.is_empty():
+		var feedback := _heading(_practice_sequence_feedback, 14)
+		feedback.name = "KL_SEQUENCE_FEEDBACK"
+		_page.add_child(feedback)
+	var answers: Dictionary = _practice_sequence.call("answers_snapshot")
+	var by_case: Dictionary = answers.get(case_id, {})
+	var record: Dictionary = by_case.get(step_index, {})
+	var solved: bool = record.get("correct", null) == true
+	if not solved:
+		var selections: Array = []
+		match kind:
+			"choice":
+				for i in range((step.get("options", []) as Array).size()):
+					selections.append({"value":i, "label":"%d. %s" % [i+1, str(step["options"][i])]})
+			"tooth":
+				for quadrant in FDI_CHART_QUADRANTS:
+					for fdi_code in quadrant:
+						selections.append({"value":str(fdi_code), "label":"FDI "+str(fdi_code)})
+			"tool":
+				for tool in _content["tools"]:
+					if tool is Dictionary:
+						selections.append({"value":str(tool.get("id", "")), "label":str(tool.get("name", tool.get("id", "")))})
+		for item in selections:
+			var b := _button(str(item["label"]))
+			b.name = "KL_SEQUENCE_ANSWER_" + str(item["value"])
+			b.pressed.connect(_practice_sequence_submit.bind(case_id, step_index, item["value"]))
+			_page.add_child(b)
+	else:
+		_page.add_child(_heading("✓ Source response complete for this run · no duplicate points.", 14))
+	var previous := _button("Previous original source task")
+	previous.name = "KL_SEQUENCE_PREVIOUS"
+	previous.pressed.connect(_practice_sequence_previous)
+	_page.add_child(previous)
+	var next := _button("Next source task / next FDI case")
+	next.name = "KL_SEQUENCE_NEXT"
+	next.disabled = not solved or bool(state["complete"])
+	next.pressed.connect(_practice_sequence_next)
+	_page.add_child(next)
+	if bool(state["complete"]):
+		_page.add_child(_heading("All original source tasks complete · replay may start a fresh independent run.", 14))
+		var replay := _button("Replay Practice Sequence · start new in-memory run")
+		replay.name = "KL_SEQUENCE_REPLAY"
+		replay.pressed.connect(_practice_sequence_replay)
+		_page.add_child(replay)
 
 func _show_station() -> void:
 	var station: String = str(STATION_IDS[_station_index])
@@ -2181,6 +2305,12 @@ func _review_writing(station: String) -> void:
 	_writing_review_label.text = _writing_structure_feedback(station)
 
 func _show_practical() -> void:
+	# Independent SR82 opt-in controller; ordinary Practical source answer
+	# controls and completion-locked journal behavior remain below unchanged.
+	var sequence_start := _button("Start Practice Sequence · six source cases · run-only score")
+	sequence_start.name = "KL_SEQUENCE_START"
+	sequence_start.pressed.connect(_practice_sequence_start)
+	_page.add_child(sequence_start)
 	# Preserve the full source case/model/anatomy disclosures as ordinary
 	# visible labels, but present the source practical actions before them.
 	# No hidden provenance, source metadata mutation or new clinical grading.
