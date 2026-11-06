@@ -326,6 +326,15 @@ jobs:
           XDG_DATA_HOME="$sr82_profile/data" XDG_CONFIG_HOME="$sr82_profile/config" XDG_CACHE_HOME="$sr82_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practice-sequence-live-smoke.gd > "$RUNNER_TEMP/sr82-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr82-runtime.log"; exit 1; }
           cat "$RUNNER_TEMP/sr82-runtime.log"
           grep -F 'SR82_LIVE_PRACTICE_SEQUENCE_TWO_RUNS_JOURNAL_BYTES_UNCHANGED_PASS' "$RUNNER_TEMP/sr82-runtime.log"
+      - name: SR87 live Practice Sequence loaded 3D scene hiding and exact clinic Exit restoration (HEADLESS)
+        run: |
+          set -euo pipefail
+          sr87_profile="$RUNNER_TEMP/sr87-sequence-scene-isolated"
+          mkdir -p "$sr87_profile/data" "$sr87_profile/config" "$sr87_profile/cache"
+          XDG_DATA_HOME="$sr87_profile/data" XDG_CONFIG_HOME="$sr87_profile/config" XDG_CACHE_HOME="$sr87_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practice-sequence-scene-identity-smoke.gd > "$RUNNER_TEMP/sr87-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr87-parse.log"; exit 1; }
+          XDG_DATA_HOME="$sr87_profile/data" XDG_CONFIG_HOME="$sr87_profile/config" XDG_CACHE_HOME="$sr87_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practice-sequence-scene-identity-smoke.gd > "$RUNNER_TEMP/sr87-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr87-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr87-runtime.log"
+          grep -F 'SR87_ORDERED_FDI_3D_SCENE_HIDDEN_RESTORED_PASS' "$RUNNER_TEMP/sr87-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
