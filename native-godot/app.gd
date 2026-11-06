@@ -1523,6 +1523,20 @@ func _sync_navigation_selection() -> void:
 	for i in range(_nav_station_buttons.size()):
 		_nav_station_buttons[i].set_pressed_no_signal(i == _station_index)
 
+# SR81: browser renderNav() shows selected case completed stations / 7.
+# Only canonical exact source station IDs count. Never turn answer records,
+# case-prefix collisions, or truthy non-Boolean journal values into completion.
+func _case_station_studied_count(case_index: int) -> int:
+	if case_index < 0 or case_index >= CASE_IDS.size():
+		return 0
+	var count: int = 0
+	var records: Dictionary = _progress.get("studied", {})
+	for station_id in STATION_IDS:
+		var completion: Variant = records.get(CASE_IDS[case_index] + ":" + station_id, null)
+		if completion is bool and completion:
+			count += 1
+	return count
+
 func _refresh() -> void:
 	if _page == null:
 		return
@@ -1545,6 +1559,10 @@ func _refresh() -> void:
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
+		if _view == "clinic":
+			var case_progress := _heading("Case progress · FDI %s · %d / 7 stations completed (formative)" % [FDI[_case_index],_case_station_studied_count(_case_index)], 13)
+			case_progress.name = "KL_CASE_STATION_PROGRESS"
+			_page.add_child(case_progress)
 	if _view == "progress":
 		_show_progress()
 	elif _view == "language":
@@ -2838,7 +2856,11 @@ func _show_progress() -> void:
 	_page.add_child(_heading("Active local progress file: " + ProjectSettings.globalize_path(PROGRESS), 12))
 	if not _progress_persistence_status.is_empty():
 		_page.add_child(_heading(_progress_persistence_status, 14))
-	for c in _cases:
+	for case_index in range(_cases.size()):
+		var c: Dictionary = _cases[case_index]
+		var count_label := _heading("FDI %s · %d / 7 stations completed (formative)" % [FDI[case_index],_case_station_studied_count(case_index)], 14)
+		count_label.name = "KL_PROGRESS_CASE_" + CASE_IDS[case_index]
+		_page.add_child(count_label)
 		for s in _stations:
 			var k := str(c["id"]) + ":" + str(s["id"])
 			var done: bool = (_progress["studied"] as Dictionary).get(k, false)
