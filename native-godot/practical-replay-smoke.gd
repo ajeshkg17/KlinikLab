@@ -77,10 +77,10 @@ func _run() -> void:
 	var attempts: int = 0
 	var total_points: int = 0
 	for case_i in range(FDIS.size()):
-		app.call("_switch_view", "clinic")
-		app.call("_select_case", case_i)
-		app.call("_select_station", 4)
-		app.call("_set_procedure_guided", true)
+		# Do not invoke normal navigation callbacks here: switching case/
+		# station legitimately persists selected-case UI metadata. This test
+		# isolates scored-run state from the saved journal byte-for-byte.
+		app.set("_case_index", case_i)
 		var steps: Array = source["practical"][case_i]
 		var scorer: RefCounted = scorer_script.new()
 		scorer.call("configure", steps, source_tools)
