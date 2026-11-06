@@ -63,7 +63,7 @@ func _run() -> void:
 	await process_frame
 	app.call("_reset_progress") # disposable CI-only profile
 	var progress: Dictionary = app.get("_progress")
-	(progress["notes"] as Dictionary)["endo:letter"] = "Existing fictional draft must survive source glossary"
+	(progress["notes"] as Dictionary)["archive:unrelated"] = "Existing fictional note must survive source glossary"
 	(progress["answers"] as Dictionary)["molar:interview:0"] = {"selected":1,"correct":true,"sourceQuestion":0}
 	(progress["studied"] as Dictionary)["perio:clinic"] = true
 	(progress["fspKpByTask"] as Dictionary)["endo|brief"] = {"text":"Unrelated existing learning text"}
@@ -102,8 +102,8 @@ func _run() -> void:
 	if not _assert_glossary(app,0,0):
 		return
 	var restored: Dictionary = app.get("_progress")
-	if str((restored["notes"] as Dictionary).get("endo:letter","")) != "Existing fictional draft must survive source glossary":
-		_fail("Preexisting independent German writing draft altered")
+	if str((restored["notes"] as Dictionary).get("archive:unrelated","")) != "Existing fictional note must survive source glossary":
+		_fail("Unrelated original learner note altered")
 		return
 	if (restored["studied"] as Dictionary).get("perio:clinic",null) != true:
 		_fail("Preexisting unrelated completed station lost")
