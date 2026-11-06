@@ -1545,6 +1545,21 @@ func _refresh() -> void:
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
+	# Browser KlinikApp.render() keeps the fictional patient, case
+	# subtitle and station learning objective visible across all seven
+	# stations. Use only exact exported source fields, with no persistence.
+	if _view == "clinic":
+		var patient_context := _heading("Fictional patient · %s · %s Jahre · FDI %s" % [
+			str(c["patientName"]), str(c["patientAge"]), str(c["fdi"])], 14)
+		patient_context.name = "KL_CASE_PATIENT_CONTEXT"
+		_page.add_child(patient_context)
+		var case_subtitle := _heading("Case focus · " + str(c["subtitle"]), 13)
+		case_subtitle.name = "KL_CASE_SOURCE_SUBTITLE"
+		_page.add_child(case_subtitle)
+		var station_objective := _heading("%s station · %s" % [
+			str(s["track"]).to_upper(), str(s["description"])], 13)
+		station_objective.name = "KL_STATION_SOURCE_OBJECTIVE"
+		_page.add_child(station_objective)
 	if _view == "progress":
 		_show_progress()
 	elif _view == "language":
