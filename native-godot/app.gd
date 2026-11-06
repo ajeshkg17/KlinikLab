@@ -1521,7 +1521,16 @@ func _sync_navigation_selection() -> void:
 	for i in range(_nav_case_buttons.size()):
 		_nav_case_buttons[i].set_pressed_no_signal(i == _case_index)
 	for i in range(_nav_station_buttons.size()):
-		_nav_station_buttons[i].set_pressed_no_signal(i == _station_index)
+		var button: Button = _nav_station_buttons[i]
+		button.set_pressed_no_signal(i == _station_index)
+		# Browser renderNav() marks each completed source station in the
+		# current case; do not count malformed or merely truthy journal data.
+		var record: Variant = (_progress.get("studied", {}) as Dictionary).get(
+			CASE_IDS[_case_index] + ":" + STATION_IDS[i], null)
+		var completed: bool = record is bool and record
+		button.text = "%d · %s%s" % [i + 1, NAV_STATION_SHORT[i], " ✓" if completed else ""]
+		button.tooltip_text = str(_stations[i]["title"]) + " · " + str(_stations[i]["subtitle"]) + (
+			" · Completed (formative)" if completed else " · Not yet completed")
 
 func _refresh() -> void:
 	if _page == null:
