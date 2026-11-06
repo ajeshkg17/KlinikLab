@@ -1523,6 +1523,29 @@ func _sync_navigation_selection() -> void:
 	for i in range(_nav_station_buttons.size()):
 		_nav_station_buttons[i].set_pressed_no_signal(i == _station_index)
 
+# SR83: exact German-English case vocabulary already exported from the
+# original browser CASES[].vocab. Read-only source study panel; no grading,
+# journal mutations, model claims or new vocabulary invented in native code.
+func _show_case_vocabulary(case_index: int) -> void:
+	if case_index < 0 or case_index >= _cases.size() or _page == null:
+		return
+	var source_case: Dictionary = _cases[case_index]
+	var source_pairs: Variant = source_case.get("vocab", null)
+	if not (source_pairs is Array):
+		return
+	var heading := _heading("German–English vocabulary · source case FDI %s · formative reference" % FDI[case_index], 14)
+	heading.name = "KL_CASE_VOCAB_HEADING"
+	_page.add_child(heading)
+	for i in range((source_pairs as Array).size()):
+		var pair: Variant = source_pairs[i]
+		if not (pair is Array) or (pair as Array).size() != 2:
+			continue
+		var term: String = str(pair[0])
+		var translation: String = str(pair[1])
+		var item := _heading("%s — %s" % [term, translation], 13)
+		item.name = "KL_CASE_VOCAB_" + str(i)
+		_page.add_child(item)
+
 func _refresh() -> void:
 	if _page == null:
 		return
@@ -1545,6 +1568,10 @@ func _refresh() -> void:
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
+	# The browser always shows the original per-case glossary beside the
+	# station exercise. Keep it available in clinic on all seven stations.
+	if _view == "clinic":
+		_show_case_vocabulary(_case_index)
 	if _view == "progress":
 		_show_progress()
 	elif _view == "language":
