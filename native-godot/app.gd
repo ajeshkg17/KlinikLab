@@ -1532,7 +1532,8 @@ func _case_station_studied_count(case_index: int) -> int:
 	var count: int = 0
 	var records: Dictionary = _progress.get("studied", {})
 	for station_id in STATION_IDS:
-		if records.get(CASE_IDS[case_index] + ":" + station_id, null) == true:
+		var completion: Variant = records.get(CASE_IDS[case_index] + ":" + station_id, null)
+		if completion is bool and completion:
 			count += 1
 	return count
 
