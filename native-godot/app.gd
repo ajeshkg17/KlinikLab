@@ -1201,12 +1201,17 @@ func _build_app() -> void:
 	_nav_case_buttons.clear()
 	for i in range(_cases.size()):
 		var c: Dictionary = _cases[i]
-		var btn := _button("FDI " + str(c["fdi"]))
+		# Browser renderNav() supplies FDI, clinical case title and subtitle
+		# together in the case chooser, not only an opaque tooth number.
+		# These strings are the exact source-exported fictional case fields.
+		var btn := _button("FDI %s · %s" % [str(c["fdi"]), str(c["title"])])
 		btn.name = "KL_FDI_CASE_" + str(c["fdi"])
-		btn.tooltip_text = "FDI %s · %s · %s" % [str(c["fdi"]), str(c["id"]).capitalize(), str(c["title"])]
+		btn.tooltip_text = "FDI %s · %s · %s" % [str(c["fdi"]), str(c["title"]), str(c["subtitle"])]
 		btn.toggle_mode = true
+		# Preserve SR23/SR50 compact responsive navigation geometry; the
+		# whole exact source title/subtitle remains accessible in the tooltip.
 		btn.autowrap_mode = TextServer.AUTOWRAP_OFF
-		btn.add_theme_font_size_override("font_size", 14)
+		btn.add_theme_font_size_override("font_size", 13)
 		btn.custom_minimum_size = Vector2(0, 42)
 		btn.pressed.connect(_select_case.bind(i))
 		_nav_case_buttons.append(btn)
