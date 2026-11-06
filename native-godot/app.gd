@@ -1782,9 +1782,10 @@ func _show_quiz(station: String) -> void:
 	_sync_quiz_feedback(station, _quiz_index)
 	# Browser parity: advancement requires the current source question correct.
 	# Returning to a previously solved case restores this state without regrading.
-	_quiz_next_button = _button("Finish station ✓" if _quiz_index == questions.size() - 1 else "Next source question")
+	var finished_station: bool = _quiz_index == questions.size() - 1 and bool((_progress["studied"] as Dictionary).get(_key(), false))
+	_quiz_next_button = _button("Station completed ✓" if finished_station else "Finish station ✓" if _quiz_index == questions.size() - 1 else "Next source question")
 	_quiz_next_button.name = "KL_QUIZ_NEXT"
-	_quiz_next_button.disabled = not bool(existing.get("correct", false))
+	_quiz_next_button.disabled = finished_station or not bool(existing.get("correct", false))
 	_quiz_next_button.pressed.connect(_next_question)
 	_page.add_child(_quiz_next_button)
 	if bool((_progress["studied"] as Dictionary).get(_key(), false)):
@@ -1834,6 +1835,8 @@ func _next_question() -> void:
 		# complete. This is a formative record, not an official exam score.
 		(_progress["studied"] as Dictionary)[_key()] = true
 		_save_progress()
+		# Browser Finish updates the completed station immediately. Rebuild
+		# the source-backed completion label now, not on a later navigation.
 	else:
 		_quiz_index += 1
 	_refresh()
