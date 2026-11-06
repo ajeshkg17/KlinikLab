@@ -276,6 +276,29 @@ jobs:
           grep -F 'SR71_NATIVE_PRACTICAL_TOOL_LOCK_CORRECT_WRONG_FEEDBACK_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
           grep -F 'SR74_COMBINED_STALE_TOOL_RELOAD_RECALL_RETRY_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
           grep -F 'SR75_COMBINED_MATCHING_TOOL_WRONG_SOURCE_STEP_RECOVERY_SIX_FDI_PASS' "$RUNNER_TEMP/sr71-tool-runtime.log"
+      - name: SR69 actual Godot six-FDI Practical choice explanation, answer lock, and journal reload (HEADLESS)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practical-choice-smoke.gd > "$RUNNER_TEMP/sr69-practical-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr69-practical-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-choice-smoke.gd > "$RUNNER_TEMP/sr69-practical-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr69-practical-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr69-practical-runtime.log"
+          grep -F 'SR69_NATIVE_PRACTICAL_CHOICE_SOURCE_EXPLANATION_LOCK_SIX_FDI_PASS' "$RUNNER_TEMP/sr69-practical-runtime.log"
+      - name: SR70 real Godot source-identified FDI chart answer lock and journal restoration (HEADLESS)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practical-fdi-recall-smoke.gd > "$RUNNER_TEMP/sr70-fdi-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr70-fdi-parse.log"; exit 1; }
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-fdi-recall-smoke.gd > "$RUNNER_TEMP/sr70-fdi-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr70-fdi-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr70-fdi-runtime.log"
+          grep -F 'SR70_SIX_FDI_PRACTICAL_TOOTH_RECALL_LOCK_PASS' "$RUNNER_TEMP/sr70-fdi-runtime.log"
+      - name: SR76 six-case genuine Godot Practical strict-correctness and disk journal compatibility (HEADLESS)
+        run: |
+          set -euo pipefail
+          sr76_profile="$RUNNER_TEMP/sr76-practical-only-profile"
+          mkdir -p "$sr76_profile/data" "$sr76_profile/config" "$sr76_profile/cache"
+          XDG_DATA_HOME="$sr76_profile/data" XDG_CONFIG_HOME="$sr76_profile/config" XDG_CACHE_HOME="$sr76_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://practical-strict-compat-smoke.gd > "$RUNNER_TEMP/sr76-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr76-parse.log"; exit 1; }
+          XDG_DATA_HOME="$sr76_profile/data" XDG_CONFIG_HOME="$sr76_profile/config" XDG_CACHE_HOME="$sr76_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://practical-strict-compat-smoke.gd > "$RUNNER_TEMP/sr76-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr76-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr76-runtime.log"
+          grep -F 'SR76_COMBINED_STRICT_CORRECT_TYPE_CHOICE_FDI_SIX_CASE_PASS' "$RUNNER_TEMP/sr76-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
