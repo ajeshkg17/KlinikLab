@@ -261,6 +261,15 @@ jobs:
           cat "$RUNNER_TEMP/sr32-practical-runtime.log"
           grep -F "SR32_NATIVE_GUIDED_PRACTICAL_SIX_FDI_FSP_KP_PASS" "$RUNNER_TEMP/sr32-practical-runtime.log"
           grep -F "SR58_SIX_FDI_TASK_FIRST_GUIDED_PRACTICAL_PASS" "$RUNNER_TEMP/sr32-practical-runtime.log"
+      - name: SR80 native FSP and KP writing structure-gated Finish original cases (HEADLESS)
+        run: |
+          set -euo pipefail
+          sr80_profile="$RUNNER_TEMP/sr80-writing-station-godot-profile"
+          mkdir -p "$sr80_profile/data" "$sr80_profile/config" "$sr80_profile/cache"
+          XDG_DATA_HOME="$sr80_profile/data" XDG_CONFIG_HOME="$sr80_profile/config" XDG_CACHE_HOME="$sr80_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --check-only --script res://writing-finish-smoke.gd > "$RUNNER_TEMP/sr80-parse.log" 2>&1 || { cat "$RUNNER_TEMP/sr80-parse.log"; exit 1; }
+          XDG_DATA_HOME="$sr80_profile/data" XDG_CONFIG_HOME="$sr80_profile/config" XDG_CACHE_HOME="$sr80_profile/cache" "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/native-kliniklab-app" --script res://writing-finish-smoke.gd > "$RUNNER_TEMP/sr80-runtime.log" 2>&1 || { cat "$RUNNER_TEMP/sr80-runtime.log"; exit 1; }
+          cat "$RUNNER_TEMP/sr80-runtime.log"
+          grep -F 'SR80_SIX_FDI_FSP_KP_WRITING_FINISH_SOURCE_REVIEW_PASS' "$RUNNER_TEMP/sr80-runtime.log"
       - name: Check exported-app watcher native capture and schema8 contract (headless parser only)
         run: |
           set -euo pipefail
