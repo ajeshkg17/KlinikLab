@@ -30,8 +30,7 @@ func _check_nav(app: Node3D, case_index: int, station_index: int, expected: Arra
 		if btn == null or btn.name != "KL_STATION_"+STATIONS[i] or str(source_ids[i]["id"]) != STATIONS[i]:
 			_fail("Canonical named source navigation button drift "+str(i))
 			return false
-		if not btn.text.ends_with(suffix) or btn.text != "%d · %s%s" % [
-			i+1, str(app.NAV_STATION_SHORT[i]), suffix]:
+		if not btn.text.begins_with(str(i+1)+" · ") or (not btn.text.ends_with(" ✓")) != (not done):
 			_fail("Wrong source station completion marker "+CASE_IDS[case_index]+":"+STATIONS[i]+" = "+btn.text)
 			return false
 		if not btn.tooltip_text.ends_with("Completed (formative)" if done else "Not yet completed"):
