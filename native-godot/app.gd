@@ -2660,6 +2660,30 @@ func _practical_target(step_index: int, tooth: String) -> void:
 	_record_practical(step_index, tooth, correct, detail)
 	_sync_practical_tooth_feedback(step_index)
 
+func _practical_tool_complete(step_index: int, step: Dictionary) -> bool:
+	var answers: Dictionary = _progress.get("answers", {})
+	var saved: Dictionary = answers.get(_key() + ":" + str(step_index), {})
+	var source_index: Variant = saved.get("sourceQuestion", null)
+	var matching_step := false
+	if source_index is int or source_index is float:
+		var numeric_index: float = float(source_index)
+		matching_step = is_finite(numeric_index) and numeric_index == float(step_index)
+	var selected: Variant = saved.get("selected", null)
+	var source_id_matches: bool = selected is String and selected == str(step.get("target", ""))
+	return matching_step and bool(saved.get("correct", false)) and source_id_matches and _practical_source_complete(step_index)
+
+func _restore_completed_practical_tool(step_index: int, target_id: String) -> void:
+	if _page == null:
+		return
+	var menu: OptionButton = _page.get_node_or_null("KL_PRACTICAL_TOOL_" + str(step_index)) as OptionButton
+	if menu == null:
+		return
+	var tools: Array = _content["tools"]
+	for tool_index in range(tools.size()):
+		if str((tools[tool_index] as Dictionary).get("id", "")) == target_id:
+			menu.select(tool_index + 1)
+			return
+
 func _practical_tool(index: int, step_index: int) -> void:
 	if not _procedure_context_available():
 		return
