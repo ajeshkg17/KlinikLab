@@ -2033,6 +2033,14 @@ func _show_writing(station: String) -> void:
 	_writing_review_label = _heading("Structural self-review not yet run. Content, safety, language and clinical quality must be assessed separately.", 13)
 	_writing_review_label.name = "KL_WRITING_STRUCTURE_FEEDBACK"
 	_page.add_child(_writing_review_label)
+	# Browser writing station requires structural review, then a deliberate
+	# Finish action. Keep this separate from saving the learner's draft.
+	var finish := _button("Finish writing station (formative)")
+	finish.name = "KL_WRITING_FINISH"
+	finish.pressed.connect(_finish_writing.bind(station))
+	_page.add_child(finish)
+	if bool((_progress["studied"] as Dictionary).get(_key(), false)):
+		_page.add_child(_heading("Writing station previously completed · local formative record only.", 13))
 	# Browser KP uses a closed "Reveal sample reasoning" detail. Keep sample
 	# diagnoses/treatment plans hidden until the learner opts to compare them.
 	var reveal := _button("Show fictional source diagnosis and illustrative plans (optional)")
@@ -2133,6 +2141,22 @@ func _review_writing(station: String) -> void:
 		return
 	_save_draft() # Preserve edits before the learner navigates away.
 	_writing_review_label.text = _writing_structure_feedback(station)
+
+func _finish_writing(station: String) -> void:
+	# Deliberate formative completion after passing the ORIGINAL browser
+	# four-section structure check. Never infer clinical correctness.
+	if _view != "clinic" or station != STATION_IDS[_station_index] or station not in ["letter", "written"] or _writing_review_label == null:
+		return
+	var checked: String = _writing_structure_feedback(station)
+	var passed: bool = checked.begins_with("Structure check passed") if station == "letter" else checked.begins_with("Written submission includes")
+	if not passed or _writing_review_label.text != checked:
+		# Re-review if the draft has changed; stale success cannot complete it.
+		_writing_review_label.text = checked
+		return
+	_save_draft()
+	(_progress["studied"] as Dictionary)[_key()] = true
+	_save_progress()
+	_refresh()
 
 func _show_practical() -> void:
 	# Preserve the full source case/model/anatomy disclosures as ordinary
