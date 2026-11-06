@@ -819,6 +819,8 @@ func _load_progress() -> void:
 	_station_index = clampi(int(_progress.get("selectedStation", 0)), 0, 6)
 
 func _save_progress() -> bool:
+	if _practice_sequence != null:
+		return false # only run-local answers permitted; never serialize ordinary progress
 	_progress["selectedCase"] = _case_index
 	_progress["selectedStation"] = _station_index
 	# Windows user:// may resolve to a different profile than expected. Treat
@@ -2894,6 +2896,8 @@ func _practical_tool(index: int, step_index: int) -> void:
 	_record_practical(step_index, str(chosen["id"]), correct, detail)
 
 func _record_practical(step_index: int, response: Variant, correct: bool, detail: String) -> void:
+	if _practice_sequence != null:
+		return # reject stale ordinary Practical answer callbacks
 	var answer_key := _key() + ":" + str(step_index)
 	(_progress["answers"] as Dictionary)[answer_key] = {
 		"selected": response, "correct": correct, "sourceQuestion": step_index}
@@ -2903,6 +2907,8 @@ func _record_practical(step_index: int, response: Variant, correct: bool, detail
 		display.text = ("Correct. " if correct else "Review required. ") + detail
 
 func _mark_studied() -> void:
+	if _practice_sequence != null:
+		return # ordinary station completion must not be awarded by the sequence
 	(_progress["studied"] as Dictionary)[_key()] = true
 	_save_progress()
 	_refresh()
@@ -3347,6 +3353,8 @@ func _write_report(path: String) -> void:
 	_page.add_child(_heading("Local report saved to: " + path, 13))
 
 func _reset_progress() -> void:
+	if _practice_sequence != null:
+		return # stale Reset UI must not wipe the learner journal during the run
 	_quiz_recall_edit = null
 	_quiz_recall_key = ""
 	_quiz_revealed = false
