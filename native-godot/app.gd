@@ -1208,9 +1208,11 @@ func _build_app() -> void:
 		btn.name = "KL_FDI_CASE_" + str(c["fdi"])
 		btn.tooltip_text = "FDI %s · %s · %s" % [str(c["fdi"]), str(c["title"]), str(c["subtitle"])]
 		btn.toggle_mode = true
-		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		# Preserve SR23/SR50 compact responsive navigation geometry; the
+		# whole exact source title/subtitle remains accessible in the tooltip.
+		btn.autowrap_mode = TextServer.AUTOWRAP_OFF
 		btn.add_theme_font_size_override("font_size", 13)
-		btn.custom_minimum_size = Vector2(0, 64)
+		btn.custom_minimum_size = Vector2(0, 42)
 		btn.pressed.connect(_select_case.bind(i))
 		_nav_case_buttons.append(btn)
 		_nav_case_grid.add_child(btn)
