@@ -260,3 +260,40 @@ The browser's `writtenView()` exposes four separate fields: Arbeitsdiagnose und 
 ## SR47 — active recall before revealing source response choices
 
 The browser's expert-mode multiple-choice exercises ask learners to formulate a free German response before clicking `Reveal response choices`. The native Godot `interview`, `handover`, `viva`, and `clinic` quiz stations previously exposed all three source options immediately. These four native station types now show an independent formative active-recall text editor and an explicit Reveal button. Until Reveal, response option buttons are not created; after Reveal, all original source options and feedback behavior remain unchanged. An earlier recorded response also permits review of choices. Notes are saved offline per **FDI case, station and question** in `quizRecall`, survive navigation and appear again when returning, and are cleared by intentional progress reset. The recall note is not compared with any model answer or used for grading, certifications, cutting or clinical validation. The browser source itself was not changed. Actual Godot headless integration checks all six FDI cases × four quiz stations for gated options, reveal, distinct notes, navigation and reset; real native GPU/visual acceptance remains pending the manual GPU session. The held watcher and Unity project are not used.
+
+
+## Experimental rebuilt Practice Game (draft PR #146; NOT recovered original SR92)
+
+This is a **new, opt-in educational game layer** built on the available native
+Practice Sequence and SR93 review fix. It is not the inaccessible local-only
+SR92 commit, and its headless/regression, desktop GPU, VR and clinical status
+must be assessed separately.
+
+**Isolated Windows launch:** from a clean *disposable checkout of this rebuild
+branch*, with Node 22, Git and Godot **4.7.2** available, run
+`native-godot/launch-local.ps1` from PowerShell, optionally passing
+`-GodotExecutable C:\\path\\to\\Godot_v4.7.2-stable_win64.exe`.
+The existing launcher refuses dirty source and output overwrite, makes a
+fresh build, imports models before opening the interactive Godot project, and
+prints the output directory. The rebuilt `build-app.mjs` assigns **each output
+folder a distinct `user://` directory**; its name is recorded in
+`practice-game-userdir.txt`. Do not point it at an existing owner profile.
+
+**Play:** Enter **Environment**, select **Start Practice Game**, use
+**Start clinic walkthrough** and press **E** near the language station and
+operatory (10 points once per station). Inside Practical choose
+**Start Practice Sequence**; the **six original FDI16 source-correct tasks**
+earn 5 base points each plus bonuses of 0, 0, 1, 1, 2, 2. The room-game
+maximum is **56** (20 stations + 30 base + 6 bonuses); other case answers in
+the longer six-case sequence do not add room-game points. Exit Practice
+Sequence and use **Return to clinic walk**, then **New Practice Game run** on
+the Environment screen to reset only the game's in-memory ledger. All
+ordinary Practical completion-locked saved records remain separate.
+
+**Testing:** `practice-room-game-smoke.gd` tests the scoring model twice;
+`practice-room-game-app-smoke.gd` drives actual native walk station-entry
+handlers and source-answer buttons twice. Both are **headless CI tests**, not
+pixel, desktop physical-input, GPU, Quest or clinical acceptance. The new
+workflow deliberately does not upload screenshots, artifacts, or learner data.
+Do not claim passing test evidence until an actual hosted runner has started
+and completed the tests.
