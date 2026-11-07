@@ -23,8 +23,8 @@ func _run() -> void:
 	for run_index in range(2):
 		if run_index > 0:
 			game.call("start_run")
-		if int(game.call("score")) != 0 or int(game.call("max_score")) != 56:
-			_fail("incorrect new-run score or 56-point ceiling")
+		if int(game.call("score")) != 0 or int(game.call("max_score")) != 66:
+			_fail("incorrect new-run score or 66-point ceiling")
 			return
 		if bool(game.call("award_station", "invalid")):
 			_fail("unknown station earned points")
@@ -48,8 +48,14 @@ func _run() -> void:
 				_fail("valid award missing or duplicate farming")
 				return
 			bonus_total += int(first.get("bonus", 0))
-		if bonus_total != 6 or int(game.call("score")) != 56 or not bool(game.call("complete")):
-			_fail("completed run did not earn 20 + 30 + 6")
+		if bonus_total != 6 or int(game.call("score")) != 56 or bool(game.call("complete")):
+			_fail("run completed without instrument handling")
+			return
+		if not bool(game.call("award_handling")) or bool(game.call("award_handling")):
+			_fail("handling points were not awarded exactly once")
+			return
+		if int(game.call("score")) != 66 or not bool(game.call("complete")):
+			_fail("completed run did not earn 20 + 30 + 6 + 10")
 			return
 		var end_state: Dictionary = game.call("summary")
 		if str(end_state.get("tier", "")) != "Mastery" or not str(end_state.get("nextBonus", "")).contains("no further tier bonus"):
