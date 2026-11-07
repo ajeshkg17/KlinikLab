@@ -140,6 +140,9 @@ var _practice_sequence_feedback := ""
 # SR87: ordered sequence case labels are NOT wired to live 3D volume/camera.
 # Preserve the real clinic identity and hide unrelated render surfaces until Exit.
 var _practice_sequence_clinic_restore: Dictionary = {}
+# Rebuilt optional room game: in-memory only, separate from Practice Sequence and learner journal.
+var _practice_game: RefCounted
+var _practice_game_feedback := ""
 
 
 func _ready() -> void:
@@ -506,6 +509,9 @@ func _walk_enter_procedure() -> bool:
 	_switch_view("clinic")
 	_set_camera_mode("teeth")
 	_set_procedure_guided(true) # Enter from walk starts at original task 1.
+	if _practice_game != null and bool(_practice_game.call("award_station", "operatory")):
+		_practice_game_feedback = "Operatory reached · +10 points in this run."
+		_refresh()
 	return true
 
 # An explicit station exit restores the bounded walk without restarting at spawn.
@@ -519,6 +525,9 @@ func _walk_enter_language_station() -> bool:
 	_walk_language_return_available = true
 	_walk_station_return_available = false
 	_switch_view("language")
+	if _view == "language" and _practice_game != null and bool(_practice_game.call("award_station", "language")):
+		_practice_game_feedback = "Language station reached · +10 points in this run."
+		_refresh()
 	return _view == "language"
 
 func _return_to_clinic_walk() -> bool:
@@ -544,6 +553,8 @@ func _procedure_context_available() -> bool:
 	return _view == "clinic" and _station_index == 4 and _case_index >= 0 and _case_index < _cases.size() and _content.has("practical") and (_content["practical"] as Array).size() > _case_index
 
 func _set_procedure_guided(enabled: bool) -> void:
+	if _practice_sequence != null:
+		return # reject stale guided-mode changes while the run is open
 	if not _procedure_context_available():
 		_procedure_guided = false
 		_procedure_step_index = 0
@@ -558,6 +569,8 @@ func _set_procedure_guided(enabled: bool) -> void:
 	_refresh()
 
 func _procedure_move_step(delta: int) -> bool:
+	if _practice_sequence != null:
+		return false
 	if not _procedure_guided or not _procedure_context_available():
 		return false
 	var steps: Array = _content["practical"][_case_index]
@@ -624,6 +637,8 @@ func _practical_source_complete(step_index: int) -> bool:
 # Find the next unanswered or incorrect original task, wrapping once through
 # the selected case. This is navigation only: no grading or volume mutation.
 func _procedure_jump_to_review() -> bool:
+	if _practice_sequence != null:
+		return false
 	if not _procedure_guided or not _procedure_context_available():
 		return false
 	var steps: Array = _content["practical"][_case_index]
@@ -1470,6 +1485,30 @@ func _set_environment_camera() -> void:
 
 func _show_environment() -> void:
 	_page.add_child(_heading("Explore the clinic · first-person preview",18))
+	if _practice_game == null:
+		var begin_game := _button("Start Practice Game · two walk stations + six FDI16 tasks")
+		begin_game.name = "KL_GAME_START"
+		begin_game.pressed.connect(_practice_game_start)
+		_page.add_child(begin_game)
+	else:
+		var game_state: Dictionary = _practice_game.call("summary")
+		_page.add_child(_heading("PRACTICE GAME · run %d · %d/%d points · tier %s" % [
+			int(game_state["runNumber"]), int(game_state["score"]),
+			int(game_state["maxScore"]), str(game_state["tier"])], 16))
+		_page.add_child(_heading("Stations %d/2 (+10 each) · FDI16 tasks %d/6 (+5 each) · tier bonuses +%d" % [
+			int(game_state["stations"]), int(game_state["tasks"]), int(game_state["bonusPoints"])], 14))
+		_page.add_child(_heading(str(game_state["nextBonus"]), 13))
+		_page.add_child(_heading("Visit both walk stations using E or their in-range buttons, then enter the Practical station and start the original six-case Practice Sequence. Only the six source-correct FDI16 tasks add game points.", 13))
+		if not _practice_game_feedback.is_empty():
+			_page.add_child(_heading(_practice_game_feedback, 13))
+		var next_run := _button("New Practice Game run · clear only in-memory points")
+		next_run.name = "KL_GAME_REPLAY"
+		next_run.pressed.connect(_practice_game_new_run)
+		_page.add_child(next_run)
+		var end_game := _button("Exit Practice Game · do not change learner progress")
+		end_game.name = "KL_GAME_EXIT"
+		end_game.pressed.connect(_practice_game_exit)
+		_page.add_child(end_game)
 	if not _walk_active:
 		var start_walk := _button("Start clinic walkthrough · WASD / arrows")
 		start_walk.pressed.connect(_start_clinic_walk)
@@ -1749,6 +1788,35 @@ func _update_fdi16_mirror_visibility() -> void:
 		return
 	_tooth16_mirror.visible = _view == "clinic" and _station_index == 4 and _case_index == 0
 
+# Optional room game: start/reset/exit only change a detached run-local ledger.
+func _practice_game_start() -> void:
+	if _practice_game != null or _practice_sequence != null or _view != "environment":
+		return
+	var game_script: GDScript = load("res://practice-room-game.gd")
+	if game_script == null:
+		return
+	var game: RefCounted = game_script.new()
+	if not bool(game.call("configure", _content["practical"][0])):
+		push_warning("Practice Game requires exactly six graded FDI16 source tasks.")
+		return
+	_practice_game = game
+	_practice_game_feedback = "Run started · enter each room station using E; then answer six FDI16 Practice Sequence tasks."
+	_refresh()
+
+func _practice_game_new_run() -> void:
+	if _practice_game == null or _practice_sequence != null or _view != "environment":
+		return
+	_practice_game.call("start_run")
+	_practice_game_feedback = "Fresh run · stations, task awards and bonuses reset in memory."
+	_refresh()
+
+func _practice_game_exit() -> void:
+	if _practice_game == null or _practice_sequence != null or _view != "environment":
+		return
+	_practice_game = null
+	_practice_game_feedback = ""
+	_refresh()
+
 # SR82 live application adapters, intentionally separate from persistent
 # _record_practical / _practical_target / _answer and from the case selector.
 func _practice_sequence_start() -> void:
@@ -1765,7 +1833,8 @@ func _practice_sequence_start() -> void:
 		"view": _view, "camera_mode": _camera_mode,
 		"scene_visible": _scene != null and _scene.visible,
 		"atlas_visible": _atlas != null and _atlas.visible,
-		"volume": _volume, "direct_bur_mode": _direct_bur_mode
+		"volume": _volume, "direct_bur_mode": _direct_bur_mode,
+		"procedure_guided": _procedure_guided, "procedure_step_index": _procedure_step_index
 	}
 	_practice_sequence = sequence
 	_direct_bur_mode = false # disable any pre-existing active cutter for the whole run
@@ -1784,6 +1853,11 @@ func _practice_sequence_submit(case_id: String, step_index: int, selected: Varia
 		return
 	var result: Dictionary = _practice_sequence.call("submit", case_id, step_index, selected)
 	_practice_sequence_feedback = "Correct · one run point awarded." if bool(result.get("awarded", false)) else "Incorrect source response · retry." if bool(result.get("accepted", false)) else "Already completed or stale selection · no point awarded."
+	if _practice_game != null and case_id == "molar" and bool(result.get("awarded", false)):
+		# The sequence model validates source correctness and guards replay/stale attempts.
+		var game_award: Dictionary = _practice_game.call("award_task", step_index)
+		if bool(game_award.get("awarded", false)):
+			_practice_sequence_feedback = "FDI16 correct · game +5 base, +%d tier bonus." % int(game_award.get("bonus", 0))
 	_refresh()
 
 func _practice_sequence_next() -> void:
@@ -1806,6 +1880,9 @@ func _practice_sequence_replay() -> void:
 	if _practice_sequence == null or not bool(_practice_sequence.call("complete")):
 		return
 	if bool(_practice_sequence.call("start_run")):
+		if _practice_game != null:
+			_practice_game.call("start_run")
+			_practice_game_feedback = "New room run · revisit both stations for their points."
 		_practice_sequence_feedback = "New run · points and answers reset in memory."
 		_refresh()
 
@@ -1823,6 +1900,8 @@ func _practice_sequence_exit() -> void:
 	_camera_mode = str(saved.get("camera_mode", _camera_mode))
 	_volume = saved.get("volume", _volume) as Node3D
 	_direct_bur_mode = bool(saved.get("direct_bur_mode", false))
+	_procedure_guided = bool(saved.get("procedure_guided", _procedure_guided))
+	_procedure_step_index = int(saved.get("procedure_step_index", _procedure_step_index))
 	if _scene != null:
 		_scene.visible = bool(saved.get("scene_visible", true))
 	if _atlas != null:
@@ -1839,6 +1918,12 @@ func _show_practice_sequence() -> void:
 	var step_index: int = int(state["stepIndex"])
 	var kind: String = str(step.get("type", ""))
 	_page.add_child(_heading("PRACTICE SEQUENCE · OPT-IN · SOURCE ORDER · FORMATIVE ONLY", 17))
+	if _practice_game != null:
+		var game_state: Dictionary = _practice_game.call("summary")
+		_page.add_child(_heading("ROOM PRACTICE GAME · %d/%d points · stations %d/2 · FDI16 tasks %d/6 · tier %s" % [
+			int(game_state["score"]), int(game_state["maxScore"]),
+			int(game_state["stations"]), int(game_state["tasks"]), str(game_state["tier"])], 15))
+		_page.add_child(_heading(str(game_state["nextBonus"]), 13))
 	_page.add_child(_heading("3D surface hidden: loaded clinic tooth remains on your original FDI, not the sequence FDI. Exit restores the original clinic scene.", 14))
 	var exit_button := _button("Exit Practice Sequence · keep existing learner progress")
 	exit_button.name = "KL_SEQUENCE_EXIT"
@@ -2350,6 +2435,10 @@ func _review_writing(station: String) -> void:
 	_writing_review_label.text = _writing_structure_feedback(station)
 
 func _show_practical() -> void:
+	if _practice_game != null:
+		var game_state: Dictionary = _practice_game.call("summary")
+		_page.add_child(_heading("Practice Game · %d/%d points · FDI16 tasks %d/6. Start Practice Sequence to earn source-validated run points." % [
+			int(game_state["score"]), int(game_state["maxScore"]), int(game_state["tasks"])], 14))
 	# Independent SR82 opt-in controller; ordinary Practical source answer
 	# controls and completion-locked journal behavior remain below unchanged.
 	var sequence_start := _button("Start Practice Sequence · six source cases · run-only score")

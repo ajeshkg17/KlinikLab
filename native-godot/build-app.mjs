@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','tooth26-reference.gd','tooth16-mirror-reference.gd','fdi-reference-clearance.gd','anatomy-reference-panel.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','practical-choice-smoke.gd','practical-fdi-recall-smoke.gd','practical-strict-compat-smoke.gd','practical-run-score.gd','practical-replay-smoke.gd','practical-case-sequence.gd','practical-case-sequence-smoke.gd','practice-sequence-live-smoke.gd','practice-sequence-scene-identity-smoke.gd','practical-tool-completion-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','tooth26-reference.gd','tooth16-mirror-reference.gd','fdi-reference-clearance.gd','anatomy-reference-panel.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','practical-choice-smoke.gd','practical-fdi-recall-smoke.gd','practical-strict-compat-smoke.gd','practical-run-score.gd','practical-replay-smoke.gd','practical-case-sequence.gd','practical-case-sequence-smoke.gd','practice-sequence-live-smoke.gd','practice-sequence-scene-identity-smoke.gd','practice-room-game.gd','practice-room-game-smoke.gd','practice-room-game-app-smoke.gd','practical-tool-completion-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  copy('native-godot/main-raw-sidecar.gd','main.gd');
  copy('visual-qa/godot-local-clinical/main.tscn','main.tscn');
  copy('native-godot/raw-source.gd','raw-source.gd');
@@ -49,6 +49,17 @@ try{
    '63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036',30452]
  ];
  const crypto=await import('node:crypto');
+ // This experimental branch MUST NOT reuse the ordinary learner's user://.
+ // The builder refuses an existing output folder; hashing that path gives a
+ // distinct desktop user-data directory for every isolated game build.
+ const userDir='KlinikLabPracticeRebuild-'+crypto.createHash('sha256').update(dest).digest('hex').slice(0,20);
+ const settingsPath=path.join(dest,'project.godot');
+ const oldSettings=fs.readFileSync(settingsPath,'utf8');
+ const nameLine='config/name="KlinikLab Native — source-derived training foundation"';
+ if(!oldSettings.includes(nameLine))throw Error('Cannot set isolated Practice Game user directory');
+ fs.writeFileSync(settingsPath,oldSettings.replace(nameLine,
+   nameLine+'\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="'+userDir+'"'));
+ fs.writeFileSync(path.join(dest,'practice-game-userdir.txt'),userDir+'\n',{flag:'wx'});
  const sha256=b=>crypto.createHash('sha256').update(b).digest('hex');
  if(approved.licenseSPDX!=='CC0-1.0'||approved.status!=='REVIEWED_CC0_STATIC_VISUAL_PROTOTYPES_ONLY'||
    approved.files?.length!==2||approved.review?.clinicalAccepted!==false)
