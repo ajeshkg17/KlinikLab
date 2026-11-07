@@ -135,6 +135,7 @@ func _run() -> void:
 	# This runs only with a fresh isolated CI user:// profile; never use owner data.
 	app.call("_reset_progress")
 	app.call("_switch_view", "environment")
+	app.set("_first_person_full_view", _record_video)
 	_event("app_ready")
 	await _hold(0.9)
 	if not _press(app, "KL_GAME_START"):
