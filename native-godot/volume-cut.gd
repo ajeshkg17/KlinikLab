@@ -119,6 +119,9 @@ func _id(i: int, j: int, k: int) -> int:
 	return ((i * (HEIGHT + 1) + j) * (GRID + 1) + k)
 
 func _channel_value(channel: int, p: Vector3) -> float:
+	return _sample_field(_source_fields, channel * TOTAL, p)
+
+func _sample_field(field: PackedFloat32Array, offset: int, p: Vector3) -> float:
 	var fx := clampf((p.x - MIN_POS.x) * GRID / (MAX_POS.x-MIN_POS.x),0.0,float(GRID))
 	var fy := clampf((p.y - MIN_POS.y) * HEIGHT / (MAX_POS.y-MIN_POS.y),0.0,float(HEIGHT))
 	var fz := clampf((p.z - MIN_POS.z) * GRID / (MAX_POS.z-MIN_POS.z),0.0,float(GRID))
@@ -128,14 +131,34 @@ func _channel_value(channel: int, p: Vector3) -> float:
 	var tx := fx-x0
 	var ty := fy-y0
 	var tz := fz-z0
-	var offset := channel * TOTAL
 	var result := 0.0
 	for dx in range(2):
 		for dy in range(2):
 			for dz in range(2):
 				var weight := (tx if dx == 1 else 1.0-tx) * (ty if dy == 1 else 1.0-ty) * (tz if dz == 1 else 1.0-tz)
-				result += weight * _source_fields[offset+_id(x0+dx,y0+dy,z0+dz)]
+				result += weight * field[offset+_id(x0+dx,y0+dy,z0+dz)]
 	return result
+
+func cross_sections(depth: float) -> Array[Image]:
+	# Both images use the verified source grid and the same plane/scale.
+	# Only the practice image uses the field modified by the saved cut strokes.
+	const WIDTH := 84
+	const PIXEL_HEIGHT := 94
+	var reference := Image.create_empty(WIDTH, PIXEL_HEIGHT, false, Image.FORMAT_RGBA8)
+	var practice := Image.create_empty(WIDTH, PIXEL_HEIGHT, false, Image.FORMAT_RGBA8)
+	var z := lerpf(MIN_POS.z, MAX_POS.z, clampf(depth, 0.0, 1.0))
+	for y in range(PIXEL_HEIGHT):
+		for x in range(WIDTH):
+			var p := Vector3(
+				lerpf(MIN_POS.x, MAX_POS.x, (x + 0.5) / WIDTH),
+				lerpf(MAX_POS.y, MIN_POS.y, (y + 0.5) / PIXEL_HEIGHT), z)
+			if _channel_value(0, p) >= 0.0:
+				continue
+			var color: Color = PALETTE[_tissue_at(p)]
+			reference.set_pixel(x, y, color)
+			if _strokes.is_empty() or _sample_field(_signed, 0, p) < 0.0:
+				practice.set_pixel(x, y, color)
+	return [reference, practice]
 
 func _tissue_at(p: Vector3) -> int:
 	if _channel_value(2,p) < 0.0:
