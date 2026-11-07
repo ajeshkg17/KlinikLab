@@ -53,7 +53,7 @@ test('SR32 ships source-exact Godot regression and no owner-PC worker/queue muta
 test('SR33 review-first action skips correct source tasks without scoring or cutting',()=>{
  for(const marker of ['func _procedure_jump_to_review() -> bool:', 'KEY_R',
    'review_button.pressed.connect(_procedure_jump_to_review)',
-   'review_button.disabled = needs_review == 0',
+   'review_button.disabled = needs_review == 0 or only_current',
    'var candidate: int = (_procedure_step_index + offset) % steps.size()',
    'if not _practical_source_complete(candidate):'])
   assert.ok(app.includes(marker),marker);
