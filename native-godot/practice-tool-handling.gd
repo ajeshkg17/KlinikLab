@@ -14,8 +14,9 @@ func setup(camera: Camera3D, station: Vector3) -> void:
 	_part(_stand, _box(Vector3(0.52, 0.07, 0.42)), Vector3.ZERO, Color("#469d97"))
 	_part(_stand, _box(Vector3(0.12, 0.92, 0.12)), Vector3(0, -0.48, 0), Color("#315568"))
 	camera.add_child(_hands)
-	_glove(Vector3(-0.26, -0.23, -0.61), 1.0)
-	_right = _glove(Vector3(0.26, -0.23, -0.61), -1.0)
+	_hands.name = "KL_FIRST_PERSON_HANDS"
+	_glove(Vector3(-0.26, -0.24, -0.63), 1.0)
+	_right = _glove(Vector3(0.26, -0.24, -0.63), -1.0)
 	_part(_mirror, _box(Vector3(0.024, 0.17, 0.026)), Vector3.ZERO, Color("#49dfd4"))
 	_part(_mirror, _box(Vector3(0.017, 0.09, 0.017)), Vector3(0, 0.11, 0), Color("#9eb0c1"))
 	_part(_mirror, _box(Vector3(0.062, 0.05, 0.013)), Vector3(0, 0.16, 0), Color("#eef5ff"))
@@ -44,9 +45,14 @@ func _glove(at: Vector3, inward: float) -> Node3D:
 	var glove := Node3D.new()
 	_hands.add_child(glove)
 	glove.position = at
+	var forearm := CapsuleMesh.new()
+	forearm.radius = 0.059
+	forearm.height = 0.39
+	var sleeve := _part(glove, forearm, Vector3(-inward * 0.035, -0.10, 0.22), Color("#283c52"))
+	sleeve.rotation = Vector3(1.95, 0.0, -inward * 0.15)
 	var blue := Color("#4276c4")
-	_part(glove, _box(Vector3(0.085, 0.057, 0.096)), Vector3.ZERO, blue)
-	_part(glove, _box(Vector3(0.076, 0.049, 0.085)), Vector3(0, 0, 0.078), Color("#315797"))
+	_part(glove, _box(Vector3(0.102, 0.066, 0.105)), Vector3.ZERO, blue)
+	_part(glove, _box(Vector3(0.091, 0.062, 0.098)), Vector3(0, -0.02, 0.079), Color("#315797"))
 	for finger in range(4):
 		_part(glove, _box(Vector3(0.016, 0.032, 0.056)), Vector3(-0.028 + 0.019 * finger, 0, -0.066), blue)
 	_part(glove, _box(Vector3(0.030, 0.034, 0.053)), Vector3(inward * 0.050, 0.008, -0.015), blue)
