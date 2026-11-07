@@ -1068,7 +1068,7 @@ func _update_responsive_layout() -> void:
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
 	_middle.visible = _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus and _practice_sequence == null
-	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus else Control.SIZE_FILL
+	_right_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL if writing_focus or _view == "drills" else Control.SIZE_FILL
 	_right_column.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 	_right_panel.custom_minimum_size.x = 460.0 if writing_focus else notes_width
 	# Godot resolves HBoxContainer widths on the next frame. Never use a stale
