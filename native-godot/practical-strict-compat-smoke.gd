@@ -21,10 +21,7 @@ func _goto(app: Node3D, target: int) -> bool:
 	return true
 
 func _review_button(app: Node3D) -> Button:
-	for node in (app.get("_page") as VBoxContainer).get_children():
-		if node is Button and (node as Button).text.begins_with("Next task to review (R)"):
-			return node as Button
-	return null
+	return (app.get("_page") as VBoxContainer).get_node_or_null("KL_PRACTICAL_REVIEW") as Button
 
 func _run() -> void:
 	root.size = Vector2i(1500, 850)
@@ -104,7 +101,7 @@ func _run() -> void:
 				_fail("Forged source record displayed false completion "+key)
 				return
 			var review: Button = _review_button(app)
-			if review == null or review.disabled or not review.text.contains("1 remaining"):
+			if review == null or not review.disabled or not review.text.contains("1 remaining") or not review.text.contains("Complete or correct this task"):
 				_fail("Review counter did not flag only the malformed record "+key)
 				return
 			var next_step: int = (target_index + 1) % steps.size()
