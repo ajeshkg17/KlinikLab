@@ -1,0 +1,67 @@
+name: Rebuilt SR92 Practice Game — isolated headless validation
+
+on:
+  push:
+    branches: [rebuild/sr92-practice-game-20261107]
+    paths:
+      - 'native-godot/**'
+      - '.github/workflows/sr92-rebuild-practice-game.yml'
+  pull_request:
+    branches: [codex/sr93-practical-review-guidance-20261107]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-scoring-and-native-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download checksum-pinned Godot 4.7.2 editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 3 -fsSL "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          echo "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  $RUNNER_TEMP/godot.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP"
+          chmod +x "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64"
+      - name: Check detached scoring model and two-run anti-farming regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          project="$RUNNER_TEMP/practice-game-ledger"
+          mkdir -p "$project"
+          printf 'config_version=5\n' > "$project/project.godot"
+          cp native-godot/practice-room-game.gd native-godot/practice-room-game-smoke.gd "$project/"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --editor --import --quit
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --script res://practice-room-game-smoke.gd > "$RUNNER_TEMP/scoring.log" 2>&1 || { cat "$RUNNER_TEMP/scoring.log"; exit 1; }
+          cat "$RUNNER_TEMP/scoring.log"
+          grep -F 'REBUILT_SR92_PRACTICE_GAME_SCORING_PASS' "$RUNNER_TEMP/scoring.log"
+      - name: Build source-pinned playable app in disposable CI workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          node native-godot/build-app.mjs "--source-dir=$GITHUB_WORKSPACE" "--expected-sha=$GITHUB_SHA" "--output=$RUNNER_TEMP/rebuilt-game-app"
+          test -s "$RUNNER_TEMP/rebuilt-game-app/practice-room-game.gd"
+          test -s "$RUNNER_TEMP/rebuilt-game-app/practice-room-game-app-smoke.gd"
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$RUNNER_TEMP/rebuilt-game-app" --editor --import --quit > "$RUNNER_TEMP/import.log" 2>&1 || { cat "$RUNNER_TEMP/import.log"; exit 1; }
+          if grep -Ei 'SCRIPT ERROR|Parse Error|Failed to load script|Parser Error' "$RUNNER_TEMP/import.log"; then
+            echo 'GDScript importer parse failure'; exit 1
+          fi
+      - name: Play two real station and source-task game runs with isolated CI profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          project="$RUNNER_TEMP/rebuilt-game-app"
+          # Hosted runner user:// is disposable and never points to an owner-PC profile.
+          "$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" --headless --path "$project" --script res://practice-room-game-app-smoke.gd > "$RUNNER_TEMP/gameplay.log" 2>&1 || { cat "$RUNNER_TEMP/gameplay.log"; exit 1; }
+          cat "$RUNNER_TEMP/gameplay.log"
+          grep -F 'REBUILT_SR92_NATIVE_TWO_56_POINT_RUNS_HEADLESS_PASS' "$RUNNER_TEMP/gameplay.log"
+      - name: Evidence scope
+        if: always()
+        run: echo 'Only headless code and input-handler tests. No screenshots, owner PC, original SR92 SHA, GPU, Quest or clinical acceptance.' >> "$GITHUB_STEP_SUMMARY"
