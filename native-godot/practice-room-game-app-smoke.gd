@@ -181,18 +181,17 @@ func _run() -> void:
 		if not await _walk_to(app, "OPERATORY"):
 			_fail("scripted walk could not reach the practical station")
 			return
-		if _record_video:
-			var walker: RefCounted = app.get("_walk")
-			var constants: Dictionary = walker.get_script().get_script_constant_map()
-			var stand: Node3D = handling.get("_stand")
-			var eye: Vector3 = walker.get("position")
-			var offset := stand.position + Vector3.UP * 0.12 - eye
-			var sensitivity: float = constants["MOUSE_SENSITIVITY"]
-			var yaw_change := wrapf(atan2(-offset.x, -offset.z) - float(walker.get("yaw")), -PI, PI)
-			var pitch_change := atan2(offset.y, Vector2(offset.x, offset.z).length()) - float(walker.get("pitch"))
-			walker.call("apply_look_intent", Vector2(-yaw_change, -pitch_change) / sensitivity)
-			app.call("_apply_walk_camera")
-			await _hold(0.65)
+		var walker: RefCounted = app.get("_walk")
+		var constants: Dictionary = walker.get_script().get_script_constant_map()
+		var stand: Node3D = handling.get("_stand")
+		var eye: Vector3 = walker.get("position")
+		var offset := stand.position + Vector3.UP * 0.09 - eye
+		var sensitivity: float = constants["MOUSE_SENSITIVITY"]
+		var yaw_change := wrapf(atan2(-offset.x, -offset.z) - float(walker.get("yaw")), -PI, PI)
+		var pitch_change := atan2(offset.y, Vector2(offset.x, offset.z).length()) - float(walker.get("pitch"))
+		walker.call("apply_look_intent", Vector2(-yaw_change, -pitch_change) / sensitivity)
+		app.call("_apply_walk_camera")
+		await _hold(0.65)
 		if not _press(app, "KL_PRACTICE_TOOL"):
 			return
 		var mirror: Node3D = handling.get("_mirror")
