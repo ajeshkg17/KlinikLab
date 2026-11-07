@@ -42,6 +42,16 @@ var _content: Dictionary = {}
 var _cases: Array = []
 var _stations: Array = []
 var _pathways: Dictionary = {}
+const ENGLISH_FSP_CASES := {
+	"perio": "Tooth 46 · bleeding gums and mobility",
+	"restoration": "Tooth 16 · carious lesion and brief cold sensitivity",
+	"endo": "Tooth 36 · lingering pain after cold",
+	"surgery": "Tooth 48 · local pericoronitis",
+}
+const SETTINGS_FILE := "user://kliniklab-settings.cfg"
+const VIEWS := ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage", "settings"]
+
+var _training_language := "en"
 var _language: RefCounted
 var _language_case := "endo"
 var _language_phase := "anamnese"
@@ -141,6 +151,13 @@ var _practice_sequence_feedback := ""
 # Preserve the real clinic identity and hide unrelated render surfaces until Exit.
 var _practice_sequence_clinic_restore: Dictionary = {}
 # Rebuilt optional room game: in-memory only, separate from Practice Sequence and learner journal.
+var _trial_pid := -1
+var _trial_folder := ""
+var _trial_video := false
+var _trial_message := ""
+var _trial_status: Label
+var _trial_folder_button: Button
+var _trial_start_button: Button
 var _practice_game: RefCounted
 var _practice_game_feedback := ""
 
@@ -151,6 +168,7 @@ func _ready() -> void:
 		push_error("KlinikLab native content provenance failure: " + _boot_error)
 		_show_blocked(_boot_error)
 		return
+	_load_settings()
 	_load_progress()
 	_scene = load("res://main.tscn").instantiate() as Node3D
 	_scene.name = "KL_ORIGINAL_FDI16_SOURCE_SCENE"
@@ -1218,7 +1236,7 @@ func _build_app() -> void:
 	toolbar_safe.add_child(_toolbar)
 	_toolbar_view_buttons.clear()
 	_toolbar_camera_buttons.clear()
-	for section in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]:
+	for section in VIEWS:
 		var b := _toolbar_button(section.capitalize())
 		b.name = "KL_TOOLBAR_VIEW_" + section
 		b.tooltip_text = section.capitalize() + " · native educational workspace"
@@ -1483,6 +1501,81 @@ func _set_environment_camera() -> void:
 		if tooth!=null:
 			tooth.visible=false
 
+func _start_automated_trial() -> void:
+	if _trial_pid > 0:
+		return
+	var project := ProjectSettings.globalize_path("res://")
+	var trial_script := "res://practice-room-game-app-smoke.gd"
+	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
+		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
+		return
+	_trial_folder = ProjectSettings.globalize_path("user://trial-results").path_join(Crypto.new().generate_random_bytes(12).hex_encode())
+	var profile := _trial_folder.path_join("profile")
+	if DirAccess.make_dir_recursive_absolute(profile) != OK:
+		_set_trial_status("Could not create an isolated trial profile.")
+		return
+	_trial_video = DisplayServer.get_name() != "headless"
+	var args := PackedStringArray(["--path", project, "--log-file", _trial_folder.path_join("godot.log")])
+	if _trial_video:
+		args.append_array(["--windowed", "--resolution", "1280x720", "--write-movie", _trial_folder.path_join("gameplay.avi"), "--fixed-fps", "24"])
+	else:
+		args.append("--headless")
+	args.append_array(["--script", trial_script, "--", _trial_folder])
+	if _trial_video:
+		args.append("--video")
+	var environment := {}
+	for key in ["APPDATA", "LOCALAPPDATA", "KLINIKLAB_GITHUB_TOKEN"]:
+		if OS.has_environment(key):
+			environment[key] = OS.get_environment(key)
+	OS.set_environment("APPDATA", profile)
+	OS.set_environment("LOCALAPPDATA", profile)
+	OS.unset_environment("KLINIKLAB_GITHUB_TOKEN")
+	_trial_pid = OS.create_process(OS.get_executable_path(), args)
+	for key in ["APPDATA", "LOCALAPPDATA", "KLINIKLAB_GITHUB_TOKEN"]:
+		if environment.has(key):
+			OS.set_environment(key, environment[key])
+		else:
+			OS.unset_environment(key)
+	if _trial_pid <= 0:
+		_set_trial_status("Could not start the automated trial. " + _trial_folder)
+		return
+	_set_trial_status("Running two isolated practice runs. " + ("Godot is rendering the gameplay video." if _trial_video else "Running without video in headless mode."))
+	_poll_automated_trial(_trial_pid, Time.get_ticks_msec() + 300000)
+
+func _poll_automated_trial(pid: int, deadline: int) -> void:
+	while OS.is_process_running(pid):
+		if Time.get_ticks_msec() >= deadline:
+			OS.kill(pid)
+			_trial_pid = -1
+			_set_trial_status("The trial timed out. Check godot.log in " + _trial_folder)
+			return
+		await get_tree().create_timer(0.5).timeout
+	_trial_pid = -1
+	var report := _trial_folder.path_join("result.json")
+	var result: Variant = JSON.parse_string(FileAccess.get_file_as_string(report)) if FileAccess.file_exists(report) else null
+	var movie := _trial_folder.path_join("gameplay.avi")
+	var movie_file := FileAccess.open(movie, FileAccess.READ) if _trial_video else null
+	var movie_ok := not _trial_video or (movie_file != null and movie_file.get_length() > 1024)
+	if result is Dictionary and result.get("status") == "pass" and movie_ok:
+		var scores: Array = result["runs"]
+		_set_trial_status("Trial passed · %d/%d and %d/%d\n%s\n%s" % [
+			scores[0]["score"], scores[0]["max_score"], scores[1]["score"], scores[1]["max_score"],
+			"Gameplay video, report and log" if _trial_video else "Report and log", _trial_folder])
+	else:
+		var detail: String = str(result.get("error", "")) if result is Dictionary else ""
+		if detail.is_empty() and not movie_ok:
+			detail = "The gameplay video is missing or incomplete."
+		_set_trial_status("Trial did not pass. %s\nCheck the report and log in %s" % [detail, _trial_folder])
+
+func _set_trial_status(message: String) -> void:
+	_trial_message = message
+	if is_instance_valid(_trial_status):
+		_trial_status.text = message
+	if is_instance_valid(_trial_start_button):
+		_trial_start_button.disabled = _trial_pid > 0
+	if is_instance_valid(_trial_folder_button):
+		_trial_folder_button.disabled = _trial_folder.is_empty() or _trial_pid > 0
+
 func _show_environment() -> void:
 	_page.add_child(_heading("Explore the clinic · first-person preview",18))
 	if _practice_game == null:
@@ -1490,6 +1583,18 @@ func _show_environment() -> void:
 		begin_game.name = "KL_GAME_START"
 		begin_game.pressed.connect(_practice_game_start)
 		_page.add_child(begin_game)
+		_trial_start_button = _button("Run automated trial · game video and report")
+		_trial_start_button.disabled = _trial_pid > 0
+		_trial_start_button.name = "KL_AUTOMATED_TRIAL"
+		_trial_start_button.pressed.connect(_start_automated_trial)
+		_page.add_child(_trial_start_button)
+		_trial_status = _heading(_trial_message, 13)
+		_trial_status.name = "KL_AUTOMATED_TRIAL_STATUS"
+		_page.add_child(_trial_status)
+		_trial_folder_button = _button("Open latest trial results")
+		_trial_folder_button.disabled = _trial_folder.is_empty()
+		_trial_folder_button.pressed.connect(func() -> void: OS.shell_open(_trial_folder))
+		_page.add_child(_trial_folder_button)
 	else:
 		var game_state: Dictionary = _practice_game.call("summary")
 		_page.add_child(_heading("PRACTICE GAME · run %d · %d/%d points · tier %s" % [
@@ -1572,10 +1677,42 @@ func _apply_environment_visibility() -> void:
 		if fill != null:
 			fill.light_energy = 0.42 if show_room else 1.2
 
+func _load_settings() -> void:
+	var config := ConfigFile.new()
+	if config.load(SETTINGS_FILE) == OK and config.get_value("training", "language", "en") == "de":
+		_training_language = "de"
+
+func _training_label(english: String, german: String) -> String:
+	return german if _training_language == "de" else english
+
+func _show_settings() -> void:
+	_page.add_child(_heading("Training interface language", 17))
+	var choice := OptionButton.new()
+	choice.name = "KL_SETTINGS_LANGUAGE"
+	choice.add_item("English (default)")
+	choice.add_item("Deutsch")
+	choice.select(1 if _training_language == "de" else 0)
+	_page.add_child(choice)
+	var status := _heading("", 13)
+	_page.add_child(status)
+	choice.item_selected.connect(func(index: int) -> void:
+		var next := "de" if index == 1 else "en"
+		var config := ConfigFile.new()
+		config.load(SETTINGS_FILE)
+		config.set_value("training", "language", next)
+		if config.save(SETTINGS_FILE) != OK:
+			choice.select(1 if _training_language == "de" else 0)
+			status.text = "Could not save the language setting."
+			return
+		_training_language = next
+		status.text = _training_label("English selected.", "Deutsch ausgewählt.")
+	)
+	_page.add_child(_heading("This setting changes the FSP/KP exercise controls and writing field labels. Original German case notes, prompts and answer examples stay available for language practice.", 13))
+
 func _switch_view(view: String) -> void:
 	if _practice_sequence != null:
 		return # no unrelated camera/view transitions while the sequence is active
-	if not (view in ["clinic", "environment", "learning", "journey", "language", "anatomy", "radiology", "scans", "progress", "coverage"]):
+	if view not in VIEWS:
 		return
 	if _view == "language" and view != "language":
 		_language_save_draft()
@@ -1645,13 +1782,17 @@ func _refresh() -> void:
 	var s: Dictionary = _stations[_station_index]
 	if _practice_sequence != null:
 		_page.add_child(_heading("Practice Sequence · source FDI changes in task panel; 3D scene safely hidden", 21))
+	elif _view == "settings":
+		_page.add_child(_heading("Settings", 21))
 	elif _view == "language":
-		_page.add_child(_heading("FSP/KP · Original German language studio",21))
+		_page.add_child(_heading(_training_label("FSP/KP · German language studio", "FSP/KP · Sprachtraining"),21))
 	else:
 		_page.add_child(_heading("FDI " + str(c["fdi"]) + "  " + str(c["title"]), 21))
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
 	if _practice_sequence != null:
 		_show_practice_sequence()
+	elif _view == "settings":
+		_show_settings()
 	elif _view == "progress":
 		_show_progress()
 	elif _view == "language":
@@ -2209,19 +2350,19 @@ func _show_language_studio() -> void:
 		return
 	_page.add_child(_heading("Four original fictional cases × four language exercises. Separate from the six procedural dental cases. No patient records, language qualification or clinical certification.",13))
 	_page.add_child(_heading("The browser source presents patient conversation → written dental letter → colleague handover; consent is an additional patient-conversation exercise, not an official fourth exam part. Regional requirements may vary.",12))
-	_page.add_child(_heading("Original German training cases",15))
+	_page.add_child(_heading(_training_label("German training cases", "Deutsche Übungsfälle"),15))
 	for id in _language.call("case_ids"):
 		var item: Dictionary = _language.call("case_data",str(id))
-		var button := _button(("✓ " if str(id)==_language_case else "") + str(item["title"]))
+		var button := _button(("✓ " if str(id)==_language_case else "") + _training_label(str(ENGLISH_FSP_CASES.get(id, item["title"])), str(item["title"])))
 		button.pressed.connect(_language_switch_case.bind(str(id)))
 		_page.add_child(button)
 	var current: Dictionary = _language.call("case_data",_language_case)
-	_page.add_child(_heading("Fictional case notes: " + str(current["facts"]),13))
-	_page.add_child(_heading("Original four-phase exercise",15))
+	_page.add_child(_heading(_training_label("Original German case notes: ", "Fiktive Fallbeschreibung: ") + str(current["facts"]),13))
+	_page.add_child(_heading(_training_label("Four exercise phases", "Vier Übungsphasen"),15))
 	var phase_ids: Array = _language.call("phase_ids")
 	for i in range(phase_ids.size()):
 		var id: String = phase_ids[i]
-		var caption: String = ["Anamnese","Aufklärung","Befund / Arztbrief","Arzt-Arzt"][i]
+		var caption: String = _training_label(["Patient history", "Consent discussion", "Findings / dental letter", "Colleague handover"][i], ["Anamnese", "Aufklärung", "Befund / Arztbrief", "Arzt-Arzt"][i])
 		var button := _button(("✓ " if id == _language_phase else "") + caption)
 		button.pressed.connect(_language_switch_phase.bind(id))
 		_page.add_child(button)
@@ -2229,9 +2370,9 @@ func _show_language_studio() -> void:
 	if task.is_empty():
 		_page.add_child(_heading("Original language prompt missing",14))
 		return
-	_page.add_child(_heading("Übungsaufgabe: " + str(task["prompt"]),15))
-	_page.add_child(_heading("B2 sprachliche Stütze: " + str(task["b2"]),13))
-	_page.add_child(_heading("C1 sprachliche Stütze: " + str(task["c1"]),13))
+	_page.add_child(_heading(_training_label("Original German task: ", "Übungsaufgabe: ") + str(task["prompt"]),15))
+	_page.add_child(_heading(_training_label("B2 German language support: ", "B2 sprachliche Stütze: ") + str(task["b2"]),13))
+	_page.add_child(_heading(_training_label("C1 German language support: ", "C1 sprachliche Stütze: ") + str(task["c1"]),13))
 	var stored: Dictionary = _progress.get("fspKpByTask",{})
 	var state: Dictionary = stored.get(_language_task_key(),{})
 	_language_draft = TextEdit.new()
@@ -2240,37 +2381,39 @@ func _show_language_studio() -> void:
 	_language_draft_key = _language_task_key()
 	_language_draft.focus_exited.connect(_language_save_draft)
 	_page.add_child(_language_draft)
-	var check := _button("Speichern und formativ prüfen (Stichwortabdeckung)")
+	var check := _button(_training_label("Save and check keyword coverage", "Speichern und formativ prüfen (Stichwortabdeckung)"))
 	check.pressed.connect(_language_submit)
 	_page.add_child(check)
 	if state.get("result",{}) is Dictionary and not (state.get("result",{}) as Dictionary).is_empty():
 		var result: Dictionary = state["result"]
 		if (result.get("flags",[]) as Array).is_empty():
-			_page.add_child(_heading("Lexikalische Stichwortabdeckung: %d / 10 (keine Prüfungsnote)" % int(result.get("lexicalScore",0)),15))
+			_page.add_child(_heading(_training_label("Keyword coverage: %d / 10 (practice feedback)", "Lexikalische Stichwortabdeckung: %d / 10 (keine Prüfungsnote)") % int(result.get("lexicalScore",0)),15))
 		else:
-			_page.add_child(_heading("Bewertung wegen Sicherheitsformulierung ausgesetzt; automatische Stichwortabdeckung: %d/10 (keine Prüfungsnote)" % int(result.get("lexicalScore",0)),15))
+			_page.add_child(_heading(_training_label("Safety wording needs review. Automated keyword coverage: %d/10", "Bewertung wegen Sicherheitsformulierung ausgesetzt; automatische Stichwortabdeckung: %d/10 (keine Prüfungsnote)") % int(result.get("lexicalScore",0)),15))
 			for warning in result["flags"]:
-				_page.add_child(_heading("Fachliche Überprüfung erforderlich: " + str(warning),13))
+				_page.add_child(_heading(_training_label("Review required: ", "Fachliche Überprüfung erforderlich: ") + str(warning),13))
 		for row in result.get("criteria",[]):
 			var check_record: Dictionary = row
 			_page.add_child(_heading(("✓ " if bool(check_record.get("matched",false)) else "○ ") +
 				str(check_record.get("label",""))+" — "+str(check_record.get("tip","")),12))
 		_page.add_child(_heading("Keyword matching cannot establish grammar, fluency, clinical appropriateness or proper handling of negation.",12))
-	_page.add_child(_heading("Original Deutsch–Englisch Glossar",14))
+	_page.add_child(_heading(_training_label("German–English glossary", "Deutsch–Englisch-Glossar"),14))
 	for pair in current["glossary"]:
 		_page.add_child(_heading(str(pair[0])+" — "+str(pair[1]),12))
-	var reveal := _button("Musterantwort anzeigen / verbergen")
+	var reveal := _button(_training_label("Show / hide model answer", "Musterantwort anzeigen / verbergen"))
 	reveal.pressed.connect(_language_reveal_model)
 	_page.add_child(reveal)
 	if _language_model_revealed:
-		_page.add_child(_heading("Originale Musterantwort (Lehrbeispiel): " + str(task["model"]),13))
-	var reset := _button("Diese FSP/KP Übungsantwort löschen")
+		_page.add_child(_heading(_training_label("Original German model answer: ", "Originale Musterantwort (Lehrbeispiel): ") + str(task["model"]),13))
+	var reset := _button(_training_label("Clear this FSP/KP practice answer", "Diese FSP/KP Übungsantwort löschen"))
 	reset.pressed.connect(_language_reset_exercise)
 	_page.add_child(reset)
 
 const LETTER_SECTIONS := ["anamnese", "befund", "diagnose", "therapie"]
+const ENGLISH_LETTER_LABELS := ["Patient history and main symptom", "Examination findings", "Working and differential diagnoses", "Treatment and next steps"]
 const LETTER_LABELS := ["Anamnese und Leitsymptom", "Untersuchungsbefund", "Verdachts-/Differenzialdiagnose", "Therapie / weiteres Vorgehen"]
 const PLAN_SECTIONS := ["diagnosis", "planA", "planB", "followup"]
+const ENGLISH_PLAN_LABELS := ["Working diagnosis and further findings needed", "Treatment plan A — tooth preservation / preferred option", "Treatment plan B — alternative", "Consent, discussion and follow-up"]
 const PLAN_LABELS := ["Arbeitsdiagnose und erforderliche Zusatzbefunde", "Behandlungsplan A — Zahnerhalt / bevorzugte Option", "Behandlungsplan B — Alternative", "Aufklärung, Einwilligung, Nachsorge"]
 
 func _show_writing(station: String) -> void:
@@ -2291,7 +2434,7 @@ func _show_writing(station: String) -> void:
 				_page.add_child(_heading("Existing single-field draft retained in first section. Review and redistribute manually.", 13))
 		for section_index in range(LETTER_SECTIONS.size()):
 			var id: String = LETTER_SECTIONS[section_index]
-			_page.add_child(_heading(str(LETTER_LABELS[section_index]), 14))
+			_page.add_child(_heading(_training_label(ENGLISH_LETTER_LABELS[section_index], LETTER_LABELS[section_index]), 14))
 			var field := TextEdit.new()
 			field.name = "KL_FSP_LETTER_" + id
 			field.custom_minimum_size = Vector2(0, 130)
