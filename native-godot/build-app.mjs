@@ -49,6 +49,17 @@ try{
    '63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036',30452]
  ];
  const crypto=await import('node:crypto');
+ // This experimental branch MUST NOT reuse the ordinary learner's user://.
+ // The builder refuses an existing output folder; hashing that path gives a
+ // distinct desktop user-data directory for every isolated game build.
+ const userDir='KlinikLabPracticeRebuild-'+crypto.createHash('sha256').update(dest).digest('hex').slice(0,20);
+ const settingsPath=path.join(dest,'project.godot');
+ const oldSettings=fs.readFileSync(settingsPath,'utf8');
+ const nameLine='config/name="KlinikLab Native — source-derived training foundation"';
+ if(!oldSettings.includes(nameLine))throw Error('Cannot set isolated Practice Game user directory');
+ fs.writeFileSync(settingsPath,oldSettings.replace(nameLine,
+   nameLine+'\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="'+userDir+'"'));
+ fs.writeFileSync(path.join(dest,'practice-game-userdir.txt'),userDir+'\n',{flag:'wx'});
  const sha256=b=>crypto.createHash('sha256').update(b).digest('hex');
  if(approved.licenseSPDX!=='CC0-1.0'||approved.status!=='REVIEWED_CC0_STATIC_VISUAL_PROTOTYPES_ONLY'||
    approved.files?.length!==2||approved.review?.clinicalAccepted!==false)
