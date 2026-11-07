@@ -176,6 +176,8 @@ func within_reach(position: Vector3) -> bool:
 	return Vector2(position.x, position.z).distance_to(Vector2(_stand.position.x, _stand.position.z)) <= REACH
 
 func interaction_status() -> String:
+	if not _camera.is_inside_tree() or not _stand.is_inside_tree():
+		return "range"
 	if not within_reach(_camera.global_position):
 		return "range"
 	var target := _stand.global_position + Vector3.UP * 0.09
