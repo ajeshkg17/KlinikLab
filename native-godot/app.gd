@@ -591,7 +591,8 @@ func _practical_source_complete(step_index: int) -> bool:
 	if not (value is Dictionary):
 		return false
 	var record: Dictionary = value
-	if record.get("correct", null) != true:
+	var correct_flag: Variant = record.get("correct", null)
+	if not (correct_flag is bool) or not correct_flag:
 		return false
 	var source_question: Variant = record.get("sourceQuestion", null)
 	if not (source_question is int or source_question is float):
