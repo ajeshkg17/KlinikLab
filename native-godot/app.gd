@@ -2697,7 +2697,7 @@ func _practical_choice_record(step_index: int, step: Dictionary) -> Dictionary:
 		"solved": valid and _practical_source_complete(step_index)}
 
 func _sync_practical_choice_feedback(step_index: int) -> void:
-	if not _procedure_context_available():
+	if _page == null or not _procedure_context_available():
 		return
 	var steps: Array = _content["practical"][_case_index]
 	if step_index < 0 or step_index >= steps.size():
@@ -2906,6 +2906,8 @@ func _record_practical(step_index: int, response: Variant, correct: bool, detail
 	_update_practical_review_button()
 
 func _update_practical_review_button() -> void:
+	if _page == null:
+		return
 	var review_button := _page.get_node_or_null("KL_PRACTICAL_REVIEW") as Button
 	if review_button == null:
 		return
