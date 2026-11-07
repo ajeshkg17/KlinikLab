@@ -302,6 +302,7 @@ func _run() -> void:
 		# isolated CI user:// journal; re-read it, then check visible count and R.
 		if wrap_index >= 0:
 			answers[IDS[i]+":practical:"+str(wrap_index)]["correct"] = true
+		answers[source_record_key] = valid_record.duplicate()
 		answers[source_record_key]["selected"] = "__stale-journal-answer__"
 		if str(original_steps[review_index]["type"]) == "choice":
 			answers[source_record_key]["selected"] = -1
