@@ -200,7 +200,24 @@ func _run() -> void:
 			_fail("mirror did not follow the right hand, or pickup incorrectly awarded points")
 			return
 		_event("mirror_grabbed", {"run": run_number, "score": int(game.call("score"))})
+		var fingers: Array = handling.get("_right_fingers")
+		var index_finger: Node3D = fingers[0]
+		var start_curl := index_finger.rotation.x
+		if _record_video:
+			await _hold(0.12)
+		else:
+			(handling.get("_pose_tween") as Tween).custom_step(0.12)
+		var grip_mid: float = handling.get("_grip")
+		if grip_mid <= 0.0 or grip_mid >= 1.0 or index_finger.rotation.x >= start_curl:
+			_fail("mirror grip did not interpolate the right index finger")
+			return
+		_event("finger_grip_interpolated", {"run": run_number, "grip": grip_mid})
 		await _hold(1.2)
+		if not _record_video:
+			(handling.get("_pose_tween") as Tween).custom_step(0.25)
+		if not is_equal_approx(float(handling.get("_grip")), 1.0):
+			_fail("right hand did not finish closing around the mirror")
+			return
 		if not _press(app, "KL_PRACTICE_TOOL"):
 			return
 		if bool(handling.call("holding")) or mirror.get_parent() != handling.get("_stand") or int(game.call("score")) != 20:
@@ -208,6 +225,12 @@ func _run() -> void:
 			return
 		_event("mirror_returned", {"run": run_number, "score": int(game.call("score"))})
 		await _hold(0.7)
+		if not _record_video:
+			(handling.get("_pose_tween") as Tween).custom_step(0.25)
+		if not is_zero_approx(float(handling.get("_grip"))) or not is_equal_approx(index_finger.rotation.x, start_curl):
+			_fail("right fingers did not return to the rest pose")
+			return
+		_event("finger_grip_released", {"run": run_number})
 		if not _press(app, "KL_PRACTICE_TOOL") or not _press(app, "KL_PRACTICE_TOOL"):
 			return
 		if int(game.call("score")) != 20:
