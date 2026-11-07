@@ -3,6 +3,7 @@ extends Node3D
 ## Only two reviewed source-original GLBs, hashes and CC0 terms pinned.
 const ROOT := "res://assets/cc0/3dassets-dental/"
 const RAW_RESOLVER = preload("res://raw-source.gd")
+const WALK = preload("res://clinic-walk-intent.gd")
 const INDEX := ROOT + "clinic-manifest.json"
 const WHOLE := "whole-clinic-starter-v1.glb"
 const TRAY := "instrument-tray-v1.glb"
@@ -20,6 +21,7 @@ var _tray_meshes := 0
 var _chair: Node3D
 var _chair_meshes := 0
 var _chair_fallback := false
+var _ceiling: MeshInstance3D
 
 func error() -> String:
 	return _error
@@ -87,7 +89,7 @@ func configure(expected_sha: String) -> bool:
 			scene.name = "KL_SOURCE_CC0_WHOLE_CLINIC"
 			# Keep original world transform and units; locate background behind
 			# source FDI comparison podiums, not as FDI patient anatomy.
-			scene.position = Vector3(0.0,-3.0,-20.0)
+			scene.position = Vector3(0.0, WALK.FLOOR_Y, -20.0)
 		else:
 			_tray=scene
 			_tray_meshes=meshes
@@ -114,15 +116,45 @@ func configure(expected_sha: String) -> bool:
 				_chair = chair_node as Node3D
 				_chair_meshes = _mesh_count(chair_node)
 				_chair.name = "KL_SOURCE_CC0_REAL_OPERATORY_CHAIR"
-				_chair.position = Vector3(3.0,-0.4,-18.0)
+				_chair.position.y = 0.0
+				var bottom := _mesh_bottom(_chair, Transform3D.IDENTITY)
+				_chair.position = WALK.OPERATORY - Vector3.UP * bottom
 				add_child(_chair)
 			else:
 				chair_node.free()
 	if _chair == null:
 		_show_chair_fallback()
+	_build_walk_ceiling()
 	_source_sha=expected_sha
 	name="KL_CC0_3DASSETS_WHOLE_CLINIC_STATIC"
 	return true
+
+func _mesh_bottom(node: Node3D, parent_transform: Transform3D) -> float:
+	var transform := parent_transform * node.transform
+	var bottom := INF
+	if node is MeshInstance3D and node.mesh != null:
+		bottom = (transform * node.get_aabb()).position.y
+	for child in node.get_children():
+		if child is Node3D:
+			bottom = minf(bottom, _mesh_bottom(child, transform))
+	return bottom
+
+func _build_walk_ceiling() -> void:
+	_ceiling = MeshInstance3D.new()
+	_ceiling.name = "KL_WALK_CEILING"
+	var slab := BoxMesh.new()
+	slab.size = Vector3(16.0, 0.12, 14.0)
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color("#dce4eb")
+	slab.material = material
+	_ceiling.mesh = slab
+	_ceiling.position = Vector3(-2.0, WALK.CEILING_Y + slab.size.y * 0.5, -21.0)
+	_ceiling.visible = false
+	add_child(_ceiling)
+
+func set_walk_ceiling_visible(enabled: bool) -> void:
+	if _ceiling != null:
+		_ceiling.visible = enabled
 
 func _show_chair_fallback() -> void:
 	if _chair != null or _chair_fallback:
@@ -130,7 +162,7 @@ func _show_chair_fallback() -> void:
 	_chair_fallback = true
 	var fallback := Node3D.new()
 	fallback.name = "KL_OPERATORY_CHAIR_ASSET_MISSING_FALLBACK"
-	fallback.position = Vector3(3.0,0.0,-18.0)
+	fallback.position = WALK.OPERATORY
 	var label := Label3D.new()
 	label.text = "Operatory chair model unavailable (asset not loaded)"
 	label.position = Vector3(0.0,1.6,0.0)
