@@ -37,7 +37,7 @@ func _report(status: String, error: String = "") -> bool:
 		"source_sha": source_sha,
 		"godot_version": Engine.get_version_info()["string"],
 		"rendering_method": RenderingServer.get_current_rendering_method(),
-		"trial": "FDI16 · two stations and six source-graded tasks per run",
+		"trial": "FDI16 · two stations, pick up and return the mirror, six source-graded tasks per run",
 		"station_input": "scripted movement intents and app interaction handlers",
 		"video": "gameplay.avi" if _record_video else "",
 		"video_fps": VIDEO_FPS if _record_video else 0,
@@ -151,6 +151,19 @@ func _run() -> void:
 			_fail("run did not start at zero")
 			return
 		app.call("_start_clinic_walk")
+		var handling: Node3D = app.get("_practice_tool")
+		var hands: Node3D = handling.get("_hands")
+		if not hands.is_visible_in_tree() or bool(handling.call("holding")):
+			_fail("hands not visible or mirror not reset at the start of Walk")
+			return
+		var early := _button(app, "KL_PRACTICE_TOOL")
+		if early == null or not early.disabled:
+			_fail("mirror can be grabbed out of range")
+			return
+		early.pressed.emit()
+		if bool(handling.call("holding")):
+			_fail("out-of-range action moved the mirror")
+			return
 		_event("walk_started", {"run": run_number})
 		await _hold(0.9)
 		if not await _walk_to(app, "LANGUAGE_STATION"):
@@ -167,13 +180,46 @@ func _run() -> void:
 		if not await _walk_to(app, "OPERATORY"):
 			_fail("scripted walk could not reach the practical station")
 			return
+		if _record_video:
+			var walker: RefCounted = app.get("_walk")
+			var constants: Dictionary = walker.get_script().get_script_constant_map()
+			var stand: Node3D = handling.get("_stand")
+			var eye: Vector3 = walker.get("position")
+			var offset := stand.position + Vector3.UP * 0.12 - eye
+			var sensitivity: float = constants["MOUSE_SENSITIVITY"]
+			var yaw_change := wrapf(atan2(-offset.x, -offset.z) - float(walker.get("yaw")), -PI, PI)
+			var pitch_change := atan2(offset.y, Vector2(offset.x, offset.z).length()) - float(walker.get("pitch"))
+			walker.call("apply_look_intent", Vector2(-yaw_change, -pitch_change) / sensitivity)
+			app.call("_apply_walk_camera")
+			await _hold(0.65)
+		if not _press(app, "KL_PRACTICE_TOOL"):
+			return
+		var mirror: Node3D = handling.get("_mirror")
+		if not bool(handling.call("holding")) or mirror.get_parent() != handling.get("_right") or int(game.call("score")) != 10:
+			_fail("mirror did not follow the right hand, or pickup incorrectly awarded points")
+			return
+		_event("mirror_grabbed", {"run": run_number, "score": int(game.call("score"))})
+		await _hold(1.2)
+		if not _press(app, "KL_PRACTICE_TOOL"):
+			return
+		if bool(handling.call("holding")) or mirror.get_parent() != handling.get("_stand") or int(game.call("score")) != 20:
+			_fail("mirror was not returned to its stand for exactly 10 points")
+			return
+		_event("mirror_returned", {"run": run_number, "score": int(game.call("score"))})
+		await _hold(0.7)
+		if not _press(app, "KL_PRACTICE_TOOL") or not _press(app, "KL_PRACTICE_TOOL"):
+			return
+		if int(game.call("score")) != 20:
+			_fail("repeated pickup and return farmed handling points")
+			return
+		_event("repeat_handling_no_points", {"run": run_number, "score": int(game.call("score"))})
 		if not bool(app.call("_walk_enter_procedure")):
 			_fail("operatory E handler rejected real walk proximity")
 			return
 		_event("practical_station", {"run": run_number, "score": int(game.call("score"))})
 		await _hold(0.7)
-		if int(game.call("score")) != 20:
-			_fail("two real station visits did not earn exactly 20")
+		if int(game.call("score")) != 30:
+			_fail("both stations and mirror handling did not earn exactly 30")
 			return
 		if not _press(app, "KL_SEQUENCE_START"):
 			return
@@ -192,7 +238,7 @@ func _run() -> void:
 			if wrong != null:
 				if not _press(app, "KL_SEQUENCE_ANSWER_" + str(wrong)):
 					return
-				if int(game.call("score")) != 20 + task_i * 5 + int(game.call("bonus_points")):
+				if int(game.call("score")) != 30 + task_i * 5 + int(game.call("bonus_points")):
 					_fail("incorrect answer gained room points")
 					return
 				_event("wrong_answer_no_points", {"run": run_number, "task": task_i + 1, "score": int(game.call("score"))})
@@ -213,13 +259,13 @@ func _run() -> void:
 			await _hold(0.65)
 			if task_i < 5 and not _press(app, "KL_SEQUENCE_NEXT"):
 				return
-		if int(game.call("score")) != 56 or not bool(game.call("complete")):
-			_fail("real station + six source tasks did not score 56")
+		if int(game.call("score")) != 66 or not bool(game.call("complete")):
+			_fail("both stations, mirror handling and six source tasks did not score 66")
 			return
 		if FileAccess.get_file_as_bytes(JOURNAL) != before_answers:
 			_fail("sequence wrote ordinary learner journal")
 			return
-		_event("full_score", {"run": run_number, "score": 56, "max_score": 56})
+		_event("full_score", {"run": run_number, "score": 66, "max_score": 66})
 		await _hold(0.8)
 		if not _press(app, "KL_SEQUENCE_EXIT"):
 			return
@@ -230,7 +276,7 @@ func _run() -> void:
 			_fail("cannot return to room to start new game")
 			return
 		app.call("_stop_clinic_walk")
-		_runs.append({"run": run_number, "score": int(game.call("score")), "max_score": 56, "journal_unchanged": true, "guided_state_restored": true})
+		_runs.append({"run": run_number, "score": int(game.call("score")), "max_score": 66, "mirror_handling_completed": true, "journal_unchanged": true, "guided_state_restored": true})
 		_event("run_complete", _runs.back())
 		await _hold(1.0)
 		if run_i == 0 and not _press(app, "KL_GAME_REPLAY"):
@@ -243,5 +289,5 @@ func _run() -> void:
 	if not _report("pass"):
 		_fail("could not write the trial report")
 		return
-	print("REBUILT_SR92_NATIVE_TWO_56_POINT_RUNS_HEADLESS_PASS")
+	print("KLINIKLAB_NATIVE_TWO_66_POINT_HANDLING_RUNS_PASS")
 	quit()

@@ -6,6 +6,8 @@ const STATION_IDS := ["operatory", "language"]
 var _graded_steps: Dictionary = {}
 var _stations: Dictionary = {}
 var _tasks: Dictionary = {}
+var _handling_done := false
+const HANDLING_POINTS := 10
 var _bonus_points: int = 0
 var _run_number: int = 0
 
@@ -25,6 +27,7 @@ func configure(source_steps: Array) -> bool:
 func start_run() -> void:
 	_stations.clear()
 	_tasks.clear()
+	_handling_done = false
 	_bonus_points = 0
 	_run_number += 1
 
@@ -60,14 +63,20 @@ func base_points() -> int:
 func bonus_points() -> int:
 	return _bonus_points
 
+func award_handling() -> bool:
+	if _handling_done:
+		return false
+	_handling_done = true
+	return true
+
 func score() -> int:
-	return station_points() + base_points() + bonus_points()
+	return station_points() + base_points() + bonus_points() + (HANDLING_POINTS if _handling_done else 0)
 
 func max_score() -> int:
 	var bonus := 0
 	for count in range(_graded_steps.size()):
 		bonus += _tier_bonus(count)
-	return STATION_IDS.size() * 10 + _graded_steps.size() * 5 + bonus
+	return STATION_IDS.size() * 10 + _graded_steps.size() * 5 + bonus + HANDLING_POINTS
 
 func tier() -> String:
 	var count: int = _tasks.size()
@@ -85,7 +94,7 @@ func next_bonus_message() -> String:
 	return "Next new correct FDI16 task: +5 base, +%d tier bonus" % _tier_bonus(_tasks.size())
 
 func complete() -> bool:
-	return _stations.size() == STATION_IDS.size() and _tasks.size() == _graded_steps.size()
+	return _stations.size() == STATION_IDS.size() and _tasks.size() == _graded_steps.size() and _handling_done
 
 func summary() -> Dictionary:
 	return {
@@ -98,6 +107,7 @@ func summary() -> Dictionary:
 		"stations":_stations.size(),
 		"stationTotal":STATION_IDS.size(),
 		"tasks":_tasks.size(),
+		"handlingDone":_handling_done,
 		"taskTotal":_graded_steps.size(),
 		"tier":tier(),
 		"nextBonus":next_bonus_message(),

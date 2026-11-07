@@ -159,6 +159,8 @@ var _trial_status: Label
 var _trial_folder_button: Button
 var _trial_start_button: Button
 var _practice_game: RefCounted
+var _practice_tool: Node3D
+var _practice_tool_button: Button
 var _practice_game_feedback := ""
 
 
@@ -352,7 +354,7 @@ func _update_walk_hud() -> void:
 	_walk_hud_top.offset_right = minf(width, 316.0)
 	_walk_hud_panel.offset_right = minf(width, 336.0)
 	var look_help := "Mouse captured · Esc releases" if _walk_mouse_captured else "Click 3D to look · Esc exits"
-	_walk_hud_title.text = "WALK PREVIEW · FDI %s\n%s" % [FDI[_case_index],look_help]
+	_walk_hud_title.text = "WALK · FDI %s · Eye %.2f units\n%s" % [FDI[_case_index], float(_walk.call("eye_height")), look_help]
 	var op: Dictionary = _walk.call("operatory_guidance")
 	var language: Dictionary = _walk.call("language_guidance")
 	var action := "E · Enter operatory" if bool(op.get("inRange",false)) else "E · Enter FSP/KP" if bool(language.get("inRange",false)) else "Approach station · E interacts"
@@ -455,6 +457,9 @@ func _handle_walk_input(event: InputEvent) -> void:
 		elif _walk_keyboard_allowed() and (key.physical_keycode == KEY_E or key.keycode == KEY_E):
 			if _walk_enter_language_station() or _walk_enter_procedure():
 				get_viewport().set_input_as_handled()
+		elif _practice_game != null and _walk_keyboard_allowed() and (key.physical_keycode == KEY_F or key.keycode == KEY_F):
+			_interact_practice_tool()
+			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event
 		if mouse.button_index == MOUSE_BUTTON_LEFT and mouse.pressed and not _walk_mouse_captured and _middle != null and _middle.get_global_rect().has_point(mouse.position):
@@ -487,6 +492,7 @@ func _start_clinic_walk() -> void:
 	_direct_bur_mode = false
 	_release_walk_mouse()
 	_walk_active = true
+	_cc0_clinic.call("set_walk_ceiling_visible", true)
 	_walk.call("reset")
 	_walk_station_return_available = false
 	_walk_language_return_available = false
@@ -498,9 +504,15 @@ func _start_clinic_walk() -> void:
 func _stop_clinic_walk() -> void:
 	_release_walk_mouse()
 	_walk_active = false
+	if _cc0_clinic != null:
+		_cc0_clinic.call("set_walk_ceiling_visible", false)
 	if _view == "environment":
 		_set_environment_camera()
 		_refresh()
+
+func _set_walk_eye_height(height: float) -> void:
+	_walk.call("set_eye_height", height)
+	_apply_walk_camera()
 
 func _apply_walk_camera() -> void:
 	if not _walk_active or _view != "environment" or _walk == null or _scene == null:
@@ -514,6 +526,8 @@ func _apply_walk_camera() -> void:
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	camera.current = true
 	_update_walk_hud()
+	if is_instance_valid(_practice_tool_button):
+		_practice_tool_button.disabled = not _practice_tool.call("within_reach", _walk.get("position"))
 
 func _walk_enter_procedure() -> bool:
 	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_operatory_range")):
@@ -1579,7 +1593,7 @@ func _set_trial_status(message: String) -> void:
 func _show_environment() -> void:
 	_page.add_child(_heading("Explore the clinic · first-person preview",18))
 	if _practice_game == null:
-		var begin_game := _button("Start Practice Game · two walk stations + six FDI16 tasks")
+		var begin_game := _button("Start Practice Game · two stations, instrument handling and six FDI16 tasks")
 		begin_game.name = "KL_GAME_START"
 		begin_game.pressed.connect(_practice_game_start)
 		_page.add_child(begin_game)
@@ -1603,7 +1617,8 @@ func _show_environment() -> void:
 		_page.add_child(_heading("Stations %d/2 (+10 each) · FDI16 tasks %d/6 (+5 each) · tier bonuses +%d" % [
 			int(game_state["stations"]), int(game_state["tasks"]), int(game_state["bonusPoints"])], 14))
 		_page.add_child(_heading(str(game_state["nextBonus"]), 13))
-		_page.add_child(_heading("Visit both walk stations using E or their in-range buttons, then enter the Practical station and start the original six-case Practice Sequence. Only the six source-correct FDI16 tasks add game points.", 13))
+		_page.add_child(_heading("Mirror handling · " + ("completed +10" if bool(game_state["handlingDone"]) else "pick up and return the mirror for +10"), 13))
+		_page.add_child(_heading("Visit both walk stations with E. At the turquoise stand near the operatory, press F to pick up and return the mirror. Then enter Practical and start Practice Sequence for the six FDI16 tasks.", 13))
 		if not _practice_game_feedback.is_empty():
 			_page.add_child(_heading(_practice_game_feedback, 13))
 		var next_run := _button("New Practice Game run · clear only in-memory points")
@@ -1621,6 +1636,17 @@ func _show_environment() -> void:
 		_page.add_child(_heading("WASD / arrows move · Shift quicker · click the central 3D pane for FPS mouse look · Esc releases cursor, then Esc exits · right-drag also works without capture · E interacts near a station.",13))
 	else:
 		_page.add_child(_heading("WALK ACTIVE · click inside 3D to capture FPS mouse look. Esc releases, then Esc exits. The right-drag alternative remains available while released.",13))
+	if _walk_active:
+		_page.add_child(_heading("Eye height above floor · release the pointer with Esc to adjust", 13))
+		var height := HSlider.new()
+		height.name = "KL_WALK_EYE_HEIGHT"
+		var walk_limits: Dictionary = _walk.get_script().get_script_constant_map()
+		height.min_value = float(walk_limits["MIN_EYE_HEIGHT"])
+		height.max_value = float(walk_limits["MAX_EYE_HEIGHT"])
+		height.step = 0.05
+		height.value = float(_walk.call("eye_height"))
+		height.value_changed.connect(_set_walk_eye_height)
+		_page.add_child(height)
 	_page.add_child(_heading("Imported CC0 3DAssets.dev dental practice • native scene",16))
 	_page.add_child(_heading("The assembled whole-clinic starter and a separate instrument tray are imported GLB meshes, instantiated in the REAL Godot application. The schematic background is disabled; the original source-identified six FDI/tooth/training flows remain independent.",14))
 	if _cc0_clinic!=null:
@@ -1637,6 +1663,12 @@ func _show_environment() -> void:
 		enter.disabled = not within
 		enter.pressed.connect(_walk_enter_procedure)
 		_page.add_child(enter)
+		if _practice_tool != null and _practice_game != null:
+			_practice_tool_button = _button("Return mirror to stand (F)" if _practice_tool.call("holding") else "Pick up mirror (F)")
+			_practice_tool_button.name = "KL_PRACTICE_TOOL"
+			_practice_tool_button.disabled = not _practice_tool.call("within_reach", _walk.get("position"))
+			_practice_tool_button.pressed.connect(_interact_practice_tool)
+			_page.add_child(_practice_tool_button)
 		_page.add_child(_heading("FSP/KP language station: " + ("in range" if language_within else "walk toward the separate language-station marker"),14))
 		var language_enter := _button("Enter FSP/KP language station (E)")
 		language_enter.disabled = not language_within
@@ -1663,6 +1695,7 @@ func _apply_environment_visibility() -> void:
 	if _cc0_clinic != null:
 		# SR60: whole CC0 room is environment-only, never overlaid on FDI.
 		_cc0_clinic.call("set_environment_visible", show_room)
+		_cc0_clinic.call("set_walk_ceiling_visible", show_room and _walk_active)
 	# SR64: the FDI16 comparison's strong three-light rig was also illuminating
 	# bright imported CC0 room surfaces. Retune only for the room, restoring
 	# the EXACT original tooth-view values when returning to Clinic.
@@ -1764,6 +1797,9 @@ func _refresh() -> void:
 	if _page == null:
 		return
 	_clear_page()
+	_practice_tool_button = null
+	if _practice_tool != null:
+		_practice_tool.call("set_active", _practice_game != null and _walk_active and _view == "environment")
 	_update_responsive_layout()
 	_sync_navigation_selection()
 	_sync_toolbar_selection()
@@ -1930,6 +1966,18 @@ func _update_fdi16_mirror_visibility() -> void:
 	_tooth16_mirror.visible = _view == "clinic" and _station_index == 4 and _case_index == 0
 
 # Optional room game: start/reset/exit only change a detached run-local ledger.
+func _interact_practice_tool() -> void:
+	if _practice_tool == null or _practice_game == null or not _walk_active or _view != "environment":
+		return
+	var was_holding: bool = _practice_tool.call("holding")
+	if not _practice_tool.call("interact", _walk.get("position")):
+		return
+	if was_holding:
+		_practice_game_feedback = "Mirror returned · +10 points." if _practice_game.call("award_handling") else "Mirror returned."
+	else:
+		_practice_game_feedback = "Mirror in your right hand. Press F at the stand to return it."
+	_refresh()
+
 func _practice_game_start() -> void:
 	if _practice_game != null or _practice_sequence != null or _view != "environment":
 		return
@@ -1941,13 +1989,20 @@ func _practice_game_start() -> void:
 		push_warning("Practice Game requires exactly six graded FDI16 source tasks.")
 		return
 	_practice_game = game
-	_practice_game_feedback = "Run started · enter each room station using E; then answer six FDI16 Practice Sequence tasks."
+	if _practice_tool == null:
+		var camera := _scene.get_node("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
+		var walk_limits: Dictionary = _walk.get_script().get_script_constant_map()
+		_practice_tool = preload("res://practice-tool-handling.gd").new()
+		_scene.add_child(_practice_tool)
+		_practice_tool.call("setup", camera, walk_limits["OPERATORY"])
+	_practice_game_feedback = "Run started. Visit both stations, handle the mirror and answer six FDI16 tasks."
 	_refresh()
 
 func _practice_game_new_run() -> void:
 	if _practice_game == null or _practice_sequence != null or _view != "environment":
 		return
 	_practice_game.call("start_run")
+	_practice_tool.call("reset")
 	_practice_game_feedback = "Fresh run · stations, task awards and bonuses reset in memory."
 	_refresh()
 
@@ -1955,6 +2010,7 @@ func _practice_game_exit() -> void:
 	if _practice_game == null or _practice_sequence != null or _view != "environment":
 		return
 	_practice_game = null
+	_practice_tool.call("reset")
 	_practice_game_feedback = ""
 	_refresh()
 
