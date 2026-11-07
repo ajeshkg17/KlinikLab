@@ -321,12 +321,33 @@ func _run() -> void:
 		if review_control == null or review_control.disabled or not review_control.text.contains("1 remaining"):
 			_fail("SR73 stale disk journal missing truthful remaining review count FDI"+FDIS[i])
 			return
+		var before_review := FileAccess.get_file_as_bytes("user://kliniklab-native-progress-v2.json")
 		review_control.pressed.emit()
 		if int(app.get("_procedure_step_index")) != review_index:
 			_fail("SR73 stale disk journal R navigation skipped source-invalid step FDI"+FDIS[i])
 			return
+		review_control = (app.get("_page") as Node).get_node_or_null("KL_PRACTICAL_REVIEW") as Button
+		if review_control == null or not review_control.disabled or not review_control.text.contains("Complete or correct this task"):
+			_fail("SR93 sole incomplete current task lacked a disabled Review action and guidance for FDI"+FDIS[i])
+			return
+		_send_key(app, KEY_R)
+		if int(app.get("_procedure_step_index")) != review_index or FileAccess.get_file_as_bytes("user://kliniklab-native-progress-v2.json") != before_review:
+			_fail("SR93 review navigation changed the task or wrote the journal for FDI"+FDIS[i])
+			return
+		match str(original_steps[review_index]["type"]):
+			"choice":
+				app.call("_practical_choice", review_index, int(valid_record["selected"]))
+			"tooth":
+				app.call("_practical_target", review_index, str(valid_record["selected"]))
+			"tool":
+				for tool_index in range(tools.size()):
+					if str(tools[tool_index]["id"]) == str(valid_record["selected"]):
+						app.call("_practical_tool", tool_index + 1, review_index)
+						break
+		if not bool(app.call("_practical_source_complete", review_index)) or not review_control.disabled or not review_control.text.contains("0 remaining"):
+			_fail("SR93 a real correction failed to update Review immediately for FDI"+FDIS[i])
+			return
 		answers = (app.get("_progress") as Dictionary)["answers"]
-		answers[source_record_key] = valid_record
 		for j in range(1,original_steps.size()):
 			answers.erase(IDS[i]+":practical:"+str(j))
 		if bool(app.get("_direct_bur_mode")):
