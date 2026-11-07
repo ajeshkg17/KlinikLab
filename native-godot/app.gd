@@ -174,6 +174,8 @@ var _practice_tool: Node3D
 var _practice_tool_button: Button
 var _practice_game_feedback := ""
 var _first_person_full_view := false
+const PROCEDURE_DRILLS := preload("res://procedure-drills.gd")
+var _procedure_drills := PROCEDURE_DRILLS.new()
 
 
 func _ready() -> void:
@@ -371,6 +373,7 @@ func _update_walk_hud() -> void:
 	_walk_hud_top.offset_right = minf(width, 316.0)
 	_walk_hud_panel.offset_right = minf(width, 336.0)
 	var look_help := "Mouse captured · Esc releases" if _walk_mouse_captured else "Click 3D to look · Esc exits"
+	_walk_hud_reticle.modulate = Color.WHITE
 	_walk_hud_title.text = "WALK · FDI %s · Eye %.2f units\n%s" % [FDI[_case_index], float(_walk.call("eye_height")), look_help]
 	var op: Dictionary = _walk.call("operatory_guidance")
 	var language: Dictionary = _walk.call("language_guidance")
@@ -382,7 +385,11 @@ func _update_walk_hud() -> void:
 		_walk_hud_title.text = "PRACTICE GAME · %d/%d points\n%s" % [
 			int(_practice_game.call("score")), int(_practice_game.call("max_score")), look_help]
 		var mirror_action := "Approach the turquoise stand"
-		if _practice_tool.call("within_reach", _walk.get("position")):
+		var interaction_status: String = _practice_tool.call("interaction_status")
+		if interaction_status == "aim":
+			mirror_action = "Aim the crosshair at the turquoise stand"
+		elif interaction_status == "ready":
+			_walk_hud_reticle.modulate = Color("#78f8c6")
 			mirror_action = "F · Return mirror" if _practice_tool.call("holding") else "F · Pick up mirror"
 		_walk_hud_guide.text += "\n%s · Tab toggles panels" % mirror_action
 	# Units and range cues come exclusively from the uncalibrated walk intent.
@@ -557,7 +564,7 @@ func _apply_walk_camera() -> void:
 	camera.current = true
 	_update_walk_hud()
 	if is_instance_valid(_practice_tool_button):
-		_practice_tool_button.disabled = not _practice_tool.call("within_reach", _walk.get("position"))
+		_practice_tool_button.disabled = _practice_tool.call("interaction_status") != "ready"
 
 func _walk_enter_procedure() -> bool:
 	if _view != "environment" or not _walk_active or _walk == null or not bool(_walk.call("in_operatory_range")):
@@ -1851,7 +1858,7 @@ func _show_environment() -> void:
 		if _practice_tool != null and _practice_game != null:
 			_practice_tool_button = _button("Return mirror to stand (F)" if _practice_tool.call("holding") else "Pick up mirror (F)")
 			_practice_tool_button.name = "KL_PRACTICE_TOOL"
-			_practice_tool_button.disabled = not _practice_tool.call("within_reach", _walk.get("position"))
+			_practice_tool_button.disabled = _practice_tool.call("interaction_status") != "ready"
 			_practice_tool_button.pressed.connect(_interact_practice_tool)
 			_page.add_child(_practice_tool_button)
 		_page.add_child(_heading("FSP/KP language station: " + ("in range" if language_within else "walk toward the separate language-station marker"),14))
@@ -1936,7 +1943,7 @@ func _show_settings() -> void:
 func _switch_view(view: String) -> void:
 	if _practice_sequence != null:
 		return # no unrelated camera/view transitions while the sequence is active
-	if view not in VIEWS:
+	if view not in VIEWS and view != "drills":
 		return
 	if _view == "language" and view != "language":
 		_language_save_draft()
@@ -2010,6 +2017,8 @@ func _refresh() -> void:
 	var s: Dictionary = _stations[_station_index]
 	if _practice_sequence != null:
 		_page.add_child(_heading("Practice Sequence · source FDI changes in task panel; 3D scene safely hidden", 21))
+	elif _view == "drills":
+		_page.add_child(_heading("Dental procedure drills", 21))
 	elif _view == "settings":
 		_page.add_child(_heading("Settings", 21))
 	elif _view == "language":
@@ -2019,6 +2028,8 @@ func _refresh() -> void:
 		_page.add_child(_heading("Station %d/7 · %s" % [_station_index + 1, str(s["title"])], 17))
 	if _practice_sequence != null:
 		_show_practice_sequence()
+	elif _view == "drills":
+		_show_procedure_drills()
 	elif _view == "settings":
 		_show_settings()
 	elif _view == "progress":
@@ -2162,7 +2173,7 @@ func _interact_practice_tool() -> void:
 	if _practice_tool == null or _practice_game == null or not _walk_active or _view != "environment":
 		return
 	var was_holding: bool = _practice_tool.call("holding")
-	if not _practice_tool.call("interact", _walk.get("position")):
+	if not _practice_tool.call("interact"):
 		return
 	if was_holding:
 		_practice_game_feedback = "Mirror returned · +10 points." if _practice_game.call("award_handling") else "Mirror returned."
@@ -3482,6 +3493,10 @@ func _journey_procedure(index: int) -> void:
 	_refresh()
 
 func _show_journey() -> void:
+	var drills := _button("Open dental procedure drills · 20 exercises")
+	drills.name = "KL_OPEN_PROCEDURE_DRILLS"
+	drills.pressed.connect(_switch_view.bind("drills"))
+	_page.add_child(drills)
 	var d: Dictionary = _pathways[CASE_IDS[_case_index]]
 	var state := _journey_state()
 	var titles := ["Anamnese", "Untersuchung", "Arbeitsdiagnose", "Therapieplanung", "Ablauf & Sicherheit", "Auswertung"]
@@ -3561,6 +3576,50 @@ func _show_journey() -> void:
 	nav.add_child(forward)
 	_page.add_child(nav)
 
+
+func _show_procedure_drills() -> void:
+	_page.add_child(_heading("Choose a preassigned simulation. Check the setup, then review the model outcome.", 14))
+	var selection := OptionButton.new()
+	selection.name = "KL_PROCEDURE_DRILL_SELECT"
+	for index in range(PROCEDURE_DRILLS.DRILLS.size()):
+		selection.add_item(PROCEDURE_DRILLS.DRILLS[index][1], index)
+	selection.select(_procedure_drills.index)
+	selection.item_selected.connect(_start_procedure_drill)
+	_page.add_child(selection)
+	var entry: Array = PROCEDURE_DRILLS.DRILLS[_procedure_drills.index]
+	_page.add_child(_heading(entry[2], 17))
+	_page.add_child(_heading("%d/20 points · %d correction(s)" % [_procedure_drills.score(), _procedure_drills.errors], 14))
+	var stage: int = _procedure_drills.stage
+	if stage < 2:
+		_page.add_child(_heading("1 · Confirm the simulation setup" if stage == 0 else "2 · Review the simulation outcome", 15))
+		var first: int = (_procedure_drills.pass_number + stage + _procedure_drills.index) % 2
+		for option in [first, 1 - first]:
+			var choice := _button(entry[3 + stage * 2 + option])
+			choice.name = "KL_PROCEDURE_DRILL_CHOICE_%d" % option
+			choice.pressed.connect(_choose_procedure_drill.bind(stage, option))
+			_page.add_child(choice)
+	_page.add_child(_heading(_procedure_drills.feedback, 14))
+	var source := LinkButton.new()
+	source.text = "Read the topic reference"
+	source.uri = entry[7]
+	_page.add_child(source)
+	var restart := _button("Restart this drill")
+	restart.name = "KL_PROCEDURE_DRILL_RESTART"
+	restart.pressed.connect(_start_procedure_drill.bind(_procedure_drills.index))
+	_page.add_child(restart)
+	var back := _button("Back to Journey")
+	back.pressed.connect(_switch_view.bind("journey"))
+	_page.add_child(back)
+	_page.add_child(_heading("Fictional model exercise · points reflect the exercise choices.", 13))
+
+func _start_procedure_drill(index: int) -> void:
+	_procedure_drills.start(index)
+	_refresh()
+
+func _choose_procedure_drill(stage: int, option: int) -> void:
+	if _view == "drills":
+		_procedure_drills.choose(stage, option)
+		_refresh()
 
 func _show_atlas_controls() -> void:
 	if _atlas == null:
