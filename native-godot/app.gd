@@ -591,7 +591,8 @@ func _practical_source_complete(step_index: int) -> bool:
 	if not (value is Dictionary):
 		return false
 	var record: Dictionary = value
-	if record.get("correct", null) != true:
+	var correct_flag: Variant = record.get("correct", null)
+	if not (correct_flag is bool) or not correct_flag:
 		return false
 	var source_question: Variant = record.get("sourceQuestion", null)
 	if not (source_question is int or source_question is float):
@@ -2502,14 +2503,11 @@ func _show_practical() -> void:
 		next_task.disabled = _procedure_step_index >= steps.size() - 1
 		next_task.pressed.connect(_procedure_move_step.bind(1))
 		_page.add_child(next_task)
-		var needs_review: int = 0
-		for i in range(steps.size()):
-			if not _practical_source_complete(i):
-				needs_review += 1
-		var review_button := _button("Next task to review (R) · %d remaining" % needs_review)
-		review_button.disabled = needs_review == 0
+		var review_button := _button("")
+		review_button.name = "KL_PRACTICAL_REVIEW"
 		review_button.pressed.connect(_procedure_jump_to_review)
 		_page.add_child(review_button)
+		_update_practical_review_button()
 		var show_all := _button("Show all original practical tasks")
 		show_all.pressed.connect(_set_procedure_guided.bind(false))
 		_page.add_child(show_all)
@@ -2699,7 +2697,7 @@ func _practical_choice_record(step_index: int, step: Dictionary) -> Dictionary:
 		"solved": valid and _practical_source_complete(step_index)}
 
 func _sync_practical_choice_feedback(step_index: int) -> void:
-	if not _procedure_context_available():
+	if _page == null or not _procedure_context_available():
 		return
 	var steps: Array = _content["practical"][_case_index]
 	if step_index < 0 or step_index >= steps.size():
@@ -2905,6 +2903,24 @@ func _record_practical(step_index: int, response: Variant, correct: bool, detail
 	if _practical_feedback.has(step_index):
 		var display: Label = _practical_feedback[step_index]
 		display.text = ("Correct. " if correct else "Review required. ") + detail
+	_update_practical_review_button()
+
+func _update_practical_review_button() -> void:
+	if _page == null:
+		return
+	var review_button := _page.get_node_or_null("KL_PRACTICAL_REVIEW") as Button
+	if review_button == null:
+		return
+	var steps: Array = _content["practical"][_case_index]
+	var needs_review := 0
+	for i in range(steps.size()):
+		if not _practical_source_complete(i):
+			needs_review += 1
+	var only_current := needs_review == 1 and not _practical_source_complete(_procedure_step_index)
+	review_button.disabled = needs_review == 0 or only_current
+	review_button.text = "Next task to review (R) · %d remaining" % needs_review
+	if only_current:
+		review_button.text = "1 remaining · Complete or correct this task"
 
 func _mark_studied() -> void:
 	if _practice_sequence != null:

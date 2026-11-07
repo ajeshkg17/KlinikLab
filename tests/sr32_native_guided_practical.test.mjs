@@ -53,7 +53,7 @@ test('SR32 ships source-exact Godot regression and no owner-PC worker/queue muta
 test('SR33 review-first action skips correct source tasks without scoring or cutting',()=>{
  for(const marker of ['func _procedure_jump_to_review() -> bool:', 'KEY_R',
    'review_button.pressed.connect(_procedure_jump_to_review)',
-   'review_button.disabled = needs_review == 0',
+   'review_button.disabled = needs_review == 0 or only_current',
    'var candidate: int = (_procedure_step_index + offset) % steps.size()',
    'if not _practical_source_complete(candidate):'])
   assert.ok(app.includes(marker),marker);
@@ -69,7 +69,7 @@ test('SR33 review-first action skips correct source tasks without scoring or cut
 test('SR73 review refuses source-mismatched saved flags and is enforced in real Godot CI',()=>{
  const workflow=read('.github/workflows/sr1c-godot-4-7-native-parse.yml');
  const smoke=read('native-godot/guided-practical-smoke.gd');
- for(const marker of ['func _practical_source_complete(step_index: int) -> bool:', 'record.get("correct", null) != true', 'sourceQuestion', 'is_finite(source_number)', 'if not _practical_source_complete(i):', 'if not _practical_source_complete(candidate):']) assert.ok(app.includes(marker),marker);
+ for(const marker of ['func _practical_source_complete(step_index: int) -> bool:', 'not (correct_flag is bool) or not correct_flag', 'sourceQuestion', 'is_finite(source_number)', 'if not _practical_source_complete(i):', 'if not _practical_source_complete(candidate):']) assert.ok(app.includes(marker),marker);
  assert.match(smoke,/SR73_SIX_FDI_SOURCE_VALIDATED_PRACTICAL_REVIEW_PASS/);
  assert.match(smoke,/Cross-step forged Practical completion trusted/);
  assert.match(smoke,/Wrong selected value with correct=true trusted/);
