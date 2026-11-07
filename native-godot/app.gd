@@ -77,6 +77,17 @@ var _camera_mode := "overview"
 var _page: VBoxContainer
 var _progress_label: Label
 var _middle: Control
+var _fdi16_comparison: VBoxContainer
+var _fdi16_sections: PanelContainer
+var _fdi16_toggle: Button
+var _fdi16_depth: HSlider
+var _fdi16_depth_label: Label
+var _fdi16_section_status: Label
+var _fdi16_images: Array[TextureRect] = []
+var _fdi16_callouts: Control
+var _fdi16_targets: Dictionary = {}
+var _fdi16_slice_key := ""
+var _fdi16_show_sections := true
 var _left_panel: PanelContainer
 var _right_panel: PanelContainer
 var _left_column: VBoxContainer
@@ -162,6 +173,7 @@ var _practice_game: RefCounted
 var _practice_tool: Node3D
 var _practice_tool_button: Button
 var _practice_game_feedback := ""
+var _first_person_full_view := false
 
 
 func _ready() -> void:
@@ -275,6 +287,11 @@ func _ready() -> void:
 			reporter.call_deferred("run",self,job_id)
 			break
 	print("SR2_GODOT_APP_FOUNDATION_READY 6 cases / 7 stations / source quizzes / native progress. FULL APP NOT YET PORTED")
+	if OS.get_cmdline_user_args().has("--first-person-practice"):
+		_first_person_full_view = true
+		_switch_view("environment")
+		_practice_game_start()
+		_start_clinic_walk()
 
 func _build_walk_hud() -> void:
 	_walk_hud = Control.new()
@@ -361,6 +378,13 @@ func _update_walk_hud() -> void:
 	var exit_help := "Esc releases · Esc again exits" if _walk_mouse_captured else "Esc exits"
 	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · %s" % [
 		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), action, exit_help]
+	if _practice_game != null:
+		_walk_hud_title.text = "PRACTICE GAME · %d/%d points\n%s" % [
+			int(_practice_game.call("score")), int(_practice_game.call("max_score")), look_help]
+		var mirror_action := "Approach the turquoise stand"
+		if _practice_tool.call("within_reach", _walk.get("position")):
+			mirror_action = "F · Return mirror" if _practice_tool.call("holding") else "F · Pick up mirror"
+		_walk_hud_guide.text += "\n%s · Tab toggles panels" % mirror_action
 	# Units and range cues come exclusively from the uncalibrated walk intent.
 	# No new score, patient mapping, geometry, or clinical accuracy claim.
 
@@ -459,6 +483,12 @@ func _handle_walk_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		elif _practice_game != null and _walk_keyboard_allowed() and (key.physical_keycode == KEY_F or key.keycode == KEY_F):
 			_interact_practice_tool()
+			get_viewport().set_input_as_handled()
+		elif _practice_game != null and (key.physical_keycode == KEY_TAB or key.keycode == KEY_TAB):
+			_first_person_full_view = not _first_person_full_view
+			if not _first_person_full_view:
+				_release_walk_mouse()
+			_update_responsive_layout()
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		var mouse: InputEventMouseButton = event
@@ -1025,6 +1055,9 @@ func _update_responsive_layout() -> void:
 	var nav_width := clampf(width * 0.15, 224.0, 248.0)
 	var notes_width := clampf(width * 0.22, 306.0, 352.0)
 	var writing_focus := _writing_focus_active()
+	var full_walk := _first_person_full_view and _view == "environment" and _walk_active and _practice_game != null
+	_left_column.visible = not full_walk
+	_right_column.visible = not full_walk
 	_left_column.custom_minimum_size.x = nav_width
 	_left_panel.custom_minimum_size.x = nav_width
 	_middle.visible = _view in ["clinic", "environment", "anatomy", "scans"] and not writing_focus and _practice_sequence == null
@@ -1261,7 +1294,7 @@ func _build_app() -> void:
 		var camera_button := _toolbar_button(mode.capitalize() + " camera")
 		camera_button.name = "KL_TOOLBAR_CAMERA_" + mode
 		camera_button.tooltip_text = mode.capitalize() + " · switch source-native 3D camera (Clinic or Environment)"
-		camera_button.pressed.connect(_set_camera_mode.bind(mode))
+		camera_button.pressed.connect(_choose_camera_mode.bind(mode))
 		_toolbar_camera_buttons[mode] = camera_button
 		_toolbar.add_child(camera_button)
 	_update_toolbar_columns()
@@ -1340,6 +1373,7 @@ func _build_app() -> void:
 	_middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(_middle)
 	_build_walk_hud() # Transparent, non-interactive overlay; only shown while walking.
+	_build_fdi16_comparison()
 	_right_column = VBoxContainer.new()
 	body.add_child(_right_column)
 	_right_panel = PanelContainer.new()
@@ -1373,6 +1407,157 @@ func _show_blocked(reason: String) -> void:
 	label.text = "KLINIKLAB NATIVE STARTUP BLOCKED: " + reason
 	label.position = Vector2(20, 20)
 	_shell.add_child(label)
+
+func _build_fdi16_comparison() -> void:
+	_fdi16_comparison = VBoxContainer.new()
+	_fdi16_comparison.name = "KL_FDI16_COMPARISON"
+	_fdi16_comparison.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fdi16_comparison.hide()
+	_middle.add_child(_fdi16_comparison)
+	_fdi16_comparison.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var header := PanelContainer.new()
+	_style_panel(header)
+	_fdi16_comparison.add_child(header)
+	var headings := VBoxContainer.new()
+	header.add_child(headings)
+	var top := HBoxContainer.new()
+	headings.add_child(top)
+	top.add_child(_heading("FDI 16 · Upper-right first molar", 16))
+	_fdi16_toggle = _button("Show 3D models")
+	_fdi16_toggle.name = "KL_FDI16_SECTION_TOGGLE"
+	_fdi16_toggle.custom_minimum_size.x = 114
+	_fdi16_toggle.size_flags_horizontal = Control.SIZE_FILL
+	_fdi16_toggle.pressed.connect(func() -> void:
+		_fdi16_show_sections = not _fdi16_show_sections
+		_update_fdi16_comparison()
+	)
+	top.add_child(_fdi16_toggle)
+	var captions := HBoxContainer.new()
+	headings.add_child(captions)
+	for title in ["Untouched reference", "Editable practice model"]:
+		var caption := _heading(title, 15)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		captions.add_child(caption)
+	_fdi16_sections = PanelContainer.new()
+	_fdi16_sections.name = "KL_FDI16_SECTION_PANEL"
+	_fdi16_sections.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_style_panel(_fdi16_sections)
+	_fdi16_comparison.add_child(_fdi16_sections)
+	var content := VBoxContainer.new()
+	_fdi16_sections.add_child(content)
+	var images := HBoxContainer.new()
+	images.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(images)
+	for i in range(2):
+		var texture := TextureRect.new()
+		texture.name = "KL_FDI16_SECTION_IMAGE_" + str(i)
+		texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture.custom_minimum_size.y = 96
+		texture.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		images.add_child(texture)
+		_fdi16_images.append(texture)
+		if i == 0:
+			_fdi16_callouts = Control.new()
+			_fdi16_callouts.name = "KL_FDI16_ANATOMY_CALLOUTS"
+			_fdi16_callouts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			texture.add_child(_fdi16_callouts)
+			_fdi16_callouts.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			_fdi16_callouts.draw.connect(_draw_fdi16_callouts)
+			_fdi16_callouts.resized.connect(_fdi16_callouts.queue_redraw)
+	var legend := HFlowContainer.new()
+	content.add_child(legend)
+	const VOLUME := preload("res://volume-cut.gd")
+	for i in range(VOLUME.TISSUES.size()):
+		var tissue := _heading("● " + VOLUME.TISSUES[i].capitalize() + "  ", 14)
+		tissue.size_flags_horizontal = Control.SIZE_FILL
+		tissue.add_theme_color_override("font_color", VOLUME.PALETTE[i].lightened(0.25))
+		legend.add_child(tissue)
+	_fdi16_depth_label = _heading("", 14)
+	content.add_child(_fdi16_depth_label)
+	_fdi16_depth = HSlider.new()
+	_fdi16_depth.name = "KL_FDI16_SECTION_DEPTH"
+	_fdi16_depth.max_value = 100
+	_fdi16_depth.step = 5
+	_fdi16_depth.value = 40
+	_fdi16_depth.custom_minimum_size.y = 27
+	_fdi16_depth.value_changed.connect(func(_value: float) -> void: _refresh_fdi16_slices.call_deferred())
+	content.add_child(_fdi16_depth)
+	_fdi16_section_status = _heading("", 13)
+	content.add_child(_fdi16_section_status)
+	content.add_child(_heading("Synthetic teaching model · tooth tissues only · same depth and scale on both sides", 12))
+
+func _update_fdi16_comparison() -> void:
+	if _fdi16_comparison == null:
+		return
+	# Preserve the live 3D camera and tool controls at the Practical station.
+	_fdi16_comparison.visible = _view == "clinic" and _case_index == 0 and _station_index != 4 and _middle.visible and _volume != null
+	_fdi16_sections.visible = _fdi16_show_sections
+	_fdi16_toggle.text = "Show 3D models" if _fdi16_show_sections else "Show cross-sections"
+	_refresh_fdi16_slices()
+
+func _refresh_fdi16_slices() -> void:
+	if not _fdi16_comparison.is_visible_in_tree() or not _fdi16_show_sections:
+		return
+	var strokes: Array = _volume.call("export_strokes")
+	var key := str(_fdi16_depth.value) + JSON.stringify(strokes)
+	if _fdi16_slice_key == key:
+		return
+	_fdi16_slice_key = key
+	var slices: Array[Image] = _volume.call("cross_sections", _fdi16_depth.value / 100.0)
+	for i in range(slices.size()):
+		_fdi16_images[i].texture = ImageTexture.create_from_image(slices[i])
+	_find_fdi16_callouts(slices[0])
+	_fdi16_callouts.queue_redraw()
+	_fdi16_depth_label.text = "Slice depth · front to back · %d%%" % int(_fdi16_depth.value)
+	_fdi16_section_status.text = "No practice cuts yet. The sections match." if strokes.is_empty() else "Right side shows saved practice cuts where they intersect this slice."
+
+func _find_fdi16_callouts(section: Image) -> void:
+	const VOLUME := preload("res://volume-cut.gd")
+	const PREFERRED := [Vector2(0.20, 0.27), Vector2(0.72, 0.34), Vector2(0.48, 0.46), Vector2(0.64, 0.81)]
+	_fdi16_targets.clear()
+	var distances := [INF, INF, INF, INF]
+	var extent := Vector2(section.get_size())
+	for y in range(section.get_height()):
+		for x in range(section.get_width()):
+			var color := section.get_pixel(x, y)
+			if color.a == 0.0:
+				continue
+			for tissue in range(PREFERRED.size()):
+				var expected: Color = VOLUME.PALETTE[tissue]
+				if Vector3(color.r - expected.r, color.g - expected.g, color.b - expected.b).length_squared() >= 0.0001:
+					continue
+				var uv := (Vector2(x, y) + Vector2(0.5, 0.5)) / extent
+				var distance := uv.distance_squared_to(PREFERRED[tissue])
+				if distance < distances[tissue]:
+					distances[tissue] = distance
+					_fdi16_targets[tissue] = uv
+				break
+
+func _draw_fdi16_callouts() -> void:
+	var overlay := _fdi16_callouts
+	var reference := _fdi16_images[0].texture
+	if reference == null or overlay.size.x < 226.0 or overlay.size.y < 170.0:
+		return
+	var image_size := Vector2(reference.get_size())
+	var scale_factor := minf(overlay.size.x / image_size.x, overlay.size.y / image_size.y)
+	var drawn_size := image_size * scale_factor
+	var origin := (overlay.size - drawn_size) * 0.5
+	var font := ThemeDB.fallback_font
+	const FONT_SIZE := 12
+	const LABELS := ["Enamel", "Dentin", "Pulp", "Cementum"]
+	const ROWS := [0.17, 0.33, 0.54, 0.79]
+	for tissue in _fdi16_targets:
+		var at: Vector2 = origin + (_fdi16_targets[tissue] as Vector2) * drawn_size
+		var label: String = LABELS[tissue]
+		var left: bool = tissue in [0, 2]
+		var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x
+		var box := Rect2(4.0 if left else overlay.size.x - width - 12.0, ROWS[tissue] * overlay.size.y, width + 8.0, 18.0)
+		var lead := Vector2(box.end.x if left else box.position.x, box.get_center().y)
+		overlay.draw_line(lead, at, Color("#b5dae7"), 1.0, true)
+		overlay.draw_circle(at, 2.5, Color("#e9faff"), true, -1.0, true)
+		overlay.draw_rect(box, Color("#0e1e2b"))
+		overlay.draw_string(font, box.position + Vector2(4, 13), label, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE, Color("#edf7ff"))
 
 func _clear_page() -> void:
 	_language_save_draft()
@@ -1681,6 +1866,12 @@ func _show_environment() -> void:
 	to_clinic.pressed.connect(_switch_view.bind("clinic"))
 	_page.add_child(to_clinic)
 
+func _choose_camera_mode(mode: String) -> void:
+	if _fdi16_comparison != null and _fdi16_comparison.visible:
+		_fdi16_show_sections = false
+		_update_fdi16_comparison()
+	_set_camera_mode(mode)
+
 func _set_camera_mode(mode: String) -> void:
 	if _scene == null or not (mode in ["overview", "teeth"]):
 		return
@@ -1804,6 +1995,7 @@ func _refresh() -> void:
 	_sync_navigation_selection()
 	_sync_toolbar_selection()
 	_update_walk_hud()
+	_update_fdi16_comparison()
 	if _screen_title != null:
 		if _practice_sequence != null:
 			var current: Dictionary = _practice_sequence.call("state")
@@ -1872,7 +2064,7 @@ func _refresh() -> void:
 				_page.add_child(_heading("FDI %s: some source-derived geometry unavailable or failed integrity checking; no FDI16 model substitution." % FDI[_case_index], 14))
 		else:
 			if _volume != null:
-				_page.add_child(_heading("FDI16: original untouched mesh (left), editable synthetic scalar-field cut mesh (right). Changes are real 3D volume subtraction with undo/reset; not calibrated clinical drilling.", 14))
+				_page.add_child(_heading("FDI 16 comparison: untouched reference on the left and editable practice model on the right. Practice cuts use the 3D model at the Practical station.", 14))
 			else:
 				_page.add_child(_heading("FDI16 original immutable mesh states only. Editable source field unavailable or failed integrity checks.", 14))
 		if not practical_first and not quiz_first:
