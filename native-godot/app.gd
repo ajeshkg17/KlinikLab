@@ -178,6 +178,7 @@ const PROCEDURE_DRILLS := preload("res://procedure-drills.gd")
 var _procedure_drills := PROCEDURE_DRILLS.new()
 const PROCEDURE_LAB := preload("res://procedure-lab.gd")
 var _procedure_lab: PROCEDURE_LAB
+var _chair_lab_walk_selected := false
 
 
 func _ready() -> void:
@@ -380,6 +381,8 @@ func _update_walk_hud() -> void:
 	var op: Dictionary = _walk.call("operatory_guidance")
 	var language: Dictionary = _walk.call("language_guidance")
 	var action := "E · Enter operatory" if bool(op.get("inRange",false)) else "E · Enter FSP/KP" if bool(language.get("inRange",false)) else "Approach station · E interacts"
+	if bool(op.get("inRange", false)) and (_practice_game == null or _chair_lab_walk_selected):
+		action = "E · " + str(PROCEDURE_DRILLS.DRILLS[_procedure_drills.index][1])
 	var exit_help := "Esc releases · Esc again exits" if _walk_mouse_captured else "Esc exits"
 	_walk_hud_guide.text = "OPERATORY · %s · %.1f units\nFSP/KP · %s · %.1f units\n%s · %s" % [
 		str(op["bearing"]), float(op["units"]), str(language["bearing"]), float(language["units"]), action, exit_help]
@@ -398,7 +401,7 @@ func _update_walk_hud() -> void:
 	# No new score, patient mapping, geometry, or clinical accuracy claim.
 
 func _walk_keyboard_allowed() -> bool:
-	if not _walk_active or _view != "environment" or _walk == null:
+	if not _walk_active or _view != "environment" or _walk == null or is_instance_valid(_procedure_lab):
 		return false
 	# Never move the camera when the learner is editing German FSP/KP notes
 	# or entering free text into a UI control.
@@ -488,7 +491,7 @@ func _handle_walk_input(event: InputEvent) -> void:
 				_stop_clinic_walk()
 			get_viewport().set_input_as_handled()
 		elif _walk_keyboard_allowed() and (key.physical_keycode == KEY_E or key.keycode == KEY_E):
-			if _walk_enter_language_station() or _walk_enter_procedure():
+			if _walk_enter_language_station() or ((_practice_game == null or _chair_lab_walk_selected) and _walk_enter_chair_lab()) or _walk_enter_procedure():
 				get_viewport().set_input_as_handled()
 		elif _practice_game != null and _walk_keyboard_allowed() and (key.physical_keycode == KEY_F or key.keycode == KEY_F):
 			_interact_practice_tool()
@@ -525,12 +528,13 @@ func _handle_walk_input(event: InputEvent) -> void:
 		_apply_walk_camera()
 		get_viewport().set_input_as_handled()
 
-func _start_clinic_walk() -> void:
+func _start_clinic_walk(for_chair_lab := false) -> void:
 	if _view != "environment" or _cc0_clinic == null or _walk == null:
 		return
 	_direct_bur_mode = false
 	_release_walk_mouse()
 	_walk_active = true
+	_chair_lab_walk_selected = for_chair_lab
 	_cc0_clinic.call("set_walk_ceiling_visible", true)
 	_walk.call("reset")
 	_walk_station_return_available = false
@@ -543,6 +547,7 @@ func _start_clinic_walk() -> void:
 func _stop_clinic_walk() -> void:
 	_release_walk_mouse()
 	_walk_active = false
+	_chair_lab_walk_selected = false
 	if _cc0_clinic != null:
 		_cc0_clinic.call("set_walk_ceiling_visible", false)
 	if _view == "environment":
@@ -584,6 +589,12 @@ func _walk_enter_procedure() -> bool:
 		_practice_game_feedback = "Operatory reached · +10 points in this run."
 		_refresh()
 	return true
+
+func _walk_enter_chair_lab() -> bool:
+	if _view != "environment" or not _walk_active or not bool(_walk.call("in_operatory_range")):
+		return false
+	_start_procedure_lab()
+	return is_instance_valid(_procedure_lab)
 
 # An explicit station exit restores the bounded walk without restarting at spawn.
 # Never enable the bur, grade, or rewrite learner progress.
@@ -1854,6 +1865,21 @@ func _show_environment() -> void:
 		_page.add_child(_heading("Room exploration only: bounded, synthetic scene-unit navigation; NO collision, verified room dimensions or clinical-scale calibration.",13))
 		var within: bool = bool(_walk.call("in_operatory_range"))
 		var language_within: bool = bool(_walk.call("in_language_station_range"))
+		var chair_case := OptionButton.new()
+		chair_case.name = "KL_CHAIR_CASE"
+		for index in range(PROCEDURE_DRILLS.DRILLS.size()):
+			chair_case.add_item(PROCEDURE_DRILLS.DRILLS[index][1], index)
+		chair_case.select(_procedure_drills.index)
+		chair_case.item_selected.connect(func(index: int) -> void:
+			_procedure_drills.start(index)
+			_refresh()
+		)
+		_page.add_child(chair_case)
+		var chair_lab := _button("Start selected 3D case at the chair" + (" (E)" if _practice_game == null or _chair_lab_walk_selected else ""))
+		chair_lab.name = "KL_CHAIR_LAB"
+		chair_lab.disabled = not within
+		chair_lab.pressed.connect(_walk_enter_chair_lab)
+		_page.add_child(chair_lab)
 		_page.add_child(_heading("Dental practical operatory: " + ("in range" if within else "walk toward the operatory marker"),14))
 		var enter := _button("Enter selected FDI %s practical station (E)" % FDI[_case_index])
 		enter.disabled = not within
@@ -3597,7 +3623,14 @@ func _show_procedure_drills() -> void:
 	launch.name = "KL_START_PROCEDURE_LAB"
 	launch.pressed.connect(_start_procedure_lab)
 	_page.add_child(launch)
-	for trial in [["Run selected procedure trial", str(_procedure_drills.index)], ["Run 10 grab checks", "grabs"], ["Run all 20 procedure trials", "all"]]:
+	var walk_to_chair := _button("Walk to the chair with this case")
+	walk_to_chair.name = "KL_WALK_TO_CHAIR"
+	walk_to_chair.pressed.connect(func() -> void:
+		_switch_view("environment")
+		_start_clinic_walk(true)
+	)
+	_page.add_child(walk_to_chair)
+	for trial in [["Run selected procedure trial", str(_procedure_drills.index)], ["Run walk-to-chair extraction trial", "chair"], ["Run 10 grab checks", "grabs"], ["Run all 20 procedure trials", "all"]]:
 		var run := _button(trial[0])
 		run.pressed.connect(_start_automated_trial.bind(trial[1]))
 		_page.add_child(run)
@@ -3633,10 +3666,21 @@ func _start_procedure_lab(hand_design := 10) -> void:
 	if is_instance_valid(_procedure_lab):
 		return
 	_release_walk_mouse()
+	var return_view := _view
+	if _view != "environment":
+		_switch_view("environment")
+	_cc0_clinic.call("set_walk_ceiling_visible", true)
+	var walk_model: Dictionary = _walk.get_script().get_script_constant_map()
+	var station: Vector3 = walk_model["OPERATORY"]
 	_procedure_lab = PROCEDURE_LAB.new()
 	_shell.add_child(_procedure_lab)
-	_procedure_lab.closed.connect(func() -> void: _procedure_lab = null)
-	_procedure_lab.start(_procedure_drills.index, hand_design)
+	_procedure_lab.closed.connect(func() -> void:
+		_procedure_lab = null
+		_cc0_clinic.call("set_walk_ceiling_visible", _walk_active)
+		if return_view != "environment":
+			_switch_view(return_view)
+	)
+	_procedure_lab.start(_procedure_drills.index, hand_design, get_viewport().world_3d, station)
 
 func _start_procedure_drill(index: int) -> void:
 	_procedure_drills.start(index)
