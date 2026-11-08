@@ -1,0 +1,270 @@
+extends SceneTree
+const JOURNAL := "user://kliniklab-native-progress-v2.json"
+const DRILLS := preload("res://procedure-drills.gd")
+const HANDS := preload("res://practice-tool-handling.gd")
+var _app: Node3D
+var _folder := ""
+var _video := false
+var _action_hold := 0.28
+var _mode := "all"
+var _runs: Array[Dictionary] = []
+var _started := Time.get_ticks_msec()
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _finish(status: String, detail := "") -> void:
+	var file := FileAccess.open(_folder.path_join("result.json"), FileAccess.WRITE)
+	if file == null:
+		push_error("Could not write procedure trial report.")
+		quit(1)
+		return
+	file.store_string(JSON.stringify({"schema": 1, "status": status, "error": detail,
+		"source_sha": FileAccess.get_file_as_string("res://source/expected-sha.txt").strip_edges(),
+		"mode": _mode, "video_fps": 24 if _video else 0, "runs": _runs,
+		"learner_journal_unchanged": status == "pass",
+		"elapsed_ms": Time.get_ticks_msec() - _started}, "\t") + "\n")
+	file.close()
+	if status != "pass":
+		push_error(detail)
+	quit(0 if status == "pass" else 1)
+
+func _open(index: int, hand_design := HANDS.FINAL_DESIGN_PASS) -> Control:
+	var page: Node = _app.get("_page")
+	var picker := page.get_node("KL_PROCEDURE_DRILL_SELECT") as OptionButton
+	picker.select(index)
+	picker.item_selected.emit(index)
+	if hand_design == HANDS.FINAL_DESIGN_PASS:
+		(page.get_node("KL_START_PROCEDURE_LAB") as Button).pressed.emit()
+	else:
+		_app.call("_start_procedure_lab", hand_design)
+	return _app.get("_procedure_lab")
+
+func _aim(lab: Control, target: String) -> void:
+	var camera: Camera3D = lab.get("_camera")
+	var marker: Node3D = (lab.get("_targets") as Dictionary)[target]
+	camera.look_at(marker.global_position)
+
+func _settle() -> void:
+	await physics_frame
+	await physics_frame
+
+func _action(lab: Control, target: String, control: String, key := false) -> void:
+	_aim(lab, target)
+	if key:
+		var event := InputEventKey.new()
+		event.physical_keycode = KEY_F
+		event.pressed = true
+		lab.call("handle_input", event)
+	else:
+		(lab.find_child(control, true, false) as Button).pressed.emit()
+	await _settle()
+	if _video:
+		await create_timer(_action_hold).timeout
+
+func _complete(lab: Control) -> bool:
+	var prompt: Label = lab.get("_status")
+	var feedback: Label = lab.get("_feedback")
+	var progress := lab.find_child("KL_LAB_PROGRESS", true, false) as Label
+	var reference := lab.find_child("KL_LAB_TOPIC_REFERENCE", true, false) as LinkButton
+	if reference == null or not reference.uri.begins_with("https://") or reference.uri.ends_with("/all-topics-a-z"):
+		return false
+	var original := prompt.text
+	await _action(lab, "wrong_tool", "KL_LAB_GRAB")
+	if int(lab.get("score")) != 0 or lab.get("held") or prompt.text != original or not feedback.text.contains("assigned instrument"):
+		return false
+	await _action(lab, "tool", "KL_LAB_GRAB", true)
+	if int(lab.get("score")) != 5 or not lab.get("held") or not progress.text.contains("0/2"):
+		return false
+	var site_label := ((lab.get("_targets") as Dictionary)["site_0"] as Node3D).get_child(2) as Label3D
+	if site_label.modulate != Color("#d0ffe4") or site_label.outline_size < 8:
+		return false
+	var tool: Node3D = lab.get("_correct_tool")
+	var hands: Node3D = lab.get("_hands")
+	if tool.get_parent() != hands.call("right_hand"):
+		return false
+	await _action(lab, "site_1", "KL_LAB_USE")
+	if int(lab.get("next_target")) != 0 or not feedback.text.contains("model action"):
+		return false
+	var picker := lab.find_child("KL_LAB_TARGETS", true, false) as OptionButton
+	for index in range(picker.item_count):
+		if picker.get_item_metadata(index) == "site_0":
+			picker.select(index)
+			picker.item_selected.emit(index)
+			(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
+			await _settle()
+			if not picker.is_item_disabled(index):
+				return false
+			break
+	await _action(lab, "site_0", "KL_LAB_USE")
+	if int(lab.get("next_target")) != 1 or int(lab.get("score")) != 5 or not progress.text.contains("1/2"):
+		return false
+	await _action(lab, "site_1", "KL_LAB_USE")
+	if int(lab.get("score")) != 15:
+		return false
+	var model_results: Dictionary = lab.get("model_results")
+	var scenario: Dictionary = lab.get("scenario")
+	if model_results.get("site_0") != scenario["actions"][0] or model_results.get("site_1") != scenario["actions"][1]:
+		return false
+	await _action(lab, "verify", "KL_LAB_USE")
+	if int(lab.get("score")) != 15:
+		return false
+	await _action(lab, "return", "KL_LAB_GRAB", true)
+	if tool.get_parent() != lab.get("_tool_home") or not progress.text.contains("Verify the model"):
+		return false
+	var first_site: Node3D = (lab.get("_targets") as Dictionary)["site_0"]
+	first_site.show()
+	await _action(lab, "verify", "KL_LAB_USE")
+	if int(lab.get("score")) != 15:
+		return false
+	first_site.hide()
+	await _action(lab, "verify", "KL_LAB_USE")
+	var summary := lab.find_child("KL_LAB_OUTCOME_SUMMARY", true, false) as Label
+	return int(lab.get("score")) == 20 and int(lab.get("stage")) == 3 and not lab.get("held") and progress.text.contains("Verified") and summary.visible and summary.text.contains(scenario["actions"][0]) and summary.text.contains(scenario["actions"][1])
+
+func _procedure(index: int) -> bool:
+	var lab := _open(index)
+	await _settle()
+	if not await _complete(lab):
+		return false
+	var first: Array = lab.get("events").duplicate(true)
+	var first_id: int = lab.get("run_id")
+	(lab.find_child("KL_PROCEDURE_RESTART", true, false) as Button).pressed.emit()
+	if int(lab.get("score")) != 0 or lab.get("held") or lab.get("run_id") != first_id + 1:
+		return false
+	if (lab.get("events") as Array).size() != 1 or not (lab.get("model_results") as Dictionary).is_empty() or not (lab.get("_applied") as Dictionary).is_empty():
+		return false
+	if not await _complete(lab):
+		return false
+	var scenario: Dictionary = lab.get("scenario")
+	_runs.append({"id": scenario["id"], "score": 20, "max_score": 20,
+		"clean_replay": true, "first_run": first, "events": lab.get("events")})
+	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
+	await process_frame
+	return true
+
+func _grab_tests(hand_design := HANDS.FINAL_DESIGN_PASS) -> bool:
+	var lab := _open(0, hand_design)
+	await _settle()
+	var camera: Camera3D = lab.get("_camera")
+	var targets: Dictionary = lab.get("_targets")
+	var target: Node3D = targets["tool"]
+	var names := ["keyboard", "button", "facing away", "outside reach", "inside reach",
+		"blocked line of sight", "wrong tool", "return", "rapid repeat", "reset while holding"]
+	for index in range(names.size()):
+		lab.call("_restart")
+		var expected := true
+		var blocker: StaticBody3D
+		match index:
+			2:
+				camera.look_at(camera.global_position + Vector3.BACK)
+				(lab.find_child("KL_LAB_GRAB", true, false) as Button).pressed.emit()
+				await _settle()
+				expected = false
+			3, 4:
+				camera.global_position = target.global_position + Vector3.BACK * (4.85 if index == 3 else 4.45)
+				await _action(lab, "tool", "KL_LAB_GRAB")
+				expected = index == 4
+			5:
+				blocker = StaticBody3D.new()
+				blocker.collision_layer = 1
+				var bounds := CollisionShape3D.new()
+				bounds.shape = SphereShape3D.new()
+				blocker.add_child(bounds)
+				(camera.get_parent() as Node3D).add_child(blocker)
+				blocker.global_position = camera.global_position.lerp(target.global_position, 0.5)
+				await _settle()
+				await _action(lab, "tool", "KL_LAB_GRAB")
+				blocker.queue_free()
+				expected = false
+			6:
+				await _action(lab, "wrong_tool", "KL_LAB_GRAB")
+				expected = false
+			_:
+				await _action(lab, "tool", "KL_LAB_GRAB", index == 0)
+		if bool(lab.get("held")) != expected or int(lab.get("score")) != (5 if expected else 0):
+			return false
+		var hands: Node3D = lab.get("_hands")
+		var instrument: Node3D = lab.get("_correct_tool")
+		var hand: Node3D = hands.call("right_hand")
+		if instrument.get_parent() != (hand if expected else lab.get("_tool_home")):
+			return false
+		if expected:
+			if not _video:
+				(hands.get("_pose_tween") as Tween).custom_step(0.25)
+			if float(hands.get("_grip")) < 0.9 or instrument.position.length() > 0.10:
+				return false
+			var viewport: Viewport = camera.get_viewport()
+			if camera.is_position_behind(hand.global_position) or not viewport.get_visible_rect().has_point(camera.unproject_position(hand.global_position)):
+				return false
+		if index == 7:
+			await _action(lab, "site_0", "KL_LAB_USE")
+			await _action(lab, "site_1", "KL_LAB_USE")
+			await _action(lab, "return", "KL_LAB_GRAB")
+			if lab.get("held") or int(lab.get("score")) != 15:
+				return false
+		elif index == 8:
+			await _action(lab, "tool", "KL_LAB_GRAB", true)
+			if not lab.get("held") or int(lab.get("score")) != 5:
+				return false
+		elif index == 9:
+			lab.call("_restart")
+			if lab.get("held") or int(lab.get("score")) != 0:
+				return false
+		_runs.append({"name": names[index], "score": 1, "max_score": 1,
+			"hand_design": hand_design, "design_change": HANDS.DESIGN_NOTES[hand_design - 1],
+			"window_size": str(root.size), "events": (lab.get("events") as Array).duplicate(true)})
+	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
+	await process_frame
+	return true
+
+func _run() -> void:
+	var args := OS.get_cmdline_user_args()
+	if args.is_empty():
+		push_error("Provide a trial folder with a fresh profile subdirectory.")
+		quit(1)
+		return
+	_folder = args[0].replace("\\", "/").simplify_path().trim_suffix("/")
+	var profile := _folder.path_join("profile").to_lower() + "/"
+	var user_data := OS.get_user_data_dir().replace("\\", "/").simplify_path().to_lower() + "/"
+	if not user_data.begins_with(profile) or OS.has_environment("KLINIKLAB_GITHUB_TOKEN"):
+		push_error("Procedure trial requires its own profile and no upload token.")
+		quit(1)
+		return
+	_video = args.has("--video")
+	if args.has("--compact"):
+		_action_hold = 0.08
+	for arg in args:
+		if arg.begins_with("--mode="):
+			_mode = arg.trim_prefix("--mode=")
+	root.size = Vector2i(1280, 720)
+	_app = load("res://app.tscn").instantiate()
+	root.add_child(_app)
+	await process_frame
+	_app.call("_switch_view", "drills")
+	var journal := FileAccess.get_file_as_bytes(JOURNAL)
+	if _mode == "grabs":
+		if not await _grab_tests():
+			_finish("fail", "Grab case failed after %d completed cases." % _runs.size())
+			return
+	elif _mode == "hands":
+		for hand_design in range(1, HANDS.FINAL_DESIGN_PASS + 1):
+			root.size = Vector2i(1024, 720) if hand_design % 2 == 0 else Vector2i(1600, 900)
+			await process_frame
+			if not await _grab_tests(hand_design):
+				_finish("fail", "Hand design %d failed after %d grab cases." % [hand_design, _runs.size()])
+				return
+	else:
+		if _mode != "all" and (not _mode.is_valid_int() or int(_mode) < 0 or int(_mode) >= DRILLS.DRILLS.size()):
+			_finish("fail", "Unknown procedure index.")
+			return
+		var indexes := range(DRILLS.DRILLS.size()) if _mode == "all" else [int(_mode)]
+		for index in indexes:
+			if not await _procedure(index):
+				_finish("fail", "Procedure failed: " + str(DRILLS.DRILLS[index][0]))
+				return
+	if journal != FileAccess.get_file_as_bytes(JOURNAL):
+		_finish("fail", "Learner journal changed.")
+		return
+	print("KLINIKLAB_PROCEDURE_TRIAL_PASS mode=", _mode, " runs=", _runs.size())
+	_finish("pass")

@@ -176,6 +176,8 @@ var _practice_game_feedback := ""
 var _first_person_full_view := false
 const PROCEDURE_DRILLS := preload("res://procedure-drills.gd")
 var _procedure_drills := PROCEDURE_DRILLS.new()
+const PROCEDURE_LAB := preload("res://procedure-lab.gd")
+var _procedure_lab: PROCEDURE_LAB
 
 
 func _ready() -> void:
@@ -1707,11 +1709,11 @@ func _set_environment_camera() -> void:
 		if tooth!=null:
 			tooth.visible=false
 
-func _start_automated_trial() -> void:
+func _start_automated_trial(mode := "room") -> void:
 	if _trial_pid > 0:
 		return
 	var project := ProjectSettings.globalize_path("res://")
-	var trial_script := "res://practice-room-game-app-smoke.gd"
+	var trial_script := "res://practice-room-game-app-smoke.gd" if mode == "room" else "res://procedure-lab-trial.gd"
 	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
 		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
 		return
@@ -1729,6 +1731,8 @@ func _start_automated_trial() -> void:
 	args.append_array(["--script", trial_script, "--", _trial_folder])
 	if _trial_video:
 		args.append("--video")
+	if mode != "room":
+		args.append("--mode=" + mode)
 	var environment := {}
 	for key in ["APPDATA", "LOCALAPPDATA", "KLINIKLAB_GITHUB_TOKEN"]:
 		if OS.has_environment(key):
@@ -1745,8 +1749,8 @@ func _start_automated_trial() -> void:
 	if _trial_pid <= 0:
 		_set_trial_status("Could not start the automated trial. " + _trial_folder)
 		return
-	_set_trial_status("Running two isolated practice runs. " + ("Godot is rendering the gameplay video." if _trial_video else "Running without video in headless mode."))
-	_poll_automated_trial(_trial_pid, Time.get_ticks_msec() + 300000)
+	_set_trial_status("Running an isolated trial. " + ("Godot is rendering the gameplay video." if _trial_video else "Running without video in headless mode."))
+	_poll_automated_trial(_trial_pid, Time.get_ticks_msec() + (600000 if mode == "all" else 300000))
 
 func _poll_automated_trial(pid: int, deadline: int) -> void:
 	while OS.is_process_running(pid):
@@ -1764,8 +1768,8 @@ func _poll_automated_trial(pid: int, deadline: int) -> void:
 	var movie_ok := not _trial_video or (movie_file != null and movie_file.get_length() > 1024)
 	if result is Dictionary and result.get("status") == "pass" and movie_ok:
 		var scores: Array = result["runs"]
-		_set_trial_status("Trial passed · %d/%d and %d/%d\n%s\n%s" % [
-			scores[0]["score"], scores[0]["max_score"], scores[1]["score"], scores[1]["max_score"],
+		_set_trial_status("Trial passed · %d completed run(s)\n%s\n%s" % [
+			scores.size(),
 			"Gameplay video, report and log" if _trial_video else "Report and log", _trial_folder])
 	else:
 		var detail: String = str(result.get("error", "")) if result is Dictionary else ""
@@ -3102,6 +3106,9 @@ func _direct_cut_world_ray(origin: Vector3, direction: Vector3) -> bool:
 	return true
 
 func _input(event: InputEvent) -> void:
+	if is_instance_valid(_procedure_lab):
+		_procedure_lab.handle_input(event)
+		return
 	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
 	# native direct bur still requires separate explicit practical opt-in.
 	if _practice_sequence != null:
@@ -3586,6 +3593,16 @@ func _show_procedure_drills() -> void:
 	selection.select(_procedure_drills.index)
 	selection.item_selected.connect(_start_procedure_drill)
 	_page.add_child(selection)
+	var launch := _button("Start 3D simulation")
+	launch.name = "KL_START_PROCEDURE_LAB"
+	launch.pressed.connect(_start_procedure_lab)
+	_page.add_child(launch)
+	for trial in [["Run selected procedure trial", str(_procedure_drills.index)], ["Run 10 grab checks", "grabs"], ["Run all 20 procedure trials", "all"]]:
+		var run := _button(trial[0])
+		run.pressed.connect(_start_automated_trial.bind(trial[1]))
+		_page.add_child(run)
+	_trial_status = _heading(_trial_message, 13)
+	_page.add_child(_trial_status)
 	var entry: Array = PROCEDURE_DRILLS.DRILLS[_procedure_drills.index]
 	_page.add_child(_heading(entry[2], 17))
 	_page.add_child(_heading("%d/20 points · %d correction(s)" % [_procedure_drills.score(), _procedure_drills.errors], 14))
@@ -3611,6 +3628,15 @@ func _show_procedure_drills() -> void:
 	back.pressed.connect(_switch_view.bind("journey"))
 	_page.add_child(back)
 	_page.add_child(_heading("Fictional model exercise · points reflect the exercise choices.", 13))
+
+func _start_procedure_lab(hand_design := 10) -> void:
+	if is_instance_valid(_procedure_lab):
+		return
+	_release_walk_mouse()
+	_procedure_lab = PROCEDURE_LAB.new()
+	_shell.add_child(_procedure_lab)
+	_procedure_lab.closed.connect(func() -> void: _procedure_lab = null)
+	_procedure_lab.start(_procedure_drills.index, hand_design)
 
 func _start_procedure_drill(index: int) -> void:
 	_procedure_drills.start(index)
