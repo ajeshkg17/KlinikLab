@@ -177,6 +177,7 @@ var _first_person_full_view := false
 const PROCEDURE_DRILLS := preload("res://procedure-drills.gd")
 var _procedure_drills := PROCEDURE_DRILLS.new()
 const PROCEDURE_LAB := preload("res://procedure-lab.gd")
+const PRACTICE_HANDS := preload("res://practice-tool-handling.gd")
 var _procedure_lab: PROCEDURE_LAB
 var _chair_lab_walk_selected := false
 
@@ -2225,7 +2226,7 @@ func _practice_game_start() -> void:
 	if _practice_tool == null:
 		var camera := _scene.get_node("KL_NATIVE_GODOT_FDI16_COMPARISON_CAMERA") as Camera3D
 		var walk_limits: Dictionary = _walk.get_script().get_script_constant_map()
-		_practice_tool = preload("res://practice-tool-handling.gd").new()
+		_practice_tool = PRACTICE_HANDS.new()
 		_scene.add_child(_practice_tool)
 		_practice_tool.call("setup", camera, walk_limits["OPERATORY"])
 	_practice_game_feedback = "Run started. Visit both stations, handle the mirror and answer six FDI16 tasks."
@@ -3662,7 +3663,7 @@ func _show_procedure_drills() -> void:
 	_page.add_child(back)
 	_page.add_child(_heading("Fictional model exercise · points reflect the exercise choices.", 13))
 
-func _start_procedure_lab(hand_design := 10) -> void:
+func _start_procedure_lab(hand_design := PRACTICE_HANDS.FINAL_DESIGN_PASS) -> void:
 	if is_instance_valid(_procedure_lab):
 		return
 	_release_walk_mouse()
@@ -3680,7 +3681,7 @@ func _start_procedure_lab(hand_design := 10) -> void:
 		if return_view != "environment":
 			_switch_view(return_view)
 	)
-	_procedure_lab.start(_procedure_drills.index, hand_design, get_viewport().world_3d, station)
+	_procedure_lab.start(_procedure_drills.index, hand_design, get_viewport().world_3d, station, float(_walk.call("eye_height")))
 
 func _start_procedure_drill(index: int) -> void:
 	_procedure_drills.start(index)
