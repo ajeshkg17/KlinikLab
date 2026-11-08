@@ -62,6 +62,14 @@ func _action(lab: Control, target: String, control: String, key := false) -> voi
 	if _video:
 		await create_timer(_action_hold).timeout
 
+func _pull(lab: Control, frames: int) -> void:
+	var button := lab.find_child("KL_LAB_PULL", true, false) as Button
+	button.button_down.emit()
+	for frame in range(frames):
+		await physics_frame
+	button.button_up.emit()
+	await _settle()
+
 func _complete(lab: Control) -> bool:
 	var prompt: Label = lab.get("_status")
 	var feedback: Label = lab.get("_feedback")
@@ -91,8 +99,45 @@ func _complete(lab: Control) -> bool:
 		if picker.get_item_metadata(index) == "site_0":
 			picker.select(index)
 			picker.item_selected.emit(index)
-			(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
-			await _settle()
+			if (lab.get("scenario") as Dictionary)["id"] == "extraction":
+				var jaw := lab.find_child("HingedTrainingJaw", true, false) as Node3D
+				var open_angle := jaw.rotation.x
+				(lab.find_child("KL_LAB_JAW", true, false) as Button).pressed.emit()
+				await _pull(lab, 12)
+				if float(lab.get("_pull_progress")) != 0.0 or jaw.rotation.x >= open_angle:
+					return false
+				(lab.find_child("KL_LAB_JAW", true, false) as Button).pressed.emit()
+				for frame in range(13):
+					await physics_frame
+				_aim(lab, "site_1")
+				await _pull(lab, 6)
+				if float(lab.get("_pull_progress")) != 0.0:
+					return false
+				_aim(lab, "site_0")
+				var camera: Camera3D = lab.get("_camera")
+				var site: Node3D = (lab.get("_targets") as Dictionary)["site_0"]
+				var blocker := StaticBody3D.new()
+				var bounds := CollisionShape3D.new()
+				bounds.shape = SphereShape3D.new()
+				blocker.add_child(bounds)
+				(camera.get_parent() as Node3D).add_child(blocker)
+				blocker.global_position = camera.global_position.lerp(site.global_position, 0.5)
+				await _settle()
+				await _pull(lab, 6)
+				blocker.queue_free()
+				await _settle()
+				if float(lab.get("_pull_progress")) != 0.0:
+					return false
+				await _pull(lab, 15)
+				var partial: float = lab.get("_pull_progress")
+				for frame in range(8):
+					await physics_frame
+				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
+					return false
+				await _pull(lab, 55)
+			else:
+				(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
+				await _settle()
 			if not picker.is_item_disabled(index):
 				return false
 			break
@@ -162,7 +207,7 @@ func _grab_tests(hand_design := HANDS.FINAL_DESIGN_PASS) -> bool:
 				await _settle()
 				expected = false
 			3, 4:
-				camera.global_position = target.global_position + Vector3.BACK * (4.85 if index == 3 else 4.45)
+				camera.global_position = target.global_position + Vector3.BACK * (lab.call("world_reach") + (0.30 if index == 3 else -0.15))
 				await _action(lab, "tool", "KL_LAB_GRAB")
 				expected = index == 4
 			5:
@@ -218,6 +263,71 @@ func _grab_tests(hand_design := HANDS.FINAL_DESIGN_PASS) -> bool:
 	await process_frame
 	return true
 
+func _press_key(code: Key) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = code
+	event.pressed = true
+	_app.call("_input", event)
+
+func _chair_route() -> bool:
+	var page: Node = _app.get("_page")
+	var picker := page.get_node("KL_PROCEDURE_DRILL_SELECT") as OptionButton
+	picker.select(17)
+	picker.item_selected.emit(17)
+	var start_frame := Engine.get_process_frames()
+	(page.get_node("KL_WALK_TO_CHAIR") as Button).pressed.emit()
+	_press_key(KEY_E)
+	if is_instance_valid(_app.get("_procedure_lab")):
+		return false
+	var walker: RefCounted = _app.get("_walk")
+	for step in range(70):
+		if walker.call("in_operatory_range"):
+			break
+		walker.call("apply_move_intent", Vector2(0, 1), 1.0 / 60.0)
+		_app.call("_apply_walk_camera")
+		await physics_frame
+	if not walker.call("in_operatory_range"):
+		for step in range(30):
+			if walker.call("in_operatory_range"):
+				break
+			walker.call("apply_move_intent", Vector2(0, 1), 1.0 / 60.0)
+			_app.call("_apply_walk_camera")
+			await physics_frame
+	var arrived: Vector3 = walker.get("position")
+	_press_key(KEY_E)
+	var lab: Control = _app.get("_procedure_lab")
+	if not is_instance_valid(lab) or (lab.get("scenario") as Dictionary)["id"] != "extraction":
+		return false
+	if (lab.get("_camera") as Camera3D).get_world_3d() != _app.get_viewport().world_3d:
+		return false
+	await _settle()
+	await _action(lab, "tool", "KL_LAB_GRAB", true)
+	_aim(lab, "site_0")
+	var pull := lab.find_child("KL_LAB_PULL", true, false) as Button
+	pull.button_down.emit()
+	for frame in range(12):
+		await physics_frame
+	if float(lab.get("_pull_progress")) <= 0.0:
+		return false
+	(lab.find_child("KL_PROCEDURE_RESTART", true, false) as Button).pressed.emit()
+	await _settle()
+	if lab.get("held") or float(lab.get("_pull_progress")) != 0.0 or int(lab.get("score")) != 0:
+		return false
+	if not await _complete(lab):
+		return false
+	var first_events: Array = lab.get("events").duplicate(true)
+	(lab.find_child("KL_PROCEDURE_RESTART", true, false) as Button).pressed.emit()
+	var tooth: Node3D = lab.get("_tooth_model")
+	if tooth.get_parent() != lab.get("_jaw") or not tooth.transform.is_equal_approx(lab.get("_tooth_rest")):
+		return false
+	if not await _complete(lab):
+		return false
+	_runs.append({"id": "chair_extraction", "score": 20, "max_score": 20, "walk_start_frame": start_frame,
+		"first_run": first_events, "events": lab.get("events")})
+	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
+	await process_frame
+	return _app.get("_walk_active") and (walker.get("position") as Vector3).is_equal_approx(arrived)
+
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.is_empty():
@@ -246,6 +356,10 @@ func _run() -> void:
 	if _mode == "grabs":
 		if not await _grab_tests():
 			_finish("fail", "Grab case failed after %d completed cases." % _runs.size())
+			return
+	elif _mode == "chair":
+		if not await _chair_route():
+			_finish("fail", "Walk-to-chair extraction route failed.")
 			return
 	elif _mode == "hands":
 		for hand_design in range(1, HANDS.FINAL_DESIGN_PASS + 1):
