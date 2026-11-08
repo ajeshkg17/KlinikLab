@@ -10,6 +10,8 @@ const VIEW_START := Vector3(0, 2.15, 3.25)
 const MARK := Color("#f6b64c")
 const DONE := Color("#63d6aa")
 const IVORY := Color("#e9e0cc")
+const PULL_SECONDS := 0.85
+const JAW_OPEN := 0.20
 
 var scenario: Dictionary
 var score := 0
@@ -38,9 +40,22 @@ var _tool_home: Node3D
 var _hands: HANDS
 var _applied: Dictionary = {}
 var _camera_start: Transform3D
+var _clinic_world: World3D
+var _chair_origin := Vector3.ZERO
+var _jaw: Node3D
+var _tooth_model: Node3D
+var _tooth_rest := Transform3D.IDENTITY
+var _neighbour_rests: Dictionary = {}
+var _jaw_open := true
+var _pull_held := false
+var _pulling := false
+var _pull_progress := 0.0
+var _pull_button: Button
 
-func start(index: int, hand_design := HANDS.FINAL_DESIGN_PASS) -> void:
+func start(index: int, hand_design := HANDS.FINAL_DESIGN_PASS, clinic_world: World3D = null, chair_origin := Vector3.ZERO) -> void:
 	scenario = CATALOG.for_drill(index)
+	_clinic_world = clinic_world
+	_chair_origin = chair_origin
 	_started_ms = Time.get_ticks_msec()
 	_build_ui()
 	_build_scene(hand_design)
@@ -87,11 +102,16 @@ func _build_ui() -> void:
 	_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(_view)
 	var viewport := SubViewport.new()
-	viewport.own_world_3d = true
+	viewport.own_world_3d = _clinic_world == null
+	if _clinic_world != null:
+		viewport.world_3d = _clinic_world
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_view.add_child(viewport)
 	_world = Node3D.new()
 	viewport.add_child(_world)
+	if _clinic_world != null:
+		_world.position = _chair_origin + Vector3(0.0, 1.05, 0.43)
+		_world.scale = Vector3.ONE * 0.56
 	_cue = _label("+", 27)
 	_cue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cue.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -107,12 +127,23 @@ func _build_ui() -> void:
 	_actions.add_child(_target_picker)
 	_button(_actions, "Pick up / return (F)", _request.bind("grab"), "KL_LAB_GRAB")
 	_button(_actions, "Use tool / verify", _request.bind("use"), "KL_LAB_USE")
+	if scenario["effect"] == "extract":
+		_pull_button = Button.new()
+		_pull_button.name = "KL_LAB_PULL"
+		_pull_button.text = "Hold to pull (Space)"
+		_pull_button.button_down.connect(_begin_pull)
+		_pull_button.button_up.connect(_end_pull)
+		_actions.add_child(_pull_button)
+		_button(_actions, "Open / close jaw (J)", _toggle_jaw, "KL_LAB_JAW")
 	var source := LinkButton.new()
 	source.name = "KL_LAB_TOPIC_REFERENCE"
 	source.text = "Read the topic reference"
 	source.uri = scenario["reference"]
 	_actions.add_child(source)
-	layout.add_child(_label("Click model to look · WASD move · F pick up / return · Click use · Tab controls · Esc release or exit", 14))
+	var controls := "Click model to look · WASD move · F pick up / return · Click use · Tab controls · Esc release or exit"
+	if scenario["effect"] == "extract":
+		controls += " · J opens or closes jaw · Hold click or Space to pull"
+	layout.add_child(_label(controls, 14))
 	layout.add_child(_label("Fictional training fixture. Points measure the simulation tasks.", 13))
 	get_window().focus_exited.connect(_release_mouse)
 
@@ -132,14 +163,15 @@ func _button(parent: Node, caption: String, action: Callable, id: String) -> voi
 	parent.add_child(button)
 
 func _build_scene(hand_design: int) -> void:
-	var world_env := WorldEnvironment.new()
-	world_env.environment = Environment.new()
-	world_env.environment.background_mode = Environment.BG_COLOR
-	world_env.environment.background_color = Color("#152634")
-	world_env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	world_env.environment.ambient_light_color = Color("#d6ebff")
-	world_env.environment.ambient_light_energy = 0.8
-	_world.add_child(world_env)
+	if _clinic_world == null:
+		var world_env := WorldEnvironment.new()
+		world_env.environment = Environment.new()
+		world_env.environment.background_mode = Environment.BG_COLOR
+		world_env.environment.background_color = Color("#152634")
+		world_env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		world_env.environment.ambient_light_color = Color("#d6ebff")
+		world_env.environment.ambient_light_energy = 0.8
+		_world.add_child(world_env)
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-50, -25, 0)
 	_world.add_child(light)
@@ -147,7 +179,7 @@ func _build_scene(hand_design: int) -> void:
 	_camera.position = VIEW_START
 	_camera.fov = 58
 	_world.add_child(_camera)
-	_camera.look_at(Vector3(0, 0.45, 0))
+	_camera.look_at(_world.to_global(Vector3(0, 0.45, 0)))
 	_camera.current = true
 	_camera_start = _camera.transform
 	_solid_box(Vector3(4.6, 0.13, 2.75), Vector3(0, -0.085, 0), Color("#345265"))
@@ -185,18 +217,33 @@ func _build_scene(hand_design: int) -> void:
 			var base := SphereMesh.new()
 			base.radius = 1.1
 			base.height = 0.30
-			_mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
+			var gum := _mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
+			if scenario["effect"] == "extract":
+				_jaw = Node3D.new()
+				_jaw.name = "HingedTrainingJaw"
+				_world.add_child(_jaw)
+				_jaw.position = Vector3(0, 0.22, -0.66)
+				gum.reparent(_jaw)
 			for x in [-0.85, -0.44, 0.0, 0.44, 0.85]:
 				if scenario["model"] != "gap" or x != 0.0:
 					var tooth := _tooth(Vector3(x, 0.31, -0.18 - absf(x) * 0.20), 0.78)
+					if _jaw != null:
+						tooth.reparent(_jaw)
 					if scenario["effect"] == "extract" and x == 0.0:
 						tooth.name = "ExtractableTooth"
+						_tooth_model = tooth
+						_tooth_rest = tooth.transform
 					elif scenario["effect"] == "extract" and absf(x) < 0.5:
 						tooth.name = "LeftAdjacentTooth" if x < 0.0 else "RightAdjacentTooth"
+						_neighbour_rests[tooth] = tooth.transform
 			if scenario["effect"] == "extract":
 				a = Vector3(0, 0.58, 0.03)
+				_mesh(_world, _box(Vector3(0.29, 0.035, 0.30)), Vector3(0.87, 0.08, 0.79), Color("#456f82"))
 	_target("site_0", a, MARK, 0.15, scenario["actions"][0])
 	_target("site_1", b, MARK, 0.15, scenario["actions"][1])
+	if _jaw != null:
+		for id in ["site_0", "site_1"]:
+			(_targets[id] as Node3D).reparent(_jaw)
 	_hands = HANDS.new()
 	_world.add_child(_hands)
 	_hands.mount_hands(_camera, hand_design)
@@ -239,7 +286,13 @@ func _instrument(parent: Node3D, correct: bool) -> Node3D:
 	var body := Node3D.new()
 	parent.add_child(body)
 	var tint := Color("#75d3c4") if correct else Color("#8f8491")
-	if correct and scenario["effect"] == "seat":
+	if correct and scenario["effect"] == "extract":
+		for side in [-1.0, 1.0]:
+			var handle := _mesh(body, _box(Vector3(0.028, 0.033, 0.21)), Vector3(side * 0.024, 0.04, 0.024), tint)
+			handle.rotation.y = side * 0.14
+			var beak := _mesh(body, _box(Vector3(0.024, 0.026, 0.10)), Vector3(side * 0.017, 0.047, -0.111), Color("#d2deea"))
+			beak.rotation.y = -side * 0.22
+	elif correct and scenario["effect"] == "seat":
 		var shape := SphereMesh.new()
 		shape.radius = 0.10
 		shape.height = 0.13
@@ -301,13 +354,19 @@ func _restart() -> void:
 	_camera.transform = _camera_start
 	_target_picker.select(-1)
 	_place_tool(false, true)
+	_pull_held = false
+	_pulling = false
+	_pull_progress = 0.0
 	for node in _applied.values():
 		node.hide()
 		node.queue_free()
 	_applied.clear()
-	var tooth := _world.get_node_or_null("ExtractableTooth") as Node3D
-	if tooth != null:
-		tooth.show()
+	if _jaw != null:
+		_jaw_open = true
+		_jaw.rotation.x = JAW_OPEN
+		if _tooth_model.get_parent() != _jaw:
+			_tooth_model.reparent(_jaw, false)
+		_tooth_model.transform = _tooth_rest
 	for id in ["site_0", "site_1"]:
 		(_targets[id] as Node3D).show()
 		(_targets[id] as StaticBody3D).collision_layer = MASK
@@ -335,14 +394,62 @@ func _physics_process(delta: float) -> void:
 		var action := _pending
 		_pending = ""
 		_apply_action(action, id)
+	if _jaw != null:
+		_jaw.rotation.x = move_toward(_jaw.rotation.x, JAW_OPEN if _jaw_open else 0.0, delta * 1.3)
+		_update_pull(id, delta)
 
 func _aimed_target() -> String:
 	var origin := _camera.global_position
-	var end := origin - _camera.global_basis.z * RANGE
+	var end := origin - _camera.global_basis.z.normalized() * world_reach()
 	var query := PhysicsRayQueryParameters3D.create(origin, end, MASK)
 	var hit := _camera.get_world_3d().direct_space_state.intersect_ray(query)
 	var collider: Object = hit.get("collider")
 	return str(collider.get_meta("target", "")) if collider != null else ""
+
+func world_reach() -> float:
+	return _world.global_basis.z.length() * RANGE
+
+func _is_extraction_step() -> bool:
+	return _jaw != null and stage == 1 and next_target == 0 and held
+
+func _toggle_jaw() -> void:
+	if _jaw == null:
+		return
+	_jaw_open = not _jaw_open
+	_end_pull()
+	_event("jaw_open" if _jaw_open else "jaw_close")
+
+func _begin_pull() -> void:
+	if _is_extraction_step():
+		_pull_held = true
+
+func _end_pull() -> void:
+	_pull_held = false
+	if _pulling:
+		_pulling = false
+		_event("pull_paused", "site_0")
+
+func _update_pull(id: String, delta: float) -> void:
+	if not _pull_held:
+		return
+	if not _is_extraction_step() or id != "site_0" or not _jaw_open or _jaw.rotation.x < JAW_OPEN * 0.8:
+		_end_pull()
+		_feedback.text = "Open the jaw and aim the forceps at the assigned tooth."
+		_event("rejected_pull", id, _feedback.text)
+		return
+	if not _pulling:
+		_pulling = true
+		_event("pull_started", id)
+	var game_speed := lerpf(0.68, 1.32, _pull_progress)
+	_pull_progress = minf(1.0, _pull_progress + delta * game_speed / PULL_SECONDS)
+	var path := Vector3(0, 0.39, 0.13)
+	_tooth_model.position = _tooth_rest.origin + path * _pull_progress
+	_feedback.text = "Release path · %d%%" % roundi(_pull_progress * 100.0)
+	if _pull_progress >= 1.0:
+		_pull_held = false
+		_pulling = false
+		_event("tooth_released", id)
+		_apply_action("use", id)
 
 func _apply_action(action: String, id: String) -> void:
 	_feedback.text = ""
@@ -351,8 +458,8 @@ func _apply_action(action: String, id: String) -> void:
 		score = 5
 		stage = 1
 		_event("tool_acquired", id)
-		_show_status(scenario["actions"][0])
-	elif stage == 1 and action == "use" and id == "site_%d" % next_target:
+		_show_status("Aim at the assigned tooth and hold to pull." if _is_extraction_step() else scenario["actions"][0])
+	elif stage == 1 and action == "use" and id == "site_%d" % next_target and (not _is_extraction_step() or _pull_progress >= 1.0):
 		_change_model(id)
 		next_target += 1
 		_event("model_action", id)
@@ -413,14 +520,15 @@ func _change_model(id: String) -> void:
 		"remove":
 			return
 		"extract":
-			var tooth := _world.get_node_or_null("ExtractableTooth") as Node3D
-			if next_target == 0 and tooth != null:
-				tooth.hide()
+			if next_target == 0:
+				_tooth_model.reparent(_world, false)
+				_tooth_model.position = Vector3(0.87, 0.24, 0.79)
+				_tooth_model.rotation.z = PI * 0.5
 		"restore":
 			if next_target == 0:
 				return
 	if scenario["effect"] == "seat" and next_target == 0:
-		_applied[id] = _seated_appliance(site.position)
+		_applied[id] = _seated_appliance(_world.to_local(site.global_position))
 	elif scenario["effect"] == "mark":
 		var label := Label3D.new()
 		label.text = ["Model reading A", "Model reading B"][next_target] if scenario["id"] == "chart" else "Marked"
@@ -429,13 +537,13 @@ func _change_model(id: String) -> void:
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.modulate = DONE
 		_world.add_child(label)
-		label.position = site.position
+		label.position = _world.to_local(site.global_position)
 		_applied[id] = label
 	else:
 		var patch := SphereMesh.new()
 		patch.radius = 0.12
 		patch.height = 0.055
-		_applied[id] = _mesh(_world, patch, site.position, IVORY if scenario["effect"] == "restore" else DONE)
+		_applied[id] = _mesh(_world, patch, _world.to_local(site.global_position), IVORY if scenario["effect"] == "restore" else DONE)
 
 func _seated_appliance(at: Vector3) -> Node3D:
 	var piece := Node3D.new()
@@ -481,10 +589,11 @@ func _verify_model() -> bool:
 			if not is_instance_valid(piece) or not piece.is_visible_in_tree():
 				return false
 	if scenario["effect"] == "extract":
-		var tooth := _world.get_node_or_null("ExtractableTooth") as Node3D
-		var left := _world.get_node_or_null("LeftAdjacentTooth") as Node3D
-		var right := _world.get_node_or_null("RightAdjacentTooth") as Node3D
-		return tooth != null and not tooth.visible and left != null and left.visible and right != null and right.visible
+		if _tooth_model.get_parent() != _world or not _tooth_model.position.is_equal_approx(Vector3(0.87, 0.24, 0.79)):
+			return false
+		for neighbour in _neighbour_rests:
+			if neighbour.get_parent() != _jaw or not neighbour.visible or not neighbour.transform.is_equal_approx(_neighbour_rests[neighbour]):
+				return false
 	return true
 
 func _set_picker_target_available(id: String, enabled: bool) -> void:
@@ -503,6 +612,8 @@ func _show_status(message: String) -> void:
 	elif stage == 3:
 		step = "4/4 · Verified"
 	_progress.text = step
+	if _pull_button != null:
+		_pull_button.disabled = not _is_extraction_step()
 	var next := "tool" if stage == 0 else "site_%d" % next_target if stage == 1 else "return" if held else "verify"
 	for id in _targets:
 		var target: Node3D = _targets[id]
@@ -511,12 +622,22 @@ func _show_status(message: String) -> void:
 
 func _event(name: String, target := "", reason := "") -> void:
 	events.append({"event": name, "target": target, "stage": stage, "score": score,
+		"pull_progress": _pull_progress,
 		"run_id": run_id,
 		"model_result": model_results.get(target, ""),
 		"reason": reason,
 		"elapsed_ms": Time.get_ticks_msec() - _started_ms, "frame": Engine.get_process_frames()})
 
 func handle_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.physical_keycode == KEY_SPACE and _jaw != null:
+		if event.pressed and not event.echo:
+			_begin_pull()
+		elif not event.pressed:
+			_end_pull()
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _capture:
+		_end_pull()
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key: Key = event.physical_keycode if event.physical_keycode != 0 else event.keycode
 		match key:
@@ -527,6 +648,8 @@ func handle_input(event: InputEvent) -> void:
 					_close()
 			KEY_F:
 				_request("grab")
+			KEY_J:
+				_toggle_jaw()
 			KEY_TAB:
 				if _capture:
 					_release_mouse()
@@ -541,7 +664,10 @@ func handle_input(event: InputEvent) -> void:
 		_camera.rotation.x = clampf(_camera.rotation.x - event.screen_relative.y * 0.003, -1.35, 0.55)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if _capture:
-			_request("use")
+			if _is_extraction_step():
+				_begin_pull()
+			else:
+				_request("use")
 		elif _view.get_global_rect().has_point(event.position):
 			_capture = true
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -551,6 +677,7 @@ func handle_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _release_mouse() -> void:
+	_end_pull()
 	if _capture:
 		_capture = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
