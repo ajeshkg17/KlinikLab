@@ -12,10 +12,10 @@ const DESIGN_NOTES := [
 	"Roll the gripping wrist inward", "Ease both ends of a faster grip"
 ]
 
-var _stand := Node3D.new()
+var _stand: Node3D
 var _hands := Node3D.new()
 var _right: Node3D
-var _mirror := Node3D.new()
+var _mirror: Node3D
 var _holding := false
 var _right_fingers: Array[Node3D] = []
 var _right_thumb: Node3D
@@ -27,20 +27,13 @@ var _rest := RIGHT_REST
 var _grip_position := RIGHT_GRIP
 
 func setup(camera: Camera3D, station: Vector3, design_pass := FINAL_DESIGN_PASS) -> void:
-	_camera = camera
-	_design_pass = clampi(design_pass, 0, FINAL_DESIGN_PASS)
-	if _design_pass >= 1:
-		_rest.y += 0.022
-	if _design_pass >= 8:
-		_grip_position.x -= 0.032
+	mount_hands(camera, design_pass)
+	_stand = Node3D.new()
+	_mirror = Node3D.new()
 	add_child(_stand)
 	_stand.position = station + Vector3(-0.8, 0.95, 0.65)
 	_part(_stand, _box(Vector3(0.52, 0.07, 0.42)), Vector3.ZERO, Color("#469d97"))
 	_part(_stand, _box(Vector3(0.12, 0.92, 0.12)), Vector3(0, -0.48, 0), Color("#315568"))
-	camera.add_child(_hands)
-	_hands.name = "KL_FIRST_PERSON_HANDS"
-	_glove(Vector3(-_rest.x, _rest.y, _rest.z), 1.0)
-	_right = _glove(_rest, -1.0)
 	_part(_mirror, _capsule(0.012, 0.16), Vector3.ZERO, Color("#3a9b98"))
 	_part(_mirror, _capsule(0.006, 0.088), Vector3(0, 0.107, 0), Color("#a4b2bd"))
 	var rim := _part(_mirror, _cylinder(0.032, 0.010), Vector3(0, 0.165, 0), Color("#718595"))
@@ -50,6 +43,31 @@ func setup(camera: Camera3D, station: Vector3, design_pass := FINAL_DESIGN_PASS)
 	_stand.add_child(_mirror)
 	reset()
 	set_active(false)
+
+func mount_hands(camera: Camera3D, design_pass := FINAL_DESIGN_PASS) -> void:
+	_camera = camera
+	_design_pass = clampi(design_pass, 0, FINAL_DESIGN_PASS)
+	if _design_pass >= 1:
+		_rest.y += 0.022
+	if _design_pass >= 8:
+		_grip_position.x -= 0.032
+	camera.add_child(_hands)
+	_hands.name = "KL_FIRST_PERSON_HANDS"
+	_glove(Vector3(-_rest.x, _rest.y, _rest.z), 1.0)
+	_right = _glove(_rest, -1.0)
+	_apply_right_pose(0.0)
+
+func right_hand() -> Node3D:
+	return _right
+
+func pose_grip(gripping: bool, immediately := false) -> void:
+	var amount := 1.0 if gripping else 0.0
+	if immediately:
+		if _pose_tween != null:
+			_pose_tween.kill()
+		_apply_right_pose(amount)
+	else:
+		_animate_right_pose(amount)
 
 func _box(size: Vector3) -> BoxMesh:
 	var box := BoxMesh.new()
