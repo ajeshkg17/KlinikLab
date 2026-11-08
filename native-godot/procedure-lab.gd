@@ -7,6 +7,12 @@ const HANDS := preload("res://practice-tool-handling.gd")
 const RANGE := 4.6
 const MASK := 1
 const VIEW_START := Vector3(0, 2.15, 3.25)
+const CHAIR_FIXTURE_HEIGHT := 1.05
+const CHAIR_SCALE := 0.56
+const CHAIR_START_Z := 2.25
+const CHAIR_MIN_EYE := 1.30
+const CHAIR_MAX_EYE := 1.85
+const CHAIR_FOCUS := Vector3(0, 0.60, 0)
 const MARK := Color("#f6b64c")
 const DONE := Color("#63d6aa")
 const IVORY := Color("#e9e0cc")
@@ -42,6 +48,7 @@ var _applied: Dictionary = {}
 var _camera_start: Transform3D
 var _clinic_world: World3D
 var _chair_origin := Vector3.ZERO
+var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
 var _tooth_rest := Transform3D.IDENTITY
@@ -52,10 +59,11 @@ var _pulling := false
 var _pull_progress := 0.0
 var _pull_button: Button
 
-func start(index: int, hand_design := HANDS.FINAL_DESIGN_PASS, clinic_world: World3D = null, chair_origin := Vector3.ZERO) -> void:
+func start(index: int, hand_design := HANDS.FINAL_DESIGN_PASS, clinic_world: World3D = null, chair_origin := Vector3.ZERO, eye_height := 1.55) -> void:
 	scenario = CATALOG.for_drill(index)
 	_clinic_world = clinic_world
 	_chair_origin = chair_origin
+	_eye_height = clampf(eye_height, CHAIR_MIN_EYE, CHAIR_MAX_EYE)
 	_started_ms = Time.get_ticks_msec()
 	_build_ui()
 	_build_scene(hand_design)
@@ -82,6 +90,17 @@ func _build_ui() -> void:
 	var title := _label(str(scenario["title"]) + " · 3D practice model", 24)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
+	if _clinic_world != null:
+		header.add_child(_label("Eye height", 14))
+		var height := SpinBox.new()
+		height.name = "KL_LAB_EYE_HEIGHT"
+		height.min_value = CHAIR_MIN_EYE
+		height.max_value = CHAIR_MAX_EYE
+		height.step = 0.01
+		height.value = _eye_height
+		height.suffix = "m"
+		height.value_changed.connect(_set_eye_height)
+		header.add_child(height)
 	_button(header, "Restart", _restart, "KL_PROCEDURE_RESTART")
 	_button(header, "Exit simulation", _close, "KL_PROCEDURE_EXIT")
 	_status = _label("", 17)
@@ -110,8 +129,8 @@ func _build_ui() -> void:
 	_world = Node3D.new()
 	viewport.add_child(_world)
 	if _clinic_world != null:
-		_world.position = _chair_origin + Vector3(0.0, 1.05, 0.43)
-		_world.scale = Vector3.ONE * 0.56
+		_world.position = _chair_origin + Vector3(0.0, CHAIR_FIXTURE_HEIGHT, 0.43)
+		_world.scale = Vector3.ONE * CHAIR_SCALE
 	_cue = _label("+", 27)
 	_cue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cue.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -176,10 +195,10 @@ func _build_scene(hand_design: int) -> void:
 	light.rotation_degrees = Vector3(-50, -25, 0)
 	_world.add_child(light)
 	_camera = Camera3D.new()
-	_camera.position = VIEW_START
+	_camera.position = VIEW_START if _clinic_world == null else Vector3(0, _chair_eye_y(), CHAIR_START_Z)
 	_camera.fov = 58
 	_world.add_child(_camera)
-	_camera.look_at(_world.to_global(Vector3(0, 0.45, 0)))
+	_camera.look_at(_world.to_global(Vector3(0, 0.45, 0) if _clinic_world == null else CHAIR_FOCUS))
 	_camera.current = true
 	_camera_start = _camera.transform
 	_solid_box(Vector3(4.6, 0.13, 2.75), Vector3(0, -0.085, 0), Color("#345265"))
@@ -247,6 +266,15 @@ func _build_scene(hand_design: int) -> void:
 	_hands = HANDS.new()
 	_world.add_child(_hands)
 	_hands.mount_hands(_camera, hand_design)
+
+func _chair_eye_y() -> float:
+	return (_eye_height - CHAIR_FIXTURE_HEIGHT) / CHAIR_SCALE
+
+func _set_eye_height(height: float) -> void:
+	_eye_height = clampf(height, CHAIR_MIN_EYE, CHAIR_MAX_EYE)
+	_camera.position.y = _chair_eye_y()
+	_camera_start.origin.y = _camera.position.y
+	_camera_start.basis = Basis.looking_at(CHAIR_FOCUS - _camera_start.origin)
 
 func _box(extent: Vector3) -> BoxMesh:
 	var result := BoxMesh.new()
@@ -386,7 +414,12 @@ func _physics_process(delta: float) -> void:
 			float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)), 0.0,
 			float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
 		var next := _camera.position + Basis(Vector3.UP, _camera.rotation.y) * move.normalized() * delta
-		_camera.position = Vector3(clampf(next.x, -2.0, 2.0), VIEW_START.y, clampf(next.z, 1.50, 4.5))
+		# In the shared clinic the corridor wall runs immediately behind this stance.
+		var chair_view := _clinic_world != null
+		var lateral := 1.20 if chair_view else 2.0
+		var nearest := 1.68 if chair_view else 1.50
+		var farthest := 2.42 if chair_view else 4.5
+		_camera.position = Vector3(clampf(next.x, -lateral, lateral), _camera.position.y, clampf(next.z, nearest, farthest))
 	var id := _aimed_target()
 	var expected := "tool" if stage == 0 else "site_%d" % next_target if stage == 1 else "return" if held else "verify"
 	_cue.modulate = DONE if id == expected and stage < 3 else Color.WHITE
@@ -505,9 +538,9 @@ func _place_tool(in_hand: bool, immediately := false) -> void:
 	var parent := _hands.right_hand() if held else _tool_home
 	if _correct_tool.get_parent() != parent:
 		_correct_tool.reparent(parent, false)
-	_correct_tool.position = Vector3(-0.026, -0.046, -0.064) if held else Vector3.ZERO
-	_correct_tool.rotation = Vector3(-0.23, 0.25, 0.0) if held else Vector3.ZERO
-	_hands.pose_grip(held, immediately)
+	var kind := str(scenario["effect"])
+	_correct_tool.transform = _hands.instrument_pose(kind) if held else Transform3D.IDENTITY
+	_hands.pose_grip(held, immediately, kind)
 
 func _change_model(id: String) -> void:
 	var site: Node3D = _targets[id]

@@ -60,7 +60,8 @@ func _action(lab: Control, target: String, control: String, key := false) -> voi
 		(lab.find_child(control, true, false) as Button).pressed.emit()
 	await _settle()
 	if _video:
-		await create_timer(_action_hold).timeout
+		var hold := maxf(_action_hold, 0.24) if control == "KL_LAB_GRAB" else _action_hold
+		await create_timer(hold).timeout
 
 func _pull(lab: Control, frames: int) -> void:
 	var button := lab.find_child("KL_LAB_PULL", true, false) as Button
@@ -69,6 +70,40 @@ func _pull(lab: Control, frames: int) -> void:
 		await physics_frame
 	button.button_up.emit()
 	await _settle()
+
+func _rigged_fit(hands: HANDS, tool: Node3D, kind: String) -> bool:
+	var skeletons := hands.right_hand().get_parent().find_children("*", "Skeleton3D", true, false)
+	if skeletons.size() != 2:
+		push_error("Expected two glove skeletons, found %d." % skeletons.size())
+		return false
+	for rig: Skeleton3D in skeletons:
+		if rig.get_bone_count() != 26:
+			push_error("Glove skeleton %s has %d bones." % [rig.name, rig.get_bone_count()])
+			return false
+	if not _video and float(hands.get("_grip")) < 0.99:
+		(hands.get("_pose_tween") as Tween).custom_step(0.25)
+	var contacts := hands.grip_contacts()
+	if contacts.size() != 2:
+		push_error("Expected two fingertip contacts for " + kind)
+		return false
+	var inverse := tool.transform.affine_inverse()
+	for contact: Vector3 in contacts:
+		var point := inverse * contact
+		match kind:
+			"seat":
+				var relative := (point - Vector3(0, 0.055, 0)) / Vector3(0.10, 0.065, 0.10)
+				if absf(relative.length() - 1.0) > 0.08:
+					push_error("Appliance grip missed its rim at %s." % point)
+					return false
+			"extract":
+				if absf(absf(point.x) - 0.038) > 0.012 or absf(point.y - 0.04) > 0.02:
+					push_error("Forceps grip missed its handle at %s." % point)
+					return false
+			_:
+				if absf(absf(point.y - 0.04) - 0.0225) > 0.008 or absf(point.x) > 0.0215:
+					push_error("Instrument grip %s missed its handle at %s." % [kind, point])
+					return false
+	return true
 
 func _complete(lab: Control) -> bool:
 	var prompt: Label = lab.get("_status")
@@ -88,8 +123,8 @@ func _complete(lab: Control) -> bool:
 	if site_label.modulate != Color("#d0ffe4") or site_label.outline_size < 8:
 		return false
 	var tool: Node3D = lab.get("_correct_tool")
-	var hands: Node3D = lab.get("_hands")
-	if tool.get_parent() != hands.call("right_hand"):
+	var hands: HANDS = lab.get("_hands")
+	if tool.get_parent() != hands.right_hand() or not _rigged_fit(hands, tool, str(lab.get("scenario")["effect"])):
 		return false
 	await _action(lab, "site_1", "KL_LAB_USE")
 	if int(lab.get("next_target")) != 0 or not feedback.text.contains("model action"):
@@ -229,7 +264,7 @@ func _grab_tests(hand_design := HANDS.FINAL_DESIGN_PASS) -> bool:
 				await _action(lab, "tool", "KL_LAB_GRAB", index == 0)
 		if bool(lab.get("held")) != expected or int(lab.get("score")) != (5 if expected else 0):
 			return false
-		var hands: Node3D = lab.get("_hands")
+		var hands: HANDS = lab.get("_hands")
 		var instrument: Node3D = lab.get("_correct_tool")
 		var hand: Node3D = hands.call("right_hand")
 		if instrument.get_parent() != (hand if expected else lab.get("_tool_home")):
@@ -237,7 +272,11 @@ func _grab_tests(hand_design := HANDS.FINAL_DESIGN_PASS) -> bool:
 		if expected:
 			if not _video:
 				(hands.get("_pose_tween") as Tween).custom_step(0.25)
-			if float(hands.get("_grip")) < 0.9 or instrument.position.length() > 0.10:
+			var max_offset := 0.24 if hand_design == HANDS.RIGGED_DESIGN_PASS else 0.10
+			if float(hands.get("_grip")) < 0.9 or instrument.position.length() > max_offset:
+				push_error("Grab '%s' grip %s or instrument offset %s outside the allowed range." % [names[index], hands.get("_grip"), instrument.position])
+				return false
+			if hand_design == HANDS.RIGGED_DESIGN_PASS and not _rigged_fit(hands, instrument, str(lab.get("scenario")["effect"])):
 				return false
 			var viewport: Viewport = camera.get_viewport()
 			if camera.is_position_behind(hand.global_position) or not viewport.get_visible_rect().has_point(camera.unproject_position(hand.global_position)):
@@ -298,9 +337,22 @@ func _chair_route() -> bool:
 	var lab: Control = _app.get("_procedure_lab")
 	if not is_instance_valid(lab) or (lab.get("scenario") as Dictionary)["id"] != "extraction":
 		return false
-	if (lab.get("_camera") as Camera3D).get_world_3d() != _app.get_viewport().world_3d:
+	var camera: Camera3D = lab.get("_camera")
+	if camera.get_world_3d() != _app.get_viewport().world_3d:
 		return false
 	await _settle()
+	var floor: Vector3 = lab.get("_chair_origin")
+	var height := lab.find_child("KL_LAB_EYE_HEIGHT", true, false) as SpinBox
+	var start_height := camera.global_position.y - floor.y
+	var start_pitch := camera.rotation_degrees.x
+	if height == null or not is_equal_approx(start_height, height.value) or absf(start_pitch) > 25.0:
+		push_error("Chair camera opened at %.2f m and %.1f degrees." % [start_height, start_pitch])
+		return false
+	height.value = 1.42
+	(lab.find_child("KL_PROCEDURE_RESTART", true, false) as Button).pressed.emit()
+	if not is_equal_approx(camera.global_position.y - floor.y, 1.42):
+		push_error("Chair camera did not retain the selected eye height after restart.")
+		return false
 	await _action(lab, "tool", "KL_LAB_GRAB", true)
 	_aim(lab, "site_0")
 	var pull := lab.find_child("KL_LAB_PULL", true, false) as Button
@@ -323,6 +375,7 @@ func _chair_route() -> bool:
 	if not await _complete(lab):
 		return false
 	_runs.append({"id": "chair_extraction", "score": 20, "max_score": 20, "walk_start_frame": start_frame,
+		"start_eye_height_m": start_height, "start_pitch_degrees": start_pitch, "replay_eye_height_m": height.value,
 		"first_run": first_events, "events": lab.get("events")})
 	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
 	await process_frame

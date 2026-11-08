@@ -1,15 +1,28 @@
 extends Node3D
-## A stylized desktop glove rig and a practice mirror on a return stand.
+## Camera-mounted gloves and a practice mirror on a return stand.
 const REACH := 2.2
 const AIM_ALIGNMENT := 0.95105652 # 18 degrees from the camera center.
-const FINAL_DESIGN_PASS := 10
+const PROCEDURAL_DESIGN_PASSES := 10
+const RIGGED_DESIGN_PASS := PROCEDURAL_DESIGN_PASSES + 1
+const FINAL_DESIGN_PASS := RIGGED_DESIGN_PASS
+const LEFT_GLOVE := preload("res://assets/xr-gloves/Hand_Glove_L.gltf")
+const RIGHT_GLOVE := preload("res://assets/xr-gloves/Hand_Glove_R.gltf")
+const GRIP_JOINTS := {
+	"Index": [0.55, 0.74, 0.39],
+	"Middle": [0.85, 1.02, 0.58],
+	"Ring": [0.94, 1.09, 0.66],
+	"Little": [1.02, 1.13, 0.68],
+}
 const RIGHT_REST := Vector3(0.26, -0.24, -0.63)
 const RIGHT_GRIP := Vector3(0.19, -0.18, -0.60)
+const RIGGED_REST := Vector3(0.29, -0.35, -0.57)
+const RIGGED_IDLE_ROTATION := Vector3(-0.38, 0.29, -0.28)
 const DESIGN_NOTES := [
 	"Raise the resting hands", "Broaden the palms", "Vary finger proportions",
 	"Round the fingertips", "Extend the sleeve cuff", "Give each finger its own curl",
 	"Oppose the thumb", "Bring the held mirror toward center",
-	"Roll the gripping wrist inward", "Ease both ends of a faster grip"
+	"Roll the gripping wrist inward", "Ease both ends of a faster grip",
+	"Fit skinned gloves to the held instrument"
 ]
 
 var _stand: Node3D
@@ -19,6 +32,14 @@ var _mirror: Node3D
 var _holding := false
 var _right_fingers: Array[Node3D] = []
 var _right_thumb: Node3D
+var _right_skeleton: Skeleton3D
+var _right_joints := PackedInt32Array()
+var _right_joint_rest: Array[Quaternion] = []
+var _right_joint_axes: Array[Vector3] = []
+var _right_joint_curls := PackedFloat32Array()
+var _grip_centers: Dictionary[String, Vector3] = {}
+var _grip_spans: Dictionary[String, Vector3] = {}
+var _grip_kind := ""
 var _grip := 0.0
 var _pose_tween: Tween
 var _camera: Camera3D
@@ -53,14 +74,62 @@ func mount_hands(camera: Camera3D, design_pass := FINAL_DESIGN_PASS) -> void:
 		_grip_position.x -= 0.032
 	camera.add_child(_hands)
 	_hands.name = "KL_FIRST_PERSON_HANDS"
-	_glove(Vector3(-_rest.x, _rest.y, _rest.z), 1.0)
-	_right = _glove(_rest, -1.0)
+	var left_rest := Vector3(-_rest.x, _rest.y, _rest.z)
+	if _design_pass == RIGGED_DESIGN_PASS:
+		_rest = RIGGED_REST
+		left_rest = Vector3(-_rest.x, _rest.y - 0.035, _rest.z)
+		var left := _mount_rigged_glove(left_rest, false)
+		left.rotation = Vector3(RIGGED_IDLE_ROTATION.x, -RIGGED_IDLE_ROTATION.y, -RIGGED_IDLE_ROTATION.z)
+		_right = _mount_rigged_glove(_rest, true)
+		for kind: String in ["", "seat", "extract"]:
+			_apply_rigged_pose(_grip_amount(kind))
+			var contacts := grip_contacts()
+			_grip_centers[kind] = contacts[0].lerp(contacts[1], 0.5)
+			_grip_spans[kind] = contacts[1] - contacts[0]
+	else:
+		_glove(left_rest, 1.0)
+		_right = _glove(_rest, -1.0)
 	_apply_right_pose(0.0)
 
 func right_hand() -> Node3D:
 	return _right
 
-func pose_grip(gripping: bool, immediately := false) -> void:
+func instrument_pose(kind: String) -> Transform3D:
+	var rotation := Vector3(-0.94, 0.0, 0.30) if kind == "mirror" else Vector3(-0.23, 0.25, 0.0)
+	var basis := Basis.from_euler(rotation)
+	if _right_skeleton == null:
+		var offset := Vector3(-0.027, -0.024, -0.050) if kind == "mirror" else Vector3(-0.026, -0.046, -0.064)
+		return Transform3D(basis, offset)
+	var grip_center: Vector3 = _grip_centers.get(kind, _grip_centers[""])
+	var handle_center := Vector3(0, 0.04, 0)
+	match kind:
+		"mirror": handle_center = Vector3.ZERO
+		"seat", "extract":
+			var span: Vector3 = _grip_spans[kind]
+			var pinch := span.normalized()
+			var forward := (basis.z - pinch * pinch.dot(basis.z)).normalized()
+			if kind == "seat":
+				basis = Basis(pinch.cross(forward), pinch, forward)
+				# Meet the curved side of the synthetic appliance at both fingertips.
+				var half_height_ratio := span.length() / 0.13
+				handle_center = Vector3(0, 0.055, 0.10 * sqrt(maxf(0.0, 1.0 - half_height_ratio ** 2)))
+			else:
+				basis = Basis(pinch, forward.cross(pinch), forward)
+				handle_center.z = 0.024
+	return Transform3D(basis, grip_center - basis * handle_center)
+
+func grip_contacts() -> PackedVector3Array:
+	var contacts := PackedVector3Array()
+	if _right_skeleton != null:
+		for name: String in ["Thumb_Tip_R", "Index_Tip_R"]:
+			var joint := _right_skeleton.find_bone(name)
+			var point := _right_skeleton.to_global(_right_skeleton.get_bone_global_pose(joint).origin)
+			contacts.append(_right.to_local(point))
+	return contacts
+
+func pose_grip(gripping: bool, immediately := false, kind := "") -> void:
+	if gripping:
+		_grip_kind = kind
 	var amount := 1.0 if gripping else 0.0
 	if immediately:
 		if _pose_tween != null:
@@ -107,6 +176,61 @@ func _part(parent: Node3D, mesh: Mesh, at: Vector3, color: Color, shaded := fals
 	part.position = at
 	parent.add_child(part)
 	return part
+
+func _mount_rigged_glove(at: Vector3, right: bool) -> Node3D:
+	var glove := Node3D.new()
+	_hands.add_child(glove)
+	glove.position = at
+	var side := 1.0 if right else -1.0
+	var sleeve := _part(glove, _capsule(0.044, 0.27), Vector3(side * 0.045, -0.071, 0.109), Color("#283c52"), true)
+	sleeve.rotation = Vector3(1.97, side * 0.20, 0)
+	var rig := (RIGHT_GLOVE if right else LEFT_GLOVE).instantiate() as Node3D
+	glove.add_child(rig)
+	rig.rotation.z = side * PI / 2.0
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color("#4f83c6")
+	material.roughness = 0.82
+	material.emission_enabled = true
+	material.emission = material.albedo_color
+	material.emission_energy_multiplier = 0.20
+	for mesh: MeshInstance3D in rig.find_children("*", "MeshInstance3D", true, false):
+		mesh.material_override = material
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var skeleton := rig.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	skeleton.name = "RightGloveRig" if right else "LeftGloveRig"
+	if right:
+		_right_skeleton = skeleton
+		for finger: String in GRIP_JOINTS:
+			for index in range(3):
+				var segment: String = ["Proximal", "Intermediate", "Distal"][index]
+				_register_joint(finger + "_" + segment + "_R", Vector3.LEFT, GRIP_JOINTS[finger][index])
+		_register_joint("Thumb_Metacarpal_R", Vector3(-1.0, -0.9, 0.0), 0.48)
+		_register_joint("Thumb_Proximal_R", Vector3(-1.0, -0.7, 0.0), 0.35)
+		_register_joint("Thumb_Distal_R", Vector3(-1.0, -0.2, 0.0), 0.26)
+	return glove
+
+func _register_joint(name: String, toward_palm: Vector3, curl: float) -> void:
+	var joint := _right_skeleton.find_bone(name)
+	var rest_basis := _right_skeleton.get_bone_global_rest(joint).basis.orthonormalized()
+	var forward := rest_basis.y
+	var axis := forward.cross(toward_palm).normalized()
+	_right_joints.append(joint)
+	_right_joint_rest.append(_right_skeleton.get_bone_pose_rotation(joint))
+	_right_joint_axes.append(rest_basis.inverse() * axis)
+	_right_joint_curls.append(curl)
+
+func _apply_rigged_pose(grip: float) -> void:
+	for index in range(_right_joints.size()):
+		var curl := lerpf(0.08, _right_joint_curls[index], grip)
+		_right_skeleton.set_bone_pose_rotation(_right_joints[index],
+			_right_joint_rest[index] * Quaternion(_right_joint_axes[index], curl))
+	_right_skeleton.force_update_all_bone_transforms()
+
+func _grip_amount(kind: String) -> float:
+	match kind:
+		"seat": return 0.35
+		"extract": return 0.20
+	return 1.0
 
 func _glove(at: Vector3, inward: float) -> Node3D:
 	var glove := Node3D.new()
@@ -172,6 +296,10 @@ func _apply_right_pose(grip: float) -> void:
 	_grip = grip
 	_right.position = _rest.lerp(_grip_position, grip)
 	_right.rotation = Vector3(0.13 * grip, -0.19 * grip, (-0.39 if _design_pass >= 9 else -0.27) * grip)
+	if _right_skeleton != null:
+		_right.rotation += RIGGED_IDLE_ROTATION * (1.0 - grip)
+		_apply_rigged_pose(grip * _grip_amount(_grip_kind))
+		return
 	for index in range(_right_fingers.size()):
 		var finger := _right_fingers[index]
 		var curl := -0.50 - 0.23 * index if _design_pass >= 6 else -0.67 - 0.16 * index
@@ -213,9 +341,8 @@ func interact() -> bool:
 	else:
 		_holding = true
 		_mirror.reparent(_right, false)
-		_mirror.position = Vector3(-0.027, -0.024, -0.050)
-		_mirror.rotation = Vector3(-0.94, 0.0, 0.30)
-		_animate_right_pose(1.0)
+		_mirror.transform = instrument_pose("mirror")
+		pose_grip(true, false, "mirror")
 	return true
 
 func _exit_tree() -> void:

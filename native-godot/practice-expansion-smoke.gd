@@ -16,7 +16,7 @@ func _check(ok: bool, message: String) -> bool:
 
 func _designs() -> bool:
 	var previous := ""
-	for pass_index in range(0, HANDS.FINAL_DESIGN_PASS + 1):
+	for pass_index in range(0, HANDS.PROCEDURAL_DESIGN_PASSES + 1):
 		var camera := Camera3D.new()
 		root.add_child(camera)
 		camera.position = Vector3(0, 1.55, 1.5)
