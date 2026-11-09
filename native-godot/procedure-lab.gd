@@ -302,7 +302,7 @@ func _build_scene(hand_design: int) -> void:
 				a = Vector3(0, 0.58, 0.03)
 				_mesh(_world, _box(Vector3(0.29, 0.035, 0.30)), Vector3(0.87, 0.08, 0.79), Color("#456f82"))
 				if _tooth_credit != null and not _tooth_credit.disabled:
-					_tooth_credit.text = "FDI 35, 36 and 37 surfaces · University of Dundee, School of Dentistry · CC BY 4.0 · illustrative arrangement; synthetic gingiva/socket"
+					_tooth_credit.text = "FDI 35, 36, 37 · University of Dundee, School of Dentistry · CC BY 4.0 · illustrative seating, synthetic gingiva/socket and outer teeth"
 	_target("site_0", a, MARK, 0.15, scenario["actions"][0])
 	_target("site_1", b, MARK, 0.15, scenario["actions"][1])
 	if _jaw != null:
