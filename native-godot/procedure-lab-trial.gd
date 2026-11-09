@@ -105,22 +105,60 @@ func _rigged_fit(hands: HANDS, tool: Node3D, kind: String) -> bool:
 					return false
 	return true
 
-func _extraction_asset(lab: Control) -> Dictionary:
-	var tooth: Node3D = lab.get("_tooth_model")
-	if tooth == null or not tooth.has_method("summary"):
-		return {}
-	var report: Dictionary = tooth.call("summary")
-	var credit := lab.find_child("KL_LAB_TOOTH_CREDIT", true, false) as LinkButton
-	if not report.get("texturePreserved") or credit == null or credit.disabled or not credit.text.contains("CC BY 4.0"):
-		return {}
+func _has_original_512_albedo(tooth: Node3D) -> bool:
 	for mesh: MeshInstance3D in tooth.find_children("*", "MeshInstance3D", true, false):
 		var material := mesh.get_active_material(0) as BaseMaterial3D
 		if material != null and material.albedo_texture != null:
 			var texture := material.albedo_texture
 			if texture.get_width() == 512 and texture.get_height() == 512:
-				report["albedo_px"] = [texture.get_width(), texture.get_height()]
-				return report
-	return {}
+				return true
+	return false
+
+func _extraction_asset(lab: Control) -> Dictionary:
+	var tooth: Node3D = lab.get("_tooth_model")
+	if tooth == null or not tooth.has_method("summary") or not _has_original_512_albedo(tooth):
+		push_error("Extraction FDI36 has no source-verified 512 px Dundee texture.")
+		return {}
+	var report: Dictionary = tooth.call("summary")
+	var credit := lab.find_child("KL_LAB_TOOTH_CREDIT", true, false) as LinkButton
+	if not report.get("texturePreserved") or str(report.get("fdi", "")) != "36" or credit == null or credit.disabled or not credit.text.contains("CC BY 4.0"):
+		push_error("FDI36 credit, FDI or texture contract failed.")
+		return {}
+	report["albedo_px"] = [512, 512]
+	var gum: Node3D = lab.get("_gum_fixture")
+	if gum == null or not gum.has_method("summary"):
+		push_error("Synthetic extraction gum fixture unavailable.")
+		return {}
+	var gum_report: Dictionary = gum.call("summary")
+	if not gum_report.get("synthetic", false) or gum_report.get("marginCount", 0) != 5 or not gum_report.get("fdi36SocketSurface", false) or gum_report.get("patientDerived", true):
+		push_error("Synthetic gum margins or visible socket missing.")
+		return {}
+	var neighbours: Dictionary = lab.get("_neighbour_rests")
+	if neighbours.size() != 2:
+		push_error("FDI35/FDI37 must be independently mounted neighbours.")
+		return {}
+	var neighbour_reports: Array[Dictionary] = []
+	var found: Array[String] = []
+	for node in neighbours:
+		var neighbour: Node3D = node
+		if not neighbour.has_method("summary") or not _has_original_512_albedo(neighbour) or neighbour.get_parent() != lab.get("_jaw"):
+			push_error("An extraction neighbour has no source-verified 512 px Dundee mesh.")
+			return {}
+		var item: Dictionary = neighbour.call("summary")
+		var fdi := str(item.get("fdi", ""))
+		var expected_blob := "892db94359877442300a6eac7a496dc85cdcaf98" if fdi == "35" else "947e90e80a7adb1d30f9cd09e84c9eacc8fc03f0" if fdi == "37" else ""
+		if found.has(fdi) or expected_blob.is_empty() or str(item.get("sourceGitBlobSha", "")) != expected_blob or not item.get("texturePreserved", false) or not item.get("illustrativeSeating", false):
+			push_error("Extraction neighbour source FDI identity mismatch: " + fdi)
+			return {}
+		found.append(fdi)
+		neighbour_reports.append(item)
+	if not found.has("35") or not found.has("37"):
+		push_error("Both distinct Dundee FDI35/FDI37 neighbours are required.")
+		return {}
+	report["neighbours"] = neighbour_reports
+	report["gum"] = gum_report
+	report["illustrativeArrangement"] = true
+	return report
 
 func _record_extracted_tooth_detail(lab: Control) -> void:
 	if not _video:
@@ -140,6 +178,32 @@ func _record_extracted_tooth_detail(lab: Control) -> void:
 	camera.global_transform = original
 	hand_rig.visible = hands_visible
 
+# These poses are recorded only in built-in Movie Maker replays.
+# The view pans over source-teeth and the synthetic margin/socket; nothing
+# touches extraction state, jaw angle, targets, score or user://.
+func _record_extraction_gum_detail(lab: Control, released: bool) -> void:
+	if not _video or str((lab.get("scenario") as Dictionary).get("id", "")) != "extraction":
+		return
+	var camera: Camera3D = lab.get("_camera")
+	var gum: Node3D = lab.get("_gum_fixture")
+	if gum == null:
+		return
+	var hand_rig := camera.get_node("KL_FIRST_PERSON_HANDS") as Node3D
+	var original := camera.global_transform
+	var hands_visible := hand_rig.visible
+	hand_rig.hide()
+	var target := gum.to_global(Vector3(0.0, 0.245, -0.18))
+	var count := 46
+	for frame in range(count):
+		var phase := float(frame) / float(count - 1)
+		var arc := lerpf(-0.23, 0.23, phase)
+		var pos := Vector3(sin(arc) * (0.34 if released else 0.51), 0.59 if released else 0.76, 0.64 if released else 0.91)
+		camera.global_position = gum.to_global(pos)
+		camera.look_at(target)
+		await process_frame
+	camera.global_transform = original
+	hand_rig.visible = hands_visible
+
 func _complete(lab: Control) -> bool:
 	var prompt: Label = lab.get("_status")
 	var feedback: Label = lab.get("_feedback")
@@ -148,8 +212,10 @@ func _complete(lab: Control) -> bool:
 	if reference == null or not reference.uri.begins_with("https://") or reference.uri.ends_with("/all-topics-a-z"):
 		return false
 	if lab.get("scenario")["id"] == "extraction" and _extraction_asset(lab).is_empty():
-		push_error("Extraction requires the attributed Dundee molar with its original 512 px texture.")
+		push_error("Extraction requires attributed textured Dundee FDI35/36/37 and a synthetic gingival socket.")
 		return false
+	if lab.get("scenario")["id"] == "extraction":
+		await _record_extraction_gum_detail(lab, false)
 	var original := prompt.text
 	await _action(lab, "wrong_tool", "KL_LAB_GRAB")
 	if int(lab.get("score")) != 0 or lab.get("held") or prompt.text != original or not feedback.text.contains("assigned instrument"):
@@ -230,6 +296,7 @@ func _complete(lab: Control) -> bool:
 				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
 					return false
 				await _pull(lab, 55)
+				await _record_extraction_gum_detail(lab, true)
 				await _record_extracted_tooth_detail(lab)
 			else:
 				(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
