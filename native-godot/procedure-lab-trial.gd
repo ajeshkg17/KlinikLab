@@ -296,6 +296,12 @@ func _complete(lab: Control) -> bool:
 				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
 					return false
 				await _pull(lab, 55)
+				# The synthetic socket surface must remain in the jaw after the
+				# original FDI36 release motion, before filming the exposed recess.
+				var socket: MeshInstance3D = (lab.get("_gum_fixture") as Node3D).get_node_or_null("KL_FDI36_SOCKET_SYNTHETIC") as MeshInstance3D
+				if socket == null or not socket.visible or (lab.get("_tooth_model") as Node3D).get_parent() != lab.get("_world"):
+					push_error("FDI36 release did not expose the synthetic socket in the jaw.")
+					return false
 				await _record_extraction_gum_detail(lab, true)
 				await _record_extracted_tooth_detail(lab)
 			else:
