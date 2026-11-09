@@ -461,6 +461,7 @@ func _end_pull() -> void:
 	if _pulling:
 		_pulling = false
 		_event("pull_paused", "site_0")
+		_feedback.text = "Pull paused at %d%%. Hold again to continue." % roundi(_pull_progress * 100.0)
 
 func _update_pull(id: String, delta: float) -> void:
 	if not _pull_held:
