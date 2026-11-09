@@ -60,5 +60,6 @@ test('SR40 Draco converter verifies original blob identity and removes unsupport
  assert.match(script,/73e9f3029d770c6b4052ebbaba708283de4c47fd/);
  assert.match(script,/GetAttributeFloatForAllPoints/);
  assert.match(script,/GetFaceFromMesh/);
- assert.match(script,/texturePreserved:false/);
+ assert.match(script,/const preserveTexture=args\['preserve-texture'\]==='true'/);
+ assert.match(script,/texturePreserved:preserveTexture/);
 });

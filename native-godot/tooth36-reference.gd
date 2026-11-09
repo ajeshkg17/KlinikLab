@@ -5,6 +5,9 @@ const MANIFEST := "res://source/tooth-fdi36-manifest.json"
 const RAW_SOURCE := "res://assets/dundee/mandibular_first_molar.glb.source"
 const CONVERTED_RAW_SOURCE := "res://assets/dundee/mandibular_first_molar-godot.glb.source"
 const GODOT_SCENE := "res://assets/dundee/mandibular_first_molar-godot.glb"
+const TRAINING_FILE := "mandibular_first_molar-training.glb"
+const TRAINING_SCENE := "res://assets/dundee/" + TRAINING_FILE
+const TRAINING_LIGHT_LAYER := 1 << 1
 const RAW_RESOLVER = preload("res://raw-source.gd")
 const SOURCE_BLOB := "73e9f3029d770c6b4052ebbaba708283de4c47fd"
 const SOURCE_COMMIT := "4f0ffb651998a4641ddf45c7632ea236cc164fcb"
@@ -13,8 +16,9 @@ var _fallback: Node3D
 var _mesh_count := 0
 var _error := ""
 var _configured := false
+var _texture_preserved := false
 
-func configure(expected_sha: String) -> bool:
+func configure(expected_sha: String, training_height := 0.0) -> bool:
 	if _configured:
 		_error = "FDI36 reference configured twice"
 		return false
@@ -39,7 +43,15 @@ func configure(expected_sha: String) -> bool:
 		_error = "Godot-compatible FDI36 conversion sidecar missing or SHA256 mismatch"
 		_show_missing_fallback()
 		return true
-	var resource := load(GODOT_SCENE)
+	var scene_path := GODOT_SCENE
+	if training_height > 0.0:
+		var training_sha := str(m.get("trainingSha256",""))
+		if m.get("trainingRuntimeFile") != TRAINING_FILE or m.get("trainingSidecar") != TRAINING_FILE + ".source" or m.get("trainingTexturePreserved") != true or training_sha.length() != 64 or RAW_RESOLVER.verified_path(TRAINING_SCENE + ".source", training_sha).is_empty():
+			_error = "Textured FDI36 training sidecar missing or SHA256 mismatch"
+			_show_missing_fallback()
+			return true
+		scene_path = TRAINING_SCENE
+	var resource := load(scene_path)
 	if not (resource is PackedScene):
 		_error = "Godot could not import converted Dundee FDI36 GLB"
 		_show_missing_fallback()
@@ -52,17 +64,49 @@ func configure(expected_sha: String) -> bool:
 		return true
 	_tooth = instance as Node3D
 	_tooth.name = "KL_DUNDEE_FDI36_CC_BY_4_SURFACE_REFERENCE"
-	_tooth.position = Vector3(-2.7,0.15,0.0)
-	_tooth.scale = Vector3.ONE * 0.72
-	add_child(_tooth)
 	_mesh_count = _count_meshes(_tooth)
-	if _mesh_count < 1:
-		_tooth.queue_free()
+	if _mesh_count < 1 or (training_height > 0.0 and not _mount_textured_training_tooth(training_height)):
+		_tooth.free()
 		_tooth = null
-		_error = "Converted FDI36 surface mesh contains no MeshInstance3D"
+		_mesh_count = 0
+		_error = "FDI36 surface has no usable mesh or training texture"
 		_show_missing_fallback()
 		return true
+	if training_height <= 0.0:
+		_tooth.position = Vector3(-2.7,0.15,0.0)
+		_tooth.scale = Vector3.ONE * 0.72
+		add_child(_tooth)
 	name = "KL_DUNDEE_FDI36_SOURCE_SURFACE_REFERENCE"
+	return true
+
+func _mount_textured_training_tooth(height: float) -> bool:
+	var bounds := AABB()
+	var has_bounds := false
+	for mesh: MeshInstance3D in _tooth.find_children("*", "MeshInstance3D", true, false):
+		if mesh.mesh == null:
+			continue
+		var local := mesh.transform
+		var ancestor := mesh.get_parent_node_3d()
+		while ancestor != null:
+			local = ancestor.transform * local
+			ancestor = ancestor.get_parent_node_3d()
+		var mesh_bounds := local * mesh.get_aabb()
+		bounds = bounds.merge(mesh_bounds) if has_bounds else mesh_bounds
+		has_bounds = true
+		for surface in range(mesh.mesh.get_surface_count()):
+			var material := mesh.get_active_material(surface) as BaseMaterial3D
+			if material == null or material.albedo_texture == null:
+				return false
+		mesh.layers = TRAINING_LIGHT_LAYER
+	if not has_bounds or bounds.size.y <= 0.0:
+		return false
+	var factor := height / bounds.size.y
+	var mount := Node3D.new()
+	mount.position = -bounds.get_center() * factor
+	mount.scale = Vector3.ONE * factor
+	mount.add_child(_tooth)
+	add_child(mount)
+	_texture_preserved = true
 	return true
 
 func _count_meshes(node: Node) -> int:
@@ -89,6 +133,7 @@ func force_missing_fallback_for_test() -> void:
 		_tooth.queue_free()
 		_tooth = null
 	_mesh_count = 0
+	_texture_preserved = false
 	if _fallback != null:
 		_fallback.queue_free()
 		_fallback = null
@@ -105,6 +150,6 @@ func summary() -> Dictionary:
 		"sourceGitBlobSha":SOURCE_BLOB,"sourceCommit":SOURCE_COMMIT,
 		"license":"CC-BY-4.0","attribution":"University of Dundee, School of Dentistry",
 		"surfaceOnly":true,"internalTissuesProvided":false,
-		"clinicalAccuracyValidated":false,"texturePreserved":false,
+		"clinicalAccuracyValidated":false,"texturePreserved":_texture_preserved,
 		"error":_error
 	}
