@@ -203,6 +203,18 @@ func _complete(lab: Control) -> bool:
 	if int(lab.get("score")) != 15:
 		return false
 	first_site.hide()
+	if scenario["effect"] == "extract":
+		var neighbour_rests: Dictionary = lab.get("_neighbour_rests")
+		if neighbour_rests.size() != 2:
+			push_error("Extraction replay expected both adjacent teeth.")
+			return false
+		for neighbour in neighbour_rests:
+			(neighbour as Node3D).position.x += 0.02
+			await _action(lab, "verify", "KL_LAB_USE")
+			if int(lab.get("score")) != 15 or int(lab.get("stage")) != 2 or not feedback.text.contains("both adjacent teeth"):
+				push_error("Failed extraction verification did not explain the adjacent-tooth check: " + feedback.text)
+				return false
+			(neighbour as Node3D).transform = neighbour_rests[neighbour]
 	await _action(lab, "verify", "KL_LAB_USE")
 	var summary := lab.find_child("KL_LAB_OUTCOME_SUMMARY", true, false) as Label
 	return int(lab.get("score")) == 20 and int(lab.get("stage")) == 3 and not lab.get("held") and progress.text.contains("Verified") and summary.visible and summary.text.contains(scenario["actions"][0]) and summary.text.contains(scenario["actions"][1])
