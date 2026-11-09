@@ -122,6 +122,72 @@ func _extraction_asset(lab: Control) -> Dictionary:
 				return report
 	return {}
 
+func _extraction_neighbours(lab: Control) -> Dictionary:
+	var rests: Dictionary = lab.get("_neighbour_rests")
+	if rests.size() != 2:
+		push_error("Extraction requires exactly two source-identified Dundee neighbours.")
+		return {}
+	var reports := {}
+	for tooth: Node3D in rests:
+		if not tooth.has_method("summary") or tooth.get_parent() != lab.get("_jaw"):
+			push_error("Extraction neighbour is not a mounted Dundee surface.")
+			return {}
+		var report: Dictionary = tooth.call("summary")
+		var fdi := str(report.get("fdi", ""))
+		if fdi not in ["35", "37"] or not report.get("assetLoaded") or not report.get("texturePreserved") or report.get("albedo_px") != [512, 512] or not report.get("illustrativeChairPlacement"):
+			push_error("Extraction neighbour FDI/512px texture or provenance failed: " + str(report))
+			return {}
+		if reports.has(fdi):
+			push_error("Duplicate Dundee neighbour identity " + fdi)
+			return {}
+		reports[fdi] = report
+	if not reports.has("35") or not reports.has("37"):
+		push_error("FDI35 and FDI37 surface identities not both present.")
+		return {}
+	return reports
+
+func _extraction_socket(lab: Control, exposed: bool) -> bool:
+	var socket: Node3D = lab.get("_socket_visual")
+	if not is_instance_valid(socket) or socket.name != "KL_SYNTHETIC_FDI36_EXTRACTION_SOCKET" or socket.visible != exposed:
+		push_error("Synthetic extraction socket visibility mismatch. expected exposed=" + str(exposed))
+		return false
+	var mesh := socket.find_child("KL_SYNTHETIC_DARK_SOCKET_BOWL", true, false) as MeshInstance3D
+	if mesh == null or mesh.mesh == null:
+		push_error("Synthetic extraction socket geometry is missing.")
+		return false
+	var gum: Node3D = socket.get_parent()
+	if gum.name != "KL_SYNTHETIC_EXTRACTION_GINGIVA_NOT_PATIENT_ANATOMY" or gum.get_parent() != lab.get("_jaw"):
+		push_error("Synthetic gingiva is not attached to the original hinged jaw.")
+		return false
+	for id in ["35", "36", "37"]:
+		var margin := gum.find_child("KL_SYNTHETIC_FDI%s_GINGIVAL_MARGIN" % id, true, false) as MeshInstance3D
+		if margin == null or margin.mesh == null:
+			push_error("Synthetic gum margin missing around FDI " + id)
+			return false
+	return true
+
+func _record_extraction_socket_detail(lab: Control) -> void:
+	# Movie-only establishing view of the exposed synthetic socket and gum
+	# margins; leave the scored chair camera and tools exactly as they were.
+	if not _video:
+		return
+	var camera: Camera3D = lab.get("_camera")
+	var socket: Node3D = lab.get("_socket_visual")
+	if not socket.visible:
+		return
+	var original := camera.global_transform
+	var hand_rig := camera.get_node("KL_FIRST_PERSON_HANDS") as Node3D
+	var hands_visible := hand_rig.visible
+	hand_rig.hide()
+	var center := socket.to_global(Vector3(0.0, 0.09, -0.18))
+	for frame in range(36):
+		var angle := lerpf(-0.32, 0.32, float(frame) / 35.0)
+		camera.global_position = center + Vector3(sin(angle) * 0.28, 0.25, cos(angle) * 0.38)
+		camera.look_at(center)
+		await process_frame
+	camera.global_transform = original
+	hand_rig.visible = hands_visible
+
 func _record_extracted_tooth_detail(lab: Control) -> void:
 	if not _video:
 		return
@@ -147,9 +213,10 @@ func _complete(lab: Control) -> bool:
 	var reference := lab.find_child("KL_LAB_TOPIC_REFERENCE", true, false) as LinkButton
 	if reference == null or not reference.uri.begins_with("https://") or reference.uri.ends_with("/all-topics-a-z"):
 		return false
-	if lab.get("scenario")["id"] == "extraction" and _extraction_asset(lab).is_empty():
-		push_error("Extraction requires the attributed Dundee molar with its original 512 px texture.")
-		return false
+	if lab.get("scenario")["id"] == "extraction":
+		if _extraction_asset(lab).is_empty() or _extraction_neighbours(lab).is_empty() or not _extraction_socket(lab, false):
+			push_error("Extraction source teeth, texture or seated synthetic gum/socket failed.")
+			return false
 	var original := prompt.text
 	await _action(lab, "wrong_tool", "KL_LAB_GRAB")
 	if int(lab.get("score")) != 0 or lab.get("held") or prompt.text != original or not feedback.text.contains("assigned instrument"):
@@ -230,6 +297,9 @@ func _complete(lab: Control) -> bool:
 				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
 					return false
 				await _pull(lab, 55)
+				if not _extraction_socket(lab, true):
+					return false
+				await _record_extraction_socket_detail(lab)
 				await _record_extracted_tooth_detail(lab)
 			else:
 				(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
@@ -292,7 +362,9 @@ func _procedure(index: int) -> bool:
 	var scenario: Dictionary = lab.get("scenario")
 	_runs.append({"id": scenario["id"], "score": 20, "max_score": 20,
 		"clean_replay": true, "first_run": first, "events": lab.get("events"),
-		"extraction_asset": _extraction_asset(lab) if scenario["id"] == "extraction" else {}})
+		"extraction_asset": _extraction_asset(lab) if scenario["id"] == "extraction" else {},
+		"extraction_neighbours": _extraction_neighbours(lab) if scenario["id"] == "extraction" else {},
+		"synthetic_socket_exposed": _extraction_socket(lab, true) if scenario["id"] == "extraction" else false})
 	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
 	await process_frame
 	return true
@@ -474,7 +546,8 @@ func _chair_route() -> bool:
 			int(lab.get("stage")), int(lab.get("score")), int(lab.get("next_target")), str((lab.get("_feedback") as Label).text)])
 		return false
 	_runs.append({"id": "chair_extraction", "score": 20, "max_score": 20, "walk_start_frame": start_frame,
-		"extraction_asset": _extraction_asset(lab),
+		"extraction_asset": _extraction_asset(lab), "extraction_neighbours": _extraction_neighbours(lab),
+		"synthetic_socket_exposed": _extraction_socket(lab, true),
 		"start_eye_height_m": start_height, "start_pitch_degrees": start_pitch, "replay_eye_height_m": height.value,
 		"first_run": first_events, "events": lab.get("events")})
 	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
