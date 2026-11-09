@@ -165,6 +165,11 @@ func _complete(lab: Control) -> bool:
 					return false
 				await _pull(lab, 15)
 				var partial: float = lab.get("_pull_progress")
+				var paused_feedback: String = (lab.get("_feedback") as Label).text
+				var paused_percent := str(roundi(partial * 100.0)) + "%"
+				if not paused_feedback.contains("Pull paused") or not paused_feedback.contains(paused_percent):
+					push_error("Released extraction did not report its paused progress: " + paused_feedback)
+					return false
 				for frame in range(8):
 					await physics_frame
 				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
