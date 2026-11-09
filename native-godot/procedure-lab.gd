@@ -5,6 +5,8 @@ signal closed
 const CATALOG := preload("res://procedure-scenarios.gd")
 const HANDS := preload("res://practice-tool-handling.gd")
 const MOLAR_REFERENCE := preload("res://tooth36-reference.gd")
+const NEIGHBOUR_REFERENCE := preload("res://tooth-training-neighbour.gd")
+const EXTRACTION_GUM := preload("res://extraction-gum-fixture.gd")
 const DUNDEE_MOLAR_URL := "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6"
 const RANGE := 4.6
 const MASK := 1
@@ -55,6 +57,7 @@ var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
 var _tooth_credit: LinkButton
+var _gum_fixture: Node3D
 var _tooth_rest := Transform3D.IDENTITY
 var _neighbour_rests: Dictionary = {}
 var _jaw_open := true
@@ -259,22 +262,31 @@ func _build_scene(hand_design: int) -> void:
 			a = Vector3(-0.54, 0.66, 0.12)
 			b = Vector3(0.54, 0.39, 0.14)
 		_:
-			var base := SphereMesh.new()
-			base.radius = 1.1
-			base.height = 0.30
-			var gum := _mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			if scenario["effect"] == "extract":
 				_jaw = Node3D.new()
 				_jaw.name = "HingedTrainingJaw"
 				_world.add_child(_jaw)
 				_jaw.position = Vector3(0, 0.22, -0.66)
-				gum.reparent(_jaw)
+				# Noninteractive shaped synthetic gingiva and exposed central
+				# socket; all aiming remains on the existing _targets bodies.
+				_gum_fixture = EXTRACTION_GUM.new()
+				_world.add_child(_gum_fixture)
+				_gum_fixture.call("build")
+				_gum_fixture.reparent(_jaw)
+			else:
+				var base := SphereMesh.new()
+				base.radius = 1.1
+				base.height = 0.30
+				_mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			for x in [-0.85, -0.44, 0.0, 0.44, 0.85]:
 				if scenario["model"] != "gap" or x != 0.0:
 					var at := Vector3(x, 0.31, -0.18 - absf(x) * 0.20)
 					var tooth: Node3D
 					if scenario["effect"] == "extract" and x == 0.0:
 						tooth = _extraction_molar(at)
+					elif scenario["effect"] == "extract" and absf(x) < 0.5:
+						# Positions are illustrative; identities are exact source teeth.
+						tooth = _extraction_neighbour(at, "35" if x < 0.0 else "37")
 					else:
 						tooth = _tooth(at, 0.78)
 					if _jaw != null:
@@ -289,6 +301,8 @@ func _build_scene(hand_design: int) -> void:
 			if scenario["effect"] == "extract":
 				a = Vector3(0, 0.58, 0.03)
 				_mesh(_world, _box(Vector3(0.29, 0.035, 0.30)), Vector3(0.87, 0.08, 0.79), Color("#456f82"))
+				if _tooth_credit != null and not _tooth_credit.disabled:
+					_tooth_credit.text = "FDI 35, 36 and 37 surfaces · University of Dundee, School of Dentistry · CC BY 4.0 · illustrative arrangement; synthetic gingiva/socket"
 	_target("site_0", a, MARK, 0.15, scenario["actions"][0])
 	_target("site_1", b, MARK, 0.15, scenario["actions"][1])
 	if _jaw != null:
@@ -317,6 +331,24 @@ func _extraction_molar(at: Vector3) -> Node3D:
 	light.light_cull_mask = MOLAR_REFERENCE.TRAINING_LIGHT_LAYER
 	_world.add_child(light)
 	return molar
+
+func _extraction_neighbour(at: Vector3, fdi: String) -> Node3D:
+	var neighbour := NEIGHBOUR_REFERENCE.new()
+	var source_sha := FileAccess.get_file_as_string("res://source/expected-sha.txt").strip_edges()
+	var height := 0.40 if fdi == "35" else 0.46
+	if not neighbour.configure(source_sha, fdi, height, 0.37):
+		push_warning(str(neighbour.summary()["error"]))
+		neighbour.free()
+		if _tooth_credit != null:
+			_tooth_credit.text = "Dundee FDI%s neighbour unavailable · simplified training tooth used" % fdi
+			_tooth_credit.disabled = true
+		var fallback := _tooth(at, 0.78)
+		fallback.set_meta("fdi", fdi)
+		fallback.set_meta("illustrative_fallback", true)
+		return fallback
+	neighbour.position = at
+	_world.add_child(neighbour)
+	return neighbour
 
 func _chair_eye_y() -> float:
 	return (_eye_height - CHAIR_FIXTURE_HEIGHT) / CHAIR_SCALE
