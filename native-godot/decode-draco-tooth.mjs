@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Deterministic conversion of the source-verified Dundee FDI36 Draco GLB
+ * Deterministic conversion of source-verified Dundee tooth Draco GLBs
  * into a stock-Godot-compatible uncompressed GLB. Original bytes stay intact.
  * Geometry and node transforms are preserved. Neutral reference conversion
  * is the default; the training mesh retains the source WebP texture.
@@ -17,7 +17,11 @@ const args=Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')
 const input=args.input,output=args.output,decoderJs=args['decoder-js'],decoderWasm=args['decoder-wasm'];
 const expected=args['expected-blob-sha'];
 const preserveTexture=args['preserve-texture']==='true';
-if(!input||!output||!decoderJs||!decoderWasm||!['73e9f3029d770c6b4052ebbaba708283de4c47fd','0948d093089c5921281185a103b323c513365502'].includes(expected))
+const sourceBlobs=['73e9f3029d770c6b4052ebbaba708283de4c47fd', // FDI36
+ '0948d093089c5921281185a103b323c513365502', // FDI26
+ '892db94359877442300a6eac7a496dc85cdcaf98', // FDI35
+ '947e90e80a7adb1d30f9cd09e84c9eacc8fc03f0']; // FDI37
+if(!input||!output||!decoderJs||!decoderWasm||!sourceBlobs.includes(expected))
  throw Error('Require exact source-verified FDI36 GLB, Draco decoder JS/WASM, and expected Git blob SHA');
 const original=fs.readFileSync(input);
 const blob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+original.length+'\0'),original])).digest('hex');
@@ -38,8 +42,13 @@ if(!doc||!bin||!doc.extensionsRequired?.includes('KHR_draco_mesh_compression'))
 const primitive=doc.meshes?.[0]?.primitives?.[0];
 const draco=primitive?.extensions?.KHR_draco_mesh_compression;
 const expectedLayout=expected==='0948d093089c5921281185a103b323c513365502'?'COLOR_0,NORMAL,POSITION,TANGENT,TEXCOORD_0':'COLOR_0,NORMAL,POSITION,TEXCOORD_0';
-if(!draco||Object.keys(primitive.attributes||{}).sort().join(',')!==expectedLayout)
- throw Error('Unexpected source FDI36 primitive layout');
+const actualLayout=Object.keys(primitive.attributes||{}).sort().join(',');
+// The two new source-verified GLBs may contain TANGENT as does FDI26.
+// Reject all other attributes, in addition to enforcing their pinned Git blobs.
+if(!draco || (expected===sourceBlobs[2]||expected===sourceBlobs[3]
+ ? !['COLOR_0,NORMAL,POSITION,TEXCOORD_0','COLOR_0,NORMAL,POSITION,TANGENT,TEXCOORD_0'].includes(actualLayout)
+ : actualLayout!==expectedLayout))
+ throw Error('Unexpected source Dundee primitive layout');
 const compressedView=doc.bufferViews?.[draco.bufferView];
 if(!compressedView||compressedView.buffer!==0)throw Error('Draco buffer view missing');
 const compressed=bin.subarray(compressedView.byteOffset||0,(compressedView.byteOffset||0)+compressedView.byteLength);
