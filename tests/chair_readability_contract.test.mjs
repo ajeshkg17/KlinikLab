@@ -31,3 +31,16 @@ test('active target caption is in the fixed 2D instruction row, never over model
   assert.match(status, /label\.visible = false/);
   assert.match(status, /var next := "tool" if stage == 0 else "site_%d" % next_target if stage == 1 else "return" if held else "verify"/);
 });
+
+test('chair replay asserts the relocated 2D target state, not stale Label3D tint', () => {
+  const trial = readSourceContract('../native-godot/procedure-lab-trial.gd', import.meta.url);
+  const complete = trial.slice(trial.indexOf('func _complete(lab: Control) -> bool:'), trial.indexOf('func _procedure(index: int) -> bool:'));
+  const chair = trial.slice(trial.indexOf('func _chair_route() -> bool:'), trial.indexOf('func _run() -> void:', trial.indexOf('func _chair_route() -> bool:')));
+  assert.doesNotMatch(complete, /site_label\.modulate != Color/);
+  assert.match(complete, /current_caption\.text != "Current target · " \+ site_label\.text/);
+  assert.match(complete, /site_label\.visible/);
+  assert.match(complete, /current_caption\.get_theme_color\("font_color"\) != Color\("#d0ffe4"\)/);
+  assert.match(complete, /push_error\("Current target caption mismatch after pickup:/);
+  assert.match(chair, /Chair first extraction pass stopped: stage=%d score=%d next_target=%d feedback=%s/);
+  assert.match(chair, /Chair second extraction pass stopped: stage=%d score=%d next_target=%d feedback=%s/);
+});
