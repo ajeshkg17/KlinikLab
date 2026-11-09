@@ -105,12 +105,50 @@ func _rigged_fit(hands: HANDS, tool: Node3D, kind: String) -> bool:
 					return false
 	return true
 
+func _extraction_asset(lab: Control) -> Dictionary:
+	var tooth: Node3D = lab.get("_tooth_model")
+	if tooth == null or not tooth.has_method("summary"):
+		return {}
+	var report: Dictionary = tooth.call("summary")
+	var credit := lab.find_child("KL_LAB_TOOTH_CREDIT", true, false) as LinkButton
+	if not report.get("texturePreserved") or credit == null or credit.disabled or not credit.text.contains("CC BY 4.0"):
+		return {}
+	for mesh: MeshInstance3D in tooth.find_children("*", "MeshInstance3D", true, false):
+		var material := mesh.get_active_material(0) as BaseMaterial3D
+		if material != null and material.albedo_texture != null:
+			var texture := material.albedo_texture
+			if texture.get_width() == 512 and texture.get_height() == 512:
+				report["albedo_px"] = [texture.get_width(), texture.get_height()]
+				return report
+	return {}
+
+func _record_extracted_tooth_detail(lab: Control) -> void:
+	if not _video:
+		return
+	var camera: Camera3D = lab.get("_camera")
+	var tooth: Node3D = lab.get("_tooth_model")
+	var hand_rig := camera.get_node("KL_FIRST_PERSON_HANDS") as Node3D
+	var original := camera.global_transform
+	var hands_visible := hand_rig.visible
+	hand_rig.hide()
+	var center := tooth.global_position
+	for frame in range(44):
+		var angle := lerpf(-0.38, 0.55, float(frame) / 43.0)
+		camera.global_position = center + Vector3(sin(angle) * 0.40, 0.19, cos(angle) * 0.40)
+		camera.look_at(center)
+		await process_frame
+	camera.global_transform = original
+	hand_rig.visible = hands_visible
+
 func _complete(lab: Control) -> bool:
 	var prompt: Label = lab.get("_status")
 	var feedback: Label = lab.get("_feedback")
 	var progress := lab.find_child("KL_LAB_PROGRESS", true, false) as Label
 	var reference := lab.find_child("KL_LAB_TOPIC_REFERENCE", true, false) as LinkButton
 	if reference == null or not reference.uri.begins_with("https://") or reference.uri.ends_with("/all-topics-a-z"):
+		return false
+	if lab.get("scenario")["id"] == "extraction" and _extraction_asset(lab).is_empty():
+		push_error("Extraction requires the attributed Dundee molar with its original 512 px texture.")
 		return false
 	var original := prompt.text
 	await _action(lab, "wrong_tool", "KL_LAB_GRAB")
@@ -192,6 +230,7 @@ func _complete(lab: Control) -> bool:
 				if partial <= 0.0 or partial >= 1.0 or not is_equal_approx(partial, float(lab.get("_pull_progress"))):
 					return false
 				await _pull(lab, 55)
+				await _record_extracted_tooth_detail(lab)
 			else:
 				(lab.find_child("KL_LAB_USE", true, false) as Button).pressed.emit()
 				await _settle()
@@ -252,7 +291,8 @@ func _procedure(index: int) -> bool:
 		return false
 	var scenario: Dictionary = lab.get("scenario")
 	_runs.append({"id": scenario["id"], "score": 20, "max_score": 20,
-		"clean_replay": true, "first_run": first, "events": lab.get("events")})
+		"clean_replay": true, "first_run": first, "events": lab.get("events"),
+		"extraction_asset": _extraction_asset(lab) if scenario["id"] == "extraction" else {}})
 	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()
 	await process_frame
 	return true
@@ -434,6 +474,7 @@ func _chair_route() -> bool:
 			int(lab.get("stage")), int(lab.get("score")), int(lab.get("next_target")), str((lab.get("_feedback") as Label).text)])
 		return false
 	_runs.append({"id": "chair_extraction", "score": 20, "max_score": 20, "walk_start_frame": start_frame,
+		"extraction_asset": _extraction_asset(lab),
 		"start_eye_height_m": start_height, "start_pitch_degrees": start_pitch, "replay_eye_height_m": height.value,
 		"first_run": first_events, "events": lab.get("events")})
 	(lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button).pressed.emit()

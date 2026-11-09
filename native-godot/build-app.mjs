@@ -137,16 +137,26 @@ try{
  if(toothOriginalSha256!==sha256(toothBytes))throw Error('Dundee FDI36 original byte copy changed');
  const toothConvertedName='mandibular_first_molar-godot.glb';
  const toothConvertedPath=path.join(toothDir,toothConvertedName);
- run(path.join(root,'native-godot/decode-draco-tooth.mjs'),[
-  '--input='+toothOriginalPath,'--output='+toothConvertedPath,
+ const toothDecoder=path.join(root,'native-godot/decode-draco-tooth.mjs');
+ const toothDecodeArgs=[
+  '--input='+toothOriginalPath,
   '--decoder-js='+path.join(root,'assets/draco/draco_decoder_gltf.js'),
   '--decoder-wasm='+path.join(root,'assets/draco/draco_decoder_gltf.wasm'),
   '--expected-blob-sha='+expectedToothBlob
- ]);
+ ];
+ run(toothDecoder,[...toothDecodeArgs,'--output='+toothConvertedPath]);
  const toothConvertedSha256=sha256(fs.readFileSync(toothConvertedPath));
  const toothConvertedSidecar=toothConvertedPath+'.source';
  fs.copyFileSync(toothConvertedPath,toothConvertedSidecar,fs.constants.COPYFILE_EXCL);
  if(sha256(fs.readFileSync(toothConvertedSidecar))!==toothConvertedSha256)throw Error('Dundee FDI36 converted raw sidecar checksum mismatch');
+ const toothTrainingName='mandibular_first_molar-training.glb';
+ const toothTrainingPath=path.join(toothDir,toothTrainingName);
+ run(toothDecoder,[...toothDecodeArgs,'--output='+toothTrainingPath,'--preserve-texture=true']);
+ const toothTrainingSidecar=toothTrainingName+'.source';
+ const toothTrainingSidecarPath=path.join(toothDir,toothTrainingSidecar);
+ const toothTrainingSha256=sha256(fs.readFileSync(toothTrainingPath));
+ fs.copyFileSync(toothTrainingPath,toothTrainingSidecarPath,fs.constants.COPYFILE_EXCL);
+ if(sha256(fs.readFileSync(toothTrainingSidecarPath))!==toothTrainingSha256)throw Error('Dundee FDI36 training raw sidecar checksum mismatch');
  const toothManifest={
   schemaVersion:1,sourceGitSHA:sha,caseId:'endo',fdi:'36',
   sourceFile:'mandibular_first_molar.glb',runtimeFile:toothConvertedName,
@@ -162,6 +172,8 @@ try{
   licenseUrl:'https://creativecommons.org/licenses/by/4.0/',
   sourceCollectionUrl:'https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f',
   convertedSha256:toothConvertedSha256,sourceGitBlobVerified:true,
+  trainingRuntimeFile:toothTrainingName,trainingSidecar:toothTrainingSidecar,
+  trainingSha256:toothTrainingSha256,trainingTexturePreserved:true,
   surfaceOnly:true,internalTissuesProvided:false,texturePreserved:false,
   clinicalAccuracyValidated:false,qualifiedAnatomyReviewPending:true,
   role:'FDI36_STATIC_SURFACE_REFERENCE_NOT_EDITABLE_TISSUE_VOLUME'

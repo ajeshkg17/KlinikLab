@@ -2,8 +2,8 @@
 /**
  * Deterministic conversion of the source-verified Dundee FDI36 Draco GLB
  * into a stock-Godot-compatible uncompressed GLB. Original bytes stay intact.
- * Geometry and node transforms are preserved; embedded WebP texture is
- * deliberately replaced by a neutral dental surface material.
+ * Geometry and node transforms are preserved. Neutral reference conversion
+ * is the default; the training mesh retains the source WebP texture.
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -16,6 +16,7 @@ const args=Object.fromEntries(process.argv.slice(2).filter(x=>x.startsWith('--')
 }));
 const input=args.input,output=args.output,decoderJs=args['decoder-js'],decoderWasm=args['decoder-wasm'];
 const expected=args['expected-blob-sha'];
+const preserveTexture=args['preserve-texture']==='true';
 if(!input||!output||!decoderJs||!decoderWasm||!['73e9f3029d770c6b4052ebbaba708283de4c47fd','0948d093089c5921281185a103b323c513365502'].includes(expected))
  throw Error('Require exact source-verified FDI36 GLB, Draco decoder JS/WASM, and expected Git blob SHA');
 const original=fs.readFileSync(input);
@@ -118,21 +119,24 @@ try{
  primitive.attributes=attrs;primitive.indices=indexAccessor;
  delete primitive.extensions.KHR_draco_mesh_compression;
  if(Object.keys(primitive.extensions).length===0)delete primitive.extensions;
- for(const ext of ['KHR_draco_mesh_compression','EXT_texture_webp','KHR_materials_specular']){
-  doc.extensionsUsed=(doc.extensionsUsed||[]).filter(x=>x!==ext);
-  doc.extensionsRequired=(doc.extensionsRequired||[]).filter(x=>x!==ext);
- }
+ const removedExtensions=['KHR_draco_mesh_compression','KHR_materials_specular'];
+ if(!preserveTexture)removedExtensions.push('EXT_texture_webp');
+ doc.extensionsUsed=(doc.extensionsUsed||[]).filter(x=>!removedExtensions.includes(x));
+ doc.extensionsRequired=(doc.extensionsRequired||[]).filter(x=>!removedExtensions.includes(x));
  if(!doc.extensionsUsed.length)delete doc.extensionsUsed;
  if(!doc.extensionsRequired.length)delete doc.extensionsRequired;
- // Preserve source mesh topology and vertex colours; replace WebP-only texture
- // dependency with a neutral, clearly documented surface reference material.
- delete doc.images;delete doc.textures;delete doc.samplers;
+ if(!preserveTexture){
+  delete doc.images;delete doc.textures;delete doc.samplers;
+ }
  for(const material of doc.materials||[]){
-  const pbr=material.pbrMetallicRoughness||{};
-  delete pbr.baseColorTexture;
-  pbr.baseColorFactor=[0.94,0.88,0.76,1.0];
-  pbr.metallicFactor=0.0;pbr.roughnessFactor=0.68;
-  material.pbrMetallicRoughness=pbr;
+  if(!preserveTexture){
+   const pbr=material.pbrMetallicRoughness||{};
+   delete pbr.baseColorTexture;
+   delete material.normalTexture;
+   pbr.baseColorFactor=[0.94,0.88,0.76,1.0];
+   pbr.metallicFactor=0.0;pbr.roughnessFactor=0.68;
+   material.pbrMetallicRoughness=pbr;
+  }
   delete material.extensions;
  }
  doc.buffers[0].byteLength=total;
@@ -147,7 +151,7 @@ try{
  fs.writeFileSync(output,out,{flag:'wx'});
  const convertedSha=crypto.createHash('sha256').update(out).digest('hex');
  process.stdout.write(JSON.stringify({sourceGitBlobSha:blob,convertedSha256:convertedSha,
-  vertices:count,triangles:faces,attributes:Object.keys(attrs),texturePreserved:false})+'\n');
+  vertices:count,triangles:faces,attributes:Object.keys(attrs),texturePreserved:preserveTexture})+'\n');
 }catch(error){
  throw new Error('FDI36 Draco conversion stage '+stage+': '+String(error?.message||error));
 }finally{

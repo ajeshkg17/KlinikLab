@@ -4,6 +4,8 @@ signal closed
 
 const CATALOG := preload("res://procedure-scenarios.gd")
 const HANDS := preload("res://practice-tool-handling.gd")
+const MOLAR_REFERENCE := preload("res://tooth36-reference.gd")
+const DUNDEE_MOLAR_URL := "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6"
 const RANGE := 4.6
 const MASK := 1
 const VIEW_START := Vector3(0, 2.15, 3.25)
@@ -52,6 +54,7 @@ var _chair_origin := Vector3.ZERO
 var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
+var _tooth_credit: LinkButton
 var _tooth_rest := Transform3D.IDENTITY
 var _neighbour_rests: Dictionary = {}
 var _jaw_open := true
@@ -182,6 +185,11 @@ func _build_ui() -> void:
 		controls += " · J opens or closes jaw · Hold click or Space to pull"
 	layout.add_child(_label(controls, 14))
 	layout.add_child(_label("Fictional training fixture. Points measure the simulation tasks.", 13))
+	if scenario["effect"] == "extract":
+		_tooth_credit = LinkButton.new()
+		_tooth_credit.name = "KL_LAB_TOOTH_CREDIT"
+		_tooth_credit.uri = DUNDEE_MOLAR_URL
+		layout.add_child(_tooth_credit)
 	get_window().focus_exited.connect(_release_mouse)
 
 func _label(value: String, font_size: int) -> Label:
@@ -263,7 +271,12 @@ func _build_scene(hand_design: int) -> void:
 				gum.reparent(_jaw)
 			for x in [-0.85, -0.44, 0.0, 0.44, 0.85]:
 				if scenario["model"] != "gap" or x != 0.0:
-					var tooth := _tooth(Vector3(x, 0.31, -0.18 - absf(x) * 0.20), 0.78)
+					var at := Vector3(x, 0.31, -0.18 - absf(x) * 0.20)
+					var tooth: Node3D
+					if scenario["effect"] == "extract" and x == 0.0:
+						tooth = _extraction_molar(at)
+					else:
+						tooth = _tooth(at, 0.78)
 					if _jaw != null:
 						tooth.reparent(_jaw)
 					if scenario["effect"] == "extract" and x == 0.0:
@@ -284,6 +297,26 @@ func _build_scene(hand_design: int) -> void:
 	_hands = HANDS.new()
 	_world.add_child(_hands)
 	_hands.mount_hands(_camera, hand_design)
+
+func _extraction_molar(at: Vector3) -> Node3D:
+	var molar := MOLAR_REFERENCE.new()
+	var source_sha := FileAccess.get_file_as_string("res://source/expected-sha.txt").strip_edges()
+	if not molar.configure(source_sha, 0.58 * 0.78) or not molar.summary()["texturePreserved"]:
+		push_warning(str(molar.summary()["error"]))
+		molar.free()
+		_tooth_credit.text = "Anatomical asset unavailable · simplified training tooth shown"
+		_tooth_credit.disabled = true
+		return _tooth(at, 0.78)
+	molar.position = at
+	_world.add_child(molar)
+	_tooth_credit.text = "FDI 36 surface adapted from University of Dundee, School of Dentistry · CC BY 4.0"
+	var light := OmniLight3D.new()
+	light.position = Vector3(-0.4, 0.95, 0.55)
+	light.omni_range = 0.9
+	light.light_energy = 0.38
+	light.light_cull_mask = MOLAR_REFERENCE.TRAINING_LIGHT_LAYER
+	_world.add_child(light)
+	return molar
 
 func _chair_eye_y() -> float:
 	return (_eye_height - CHAIR_FIXTURE_HEIGHT) / CHAIR_SCALE
