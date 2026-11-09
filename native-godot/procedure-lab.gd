@@ -531,6 +531,8 @@ func _rejection_reason(action: String, id: String) -> String:
 	if held and action == "use":
 		return "Return the instrument to the blue tray before verifying."
 	if stage == 2 and id == "verify":
+		if scenario["effect"] == "extract":
+			return "Extraction check failed. Confirm the assigned tooth is released and both adjacent teeth remain in place, then verify again."
 		return "Model check failed. Inspect the assigned sites or restart the simulation."
 	return "Aim at the next target shown above."
 
