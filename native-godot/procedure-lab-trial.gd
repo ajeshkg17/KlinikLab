@@ -135,18 +135,19 @@ func _complete(lab: Control) -> bool:
 			picker.select(index)
 			picker.item_selected.emit(index)
 			if (lab.get("scenario") as Dictionary)["id"] == "extraction":
+				_aim(lab, "site_0")
 				var jaw := lab.find_child("HingedTrainingJaw", true, false) as Node3D
 				var open_angle := jaw.rotation.x
 				(lab.find_child("KL_LAB_JAW", true, false) as Button).pressed.emit()
 				await _pull(lab, 12)
-				if float(lab.get("_pull_progress")) != 0.0 or jaw.rotation.x >= open_angle:
+				if float(lab.get("_pull_progress")) != 0.0 or jaw.rotation.x >= open_angle or not feedback.text.contains("Open the jaw fully"):
 					return false
 				(lab.find_child("KL_LAB_JAW", true, false) as Button).pressed.emit()
 				for frame in range(13):
 					await physics_frame
 				_aim(lab, "site_1")
 				await _pull(lab, 6)
-				if float(lab.get("_pull_progress")) != 0.0:
+				if float(lab.get("_pull_progress")) != 0.0 or not feedback.text.contains("assigned tooth, not an adjacent tooth"):
 					return false
 				_aim(lab, "site_0")
 				var camera: Camera3D = lab.get("_camera")
@@ -163,8 +164,16 @@ func _complete(lab: Control) -> bool:
 				await _settle()
 				if float(lab.get("_pull_progress")) != 0.0:
 					return false
-				await _pull(lab, 15)
+				var pull_button := lab.find_child("KL_LAB_PULL", true, false) as Button
+				pull_button.button_down.emit()
+				for frame in range(15):
+					await physics_frame
+					if frame == 0 and not feedback.text.contains("Correct tooth contact"):
+						push_error("Correct forceps contact was not acknowledged: " + feedback.text)
+						return false
 				var partial: float = lab.get("_pull_progress")
+				pull_button.button_up.emit()
+				await _settle()
 				var paused_feedback: String = (lab.get("_feedback") as Label).text
 				var paused_percent := str(roundi(partial * 100.0)) + "%"
 				if not paused_feedback.contains("Pull paused") or not paused_feedback.contains(paused_percent):
