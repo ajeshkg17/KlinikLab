@@ -89,11 +89,20 @@ func _build_ui() -> void:
 	layout.add_child(header)
 	var title := _label(str(scenario["title"]) + " · 3D practice model", 24)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# The title must yield width to the eye-height control on 1280 px windows.
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.clip_text = true
+	title.tooltip_text = title.text
 	header.add_child(title)
 	if _clinic_world != null:
-		header.add_child(_label("Eye height", 14))
+		var eye_label := _label("Eye height", 14)
+		eye_label.name = "KL_LAB_EYE_HEIGHT_LABEL"
+		eye_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		eye_label.custom_minimum_size.x = 90.0
+		header.add_child(eye_label)
 		var height := SpinBox.new()
 		height.name = "KL_LAB_EYE_HEIGHT"
+		height.custom_minimum_size.x = 116.0
 		height.min_value = CHAIR_MIN_EYE
 		height.max_value = CHAIR_MAX_EYE
 		height.step = 0.01
@@ -661,7 +670,11 @@ func _show_status(message: String) -> void:
 	for id in _targets:
 		var target: Node3D = _targets[id]
 		var label := target.get_child(2) as Label3D
-		label.modulate = Color("#d0ffe4") if id == next and stage < 3 else Color("#acbfcb")
+		# Keep interaction spheres/picker entries available, but show only the
+		# currently requested 3D caption. Overlapping captions obscure the tool,
+		# return tray, signed site and adjacent teeth at both desktop sizes.
+		label.visible = id == next and stage < 3
+		label.modulate = Color("#d0ffe4") if label.visible else Color("#acbfcb")
 
 func _event(name: String, target := "", reason := "") -> void:
 	events.append({"event": name, "target": target, "stage": stage, "score": score,
