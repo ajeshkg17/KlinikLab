@@ -42,11 +42,14 @@ if(!doc||!bin||!doc.extensionsRequired?.includes('KHR_draco_mesh_compression'))
 const primitive=doc.meshes?.[0]?.primitives?.[0];
 const draco=primitive?.extensions?.KHR_draco_mesh_compression;
 const expectedLayout=expected==='0948d093089c5921281185a103b323c513365502'?'COLOR_0,NORMAL,POSITION,TANGENT,TEXCOORD_0':'COLOR_0,NORMAL,POSITION,TEXCOORD_0';
-const actualLayout=Object.keys(primitive.attributes||{}).sort().join(',');
-// The two new source-verified GLBs may contain TANGENT as does FDI26.
-// Reject all other attributes, in addition to enforcing their pinned Git blobs.
+const actualKeys=Object.keys(primitive.attributes||{}).sort();
+const actualLayout=actualKeys.join(',');
+// The two newly pinned original Git blobs can differ in optional colour
+// or tangent attributes; geometry, normals and source texture UV are required.
+const neighbourLayoutOk=['POSITION','NORMAL','TEXCOORD_0'].every(k=>actualKeys.includes(k)) &&
+ actualKeys.every(k=>['POSITION','NORMAL','TEXCOORD_0','COLOR_0','TANGENT'].includes(k));
 if(!draco || (expected===sourceBlobs[2]||expected===sourceBlobs[3]
- ? !['COLOR_0,NORMAL,POSITION,TEXCOORD_0','COLOR_0,NORMAL,POSITION,TANGENT,TEXCOORD_0'].includes(actualLayout)
+ ? !neighbourLayoutOk
  : actualLayout!==expectedLayout))
  throw Error('Unexpected source Dundee primitive layout');
 const compressedView=doc.bufferViews?.[draco.bufferView];
