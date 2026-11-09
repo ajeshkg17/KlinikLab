@@ -5,7 +5,9 @@ signal closed
 const CATALOG := preload("res://procedure-scenarios.gd")
 const HANDS := preload("res://practice-tool-handling.gd")
 const MOLAR_REFERENCE := preload("res://tooth36-reference.gd")
+const NEIGHBOUR_REFERENCE := preload("res://dundee-extraction-neighbour.gd")
 const DUNDEE_MOLAR_URL := "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6"
+const DUNDEE_COLLECTION_URL := "https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f"
 const RANGE := 4.6
 const MASK := 1
 const VIEW_START := Vector3(0, 2.15, 3.25)
@@ -54,6 +56,7 @@ var _chair_origin := Vector3.ZERO
 var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
+var _socket_visual: Node3D
 var _tooth_credit: LinkButton
 var _tooth_rest := Transform3D.IDENTITY
 var _neighbour_rests: Dictionary = {}
@@ -188,7 +191,7 @@ func _build_ui() -> void:
 	if scenario["effect"] == "extract":
 		_tooth_credit = LinkButton.new()
 		_tooth_credit.name = "KL_LAB_TOOTH_CREDIT"
-		_tooth_credit.uri = DUNDEE_MOLAR_URL
+		_tooth_credit.uri = DUNDEE_COLLECTION_URL
 		layout.add_child(_tooth_credit)
 	get_window().focus_exited.connect(_release_mouse)
 
@@ -259,22 +262,27 @@ func _build_scene(hand_design: int) -> void:
 			a = Vector3(-0.54, 0.66, 0.12)
 			b = Vector3(0.54, 0.39, 0.14)
 		_:
-			var base := SphereMesh.new()
-			base.radius = 1.1
-			base.height = 0.30
-			var gum := _mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			if scenario["effect"] == "extract":
 				_jaw = Node3D.new()
 				_jaw.name = "HingedTrainingJaw"
 				_world.add_child(_jaw)
 				_jaw.position = Vector3(0, 0.22, -0.66)
-				gum.reparent(_jaw)
+				_build_extraction_gingiva()
+			else:
+				var base := SphereMesh.new()
+				base.radius = 1.1
+				base.height = 0.30
+				_mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			for x in [-0.85, -0.44, 0.0, 0.44, 0.85]:
+				# Extraction uses exactly source-identified FDI35/36/37;
+				# synthetic outer toy teeth must not masquerade as anatomy.
+				if scenario["effect"] == "extract" and absf(x) > 0.5:
+					continue
 				if scenario["model"] != "gap" or x != 0.0:
 					var at := Vector3(x, 0.31, -0.18 - absf(x) * 0.20)
 					var tooth: Node3D
-					if scenario["effect"] == "extract" and x == 0.0:
-						tooth = _extraction_molar(at)
+					if scenario["effect"] == "extract":
+						tooth = _extraction_molar(at) if x == 0.0 else _extraction_neighbour(at, "35" if x < 0.0 else "37")
 					else:
 						tooth = _tooth(at, 0.78)
 					if _jaw != null:
@@ -309,7 +317,7 @@ func _extraction_molar(at: Vector3) -> Node3D:
 		return _tooth(at, 0.78)
 	molar.position = at
 	_world.add_child(molar)
-	_tooth_credit.text = "FDI 36 surface adapted from University of Dundee, School of Dentistry · CC BY 4.0"
+	_tooth_credit.text = "FDI 35/36/37 Dundee original tooth surfaces/textures · CC BY 4.0 · illustrative placement; synthetic gingiva/socket"
 	var light := OmniLight3D.new()
 	light.position = Vector3(-0.4, 0.95, 0.55)
 	light.omni_range = 0.9
