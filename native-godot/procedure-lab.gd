@@ -57,6 +57,7 @@ var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
 var _socket_visual: Node3D
+var _missing_extraction_neighbours: Array[String] = []
 var _tooth_credit: LinkButton
 var _tooth_rest := Transform3D.IDENTITY
 var _neighbour_rests: Dictionary = {}
@@ -295,6 +296,9 @@ func _build_scene(hand_design: int) -> void:
 						tooth.name = "LeftAdjacentTooth" if x < 0.0 else "RightAdjacentTooth"
 						_neighbour_rests[tooth] = tooth.transform
 			if scenario["effect"] == "extract":
+				if not _missing_extraction_neighbours.is_empty():
+					_tooth_credit.text += " · FDI%s synthetic fallback; original surface unavailable" % "/".join(_missing_extraction_neighbours)
+					_tooth_credit.disabled = true
 				a = Vector3(0, 0.58, 0.03)
 				_mesh(_world, _box(Vector3(0.29, 0.035, 0.30)), Vector3(0.87, 0.08, 0.79), Color("#456f82"))
 	_target("site_0", a, MARK, 0.15, scenario["actions"][0])
@@ -337,8 +341,7 @@ func _extraction_neighbour(at: Vector3, fdi: String) -> Node3D:
 		model.free()
 		# Explicitly labelled synthetic fallback: never claim that the source
 		# loaded when texture/import/sidecar verification failed.
-		_tooth_credit.text += " · FDI%s FALLBACK SYNTHETIC" % fdi
-		_tooth_credit.disabled = true
+		_missing_extraction_neighbours.append(fdi)
 		return _tooth(at, 0.78)
 	model.position = at
 	_world.add_child(model)
