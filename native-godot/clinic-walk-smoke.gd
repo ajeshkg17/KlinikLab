@@ -217,16 +217,55 @@ func _run() -> void:
 	if not bool(walker.call("in_operatory_range")):
 		_fail("Keyboard movement cannot reach the operatory interaction")
 		return
+	# Synthetic direct walker intents bypass _process, which normally
+	# refreshes in-range button states when keyboard movement crosses REACH.
+	app.call("_apply_walk_camera")
+	app.call("_refresh")
 	if not bool(app.get("_walk_active")) or str(app.get("_view")) != "environment":
 		_fail("Movement alone activated procedure")
 		return
+	# Ordinary Walk (without a Practice Game): E opens the selected chair case.
+	# The original FDI36 Practical is still available through its own button.
+	var chair_entry: Button = (app.get("_page") as VBoxContainer).get_node_or_null("KL_CHAIR_LAB") as Button
+	var practical_entry: Button = (app.get("_page") as VBoxContainer).get_node_or_null("KL_FDI_PRACTICAL_ENTRY") as Button
+	if chair_entry == null or practical_entry == null or chair_entry.disabled or practical_entry.disabled:
+		_fail("Both operatory entries must be available within range")
+		return
+	if not chair_entry.text.ends_with("(E)") or practical_entry.text.contains("(E)") or not practical_entry.text.contains("FDI 36"):
+		_fail("Default Walk labels assign E to the wrong operatory action")
+		return
+	var chair_pose: Vector3 = walker.get("position")
 	var key := InputEventKey.new()
 	key.keycode=KEY_E
 	key.physical_keycode=KEY_E
 	key.pressed=true
 	app.call("_input",key)
+	var lab: Control = app.get("_procedure_lab")
+	if not is_instance_valid(lab) or str(app.get("_view")) != "environment" or not bool(app.get("_walk_active")):
+		_fail("Default E did not enter selected 3D chair lab")
+		return
+	if int(app.get("_case_index")) != 1 or str((app.get("_cases") as Array)[1]["fdi"]) != "36":
+		_fail("Chair entry changed the selected original FDI36 case")
+		return
+	var chair_exit: Button = lab.find_child("KL_PROCEDURE_EXIT", true, false) as Button
+	if chair_exit == null:
+		_fail("Chair lab has no exit control")
+		return
+	chair_exit.pressed.emit()
+	await process_frame
+	if is_instance_valid(app.get("_procedure_lab")) or not bool(app.get("_walk_active")) or str(app.get("_view")) != "environment":
+		_fail("Chair lab exit did not resume the original Walk")
+		return
+	if (walker.get("position") as Vector3).distance_to(chair_pose) > 0.0001:
+		_fail("Chair lab exit lost the original Walk pose")
+		return
+	practical_entry = (app.get("_page") as VBoxContainer).get_node_or_null("KL_FDI_PRACTICAL_ENTRY") as Button
+	if practical_entry == null or practical_entry.disabled or practical_entry.text.contains("(E)") or not practical_entry.text.contains("FDI 36"):
+		_fail("Labeled FDI36 Practical button not restored after chair lab exit")
+		return
+	practical_entry.pressed.emit()
 	if str(app.get("_view")) != "clinic" or bool(app.get("_walk_active")) or int(app.get("_station_index")) != 4 or int(app.get("_case_index")) != 1:
-		_fail("E did not enter selected FDI36 practical via the shared action")
+		_fail("Explicit FDI36 Practical button did not open the original station")
 		return
 	if str((app.get("_cases") as Array)[1]["fdi"]) != "36" or bool(app.get("_direct_bur_mode")):
 		_fail("Procedure mapping changed FDI or enabled an unsafe bur")
@@ -329,5 +368,37 @@ func _run() -> void:
 	if bool(app.get("_walk_active")) or bool(app.call("_walk_enter_procedure")):
 		_fail("Keyboard walk leaked into FSP/KP language view")
 		return
+	# With an opt-in Practice Game, E must retain the original Practical route.
+	app.call("_switch_view", "environment")
+	app.call("_practice_game_start")
+	if app.get("_practice_game") == null:
+		_fail("Unable to start opt-in Practice Game for E dispatch contract")
+		return
+	app.call("_start_clinic_walk")
+	for i in range(24):
+		walker.call("apply_move_intent", Vector2(0.0, 1.0), 0.1)
+	if not bool(walker.call("in_operatory_range")):
+		_fail("Active-game Walk cannot reach operatory")
+		return
+	app.call("_apply_walk_camera")
+	app.call("_refresh")
+	chair_entry = (app.get("_page") as VBoxContainer).get_node_or_null("KL_CHAIR_LAB") as Button
+	practical_entry = (app.get("_page") as VBoxContainer).get_node_or_null("KL_FDI_PRACTICAL_ENTRY") as Button
+	if chair_entry == null or practical_entry == null or chair_entry.text.contains("(E)") or not practical_entry.text.ends_with("(E)"):
+		_fail("Active Practice Game must label E on FDI Practical only")
+		return
+	app.call("_input", key)
+	if str(app.get("_view")) != "clinic" or bool(app.get("_walk_active")) or int(app.get("_station_index")) != 4 or int(app.get("_case_index")) != 1 or is_instance_valid(app.get("_procedure_lab")):
+		_fail("Active Practice Game E did not enter original FDI36 Practical")
+		return
+	if not bool(app.call("_return_to_clinic_walk")):
+		_fail("Active-game Practical exit could not resume Walk")
+		return
+	app.call("_stop_clinic_walk")
+	app.call("_practice_game_exit")
+	if app.get("_practice_game") != null:
+		_fail("Opt-in Practice Game did not exit cleanly")
+		return
+	print("CHAIR_E_DEFAULT_AND_GAME_PRACTICAL_DISPATCH_PASS default_E_chair, button_FDI36_practical, active_game_E_FDI36_practical; HEADLESS_ONLY")
 	print("SR31_DESKTOP_WASD_MOUSE_INTENT_FDI_OPERATORY_FSP_KP_PRESERVED_PASS SR37_STATION_RETURN_SAME_POSE_PASS SR38_RANGE_GATED_FSP_KP_STATION_DRAFT_AND_PRACTICAL_PERSISTENCE_PASS no capture/Quest/clinical validation")
 	quit(0)
