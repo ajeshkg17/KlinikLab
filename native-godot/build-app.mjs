@@ -25,7 +25,7 @@ if(fs.existsSync(dest))throw Error('Refusing to overwrite existing native Godot 
 fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
- for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','tooth26-reference.gd','tooth16-mirror-reference.gd','fdi-reference-clearance.gd','anatomy-reference-panel.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','practical-choice-smoke.gd','practical-fdi-recall-smoke.gd','practical-strict-compat-smoke.gd','practical-run-score.gd','practical-replay-smoke.gd','practical-case-sequence.gd','practical-case-sequence-smoke.gd','practice-sequence-live-smoke.gd','practice-sequence-scene-identity-smoke.gd','practice-room-game.gd','practice-tool-handling.gd','procedure-drills.gd','procedure-scenarios.gd','procedure-lab.gd','procedure-lab-trial.gd','practice-expansion-smoke.gd','practice-room-game-smoke.gd','practice-room-game-app-smoke.gd','practical-tool-completion-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
+ for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','dundee-extraction-neighbour.gd','tooth26-reference.gd','tooth16-mirror-reference.gd','fdi-reference-clearance.gd','anatomy-reference-panel.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','practical-choice-smoke.gd','practical-fdi-recall-smoke.gd','practical-strict-compat-smoke.gd','practical-run-score.gd','practical-replay-smoke.gd','practical-case-sequence.gd','practical-case-sequence-smoke.gd','practice-sequence-live-smoke.gd','practice-sequence-scene-identity-smoke.gd','practice-room-game.gd','practice-tool-handling.gd','procedure-drills.gd','procedure-scenarios.gd','procedure-lab.gd','procedure-lab-trial.gd','practice-expansion-smoke.gd','practice-room-game-smoke.gd','practice-room-game-app-smoke.gd','practical-tool-completion-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
  const gloveDir = 'assets/xr-gloves';
  fs.mkdirSync(path.join(dest,gloveDir),{recursive:true});
  for (const name of ['Hand_Glove_L.gltf','Hand_Glove_R.gltf','LICENSE','SOURCE.md']) {
@@ -178,6 +178,56 @@ try{
   clinicalAccuracyValidated:false,qualifiedAnatomyReviewPending:true,
   role:'FDI36_STATIC_SURFACE_REFERENCE_NOT_EDITABLE_TISSUE_VOLUME'
  };
+ // Verified Dundee LEFT mandibular neighbours for the FDI36 extraction.
+ // Keep original Draco/WebP source bytes and separately SHA-verified textured
+ // Godot derivatives as with the already verified active FDI36 model.
+ const extractionNeighbours=[
+  {fdi:'35',file:'mandibular_left_second_premolar',blob:'892db94359877442300a6eac7a496dc85cdcaf98'},
+  {fdi:'37',file:'mandibular_second_molar',blob:'947e90e80a7adb1d30f9cd09e84c9eacc8fc03f0'}
+ ];
+ const neighbourManifests=[];
+ for(const neighbour of extractionNeighbours){
+  const file=neighbour.file+'.glb';
+  const originalBytes=fs.readFileSync(path.join(root,'assets/dundee',file));
+  const originalBlob=crypto.createHash('sha1').update(Buffer.concat([
+   Buffer.from('blob '+originalBytes.length),Buffer.from([0]),originalBytes])).digest('hex');
+  if(originalBlob!==neighbour.blob)throw Error('Dundee FDI'+neighbour.fdi+' original source Git blob mismatch');
+  const originalName=file+'.source',originalPath=path.join(toothDir,originalName);
+  fs.writeFileSync(originalPath,originalBytes,{flag:'wx'});
+  const originalSha256=sha256(originalBytes);
+  if(sha256(fs.readFileSync(originalPath))!==originalSha256)throw Error('FDI'+neighbour.fdi+' original byte copy changed');
+  const trainingName=neighbour.file+'-training.glb',trainingPath=path.join(toothDir,trainingName);
+  run(toothDecoder,[
+   '--input='+originalPath,'--output='+trainingPath,
+   '--decoder-js='+path.join(root,'assets/draco/draco_decoder_gltf.js'),
+   '--decoder-wasm='+path.join(root,'assets/draco/draco_decoder_gltf.wasm'),
+   '--expected-blob-sha='+neighbour.blob,'--preserve-texture=true'
+  ]);
+  const trainingSha256=sha256(fs.readFileSync(trainingPath));
+  const trainingSidecar=trainingName+'.source';
+  fs.copyFileSync(trainingPath,path.join(toothDir,trainingSidecar),fs.constants.COPYFILE_EXCL);
+  if(sha256(fs.readFileSync(path.join(toothDir,trainingSidecar)))!==trainingSha256)
+   throw Error('Dundee FDI'+neighbour.fdi+' textured sidecar checksum mismatch');
+  const manifest={
+   schemaVersion:1,sourceGitSHA:sha,caseId:'extraction',fdi:neighbour.fdi,
+   sourceFile:file,originalSidecar:originalName,originalSha256,
+   originalGitBlobSha:neighbour.blob,
+   upstreamRepository:'sameralseedbth-Dental/dental-3d-models',
+   upstreamCommit:'4f0ffb651998a4641ddf45c7632ea236cc164fcb',
+   upstreamPath:file,
+   upstreamSourceUrl:'https://github.com/sameralseedbth-Dental/dental-3d-models/blob/4f0ffb651998a4641ddf45c7632ea236cc164fcb/'+file,
+   licenseSPDX:'CC-BY-4.0',
+   attribution:'3D tooth model © University of Dundee, School of Dentistry',
+   licenseUrl:'https://creativecommons.org/licenses/by/4.0/',
+   sourceCollectionUrl:'https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f',
+   trainingRuntimeFile:trainingName,trainingSidecar,trainingSha256,
+   trainingTexturePreserved:true,originalTextureSizePx:[512,512],
+   surfaceOnly:true,internalTissuesProvided:false,
+   clinicalAccuracyValidated:false,qualifiedAnatomyReviewPending:true,
+   role:'FDI'+neighbour.fdi+'_ORIGINAL_TEXTURED_NEIGHBOUR_SYNTHETIC_CHAIR_PLACEMENT'
+  };
+  neighbourManifests.push(manifest);
+ }
  // Next exact-side Dundee surface: maxillary left first molar, FDI 26 crown case.
  // Verify the upstream Git blob identity before any conversion; keep original bytes.
  const tooth26Source=path.join(root,'assets/dundee/maxillary_first_molar.glb');
@@ -237,6 +287,8 @@ try{
  const exported=path.join(dest,'source');
  run(exportSource,['--output='+exported,'--expected-sha='+sha]);
  fs.writeFileSync(path.join(exported,'tooth-fdi36-manifest.json'),JSON.stringify(toothManifest,null,2)+'\n',{flag:'wx'});
+ for(const neighbour of neighbourManifests)
+  fs.writeFileSync(path.join(exported,'tooth-fdi'+neighbour.fdi+'-neighbour-manifest.json'),JSON.stringify(neighbour,null,2)+String.fromCharCode(10),{flag:'wx'});
  fs.writeFileSync(path.join(exported,'tooth-fdi26-manifest.json'),JSON.stringify(tooth26Manifest,null,2)+'\n',{flag:'wx'});
  run(exportCases,['--source-dir='+src,'--output='+path.join(exported,'kliniklab-native-cases.json'),'--expected-sha='+sha]);
  run(exportContent,['--source-dir='+src,'--output='+path.join(exported,'app-content.json'),'--expected-sha='+sha]);
@@ -305,6 +357,12 @@ try{
   nativeDundeeFDI36ConvertedSHA256:toothConvertedSha256,
   nativeDundeeFDI36License:'CC-BY-4.0',
   nativeDundeeFDI36SurfaceOnly:true,
+  nativeDundeeExtractionNeighbours:neighbourManifests.map(n=>({
+   fdi:n.fdi,sourceGitBlobSha:n.originalGitBlobSha,sourceOriginalSha256:n.originalSha256,
+   texturedTrainingSha256:n.trainingSha256,originalTextureSizePx:n.originalTextureSizePx,
+   license:n.licenseSPDX,illustrativeChairPlacement:true
+  })),
+  nativeSyntheticExtractionGumAndSocket:true,
   nativeDundeeFDI26SurfaceReference:true,
   nativeDundeeFDI26SourceGitBlobSHA:expectedTooth26Blob,
   nativeDundeeFDI26OriginalSHA256:tooth26OriginalSha256,

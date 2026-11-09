@@ -36,3 +36,19 @@ The first native practical-station surface reference is mandibular_first_molar.g
 At runtime it is shown only in the FDI 36 endodontic practical station, beside (not in place of) the separately source-derived editable synthetic working volume. The runtime UI credits the University of Dundee and identifies the CC BY 4.0 licence. If the original source sidecar or imported model is missing, the native app displays a labelled missing-asset marker.
 
 **Scope remains limited:** this is a surface-only tooth reference. It does not contain enamel/dentin/pulp/caries labels, pulp chamber/canal geometry, a patient-specific scan, or a calibrated drilling volume. Its morphology and orientation have not received qualified anatomy review and it is not validated for diagnosis, endodontic planning, or preparation assessment. No native visual/GPU acceptance is implied by headless import tests.
+
+## Native chair extraction teaching fixture — FDI 35 / 36 / 37
+
+The isolated native Godot chair extraction now uses three **distinct, source-verified left mandibular** exterior models from the Dundee-derived bundle:
+
+- **FDI 35:** `mandibular_left_second_premolar.glb` — left second premolar; original Git blob `892db94359877442300a6eac7a496dc85cdcaf98`.
+- **FDI 36:** `mandibular_first_molar.glb` — left first molar; original Git blob `73e9f3029d770c6b4052ebbaba708283de4c47fd`.
+- **FDI 37:** `mandibular_second_molar.glb` — left second molar; original Git blob `947e90e80a7adb1d30f9cd09e84c9eacc8fc03f0`.
+
+The source bytes remain unchanged as `.glb.source` sidecars; the runtime meshes are deterministic Draco-decoded training GLBs with source texture preserved, and both source and converted files have independently checked SHA256 sidecars/manifests. The imported original textures must be **512×512 pixels**. The neighbour runtime loader checks FDI-specific blob identity, bundle attribution and licence, imported texture size, nonempty mesh, and exact build SHA. The visual positions, gaps and scale are explicitly **illustrative**—not a measured articulation or a clinically reviewed arch.
+
+The extraction gum, three scalloped marginal collars and exposed FDI36 socket bowl are **synthetic computer-generated teaching geometry**; they are not a Dundee gingival or jaw scan, nor validated anatomical tissue. The socket appears only after the central tooth is released and is hidden again on restart. It is a visible state cue and does not alter forceps contact physics, ray targets, adjacent-tooth safety checks or scoring.
+
+**Attribution for all three surface meshes and original textures:** 3D tooth models © University of Dundee, School of Dentistry, CC BY 4.0. Source collection: https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f . Licence: https://creativecommons.org/licenses/by/4.0/ . Immediate conversion source repository: https://github.com/sameralseedbth-Dental/dental-3d-models at `4f0ffb651998a4641ddf45c7632ea236cc164fcb`.
+
+The already-present historical FDI36 **neutral reference** remains a separate texture-free path. This chair training surface does not add an editable tooth tissue volume; geometry, root orientation, gum margins and overall clinical correctness still require dentist review and independent real-GPU visual acceptance.

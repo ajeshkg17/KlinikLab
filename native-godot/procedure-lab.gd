@@ -5,7 +5,9 @@ signal closed
 const CATALOG := preload("res://procedure-scenarios.gd")
 const HANDS := preload("res://practice-tool-handling.gd")
 const MOLAR_REFERENCE := preload("res://tooth36-reference.gd")
+const NEIGHBOUR_REFERENCE := preload("res://dundee-extraction-neighbour.gd")
 const DUNDEE_MOLAR_URL := "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6"
+const DUNDEE_COLLECTION_URL := "https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f"
 const RANGE := 4.6
 const MASK := 1
 const VIEW_START := Vector3(0, 2.15, 3.25)
@@ -54,6 +56,8 @@ var _chair_origin := Vector3.ZERO
 var _eye_height := 1.55
 var _jaw: Node3D
 var _tooth_model: Node3D
+var _socket_visual: Node3D
+var _missing_extraction_neighbours: Array[String] = []
 var _tooth_credit: LinkButton
 var _tooth_rest := Transform3D.IDENTITY
 var _neighbour_rests: Dictionary = {}
@@ -188,7 +192,7 @@ func _build_ui() -> void:
 	if scenario["effect"] == "extract":
 		_tooth_credit = LinkButton.new()
 		_tooth_credit.name = "KL_LAB_TOOTH_CREDIT"
-		_tooth_credit.uri = DUNDEE_MOLAR_URL
+		_tooth_credit.uri = DUNDEE_COLLECTION_URL
 		layout.add_child(_tooth_credit)
 	get_window().focus_exited.connect(_release_mouse)
 
@@ -259,22 +263,27 @@ func _build_scene(hand_design: int) -> void:
 			a = Vector3(-0.54, 0.66, 0.12)
 			b = Vector3(0.54, 0.39, 0.14)
 		_:
-			var base := SphereMesh.new()
-			base.radius = 1.1
-			base.height = 0.30
-			var gum := _mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			if scenario["effect"] == "extract":
 				_jaw = Node3D.new()
 				_jaw.name = "HingedTrainingJaw"
 				_world.add_child(_jaw)
 				_jaw.position = Vector3(0, 0.22, -0.66)
-				gum.reparent(_jaw)
+				_build_extraction_gingiva()
+			else:
+				var base := SphereMesh.new()
+				base.radius = 1.1
+				base.height = 0.30
+				_mesh(_world, base, Vector3(0, 0.14, -0.23), Color("#a86579"))
 			for x in [-0.85, -0.44, 0.0, 0.44, 0.85]:
+				# Extraction uses exactly source-identified FDI35/36/37;
+				# synthetic outer toy teeth must not masquerade as anatomy.
+				if scenario["effect"] == "extract" and absf(x) > 0.5:
+					continue
 				if scenario["model"] != "gap" or x != 0.0:
 					var at := Vector3(x, 0.31, -0.18 - absf(x) * 0.20)
 					var tooth: Node3D
-					if scenario["effect"] == "extract" and x == 0.0:
-						tooth = _extraction_molar(at)
+					if scenario["effect"] == "extract":
+						tooth = _extraction_molar(at) if x == 0.0 else _extraction_neighbour(at, "35" if x < 0.0 else "37")
 					else:
 						tooth = _tooth(at, 0.78)
 					if _jaw != null:
@@ -287,6 +296,9 @@ func _build_scene(hand_design: int) -> void:
 						tooth.name = "LeftAdjacentTooth" if x < 0.0 else "RightAdjacentTooth"
 						_neighbour_rests[tooth] = tooth.transform
 			if scenario["effect"] == "extract":
+				if not _missing_extraction_neighbours.is_empty():
+					_tooth_credit.text += " · FDI%s synthetic fallback; original surface unavailable" % "/".join(_missing_extraction_neighbours)
+					_tooth_credit.disabled = true
 				a = Vector3(0, 0.58, 0.03)
 				_mesh(_world, _box(Vector3(0.29, 0.035, 0.30)), Vector3(0.87, 0.08, 0.79), Color("#456f82"))
 	_target("site_0", a, MARK, 0.15, scenario["actions"][0])
@@ -309,7 +321,7 @@ func _extraction_molar(at: Vector3) -> Node3D:
 		return _tooth(at, 0.78)
 	molar.position = at
 	_world.add_child(molar)
-	_tooth_credit.text = "FDI 36 surface adapted from University of Dundee, School of Dentistry · CC BY 4.0"
+	_tooth_credit.text = "FDI 35/36/37 Dundee original tooth surfaces/textures · CC BY 4.0 · illustrative placement; synthetic gingiva/socket"
 	var light := OmniLight3D.new()
 	light.position = Vector3(-0.4, 0.95, 0.55)
 	light.omni_range = 0.9
@@ -317,6 +329,126 @@ func _extraction_molar(at: Vector3) -> Node3D:
 	light.light_cull_mask = MOLAR_REFERENCE.TRAINING_LIGHT_LAYER
 	_world.add_child(light)
 	return molar
+
+
+func _extraction_neighbour(at: Vector3, fdi: String) -> Node3D:
+	var model := NEIGHBOUR_REFERENCE.new()
+	var source_sha := FileAccess.get_file_as_string("res://source/expected-sha.txt").strip_edges()
+	var target_height := 0.395 if fdi == "35" else 0.445
+	if not model.configure(source_sha, fdi, target_height):
+		var message := str(model.summary().get("error", "source failure"))
+		push_error("FDI%s textured Dundee neighbour unavailable: %s" % [fdi, message])
+		model.free()
+		# Explicitly labelled synthetic fallback: never claim that the source
+		# loaded when texture/import/sidecar verification failed.
+		_missing_extraction_neighbours.append(fdi)
+		return _tooth(at, 0.78)
+	model.position = at
+	_world.add_child(model)
+	return model
+
+func _gum_quad(surface: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
+	surface.add_vertex(a)
+	surface.add_vertex(b)
+	surface.add_vertex(c)
+	surface.add_vertex(a)
+	surface.add_vertex(c)
+	surface.add_vertex(d)
+
+func _gum_collar_mesh(center: Vector3, neck: float) -> ArrayMesh:
+	# Synthetic, smooth scalloped marginal tissue surrounding each surface.
+	# There is no solid disk across the root/socket aperture.
+	var profile: Array[Vector2] = [
+		Vector2(neck, 0.155), Vector2(neck + 0.040, 0.169),
+		Vector2(neck + 0.096, 0.120), Vector2(neck + 0.158, 0.042)
+	]
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for band in range(profile.size() - 1):
+		for j in range(48):
+			var t0 := TAU * float(j) / 48.0
+			var t1 := TAU * float(j + 1) / 48.0
+			var inner: Vector2 = profile[band]
+			var outer: Vector2 = profile[band + 1]
+			var a := Vector3(center.x + cos(t0) * inner.x, inner.y, center.z + sin(t0) * inner.x)
+			var b := Vector3(center.x + cos(t1) * inner.x, inner.y, center.z + sin(t1) * inner.x)
+			var c := Vector3(center.x + cos(t1) * outer.x, outer.y, center.z + sin(t1) * outer.x)
+			var d := Vector3(center.x + cos(t0) * outer.x, outer.y, center.z + sin(t0) * outer.x)
+			_gum_quad(surface, a, b, c, d)
+	surface.generate_normals()
+	return surface.commit()
+
+func _gum_bridge_mesh(front: bool) -> ArrayMesh:
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for j in range(40):
+		var x0 := -0.78 + 1.56 * float(j) / 40.0
+		var x1 := -0.78 + 1.56 * float(j + 1) / 40.0
+		var z_inner := 0.07 if front else -0.46
+		var z_outer := 0.43 if front else -0.80
+		var h0 := 0.128 - 0.015 * cos(x0 * PI / 0.44)
+		var h1 := 0.128 - 0.015 * cos(x1 * PI / 0.44)
+		_gum_quad(surface,
+			Vector3(x0, h0, z_inner), Vector3(x1, h1, z_inner),
+			Vector3(x1, 0.045, z_outer), Vector3(x0, 0.045, z_outer))
+	surface.generate_normals()
+	return surface.commit()
+
+func _gum_socket_mesh(center: Vector3) -> ArrayMesh:
+	# Concave dark socket floor is a purely synthetic teaching visual.
+	# It does NOT represent patient bone or validated alveolar anatomy.
+	var profile: Array[Vector2] = [
+		Vector2(0.160, 0.157), Vector2(0.128, 0.080),
+		Vector2(0.082, 0.022), Vector2(0.013, -0.006)
+	]
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for band in range(profile.size() - 1):
+		for j in range(48):
+			var t0 := TAU * float(j) / 48.0
+			var t1 := TAU * float(j + 1) / 48.0
+			var inner: Vector2 = profile[band]
+			var outer: Vector2 = profile[band + 1]
+			var a := Vector3(center.x + cos(t0) * inner.x, inner.y, center.z + sin(t0) * inner.x)
+			var b := Vector3(center.x + cos(t1) * inner.x, inner.y, center.z + sin(t1) * inner.x)
+			var c := Vector3(center.x + cos(t1) * outer.x, outer.y, center.z + sin(t1) * outer.x)
+			var d := Vector3(center.x + cos(t0) * outer.x, outer.y, center.z + sin(t0) * outer.x)
+			_gum_quad(surface, a, b, c, d)
+	surface.generate_normals()
+	return surface.commit()
+
+func _gum_mesh(parent: Node3D, geometry: ArrayMesh, label: String, tint: Color) -> MeshInstance3D:
+	var result := _mesh(parent, geometry, Vector3.ZERO, tint)
+	result.name = label
+	var material := result.material_override as StandardMaterial3D
+	material.roughness = 0.91
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return result
+
+func _build_extraction_gingiva() -> void:
+	# Render-only, noncolliding tissue; original ray targets and jaw kinematics
+	# remain unchanged. The gum follows the same hinged jaw as the three teeth.
+	var gum := Node3D.new()
+	gum.name = "KL_SYNTHETIC_EXTRACTION_GINGIVA_NOT_PATIENT_ANATOMY"
+	_world.add_child(gum)
+	_gum_mesh(gum, _gum_bridge_mesh(true), "KL_SYNTHETIC_BUCCAL_GUM", Color("#bd7184"))
+	_gum_mesh(gum, _gum_bridge_mesh(false), "KL_SYNTHETIC_LINGUAL_GUM", Color("#ae6477"))
+	for outline in [
+		{"x": -0.44, "z": -0.268, "neck": 0.135, "fdi": "35"},
+		{"x": 0.0, "z": -0.18, "neck": 0.160, "fdi": "36"},
+		{"x": 0.44, "z": -0.268, "neck": 0.163, "fdi": "37"}
+	]:
+		var center := Vector3(float(outline["x"]), 0.0, float(outline["z"]))
+		var collar := _gum_mesh(gum, _gum_collar_mesh(center, float(outline["neck"])),
+			"KL_SYNTHETIC_FDI%s_GINGIVAL_MARGIN" % str(outline["fdi"]), Color("#ca8291"))
+		collar.set_meta("teaching_fixture", "synthetic_gingiva")
+	_socket_visual = Node3D.new()
+	_socket_visual.name = "KL_SYNTHETIC_FDI36_EXTRACTION_SOCKET"
+	gum.add_child(_socket_visual)
+	_gum_mesh(_socket_visual, _gum_socket_mesh(Vector3(0.0, 0.0, -0.18)),
+		"KL_SYNTHETIC_DARK_SOCKET_BOWL", Color("#753947"))
+	_socket_visual.hide()
+	gum.reparent(_jaw)
 
 func _chair_eye_y() -> float:
 	return (_eye_height - CHAIR_FIXTURE_HEIGHT) / CHAIR_SCALE
@@ -446,6 +578,8 @@ func _restart() -> void:
 		if _tooth_model.get_parent() != _jaw:
 			_tooth_model.reparent(_jaw, false)
 		_tooth_model.transform = _tooth_rest
+		if _socket_visual != null:
+			_socket_visual.hide()
 	for id in ["site_0", "site_1"]:
 		(_targets[id] as Node3D).show()
 		(_targets[id] as StaticBody3D).collision_layer = MASK
@@ -618,6 +752,8 @@ func _change_model(id: String) -> void:
 				_tooth_model.reparent(_world, false)
 				_tooth_model.position = Vector3(0.87, 0.24, 0.79)
 				_tooth_model.rotation.z = PI * 0.5
+				if _socket_visual != null:
+					_socket_visual.show()
 		"restore":
 			if next_target == 0:
 				return
