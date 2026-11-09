@@ -466,9 +466,16 @@ func _end_pull() -> void:
 func _update_pull(id: String, delta: float) -> void:
 	if not _pull_held:
 		return
-	if not _is_extraction_step() or id != "site_0" or not _jaw_open or _jaw.rotation.x < JAW_OPEN * 0.8:
+	var rejection := ""
+	if not _is_extraction_step():
+		rejection = "Complete the instrument step before starting the extraction."
+	elif id != "site_0":
+		rejection = "Aim the forceps at the assigned tooth, not an adjacent tooth."
+	elif not _jaw_open or _jaw.rotation.x < JAW_OPEN * 0.8:
+		rejection = "Open the jaw fully, then aim the forceps at the assigned tooth."
+	if not rejection.is_empty():
 		_end_pull()
-		_feedback.text = "Open the jaw and aim the forceps at the assigned tooth."
+		_feedback.text = rejection
 		_event("rejected_pull", id, _feedback.text)
 		return
 	if not _pulling:
@@ -478,7 +485,7 @@ func _update_pull(id: String, delta: float) -> void:
 	_pull_progress = minf(1.0, _pull_progress + delta * game_speed / PULL_SECONDS)
 	var path := Vector3(0, 0.39, 0.13)
 	_tooth_model.position = _tooth_rest.origin + path * _pull_progress
-	_feedback.text = "Release path · %d%%" % roundi(_pull_progress * 100.0)
+	_feedback.text = "Correct tooth contact · release path %d%%" % roundi(_pull_progress * 100.0)
 	if _pull_progress >= 1.0:
 		_pull_held = false
 		_pulling = false
