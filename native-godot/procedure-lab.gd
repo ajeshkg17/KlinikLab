@@ -33,6 +33,7 @@ var _view: SubViewportContainer
 var _status: Label
 var _feedback: Label
 var _progress: Label
+var _active_target_caption: Label
 var _summary: Label
 var _cue: Label
 var _actions: HBoxContainer
@@ -118,6 +119,14 @@ func _build_ui() -> void:
 	_progress.name = "KL_LAB_PROGRESS"
 	_progress.add_theme_color_override("font_color", Color("#a6d9f4"))
 	layout.add_child(_progress)
+	# A fixed instruction row outside the 3D canvas remains legible while
+	# the camera moves or zooms, unlike a world-space Label3D billboard.
+	_active_target_caption = _label("", 15)
+	_active_target_caption.name = "KL_LAB_ACTIVE_TARGET_CAPTION"
+	_active_target_caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_active_target_caption.clip_text = true
+	_active_target_caption.add_theme_color_override("font_color", Color("#d0ffe4"))
+	layout.add_child(_active_target_caption)
 	_feedback = _label("", 14)
 	_feedback.add_theme_color_override("font_color", Color("#ffce99"))
 	layout.add_child(_feedback)
@@ -667,14 +676,21 @@ func _show_status(message: String) -> void:
 	if _pull_button != null:
 		_pull_button.disabled = not _is_extraction_step()
 	var next := "tool" if stage == 0 else "site_%d" % next_target if stage == 1 else "return" if held else "verify"
+	var show_target: bool = stage < 3 and _targets.has(next)
+	_active_target_caption.visible = show_target
+	if show_target:
+		var current_label: Label3D = (_targets[next] as Node3D).get_child(2) as Label3D
+		_active_target_caption.text = "Current target · " + current_label.text
+		_active_target_caption.tooltip_text = _active_target_caption.text
+	else:
+		_active_target_caption.text = ""
+	# Keep the original Label3D nodes for target provenance, but do not draw
+	# billboards over the teeth. The target spheres, collisions and picker
+	# still use exactly their original IDs and positions.
 	for id in _targets:
 		var target: Node3D = _targets[id]
 		var label := target.get_child(2) as Label3D
-		# Keep interaction spheres/picker entries available, but show only the
-		# currently requested 3D caption. Overlapping captions obscure the tool,
-		# return tray, signed site and adjacent teeth at both desktop sizes.
-		label.visible = id == next and stage < 3
-		label.modulate = Color("#d0ffe4") if label.visible else Color("#acbfcb")
+		label.visible = false
 
 func _event(name: String, target := "", reason := "") -> void:
 	events.append({"event": name, "target": target, "stage": stage, "score": score,

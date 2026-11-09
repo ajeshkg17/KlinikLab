@@ -334,6 +334,25 @@ func _press_key(code: Key) -> void:
 	event.pressed = true
 	_app.call("_input", event)
 
+# Source/UI regression: no world-space target caption may cover dental geometry.
+# The fixed Control must occupy the reserved header area above the SubViewport.
+func _chair_caption_clear(lab: Control) -> bool:
+	var caption: Label = lab.get("_active_target_caption") as Label
+	var view: SubViewportContainer = lab.get("_view") as SubViewportContainer
+	if caption == null or view == null or not caption.visible or not caption.text.begins_with("Current target · "):
+		push_error("Chair active target text is missing from its fixed UI row.")
+		return false
+	if caption.get_global_rect().end.y > view.get_global_rect().position.y + 1.0:
+		push_error("Chair target instruction overlaps the rendered model viewport.")
+		return false
+	var targets: Dictionary = lab.get("_targets")
+	for id in targets:
+		var world_caption: Label3D = (targets[id] as Node3D).get_child(2) as Label3D
+		if world_caption.visible:
+			push_error("World-space target caption still overlays the model: " + str(id))
+			return false
+	return true
+
 func _chair_route() -> bool:
 	var page: Node = _app.get("_page")
 	var picker := page.get_node("KL_PROCEDURE_DRILL_SELECT") as OptionButton
@@ -367,6 +386,8 @@ func _chair_route() -> bool:
 	if camera.get_world_3d() != _app.get_viewport().world_3d:
 		return false
 	await _settle()
+	if not _chair_caption_clear(lab):
+		return false
 	var floor: Vector3 = lab.get("_chair_origin")
 	var height := lab.find_child("KL_LAB_EYE_HEIGHT", true, false) as SpinBox
 	var start_height := camera.global_position.y - floor.y
