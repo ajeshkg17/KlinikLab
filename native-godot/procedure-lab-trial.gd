@@ -120,7 +120,15 @@ func _complete(lab: Control) -> bool:
 	if int(lab.get("score")) != 5 or not lab.get("held") or not progress.text.contains("0/2"):
 		return false
 	var site_label := ((lab.get("_targets") as Dictionary)["site_0"] as Node3D).get_child(2) as Label3D
-	if site_label.modulate != Color("#d0ffe4") or site_label.outline_size < 8:
+	var current_caption: Label = lab.get("_active_target_caption") as Label
+	# PR160 moved active instructions out of world-space Label3D billboards.
+	# Compare the same target text and green state on the fixed 2D row.
+	if current_caption == null:
+		push_error("Chair target caption missing after acquiring instrument.")
+		return false
+	if not current_caption.visible or current_caption.text != "Current target · " + site_label.text or site_label.visible or current_caption.get_theme_color("font_color") != Color("#d0ffe4"):
+		push_error("Current target caption mismatch after pickup: stage=%d score=%d text=%s 3d_visible=%s" % [
+			int(lab.get("stage")), int(lab.get("score")), current_caption.text, str(site_label.visible)])
 		return false
 	var tool: Node3D = lab.get("_correct_tool")
 	var hands: HANDS = lab.get("_hands")
@@ -413,6 +421,8 @@ func _chair_route() -> bool:
 	if lab.get("held") or float(lab.get("_pull_progress")) != 0.0 or int(lab.get("score")) != 0:
 		return false
 	if not await _complete(lab):
+		push_error("Chair first extraction pass stopped: stage=%d score=%d next_target=%d feedback=%s" % [
+			int(lab.get("stage")), int(lab.get("score")), int(lab.get("next_target")), str((lab.get("_feedback") as Label).text)])
 		return false
 	var first_events: Array = lab.get("events").duplicate(true)
 	(lab.find_child("KL_PROCEDURE_RESTART", true, false) as Button).pressed.emit()
@@ -420,6 +430,8 @@ func _chair_route() -> bool:
 	if tooth.get_parent() != lab.get("_jaw") or not tooth.transform.is_equal_approx(lab.get("_tooth_rest")):
 		return false
 	if not await _complete(lab):
+		push_error("Chair second extraction pass stopped: stage=%d score=%d next_target=%d feedback=%s" % [
+			int(lab.get("stage")), int(lab.get("score")), int(lab.get("next_target")), str((lab.get("_feedback") as Label).text)])
 		return false
 	_runs.append({"id": "chair_extraction", "score": 20, "max_score": 20, "walk_start_frame": start_frame,
 		"start_eye_height_m": start_height, "start_pitch_degrees": start_pitch, "replay_eye_height_m": height.value,
