@@ -217,6 +217,10 @@ func _run() -> void:
 	if not bool(walker.call("in_operatory_range")):
 		_fail("Keyboard movement cannot reach the operatory interaction")
 		return
+	# Synthetic direct walker intents bypass _process, which normally
+	# refreshes in-range button states when keyboard movement crosses REACH.
+	app.call("_apply_walk_camera")
+	app.call("_refresh")
 	if not bool(app.get("_walk_active")) or str(app.get("_view")) != "environment":
 		_fail("Movement alone activated procedure")
 		return
@@ -376,6 +380,8 @@ func _run() -> void:
 	if not bool(walker.call("in_operatory_range")):
 		_fail("Active-game Walk cannot reach operatory")
 		return
+	app.call("_apply_walk_camera")
+	app.call("_refresh")
 	chair_entry = (app.get("_page") as VBoxContainer).get_node_or_null("KL_CHAIR_LAB") as Button
 	practical_entry = (app.get("_page") as VBoxContainer).get_node_or_null("KL_FDI_PRACTICAL_ENTRY") as Button
 	if chair_entry == null or practical_entry == null or chair_entry.text.contains("(E)") or not practical_entry.text.ends_with("(E)"):
