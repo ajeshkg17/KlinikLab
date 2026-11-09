@@ -43,7 +43,7 @@ func configure(source_sha: String, fdi: String, target_height: float) -> bool:
 		_error = "Dundee FDI%s manifest missing or invalid" % fdi
 		return false
 	var m: Dictionary = parsed
-	if m.get("schemaVersion") != 1 or m.get("sourceGitSHA") != source_sha or m.get("fdi") != fdi or m.get("sourceFile") != basename + ".glb" or m.get("originalGitBlobSha") != spec["blob"] or m.get("upstreamCommit") != SOURCE_COMMIT or m.get("upstreamRepository") != UPSTREAM or m.get("licenseSPDX") != "CC-BY-4.0" or m.get("surfaceOnly") != true or m.get("clinicalAccuracyValidated") != false or m.get("trainingTexturePreserved") != true:
+	if m.get("schemaVersion") != 1 or m.get("sourceGitSHA") != source_sha or m.get("caseId") != "extraction" or m.get("fdi") != fdi or m.get("sourceFile") != basename + ".glb" or m.get("originalGitBlobSha") != spec["blob"] or m.get("upstreamCommit") != SOURCE_COMMIT or m.get("upstreamRepository") != UPSTREAM or m.get("licenseSPDX") != "CC-BY-4.0" or m.get("surfaceOnly") != true or m.get("clinicalAccuracyValidated") != false or m.get("trainingTexturePreserved") != true:
 		_error = "FDI%s source, licence or surface-only contract rejected" % fdi
 		return false
 	if m.get("originalSidecar") != basename + ".glb.source" or m.get("trainingRuntimeFile") != basename + "-training.glb" or m.get("trainingSidecar") != basename + "-training.glb.source":
