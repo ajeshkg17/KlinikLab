@@ -233,7 +233,7 @@ try{
  for(const spec of neighbourSpecs){
   const originalFile=spec.basename+'.glb';
   const bytes=fs.readFileSync(path.join(root,'assets/dundee',originalFile));
-  const actualBlob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\\0'),bytes])).digest('hex');
+  const actualBlob=crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+bytes.length+'\0'),bytes])).digest('hex');
   if(actualBlob!==spec.gitBlob)throw Error('Dundee FDI'+spec.fdi+' source Git blob identity mismatch');
   const rawName=originalFile+'.source';
   const rawPath=path.join(toothDir,rawName);
