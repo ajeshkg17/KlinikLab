@@ -1882,7 +1882,11 @@ func _show_environment() -> void:
 		chair_lab.pressed.connect(_walk_enter_chair_lab)
 		_page.add_child(chair_lab)
 		_page.add_child(_heading("Dental practical operatory: " + ("in range" if within else "walk toward the operatory marker"),14))
-		var enter := _button("Enter selected FDI %s practical station (E)" % FDI[_case_index])
+		# E opens the chair case in ordinary Walk, but the original Practical
+		# station in an active Practice Game (unless chair walk was selected).
+		var practical_shortcut := " (E)" if _practice_game != null and not _chair_lab_walk_selected else ""
+		var enter := _button("Enter selected FDI %s practical station%s" % [FDI[_case_index], practical_shortcut])
+		enter.name = "KL_FDI_PRACTICAL_ENTRY"
 		enter.disabled = not within
 		enter.pressed.connect(_walk_enter_procedure)
 		_page.add_child(enter)
