@@ -7,7 +7,7 @@ const HANDS := preload("res://practice-tool-handling.gd")
 const MOLAR_REFERENCE := preload("res://tooth36-reference.gd")
 const NEIGHBOUR_REFERENCE := preload("res://tooth-training-neighbour.gd")
 const EXTRACTION_GUM := preload("res://extraction-gum-fixture.gd")
-const DUNDEE_MOLAR_URL := "https://sketchfab.com/3d-models/mandibular-first-molar-e1c919d6603846eca873154eeededdd6"
+const DUNDEE_COLLECTION_URL := "https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f"
 const RANGE := 4.6
 const MASK := 1
 const VIEW_START := Vector3(0, 2.15, 3.25)
@@ -191,7 +191,7 @@ func _build_ui() -> void:
 	if scenario["effect"] == "extract":
 		_tooth_credit = LinkButton.new()
 		_tooth_credit.name = "KL_LAB_TOOTH_CREDIT"
-		_tooth_credit.uri = DUNDEE_MOLAR_URL
+		_tooth_credit.uri = DUNDEE_COLLECTION_URL
 		layout.add_child(_tooth_credit)
 	get_window().focus_exited.connect(_release_mouse)
 
