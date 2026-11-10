@@ -68,7 +68,7 @@ func start(lesson: Dictionary) -> void:
 	_report_button = _button(actions, "Open lesson report folder", "KL_BENCH_REPORT", _open_report)
 	_review = _label("", 14)
 	content.add_child(_review)
-	content.add_child(_label("The curing light and scaler are schematic CC0 study models; the varnish brush, polishing cup and periodontal probe are synthetic 3D geometry. Material swatches are illustrations. This simulation does not certify clinical technique.", 13))
+	content.add_child(_label("The curing light and scaler are schematic CC0 study models; the varnish brush, polishing cup, periodontal probe and image pointer are synthetic 3D geometry. Material swatches are illustrations. This simulation does not certify clinical technique.", 13))
 	_restart()
 
 func _add_options(content: VBoxContainer, kind: String) -> void:

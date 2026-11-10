@@ -53,7 +53,7 @@ test('record choice is a site chart vs a shade guide, not mislabeled as material
   assert.match(catalog, /"expected": "material\.site_chart"/);
   assert.match(catalog, /"finish": "Confirm both simulated periodontal site records"/);
   assert.match(bench, /str\(step\.get\("label", "material"\)\)/);
-  assert.match(bench, /periodontal probe are synthetic 3D geometry/);
+  assert.match(bench, /periodontal probe.*synthetic 3D geometry/);
   assert.match(bench, /"selected_id": selected, "expected_id": expected/);
 });
 
@@ -65,15 +65,15 @@ test('Journey, builder and guarded replay add only chart and retain previous rou
   ]) assert.ok(app.includes('"' + name + '", "KL_OPEN_' + id + '_BENCH"'), 'missing ' + id);
   assert.match(app, /\["Run periodontal charting bench replay", "chart_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/chart-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'chart-inspection-trial\.gd'/);
   assert.match(chartTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
   assert.match(chartTrial, /await _run_lesson\("chart"\)/);
 });
 
 test('shared replay enforces wrong/right IDs, chair rejection, 20/20, reset and journal identity', () => {
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_periodontal_probe/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler/);
   assert.match(replay, /"material\.shade_guide" if lesson_id == "chart"/);

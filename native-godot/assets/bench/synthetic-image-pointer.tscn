@@ -1,0 +1,49 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_body"]
+top_radius = 0.057
+bottom_radius = 0.061
+height = 1.35
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.24, 0.42, 0.68, 1)
+roughness = 0.52
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_neck"]
+top_radius = 0.024
+bottom_radius = 0.04
+height = 0.31
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.74, 0.78, 0.83, 1)
+metallic = 0.43
+roughness = 0.32
+
+[sub_resource type="SphereMesh" id="SphereMesh_pointer_tip"]
+radius = 0.055
+height = 0.11
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+albedo_color = Color(0.99, 0.67, 0.26, 1)
+roughness = 0.75
+
+[node name="SyntheticImageAnnotationPointer" type="Node3D"]
+
+[node name="StylusHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.27, 0)
+mesh = SubResource("CylinderMesh_body")
+material_override = SubResource("StandardMaterial3D_body")
+
+[node name="ThinPointingNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.56, 0)
+mesh = SubResource("CylinderMesh_neck")
+material_override = SubResource("StandardMaterial3D_metal")
+
+[node name="RoundedAnnotationTipNotImagingDevice" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.77, 0)
+mesh = SubResource("SphereMesh_pointer_tip")
+material_override = SubResource("StandardMaterial3D_marker")

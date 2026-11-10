@@ -6,6 +6,7 @@ const ADA_FLUORIDE := "https://www.mouthhealthy.org/all-topics-a-z/fluoride"
 const ADA_PLAQUE := "https://www.mouthhealthy.org/all-topics-a-z/plaque"
 const ADA_ROOT_PLANING := "https://www.mouthhealthy.org/all-topics-a-z/scaling-and-root-planing"
 const ADA_CHART := "https://www.mouthhealthy.org/all-topics-a-z/periodontics"
+const ADA_XRAYS := "https://www.mouthhealthy.org/all-topics-a-z/x-rays"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -93,6 +94,20 @@ const ITEMS := {
 		"cue": "Illustration · warm tooth shade card; used for a different clinical task",
 		"purpose": "Shade selection cannot substitute for the assigned site-specific periodontal chart.",
 		"swatch": Color("#dfc09c"), "source": ADA_CHART,
+	},
+
+	"tool.image_pointer": {
+		"name": "Image annotation pointer (synthetic 3D teaching model)", "german": "Bildmarkierungs-Zeiger (schematisch)",
+		"scene": "res://assets/bench/synthetic-image-pointer.tscn",
+		"cue": "Synthetic teaching geometry · straight stylus with a contrasting rounded marker tip, not a dental instrument, X-ray sensor or radiation device.",
+		"purpose": "Represents selecting virtual landmarks on an assigned image diagram; it has no clinical measuring or imaging capability.",
+		"source": ADA_XRAYS,
+	},
+	"material.assigned_bitewing_image": {
+		"name": "Assigned simulated bitewing diagram and tooth identifiers", "german": "Zugeordnetes Bissflügel-Diagramm mit Zahnnummern",
+		"cue": "Illustration · blue-grey image-reference card; not an actual bitewing exposure or patient radiograph.",
+		"purpose": "The fictional image-reference sheet names the preassigned proximal landmarks and an intentionally overlapping zone. No clinical findings are inferred.",
+		"swatch": Color("#a9c8d7"), "source": ADA_XRAYS,
 	},
 }
 
@@ -246,4 +261,30 @@ const CHART := {
 	"finish_event": "record_periodontal_sites",
 	"outcome": "Periodontal charting exercise complete · The two assigned model locations were recorded and verified in the chair. No actual pocket depth, clinical finding, patient diagnosis or professional proficiency is claimed.",
 	"reference": ADA_CHART,
+}
+
+const BITEWING := {
+	"id": "bitewing_image_annotation_intro",
+	"scenario": "bitewing",
+	"title": "Bitewing image review bench",
+	"case": "Fictional instructor-supplied IMAGE DIAGRAM exercise · The model marks two predetermined bitewing reference regions. Identify the assigned proximal surface region, then FLAG an intentionally overlapping region as NOT READABLE. This is not a real dental X-ray, exposure, lesion assessment, caries diagnosis or patient report.",
+	"tool": {
+		"choices": ["tool.image_pointer", "tool.periodontal_probe"],
+		"expected": "tool.image_pointer",
+		"prompt": "Which 3D study object represents annotating the assigned image rather than examining periodontal tissue?",
+		"correct": "Correct. The schematic image pointer selects diagram landmarks; it is not a radiography device.",
+		"incorrect": "A periodontal probe represents physical site examination. Select the virtual-image annotation pointer for this case.",
+	},
+	"material": {
+		"label": "image reference",
+		"choices": ["material.assigned_bitewing_image", "material.site_chart"],
+		"expected": "material.assigned_bitewing_image",
+		"prompt": "Which reference matches the assigned diagram and tooth identifiers for these two image landmarks?",
+		"correct": "Correct. The fictional image-reference card contains the supplied identifiers and marks the overlap as unreadable.",
+		"incorrect": "The periodontal site chart belongs to a different examination. Use the specifically assigned simulated bitewing image reference.",
+	},
+	"finish": "Record proximal landmark and unreadable overlap",
+	"finish_event": "record_bitewing_image_annotations",
+	"outcome": "Bitewing image-review simulation complete · The assigned proximal landmark and overlapping, unreadable region were recorded in the existing chair exercise. No radiograph was taken or interpreted for clinical diagnosis.",
+	"reference": ADA_XRAYS,
 }
