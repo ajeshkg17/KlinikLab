@@ -4,6 +4,7 @@ const ADA_MATERIALS := "https://www.ada.org/resources/ada-library/oral-health-to
 const ADA_SEALANTS := "https://www.ada.org/resources/ada-library/oral-health-topics/dental-sealants"
 const ADA_FLUORIDE := "https://www.mouthhealthy.org/all-topics-a-z/fluoride"
 const ADA_PLAQUE := "https://www.mouthhealthy.org/all-topics-a-z/plaque"
+const ADA_ROOT_PLANING := "https://www.mouthhealthy.org/all-topics-a-z/scaling-and-root-planing"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -64,6 +65,13 @@ const ITEMS := {
 		"cue": "Illustration · mint-coloured polishing paste swatch (not product-specific)",
 		"purpose": "Fictional tray assignment for model surface polishing. Not fluoride varnish, sealant, or a measured abrasive specification.",
 		"swatch": Color("#b8d9d0"), "source": ADA_PLAQUE,
+	},
+
+	"material.clean_water_coolant": {
+		"name": "Clean water coolant for assigned ultrasonic unit", "german": "Kühl-/Spülwasser für den Ultraschallscaler",
+		"cue": "Illustration · pale blue coolant swatch, not a bottle or device specification",
+		"purpose": "The fictional powered-scaler exercise specifies water flow for coolant/irrigation. This represents a case consumable, not a medication, calibrated fluid volume, or a recommendation for patient treatment.",
+		"swatch": Color("#bbdfe7"), "source": ADA_ROOT_PLANING,
 	},
 }
 
@@ -166,4 +174,29 @@ const CLEANING := {
 	"finish_event": "record_cleaning_polish_markers",
 	"outcome": "Professional cleaning simulation complete · Both marked soft-deposit sites were cleared and verified by the existing chair exercise. This is a model-only polishing record, not a clinically validated plaque/calculus-removal outcome.",
 	"reference": ADA_PLAQUE,
+}
+
+const ROOT_PLANING := {
+	"id": "root_planing_ultrasonic_intro",
+	"scenario": "root_planing",
+	"title": "Scaling and root planing bench",
+	"case": "Fictional supervised periodontal model exercise · The assigned simulated subgingival instrumentation uses an ULTRASONIC SCALER with CLEAN WATER COOLANT to clear two marked ROOT-SURFACE deposits. A clinician would assess the site and instrument suitability in real practice. Here the targets are schematic and no actual periodontal treatment or root smoothing is simulated.",
+	"tool": {
+		"choices": ["tool.ultrasonic_scaler", "tool.polishing_cup"],
+		"expected": "tool.ultrasonic_scaler",
+		"prompt": "Which 3D study instrument matches the powered root-surface instrumentation specified by this case?",
+		"correct": "Correct. This case specifies the ultrasonic scaler. The narrow metal tip contrasts with the rubber polishing cup.",
+		"incorrect": "The rubber polishing cup represents surface polishing. It cannot replace the assigned ultrasonic instrument for these simulated root deposits.",
+	},
+	"material": {
+		"choices": ["material.clean_water_coolant", "material.prophylaxis_paste"],
+		"expected": "material.clean_water_coolant",
+		"prompt": "Which case consumable is assigned to this water-cooled ultrasonic demonstration?",
+		"correct": "Correct. The fictional powered-scaler scenario specifies a water coolant/irrigation supply, without modeling flow or dose.",
+		"incorrect": "Fine prophylaxis paste is for a different polishing step. The assigned ultrasonic instrument requires its specified water coolant, not paste.",
+	},
+	"finish": "Record both simulated root-surface deposits cleared",
+	"finish_event": "record_root_surface_instrumentation",
+	"outcome": "Scaling and root planing model exercise complete · Both assigned root-surface markers were cleared and verified by the existing chair simulation. This does not assess periodontal pocket therapy, root smoothness, patient outcomes, or clinical competence.",
+	"reference": ADA_ROOT_PLANING,
 }

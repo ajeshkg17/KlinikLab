@@ -55,19 +55,20 @@ test('Journey, builder and procedure router preserve all previous benches', () =
   }
   assert.match(app, /\["Run professional cleaning bench replay", "cleaning_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/cleaning-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning"\]/);
-  assert.match(build, /chairsideLessons:\['composite','sealant','fluoride','cleaning'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning"(?:, "[a-z_]+")*\]/);
+  assert.match(build, /chairsideLessons:\['composite','sealant','fluoride','cleaning'(?:,'[a-z_]+')*\]/);
   assert.match(build, /'cleaning-inspection-trial\.gd'/);
 });
 
 test('shared replay checks incorrect/correct IDs, rejected chair target, completion and restart', () => {
   assert.match(cleaningReplay, /extends "res:\/\/composite-inspection-trial\.gd"/);
   assert.match(cleaningReplay, /await _run_lesson\("cleaning"\)/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_polishing_cup/);
   assert.match(replay, /KL_BENCH_PICK_tool_polishing_cup/);
   assert.match(replay, /material_prophylaxis_paste/);
-  assert.match(replay, /var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.ultrasonic_scaler"/);
+  assert.match(replay, /var wrong_tool := "tool.curing_light" if lesson_id == "fluoride"/);
+  assert.match(replay, /"tool.ultrasonic_scaler"/);
   assert.match(replay, /var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.fluoride_varnish" if lesson_id == "cleaning"/);
   assert.match(replay, /retries\.has_all\(\["tool_choice", "material_choice", "chair"\]\)/);
   assert.match(replay, /str\(retries\["chair"\]\["selected_id"\]\) == str\(retries\["chair"\]\["expected_id"\]\)/);
