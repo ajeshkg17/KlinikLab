@@ -12,6 +12,7 @@ const ADA_VENEERS := "https://www.mouthhealthy.org/all-topics-a-z/veneers"
 const ADA_INLAYS := "https://www.mouthhealthy.org/all-topics-a-z/fillings-gold-inlays"
 const ADA_CROWNS := "https://www.mouthhealthy.org/all-topics-a-z/crowns"
 const ADA_BRIDGES := "https://www.mouthhealthy.org/all-topics-a-z/bridges"
+const ADA_DENTURES := "https://www.ada.org/resources/ada-library/oral-health-topics/dentures"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -183,6 +184,20 @@ const ITEMS := {
 		"cue": "Illustration · a two-support and central-pontic target card, not a clinical working model or patient scan.",
 		"purpose": "Identifies the two assigned model support units and the pontic marker. Does not quantify fit, occlusal contacts, biological width or connector dimensions.",
 		"swatch": Color("#c6d9d0"), "source": ADA_BRIDGES,
+	},
+
+	"tool.complete_denture_arch": {
+		"name": "Complete removable denture (synthetic 3D arch study object)", "german": "Vollprothese (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-complete-denture.tscn",
+		"cue": "Original primitive-mesh U-shaped gum ridge and off-white arch teeth, with a posterior blue study landmark. Not a patient-specific prosthesis.",
+		"purpose": "Represents the instructor-assigned fictional complete denture arch. The shape is neither calibrated for oral tissues nor suitable to evaluate retention, stability, occlusion or pressure areas.",
+		"source": ADA_DENTURES,
+	},
+	"material.complete_denture_arch_reference": {
+		"name": "Matched full-arch seating and posterior-landmark reference", "german": "Vollprothesen-Bogen- und hintere Markierungs-Vorlage",
+		"cue": "Illustration · a model-arch map with the assigned posterior marker; no patient impression, bite registration or pressure finding.",
+		"purpose": "Identifies the fictional full-arch reference and posterior location to record in this supervised model exercise. No clinical fit or mucosal findings are generated.",
+		"swatch": Color("#b5d4c9"), "source": ADA_DENTURES,
 	},
 }
 
@@ -496,4 +511,31 @@ const BRIDGE := {
 	"finish_event": "record_bridge_mock_try_in",
 	"outcome": "Fixed bridge model try-in complete · The assigned support-seating action and pontic teaching landmark were verified in the existing chair. No clinical fit, cementation, implant loading or patient outcome was assessed.",
 	"reference": ADA_BRIDGES,
+}
+
+const FULL_DENTURE := {
+	"id": "complete_denture_mock_arch_fitting_intro",
+	"scenario": "full_denture",
+	"title": "Complete denture fitting bench",
+	"case": "Fictional complete removable-denture teaching fixture · The instructor assigns a MODEL DENTURE ARCH and a MATCHED FULL-ARCH REFERENCE. Identify the simulated removable arch rather than a fixed bridge, then enter the unchanged chair to SEAT the COMPLETE ARCH and CHECK a POSTERIOR TEACHING LANDMARK. This exercise cannot measure fit, retention, stability, pressure areas, occlusion, speech, function or patient outcomes.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.complete_denture_arch", "tool.bridge_framework"],
+		"expected": "tool.complete_denture_arch",
+		"prompt": "Which rotating 3D study object is the removable full-arch model, not a fixed three-unit bridge?",
+		"correct": "Correct. The schematic U-shaped denture represents the instructor-assigned complete removable arch. It is not clinically fitted.",
+		"incorrect": "The fixed three-unit bridge spans a local missing-tooth space; it is not the complete removable arch assigned in this model-only exercise.",
+	},
+	"material": {
+		"label": "arch reference",
+		"choices": ["material.complete_denture_arch_reference", "material.bridge_support_reference"],
+		"expected": "material.complete_denture_arch_reference",
+		"prompt": "Which supplied study reference identifies the full arch and its posterior landmark?",
+		"correct": "Correct. The matching arch card identifies the simulated posterior study location, without a tissue or pressure finding.",
+		"incorrect": "The bridge-support reference identifies two abutments and a pontic for a fixed restoration, not this complete-denture arch.",
+	},
+	"finish": "Record simulated full-arch seating and posterior landmark",
+	"finish_event": "record_complete_denture_mock_fitting",
+	"outcome": "Complete denture model-fitting exercise complete · The assigned full-arch seating and posterior teaching landmark were verified in the existing chair simulation. No retention, pressure-area, occlusal, clinical-fit or patient outcome was assessed.",
+	"reference": ADA_DENTURES,
 }
