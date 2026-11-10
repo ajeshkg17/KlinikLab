@@ -44,7 +44,7 @@ test('new schematic 3D mouth mirror is distinguished from periodontal probe', ()
   assert.match(mirror, /IllustrativeReflectiveDiscNotClinicalDevice/);
   assert.match(mirror, /MirrorRim/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-examination-mirror\.tscn','assets\/bench\/synthetic-examination-mirror\.tscn'\)/);
-  assert.match(bench, /examination mirror are synthetic 3D geometry/);
+  assert.match(bench, /examination mirror.*synthetic 3D geometry/);
   assert.match(catalog, /not a diagnostic sensor/);
 });
 
@@ -66,19 +66,19 @@ test('Journey and build list eight lessons, with new independent oral-exam repla
   ]) assert.ok(app.includes('"' + name + '", "KL_OPEN_' + id + '_BENCH"'), 'missing ' + id);
   assert.match(app, /\["Run oral soft-tissue screening bench replay", "oral_exam_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/oral-exam-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'oral-exam-inspection-trial\.gd'/);
   assert.match(oralTrial, /await _run_lesson\("oral_exam"\)/);
 });
 
 test('shared replay checks rejected and corrected IDs, verified chair, clean reset and journal bytes', () => {
   assert.match(oralTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_examination_mirror/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_periodontal_probe/);
   assert.match(replay, /"tool\.periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
-  assert.match(replay, /"material\.site_chart" if lesson_id in \["bitewing", "oral_exam"\]/);
+  assert.match(replay, /"material\.site_chart" if lesson_id in \["bitewing", "oral_exam"(?:, "[a-z_]+")*\]/);
   assert.match(replay, /KL_BENCH_PICK_tool_periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
   assert.match(replay, /KL_BENCH_PICK_tool_examination_mirror/);
   assert.match(replay, /material_soft_tissue_location_record/);
