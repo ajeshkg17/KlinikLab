@@ -18,6 +18,7 @@ const ADA_IMPLANTS := "https://www.mouthhealthy.org/all-topics-a-z/implants"
 const AAE_ROOT_CANAL := "https://www.aae.org/patients/root-canal-treatment/"
 const AAE_RETREATMENT := "https://www.aae.org/patients/root-canal-treatment/endodontic-treatment-options/endodontic-retreatment/"
 const AAO_ALIGNERS := "https://aaoinfo.org/treatments/aligners/"
+const ADA_MOUTHGUARDS := "https://www.mouthhealthy.org/all-topics-a-z/mouthguards"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -273,6 +274,20 @@ const ITEMS := {
 		"cue": "Illustration · the fictional arch and stage number 04 are preassigned; no patient record, scan, orthodontic prescription or clinical treatment sequence.",
 		"purpose": "Connects a model-only aligner stage identifier to the chair's two preset learning targets; it does not assess tooth movement or seating accuracy.",
 		"swatch": Color("#b5dcea"), "source": AAO_ALIGNERS,
+	},
+
+	"tool.sports_mouthguard_study": {
+		"name": "Upper-arch sports mouthguard (synthetic 3D study object)", "german": "Sportmundschutz für den Oberkiefer (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-sports-mouthguard.tscn",
+		"cue": "Original thick opaque U-shaped training guard with raised outer rim, broad occlusal training pads and a contrasting assigned coverage marker. Not a manufactured, fitted protective device.",
+		"purpose": "Distinguishes the instructor-assigned mock upper-arch sports guard from the thinner stage-marked clear-aligner teaching tray. Does not establish actual impact attenuation, material thickness, retention, occlusion or safety.",
+		"source": ADA_MOUTHGUARDS,
+	},
+	"material.mouthguard_upper_arch_reference": {
+		"name": "Assigned upper-arch guard and coverage-landmark diagram", "german": "Oberkiefer-Sportmundschutz und Abdeckungsmarkierung (Lehrvorlage)",
+		"cue": "Illustration · a fictional upper-arch map highlighting the teacher-assigned seating and coverage points. Not a dental scan, fitting record or protection certificate.",
+		"purpose": "Identifies the simulated arch and target coverage marker in the preassigned chair task. No clinical fit, wearing comfort or protective performance is evaluated.",
+		"swatch": Color("#ecd2b2"), "source": ADA_MOUTHGUARDS,
 	},
 }
 
@@ -748,4 +763,31 @@ const ALIGNER := {
 	"finish_event": "record_aligner_mock_stage04_review",
 	"outcome": "Clear aligner stage matching complete · The assigned teaching stage and fixed seating landmark were verified in the existing chair simulation. No orthodontic biomechanics, fit measurement, tooth movement, treatment planning or patient outcome was assessed.",
 	"reference": AAO_ALIGNERS,
+}
+
+const MOUTHGUARD := {
+	"id": "mouthguard_mock_upper_arch_coverage_intro",
+	"scenario": "mouthguard",
+	"title": "Custom mouthguard fitting bench",
+	"case": "Fictional sports-mouthguard teaching fixture · The instructor assigns a THICK UPPER-ARCH GUARD STUDY OBJECT and a MATCHING UPPER-ARCH COVERAGE DIAGRAM. Compare the guard to a stage-04 aligner, then use the unchanged chair to SEAT the assigned mock guard and CHECK its fixed coverage landmark. No impact-protection effectiveness, actual guard fit, occlusion, retention, material strength, safety certification, treatment or patient outcome is measured.",
+	"tool": {
+		"label": "study appliance",
+		"choices": ["tool.sports_mouthguard_study", "tool.aligner_stage04_tray"],
+		"expected": "tool.sports_mouthguard_study",
+		"prompt": "Which rotating 3D model is the assigned thick sports mouthguard for this fictional upper-arch coverage exercise?",
+		"correct": "Correct. The opaque, rimmed sports-guard teaching model differs from the translucent stage-04 orthodontic aligner.",
+		"incorrect": "The stage-04 aligner is assigned to a different orthodontic model and cannot replace this sports-mouthguard study object.",
+	},
+	"material": {
+		"label": "coverage reference",
+		"choices": ["material.mouthguard_upper_arch_reference", "material.assigned_aligner_stage04_plan"],
+		"expected": "material.mouthguard_upper_arch_reference",
+		"prompt": "Which instructor-supplied diagram identifies the upper arch and premarked coverage landmark for this guard?",
+		"correct": "Correct. The mock upper-arch map shows the teacher-specified coverage landmark only, not a protective performance measurement.",
+		"incorrect": "The stage-04 orthodontic plan describes a simulated aligner stage, not the assigned guard coverage landmark.",
+	},
+	"finish": "Record mock guard seating and assigned arch-coverage landmark",
+	"finish_event": "record_mouthguard_mock_coverage_review",
+	"outcome": "Mouthguard model fitting complete · The assigned guard seating and arch-coverage teaching landmark were verified in the existing chair simulation. No protection, impact performance, retention, clinical fit, occlusal adjustment or patient outcome was assessed.",
+	"reference": ADA_MOUTHGUARDS,
 }
