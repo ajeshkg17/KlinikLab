@@ -41,7 +41,7 @@ test('new tool and paste choices are modelled, compared and credibly attributed'
   assert.match(synthetic, /MeshInstance3D/);
   assert.match(build, /copy\('native-godot\/assets\/bench\/synthetic-polishing-cup\.tscn','assets\/bench\/synthetic-polishing-cup\.tscn'\)/);
   assert.match(build, /5e83a4f0be8c36c40d77997a6f9dfe0d406f6ea9f427f41079cee405d7354bd1/);
-  assert.match(bench, /polishing cup are synthetic 3D geometry/);
+  assert.match(bench, /polishing cup.*synthetic 3D geometry/);
 });
 
 test('Journey, builder and procedure router preserve all previous benches', () => {

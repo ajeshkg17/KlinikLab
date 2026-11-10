@@ -5,6 +5,7 @@ const ADA_SEALANTS := "https://www.ada.org/resources/ada-library/oral-health-top
 const ADA_FLUORIDE := "https://www.mouthhealthy.org/all-topics-a-z/fluoride"
 const ADA_PLAQUE := "https://www.mouthhealthy.org/all-topics-a-z/plaque"
 const ADA_ROOT_PLANING := "https://www.mouthhealthy.org/all-topics-a-z/scaling-and-root-planing"
+const ADA_CHART := "https://www.mouthhealthy.org/all-topics-a-z/periodontics"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -72,6 +73,26 @@ const ITEMS := {
 		"cue": "Illustration · pale blue coolant swatch, not a bottle or device specification",
 		"purpose": "The fictional powered-scaler exercise specifies water flow for coolant/irrigation. This represents a case consumable, not a medication, calibrated fluid volume, or a recommendation for patient treatment.",
 		"swatch": Color("#bbdfe7"), "source": ADA_ROOT_PLANING,
+	},
+
+	"tool.periodontal_probe": {
+		"name": "Periodontal probe (synthetic 3D teaching model)", "german": "Parodontalsonde (schematisch)",
+		"scene": "res://assets/bench/synthetic-periodontal-probe.tscn",
+		"cue": "Synthetic educational geometry · narrow blunt probing tip with illustrative dark marker bands; the markings are NOT calibrated.",
+		"purpose": "Represents a site-checking periodontal probe, not a scaler; no real pocket depth, probing force, tissue response or diagnosis is measured.",
+		"source": ADA_CHART,
+	},
+	"material.site_chart": {
+		"name": "Tooth-and-site periodontal chart", "german": "Parodontalstatus mit Zahn- und Stellenzuordnung",
+		"cue": "Illustration · blue-green record card for assigned tooth/site identifiers, not real clinical data",
+		"purpose": "Fictional study record to associate the two named model sites with their locations. No depths or clinical readings are generated.",
+		"swatch": Color("#9acacc"), "source": ADA_CHART,
+	},
+	"material.shade_guide": {
+		"name": "Tooth shade guide (different record type)", "german": "Zahnfarbschlüssel",
+		"cue": "Illustration · warm tooth shade card; used for a different clinical task",
+		"purpose": "Shade selection cannot substitute for the assigned site-specific periodontal chart.",
+		"swatch": Color("#dfc09c"), "source": ADA_CHART,
 	},
 }
 
@@ -199,4 +220,30 @@ const ROOT_PLANING := {
 	"finish_event": "record_root_surface_instrumentation",
 	"outcome": "Scaling and root planing model exercise complete · Both assigned root-surface markers were cleared and verified by the existing chair simulation. This does not assess periodontal pocket therapy, root smoothness, patient outcomes, or clinical competence.",
 	"reference": ADA_ROOT_PLANING,
+}
+
+const CHART := {
+	"id": "periodontal_charting_site_record_intro",
+	"scenario": "chart",
+	"title": "Periodontal charting bench",
+	"case": "Fictional periodontal assessment training model · The instructor assigned two named SITES on a teaching arch for LOCATION RECORDING using a PERIODONTAL PROBE and a TOOTH-AND-SITE CHART. The exercise records which model site was identified; it does NOT generate pocket depths, clinical measurements, diagnostic findings or an actual patient chart.",
+	"tool": {
+		"choices": ["tool.periodontal_probe", "tool.ultrasonic_scaler"],
+		"expected": "tool.periodontal_probe",
+		"prompt": "Which 3D study instrument is assigned to the periodontal assessment, rather than deposit removal?",
+		"correct": "Correct. The schematic periodontal probe represents site examination; its simulated markings are not a calibrated measuring scale.",
+		"incorrect": "The ultrasonic scaler is for instrumentation of deposits, not the periodontal probe assigned for site recording in this fictional case.",
+	},
+	"material": {
+		"label": "site record",
+		"choices": ["material.site_chart", "material.shade_guide"],
+		"expected": "material.site_chart",
+		"prompt": "Which record supports a tooth-and-site periodontal assessment of the two assigned teaching landmarks?",
+		"correct": "Correct. The site chart links each assigned teaching landmark with its tooth/site identifier.",
+		"incorrect": "A shade guide records tooth colour and cannot replace the site chart needed for this fictional periodontal record.",
+	},
+	"finish": "Confirm both simulated periodontal site records",
+	"finish_event": "record_periodontal_sites",
+	"outcome": "Periodontal charting exercise complete · The two assigned model locations were recorded and verified in the chair. No actual pocket depth, clinical finding, patient diagnosis or professional proficiency is claimed.",
+	"reference": ADA_CHART,
 }
