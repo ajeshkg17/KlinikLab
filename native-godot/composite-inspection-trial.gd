@@ -19,7 +19,7 @@ func _run_lesson(lesson_id: String) -> void:
 		push_error("Bench trial requires its own disposable user:// profile and no upload token.")
 		quit(1)
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"]:
 		_finish("fail", "Unknown bench lesson.")
 		return
 	_mode = lesson_id + "_bench"
@@ -45,15 +45,18 @@ func _run_lesson(lesson_id: String) -> void:
 	_finish("pass")
 
 func _bench(lesson_id: String) -> Dictionary:
-	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT if lesson_id == "sealant" else BENCH_CATALOG.FLUORIDE if lesson_id == "fluoride" else BENCH_CATALOG.CLEANING if lesson_id == "cleaning" else BENCH_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else BENCH_CATALOG.CHART
-	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH" if lesson_id == "sealant" else "KL_OPEN_FLUORIDE_BENCH" if lesson_id == "fluoride" else "KL_OPEN_CLEANING_BENCH" if lesson_id == "cleaning" else "KL_OPEN_ROOT_PLANING_BENCH" if lesson_id == "root_planing" else "KL_OPEN_CHART_BENCH"
+	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT if lesson_id == "sealant" else BENCH_CATALOG.FLUORIDE if lesson_id == "fluoride" else BENCH_CATALOG.CLEANING if lesson_id == "cleaning" else BENCH_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else BENCH_CATALOG.CHART if lesson_id == "chart" else BENCH_CATALOG.BITEWING
+	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH" if lesson_id == "sealant" else "KL_OPEN_FLUORIDE_BENCH" if lesson_id == "fluoride" else "KL_OPEN_CLEANING_BENCH" if lesson_id == "cleaning" else "KL_OPEN_ROOT_PLANING_BENCH" if lesson_id == "root_planing" else "KL_OPEN_CHART_BENCH" if lesson_id == "chart" else "KL_OPEN_BITEWING_BENCH"
 	if not await _click(_app, opener):
 		return {}
 	var bench: Control = _app.get("_chairside_bench")
 	if not is_instance_valid(bench) or not bench.call("summary")["models_loaded"]:
 		push_error("Bench or both study 3D models not loaded.")
 		return {}
-	if lesson_id == "chart":
+	if lesson_id == "bitewing":
+		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_image_pointer") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_periodontal_probe"):
+			return {}
+	elif lesson_id == "chart":
 		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_periodontal_probe") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
 			return {}
 	elif lesson_id == "root_planing":
@@ -69,19 +72,19 @@ func _bench(lesson_id: String) -> Dictionary:
 		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_curing_light") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
 			return {}
 	# Correct and incorrect choices remain distinct, source-stable IDs in all lessons.
-	var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.polishing_cup" if lesson_id == "root_planing" else "tool.ultrasonic_scaler"
-	var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.fluoride_varnish" if lesson_id == "cleaning" else "material.prophylaxis_paste" if lesson_id == "root_planing" else "material.shade_guide" if lesson_id == "chart" else "material.glass_ionomer"
-	if not await _click(bench, "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "root_planing" else "KL_BENCH_PICK_tool_curing_light" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_ultrasonic_scaler"):
+	var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.polishing_cup" if lesson_id == "root_planing" else "tool.periodontal_probe" if lesson_id == "bitewing" else "tool.ultrasonic_scaler"
+	var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.fluoride_varnish" if lesson_id == "cleaning" else "material.prophylaxis_paste" if lesson_id == "root_planing" else "material.shade_guide" if lesson_id == "chart" else "material.site_chart" if lesson_id == "bitewing" else "material.glass_ionomer"
+	if not await _click(bench, "KL_BENCH_PICK_tool_periodontal_probe" if lesson_id == "bitewing" else "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "root_planing" else "KL_BENCH_PICK_tool_curing_light" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_ultrasonic_scaler"):
 		return {}
 	if bench.call("summary")["selection_score"] != 0:
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_tool_varnish_brush" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "cleaning" else "KL_BENCH_PICK_tool_ultrasonic_scaler" if lesson_id == "root_planing" else "KL_BENCH_PICK_tool_periodontal_probe"):
+	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_tool_varnish_brush" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "cleaning" else "KL_BENCH_PICK_tool_ultrasonic_scaler" if lesson_id == "root_planing" else "KL_BENCH_PICK_tool_periodontal_probe" if lesson_id == "chart" else "KL_BENCH_PICK_tool_image_pointer"):
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_material_light_cure_sealant" if lesson_id == "fluoride" else "KL_BENCH_PICK_material_fluoride_varnish" if lesson_id == "cleaning" else "KL_BENCH_PICK_material_prophylaxis_paste" if lesson_id == "root_planing" else "KL_BENCH_PICK_material_shade_guide"):
+	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_material_light_cure_sealant" if lesson_id == "fluoride" else "KL_BENCH_PICK_material_fluoride_varnish" if lesson_id == "cleaning" else "KL_BENCH_PICK_material_prophylaxis_paste" if lesson_id == "root_planing" else "KL_BENCH_PICK_material_shade_guide" if lesson_id == "chart" else "KL_BENCH_PICK_material_site_chart"):
 		return {}
 	if bench.call("summary")["selection_score"] != 1:
 		return {}
-	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant" if lesson_id == "sealant" else "material_fluoride_varnish" if lesson_id == "fluoride" else "material_prophylaxis_paste" if lesson_id == "cleaning" else "material_clean_water_coolant" if lesson_id == "root_planing" else "material_site_chart"
+	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant" if lesson_id == "sealant" else "material_fluoride_varnish" if lesson_id == "fluoride" else "material_prophylaxis_paste" if lesson_id == "cleaning" else "material_clean_water_coolant" if lesson_id == "root_planing" else "material_site_chart" if lesson_id == "chart" else "material_assigned_bitewing_image"
 	if not await _click(bench, "KL_BENCH_PICK_" + correct_material):
 		return {}
 	if bench.call("summary")["selection_score"] != 2:
