@@ -8,6 +8,7 @@ const ADA_ROOT_PLANING := "https://www.mouthhealthy.org/all-topics-a-z/scaling-a
 const ADA_CHART := "https://www.mouthhealthy.org/all-topics-a-z/periodontics"
 const ADA_XRAYS := "https://www.mouthhealthy.org/all-topics-a-z/x-rays"
 const ADA_ORAL_CANCER := "https://www.mouthhealthy.org/all-topics-a-z/oral-cancer"
+const ADA_VENEERS := "https://www.mouthhealthy.org/all-topics-a-z/veneers"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -123,6 +124,20 @@ const ITEMS := {
 		"cue": "Illustration · teal location card; not a photograph, clinical finding or a patient chart.",
 		"purpose": "Assigned record template for two labelled model landmarks and a note that the observation requires supervised clinical review. No diagnosis is generated.",
 		"swatch": Color("#a9d8cb"), "source": ADA_ORAL_CANCER,
+	},
+
+	"tool.veneer_shell": {
+		"name": "Mock facial veneer shell (synthetic 3D fixture)", "german": "Veneerschale (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-veneer-shell.tscn",
+		"cue": "Synthetic illustrative 3D shell silhouette with a marked incisal edge; geometry is not an exact clinical restoration.",
+		"purpose": "A schematic lab-supplied facial shell for comparing model seating and an incisal landmark; it is not a calibrated patient-specific veneer.",
+		"source": ADA_VENEERS,
+	},
+	"material.veneer_fit_reference": {
+		"name": "Matched veneer outline and incisal landmark reference", "german": "Veneer-Passungs- und Schneidekanten-Vorlage (schematisch)",
+		"cue": "Illustration · warm neutral reference card showing the model's assigned fitting landmarks, not a real patient impression.",
+		"purpose": "Identifies the fictional target veneer outline and incisal marker used for this two-step try-in exercise. Does not provide bonding, occlusal, margin-gap or colour calibration.",
+		"swatch": Color("#e5cdb3"), "source": ADA_VENEERS,
 	},
 }
 
@@ -328,4 +343,30 @@ const ORAL_EXAM := {
 	"finish_event": "record_soft_tissue_observation",
 	"outcome": "Oral soft-tissue screening exercise complete · Both assigned model annotations were verified in the existing chair. These are training markers, not oral-cancer findings, clinical screening results or patient data.",
 	"reference": ADA_ORAL_CANCER,
+}
+
+const VENEER := {
+	"id": "veneer_mock_try_in_intro",
+	"scenario": "veneer",
+	"title": "Veneer try-in bench",
+	"case": "Fictional anterior-teaching-crown case · An instructor supplies a MOCK FACIAL VENEER SHELL and a MATCHED INCISAL-LANDMARK REFERENCE CARD. The two abstract chair actions are to SEAT the model shell and CHECK its incisal marker. This is not a cementation, preparation, colour matching, marginal-fit measurement or patient veneer procedure.",
+	"tool": {
+		"choices": ["tool.veneer_shell", "tool.examination_mirror"],
+		"expected": "tool.veneer_shell",
+		"prompt": "Which rotating 3D study object is the mock restoration to be seated in this model-specific try-in?",
+		"correct": "Correct. The illustrative facial shell is the assigned model restoration; its form is schematic, not patient-specific.",
+		"incorrect": "The mouth mirror is useful for viewing clinical sites but cannot replace the lab-assigned shell that this fictional case asks you to seat.",
+	},
+	"material": {
+		"label": "fit reference",
+		"choices": ["material.veneer_fit_reference", "material.site_chart"],
+		"expected": "material.veneer_fit_reference",
+		"prompt": "Which supplied reference identifies the target shell outline and incisal landmark for this case?",
+		"correct": "Correct. The matched fit card supplies the fictional target shell outline and incisal marker without clinical fit measurements.",
+		"incorrect": "A periodontal chart describes tooth and site observations; choose the veneer-specific model fitting reference.",
+	},
+	"finish": "Record mock veneer seating and incisal alignment check",
+	"finish_event": "record_veneer_mock_try_in",
+	"outcome": "Veneer model try-in complete · The model shell and incisal teaching landmark were recorded and verified through the existing chair scenario. No adhesive bonding, measured margin, clinical fit or real patient outcome is claimed.",
+	"reference": ADA_VENEERS,
 }
