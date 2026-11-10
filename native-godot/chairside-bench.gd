@@ -73,7 +73,7 @@ func start(lesson: Dictionary) -> void:
 
 func _add_options(content: VBoxContainer, kind: String) -> void:
 	var step: Dictionary = _lesson[kind]
-	content.add_child(_label(("1 · Inspect and choose the instrument · " if kind == "tool" else "2 · Choose the " + str(step.get("label", "material")) + " · ") + str(step["prompt"]), 17))
+	content.add_child(_label(("1 · Inspect and choose the " + str(step.get("label", "instrument")) + " · " if kind == "tool" else "2 · Choose the " + str(step.get("label", "material")) + " · ") + str(step["prompt"]), 17))
 	var cards := HBoxContainer.new()
 	cards.add_theme_constant_override("separation", 12)
 	content.add_child(cards)
