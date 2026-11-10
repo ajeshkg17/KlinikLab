@@ -1,0 +1,143 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="SphereMesh" id="SphereMesh_gum"]
+radius = 0.235
+height = 0.47
+radial_segments = 20
+rings = 10
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gum"]
+albedo_color = Color(0.73, 0.38, 0.43, 1)
+roughness = 0.62
+
+[sub_resource type="SphereMesh" id="SphereMesh_tooth"]
+radius = 0.154
+height = 0.308
+radial_segments = 18
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tooth"]
+albedo_color = Color(0.94, 0.91, 0.80, 1)
+roughness = 0.32
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+albedo_color = Color(0.27, 0.58, 0.82, 1)
+roughness = 0.51
+
+[node name="SyntheticCompleteRemovableDentureArch" type="Node3D"]
+
+[node name="GumArchSegment1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.73, 0, 0.43)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.73, 0.254, 0.43)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.75, 0, 0.11)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.75, 0.254, 0.11)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.64, 0, -0.17)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.64, 0.254, -0.17)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, 0, -0.41)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, 0.254, -0.41)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, 0, -0.51)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, 0.254, -0.51)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment6" type="MeshInstance3D" parent="."]
+position = Vector3(0.15, 0, -0.51)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth6" type="MeshInstance3D" parent="."]
+position = Vector3(0.15, 0.254, -0.51)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment7" type="MeshInstance3D" parent="."]
+position = Vector3(0.41, 0, -0.41)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth7" type="MeshInstance3D" parent="."]
+position = Vector3(0.41, 0.254, -0.41)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment8" type="MeshInstance3D" parent="."]
+position = Vector3(0.64, 0, -0.17)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth8" type="MeshInstance3D" parent="."]
+position = Vector3(0.64, 0.254, -0.17)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment9" type="MeshInstance3D" parent="."]
+position = Vector3(0.75, 0, 0.11)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth9" type="MeshInstance3D" parent="."]
+position = Vector3(0.75, 0.254, 0.11)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="GumArchSegment10" type="MeshInstance3D" parent="."]
+position = Vector3(0.73, 0, 0.43)
+scale = Vector3(1.22, 0.66, 1.18)
+mesh = SubResource("SphereMesh_gum")
+material_override = SubResource("StandardMaterial3D_gum")
+
+[node name="IllustrativeTooth10" type="MeshInstance3D" parent="."]
+position = Vector3(0.73, 0.254, 0.43)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="PosteriorLandmarkNotPressureAreaOrFitMeasurement" type="MeshInstance3D" parent="."]
+position = Vector3(-0.73, 0.43, 0.43)
+scale = Vector3(0.46, 0.46, 0.46)
+mesh = SubResource("SphereMesh_tooth")
+material_override = SubResource("StandardMaterial3D_marker")
