@@ -19,7 +19,7 @@ func _run_lesson(lesson_id: String) -> void:
 		push_error("Bench trial requires its own disposable user:// profile and no upload token.")
 		quit(1)
 		return
-	if lesson_id not in ["composite", "sealant"]:
+	if lesson_id not in ["composite", "sealant", "fluoride"]:
 		_finish("fail", "Unknown bench lesson.")
 		return
 	_mode = lesson_id + "_bench"
@@ -45,27 +45,34 @@ func _run_lesson(lesson_id: String) -> void:
 	_finish("pass")
 
 func _bench(lesson_id: String) -> Dictionary:
-	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT
-	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH"
+	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT if lesson_id == "sealant" else BENCH_CATALOG.FLUORIDE
+	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH" if lesson_id == "sealant" else "KL_OPEN_FLUORIDE_BENCH"
 	if not await _click(_app, opener):
 		return {}
 	var bench: Control = _app.get("_chairside_bench")
 	if not is_instance_valid(bench) or not bench.call("summary")["models_loaded"]:
 		push_error("Bench or both original source-derived 3D models not loaded.")
 		return {}
-	if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_curing_light") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
-		return {}
-	if not await _click(bench, "KL_BENCH_PICK_tool_ultrasonic_scaler"):
+	if lesson_id == "fluoride":
+		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_varnish_brush") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_curing_light"):
+			return {}
+	else:
+		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_curing_light") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
+			return {}
+	# Correct and incorrect choices remain distinct, source-stable IDs in all lessons.
+	var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.ultrasonic_scaler"
+	var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.glass_ionomer"
+	if not await _click(bench, "KL_BENCH_PICK_tool_ultrasonic_scaler" if lesson_id != "fluoride" else "KL_BENCH_PICK_tool_curing_light"):
 		return {}
 	if bench.call("summary")["selection_score"] != 0:
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light"):
+	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light" if lesson_id != "fluoride" else "KL_BENCH_PICK_tool_varnish_brush"):
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer"):
+	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer" if lesson_id != "fluoride" else "KL_BENCH_PICK_material_light_cure_sealant"):
 		return {}
 	if bench.call("summary")["selection_score"] != 1:
 		return {}
-	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant"
+	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant" if lesson_id == "sealant" else "material_fluoride_varnish"
 	if not await _click(bench, "KL_BENCH_PICK_" + correct_material):
 		return {}
 	if bench.call("summary")["selection_score"] != 2:
@@ -77,7 +84,7 @@ func _bench(lesson_id: String) -> Dictionary:
 		push_error("Bench routed to wrong chair scenario; expected " + lesson_id)
 		return {}
 	var chair_ref := lab.find_child("KL_LAB_TOPIC_REFERENCE", true, false) as LinkButton
-	if chair_ref == null or not chair_ref.uri.begins_with("https://") or (lesson_id == "sealant" and chair_ref.uri != config["reference"]):
+	if chair_ref == null or not chair_ref.uri.begins_with("https://") or (lesson_id != "composite" and chair_ref.uri != config["reference"]):
 		push_error("Chair does not display this lesson's existing ADA source.")
 		return {}
 	if not await _complete(lab):
@@ -114,7 +121,7 @@ func _bench(lesson_id: String) -> Dictionary:
 		push_error("Missing wrong/correct tool and material picks, chair rejection, or simulation-specific finish.")
 		return {}
 	for kind in ["tool", "material"]:
-		if str(retries[kind + "_choice"]["selected_id"]) != ("tool.ultrasonic_scaler" if kind == "tool" else "material.glass_ionomer") or str(retries[kind + "_choice"]["expected_id"]) != config[kind]["expected"] or str(seen_correct[kind + "_choice"]["selected_id"]) != config[kind]["expected"]:
+		if str(retries[kind + "_choice"]["selected_id"]) != (wrong_tool if kind == "tool" else wrong_material) or str(retries[kind + "_choice"]["expected_id"]) != config[kind]["expected"] or str(seen_correct[kind + "_choice"]["selected_id"]) != config[kind]["expected"]:
 			push_error("Bench replay selected/expected ID mismatch: " + kind)
 			return {}
 	if str(retries["chair"]["selected_id"]) == str(retries["chair"]["expected_id"]):
