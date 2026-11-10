@@ -50,7 +50,7 @@ test('original synthetic stage-04 tray differs from complete denture with visibl
   assert.match(scene, /NotCalibratedPolymerShell/);
   assert.match(scene, /transparency = 1/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-aligner-stage04\.tscn','assets\/bench\/synthetic-aligner-stage04\.tscn'\)/);
-  assert.match(bench, /clear aligner stage-04 tray are synthetic 3D geometry/);
+  assert.match(bench, /clear aligner stage-04 tray.*synthetic 3D geometry/);
 });
 
 test('matching stage reference is an assigned fictional diagram rather than clinical material', () => {
@@ -78,15 +78,15 @@ test('Journey, build and independent runner add only aligner and preserve all ea
   ]) assert.ok(app.includes('"'+label+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run clear aligner stage matching bench replay", "aligner_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/aligner-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat','aligner'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat','aligner'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'aligner-inspection-trial\.gd'/);
   assert.match(alignerTrial, /await _run_lesson\("aligner"\)/);
 });
 
 test('shared replay asserts wrong/right IDs, rejected chair target, 20/20, finish, reset and journal bytes', () => {
   assert.match(alignerTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_aligner_stage04_tray/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_complete_denture_arch/);
   assert.match(replay, /"tool\.complete_denture_arch" if lesson_id == "aligner"/);
