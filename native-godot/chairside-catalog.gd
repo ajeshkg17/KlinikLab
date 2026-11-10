@@ -17,6 +17,7 @@ const ADA_PARTIAL_DENTURES := "https://www.mouthhealthy.org/all-topics-a-z/dentu
 const ADA_IMPLANTS := "https://www.mouthhealthy.org/all-topics-a-z/implants"
 const AAE_ROOT_CANAL := "https://www.aae.org/patients/root-canal-treatment/"
 const AAE_RETREATMENT := "https://www.aae.org/patients/root-canal-treatment/endodontic-treatment-options/endodontic-retreatment/"
+const AAO_ALIGNERS := "https://aaoinfo.org/treatments/aligners/"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -258,6 +259,20 @@ const ITEMS := {
 		"cue": "Illustration · a paired prior and current teaching record with one assigned model reference and one instructor-flagged discrepancy. Not patient radiographs or a clinical finding.",
 		"purpose": "Identifies the historical reference and instructor-specified discrepancy in this case, without diagnosing failure, infection, healing or whether treatment is necessary.",
 		"swatch": Color("#bec5dc"), "source": AAE_RETREATMENT,
+	},
+
+	"tool.aligner_stage04_tray": {
+		"name": "Fictional stage-04 clear aligner tray (synthetic 3D study object)", "german": "Aligner-Schiene, Modellstufe 04 (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-aligner-stage04.tscn",
+		"cue": "Original U-shaped, translucent teaching tray with four blue stage markers. This numbered learning fixture is not an impression, scan, prescribed aligner or patient-specific polymer shell.",
+		"purpose": "Identifies the assigned simulated stage 04 among case choices, without predicting tooth movement, attachment fit, actual seating, biomechanics, wear schedule or treatment.",
+		"source": AAO_ALIGNERS,
+	},
+	"material.assigned_aligner_stage04_plan": {
+		"name": "Instructor-assigned stage-04 and matching arch diagram", "german": "Zugeordnete Aligner-Stufe 04 und Zahnmodell-Schema",
+		"cue": "Illustration · the fictional arch and stage number 04 are preassigned; no patient record, scan, orthodontic prescription or clinical treatment sequence.",
+		"purpose": "Connects a model-only aligner stage identifier to the chair's two preset learning targets; it does not assess tooth movement or seating accuracy.",
+		"swatch": Color("#b5dcea"), "source": AAO_ALIGNERS,
 	},
 }
 
@@ -706,4 +721,31 @@ const RETREAT := {
 	"finish_event": "record_retreat_mock_record_comparison",
 	"outcome": "Endodontic record-comparison exercise complete · The supplied prior model landmark and instructor-preflagged current discrepancy were marked in the existing chair. No radiographic diagnosis, pathology, retreatment decision, clinical result or patient outcome was assessed.",
 	"reference": AAE_RETREATMENT,
+}
+
+const ALIGNER := {
+	"id": "aligner_mock_stage04_fit_review_intro",
+	"scenario": "aligner",
+	"title": "Clear aligner stage matching bench",
+	"case": "Fictional orthodontic teaching fixture · The instructor has PREASSIGNED STAGE 04 of a schematic clear-aligner sequence to a matching model arch. Choose the stage-marked ALIGNER STUDY TRAY rather than a complete denture, select its matching stage-and-arch diagram, and use the original chair to SEAT the assigned model stage and CHECK its fixed seating landmark. No clinical fit, aligner force, attachment engagement, tooth movement, wear schedule, treatment plan or patient outcome is assessed.",
+	"tool": {
+		"label": "study appliance",
+		"choices": ["tool.aligner_stage04_tray", "tool.complete_denture_arch"],
+		"expected": "tool.aligner_stage04_tray",
+		"prompt": "Which rotating 3D model represents the instructor-assigned removable stage-04 aligner, not a complete denture?",
+		"correct": "Correct. The light-blue teaching tray carries four stage identifiers and belongs to the fictional matching arch exercise.",
+		"incorrect": "A complete denture replaces an arch of missing teeth; it is not the assigned stage-04 model aligner.",
+	},
+	"material": {
+		"label": "stage reference",
+		"choices": ["material.assigned_aligner_stage04_plan", "material.complete_denture_arch_reference"],
+		"expected": "material.assigned_aligner_stage04_plan",
+		"prompt": "Which instructor-issued reference matches the schematic arch with stage 04?",
+		"correct": "Correct. The assigned stage-04 map names the fictional arch and seating marker without prescribing orthodontic treatment.",
+		"incorrect": "The complete-denture arch reference has no assigned aligner stage or seating marker for this model task.",
+	},
+	"finish": "Record assigned aligner stage and model seating landmark",
+	"finish_event": "record_aligner_mock_stage04_review",
+	"outcome": "Clear aligner stage matching complete · The assigned teaching stage and fixed seating landmark were verified in the existing chair simulation. No orthodontic biomechanics, fit measurement, tooth movement, treatment planning or patient outcome was assessed.",
+	"reference": AAO_ALIGNERS,
 }
