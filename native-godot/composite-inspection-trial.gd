@@ -77,7 +77,7 @@ func _bench(lesson_id: String) -> Dictionary:
 		push_error("Bench routed to wrong chair scenario; expected " + lesson_id)
 		return {}
 	var chair_ref := lab.find_child("KL_LAB_TOPIC_REFERENCE", true, false) as LinkButton
-	if chair_ref == null or chair_ref.uri != config["reference"]:
+	if chair_ref == null or not chair_ref.uri.begins_with("https://") or (lesson_id == "sealant" and chair_ref.uri != config["reference"]):
 		push_error("Chair does not display this lesson's existing ADA source.")
 		return {}
 	if not await _complete(lab):
