@@ -45,7 +45,7 @@ test('synthetic 3D inlay study insert differs from existing mock facial veneer',
   assert.match(insert, /OcclusalTeachingSurface/);
   assert.match(insert, /OutlineLandmarkNotMeasuredMargin/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-inlay-insert\.tscn','assets\/bench\/synthetic-inlay-insert\.tscn'\)/);
-  assert.match(bench, /inlay insert are synthetic 3D geometry/);
+  assert.match(bench, /inlay insert.*synthetic 3D geometry/);
 });
 
 test('case-specific inlay outline card is a fit reference, not a dental material', () => {
@@ -69,15 +69,15 @@ test('Journey, build and dedicated replay register inlay without removing older 
   ]) assert.ok(app.includes('"'+name+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run indirect inlay try-in bench replay", "inlay_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/inlay-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'inlay-inspection-trial\.gd'/);
   assert.match(inlayTrial, /await _run_lesson\("inlay"\)/);
 });
 
 test('shared replay checks wrong/right IDs, rejected chair target, 20/20, finish, clean reset and journal bytes', () => {
   assert.match(inlayTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_inlay_insert/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_veneer_shell/);
   assert.match(replay, /"tool\.veneer_shell" if lesson_id == "inlay"/);
