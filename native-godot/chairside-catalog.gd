@@ -13,6 +13,7 @@ const ADA_INLAYS := "https://www.mouthhealthy.org/all-topics-a-z/fillings-gold-i
 const ADA_CROWNS := "https://www.mouthhealthy.org/all-topics-a-z/crowns"
 const ADA_BRIDGES := "https://www.mouthhealthy.org/all-topics-a-z/bridges"
 const ADA_DENTURES := "https://www.ada.org/resources/ada-library/oral-health-topics/dentures"
+const ADA_PARTIAL_DENTURES := "https://www.mouthhealthy.org/all-topics-a-z/dentures-partial"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -198,6 +199,20 @@ const ITEMS := {
 		"cue": "Illustration · a model-arch map with the assigned posterior marker; no patient impression, bite registration or pressure finding.",
 		"purpose": "Identifies the fictional full-arch reference and posterior location to record in this supervised model exercise. No clinical fit or mucosal findings are generated.",
 		"swatch": Color("#b5d4c9"), "source": ADA_DENTURES,
+	},
+
+	"tool.partial_denture_framework": {
+		"name": "Removable partial denture (synthetic 3D teaching framework)", "german": "Teilprothese (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-partial-denture.tscn",
+		"cue": "Original open U-shaped schematic connector with three replacement-tooth markers and two contrasting clasp/support identifiers. Not a patient-specific framework.",
+		"purpose": "Represents an assigned fictional removable partial denture beside retained natural teeth shown in the chair fixture; does not model an actual insertion path, clasp force, tooth contact or mucosal support.",
+		"source": ADA_PARTIAL_DENTURES,
+	},
+	"material.partial_denture_support_reference": {
+		"name": "Assigned remaining-teeth and support-landmark diagram", "german": "Teilprothesen-Pfeilerzahn- und Auflage-Markierung (Lehrvorlage)",
+		"cue": "Illustration · an assigned partial-denture location record identifying surviving model teeth, planned support sites and a target landmark. Not a clinical working cast.",
+		"purpose": "Provides identifiers for the fictional tooth-supported partial framework and its support marker. No retention, pressure, measured seating, occlusion or patient condition is inferred.",
+		"swatch": Color("#c3d3ea"), "source": ADA_PARTIAL_DENTURES,
 	},
 }
 
@@ -538,4 +553,31 @@ const FULL_DENTURE := {
 	"finish_event": "record_complete_denture_mock_fitting",
 	"outcome": "Complete denture model-fitting exercise complete · The assigned full-arch seating and posterior teaching landmark were verified in the existing chair simulation. No retention, pressure-area, occlusal, clinical-fit or patient outcome was assessed.",
 	"reference": ADA_DENTURES,
+}
+
+const PARTIAL_DENTURE := {
+	"id": "partial_denture_mock_support_fitting_intro",
+	"scenario": "partial_denture",
+	"title": "Removable partial denture fitting bench",
+	"case": "Fictional tooth-supported removable-partial-denture teaching fixture · The instructor assigns a PARTIAL DENTURE FRAMEWORK with replacement-tooth markers for a model that RETAINS NATURAL TEETH, plus a MATCHED SUPPORT-LANDMARK REFERENCE. Compare this partial framework to a complete arch, then SEAT the model beside remaining teeth and CHECK the assigned SUPPORT MARKER using the unchanged chair. No insertion path, clasp retention, pressure areas, clinical fit, tissue support, occlusion or real patient care is evaluated.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.partial_denture_framework", "tool.complete_denture_arch"],
+		"expected": "tool.partial_denture_framework",
+		"prompt": "Which rotating 3D study object belongs to the model with retained natural teeth and selected replacement-tooth sites?",
+		"correct": "Correct. The open synthetic partial framework represents the assigned removable appliance beside remaining model teeth. Its clasps are illustrative only.",
+		"incorrect": "The complete denture replaces a full arch and does not correspond to this fictional model with remaining natural teeth.",
+	},
+	"material": {
+		"label": "support reference",
+		"choices": ["material.partial_denture_support_reference", "material.complete_denture_arch_reference"],
+		"expected": "material.partial_denture_support_reference",
+		"prompt": "Which assigned study record identifies the remaining model teeth and the planned support landmark?",
+		"correct": "Correct. The partial-denture reference labels the retained-teeth sites and one fictional support marker; it does not quantify real fit or clasp force.",
+		"incorrect": "A complete-denture full-arch reference omits the retained teeth and support marker assigned to this particular partial appliance.",
+	},
+	"finish": "Record simulated partial seating and support landmark",
+	"finish_event": "record_partial_denture_mock_fitting",
+	"outcome": "Removable partial denture model-fitting exercise complete · Seating beside the model's retained teeth and the assigned support landmark were recorded in the existing chair simulation. No retention, clasp force, support quality, clinical fit or patient outcome was assessed.",
+	"reference": ADA_PARTIAL_DENTURES,
 }

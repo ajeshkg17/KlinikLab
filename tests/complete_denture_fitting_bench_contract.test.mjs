@@ -49,7 +49,7 @@ test('original schematic U-shaped 3D arch compared against fixed bridge', () => 
   assert.equal((scene.match(/^\[node name="GumArchSegment/gm)||[]).length,10);
   assert.equal((scene.match(/^\[node name="IllustrativeTooth/gm)||[]).length,10);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-complete-denture\.tscn','assets\/bench\/synthetic-complete-denture\.tscn'\)/);
-  assert.match(bench, /complete denture arch are synthetic 3D geometry/);
+  assert.match(bench, /complete denture arch.*synthetic 3D geometry/);
 });
 
 test('full arch reference is labeled as an arch record, not dental material', () => {
@@ -75,15 +75,15 @@ test('Journey, builder and standalone runner retain twelve earlier routes', () =
   ]) assert.ok(app.includes('"'+name+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run complete denture fitting bench replay", "full_denture_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/full-denture-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'full-denture-inspection-trial\.gd'/);
   assert.match(dentureTrial, /await _run_lesson\("full_denture"\)/);
 });
 
 test('shared replay retains rejected/corrected IDs, /20 chair, restart and journal guard', () => {
   assert.match(dentureTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_complete_denture_arch/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_bridge_framework/);
   assert.match(replay, /"tool\.bridge_framework" if lesson_id == "full_denture"/);

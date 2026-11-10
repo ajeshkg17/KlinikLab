@@ -1,0 +1,108 @@
+[gd_scene load_steps=10 format=3]
+
+[sub_resource type="BoxMesh" id="BoxMesh_framework_arm"]
+size = Vector3(0.14, 0.11, 0.89)
+
+[sub_resource type="BoxMesh" id="BoxMesh_anterior_connector"]
+size = Vector3(1.12, 0.11, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_framework"]
+albedo_color = Color(0.57, 0.66, 0.74, 1)
+metallic = 0.45
+roughness = 0.39
+
+[sub_resource type="SphereMesh" id="SphereMesh_replacement_tooth"]
+radius = 0.16
+height = 0.32
+radial_segments = 18
+rings = 9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tooth"]
+albedo_color = Color(0.94, 0.89, 0.77, 1)
+roughness = 0.36
+
+[sub_resource type="SphereMesh" id="SphereMesh_saddle"]
+radius = 0.31
+height = 0.62
+radial_segments = 20
+rings = 10
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_saddle"]
+albedo_color = Color(0.73, 0.39, 0.43, 1)
+roughness = 0.66
+
+[sub_resource type="TorusMesh" id="TorusMesh_clasp_loop"]
+inner_radius = 0.19
+outer_radius = 0.25
+rings = 12
+ring_segments = 28
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_support_marker"]
+albedo_color = Color(0.26, 0.61, 0.84, 1)
+roughness = 0.48
+
+[node name="SyntheticRemovablePartialDentureFramework" type="Node3D"]
+
+[node name="LeftOpenFrameworkArmNotRetentionCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.58, 0, 0.04)
+mesh = SubResource("BoxMesh_framework_arm")
+material_override = SubResource("StandardMaterial3D_framework")
+
+[node name="RightOpenFrameworkArmNotRetentionCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.58, 0, 0.04)
+mesh = SubResource("BoxMesh_framework_arm")
+material_override = SubResource("StandardMaterial3D_framework")
+
+[node name="AnteriorFrameworkConnector" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -0.39)
+mesh = SubResource("BoxMesh_anterior_connector")
+material_override = SubResource("StandardMaterial3D_framework")
+
+[node name="LeftIllustrativeClaspLoopNotClinicalContact" type="MeshInstance3D" parent="."]
+position = Vector3(-0.58, 0.0, 0.52)
+mesh = SubResource("TorusMesh_clasp_loop")
+material_override = SubResource("StandardMaterial3D_framework")
+
+[node name="RightIllustrativeClaspLoopNotClinicalContact" type="MeshInstance3D" parent="."]
+position = Vector3(0.58, 0.0, 0.52)
+mesh = SubResource("TorusMesh_clasp_loop")
+material_override = SubResource("StandardMaterial3D_framework")
+
+[node name="AssignedSupportLandmarkNotClaspForceMeasurement" type="MeshInstance3D" parent="."]
+position = Vector3(-0.58, 0.02, 0.52)
+scale = Vector3(0.72, 0.72, 0.72)
+mesh = SubResource("TorusMesh_clasp_loop")
+material_override = SubResource("StandardMaterial3D_support_marker")
+
+[node name="PartialReplacementSaddle1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.26, 0.03, -0.39)
+scale = Vector3(0.67, 0.37, 0.67)
+mesh = SubResource("SphereMesh_saddle")
+material_override = SubResource("StandardMaterial3D_saddle")
+
+[node name="IllustrativeReplacementTooth1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.26, 0.21, -0.39)
+mesh = SubResource("SphereMesh_replacement_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="PartialReplacementSaddle2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, -0.41)
+scale = Vector3(0.67, 0.37, 0.67)
+mesh = SubResource("SphereMesh_saddle")
+material_override = SubResource("StandardMaterial3D_saddle")
+
+[node name="IllustrativeReplacementTooth2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.21, -0.41)
+mesh = SubResource("SphereMesh_replacement_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
+
+[node name="PartialReplacementSaddle3" type="MeshInstance3D" parent="."]
+position = Vector3(0.26, 0.03, -0.39)
+scale = Vector3(0.67, 0.37, 0.67)
+mesh = SubResource("SphereMesh_saddle")
+material_override = SubResource("StandardMaterial3D_saddle")
+
+[node name="IllustrativeReplacementTooth3" type="MeshInstance3D" parent="."]
+position = Vector3(0.26, 0.21, -0.39)
+mesh = SubResource("SphereMesh_replacement_tooth")
+material_override = SubResource("StandardMaterial3D_tooth")
