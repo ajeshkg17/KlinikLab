@@ -351,6 +351,7 @@ const VENEER := {
 	"title": "Veneer try-in bench",
 	"case": "Fictional anterior-teaching-crown case · An instructor supplies a MOCK FACIAL VENEER SHELL and a MATCHED INCISAL-LANDMARK REFERENCE CARD. The two abstract chair actions are to SEAT the model shell and CHECK its incisal marker. This is not a cementation, preparation, colour matching, marginal-fit measurement or patient veneer procedure.",
 	"tool": {
+		"label": "study object",
 		"choices": ["tool.veneer_shell", "tool.examination_mirror"],
 		"expected": "tool.veneer_shell",
 		"prompt": "Which rotating 3D study object is the mock restoration to be seated in this model-specific try-in?",
