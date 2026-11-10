@@ -52,7 +52,7 @@ test('synthetic partial framework and support markers are visibly distinct from 
   assert.equal((scene.match(/^\[node name="IllustrativeReplacementTooth/gm)||[]).length,3);
   assert.equal((scene.match(/^\[node name="PartialReplacementSaddle/gm)||[]).length,3);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-partial-denture\.tscn','assets\/bench\/synthetic-partial-denture\.tscn'\)/);
-  assert.match(bench, /removable partial framework are synthetic 3D geometry/);
+  assert.match(bench, /removable partial framework.*synthetic 3D geometry/);
 });
 
 test('case-specific remaining-teeth support diagram is labeled a support reference, not material', () => {
@@ -79,15 +79,15 @@ test('Journey, build and runner add only partial denture after thirteen prior le
   ]) assert.ok(app.includes('"'+name+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run removable partial denture fitting bench replay", "partial_denture_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/partial-denture-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'partial-denture-inspection-trial\.gd'/);
   assert.match(partialTrial, /await _run_lesson\("partial_denture"\)/);
 });
 
 test('shared replay requires rejected/corrected selections, chair 20/20, unique finish, reset and byte-identical journal', () => {
   assert.match(partialTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_partial_denture_framework/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_complete_denture_arch/);
   assert.match(replay, /"tool\.complete_denture_arch" if lesson_id == "partial_denture"/);

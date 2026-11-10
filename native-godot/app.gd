@@ -1757,6 +1757,8 @@ func _start_automated_trial(mode := "room") -> void:
 		trial_script = "res://full-denture-inspection-trial.gd"
 	elif mode == "partial_denture_bench":
 		trial_script = "res://partial-denture-inspection-trial.gd"
+	elif mode == "implant_bench":
+		trial_script = "res://implant-inspection-trial.gd"
 	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
 		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
 		return
@@ -3578,7 +3580,8 @@ func _show_journey() -> void:
 		["crown", "Open crown try-in bench", "KL_OPEN_CROWN_BENCH"],
 		["bridge", "Open fixed bridge try-in bench", "KL_OPEN_BRIDGE_BENCH"],
 		["full_denture", "Open complete denture fitting bench", "KL_OPEN_FULL_DENTURE_BENCH"],
-		["partial_denture", "Open removable partial denture fitting bench", "KL_OPEN_PARTIAL_DENTURE_BENCH"]
+		["partial_denture", "Open removable partial denture fitting bench", "KL_OPEN_PARTIAL_DENTURE_BENCH"],
+		["implant", "Open implant restoration review bench", "KL_OPEN_IMPLANT_BENCH"]
 	]:
 		var entry := _button(str(lesson[1]))
 		entry.name = str(lesson[2])
@@ -3598,7 +3601,8 @@ func _show_journey() -> void:
 		["Run crown try-in bench replay", "crown_bench"],
 		["Run fixed bridge try-in bench replay", "bridge_bench"],
 		["Run complete denture fitting bench replay", "full_denture_bench"],
-		["Run removable partial denture fitting bench replay", "partial_denture_bench"]
+		["Run removable partial denture fitting bench replay", "partial_denture_bench"],
+		["Run implant restoration review bench replay", "implant_bench"]
 	]:
 		var replay := _button(str(trial[0]))
 		replay.disabled = _trial_pid > 0
@@ -3697,18 +3701,18 @@ func _show_journey() -> void:
 func _open_chairside_bench(lesson_id: String) -> void:
 	if is_instance_valid(_chairside_bench):
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"]:
 		return
 	_chairside_bench = CHAIRSIDE_BENCH.new()
 	_shell.add_child(_chairside_bench)
-	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN if lesson_id == "crown" else CHAIRSIDE_CATALOG.BRIDGE if lesson_id == "bridge" else CHAIRSIDE_CATALOG.FULL_DENTURE if lesson_id == "full_denture" else CHAIRSIDE_CATALOG.PARTIAL_DENTURE
+	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN if lesson_id == "crown" else CHAIRSIDE_CATALOG.BRIDGE if lesson_id == "bridge" else CHAIRSIDE_CATALOG.FULL_DENTURE if lesson_id == "full_denture" else CHAIRSIDE_CATALOG.PARTIAL_DENTURE if lesson_id == "partial_denture" else CHAIRSIDE_CATALOG.IMPLANT
 	_chairside_bench.start(lesson)
 	_chairside_bench.practice_requested.connect(_enter_bench_practice)
 
 func _enter_bench_practice(scenario: String) -> void:
 	if is_instance_valid(_procedure_lab) or not is_instance_valid(_chairside_bench):
 		return
-	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
+	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
 		return
 	for index in range(PROCEDURE_DRILLS.DRILLS.size()):
 		if str(PROCEDURE_DRILLS.DRILLS[index][0]) != scenario:

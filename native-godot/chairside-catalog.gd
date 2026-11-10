@@ -14,6 +14,7 @@ const ADA_CROWNS := "https://www.mouthhealthy.org/all-topics-a-z/crowns"
 const ADA_BRIDGES := "https://www.mouthhealthy.org/all-topics-a-z/bridges"
 const ADA_DENTURES := "https://www.ada.org/resources/ada-library/oral-health-topics/dentures"
 const ADA_PARTIAL_DENTURES := "https://www.mouthhealthy.org/all-topics-a-z/dentures-partial"
+const ADA_IMPLANTS := "https://www.mouthhealthy.org/all-topics-a-z/implants"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -213,6 +214,20 @@ const ITEMS := {
 		"cue": "Illustration · an assigned partial-denture location record identifying surviving model teeth, planned support sites and a target landmark. Not a clinical working cast.",
 		"purpose": "Provides identifiers for the fictional tooth-supported partial framework and its support marker. No retention, pressure, measured seating, occlusion or patient condition is inferred.",
 		"swatch": Color("#c3d3ea"), "source": ADA_PARTIAL_DENTURES,
+	},
+
+	"tool.implant_crown_study": {
+		"name": "Implant-supported crown assembly (synthetic 3D study object)", "german": "Implantatgetragene Krone (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-implant-crown.tscn",
+		"cue": "Original primitive-mesh study object: a support cylinder, separate neck/abutment band, illustrative crown and a blue interface marker. Not a dimensionally accurate implant connection.",
+		"purpose": "Represents the assigned fictional implant-supported restoration and its model interface landmark. Does not demonstrate clinical implant placement, osseointegration, screw torque, abutment compatibility or load transfer.",
+		"source": ADA_IMPLANTS,
+	},
+	"material.implant_site_interface_reference": {
+		"name": "Assigned implant site and interface-landmark record (fictional)", "german": "Implantatposition und Verbindungsmarkierung (Lehrvorlage)",
+		"cue": "Illustration · a labelled model implant site with one preassigned interface marker. Not a radiograph, patient chart or verified component specification.",
+		"purpose": "Links the synthetic implant-supported study crown to its assigned fixture site and teaching interface landmark. No implant-system identification, radiographic diagnosis or clinical fit decision is possible.",
+		"swatch": Color("#b8d5dd"), "source": ADA_IMPLANTS,
 	},
 }
 
@@ -580,4 +595,31 @@ const PARTIAL_DENTURE := {
 	"finish_event": "record_partial_denture_mock_fitting",
 	"outcome": "Removable partial denture model-fitting exercise complete · Seating beside the model's retained teeth and the assigned support landmark were recorded in the existing chair simulation. No retention, clasp force, support quality, clinical fit or patient outcome was assessed.",
 	"reference": ADA_PARTIAL_DENTURES,
+}
+
+const IMPLANT := {
+	"id": "implant_mock_restoration_site_review_intro",
+	"scenario": "implant",
+	"title": "Implant restoration review bench",
+	"case": "Fictional implant-restoration inspection fixture · An instructor assigns a SCHEMATIC IMPLANT-SUPPORTED CROWN ASSEMBLY and MATCHED SITE-AND-INTERFACE RECORD. Match the study restoration to the designated implant site and mark the provided interface landmark in the unchanged chair. This is not implant surgery, torque selection, clinical abutment fitting, radiographic interpretation, occlusal loading or a treatment recommendation.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.implant_crown_study", "tool.crown_shell"],
+		"expected": "tool.implant_crown_study",
+		"prompt": "Which 3D study object includes the model implant support, abutment marker and crown assigned to this fixture?",
+		"correct": "Correct. The synthetic implant-crown assembly includes a marked implant-interface study region. It is not a calibrated component connection.",
+		"incorrect": "The single-crown shell represents a different model-only restoration and does not carry the implant support/interface annotation for this assigned task.",
+	},
+	"material": {
+		"label": "site reference",
+		"choices": ["material.implant_site_interface_reference", "material.crown_fit_reference"],
+		"expected": "material.implant_site_interface_reference",
+		"prompt": "Which fictional reference identifies the assigned implant fixture site and its interface landmark?",
+		"correct": "Correct. The case reference links the simulated implant site to the marker to be recorded; it does not establish a clinical fit.",
+		"incorrect": "A crown margin reference for a different restoration does not identify the assigned implant site and interface landmark.",
+	},
+	"finish": "Record simulated implant-site match and interface landmark",
+	"finish_event": "record_implant_mock_site_review",
+	"outcome": "Implant restoration model review complete · The assigned site match and interface study marker were recorded with the existing chair. No implant-system compatibility, screw torque, osseointegration, loading, clinical fit or patient outcome was assessed.",
+	"reference": ADA_IMPLANTS,
 }
