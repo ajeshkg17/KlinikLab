@@ -2,6 +2,7 @@ extends RefCounted
 ## Case-specific selections share one source-checked instrument preview catalog.
 const ADA_MATERIALS := "https://www.ada.org/resources/ada-library/oral-health-topics/materials-for-direct-restorations"
 const ADA_SEALANTS := "https://www.ada.org/resources/ada-library/oral-health-topics/dental-sealants"
+const ADA_FLUORIDE := "https://www.mouthhealthy.org/all-topics-a-z/fluoride"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -34,6 +35,20 @@ const ITEMS := {
 		"cue": "Illustration · thin translucent fissure coating",
 		"purpose": "A resin pit-and-fissure sealant requiring light activation, as specified by this fictional case.",
 		"swatch": Color("#d5e7dd"), "source": ADA_SEALANTS,
+	},
+
+	"tool.varnish_brush": {
+		"name": "Single-use varnish applicator (synthetic 3D model)", "german": "Fluoridlack-Applikator (schematisch)",
+		"scene": "res://assets/bench/synthetic-varnish-applicator.tscn",
+		"cue": "Synthetic educational geometry · slim handle, narrow neck and soft applicator tip.",
+		"purpose": "Represents a brush for the case-assigned coating; no real device geometry or dosing is modelled.",
+		"source": ADA_FLUORIDE,
+	},
+	"material.fluoride_varnish": {
+		"name": "Fluoride varnish", "german": "Fluoridlack",
+		"cue": "Illustration · pale gold varnish swatch, not a product photograph",
+		"purpose": "The fictional case explicitly selects fluoride varnish to coat the training surfaces; it is not light-cured.",
+		"swatch": Color("#e8cf91"), "source": ADA_FLUORIDE,
 	},
 }
 
@@ -85,4 +100,30 @@ const SEALANT := {
 	"finish_event": "simulate_sealant_cure",
 	"outcome": "Sealant simulation complete · Both marked fissures were coated and verified in the chair. The selected resin sealant is marked light-cured for this fictional exercise only.",
 	"reference": ADA_SEALANTS,
+}
+
+
+const FLUORIDE := {
+	"id": "fluoride_varnish_coating_intro",
+	"scenario": "fluoride",
+	"title": "Fluoride varnish bench",
+	"case": "Fictional instructor-assigned case · Demonstrate fluoride varnish on two indicated surfaces of an arch teaching model. This is an educational material and applicator selection exercise, not an actual treatment or dose protocol. No curing light is required.",
+	"tool": {
+		"choices": ["tool.varnish_brush", "tool.curing_light"],
+		"expected": "tool.varnish_brush",
+		"prompt": "Which 3D instrument represents applying the assigned varnish to the model surfaces?",
+		"correct": "Correct. The schematic disposable brush represents varnish application; no device dose is simulated.",
+		"incorrect": "A curing light polymerizes certain resin materials. It is not the varnish applicator for this assigned fluoride-varnish case.",
+	},
+	"material": {
+		"choices": ["material.fluoride_varnish", "material.light_cure_sealant"],
+		"expected": "material.fluoride_varnish",
+		"prompt": "Which coating material matches the fictional assignment?",
+		"correct": "Correct. This exercise specifies fluoride varnish, not a resin pit-and-fissure sealant.",
+		"incorrect": "The light-cured fissure sealant is a different preventive material. Select the fluoride varnish explicitly assigned here.",
+	},
+	"finish": "Record both simulated varnish-coated surfaces",
+	"finish_event": "record_fluoride_varnish_coating",
+	"outcome": "Fluoride varnish exercise complete · Both assigned training surfaces were coated and verified in the existing chair simulation. This is an illustrative record, not a measured clinical varnish dose or fluoride release.",
+	"reference": ADA_FLUORIDE,
 }
