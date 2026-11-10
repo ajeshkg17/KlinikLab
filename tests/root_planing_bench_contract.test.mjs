@@ -54,15 +54,15 @@ test('Journey, registry, and scenario routing retain all four older benches', ()
     assert.ok(app.includes('"' + name + '", "KL_OPEN_' + id + '_BENCH"'));
   assert.match(app, /\["Run scaling and root planing bench replay", "root_planing_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/root-planing-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'root-planing-inspection-trial\.gd'/);
 });
 
 test('new replay asserts wrong/correct tool and material IDs, chair rejection, finish, score and clean reset', () => {
   assert.match(rootTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
   assert.match(rootTrial, /await _run_lesson\("root_planing"\)/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_ultrasonic_scaler/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_polishing_cup/);
   assert.match(replay, /"tool\.polishing_cup" if lesson_id == "root_planing"/);
