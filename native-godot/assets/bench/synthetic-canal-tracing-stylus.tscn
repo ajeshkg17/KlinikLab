@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_stylus"]
+top_radius = 0.058
+bottom_radius = 0.077
+height = 1.35
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="SphereMesh_tip"]
+radius = 0.16
+height = 0.32
+radial_segments = 24
+rings = 12
+
+[sub_resource type="BoxMesh" id="BoxMesh_label_band"]
+size = Vector3(0.18, 0.32, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.66, 0.69, 0.75, 1)
+metallic = 0.28
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+albedo_color = Color(0.30, 0.55, 0.87, 1)
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_label"]
+albedo_color = Color(0.93, 0.82, 0.45, 1)
+roughness = 0.71
+
+[node name="SyntheticCanalDiagramTracingStylus" type="Node3D"]
+
+[node name="WideTeachingShaftNotEndodonticFile" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_stylus")
+material_override = SubResource("StandardMaterial3D_body")
+
+[node name="RoundedDiagramMarkerNotCanalInsertionTip" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.70, 0)
+mesh = SubResource("SphereMesh_tip")
+material_override = SubResource("StandardMaterial3D_marker")
+
+[node name="AssignedCanalMapIdentificationBand" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.28, 0)
+mesh = SubResource("BoxMesh_label_band")
+material_override = SubResource("StandardMaterial3D_label")
