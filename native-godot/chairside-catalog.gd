@@ -15,6 +15,7 @@ const ADA_BRIDGES := "https://www.mouthhealthy.org/all-topics-a-z/bridges"
 const ADA_DENTURES := "https://www.ada.org/resources/ada-library/oral-health-topics/dentures"
 const ADA_PARTIAL_DENTURES := "https://www.mouthhealthy.org/all-topics-a-z/dentures-partial"
 const ADA_IMPLANTS := "https://www.mouthhealthy.org/all-topics-a-z/implants"
+const AAE_ROOT_CANAL := "https://www.aae.org/patients/root-canal-treatment/"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -228,6 +229,20 @@ const ITEMS := {
 		"cue": "Illustration · a labelled model implant site with one preassigned interface marker. Not a radiograph, patient chart or verified component specification.",
 		"purpose": "Links the synthetic implant-supported study crown to its assigned fixture site and teaching interface landmark. No implant-system identification, radiographic diagnosis or clinical fit decision is possible.",
 		"swatch": Color("#b8d5dd"), "source": ADA_IMPLANTS,
+	},
+
+	"tool.canal_tracing_stylus": {
+		"name": "Model canal tracing stylus (synthetic 3D annotation pointer)", "german": "Wurzelkanal-Markierungsstift (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-canal-tracing-stylus.tscn",
+		"cue": "Synthetic 3D diagram-tracing stylus with a blue alignment marker; this is a virtual annotation object, not a root canal instrument, file or calibrated probe.",
+		"purpose": "Identifies preassigned chamber and canal marks in a fictional teaching diagram. Does not model insertion into a tooth, working length, canal anatomy, instrumentation, irrigation or obturation.",
+		"source": AAE_ROOT_CANAL,
+	},
+	"material.assigned_canal_diagram": {
+		"name": "Assigned schematic chamber and canal tracing map", "german": "Zugeordnetes Pulpenkammer- und Wurzelkanal-Schema",
+		"cue": "Illustration · a fictional single-canal tracing card with predetermined chamber and canal markers; not a radiograph, treatment plan or actual anatomy.",
+		"purpose": "Names the two teacher-specified virtual tracing targets, without suggesting a clinical canal count, morphology, working length or diagnosis.",
+		"swatch": Color("#c1c9e7"), "source": AAE_ROOT_CANAL,
 	},
 }
 
@@ -622,4 +637,31 @@ const IMPLANT := {
 	"finish_event": "record_implant_mock_site_review",
 	"outcome": "Implant restoration model review complete · The assigned site match and interface study marker were recorded with the existing chair. No implant-system compatibility, screw torque, osseointegration, loading, clinical fit or patient outcome was assessed.",
 	"reference": ADA_IMPLANTS,
+}
+
+const ENDO := {
+	"id": "endo_mock_chamber_canal_map_review_intro",
+	"scenario": "endo",
+	"title": "Root canal model review bench",
+	"case": "Fictional instructor-assigned ROOT CANAL DIAGRAM review · The supplied schematic shows ONE PREMARKED CHAMBER and ONE PREMARKED CANAL path. Select the diagram tracing stylus and the ASSIGNED CANAL MAP; then trace the chamber and assigned canal markers in the unchanged chair. This is not root canal therapy, working-length determination, anatomical identification, instrumentation, irrigation, obturation, diagnosis or a real patient record.",
+	"tool": {
+		"label": "study pointer",
+		"choices": ["tool.canal_tracing_stylus", "tool.image_pointer"],
+		"expected": "tool.canal_tracing_stylus",
+		"prompt": "Which rotating 3D study pointer is specifically assigned to trace the fictional chamber and canal markers?",
+		"correct": "Correct. The labelled synthetic tracing stylus marks the preassigned schematic canal; it is not an endodontic hand file or clinical probe.",
+		"incorrect": "The image pointer belongs to the separate bitewing-diagram lesson and does not represent the assigned canal tracing tool in this case.",
+	},
+	"material": {
+		"label": "canal reference",
+		"choices": ["material.assigned_canal_diagram", "material.assigned_bitewing_image"],
+		"expected": "material.assigned_canal_diagram",
+		"prompt": "Which supplied fictional reference contains the two preassigned chamber and canal tracing locations?",
+		"correct": "Correct. The assigned model canal diagram shows the teaching targets, not a clinical canal morphology or length.",
+		"incorrect": "The simulated bitewing image marks proximal surfaces and overlap, not the preassigned chamber/canal targets.",
+	},
+	"finish": "Record fictional chamber and canal map tracing",
+	"finish_event": "record_endo_mock_canal_map_review",
+	"outcome": "Root canal diagram review complete · The two assigned schematic markers were recorded in the original chair exercise. No real root anatomy, treatment, canal preparation, working length, diagnosis or patient outcome was assessed.",
+	"reference": AAE_ROOT_CANAL,
 }
