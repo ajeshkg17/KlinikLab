@@ -1,0 +1,142 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="BoxMesh" id="BoxMesh_protective_pad"]
+size = Vector3(0.29, 0.24, 0.32)
+
+[sub_resource type="SphereMesh" id="SphereMesh_guard_rim"]
+radius = 0.20
+height = 0.40
+radial_segments = 20
+rings = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_coverage_marker"]
+size = Vector3(0.26, 0.07, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_guard"]
+albedo_color = Color(0.93, 0.66, 0.35, 1)
+roughness = 0.51
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rim"]
+albedo_color = Color(0.88, 0.52, 0.23, 1)
+roughness = 0.48
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+albedo_color = Color(0.21, 0.52, 0.72, 1)
+roughness = 0.53
+
+[node name="SyntheticUpperArchSportsMouthguard" type="Node3D"]
+
+[node name="IllustrativeOcclusalGuardPad1NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.75, 0, 0.43)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment1NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(-0.87, 0.16, 0.43)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad2NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.77, 0, 0.14)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment2NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(-0.89, 0.16, 0.14)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad3NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.66, 0, -0.17)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment3NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(-0.78, 0.16, -0.17)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad4NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.42, 0, -0.39)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment4NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(-0.54, 0.16, -0.39)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad5NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, 0, -0.49)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment5NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(-0.27, 0.16, -0.49)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad6NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.15, 0, -0.49)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment6NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(0.27, 0.16, -0.49)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad7NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.42, 0, -0.39)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment7NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(0.54, 0.16, -0.39)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad8NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.66, 0, -0.17)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment8NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(0.78, 0.16, -0.17)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad9NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.77, 0, 0.14)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment9NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(0.89, 0.16, 0.14)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="IllustrativeOcclusalGuardPad10NotImpactCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0.75, 0, 0.43)
+mesh = SubResource("BoxMesh_protective_pad")
+material_override = SubResource("StandardMaterial3D_guard")
+
+[node name="RaisedOuterBumperSegment10NotRetentionMeasured" type="MeshInstance3D" parent="."]
+position = Vector3(0.87, 0.16, 0.43)
+scale = Vector3(0.68, 0.69, 0.82)
+mesh = SubResource("SphereMesh_guard_rim")
+material_override = SubResource("StandardMaterial3D_rim")
+
+[node name="AssignedPosteriorCoverageMarkerNotProtectionTest" type="MeshInstance3D" parent="."]
+position = Vector3(-0.75, 0.22, 0.43)
+mesh = SubResource("BoxMesh_coverage_marker")
+material_override = SubResource("StandardMaterial3D_marker")
