@@ -11,6 +11,7 @@ const ADA_ORAL_CANCER := "https://www.mouthhealthy.org/all-topics-a-z/oral-cance
 const ADA_VENEERS := "https://www.mouthhealthy.org/all-topics-a-z/veneers"
 const ADA_INLAYS := "https://www.mouthhealthy.org/all-topics-a-z/fillings-gold-inlays"
 const ADA_CROWNS := "https://www.mouthhealthy.org/all-topics-a-z/crowns"
+const ADA_BRIDGES := "https://www.mouthhealthy.org/all-topics-a-z/bridges"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -168,6 +169,20 @@ const ITEMS := {
 		"cue": "Illustration · assigned preparation outline and cervical teaching landmark, not a clinical working cast or patient scan.",
 		"purpose": "Identifies the fictional prepared model and the exact cervical landmark to check. This does not contain patient measurements, marginal gap, contacts or bite data.",
 		"swatch": Color("#d6d4c2"), "source": ADA_CROWNS,
+	},
+
+	"tool.bridge_framework": {
+		"name": "Mock three-unit fixed bridge (synthetic 3D study fixture)", "german": "Dreigliedrige Brücke (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-bridge-framework.tscn",
+		"cue": "Original schematic 3D model: two abutment-shaped supports and one central pontic with contrasting study marker; geometry does not depict a clinical cemented fit.",
+		"purpose": "Represents the assigned fictional fixed bridge spanning one missing model tooth; not a calibrated framework, connector-strength assessment or patient-specific prosthesis.",
+		"source": ADA_BRIDGES,
+	},
+	"material.bridge_support_reference": {
+		"name": "Bridge abutment-and-pontic matching reference", "german": "Brückenpfeiler- und Brückenglied-Zuordnung (Lehrvorlage)",
+		"cue": "Illustration · a two-support and central-pontic target card, not a clinical working model or patient scan.",
+		"purpose": "Identifies the two assigned model support units and the pontic marker. Does not quantify fit, occlusal contacts, biological width or connector dimensions.",
+		"swatch": Color("#c6d9d0"), "source": ADA_BRIDGES,
 	},
 }
 
@@ -454,4 +469,31 @@ const CROWN := {
 	"finish_event": "record_crown_mock_try_in",
 	"outcome": "Crown model try-in complete · The assigned crown seating and cervical teaching landmark were verified in the existing chair simulation. No clinical fit, margin quality, cementation or patient outcome was assessed.",
 	"reference": ADA_CROWNS,
+}
+
+const BRIDGE := {
+	"id": "bridge_mock_three_unit_try_in_intro",
+	"scenario": "bridge",
+	"title": "Fixed bridge try-in bench",
+	"case": "Fictional three-unit fixed-bridge teaching fixture · The instructor assigns a mock bridge spanning ONE missing tooth between TWO labelled model supports. Identify the BRIDGE STUDY OBJECT and its MATCHED ABUTMENT–PONTIC REFERENCE, then use the unchanged chair to SEAT across supports and CHECK the pontic landmark. This is not clinical cementation, abutment preparation, fit measurement, pontic-tissue assessment or patient treatment.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.bridge_framework", "tool.crown_shell"],
+		"expected": "tool.bridge_framework",
+		"prompt": "Which 3D model is assigned to span the two study supports across the missing-tooth site?",
+		"correct": "Correct. The synthetic three-unit framework includes two study support positions and an illustrative central pontic.",
+		"incorrect": "The single-unit crown is a different restoration and does not represent the prescribed three-unit bridge in this fictional case.",
+	},
+	"material": {
+		"label": "fit reference",
+		"choices": ["material.bridge_support_reference", "material.crown_fit_reference"],
+		"expected": "material.bridge_support_reference",
+		"prompt": "Which case reference identifies both support units and the pontic landmark for this model try-in?",
+		"correct": "Correct. The bridge-specific card identifies the assigned two supports and model pontic target. No clinical adaptation is measured.",
+		"incorrect": "The single-crown preparation reference does not identify both model supports and pontic; select the assigned bridge reference.",
+	},
+	"finish": "Record mock bridge seating and pontic landmark",
+	"finish_event": "record_bridge_mock_try_in",
+	"outcome": "Fixed bridge model try-in complete · The assigned support-seating action and pontic teaching landmark were verified in the existing chair. No clinical fit, cementation, implant loading or patient outcome was assessed.",
+	"reference": ADA_BRIDGES,
 }
