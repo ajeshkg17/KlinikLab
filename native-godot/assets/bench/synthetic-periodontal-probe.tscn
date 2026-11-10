@@ -1,0 +1,81 @@
+[gd_scene load_steps=9 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_handle"]
+top_radius = 0.068
+bottom_radius = 0.068
+height = 0.93
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_handle"]
+albedo_color = Color(0.15, 0.54, 0.63, 1)
+roughness = 0.48
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_stem"]
+top_radius = 0.03
+bottom_radius = 0.039
+height = 0.55
+radial_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_metal"]
+albedo_color = Color(0.74, 0.79, 0.8, 1)
+metallic = 0.52
+roughness = 0.36
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tip"]
+top_radius = 0.014
+bottom_radius = 0.023
+height = 0.36
+radial_segments = 12
+
+[sub_resource type="SphereMesh" id="SphereMesh_blunt"]
+radius = 0.023
+height = 0.046
+radial_segments = 12
+rings = 6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_band"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.025
+radial_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_band"]
+albedo_color = Color(0.12, 0.14, 0.16, 1)
+roughness = 0.82
+
+[node name="SyntheticPeriodontalProbe" type="Node3D"]
+
+[node name="TealGrip" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.44, 0)
+mesh = SubResource("CylinderMesh_handle")
+material_override = SubResource("StandardMaterial3D_handle")
+
+[node name="MetalNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.25, 0)
+mesh = SubResource("CylinderMesh_stem")
+material_override = SubResource("StandardMaterial3D_metal")
+
+[node name="IllustrativeTipNotCalibrated" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.69, 0)
+mesh = SubResource("CylinderMesh_tip")
+material_override = SubResource("StandardMaterial3D_metal")
+
+[node name="BluntTip" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.88, 0)
+mesh = SubResource("SphereMesh_blunt")
+material_override = SubResource("StandardMaterial3D_metal")
+
+[node name="MarkerBandA" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.59, 0)
+mesh = SubResource("CylinderMesh_band")
+material_override = SubResource("StandardMaterial3D_band")
+
+[node name="MarkerBandB" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.68, 0)
+mesh = SubResource("CylinderMesh_band")
+material_override = SubResource("StandardMaterial3D_band")
+
+[node name="MarkerBandC" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.77, 0)
+mesh = SubResource("CylinderMesh_band")
+material_override = SubResource("StandardMaterial3D_band")
