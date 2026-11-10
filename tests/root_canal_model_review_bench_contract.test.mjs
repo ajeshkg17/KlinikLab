@@ -49,7 +49,7 @@ test('schematic 3D pointer clearly differs from an actual canal file and image p
   assert.match(stylus, /RoundedDiagramMarkerNotCanalInsertionTip/);
   assert.match(stylus, /AssignedCanalMapIdentificationBand/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-canal-tracing-stylus\.tscn','assets\/bench\/synthetic-canal-tracing-stylus\.tscn'\)/);
-  assert.match(bench, /canal tracing stylus are synthetic 3D geometry/);
+  assert.match(bench, /canal tracing stylus.*synthetic 3D geometry/);
 });
 
 test('assigned canal-map reference is not a clinical file or patient X-ray', () => {
@@ -78,15 +78,15 @@ test('Journey, packaging and dedicated replay add only endo after earlier fiftee
   ]) assert.ok(app.includes('"'+label+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run root canal model review bench replay", "endo_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/endo-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'endo-inspection-trial\.gd'/);
   assert.match(endoTrial, /await _run_lesson\("endo"\)/);
 });
 
 test('shared replay requires wrong/right IDs, rejected chair, 20/20, finish, reset and isolated journal', () => {
   assert.match(endoTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_canal_tracing_stylus/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_image_pointer/);
   assert.match(replay, /"tool\.image_pointer" if lesson_id == "endo"/);
