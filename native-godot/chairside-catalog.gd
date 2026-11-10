@@ -16,6 +16,7 @@ const ADA_DENTURES := "https://www.ada.org/resources/ada-library/oral-health-top
 const ADA_PARTIAL_DENTURES := "https://www.mouthhealthy.org/all-topics-a-z/dentures-partial"
 const ADA_IMPLANTS := "https://www.mouthhealthy.org/all-topics-a-z/implants"
 const AAE_ROOT_CANAL := "https://www.aae.org/patients/root-canal-treatment/"
+const AAE_RETREATMENT := "https://www.aae.org/patients/root-canal-treatment/endodontic-treatment-options/endodontic-retreatment/"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -243,6 +244,20 @@ const ITEMS := {
 		"cue": "Illustration · a fictional single-canal tracing card with predetermined chamber and canal markers; not a radiograph, treatment plan or actual anatomy.",
 		"purpose": "Names the two teacher-specified virtual tracing targets, without suggesting a clinical canal count, morphology, working length or diagnosis.",
 		"swatch": Color("#c1c9e7"), "source": AAE_ROOT_CANAL,
+	},
+
+	"tool.record_comparison_pointer": {
+		"name": "Prior/current record comparison pointer (synthetic 3D teaching object)", "german": "Vorher-Nachher-Befundvergleich-Zeiger (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-record-comparison-pointer.tscn",
+		"cue": "Original two-headed model pointer with contrasting prior/current markers. It annotates schematic record panels; not an endodontic file, radiograph reader or diagnostic instrument.",
+		"purpose": "Selects two preassigned locations in a fictional before-and-after diagram. Cannot assess healing, pathology, treatment quality or indications for actual retreatment.",
+		"source": AAE_RETREATMENT,
+	},
+	"material.assigned_prior_current_record": {
+		"name": "Matched fictional prior/current endodontic record pair", "german": "Zugeordnetes Vor- und Nachbefund-Schema (Lehrvorlage)",
+		"cue": "Illustration · a paired prior and current teaching record with one assigned model reference and one instructor-flagged discrepancy. Not patient radiographs or a clinical finding.",
+		"purpose": "Identifies the historical reference and instructor-specified discrepancy in this case, without diagnosing failure, infection, healing or whether treatment is necessary.",
+		"swatch": Color("#bec5dc"), "source": AAE_RETREATMENT,
 	},
 }
 
@@ -664,4 +679,31 @@ const ENDO := {
 	"finish_event": "record_endo_mock_canal_map_review",
 	"outcome": "Root canal diagram review complete · The two assigned schematic markers were recorded in the original chair exercise. No real root anatomy, treatment, canal preparation, working length, diagnosis or patient outcome was assessed.",
 	"reference": AAE_ROOT_CANAL,
+}
+
+const RETREAT := {
+	"id": "retreat_mock_prior_current_record_review_intro",
+	"scenario": "retreat",
+	"title": "Endodontic retreatment record review bench",
+	"case": "Fictional instructor-supplied PRIOR/CURRENT RECORD COMPARISON · One prior-model landmark and one current-panel discrepancy are PREMARKED on a synthetic worksheet. Select the two-panel annotation pointer and the paired reference card, then mark the prior landmark and flag the assigned discrepancy in the unchanged chair. The exercise does not determine treatment failure, pathology, healing, retreatment indications, clinical radiographic findings, or patient care.",
+	"tool": {
+		"label": "study pointer",
+		"choices": ["tool.record_comparison_pointer", "tool.canal_tracing_stylus"],
+		"expected": "tool.record_comparison_pointer",
+		"prompt": "Which rotating model pointer identifies both prior and current record panels rather than a single assigned canal path?",
+		"correct": "Correct. The double-marker synthetic pointer identifies the two teacher-labelled panels; it is not a diagnostic instrument.",
+		"incorrect": "The canal tracing stylus belongs to a single-diagram exercise. This case requires comparing two instructor-assigned record panels.",
+	},
+	"material": {
+		"label": "record reference",
+		"choices": ["material.assigned_prior_current_record", "material.assigned_canal_diagram"],
+		"expected": "material.assigned_prior_current_record",
+		"prompt": "Which fictional reference pairs the prior model panel with the current panel and its preflagged discrepancy?",
+		"correct": "Correct. The matched two-panel worksheet identifies the assigned reference and discrepancy. It is not a patient radiograph or diagnosis.",
+		"incorrect": "The single-canal schematic does not contain both prior and current record panels. Use the matched comparison worksheet.",
+	},
+	"finish": "Record fictional prior landmark and current discrepancy",
+	"finish_event": "record_retreat_mock_record_comparison",
+	"outcome": "Endodontic record-comparison exercise complete · The supplied prior model landmark and instructor-preflagged current discrepancy were marked in the existing chair. No radiographic diagnosis, pathology, retreatment decision, clinical result or patient outcome was assessed.",
+	"reference": AAE_RETREATMENT,
 }
