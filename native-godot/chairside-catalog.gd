@@ -19,6 +19,7 @@ const AAE_ROOT_CANAL := "https://www.aae.org/patients/root-canal-treatment/"
 const AAE_RETREATMENT := "https://www.aae.org/patients/root-canal-treatment/endodontic-treatment-options/endodontic-retreatment/"
 const AAO_ALIGNERS := "https://aaoinfo.org/treatments/aligners/"
 const ADA_MOUTHGUARDS := "https://www.mouthhealthy.org/all-topics-a-z/mouthguards"
+const ADA_EXTRACTIONS := "https://www.mouthhealthy.org/all-topics-a-z/extractions"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -288,6 +289,20 @@ const ITEMS := {
 		"cue": "Illustration · a fictional upper-arch map highlighting the teacher-assigned seating and coverage points. Not a dental scan, fitting record or protection certificate.",
 		"purpose": "Identifies the simulated arch and target coverage marker in the preassigned chair task. No clinical fit, wearing comfort or protective performance is evaluated.",
 		"swatch": Color("#ecd2b2"), "source": ADA_MOUTHGUARDS,
+	},
+
+	"tool.training_forceps_study": {
+		"name": "Model extraction forceps (synthetic 3D teaching object)", "german": "Modell-Extraktionszange (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-training-forceps.tscn",
+		"cue": "Original oversized blunt model jaws with pivot and two schematic handles. This is not a working forceps, sterile instrument, torque model or procedure demonstration.",
+		"purpose": "Identifies the instructor-assigned fictional forceps model for an abstract extraction setup; does not represent root anatomy, grip forces, leverage, tissue injury or surgical technique.",
+		"source": ADA_EXTRACTIONS,
+	},
+	"material.assigned_extraction_tooth_and_adjacent_record": {
+		"name": "Instructor-assigned model tooth and two-adjacent-tooth checklist", "german": "Zugeordneter Modellzahn und Nachbarzahn-Checkliste (Lehrvorlage)",
+		"cue": "Illustration · a fictional ID for one assigned model tooth and separate labels for its two neighbours. Not a patient chart, consent, radiograph or clinical tooth verification.",
+		"purpose": "Links the existing chair's target tooth and two adjacent-check landmarks to a teacher-specified exercise sheet. Does not verify a real surgical site or predict outcome.",
+		"swatch": Color("#e3c4b7"), "source": ADA_EXTRACTIONS,
 	},
 }
 
@@ -790,4 +805,31 @@ const MOUTHGUARD := {
 	"finish_event": "record_mouthguard_mock_coverage_review",
 	"outcome": "Mouthguard model fitting complete · The assigned guard seating and arch-coverage teaching landmark were verified in the existing chair simulation. No protection, impact performance, retention, clinical fit, occlusal adjustment or patient outcome was assessed.",
 	"reference": ADA_MOUTHGUARDS,
+}
+
+const EXTRACTION := {
+	"id": "extraction_mock_tool_site_check_intro",
+	"scenario": "extraction",
+	"title": "Extraction simulation setup bench",
+	"case": "Fictional supervised MODEL EXTRACTION SETUP · The instructor assigns ONE PREIDENTIFIED MODEL TOOTH and TWO ADJACENT MODEL CHECKS. Select the BLUNT SYNTHETIC TRAINING FORCEPS and a matching tooth-plus-neighbours checklist, then enter the UNCHANGED existing chair simulation to perform its two labelled model actions. This does not establish a real tooth identity, clinical consent, local anaesthesia, extraction technique, tooth/periodontal anatomy, required force, surgical safety or patient outcome.",
+	"tool": {
+		"label": "study instrument",
+		"choices": ["tool.training_forceps_study", "tool.periodontal_probe"],
+		"expected": "tool.training_forceps_study",
+		"prompt": "Which rotating 3D model is the assigned blunt training forceps for this fictional extraction setup, rather than the probe?",
+		"correct": "Correct. The model forceps represents the instructor's assigned simulation object; its geometry does not demonstrate a safe technique.",
+		"incorrect": "The periodontal probe is for a separate fictional site-assessment bench; it is not the assigned model forceps here.",
+	},
+	"material": {
+		"label": "site checklist",
+		"choices": ["material.assigned_extraction_tooth_and_adjacent_record", "material.site_chart"],
+		"expected": "material.assigned_extraction_tooth_and_adjacent_record",
+		"prompt": "Which instructor-made fictional checklist identifies the target model tooth and BOTH adjacent-tooth check landmarks?",
+		"correct": "Correct. The assigned exercise sheet identifies one model tooth and both neighbour checks without verifying any real clinical site.",
+		"incorrect": "The periodontal site chart does not identify this model extraction tooth and its two adjacent-check landmarks.",
+	},
+	"finish": "Record fictional assigned-tooth and adjacent-model checks",
+	"finish_event": "record_extraction_mock_setup_review",
+	"outcome": "Extraction setup model exercise complete · The existing chair recorded the assigned model-tooth action and the adjacent-teeth check. No real extraction, tooth identity verification, clinical safety, anatomical measurement, patient treatment or outcome was assessed.",
+	"reference": ADA_EXTRACTIONS,
 }

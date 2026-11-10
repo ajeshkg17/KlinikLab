@@ -52,7 +52,7 @@ test('opaque raised-bumper sports guard differs from translucent clear aligner',
   assert.match(scene, /NotImpactCalibrated/);
   assert.match(scene, /NotRetentionMeasured/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-sports-mouthguard\.tscn','assets\/bench\/synthetic-sports-mouthguard\.tscn'\)/);
-  assert.match(bench, /sports mouthguard are synthetic 3D geometry/);
+  assert.match(bench, /sports mouthguard.*synthetic 3D geometry/);
 });
 
 test('assigned arch coverage reference is not confused with orthodontic stage plan', () => {
@@ -81,15 +81,15 @@ test('Journey and packed runner add only mouthguard after eighteen earlier bench
   ]) assert.ok(app.includes('"'+label+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run custom mouthguard fitting bench replay", "mouthguard_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/mouthguard-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat','aligner','mouthguard'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat','aligner','mouthguard'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'mouthguard-inspection-trial\.gd'/);
   assert.match(mouthguardTrial, /await _run_lesson\("mouthguard"\)/);
 });
 
 test('shared guarded replay verifies wrong/correct IDs, chair rejection, 20/20, finish, reset and journal bytes', () => {
   assert.match(mouthguardTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_sports_mouthguard_study/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_aligner_stage04_tray/);
   assert.match(replay, /"tool\.aligner_stage04_tray" if lesson_id == "mouthguard"/);
