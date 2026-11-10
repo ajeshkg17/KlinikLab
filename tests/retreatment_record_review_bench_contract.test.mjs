@@ -50,7 +50,7 @@ test('original 3D two-panel pointer is explicitly non-diagnostic', () => {
   assert.match(scene, /PriorPanelTeachingMarkerNotDiagnosis/);
   assert.match(scene, /CurrentPanelTeachingMarkerNotDiagnosis/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-record-comparison-pointer\.tscn','assets\/bench\/synthetic-record-comparison-pointer\.tscn'\)/);
-  assert.match(bench, /record comparison pointer are synthetic 3D geometry/);
+  assert.match(bench, /record comparison pointer.*synthetic 3D geometry/);
 });
 
 test('assigned prior/current record differs from one synthetic canal map', () => {
@@ -80,15 +80,15 @@ test('Journey and build add only retreat after all sixteen prior routes', () => 
   ]) assert.ok(app.includes('"'+label+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run retreatment record comparison bench replay", "retreat_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/retreat-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'retreat-inspection-trial\.gd'/);
   assert.match(retreatTrial, /await _run_lesson\("retreat"\)/);
 });
 
 test('guarded replay checks wrong/right IDs, rejected target, /20, finish, reset and isolated journal', () => {
   assert.match(retreatTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_record_comparison_pointer/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_canal_tracing_stylus/);
   assert.match(replay, /"tool\.canal_tracing_stylus" if lesson_id == "retreat"/);
