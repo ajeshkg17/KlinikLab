@@ -26,7 +26,7 @@ fs.mkdirSync(dest,{recursive:true});
 const copy=(from,to)=>fs.copyFileSync(path.join(root,from),path.join(dest,to));
 try{
  for(const name of ['app.gd','app.tscn','project.godot','smoke.gd','volume-cut.gd','volume-cut-smoke.gd','multi-case-volume-smoke.gd','pulp-sample-smoke.gd','radiography-panel.gd','radiography-smoke.gd','fsp-kp-rubric.gd','fsp-kp-smoke.gd','direct-bur-smoke.gd','cc0-clinic.gd','cc0-clinic-smoke.gd','tooth36-reference.gd','tooth26-reference.gd','tooth16-mirror-reference.gd','fdi-reference-clearance.gd','anatomy-reference-panel.gd','visual-layout-smoke.gd','clinic-walk-intent.gd','clinic-walk-smoke.gd','guided-practical-smoke.gd','practical-choice-smoke.gd','practical-fdi-recall-smoke.gd','practical-strict-compat-smoke.gd','practical-run-score.gd','practical-replay-smoke.gd','practical-case-sequence.gd','practical-case-sequence-smoke.gd','practice-sequence-live-smoke.gd','practice-sequence-scene-identity-smoke.gd','practice-room-game.gd','practice-tool-handling.gd','procedure-drills.gd','procedure-scenarios.gd','procedure-lab.gd','procedure-lab-trial.gd','practice-expansion-smoke.gd','practice-room-game-smoke.gd','practice-room-game-app-smoke.gd','practical-tool-completion-smoke.gd','owner-pc-capture.gd','actual-app-smoke.gd','exported-app-capture.gd','exported-app-capture-node.gd','raw-source-smoke.gd','atlas-viewer.gd','atlas-smoke.gd','scan-viewer.gd','scan-smoke.gd'])copy('native-godot/'+name,name);
- for(const name of ['chairside-bench.gd','chairside-catalog.gd','chairside-model-preview.gd','composite-inspection-trial.gd','sealant-inspection-trial.gd','fluoride-inspection-trial.gd','cleaning-inspection-trial.gd','root-planing-inspection-trial.gd','chart-inspection-trial.gd','bitewing-inspection-trial.gd','oral-exam-inspection-trial.gd','veneer-inspection-trial.gd','inlay-inspection-trial.gd'])
+ for(const name of ['chairside-bench.gd','chairside-catalog.gd','chairside-model-preview.gd','composite-inspection-trial.gd','sealant-inspection-trial.gd','fluoride-inspection-trial.gd','cleaning-inspection-trial.gd','root-planing-inspection-trial.gd','chart-inspection-trial.gd','bitewing-inspection-trial.gd','oral-exam-inspection-trial.gd','veneer-inspection-trial.gd','inlay-inspection-trial.gd','crown-inspection-trial.gd'])
   copy('native-godot/'+name,name);
  const gloveDir = 'assets/xr-gloves';
  fs.mkdirSync(path.join(dest,gloveDir),{recursive:true});
@@ -86,6 +86,7 @@ try{
  copy('native-godot/assets/bench/synthetic-examination-mirror.tscn','assets/bench/synthetic-examination-mirror.tscn');
  copy('native-godot/assets/bench/synthetic-veneer-shell.tscn','assets/bench/synthetic-veneer-shell.tscn');
  copy('native-godot/assets/bench/synthetic-inlay-insert.tscn','assets/bench/synthetic-inlay-insert.tscn');
+ copy('native-godot/assets/bench/synthetic-crown-shell.tscn','assets/bench/synthetic-crown-shell.tscn');
  const packIndex=JSON.parse(fs.readFileSync(path.join(fullPack,'download-index.json'),'utf8'));
  const benchModels=[
   ['curing-light.glb','34385','Curing Light (Dental Practice and Surgery).glb',
@@ -348,7 +349,7 @@ try{
   nativeDundeeFDI26License:'CC-BY-4.0',nativeDundeeFDI26SurfaceOnly:true,
   cataloguedSourceGLBs:54,requiredCC0GLBs:2,optionalRealChairGLBs:optionalChair.available?1:0,
   nativeCc0Hashes:caseAssets.map(x=>({name:x.name,sha256:x.sha256})),
-  nativeChairsideBenchShared:true,chairsideLessons:['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay'],
+  nativeChairsideBenchShared:true,chairsideLessons:['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown'],
   nativeChairsideCc0Models:benchSources.map(x=>({filename:x.filename,sourceSha256:x.sourceSha256,godotSha256:x.godotSha256,licenseSPDX:x.licenseSPDX})),
   nativeFdi16EditableSampledVolume:true,otherCasesEditableVolume:true,
   sourceVerifiedEditableCases:expectedVolumes.map(([id,fdi])=>({id,fdi})),

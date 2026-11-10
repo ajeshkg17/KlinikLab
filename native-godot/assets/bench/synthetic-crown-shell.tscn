@@ -1,0 +1,53 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_crown_band"]
+top_radius = 0.45
+bottom_radius = 0.42
+height = 0.55
+radial_segments = 32
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crown"]
+albedo_color = Color(0.92, 0.87, 0.75, 1)
+roughness = 0.32
+
+[sub_resource type="SphereMesh" id="SphereMesh_occlusal"]
+radius = 0.52
+height = 1.04
+radial_segments = 32
+rings = 16
+
+[sub_resource type="TorusMesh" id="TorusMesh_margin"]
+inner_radius = 0.395
+outer_radius = 0.458
+rings = 12
+ring_segments = 32
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_margin"]
+albedo_color = Color(0.38, 0.59, 0.73, 1)
+roughness = 0.62
+
+[sub_resource type="BoxMesh" id="BoxMesh_cusp_marker"]
+size = Vector3(0.11, 0.035, 0.33)
+
+[node name="SyntheticFullCoverageCrown" type="Node3D"]
+
+[node name="IllustrativeCervicalCoverageNotHollowClinicalFit" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 0)
+mesh = SubResource("CylinderMesh_crown_band")
+material_override = SubResource("StandardMaterial3D_crown")
+
+[node name="OcclusalDome" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, 0)
+scale = Vector3(0.94, 0.54, 0.94)
+mesh = SubResource("SphereMesh_occlusal")
+material_override = SubResource("StandardMaterial3D_crown")
+
+[node name="CervicalMarginTeachingMarkerNotGapMeasurement" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.40, 0)
+mesh = SubResource("TorusMesh_margin")
+material_override = SubResource("StandardMaterial3D_margin")
+
+[node name="OcclusalTeachingMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, 0.505, 0.02)
+mesh = SubResource("BoxMesh_cusp_marker")
+material_override = SubResource("StandardMaterial3D_margin")
