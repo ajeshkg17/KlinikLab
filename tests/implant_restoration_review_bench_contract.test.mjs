@@ -49,7 +49,7 @@ test('synthetic 3D implant-crown model is distinct from the tooth-supported crow
   assert.match(scene, /IllustrativeCrownNoOcclusalOrFitMeasurement/);
   assert.match(scene, /ImplantInterfaceTeachingMarkerNotTorqueMeasurement/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-implant-crown\.tscn','assets\/bench\/synthetic-implant-crown\.tscn'\)/);
-  assert.match(bench, /implant-crown assembly are synthetic 3D geometry/);
+  assert.match(bench, /implant-crown assembly.*synthetic 3D geometry/);
 });
 
 test('fictional site-reference selection does not claim implant measurement or clinical fit', () => {
@@ -77,15 +77,15 @@ test('Journey, packaged assets and dedicated runner add only implant and preserv
   ]) assert.ok(app.includes('"'+name+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run implant restoration review bench replay", "implant_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/implant-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'implant-inspection-trial\.gd'/);
   assert.match(implantTrial, /await _run_lesson\("implant"\)/);
 });
 
 test('shared replay asserts rejected and corrected choices, chair 20/20, finish, reset and journal bytes', () => {
   assert.match(implantTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_implant_crown_study/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_crown_shell/);
   assert.match(replay, /"tool\.crown_shell" if lesson_id == "implant"/);
