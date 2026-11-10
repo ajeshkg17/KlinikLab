@@ -1741,6 +1741,8 @@ func _start_automated_trial(mode := "room") -> void:
 		trial_script = "res://root-planing-inspection-trial.gd"
 	elif mode == "chart_bench":
 		trial_script = "res://chart-inspection-trial.gd"
+	elif mode == "bitewing_bench":
+		trial_script = "res://bitewing-inspection-trial.gd"
 	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
 		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
 		return
@@ -3554,7 +3556,8 @@ func _show_journey() -> void:
 		["fluoride", "Open fluoride varnish bench", "KL_OPEN_FLUORIDE_BENCH"],
 		["cleaning", "Open professional cleaning bench", "KL_OPEN_CLEANING_BENCH"],
 		["root_planing", "Open scaling and root planing bench", "KL_OPEN_ROOT_PLANING_BENCH"],
-		["chart", "Open periodontal charting bench", "KL_OPEN_CHART_BENCH"]
+		["chart", "Open periodontal charting bench", "KL_OPEN_CHART_BENCH"],
+		["bitewing", "Open bitewing image review bench", "KL_OPEN_BITEWING_BENCH"]
 	]:
 		var entry := _button(str(lesson[1]))
 		entry.name = str(lesson[2])
@@ -3566,7 +3569,8 @@ func _show_journey() -> void:
 		["Run fluoride varnish bench replay", "fluoride_bench"],
 		["Run professional cleaning bench replay", "cleaning_bench"],
 		["Run scaling and root planing bench replay", "root_planing_bench"],
-		["Run periodontal charting bench replay", "chart_bench"]
+		["Run periodontal charting bench replay", "chart_bench"],
+		["Run bitewing image review bench replay", "bitewing_bench"]
 	]:
 		var replay := _button(str(trial[0]))
 		replay.disabled = _trial_pid > 0
@@ -3665,18 +3669,18 @@ func _show_journey() -> void:
 func _open_chairside_bench(lesson_id: String) -> void:
 	if is_instance_valid(_chairside_bench):
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"]:
 		return
 	_chairside_bench = CHAIRSIDE_BENCH.new()
 	_shell.add_child(_chairside_bench)
-	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART
+	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING
 	_chairside_bench.start(lesson)
 	_chairside_bench.practice_requested.connect(_enter_bench_practice)
 
 func _enter_bench_practice(scenario: String) -> void:
 	if is_instance_valid(_procedure_lab) or not is_instance_valid(_chairside_bench):
 		return
-	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
+	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
 		return
 	for index in range(PROCEDURE_DRILLS.DRILLS.size()):
 		if str(PROCEDURE_DRILLS.DRILLS[index][0]) != scenario:
