@@ -177,8 +177,11 @@ var _first_person_full_view := false
 const PROCEDURE_DRILLS := preload("res://procedure-drills.gd")
 var _procedure_drills := PROCEDURE_DRILLS.new()
 const PROCEDURE_LAB := preload("res://procedure-lab.gd")
+const CHAIRSIDE_BENCH := preload("res://chairside-bench.gd")
+const CHAIRSIDE_CATALOG := preload("res://chairside-catalog.gd")
 const PRACTICE_HANDS := preload("res://practice-tool-handling.gd")
 var _procedure_lab: PROCEDURE_LAB
+var _chairside_bench: CHAIRSIDE_BENCH
 var _chair_lab_walk_selected := false
 
 
@@ -1726,6 +1729,10 @@ func _start_automated_trial(mode := "room") -> void:
 		return
 	var project := ProjectSettings.globalize_path("res://")
 	var trial_script := "res://practice-room-game-app-smoke.gd" if mode == "room" else "res://procedure-lab-trial.gd"
+	if mode == "composite_bench":
+		trial_script = "res://composite-inspection-trial.gd"
+	elif mode == "sealant_bench":
+		trial_script = "res://sealant-inspection-trial.gd"
 	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
 		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
 		return
@@ -3140,6 +3147,8 @@ func _input(event: InputEvent) -> void:
 	if is_instance_valid(_procedure_lab):
 		_procedure_lab.handle_input(event)
 		return
+	if is_instance_valid(_chairside_bench) and _chairside_bench.visible:
+		return
 	# Single entry point: walk routes right-drag/E/Esc ONLY in environment;
 	# native direct bur still requires separate explicit practical opt-in.
 	if _practice_sequence != null:
@@ -3531,6 +3540,28 @@ func _journey_procedure(index: int) -> void:
 	_refresh()
 
 func _show_journey() -> void:
+	for lesson in [
+		["composite", "Open composite restoration bench", "KL_OPEN_COMPOSITE_BENCH"],
+		["sealant", "Open fissure sealant bench", "KL_OPEN_SEALANT_BENCH"]
+	]:
+		var entry := _button(str(lesson[1]))
+		entry.name = str(lesson[2])
+		entry.pressed.connect(_open_chairside_bench.bind(str(lesson[0])))
+		_page.add_child(entry)
+	for trial in [
+		["Run composite bench replay", "composite_bench"],
+		["Run fissure sealant bench replay", "sealant_bench"]
+	]:
+		var replay := _button(str(trial[0]))
+		replay.disabled = _trial_pid > 0
+		replay.pressed.connect(_start_automated_trial.bind(str(trial[1])))
+		_page.add_child(replay)
+	_trial_status = _heading(_trial_message, 13)
+	_page.add_child(_trial_status)
+	_trial_folder_button = _button("Open latest trial results")
+	_trial_folder_button.disabled = _trial_folder.is_empty() or _trial_pid > 0
+	_trial_folder_button.pressed.connect(func() -> void: OS.shell_open(_trial_folder))
+	_page.add_child(_trial_folder_button)
 	var drills := _button("Open dental procedure drills · 20 exercises")
 	drills.name = "KL_OPEN_PROCEDURE_DRILLS"
 	drills.pressed.connect(_switch_view.bind("drills"))
@@ -3614,6 +3645,37 @@ func _show_journey() -> void:
 	nav.add_child(forward)
 	_page.add_child(nav)
 
+
+func _open_chairside_bench(lesson_id: String) -> void:
+	if is_instance_valid(_chairside_bench):
+		return
+	if lesson_id not in ["composite", "sealant"]:
+		return
+	_chairside_bench = CHAIRSIDE_BENCH.new()
+	_shell.add_child(_chairside_bench)
+	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT
+	_chairside_bench.start(lesson)
+	_chairside_bench.practice_requested.connect(_enter_bench_practice)
+
+func _enter_bench_practice(scenario: String) -> void:
+	if is_instance_valid(_procedure_lab) or not is_instance_valid(_chairside_bench):
+		return
+	if scenario not in ["composite", "sealant"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
+		return
+	for index in range(PROCEDURE_DRILLS.DRILLS.size()):
+		if str(PROCEDURE_DRILLS.DRILLS[index][0]) != scenario:
+			continue
+		_procedure_drills.start(index)
+		_start_procedure_lab()
+		if is_instance_valid(_procedure_lab):
+			var bench := _chairside_bench
+			var lab := _procedure_lab
+			bench.hide()
+			lab.closed.connect(func() -> void:
+				if is_instance_valid(bench):
+					bench.record_practice(lab.score, lab.stage == 3, lab.events)
+			)
+		return
 
 func _show_procedure_drills() -> void:
 	_page.add_child(_heading("Choose a preassigned simulation. Check the setup, then review the model outcome.", 14))
