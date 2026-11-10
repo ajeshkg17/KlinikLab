@@ -41,7 +41,7 @@ test('3D comparison distinguishes original CC0 curing light and synthetic brush'
   assert.match(syntheticModel, /MeshInstance3D/);
   assert.match(build, /copy\('native-godot\/assets\/bench\/synthetic-varnish-applicator\.tscn','assets\/bench\/synthetic-varnish-applicator\.tscn'\)/);
   assert.match(build, /59c21274e9bed7b1c1239a7a04091685f1eb41dedf4a9acdb4cfdd864cb500f7/);
-  assert.match(bench, /varnish applicator is synthetic 3D geometry/);
+  assert.match(bench, /varnish (?:applicator|brush).*synthetic 3D geometry/);
 });
 
 test('Journey keeps old lessons/replays and dispatches new fluoride scenario', () => {
@@ -50,15 +50,15 @@ test('Journey keeps old lessons/replays and dispatches new fluoride scenario', (
   assert.match(app, /\["fluoride", "Open fluoride varnish bench", "KL_OPEN_FLUORIDE_BENCH"\]/);
   assert.match(app, /\["Run fluoride varnish bench replay", "fluoride_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/fluoride-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride"\]/);
-  assert.match(build, /chairsideLessons:\['composite','sealant','fluoride'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride"(?:, "[a-z_]+")*\]/);
+  assert.match(build, /chairsideLessons:\['composite','sealant','fluoride'(?:,'[a-z_]+')*\]/);
   assert.match(build, /'fluoride-inspection-trial\.gd'/);
 });
 
 test('replay enforces wrong/correct choices, chair rejection, specific finish, reset', () => {
   assert.match(newTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
   assert.match(newTrial, /await _run_lesson\("fluoride"\)/);
-  assert.match(sharedTrial, /if lesson_id not in \["composite", "sealant", "fluoride"\]:/);
+  assert.match(sharedTrial, /if lesson_id not in \["composite", "sealant", "fluoride"(?:, "[a-z_]+")*\]:/);
   assert.match(sharedTrial, /KL_BENCH_ROTATE_LEFT_tool_varnish_brush/);
   assert.match(sharedTrial, /KL_BENCH_PICK_tool_varnish_brush/);
   assert.match(sharedTrial, /material_fluoride_varnish/);

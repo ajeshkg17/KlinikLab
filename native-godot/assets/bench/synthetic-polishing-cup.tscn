@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shaft"]
+top_radius = 0.05
+bottom_radius = 0.062
+height = 1.25
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shaft"]
+albedo_color = Color(0.25, 0.57, 0.8, 1)
+metallic = 0.15
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_neck"]
+top_radius = 0.04
+bottom_radius = 0.058
+height = 0.29
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_neck"]
+albedo_color = Color(0.73, 0.79, 0.85, 1)
+metallic = 0.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cup"]
+top_radius = 0.075
+bottom_radius = 0.153
+height = 0.25
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rubber"]
+albedo_color = Color(0.15, 0.67, 0.55, 1)
+roughness = 0.9
+
+[sub_resource type="TorusMesh" id="TorusMesh_rim"]
+inner_radius = 0.09
+outer_radius = 0.16
+rings = 16
+ring_segments = 24
+
+[node name="SyntheticPolishingCup" type="Node3D"]
+
+[node name="ColourCodedShaft" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.35, 0)
+mesh = SubResource("CylinderMesh_shaft")
+material_override = SubResource("StandardMaterial3D_shaft")
+
+[node name="Coupler" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.385, 0)
+mesh = SubResource("CylinderMesh_neck")
+material_override = SubResource("StandardMaterial3D_neck")
+
+[node name="RubberCup" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.65, 0)
+mesh = SubResource("CylinderMesh_cup")
+material_override = SubResource("StandardMaterial3D_rubber")
+
+[node name="SoftRim" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.778, 0)
+mesh = SubResource("TorusMesh_rim")
+material_override = SubResource("StandardMaterial3D_rubber")
