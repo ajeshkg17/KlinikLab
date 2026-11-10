@@ -43,7 +43,7 @@ test('synthetic pointer is NOT an imaging device and is compared against prior 3
   assert.match(pointer, /RoundedAnnotationTipNotImagingDevice/);
   assert.match(pointer, /MeshInstance3D/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-image-pointer\.tscn','assets\/bench\/synthetic-image-pointer\.tscn'\)/);
-  assert.match(bench, /image pointer are synthetic 3D geometry/);
+  assert.match(bench, /image pointer.*synthetic 3D geometry/);
 });
 
 test('assigned image reference versus periodontal site chart is labeled as an image reference', () => {
@@ -64,20 +64,20 @@ test('Journey/build/routing retains six earlier benches and adds just bitewing',
   ]) assert.ok(app.includes('"' + name + '", "KL_OPEN_' + id + '_BENCH"'), 'missing ' + id);
   assert.match(app, /\["Run bitewing image review bench replay", "bitewing_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/bitewing-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'bitewing-inspection-trial\.gd'/);
 });
 
 test('shared replay checks wrong/correct IDs, chair rejection, 20/20, reset and byte-identical journal', () => {
   assert.match(bitewingTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
   assert.match(bitewingTrial, /await _run_lesson\("bitewing"\)/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_image_pointer/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_periodontal_probe/);
-  assert.match(replay, /"tool\.periodontal_probe" if lesson_id == "bitewing"/);
-  assert.match(replay, /"material\.site_chart" if lesson_id == "bitewing"/);
-  assert.match(replay, /KL_BENCH_PICK_tool_periodontal_probe" if lesson_id == "bitewing"/);
+  assert.match(replay, /"tool\.periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
+  assert.match(replay, /"material\.site_chart" if lesson_id in \["bitewing", "oral_exam"\]/);
+  assert.match(replay, /KL_BENCH_PICK_tool_periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
   assert.match(replay, /KL_BENCH_PICK_tool_image_pointer/);
   assert.match(replay, /KL_BENCH_PICK_material_site_chart/);
   assert.match(replay, /material_assigned_bitewing_image/);

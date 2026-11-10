@@ -7,6 +7,7 @@ const ADA_PLAQUE := "https://www.mouthhealthy.org/all-topics-a-z/plaque"
 const ADA_ROOT_PLANING := "https://www.mouthhealthy.org/all-topics-a-z/scaling-and-root-planing"
 const ADA_CHART := "https://www.mouthhealthy.org/all-topics-a-z/periodontics"
 const ADA_XRAYS := "https://www.mouthhealthy.org/all-topics-a-z/x-rays"
+const ADA_ORAL_CANCER := "https://www.mouthhealthy.org/all-topics-a-z/oral-cancer"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -108,6 +109,20 @@ const ITEMS := {
 		"cue": "Illustration · blue-grey image-reference card; not an actual bitewing exposure or patient radiograph.",
 		"purpose": "The fictional image-reference sheet names the preassigned proximal landmarks and an intentionally overlapping zone. No clinical findings are inferred.",
 		"swatch": Color("#a9c8d7"), "source": ADA_XRAYS,
+	},
+
+	"tool.examination_mirror": {
+		"name": "Intraoral examination mirror (synthetic 3D model)", "german": "Mundspiegel (schematisch)",
+		"scene": "res://assets/bench/synthetic-examination-mirror.tscn",
+		"cue": "Synthetic educational geometry · long shaft and a rounded reflective disc. Not dimensionally calibrated or suitable for real use.",
+		"purpose": "Represents the mirror assigned for visual inspection of an oral soft-tissue teaching fixture; not a diagnostic sensor.",
+		"source": ADA_ORAL_CANCER,
+	},
+	"material.soft_tissue_location_record": {
+		"name": "Soft-tissue location and appearance record (fictional)", "german": "Schleimhautbefund-Lokalisationsbogen (schematisch)",
+		"cue": "Illustration · teal location card; not a photograph, clinical finding or a patient chart.",
+		"purpose": "Assigned record template for two labelled model landmarks and a note that the observation requires supervised clinical review. No diagnosis is generated.",
+		"swatch": Color("#a9d8cb"), "source": ADA_ORAL_CANCER,
 	},
 }
 
@@ -287,4 +302,30 @@ const BITEWING := {
 	"finish_event": "record_bitewing_image_annotations",
 	"outcome": "Bitewing image-review simulation complete · The assigned proximal landmark and overlapping, unreadable region were recorded in the existing chair exercise. No radiograph was taken or interpreted for clinical diagnosis.",
 	"reference": ADA_XRAYS,
+}
+
+const ORAL_EXAM := {
+	"id": "oral_soft_tissue_observation_intro",
+	"scenario": "oral_exam",
+	"title": "Oral soft-tissue screening bench",
+	"case": "Fictional preassigned oral mucosa teaching fixture · The instructor highlights two locations for a superficial VISUAL OBSERVATION and LOCATION RECORD using a MOUTH MIRROR. The simulated mark is not an oral cancer diagnosis. Identify the assigned model finding and record its location for supervisor review; no lesion classification, risk assessment, palpation, biopsy or patient screening is performed.",
+	"tool": {
+		"choices": ["tool.examination_mirror", "tool.periodontal_probe"],
+		"expected": "tool.examination_mirror",
+		"prompt": "Which 3D study instrument is assigned for viewing the model soft-tissue region?",
+		"correct": "Correct. This fictional visual-inspection task specifies an intraoral mirror rather than periodontal probing.",
+		"incorrect": "The periodontal probe is for a different examination task; do not substitute it for the assigned mirror in this model-only visual observation.",
+	},
+	"material": {
+		"label": "observation record",
+		"choices": ["material.soft_tissue_location_record", "material.site_chart"],
+		"expected": "material.soft_tissue_location_record",
+		"prompt": "Which fictional record matches the assigned soft-tissue finding location and appearance?",
+		"correct": "Correct. The soft-tissue location record is for communicating an observation for supervised review; it does not establish a diagnosis.",
+		"incorrect": "A tooth-and-site periodontal chart does not replace a soft-tissue observation record in this fictional case.",
+	},
+	"finish": "Record model finding and location for review",
+	"finish_event": "record_soft_tissue_observation",
+	"outcome": "Oral soft-tissue screening exercise complete · Both assigned model annotations were verified in the existing chair. These are training markers, not oral-cancer findings, clinical screening results or patient data.",
+	"reference": ADA_ORAL_CANCER,
 }
