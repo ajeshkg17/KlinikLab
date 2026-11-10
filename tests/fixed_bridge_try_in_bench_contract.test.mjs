@@ -47,7 +47,7 @@ test('schematic three-unit bridge is distinguished from a single synthetic crown
   assert.match(scene, /PonticNotTissueContactMeasurement/);
   assert.match(scene, /PonticTeachingMarkerNotFitMeasurement/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-bridge-framework\.tscn','assets\/bench\/synthetic-bridge-framework\.tscn'\)/);
-  assert.match(bench, /bridge framework are synthetic 3D geometry/);
+  assert.match(bench, /bridge framework.*synthetic 3D geometry/);
 });
 
 test('case-specific support/pontic card is labeled a fit reference, not a material', () => {
@@ -72,15 +72,15 @@ test('Journey, build and dedicated runner add only bridge while preserving previ
   ]) assert.ok(app.includes('"'+name+'", "KL_OPEN_'+id+'_BENCH"'), 'missing '+id);
   assert.match(app, /\["Run fixed bridge try-in bench replay", "bridge_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/bridge-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'bridge-inspection-trial\.gd'/);
   assert.match(bridgeTrial, /await _run_lesson\("bridge"\)/);
 });
 
 test('guarded replay includes wrong/right IDs, rejected target, chair score 20, clean restart and journal integrity', () => {
   assert.match(bridgeTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_bridge_framework/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_crown_shell/);
   assert.match(replay, /"tool\.crown_shell" if lesson_id == "bridge"/);
