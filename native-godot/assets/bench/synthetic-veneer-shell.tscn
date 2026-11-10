@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="SphereMesh" id="SphereMesh_facial"]
+radius = 0.52
+height = 1.50
+radial_segments = 32
+rings = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shell"]
+albedo_color = Color(0.94, 0.87, 0.76, 1)
+roughness = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_incise"]
+size = Vector3(0.72, 0.065, 0.14)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_incise"]
+albedo_color = Color(0.75, 0.62, 0.48, 1)
+roughness = 0.58
+
+[sub_resource type="BoxMesh" id="BoxMesh_back"]
+size = Vector3(0.74, 0.93, 0.02)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_back"]
+albedo_color = Color(0.72, 0.67, 0.58, 1)
+roughness = 0.7
+
+[node name="SyntheticFacialVeneerShell" type="Node3D"]
+
+[node name="IllustrativeFacialSilhouette" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.09)
+scale = Vector3(0.93, 1.0, 0.17)
+mesh = SubResource("SphereMesh_facial")
+material_override = SubResource("StandardMaterial3D_shell")
+
+[node name="UncalibratedBacking" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -0.03)
+mesh = SubResource("BoxMesh_back")
+material_override = SubResource("StandardMaterial3D_back")
+
+[node name="IncisalTeachingMarkerNotAMarginMeasurement" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.70, 0.095)
+mesh = SubResource("BoxMesh_incise")
+material_override = SubResource("StandardMaterial3D_incise")
