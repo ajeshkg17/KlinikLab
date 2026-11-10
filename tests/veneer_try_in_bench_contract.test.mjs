@@ -47,7 +47,7 @@ test('clearly synthetic 3D veneer object is compared with the original study mir
   assert.match(shell, /UncalibratedBacking/);
   assert.match(shell, /IncisalTeachingMarkerNotAMarginMeasurement/);
   assert.match(builder, /copy\('native-godot\/assets\/bench\/synthetic-veneer-shell\.tscn','assets\/bench\/synthetic-veneer-shell\.tscn'\)/);
-  assert.match(bench, /veneer shell are synthetic 3D geometry/);
+  assert.match(bench, /veneer shell.*synthetic 3D geometry/);
 });
 
 test('case-specific matched veneer fit card is correctly labeled a reference, not material', () => {
@@ -69,15 +69,15 @@ test('Journey and build register one veneer bench while preserving all eight ear
   ]) assert.ok(app.includes('"' + name + '", "KL_OPEN_' + id + '_BENCH"'), 'missing ' + id);
   assert.match(app, /\["Run veneer try-in bench replay", "veneer_bench"\]/);
   assert.match(app, /trial_script = "res:\/\/veneer-inspection-trial\.gd"/);
-  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer"\]/);
-  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer'\]/);
+  assert.match(app, /scenario not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer"(?:, "[a-z_]+")*\]/);
+  assert.match(builder, /chairsideLessons:\['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer'(?:,'[a-z_]+')*\]/);
   assert.match(builder, /'veneer-inspection-trial\.gd'/);
   assert.match(veneerTrial, /await _run_lesson\("veneer"\)/);
 });
 
 test('shared replay enforces wrong/right IDs, chair rejection, 20/20 verification, finish, reset and private journal', () => {
   assert.match(veneerTrial, /extends "res:\/\/composite-inspection-trial\.gd"/);
-  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer"\]:/);
+  assert.match(replay, /if lesson_id not in \["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer"(?:, "[a-z_]+")*\]:/);
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_veneer_shell/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_examination_mirror/);
   assert.match(replay, /"tool\.examination_mirror" if lesson_id == "veneer"/);

@@ -9,6 +9,7 @@ const ADA_CHART := "https://www.mouthhealthy.org/all-topics-a-z/periodontics"
 const ADA_XRAYS := "https://www.mouthhealthy.org/all-topics-a-z/x-rays"
 const ADA_ORAL_CANCER := "https://www.mouthhealthy.org/all-topics-a-z/oral-cancer"
 const ADA_VENEERS := "https://www.mouthhealthy.org/all-topics-a-z/veneers"
+const ADA_INLAYS := "https://www.mouthhealthy.org/all-topics-a-z/fillings-gold-inlays"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -138,6 +139,20 @@ const ITEMS := {
 		"cue": "Illustration · warm neutral reference card showing the model's assigned fitting landmarks, not a real patient impression.",
 		"purpose": "Identifies the fictional target veneer outline and incisal marker used for this two-step try-in exercise. Does not provide bonding, occlusal, margin-gap or colour calibration.",
 		"swatch": Color("#e5cdb3"), "source": ADA_VENEERS,
+	},
+
+	"tool.inlay_insert": {
+		"name": "Mock indirect inlay insert (synthetic 3D fixture)", "german": "Einlagefüllung / Inlay (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-inlay-insert.tscn",
+		"cue": "Synthetic 3D stepped insert with a visible outline marker. Shape is illustrative, not derived from a clinical tooth preparation or digital impression.",
+		"purpose": "The assigned model insert for checking the fictional prepared-outline target; not a real milled restoration or measured contact/margin surface.",
+		"source": ADA_INLAYS,
+	},
+	"material.inlay_outline_reference": {
+		"name": "Matched inlay cavity-outline and seating reference", "german": "Inlay-Präparationsumriss- und Sitzvorlage (schematisch)",
+		"cue": "Illustration · pale blue reference card with a named model cavity outline and marker; not a patient scan.",
+		"purpose": "Specifies the fictional prepared outline and landmark for model matching. No marginal-gap, internal-contact, occlusion or cementation metrics are simulated.",
+		"swatch": Color("#b8d5e7"), "source": ADA_INLAYS,
 	},
 }
 
@@ -370,4 +385,31 @@ const VENEER := {
 	"finish_event": "record_veneer_mock_try_in",
 	"outcome": "Veneer model try-in complete · The model shell and incisal teaching landmark were recorded and verified through the existing chair scenario. No adhesive bonding, measured margin, clinical fit or real patient outcome is claimed.",
 	"reference": ADA_VENEERS,
+}
+
+const INLAY := {
+	"id": "inlay_mock_indirect_try_in_intro",
+	"scenario": "inlay",
+	"title": "Indirect inlay try-in bench",
+	"case": "Fictional prepared-cavity teaching model · The instructor supplies a MOCK INDIRECT INLAY INSERT and its MATCHED CAVITY-OUTLINE REFERENCE. Seat the insert in the model's prepared outline and verify one indicated outline landmark. This is NOT a patient restoration: internal adaptation, proximal contacts, occlusion, cementation, adhesive bonding and precise marginal gaps are not measured.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.inlay_insert", "tool.veneer_shell"],
+		"expected": "tool.inlay_insert",
+		"prompt": "Which rotating study object is the inlay insert assigned to the prepared cavity of this model?",
+		"correct": "Correct. The synthetic stepped inlay represents the fictional indirect insert to be seated in the assigned model outline.",
+		"incorrect": "A facial veneer shell covers a different model surface; it does not match this case's specified indirect inlay insert.",
+	},
+	"material": {
+		"label": "fit reference",
+		"choices": ["material.inlay_outline_reference", "material.veneer_fit_reference"],
+		"expected": "material.inlay_outline_reference",
+		"prompt": "Which schematic reference specifies the matched cavity outline and the assigned seating landmark?",
+		"correct": "Correct. The inlay outline card gives the two case-specific model reference points, not measured clinical fit.",
+		"incorrect": "A veneer incisal-outline card belongs to a different mock restoration. Select the matched cavity-outline reference for this inlay.",
+	},
+	"finish": "Record mock inlay seating and outline landmark",
+	"finish_event": "record_inlay_mock_try_in",
+	"outcome": "Indirect inlay model try-in complete · The fictional insert and assigned prepared-outline landmark were marked in the existing chair simulation. No clinical marginal adaptation, adhesive cementation or patient outcome was assessed.",
+	"reference": ADA_INLAYS,
 }
