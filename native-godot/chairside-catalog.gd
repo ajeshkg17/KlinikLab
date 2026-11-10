@@ -3,6 +3,7 @@ extends RefCounted
 const ADA_MATERIALS := "https://www.ada.org/resources/ada-library/oral-health-topics/materials-for-direct-restorations"
 const ADA_SEALANTS := "https://www.ada.org/resources/ada-library/oral-health-topics/dental-sealants"
 const ADA_FLUORIDE := "https://www.mouthhealthy.org/all-topics-a-z/fluoride"
+const ADA_PLAQUE := "https://www.mouthhealthy.org/all-topics-a-z/plaque"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -49,6 +50,20 @@ const ITEMS := {
 		"cue": "Illustration · pale gold varnish swatch, not a product photograph",
 		"purpose": "The fictional case explicitly selects fluoride varnish to coat the training surfaces; it is not light-cured.",
 		"swatch": Color("#e8cf91"), "source": ADA_FLUORIDE,
+	},
+
+	"tool.polishing_cup": {
+		"name": "Rubber polishing cup (synthetic 3D model)", "german": "Polierkelch / Gummipolierer (schematisch)",
+		"scene": "res://assets/bench/synthetic-polishing-cup.tscn",
+		"cue": "Synthetic educational geometry · wide rubber cup on a short shaft; examine the flared working end.",
+		"purpose": "Represents the assigned cup for an illustrative polishing pass on soft plaque/stain markers, not calculus removal.",
+		"source": ADA_PLAQUE,
+	},
+	"material.prophylaxis_paste": {
+		"name": "Fine prophylaxis polishing paste", "german": "Feine Prophylaxepolierpaste",
+		"cue": "Illustration · mint-coloured polishing paste swatch (not product-specific)",
+		"purpose": "Fictional tray assignment for model surface polishing. Not fluoride varnish, sealant, or a measured abrasive specification.",
+		"swatch": Color("#b8d9d0"), "source": ADA_PLAQUE,
 	},
 }
 
@@ -126,4 +141,29 @@ const FLUORIDE := {
 	"finish_event": "record_fluoride_varnish_coating",
 	"outcome": "Fluoride varnish exercise complete · Both assigned training surfaces were coated and verified in the existing chair simulation. This is an illustrative record, not a measured clinical varnish dose or fluoride release.",
 	"reference": ADA_FLUORIDE,
+}
+
+const CLEANING := {
+	"id": "professional_cleaning_polishing_intro",
+	"scenario": "cleaning",
+	"title": "Professional cleaning bench",
+	"case": "Fictional demonstration · An instructor requests a final polishing pass of TWO marked soft-plaque/stain deposits on an arch teaching model using a RUBBER POLISHING CUP and FINE PROPHYLAXIS POLISHING PASTE. Earlier scaling has already been completed; these are soft training markers, not hardened calculus.",
+	"tool": {
+		"choices": ["tool.polishing_cup", "tool.ultrasonic_scaler"],
+		"expected": "tool.polishing_cup",
+		"prompt": "Which 3D study instrument matches the specified final polishing pass?",
+		"correct": "Correct. The schematic rubber cup matches the assigned polishing step on the teaching arch.",
+		"incorrect": "Ultrasonic scalers can remove calculus during other cleaning steps, but this fictional assignment specifically requests a rubber polishing cup for the finishing pass.",
+	},
+	"material": {
+		"choices": ["material.prophylaxis_paste", "material.fluoride_varnish"],
+		"expected": "material.prophylaxis_paste",
+		"prompt": "Which material is assigned for this model polishing pass?",
+		"correct": "Correct. The fictional polishing step specifies fine prophylaxis paste.",
+		"incorrect": "Fluoride varnish is a different preventive coating. Select the explicitly assigned fine polishing paste; neither swatch represents a measured clinical formulation.",
+	},
+	"finish": "Record removal of both simulated soft-deposit markers",
+	"finish_event": "record_cleaning_polish_markers",
+	"outcome": "Professional cleaning simulation complete · Both marked soft-deposit sites were cleared and verified by the existing chair exercise. This is a model-only polishing record, not a clinically validated plaque/calculus-removal outcome.",
+	"reference": ADA_PLAQUE,
 }
