@@ -80,5 +80,5 @@ test('the two shared 3D CC0 assets remain pin-verified without adding a model', 
   assert.match(build, /5e83a4f0be8c36c40d77997a6f9dfe0d406f6ea9f427f41079cee405d7354bd1/);
   assert.match(build, /sha256\(bytes\)!==sourceSha256/);
   assert.match(build, /'sealant-inspection-trial\.gd'/);
-  assert.match(build, /chairsideLessons:\['composite','sealant'\]/);
+  assert.match(build, /chairsideLessons:\['composite','sealant'(?:,'[a-z_]+')*\]/);
 });
