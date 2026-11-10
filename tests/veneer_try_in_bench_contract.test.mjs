@@ -39,6 +39,8 @@ test('mock veneer fit and incisal landmark use unchanged two-target chair and ex
 test('clearly synthetic 3D veneer object is compared with the original study mirror', () => {
   assert.match(catalog, /"choices": \["tool\.veneer_shell", "tool\.examination_mirror"\]/);
   assert.match(catalog, /"expected": "tool\.veneer_shell"/);
+  assert.match(catalog, /"label": "study object"/);
+  assert.match(bench, /step\.get\("label", "instrument"\)/);
   assert.match(catalog, /res:\/\/assets\/bench\/synthetic-veneer-shell\.tscn/);
   assert.match(shell, /\[node name="SyntheticFacialVeneerShell" type="Node3D"\]/);
   assert.match(shell, /IllustrativeFacialSilhouette/);
