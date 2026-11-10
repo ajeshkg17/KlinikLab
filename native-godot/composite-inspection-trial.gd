@@ -19,7 +19,7 @@ func _run_lesson(lesson_id: String) -> void:
 		push_error("Bench trial requires its own disposable user:// profile and no upload token.")
 		quit(1)
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing"]:
 		_finish("fail", "Unknown bench lesson.")
 		return
 	_mode = lesson_id + "_bench"
@@ -45,15 +45,18 @@ func _run_lesson(lesson_id: String) -> void:
 	_finish("pass")
 
 func _bench(lesson_id: String) -> Dictionary:
-	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT if lesson_id == "sealant" else BENCH_CATALOG.FLUORIDE if lesson_id == "fluoride" else BENCH_CATALOG.CLEANING
-	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH" if lesson_id == "sealant" else "KL_OPEN_FLUORIDE_BENCH" if lesson_id == "fluoride" else "KL_OPEN_CLEANING_BENCH"
+	var config: Dictionary = BENCH_CATALOG.COMPOSITE if lesson_id == "composite" else BENCH_CATALOG.SEALANT if lesson_id == "sealant" else BENCH_CATALOG.FLUORIDE if lesson_id == "fluoride" else BENCH_CATALOG.CLEANING if lesson_id == "cleaning" else BENCH_CATALOG.ROOT_PLANING
+	var opener := "KL_OPEN_COMPOSITE_BENCH" if lesson_id == "composite" else "KL_OPEN_SEALANT_BENCH" if lesson_id == "sealant" else "KL_OPEN_FLUORIDE_BENCH" if lesson_id == "fluoride" else "KL_OPEN_CLEANING_BENCH" if lesson_id == "cleaning" else "KL_OPEN_ROOT_PLANING_BENCH"
 	if not await _click(_app, opener):
 		return {}
 	var bench: Control = _app.get("_chairside_bench")
 	if not is_instance_valid(bench) or not bench.call("summary")["models_loaded"]:
 		push_error("Bench or both study 3D models not loaded.")
 		return {}
-	if lesson_id == "cleaning":
+	if lesson_id == "root_planing":
+		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_ultrasonic_scaler") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_polishing_cup"):
+			return {}
+	elif lesson_id == "cleaning":
 		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_polishing_cup") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
 			return {}
 	elif lesson_id == "fluoride":
@@ -63,19 +66,19 @@ func _bench(lesson_id: String) -> Dictionary:
 		if not await _click(bench, "KL_BENCH_ROTATE_LEFT_tool_curing_light") or not await _click(bench, "KL_BENCH_ROTATE_RIGHT_tool_ultrasonic_scaler"):
 			return {}
 	# Correct and incorrect choices remain distinct, source-stable IDs in all lessons.
-	var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.ultrasonic_scaler"
-	var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.fluoride_varnish" if lesson_id == "cleaning" else "material.glass_ionomer"
-	if not await _click(bench, "KL_BENCH_PICK_tool_ultrasonic_scaler" if lesson_id != "fluoride" else "KL_BENCH_PICK_tool_curing_light"):
+	var wrong_tool := "tool.curing_light" if lesson_id == "fluoride" else "tool.polishing_cup" if lesson_id == "root_planing" else "tool.ultrasonic_scaler"
+	var wrong_material := "material.light_cure_sealant" if lesson_id == "fluoride" else "material.fluoride_varnish" if lesson_id == "cleaning" else "material.prophylaxis_paste" if lesson_id == "root_planing" else "material.glass_ionomer"
+	if not await _click(bench, "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "root_planing" else "KL_BENCH_PICK_tool_curing_light" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_ultrasonic_scaler"):
 		return {}
 	if bench.call("summary")["selection_score"] != 0:
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_tool_varnish_brush" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_polishing_cup"):
+	if not await _click(bench, "KL_BENCH_PICK_tool_curing_light" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_tool_varnish_brush" if lesson_id == "fluoride" else "KL_BENCH_PICK_tool_polishing_cup" if lesson_id == "cleaning" else "KL_BENCH_PICK_tool_ultrasonic_scaler"):
 		return {}
-	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_material_light_cure_sealant" if lesson_id == "fluoride" else "KL_BENCH_PICK_material_fluoride_varnish"):
+	if not await _click(bench, "KL_BENCH_PICK_material_glass_ionomer" if lesson_id in ["composite", "sealant"] else "KL_BENCH_PICK_material_light_cure_sealant" if lesson_id == "fluoride" else "KL_BENCH_PICK_material_fluoride_varnish" if lesson_id == "cleaning" else "KL_BENCH_PICK_material_prophylaxis_paste"):
 		return {}
 	if bench.call("summary")["selection_score"] != 1:
 		return {}
-	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant" if lesson_id == "sealant" else "material_fluoride_varnish" if lesson_id == "fluoride" else "material_prophylaxis_paste"
+	var correct_material := "material_light_cure_composite" if lesson_id == "composite" else "material_light_cure_sealant" if lesson_id == "sealant" else "material_fluoride_varnish" if lesson_id == "fluoride" else "material_prophylaxis_paste" if lesson_id == "cleaning" else "material_clean_water_coolant"
 	if not await _click(bench, "KL_BENCH_PICK_" + correct_material):
 		return {}
 	if bench.call("summary")["selection_score"] != 2:
