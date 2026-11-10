@@ -10,6 +10,7 @@ const ADA_XRAYS := "https://www.mouthhealthy.org/all-topics-a-z/x-rays"
 const ADA_ORAL_CANCER := "https://www.mouthhealthy.org/all-topics-a-z/oral-cancer"
 const ADA_VENEERS := "https://www.mouthhealthy.org/all-topics-a-z/veneers"
 const ADA_INLAYS := "https://www.mouthhealthy.org/all-topics-a-z/fillings-gold-inlays"
+const ADA_CROWNS := "https://www.mouthhealthy.org/all-topics-a-z/crowns"
 const ITEMS := {
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
@@ -153,6 +154,20 @@ const ITEMS := {
 		"cue": "Illustration · pale blue reference card with a named model cavity outline and marker; not a patient scan.",
 		"purpose": "Specifies the fictional prepared outline and landmark for model matching. No marginal-gap, internal-contact, occlusion or cementation metrics are simulated.",
 		"swatch": Color("#b8d5e7"), "source": ADA_INLAYS,
+	},
+
+	"tool.crown_shell": {
+		"name": "Mock full-coverage crown (synthetic 3D study object)", "german": "Krone (schematisches Lehrmodell)",
+		"scene": "res://assets/bench/synthetic-crown-shell.tscn",
+		"cue": "Synthetic full-coverage crown silhouette with a highlighted cervical margin landmark; solid illustrative shapes, not a true hollow fitting surface.",
+		"purpose": "Represents the specified mock crown for seating on a named teaching model; it cannot establish measured marginal adaptation, contacts or occlusion.",
+		"source": ADA_CROWNS,
+	},
+	"material.crown_fit_reference": {
+		"name": "Assigned crown model and cervical-margin reference card", "german": "Kronenmodell mit Randmarkierungs-Vorlage (schematisch)",
+		"cue": "Illustration · assigned preparation outline and cervical teaching landmark, not a clinical working cast or patient scan.",
+		"purpose": "Identifies the fictional prepared model and the exact cervical landmark to check. This does not contain patient measurements, marginal gap, contacts or bite data.",
+		"swatch": Color("#d6d4c2"), "source": ADA_CROWNS,
 	},
 }
 
@@ -412,4 +427,31 @@ const INLAY := {
 	"finish_event": "record_inlay_mock_try_in",
 	"outcome": "Indirect inlay model try-in complete · The fictional insert and assigned prepared-outline landmark were marked in the existing chair simulation. No clinical marginal adaptation, adhesive cementation or patient outcome was assessed.",
 	"reference": ADA_INLAYS,
+}
+
+const CROWN := {
+	"id": "crown_mock_full_coverage_try_in_intro",
+	"scenario": "crown",
+	"title": "Crown try-in bench",
+	"case": "Fictional prepared-tooth teaching model · An instructor assigns a MOCK FULL-COVERAGE CROWN and its MATCHED PREPARATION-AND-MARGIN REFERENCE. The model chair asks the learner to SEAT the crown and CHECK a predetermined cervical landmark. This does not simulate a hollow crown's actual fit, tooth preparation, marginal-gap measurement, occlusal adjustment, cementation, or a real patient procedure.",
+	"tool": {
+		"label": "study object",
+		"choices": ["tool.crown_shell", "tool.inlay_insert"],
+		"expected": "tool.crown_shell",
+		"prompt": "Which rotating 3D model is the specified full-coverage mock restoration for this crown try-in?",
+		"correct": "Correct. The assigned schematic crown represents full coverage; its geometry does not reproduce a calibrated fitting surface.",
+		"incorrect": "An inlay is a different indirect restoration used within a prepared outline. It is not the full-coverage crown assigned in this fictional case.",
+	},
+	"material": {
+		"label": "fit reference",
+		"choices": ["material.crown_fit_reference", "material.inlay_outline_reference"],
+		"expected": "material.crown_fit_reference",
+		"prompt": "Which assigned study reference identifies the crown preparation and cervical-margin landmark?",
+		"correct": "Correct. The crown-specific reference names the model preparation and teaching margin marker, without measured adaptation.",
+		"incorrect": "The inlay's cavity-outline reference is a different case. Use the crown's matched preparation and margin marker instead.",
+	},
+	"finish": "Record crown seating and cervical landmark check",
+	"finish_event": "record_crown_mock_try_in",
+	"outcome": "Crown model try-in complete · The assigned crown seating and cervical teaching landmark were verified in the existing chair simulation. No clinical fit, margin quality, cementation or patient outcome was assessed.",
+	"reference": ADA_CROWNS,
 }
