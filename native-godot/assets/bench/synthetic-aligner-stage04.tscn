@@ -1,0 +1,101 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="SphereMesh" id="SphereMesh_arch_cell"]
+radius = 0.255
+height = 0.510
+radial_segments = 20
+rings = 10
+
+[sub_resource type="BoxMesh" id="BoxMesh_stage_bar"]
+size = Vector3(0.10, 0.045, 0.13)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_synthetic_tray"]
+transparency = 1
+albedo_color = Color(0.69, 0.86, 0.94, 0.75)
+roughness = 0.22
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stage04_marker"]
+albedo_color = Color(0.25, 0.48, 0.87, 1)
+roughness = 0.48
+
+[node name="SyntheticStage04AlignerTeachingTray" type="Node3D"]
+
+[node name="TranslucentArchCell1NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.73, 0, 0.43)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell2NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.76, 0, 0.13)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell3NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.67, 0, -0.18)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell4NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.45, 0, -0.39)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell5NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, 0, -0.51)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell6NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(0.15, 0, -0.51)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell7NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(0.45, 0, -0.39)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell8NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(0.67, 0, -0.18)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell9NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(0.76, 0, 0.13)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="TranslucentArchCell10NotCalibratedPolymerShell" type="MeshInstance3D" parent="."]
+position = Vector3(0.73, 0, 0.43)
+scale = Vector3(1.17, 0.42, 1.13)
+mesh = SubResource("SphereMesh_arch_cell")
+material_override = SubResource("StandardMaterial3D_synthetic_tray")
+
+[node name="Stage04IdentifierBar1NotClinicalStageAccuracy" type="MeshInstance3D" parent="."]
+position = Vector3(-0.25, 0.126, -0.51)
+mesh = SubResource("BoxMesh_stage_bar")
+material_override = SubResource("StandardMaterial3D_stage04_marker")
+
+[node name="Stage04IdentifierBar2NotClinicalStageAccuracy" type="MeshInstance3D" parent="."]
+position = Vector3(-0.09, 0.126, -0.51)
+mesh = SubResource("BoxMesh_stage_bar")
+material_override = SubResource("StandardMaterial3D_stage04_marker")
+
+[node name="Stage04IdentifierBar3NotClinicalStageAccuracy" type="MeshInstance3D" parent="."]
+position = Vector3(0.09, 0.126, -0.51)
+mesh = SubResource("BoxMesh_stage_bar")
+material_override = SubResource("StandardMaterial3D_stage04_marker")
+
+[node name="Stage04IdentifierBar4NotClinicalStageAccuracy" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, 0.126, -0.51)
+mesh = SubResource("BoxMesh_stage_bar")
+material_override = SubResource("StandardMaterial3D_stage04_marker")
