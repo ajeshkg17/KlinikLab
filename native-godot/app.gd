@@ -1751,6 +1751,8 @@ func _start_automated_trial(mode := "room") -> void:
 		trial_script = "res://inlay-inspection-trial.gd"
 	elif mode == "crown_bench":
 		trial_script = "res://crown-inspection-trial.gd"
+	elif mode == "bridge_bench":
+		trial_script = "res://bridge-inspection-trial.gd"
 	if OS.get_name() != "Windows" or not FileAccess.file_exists(project.path_join("project.godot")) or not FileAccess.file_exists(trial_script):
 		_set_trial_status("Open the Windows Practice Game tester build to run this trial.")
 		return
@@ -3569,7 +3571,8 @@ func _show_journey() -> void:
 		["oral_exam", "Open oral soft-tissue screening bench", "KL_OPEN_ORAL_EXAM_BENCH"],
 		["veneer", "Open veneer try-in bench", "KL_OPEN_VENEER_BENCH"],
 		["inlay", "Open indirect inlay try-in bench", "KL_OPEN_INLAY_BENCH"],
-		["crown", "Open crown try-in bench", "KL_OPEN_CROWN_BENCH"]
+		["crown", "Open crown try-in bench", "KL_OPEN_CROWN_BENCH"],
+		["bridge", "Open fixed bridge try-in bench", "KL_OPEN_BRIDGE_BENCH"]
 	]:
 		var entry := _button(str(lesson[1]))
 		entry.name = str(lesson[2])
@@ -3586,7 +3589,8 @@ func _show_journey() -> void:
 		["Run oral soft-tissue screening bench replay", "oral_exam_bench"],
 		["Run veneer try-in bench replay", "veneer_bench"],
 		["Run indirect inlay try-in bench replay", "inlay_bench"],
-		["Run crown try-in bench replay", "crown_bench"]
+		["Run crown try-in bench replay", "crown_bench"],
+		["Run fixed bridge try-in bench replay", "bridge_bench"]
 	]:
 		var replay := _button(str(trial[0]))
 		replay.disabled = _trial_pid > 0
@@ -3685,18 +3689,18 @@ func _show_journey() -> void:
 func _open_chairside_bench(lesson_id: String) -> void:
 	if is_instance_valid(_chairside_bench):
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"]:
 		return
 	_chairside_bench = CHAIRSIDE_BENCH.new()
 	_shell.add_child(_chairside_bench)
-	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN
+	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN if lesson_id == "crown" else CHAIRSIDE_CATALOG.BRIDGE
 	_chairside_bench.start(lesson)
 	_chairside_bench.practice_requested.connect(_enter_bench_practice)
 
 func _enter_bench_practice(scenario: String) -> void:
 	if is_instance_valid(_procedure_lab) or not is_instance_valid(_chairside_bench):
 		return
-	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
+	if scenario not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge"] or str(_chairside_bench.get("_lesson")["scenario"]) != scenario:
 		return
 	for index in range(PROCEDURE_DRILLS.DRILLS.size()):
 		if str(PROCEDURE_DRILLS.DRILLS[index][0]) != scenario:
