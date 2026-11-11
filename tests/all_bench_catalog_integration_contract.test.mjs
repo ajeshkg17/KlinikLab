@@ -84,7 +84,7 @@ test('all original synthetic 3D scenes exist and are packed; the two CC0 GLBs st
 });
 
 test('all twenty Journey and trial entries are packed and shared replay enforces evidence guards', () => {
-  for (const [constant, , lesson] of lessons) {
+  for (const [, constant, lesson] of lessons) {
     const scenario = lesson.match(/^\t"scenario": "([^"]+)"/m)?.[1];
     assert.ok(app.includes('KL_OPEN_' + constant + '_BENCH'), 'Journey opener absent: ' + scenario);
     const stem = scenario === 'extraction' ? 'extraction-bench' : scenario.replaceAll('_','-');
