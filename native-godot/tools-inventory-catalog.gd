@@ -1,7 +1,7 @@
 extends RefCounted
 ## Independent, read-only instrument inventory. No additions to the 20 chair scenarios.
-## All six new assets are taken from the previously downloaded 3DAssets.dev
-## Dental Practice and Surgery CC0 pack (local, SHA-verified at build time).
+## Six downloaded CC0 models are sourced from the previously tracked pack;
+## additional handheld instruments are original schematic teaching geometry.
 const BENCH := preload("res://chairside-catalog.gd")
 const PACK_URL := "https://3dassets.dev/packs/dental-practice-and-surgery"
 const EXTRA := [
