@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const source = name => readSourceContract('../' + name, import.meta.url);
 const catalog = source('native-godot/tools-inventory-catalog.gd');
@@ -39,7 +39,7 @@ test('ten new endodontic models are uniquely catalogued alongside 113 prior inve
   const uniqueIds=[...catalog.matchAll(/^\t\t"id": "((?:inventory|handtool|rotary|assistant|prostho_ortho|perio_surgery|finishing|surgery_implant|diagnostic|lab|advanced_endo)\.[^"]+)",/gm)].map(x=>x[1]);
   assert.equal(uniqueIds.length,104,'104 additional inventory entries');
   assert.equal(new Set(uniqueIds).size,104,'unique inventory IDs');
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19,'19 original bench study models');
+  assert.equal(countOriginalBenchToolEntries(bench),19,'19 original bench study models');
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20,'20 unchanged chair scenarios');
 });
 
