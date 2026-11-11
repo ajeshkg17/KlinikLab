@@ -1106,6 +1106,112 @@ const ADVANCED_ENDODONTIC_TOOLS := [
 	},
 ]
 
+
+## Ten locally authored and nonfunctional orthodontic training silhouettes.
+## External URLs explain instrument families and do not provide meshes.
+const ORTHO_ALIGNMENT_TOOLS := [
+	{
+		"id": "ortho_alignment.bird_beak_pliers",
+		"name": "Bird beak wire-bending pliers",
+		"german": "Vogelkopfzange / Bird-Beak-Zange",
+		"kind": "Orthodontics · wire-bending",
+		"scene": "res://assets/inventory/synthetic-bird-beak-pliers.tscn",
+		"cue": "Compare one rounded tapered beak with a contrasting flat-sided beak, unlike a three-prong wire tool.",
+		"purpose": "Blunt illustrated jaws; no wire grasp, actual bending radius, wire size limit or mechanical performance.",
+		"source": "https://www.healthcare-holding.ch/hubfs/04_Ortho%20Walker%20Files/0406_Hersteller%20Kataloge/Hufriedy_Catalog_GB_036_2307_V8_EN.pdf?hsLang=fr",
+	},
+	{
+		"id": "ortho_alignment.three_prong_pliers",
+		"name": "Three-prong orthodontic wire-bending pliers",
+		"german": "Dreizackzange / Dreipunkt-Biegezange",
+		"kind": "Orthodontics · wire-bending",
+		"scene": "res://assets/inventory/synthetic-three-prong-pliers.tscn",
+		"cue": "Find the center working beak flanked by two outer prongs, contrasting with bird-beak pliers.",
+		"purpose": "The three-part jaw arrangement is schematic, nonfunctional and not mechanically dimensioned.",
+		"source": "https://www.dentalsky.com/all-products/hand-instruments/orthodontic-instruments.html",
+	},
+	{
+		"id": "ortho_alignment.adams_pliers",
+		"name": "Adams flat-on-flat orthodontic pliers",
+		"german": "Adams-Zange / Flachbackenzange",
+		"kind": "Orthodontics · appliance adjustment",
+		"scene": "res://assets/inventory/synthetic-adams-pliers.tscn",
+		"cue": "Recognise broad opposing flat jaws rather than the round tapered bird-beak profile.",
+		"purpose": "Static uncalibrated pliers model; not an approved clinical or wire-bending device.",
+		"source": "https://www.healthcare-holding.ch/hubfs/04_Ortho%20Walker%20Files/0406_Hersteller%20Kataloge/Hufriedy_Catalog_GB_036_2307_V8_EN.pdf?hsLang=fr",
+	},
+	{
+		"id": "ortho_alignment.mathieu_ligature_pliers",
+		"name": "Mathieu orthodontic needle holder / ligature pliers",
+		"german": "Mathieu-Nadelhalter / Mathieu-Ligaturzange",
+		"kind": "Orthodontics · ligatures",
+		"scene": "res://assets/inventory/synthetic-mathieu-ligature-pliers.tscn",
+		"cue": "Identify opposed spring handles, a thumb ratchet and short gripping jaws, distinct from the ring-handled Mayo-Hegar holder.",
+		"purpose": "Decorative spring and lock components; no functional retention, tissue handling or ligature tension.",
+		"source": "https://www.dentalsky.com/all-products/hand-instruments/orthodontic-instruments.html",
+	},
+	{
+		"id": "ortho_alignment.elastic_separator_pliers",
+		"name": "Orthodontic elastic separating pliers",
+		"german": "Separierzange / Elastik-Separierzange",
+		"kind": "Orthodontics · elastic separators",
+		"scene": "res://assets/inventory/synthetic-elastic-separating-pliers.tscn",
+		"cue": "Observe ring handles, fine paired tips and a small illustrative elastic ring, unlike broad bracket-removing jaws.",
+		"purpose": "Schematic prop without real spring force, elastic stretching or interproximal placement capability.",
+		"source": "https://www.dentalsky.com/all-products/hand-instruments/orthodontic-instruments.html",
+	},
+	{
+		"id": "ortho_alignment.boone_bracket_height_gauge",
+		"name": "Boone bracket-positioning height gauge",
+		"german": "Boone-Brackethöhenmesslehre / Bracketpositionierlehre",
+		"kind": "Orthodontics · bracket positioning",
+		"scene": "res://assets/inventory/synthetic-boone-bracket-height-gauge.tscn",
+		"cue": "Identify a narrow gauge shank with a perpendicular measuring crossbar and stepped ends.",
+		"purpose": "Decorative geometry only; no real bracket-height measurement or millimetre calibration.",
+		"source": "https://www.healthcare-holding.ch/hubfs/04_Ortho%20Walker%20Files/0406_Hersteller%20Kataloge/Hufriedy_Catalog_GB_036_2307_V8_EN.pdf?hsLang=fr",
+	},
+	{
+		"id": "ortho_alignment.ligature_director",
+		"name": "Orthodontic ligature director / tucker",
+		"german": "Ligaturendrücker / Ligaturenstopfer",
+		"kind": "Orthodontics · hand instruments",
+		"scene": "res://assets/inventory/synthetic-orthodontic-ligature-director.tscn",
+		"cue": "Look for a double-ended fine shaft with an offset shallow ligature-directing tip.",
+		"purpose": "Nonfunctional rounded reference tips; no ligature placement, bracket positioning or actual wire force.",
+		"source": "https://www.dentalsky.com/all-products/hand-instruments/orthodontic-instruments.html",
+	},
+	{
+		"id": "ortho_alignment.tweed_loop_forming_pliers",
+		"name": "Tweed loop-forming orthodontic pliers",
+		"german": "Tweed-Schlaufenbiegezange",
+		"kind": "Orthodontics · wire loops",
+		"scene": "res://assets/inventory/synthetic-tweed-loop-pliers.tscn",
+		"cue": "Compare a rounded cone and a stepped opposing jaw with the flat-on-flat Adams pattern.",
+		"purpose": "Illustrative omega-loop wire and blunt jaws, not real loop forming, size control or wire force.",
+		"source": "https://www.healthcare-holding.ch/hubfs/04_Ortho%20Walker%20Files/0406_Hersteller%20Kataloge/Hufriedy_Catalog_GB_036_2307_V8_EN.pdf?hsLang=fr",
+	},
+	{
+		"id": "ortho_alignment.torquing_turret",
+		"name": "Orthodontic archwire torquing turret",
+		"german": "Torquierturm / Torquierturret für Bögen",
+		"kind": "Orthodontics · archwire adjustment",
+		"scene": "res://assets/inventory/synthetic-orthodontic-torquing-turret.tscn",
+		"cue": "Identify a central grooved drum, wire holding posts and base, distinct from hand pliers.",
+		"purpose": "Nonfunctional wire-forming trainer silhouette; no calibrated torque, angle, channel spacing or clinical outcome.",
+		"source": "https://www.healthcare-holding.ch/hubfs/04_Ortho%20Walker%20Files/0406_Hersteller%20Kataloge/Hufriedy_Catalog_GB_036_2307_V8_EN.pdf?hsLang=fr",
+	},
+	{
+		"id": "ortho_alignment.aligner_removal_hook",
+		"name": "Removable aligner / retainer retrieval hook",
+		"german": "Aligner-Entfernungshilfe / Retainer-Abziehhilfe",
+		"kind": "Orthodontics · removable appliances",
+		"scene": "res://assets/inventory/synthetic-aligner-removal-hook.tscn",
+		"cue": "Recognise the compact hooked retrieval end and finger loop, not a scaler or curette.",
+		"purpose": "Rounded study hook only; no proven appliance fit, actual removal action or hygienic suitability.",
+		"source": "https://www.dentsplysirona.com/services/asset/download?path=%2Fcontent%2Fdam%2Fmaster%2Fproduct-procedure-brand-categories%2Forthodontics%2Fproduct-categories%2Fpatient-care-and-records%2Fappliance-accessories%2Fretainer-retriever%2Fifu%2FORT-IFU+Retainer+Retriever+-+Multilingal+-+2025-10.pdf",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -1144,5 +1250,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in LABORATORY_IMPRESSION_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in ADVANCED_ENDODONTIC_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in ORTHO_ALIGNMENT_TOOLS:
 		result.append(entry.duplicate(true))
 	return result

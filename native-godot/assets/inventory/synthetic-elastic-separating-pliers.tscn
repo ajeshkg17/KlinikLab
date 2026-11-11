@@ -1,0 +1,433 @@
+[gd_scene load_steps=31 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.11723
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.09041
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.09041
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.11723
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.09041
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.11723
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_10"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_11"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.10469
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_12"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 1.00846
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_13"]
+radius = 0.135
+height = 0.18
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_14"]
+top_radius = 0.037
+bottom_radius = 0.037
+height = 0.49244
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_15"]
+radius = 0.06
+height = 0.1
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_16"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.04928
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_17"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.06403
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_18"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.07596
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_19"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.07596
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_20"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.06403
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_21"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.04928
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_22"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.07596
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_23"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.06403
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_24"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.04928
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.84, 1)
+metallic = 0.73
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.23, 1)
+metallic = 0.21
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.83, 0.67, 0.31, 1)
+metallic = 0.44
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.92, 0.93, 0.94, 1)
+metallic = 0.1
+roughness = 0.49
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.34, 0.56, 0.76, 1)
+metallic = 0.16
+roughness = 0.5
+
+[node name="SchematicElasticSeparatingPliers" type="Node3D"]
+
+[node name="SeparatorFingerRingLeft0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12139, 0.9175, 0)
+rotation_degrees = Vector3(0, 0, 11.20243)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16389, 1.01709, 0)
+rotation_degrees = Vector3(0, 0, 36.46923)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2375, 1.07459, 0)
+rotation_degrees = Vector3(0, 0, 70.07343)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3225, 1.07459, 0)
+rotation_degrees = Vector3(0, 0, 109.92657)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.39611, 1.01709, 0)
+rotation_degrees = Vector3(0, 0, 143.53077)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43861, 0.9175, 0)
+rotation_degrees = Vector3(0, 0, 168.79757)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43861, 0.8025, 0)
+rotation_degrees = Vector3(0, 0, -168.79757)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.39611, 0.70291, 0)
+rotation_degrees = Vector3(0, 0, -143.53077)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3225, 0.64541, 0)
+rotation_degrees = Vector3(0, 0, -109.92657)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft9" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2375, 0.64541, 0)
+rotation_degrees = Vector3(0, 0, -70.07343)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft10" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16389, 0.70291, 0)
+rotation_degrees = Vector3(0, 0, -36.46923)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingLeft11" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12139, 0.8025, 0)
+rotation_degrees = Vector3(0, 0, -11.20243)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight0" type="MeshInstance3D" parent="."]
+position = Vector3(0.43861, 0.9175, 0)
+rotation_degrees = Vector3(0, 0, 11.20243)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight1" type="MeshInstance3D" parent="."]
+position = Vector3(0.39611, 1.01709, 0)
+rotation_degrees = Vector3(0, 0, 36.46923)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight2" type="MeshInstance3D" parent="."]
+position = Vector3(0.3225, 1.07459, 0)
+rotation_degrees = Vector3(0, 0, 70.07343)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight3" type="MeshInstance3D" parent="."]
+position = Vector3(0.2375, 1.07459, 0)
+rotation_degrees = Vector3(0, 0, 109.92657)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight4" type="MeshInstance3D" parent="."]
+position = Vector3(0.16389, 1.01709, 0)
+rotation_degrees = Vector3(0, 0, 143.53077)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight5" type="MeshInstance3D" parent="."]
+position = Vector3(0.12139, 0.9175, 0)
+rotation_degrees = Vector3(0, 0, 168.79757)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight6" type="MeshInstance3D" parent="."]
+position = Vector3(0.12139, 0.8025, 0)
+rotation_degrees = Vector3(0, 0, -168.79757)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight7" type="MeshInstance3D" parent="."]
+position = Vector3(0.16389, 0.70291, 0)
+rotation_degrees = Vector3(0, 0, -143.53077)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight8" type="MeshInstance3D" parent="."]
+position = Vector3(0.2375, 0.64541, 0)
+rotation_degrees = Vector3(0, 0, -109.92657)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight9" type="MeshInstance3D" parent="."]
+position = Vector3(0.3225, 0.64541, 0)
+rotation_degrees = Vector3(0, 0, -70.07343)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight10" type="MeshInstance3D" parent="."]
+position = Vector3(0.39611, 0.70291, 0)
+rotation_degrees = Vector3(0, 0, -36.46923)
+mesh = SubResource("Mesh_11")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorFingerRingRight11" type="MeshInstance3D" parent="."]
+position = Vector3(0.43861, 0.8025, 0)
+rotation_degrees = Vector3(0, 0, -11.20243)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorCrossingArmLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.065, 0.145, 0)
+rotation_degrees = Vector3(0, 0, -157.24902)
+mesh = SubResource("Mesh_12")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorCrossingArmRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.065, 0.145, 0)
+rotation_degrees = Vector3(0, 0, 157.24902)
+mesh = SubResource("Mesh_12")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorPliersPivot" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.19, 0)
+mesh = SubResource("Mesh_13")
+material_override = SubResource("Mat_dark")
+
+[node name="SeparatorTipLeft" type="MeshInstance3D" parent="."]
+position = Vector3(0.185, -0.55, 0)
+rotation_degrees = Vector3(0, 0, -167.09259)
+mesh = SubResource("Mesh_14")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorTipRight" type="MeshInstance3D" parent="."]
+position = Vector3(-0.185, -0.55, 0)
+rotation_degrees = Vector3(0, 0, 167.09259)
+mesh = SubResource("Mesh_14")
+material_override = SubResource("Mat_steel")
+
+[node name="SeparatorLeftBluntHook" type="MeshInstance3D" parent="."]
+position = Vector3(0.27, -0.89, 0)
+mesh = SubResource("Mesh_15")
+material_override = SubResource("Mat_gold")
+
+[node name="SeparatorRightBluntHook" type="MeshInstance3D" parent="."]
+position = Vector3(-0.27, -0.89, 0)
+mesh = SubResource("Mesh_15")
+material_override = SubResource("Mat_gold")
+
+[node name="DecorativeElasticSeparatorRing0" type="MeshInstance3D" parent="."]
+position = Vector3(0.13995, -0.9175, 0)
+rotation_degrees = Vector3(0, 0, 24.06468)
+mesh = SubResource("Mesh_16")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing1" type="MeshInstance3D" parent="."]
+position = Vector3(0.10245, -0.87853, 0)
+rotation_degrees = Vector3(0, 0, 59.03624)
+mesh = SubResource("Mesh_17")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing2" type="MeshInstance3D" parent="."]
+position = Vector3(0.0375, -0.85603, 0)
+rotation_degrees = Vector3(0, 0, 80.86674)
+mesh = SubResource("Mesh_18")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.0375, -0.85603, 0)
+rotation_degrees = Vector3(0, 0, 99.13326)
+mesh = SubResource("Mesh_19")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.10245, -0.87853, 0)
+rotation_degrees = Vector3(0, 0, 120.96376)
+mesh = SubResource("Mesh_20")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.13995, -0.9175, 0)
+rotation_degrees = Vector3(0, 0, 155.93532)
+mesh = SubResource("Mesh_16")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.13995, -0.9625, 0)
+rotation_degrees = Vector3(0, 0, -155.93532)
+mesh = SubResource("Mesh_21")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.10245, -1.00147, 0)
+rotation_degrees = Vector3(0, 0, -120.96376)
+mesh = SubResource("Mesh_17")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.0375, -1.02397, 0)
+rotation_degrees = Vector3(0, 0, -99.13326)
+mesh = SubResource("Mesh_22")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing9" type="MeshInstance3D" parent="."]
+position = Vector3(0.0375, -1.02397, 0)
+rotation_degrees = Vector3(0, 0, -80.86674)
+mesh = SubResource("Mesh_22")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing10" type="MeshInstance3D" parent="."]
+position = Vector3(0.10245, -1.00147, 0)
+rotation_degrees = Vector3(0, 0, -59.03624)
+mesh = SubResource("Mesh_23")
+material_override = SubResource("Mat_grip")
+
+[node name="DecorativeElasticSeparatorRing11" type="MeshInstance3D" parent="."]
+position = Vector3(0.13995, -0.9625, 0)
+rotation_degrees = Vector3(0, 0, -24.06468)
+mesh = SubResource("Mesh_24")
+material_override = SubResource("Mat_grip")

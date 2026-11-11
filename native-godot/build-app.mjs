@@ -179,6 +179,11 @@ try{
  const advancedEndodonticScenes=["synthetic-hedstrom-h-file.tscn","synthetic-niti-rotary-file.tscn","synthetic-gates-glidden-drill.tscn","synthetic-peeso-reamer.tscn","synthetic-endodontic-measuring-ruler.tscn","synthetic-endodontic-file-stand.tscn","synthetic-gutta-percha-point-box.tscn","synthetic-endodontic-motor.tscn","synthetic-heated-obturation-pen.tscn","synthetic-gutta-percha-backfill-gun.tscn"];
  for(const filename of advancedEndodonticScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Original schematic orthodontic bending/aligner study geometries.
+ // Local read-only inventory assets only; no chair lesson or profile mutation.
+ const orthoAlignmentScenes=["synthetic-bird-beak-pliers.tscn","synthetic-three-prong-pliers.tscn","synthetic-adams-pliers.tscn","synthetic-mathieu-ligature-pliers.tscn","synthetic-elastic-separating-pliers.tscn","synthetic-boone-bracket-height-gauge.tscn","synthetic-orthodontic-ligature-director.tscn","synthetic-tweed-loop-pliers.tscn","synthetic-orthodontic-torquing-turret.tscn","synthetic-aligner-removal-hook.tscn"];
+ for(const filename of orthoAlignmentScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
