@@ -1212,6 +1212,112 @@ const ORTHO_ALIGNMENT_TOOLS := [
 	},
 ]
 
+
+## Ten original schematic, uncalibrated periodontal assessment and surgery study models.
+## URLs are instrument-family references only, never sources for downloaded CAD.
+const PERIODONTAL_ASSESSMENT_TOOLS := [
+	{
+		"id": "perio_assessment.unc15_probe",
+		"name": "UNC-15 periodontal pocket probe (study scale)",
+		"german": "UNC-15-Parodontalsonde / Parodontometer",
+		"kind": "Periodontics · pocket measurement",
+		"scene": "res://assets/inventory/synthetic-unc15-periodontal-probe.tscn",
+		"cue": "Look for fifteen small graduation indicators distributed along the offset, rounded working end.",
+		"purpose": "The fifteen illustrative bands are not millimetre-calibrated; no pocket depth, measured pressure or actual patient probing.",
+		"source": "https://deutschedt.com/pages/periodontal-probe-markings-types-guide",
+	},
+	{
+		"id": "perio_assessment.who_cpi_probe",
+		"name": "WHO / CPITN ball-ended periodontal probe",
+		"german": "WHO-Parodontalsonde / PSI-Sonde",
+		"kind": "Periodontics · periodontal screening",
+		"scene": "res://assets/inventory/synthetic-who-cpi-periodontal-probe.tscn",
+		"cue": "Identify the terminal ball and contrasting study band, unlike the UNC-15 series of fine marks.",
+		"purpose": "The illustrated ball and 3.5–5.5 mm-style band do not reproduce exact 0.5 mm tip size or clinically measurable spacing.",
+		"source": "https://deutschedt.com/pages/periodontal-probe-markings-types-guide",
+	},
+	{
+		"id": "perio_assessment.nabers_furcation_probe",
+		"name": "Nabers curved furcation probe",
+		"german": "Nabers-Furkationssonde",
+		"kind": "Periodontics · furcation assessment",
+		"scene": "res://assets/inventory/synthetic-nabers-furcation-probe.tscn",
+		"cue": "Compare the pronounced curved terminal shank with the straight, angled working ends of pocket probes.",
+		"purpose": "Noncalibrated curved study geometry; no real furcation measurement, probing forces, or root-anatomy simulation.",
+		"source": "https://deutschedt.com/pages/periodontal-probe-markings-types-guide",
+	},
+	{
+		"id": "perio_assessment.goldman_fox_pocket_marker",
+		"name": "Goldman-Fox periodontal pocket-marking forceps",
+		"german": "Goldman-Fox-Taschenmarkierungspinzette",
+		"kind": "Periodontics · pocket marking",
+		"scene": "res://assets/inventory/synthetic-goldman-fox-pocket-marker.tscn",
+		"cue": "Identify a spring-tweezer form with two differently shaped opposing ends and marking-anvil silhouette.",
+		"purpose": "Static non-piercing geometry; does not mark tissues, puncture gingiva or reproduce clinical instruments.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.kirkland_knife",
+		"name": "Kirkland gingivectomy knife (guarded study edge)",
+		"german": "Kirkland-Gingivektomiemesser",
+		"kind": "Periodontal surgery · gingival knives",
+		"scene": "res://assets/inventory/synthetic-kirkland-gingivectomy-knife.tscn",
+		"cue": "Look for a broad, gently rounded working-blade silhouette, distinct from narrow interdental Orban form.",
+		"purpose": "The blade-like end is blunt and stylised; no cutting edge, precise angulation or clinical gingivectomy ability.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.orban_interdental_knife",
+		"name": "Orban interdental periodontal knife",
+		"german": "Orban-Interdentalmesser",
+		"kind": "Periodontal surgery · interdental knives",
+		"scene": "res://assets/inventory/synthetic-orban-interdental-knife.tscn",
+		"cue": "Find the narrower elongated, protected pointed leaf-shaped study end instead of Kirkland's broader outline.",
+		"purpose": "Non-sharp geometry only; no interdental dissection, validated edge dimensions or safe tissue use.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.goldman_fox_scissors",
+		"name": "Goldman-Fox curved periodontal gum scissors",
+		"german": "Goldman-Fox-Zahnfleischschere",
+		"kind": "Periodontal surgery · soft-tissue scissors",
+		"scene": "res://assets/inventory/synthetic-goldman-fox-periodontal-scissors.tscn",
+		"cue": "Recognise paired finger rings, crossing pivot and curved distal blades, unlike the earlier straight crown scissors.",
+		"purpose": "Noncutting, permanently posed educational silhouette; no scissor mechanics, tissue force or incision.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.hirschfeld_periodontal_file",
+		"name": "Hirschfeld double-ended periodontal file",
+		"german": "Hirschfeld-Parodontalfeile",
+		"kind": "Periodontal instruments · root surface files",
+		"scene": "res://assets/inventory/synthetic-hirschfeld-periodontal-file.tscn",
+		"cue": "Compare flattened working tips with short transverse serration markers on opposite ends, not the longer surgical bone file.",
+		"purpose": "Unsharpened illustrative file heads; no actual root-surface instrumentation, tooth profile, or validated force.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.ochsenbein_chisel",
+		"name": "Ochsenbein periodontal bone chisel",
+		"german": "Ochsenbein-Knochenmeißel",
+		"kind": "Periodontal surgery · bone chisels",
+		"scene": "res://assets/inventory/synthetic-ochsenbein-periodontal-chisel.tscn",
+		"cue": "Identify the broad offset blunt chisel and bevel indicator compared with a spatula or curette.",
+		"purpose": "A blunt fixed study silhouette, not a bone-cutting chisel or a clinically validated surgical instrument.",
+		"source": "https://asadental.fra1.cdn.digitaloceanspaces.com/media/documents/Asa_Dental_2025_Catalog_-_Chapter_8_-_Periodontal.pdf",
+	},
+	{
+		"id": "perio_assessment.implant_plastic_scaler",
+		"name": "Polymer-tip implant-maintenance scaler",
+		"german": "Implantat-Kunststoffscaler / Kunststoffkürette",
+		"kind": "Peri-implant care · maintenance instruments",
+		"scene": "res://assets/inventory/synthetic-implant-polymer-scaler.tscn",
+		"cue": "Look for predominantly polymer-coloured curved non-metallic tips, contrasting with steel periodontal scaling tools.",
+		"purpose": "Nonfunctional recognition model. Plastic curettes have documented effectiveness limitations for deposits; device suitability depends on actual clinical guidance.",
+		"source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11126374/",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -1252,5 +1358,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in ADVANCED_ENDODONTIC_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in ORTHO_ALIGNMENT_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in PERIODONTAL_ASSESSMENT_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
