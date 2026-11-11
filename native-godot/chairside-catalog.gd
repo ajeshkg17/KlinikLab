@@ -284,6 +284,34 @@ const ITEMS := {
 		"swatch": Color("#b8d5dd"), "source": ADA_IMPLANTS,
 	},
 
+	"tool.hand_h_file_recognition": {
+		"name": "Hedström hand file (schematic 3D study)", "german": "Hedström-Handfeile / H-Feile (3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-hedstrom-h-file.tscn",
+		"cue": "A short colored finger grip and long simplified fluted manual-file silhouette distinguish this H-file study object from a motor-driven file.",
+		"purpose": "The instructor-assigned visual identification prop. It never enters a tooth or simulates cutting, ISO size, taper, sterility, canal instrumentation or treatment.",
+		"source": AAE_ROOT_CANAL,
+	},
+	"tool.niti_rotary_file_alternative": {
+		"name": "NiTi rotary endodontic file (schematic 3D alternative)", "german": "NiTi-Maschinenfeile / rotierende Wurzelkanalfeile (3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-niti-rotary-file.tscn",
+		"cue": "A compact motor-latch connector and a study-tapered flute pattern distinguish this separate rotary-file family from the H-file finger handle.",
+		"purpose": "Plausible different endodontic instrument, but not the manual H-file silhouette the fictional instructor assigned. No rotation, torque calibration or actual canal preparation.",
+		"source": AAE_ROOT_CANAL,
+	},
+	"material.manual_file_canal_reference": {
+		"name": "Instructor's manual H-file and two-location canal diagram key (fictional)",
+		"german": "Lehrkarte: Handfeile und zwei Wurzelkanal-Referenzstellen",
+		"cue": "Illustration · pale lavender instructor card with the assigned MANUAL FILE identity plus two chamber/canal diagram target markers.",
+		"purpose": "Fictional pairing of an instrument-recognition exercise with two existing schematic diagram markers. Not a length measurement, canal path, technique or patient record.",
+		"swatch": Color("#c7c3e3"), "source": AAE_ROOT_CANAL,
+	},
+	"material.rotary_file_reference_alternative": {
+		"name": "Rotary NiTi file motor setup reference (fictional alternative)",
+		"german": "Lehrkarte: Rotierende NiTi-Maschinenfeile (Vergleich)",
+		"cue": "Illustration · muted turquoise rotary-motor reference card, not the assigned manual-file and chamber/canal label key.",
+		"purpose": "Belongs to a different imaginary rotary-file exercise; no RPM, torque, actual motor use, clinical preparation or imaging.",
+		"swatch": Color("#afd4cf"), "source": AAE_ROOT_CANAL,
+	},
 	"tool.canal_tracing_stylus": {
 		"name": "Model canal tracing stylus (synthetic 3D annotation pointer)", "german": "Wurzelkanal-Markierungsstift (schematisches Lehrmodell)",
 		"scene": "res://assets/bench/synthetic-canal-tracing-stylus.tscn",
@@ -828,6 +856,34 @@ const ENDO := {
 	"finish": "Record fictional chamber and canal map tracing",
 	"finish_event": "record_endo_mock_canal_map_review",
 	"outcome": "Root canal diagram review complete · The two assigned schematic markers were recorded in the original chair exercise. No real root anatomy, treatment, canal preparation, working length, diagnosis or patient outcome was assessed.",
+	"reference": AAE_ROOT_CANAL,
+}
+
+
+const ENDO_FILE := {
+	"id": "endo_manual_file_canal_reference_intro",
+	"scenario": "endo",
+	"title": "Manual H-file recognition and canal diagram bench",
+	"case": "FICTIONAL instructor-assigned instrument-recognition AND DIAGRAM-LABELLING exercise · Distinguish the HEDSTRÖM MANUAL H-FILE study model from a NiTi ROTARY FILE model, then choose the supplied manual-file TWO-MARKER REFERENCE KEY. The learner continues into the UNCHANGED endodontic diagram chair to trace the PREASSIGNED CHAMBER and CANAL MODEL LOCATIONS. The chair uses a virtual diagram annotation pointer, NOT an H-file inserted into root anatomy. No actual tooth, canal entry, instrumentation, working length, hand-file technique, irrigation, obturation, diagnosis, clinical procedure or patient outcome is simulated.",
+	"tool": {
+		"label": "endodontic file study model",
+		"choices": ["tool.hand_h_file_recognition", "tool.niti_rotary_file_alternative"],
+		"expected": "tool.hand_h_file_recognition",
+		"prompt": "Which rotatable study file matches the instructor's assigned MANUAL Hedström H-file instead of a rotary motor-driven file?",
+		"correct": "Correct. The manual H-file silhouette has a finger handle. This is instrument-family identification only.",
+		"incorrect": "The NiTi rotary-file model has a motor-latch connection. Choose the specified manual H-file study model.",
+	},
+	"material": {
+		"label": "instructor canal reference key",
+		"choices": ["material.manual_file_canal_reference", "material.rotary_file_reference_alternative"],
+		"expected": "material.manual_file_canal_reference",
+		"prompt": "Which fictional instructor card pairs the manual-file assignment with the two chamber/canal diagram markers?",
+		"correct": "Correct. This H-file reference card names the two simulated diagram locations without supplying clinical canal anatomy or length.",
+		"incorrect": "The rotary NiTi equipment card is a plausible different exercise, not the assigned manual-file and canal-label reference.",
+	},
+	"finish": "Record manual H-file identity and two canal-diagram markers",
+	"finish_event": "record_manual_h_file_canal_reference_review",
+	"outcome": "Manual H-file study recognition and diagram review complete · The unchanged endodontic chair recorded its two preset chamber/canal markers. No real root-canal instrumentation, diagnosis, working length, canal anatomy, treatment or patient outcome was evaluated.",
 	"reference": AAE_ROOT_CANAL,
 }
 
