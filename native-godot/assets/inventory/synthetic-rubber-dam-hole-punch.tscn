@@ -1,0 +1,353 @@
+[gd_scene load_steps=24 format=3]
+
+[sub_resource type="CylinderMesh" id="Shape_0"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.11674
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_1"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.10051
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_2"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.08108
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_3"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.08108
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_4"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.10051
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_5"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.11674
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_6"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.10051
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_7"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.08108
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_8"]
+top_radius = 0.038
+bottom_radius = 0.038
+height = 0.10051
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_9"]
+top_radius = 0.066
+bottom_radius = 0.066
+height = 0.97576
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Shape_10"]
+radius = 0.125
+height = 0.16
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Shape_11"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.4272
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_12"]
+top_radius = 0.26
+bottom_radius = 0.26
+height = 0.1
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_13"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.028
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Shape_14"]
+top_radius = 0.06
+bottom_radius = 0.045
+height = 0.14
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Shape_15"]
+radius = 0.065
+height = 0.08
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.75, 0.8, 0.86, 1)
+metallic = 0.74
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.23, 1)
+metallic = 0.24
+roughness = 0.59
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.67, 0.29, 1)
+metallic = 0.52
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.27, 0.56, 0.84, 1)
+metallic = 0.18
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.31, 0.73, 0.52, 1)
+metallic = 0.14
+roughness = 0.49
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.93, 0.94, 1)
+metallic = 0.08
+roughness = 0.51
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.5, 0.55, 0.69, 1)
+metallic = 0.2
+roughness = 0.5
+
+[node name="SchematicAinsworthRubberDamHolePunch" type="Node3D"]
+
+[node name="PunchLeftFingerRing1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16005, 0.9075, 0)
+rotation_degrees = Vector3(0, 0, 9.91232)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19755, 1.00709, 0)
+rotation_degrees = Vector3(0, 0, 33.11134)
+mesh = SubResource("Shape_1")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2625, 1.06459, 0)
+rotation_degrees = Vector3(0, 0, 67.66442)
+mesh = SubResource("Shape_2")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3375, 1.06459, 0)
+rotation_degrees = Vector3(0, 0, 112.33558)
+mesh = SubResource("Shape_3")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.40245, 1.00709, 0)
+rotation_degrees = Vector3(0, 0, 146.88866)
+mesh = SubResource("Shape_4")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43995, 0.9075, 0)
+rotation_degrees = Vector3(0, 0, 170.08768)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43995, 0.7925, 0)
+rotation_degrees = Vector3(0, 0, -170.08768)
+mesh = SubResource("Shape_5")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.40245, 0.69291, 0)
+rotation_degrees = Vector3(0, 0, -146.88866)
+mesh = SubResource("Shape_6")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing9" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3375, 0.63541, 0)
+rotation_degrees = Vector3(0, 0, -112.33558)
+mesh = SubResource("Shape_2")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing10" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2625, 0.63541, 0)
+rotation_degrees = Vector3(0, 0, -67.66442)
+mesh = SubResource("Shape_7")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing11" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19755, 0.69291, 0)
+rotation_degrees = Vector3(0, 0, -33.11134)
+mesh = SubResource("Shape_8")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftFingerRing12" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16005, 0.7925, 0)
+rotation_degrees = Vector3(0, 0, -9.91232)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing1" type="MeshInstance3D" parent="."]
+position = Vector3(0.43995, 0.9075, 0)
+rotation_degrees = Vector3(0, 0, 9.91232)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing2" type="MeshInstance3D" parent="."]
+position = Vector3(0.40245, 1.00709, 0)
+rotation_degrees = Vector3(0, 0, 33.11134)
+mesh = SubResource("Shape_1")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing3" type="MeshInstance3D" parent="."]
+position = Vector3(0.3375, 1.06459, 0)
+rotation_degrees = Vector3(0, 0, 67.66442)
+mesh = SubResource("Shape_2")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing4" type="MeshInstance3D" parent="."]
+position = Vector3(0.2625, 1.06459, 0)
+rotation_degrees = Vector3(0, 0, 112.33558)
+mesh = SubResource("Shape_3")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing5" type="MeshInstance3D" parent="."]
+position = Vector3(0.19755, 1.00709, 0)
+rotation_degrees = Vector3(0, 0, 146.88866)
+mesh = SubResource("Shape_4")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing6" type="MeshInstance3D" parent="."]
+position = Vector3(0.16005, 0.9075, 0)
+rotation_degrees = Vector3(0, 0, 170.08768)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing7" type="MeshInstance3D" parent="."]
+position = Vector3(0.16005, 0.7925, 0)
+rotation_degrees = Vector3(0, 0, -170.08768)
+mesh = SubResource("Shape_5")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing8" type="MeshInstance3D" parent="."]
+position = Vector3(0.19755, 0.69291, 0)
+rotation_degrees = Vector3(0, 0, -146.88866)
+mesh = SubResource("Shape_6")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing9" type="MeshInstance3D" parent="."]
+position = Vector3(0.2625, 0.63541, 0)
+rotation_degrees = Vector3(0, 0, -112.33558)
+mesh = SubResource("Shape_2")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing10" type="MeshInstance3D" parent="."]
+position = Vector3(0.3375, 0.63541, 0)
+rotation_degrees = Vector3(0, 0, -67.66442)
+mesh = SubResource("Shape_7")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing11" type="MeshInstance3D" parent="."]
+position = Vector3(0.40245, 0.69291, 0)
+rotation_degrees = Vector3(0, 0, -33.11134)
+mesh = SubResource("Shape_8")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightFingerRing12" type="MeshInstance3D" parent="."]
+position = Vector3(0.43995, 0.7925, 0)
+rotation_degrees = Vector3(0, 0, -9.91232)
+mesh = SubResource("Shape_0")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchLeftHandleArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.08, 0.175, 0)
+rotation_degrees = Vector3(0, 0, -155.79903)
+mesh = SubResource("Shape_9")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchRightHandleArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, 0.175, 0.03)
+rotation_degrees = Vector3(0, 0, 155.79903)
+mesh = SubResource("Shape_9")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchArticulationHinge" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.24, 0)
+mesh = SubResource("Shape_10")
+material_override = SubResource("Mat_dark")
+
+[node name="PunchLowerJaw" type="MeshInstance3D" parent="."]
+position = Vector3(0.17, -0.505, 0)
+rotation_degrees = Vector3(0, 0, -163.68615)
+mesh = SubResource("Shape_11")
+material_override = SubResource("Mat_metal")
+
+[node name="PunchUpperJaw" type="MeshInstance3D" parent="."]
+position = Vector3(-0.17, -0.505, 0)
+rotation_degrees = Vector3(0, 0, 163.68615)
+mesh = SubResource("Shape_11")
+material_override = SubResource("Mat_metal")
+
+[node name="RotatingHoleSelectionWheel" type="MeshInstance3D" parent="."]
+position = Vector3(0.22, -0.83, 0.07)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_12")
+material_override = SubResource("Mat_metal")
+
+[node name="IllustrativeHoleSize0" type="MeshInstance3D" parent="."]
+position = Vector3(0.38, -0.83, 0.15)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_13")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeHoleSize1" type="MeshInstance3D" parent="."]
+position = Vector3(0.26944, -0.67783, 0.15)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_13")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeHoleSize2" type="MeshInstance3D" parent="."]
+position = Vector3(0.09056, -0.73595, 0.15)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_13")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeHoleSize3" type="MeshInstance3D" parent="."]
+position = Vector3(0.09056, -0.92405, 0.15)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_13")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeHoleSize4" type="MeshInstance3D" parent="."]
+position = Vector3(0.26944, -0.98217, 0.15)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Shape_13")
+material_override = SubResource("Mat_dark")
+
+[node name="BluntedPunchStud" type="MeshInstance3D" parent="."]
+position = Vector3(-0.23, -0.88, 0)
+mesh = SubResource("Shape_14")
+material_override = SubResource("Mat_gold")
+
+[node name="NoCuttingSafetyCap" type="MeshInstance3D" parent="."]
+position = Vector3(-0.23, -0.99, 0)
+mesh = SubResource("Shape_15")
+material_override = SubResource("Mat_grip")
