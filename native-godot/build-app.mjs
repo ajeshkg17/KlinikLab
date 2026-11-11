@@ -184,6 +184,11 @@ try{
  const orthoAlignmentScenes=["synthetic-bird-beak-pliers.tscn","synthetic-three-prong-pliers.tscn","synthetic-adams-pliers.tscn","synthetic-mathieu-ligature-pliers.tscn","synthetic-elastic-separating-pliers.tscn","synthetic-boone-bracket-height-gauge.tscn","synthetic-orthodontic-ligature-director.tscn","synthetic-tweed-loop-pliers.tscn","synthetic-orthodontic-torquing-turret.tscn","synthetic-aligner-removal-hook.tscn"];
  for(const filename of orthoAlignmentScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Ten original local static periodontal assessment, surgery and implant maintenance studies.
+ // Read-only inventory only; no changes to chair lessons, grading, or learner files.
+ const periodontalAssessmentScenes=["synthetic-unc15-periodontal-probe.tscn","synthetic-who-cpi-periodontal-probe.tscn","synthetic-nabers-furcation-probe.tscn","synthetic-goldman-fox-pocket-marker.tscn","synthetic-kirkland-gingivectomy-knife.tscn","synthetic-orban-interdental-knife.tscn","synthetic-goldman-fox-periodontal-scissors.tscn","synthetic-hirschfeld-periodontal-file.tscn","synthetic-ochsenbein-periodontal-chisel.tscn","synthetic-implant-polymer-scaler.tscn"];
+ for(const filename of periodontalAssessmentScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
