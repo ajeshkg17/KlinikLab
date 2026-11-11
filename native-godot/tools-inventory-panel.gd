@@ -1,5 +1,5 @@
 extends Control
-## Read-only 3D dental-tool inventory. No case scoring or user:// writes.
+## Read-only 3D dental-tool inventory. No case scoring or profile persistence.
 const CATALOG := preload("res://tools-inventory-catalog.gd")
 const PREVIEW := preload("res://chairside-model-preview.gd")
 
