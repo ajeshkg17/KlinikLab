@@ -1,0 +1,152 @@
+[gd_scene load_steps=12 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.079
+bottom_radius = 0.079
+height = 0.84
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_1"]
+radius = 0.12
+height = 0.14
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.045
+bottom_radius = 0.045
+height = 0.4639
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_3"]
+size = Vector3(0.067, 0.23, 0.075)
+
+[sub_resource type="SphereMesh" id="Mesh_4"]
+radius = 0.04
+height = 0.08
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.081
+bottom_radius = 0.081
+height = 0.019
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.76
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.23, 1)
+metallic = 0.24
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.84, 0.67, 0.28, 1)
+metallic = 0.45
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.21, 0.59, 0.81, 1)
+metallic = 0.1
+roughness = 0.44
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.76, 0.44, 0.29, 1)
+metallic = 0.18
+roughness = 0.49
+
+[node name="SchematicMicroLigatureCutter" type="Node3D"]
+
+[node name="MicroCutterLeftShortHandle" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.4, 0)
+rotation_degrees = Vector3(0, 0, -9)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="MicroCutterRightShortHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.4, 0)
+rotation_degrees = Vector3(0, 0, 9)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="MicroLigatureCutterPivot" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.07, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroLeftArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.1, -0.34, 0)
+rotation_degrees = Vector3(0, 0, -172.56859)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="MicroRightArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.1, -0.34, 0.03)
+rotation_degrees = Vector3(0, 0, 172.56859)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="MicroLeftBluntCuttingJaw" type="MeshInstance3D" parent="."]
+position = Vector3(0.13, -0.72, 0)
+rotation_degrees = Vector3(0, 0, -9)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="MicroRightBluntCuttingJaw" type="MeshInstance3D" parent="."]
+position = Vector3(-0.13, -0.72, 0.03)
+rotation_degrees = Vector3(0, 0, 9)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="MicroLeftRoundedTerminal" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, -0.87, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="MicroRightRoundedTerminal" type="MeshInstance3D" parent="."]
+position = Vector3(-0.14, -0.87, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="MicroLeftGripGroove1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.23, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroLeftGripGroove2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.33, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroLeftGripGroove3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.43, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroLeftGripGroove4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.53, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroRightGripGroove1" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.23, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroRightGripGroove2" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.33, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroRightGripGroove3" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.43, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="MicroRightGripGroove4" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.53, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")

@@ -348,3 +348,21 @@ The **53 total static inventory entries** consist of 19 existing bench models + 
 **These are NOT clinical CAD or functioning equipment.** Air/water spray, suction airflow, local anaesthetic needle and delivery, matrix-band tension, interdental separation, dam-frame stretch, apex locator electrical measurement and bite-block fit are **not simulated or validated**. The syringe has a schematic protective cap, not an operative needle. No real treatment guidance, grading, chair gameplay or progress modification is introduced. External links in the catalog are instrument-identification reading references, not mesh or texture sources.
 
 Identification references: [A-dec assistant instrumentation documentation](https://dental.a-dec.com/-/media/adecdotcom/resource-center/product-information/support-information/instructions-for-use/86050700.pdf), [Dental matrix bands and retainers](https://resource.odmu.edu.ua/chair/download/28681/mKlXwO8UaBWrCiQR7PFe1g/dental%20instruments.pdf), and [Dental assistant handbook](https://azdentalassistants.com/wp-content/uploads/study-materials/delmars-handbook-complete.pdf). The new local contract is tests/assistant_restorative_inventory_contract.test.mjs; execute it with previous inventory contracts on a native Node 22 checkout. Actual Godot 4.7.2 import/visual inspection and all 20 bench replays remain owner acceptance gates.
+
+
+### Prosthodontic and orthodontic instrument inventory · ten additional models
+
+The read-only rotating 3D inventory gains **ten further authored schematic models**.
+
+- Prosthodontics: impression-material cartridge dispenser, articulating-paper holding forceps, sliding-weight crown remover, crown-and-bridge scissors.
+- Orthodontics: bracket placement holder, cut-and-hold distal-end archwire cutter concept, micro ligature cutter, Weingart utility pliers, bracket-removing pliers, band pusher.
+
+This brings the inventory to **63 selectable entries**: 19 pre-existing bench study tools, six verified CC0 source-pack equipment GLBs, eight early original hand tools, ten rotary/isolation/extraction models, ten assistant/restorative/endodontic models and ten new prosthodontic/orthodontic models.
+
+Every newly added instrument is a locally authored primitive-based .tscn scene with an English and German identification label and a source link for instrument-family reading. The references are **not** the source of model meshes or textures. The builder copies them deterministically into the existing isolated Godot inventory; there are no new network downloads and no changes to bench lessons, scoring, saved learner progress or journal data.
+
+**Limitations:** The objects are educational silhouettes and not physically or clinically calibrated manufacturer CAD. The articulating-paper strip and demonstration bracket are visual markers. The crown remover does not deliver impulses, impression gun does not dispense material, scissors/cutters have blunted schematic blades, and no bracket handling, wire manipulation or intraoral procedures are simulated.
+
+Identification references: [GC Cartridge Dispenser II](https://www.gc.dental/america/products/operatory/equipment/gc-cartridge-dispenser-ii); [HuFriedy instrument catalog (orthodontic setup)](https://catalog.hu-friedy.com/product/files/basic-html/page474.html); [HuFriedy distal-end cutters](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page17.html); [ligature cutters](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page18.html); [Weingart pliers](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page19.html); [band pushers](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page28.html).
+
+Execute the new source contracts with native Node 22 using node --test tests/prostho_ortho_tool_inventory_contract.test.mjs. **Do not merge** without Windows Godot 4.7.2 import, all 63 previews verified visually and 20-bench gameplay/journal regression. Source parsing is not runtime acceptance.
