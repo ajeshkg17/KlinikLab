@@ -145,6 +145,11 @@ try{
  const assistantRestorativeScenes=["synthetic-air-water-syringe.tscn","synthetic-hve-evacuator-tip.tscn","synthetic-saliva-ejector.tscn","synthetic-aspirating-cartridge-syringe.tscn","synthetic-tofflemire-matrix-retainer.tscn","synthetic-sectional-matrix-ring.tscn","synthetic-interdental-wooden-wedge.tscn","synthetic-rubber-dam-frame.tscn","synthetic-endodontic-apex-locator.tscn","synthetic-dental-bite-block.tscn"];
  for(const filename of assistantRestorativeScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Additional authored prosthodontic/orthodontic schematic study geometry.
+ // No vendor CAD downloads, clinical dimensions, scoring or chair modifications.
+ const prosthoOrthoScenes=["synthetic-impression-dispenser.tscn","synthetic-articulating-paper-forceps.tscn","synthetic-crown-remover.tscn","synthetic-crown-bridge-scissors.tscn","synthetic-bracket-holder.tscn","synthetic-distal-end-cutter.tscn","synthetic-ligature-cutter.tscn","synthetic-weingart-pliers.tscn","synthetic-bracket-remover.tscn","synthetic-orthodontic-band-pusher.tscn"];
+ for(const filename of prosthoOrthoScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
