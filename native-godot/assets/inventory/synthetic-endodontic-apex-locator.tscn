@@ -1,0 +1,233 @@
+[gd_scene load_steps=24 format=3]
+
+[sub_resource type="BoxMesh" id="Mesh_0"]
+size = Vector3(1.05, 0.76, 0.25)
+
+[sub_resource type="BoxMesh" id="Mesh_1"]
+size = Vector3(0.69, 0.39, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_2"]
+size = Vector3(0.54, 0.065, 0.065)
+
+[sub_resource type="BoxMesh" id="Mesh_3"]
+size = Vector3(0.075, 0.18, 0.068)
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.09
+bottom_radius = 0.09
+height = 0.05
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.15811
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.20616
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.23259
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.21541
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.19698
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_10"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.20125
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_11"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.19925
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_12"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.24515
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_13"]
+size = Vector3(0.2, 0.09, 0.07)
+
+[sub_resource type="BoxMesh" id="Mesh_14"]
+size = Vector3(0.12, 0.24, 0.08)
+
+[sub_resource type="SphereMesh" id="Mesh_15"]
+radius = 0.07
+height = 0.075
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.29, 0.5, 0.65, 1)
+metallic = 0.15
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.22, 0.59, 0.82, 1)
+metallic = 0.12
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.81, 0.25, 0.25, 1)
+metallic = 0.08
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.34, 0.84, 0.52, 1)
+metallic = 0.08
+roughness = 0.36
+
+[node name="SchematicElectronicEndodonticApexLocator" type="Node3D"]
+
+[node name="LocatorCase" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.18, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="DarkDisplayBezel" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.27, 0.155)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeGradientBar" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.28, 0.197)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_green")
+
+[node name="ScreenSegment0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.25, 0.27, 0.215)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="ScreenSegment1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12, 0.27, 0.215)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="ScreenSegment2" type="MeshInstance3D" parent="."]
+position = Vector3(0.01, 0.27, 0.215)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="ScreenSegment3" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 0.27, 0.215)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="ScreenSegment4" type="MeshInstance3D" parent="."]
+position = Vector3(0.27, 0.27, 0.215)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="PowerInputJack" type="MeshInstance3D" parent="."]
+position = Vector3(-0.4, -0.25, 0.14)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="ClipInputJack" type="MeshInstance3D" parent="."]
+position = Vector3(0.4, -0.25, 0.14)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="RedCable_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.425, -0.385, 0)
+rotation_degrees = Vector3(0, 0, 161.56505)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_red")
+
+[node name="RedCable_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, -0.555, 0)
+rotation_degrees = Vector3(0, 0, -157.16635)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_red")
+
+[node name="RedCable_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.265, -0.7, 0)
+rotation_degrees = Vector3(0, 0, -115.46335)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_red")
+
+[node name="RedCable_4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12, -0.85, 0)
+rotation_degrees = Vector3(0, 0, -158.19859)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_red")
+
+[node name="BlueCable_1" type="MeshInstance3D" parent="."]
+position = Vector3(0.44, -0.4, 0)
+rotation_degrees = Vector3(0, 0, -156.03751)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_blue")
+
+[node name="BlueCable_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.435, -0.58, 0)
+rotation_degrees = Vector3(0, 0, 153.43495)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_blue")
+
+[node name="BlueCable_3" type="MeshInstance3D" parent="."]
+position = Vector3(0.295, -0.7, 0)
+rotation_degrees = Vector3(0, 0, 107.52557)
+mesh = SubResource("Mesh_11")
+material_override = SubResource("Mat_blue")
+
+[node name="BlueCable_4" type="MeshInstance3D" parent="."]
+position = Vector3(0.175, -0.85, 0)
+rotation_degrees = Vector3(0, 0, 168.23171)
+mesh = SubResource("Mesh_12")
+material_override = SubResource("Mat_blue")
+
+[node name="LipClipMarker" type="MeshInstance3D" parent="."]
+position = Vector3(-0.11, -1, 0)
+rotation_degrees = Vector3(0, 0, -12)
+mesh = SubResource("Mesh_13")
+material_override = SubResource("Mat_steel")
+
+[node name="FileClipMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0.13, -1.04, 0)
+rotation_degrees = Vector3(0, 0, 14)
+mesh = SubResource("Mesh_14")
+material_override = SubResource("Mat_steel")
+
+[node name="StartButton" type="MeshInstance3D" parent="."]
+position = Vector3(0.42, 0.51, 0.15)
+mesh = SubResource("Mesh_15")
+material_override = SubResource("Mat_gold")

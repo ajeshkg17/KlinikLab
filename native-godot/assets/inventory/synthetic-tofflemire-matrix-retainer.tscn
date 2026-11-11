@@ -1,0 +1,262 @@
+[gd_scene load_steps=26 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.055
+bottom_radius = 0.055
+height = 1.35
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.15
+bottom_radius = 0.15
+height = 0.18
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.125
+bottom_radius = 0.125
+height = 0.16
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.153
+bottom_radius = 0.153
+height = 0.018
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_4"]
+size = Vector3(0.07, 0.55, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_5"]
+size = Vector3(0.34, 0.075, 0.12)
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.08058
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.09746
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.11182
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.11182
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_10"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.09746
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_11"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.08058
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_12"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.09746
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_13"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.11182
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_14"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.11182
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_15"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.09746
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_16"]
+top_radius = 0.022
+bottom_radius = 0.022
+height = 0.08058
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_17"]
+top_radius = 0.085
+bottom_radius = 0.085
+height = 0.09
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.58, 0.44, 0.33, 1)
+metallic = 0.15
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.22, 0.59, 0.82, 1)
+metallic = 0.12
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.81, 0.25, 0.25, 1)
+metallic = 0.08
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.34, 0.84, 0.52, 1)
+metallic = 0.08
+roughness = 0.36
+
+[node name="SchematicUniversalTofflemireMatrixRetainer" type="Node3D"]
+
+[node name="MainRetainerStem" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.19, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="OuterKnurledKnob" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.91, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="InnerAdjustmentKnob" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.58, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_gold")
+
+[node name="OuterKnobGrip0" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.87, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="OuterKnobGrip1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.93, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="OuterKnobGrip2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.99, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="RetainerFrameLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15, -0.54, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="RetainerFrameRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.15, -0.54, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="RetainerFrameCrosspiece" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.78, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="LooseMatrixBandStudyLoop_1" type="MeshInstance3D" parent="."]
+position = Vector3(0.20526, -1.0025, 0)
+rotation_degrees = Vector3(0, 0, 21.45444)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_2" type="MeshInstance3D" parent="."]
+position = Vector3(0.15026, -0.93755, 0)
+rotation_degrees = Vector3(0, 0, 55.71312)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_3" type="MeshInstance3D" parent="."]
+position = Vector3(0.055, -0.90005, 0)
+rotation_degrees = Vector3(0, 0, 79.64666)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, -0.90005, 0)
+rotation_degrees = Vector3(0, 0, 100.35334)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15026, -0.93755, 0)
+rotation_degrees = Vector3(0, 0, 124.28688)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.20526, -1.0025, 0)
+rotation_degrees = Vector3(0, 0, 158.54556)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.20526, -1.0775, 0)
+rotation_degrees = Vector3(0, 0, -158.54556)
+mesh = SubResource("Mesh_11")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.15026, -1.14245, 0)
+rotation_degrees = Vector3(0, 0, -124.28688)
+mesh = SubResource("Mesh_12")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_9" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, -1.17995, 0)
+rotation_degrees = Vector3(0, 0, -100.35334)
+mesh = SubResource("Mesh_13")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_10" type="MeshInstance3D" parent="."]
+position = Vector3(0.055, -1.17995, 0)
+rotation_degrees = Vector3(0, 0, -79.64666)
+mesh = SubResource("Mesh_14")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_11" type="MeshInstance3D" parent="."]
+position = Vector3(0.15026, -1.14245, 0)
+rotation_degrees = Vector3(0, 0, -55.71312)
+mesh = SubResource("Mesh_15")
+material_override = SubResource("Mat_gold")
+
+[node name="LooseMatrixBandStudyLoop_12" type="MeshInstance3D" parent="."]
+position = Vector3(0.20526, -1.0775, 0)
+rotation_degrees = Vector3(0, 0, -21.45444)
+mesh = SubResource("Mesh_16")
+material_override = SubResource("Mat_gold")
+
+[node name="AdjusterCap" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.82, 0)
+mesh = SubResource("Mesh_17")
+material_override = SubResource("Mat_dark")

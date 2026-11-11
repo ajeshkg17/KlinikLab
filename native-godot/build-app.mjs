@@ -140,6 +140,11 @@ try{
  const additionalHandToolScenes=["synthetic-high-speed-handpiece.tscn","synthetic-contra-angle-handpiece.tscn","synthetic-straight-handpiece.tscn","synthetic-round-bur.tscn","synthetic-pear-bur-330.tscn","synthetic-endo-z-bur.tscn","synthetic-rubber-dam-clamp.tscn","synthetic-rubber-dam-clamp-forceps.tscn","synthetic-straight-elevator.tscn","synthetic-extraction-forceps.tscn"];
  for(const filename of additionalHandToolScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Independent original teaching meshes, not downloaded clinical geometry.
+ // These static study props are read-only and do not change chair tasks.
+ const assistantRestorativeScenes=["synthetic-air-water-syringe.tscn","synthetic-hve-evacuator-tip.tscn","synthetic-saliva-ejector.tscn","synthetic-aspirating-cartridge-syringe.tscn","synthetic-tofflemire-matrix-retainer.tscn","synthetic-sectional-matrix-ring.tscn","synthetic-interdental-wooden-wedge.tscn","synthetic-rubber-dam-frame.tscn","synthetic-endodontic-apex-locator.tscn","synthetic-dental-bite-block.tscn"];
+ for(const filename of assistantRestorativeScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);

@@ -1,0 +1,226 @@
+[gd_scene load_steps=20 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.26683
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.26173
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.28018
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.31765
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.28231
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.27166
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.31321
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.34059
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.32757
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.29155
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_10"]
+radius = 0.058
+height = 0.06
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_11"]
+radius = 0.085
+height = 0.12
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.28, 0.46, 0.68, 1)
+metallic = 0.15
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.22, 0.59, 0.82, 1)
+metallic = 0.12
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.81, 0.25, 0.25, 1)
+metallic = 0.08
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.34, 0.84, 0.52, 1)
+metallic = 0.08
+roughness = 0.36
+
+[node name="SchematicRubberDamUFrame" type="Node3D"]
+
+[node name="DamFrameU_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.57, 0.44, 0)
+rotation_degrees = Vector3(0, 0, 167.00538)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.615, 0.18, 0)
+rotation_degrees = Vector3(0, 0, 173.41806)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.635, -0.09, 0)
+rotation_degrees = Vector3(0, 0, 177.95459)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.565, -0.37, 0)
+rotation_degrees = Vector3(0, 0, -151.82141)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.36, -0.565, 0)
+rotation_degrees = Vector3(0, 0, -112.9321)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.095, -0.635, 0)
+rotation_degrees = Vector3(0, 0, -96.34019)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_7" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, -0.605, 0)
+rotation_degrees = Vector3(0, 0, -73.30076)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_8" type="MeshInstance3D" parent="."]
+position = Vector3(0.45, -0.43, 0)
+rotation_degrees = Vector3(0, 0, -40.23636)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_9" type="MeshInstance3D" parent="."]
+position = Vector3(0.595, -0.14, 0)
+rotation_degrees = Vector3(0, 0, -12.33909)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_10" type="MeshInstance3D" parent="."]
+position = Vector3(0.615, 0.165, 0)
+rotation_degrees = Vector3(0, 0, 5.90614)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_grip")
+
+[node name="DamFrameU_11" type="MeshInstance3D" parent="."]
+position = Vector3(0.57, 0.44, 0)
+rotation_degrees = Vector3(0, 0, 12.99462)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="LeftDamRetentionStud0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.65, -0.4, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="RightDamRetentionStud0" type="MeshInstance3D" parent="."]
+position = Vector3(0.65, -0.4, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftDamRetentionStud1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.65, -0.16, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="RightDamRetentionStud1" type="MeshInstance3D" parent="."]
+position = Vector3(0.65, -0.16, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftDamRetentionStud2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.65, 0.08, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="RightDamRetentionStud2" type="MeshInstance3D" parent="."]
+position = Vector3(0.65, 0.08, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftDamRetentionStud3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.65, 0.32, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="RightDamRetentionStud3" type="MeshInstance3D" parent="."]
+position = Vector3(0.65, 0.32, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftTerminalCap" type="MeshInstance3D" parent="."]
+position = Vector3(-0.54, 0.6, 0)
+mesh = SubResource("Mesh_11")
+material_override = SubResource("Mat_dark")
+
+[node name="RightTerminalCap" type="MeshInstance3D" parent="."]
+position = Vector3(0.54, 0.6, 0)
+mesh = SubResource("Mesh_11")
+material_override = SubResource("Mat_dark")

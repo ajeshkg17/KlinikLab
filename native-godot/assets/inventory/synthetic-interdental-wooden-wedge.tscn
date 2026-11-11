@@ -1,0 +1,147 @@
+[gd_scene load_steps=18 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.02
+bottom_radius = 0.17
+height = 1.4
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.19
+bottom_radius = 0.19
+height = 0.16
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.024
+bottom_radius = 0.032
+height = 0.15
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.153
+bottom_radius = 0.153
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.137
+bottom_radius = 0.137
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.121
+bottom_radius = 0.121
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.089
+bottom_radius = 0.089
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.073
+bottom_radius = 0.073
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.057
+bottom_radius = 0.057
+height = 0.012
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.71, 0.49, 0.27, 1)
+metallic = 0.15
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.22, 0.59, 0.82, 1)
+metallic = 0.12
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.81, 0.25, 0.25, 1)
+metallic = 0.08
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_green"]
+albedo_color = Color(0.34, 0.84, 0.52, 1)
+metallic = 0.08
+roughness = 0.36
+
+[node name="SchematicWoodenInterdentalWedge" type="Node3D"]
+
+[node name="TaperedWedgeMainBody" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="WideHandlingButt" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.76, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_gold")
+
+[node name="RoundedFineWedgeTipNotClinical" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.77, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_gold")
+
+[node name="WoodGrainGuideBand0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.52, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.32, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand2" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.08, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.28, 0)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand5" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.48, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="WoodGrainGuideBand6" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.68, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
