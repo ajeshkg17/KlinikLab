@@ -133,7 +133,7 @@ try{
  fs.mkdirSync(inventoryDir,{recursive:true});
  // Original schematic handheld instrument meshes: visual recognition only.
  // These are not source-pack downloads and are never used as clinical geometry.
- for(const filename of ["synthetic-explorer-23.tscn","synthetic-college-pliers.tscn","synthetic-spoon-excavator.tscn","synthetic-ball-burnisher.tscn","synthetic-k-file.tscn","synthetic-finger-spreader.tscn","synthetic-sickle-scaler.tscn","synthetic-composite-spatula.tscn"])
+ for(const filename of ['synthetic-explorer-23.tscn','synthetic-college-pliers.tscn','synthetic-spoon-excavator.tscn','synthetic-ball-burnisher.tscn','synthetic-k-file.tscn','synthetic-finger-spreader.tscn','synthetic-sickle-scaler.tscn','synthetic-composite-spatula.tscn'])
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
  const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
