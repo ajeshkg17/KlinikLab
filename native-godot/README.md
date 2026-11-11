@@ -297,3 +297,21 @@ pixel, desktop physical-input, GPU, Quest or clinical acceptance. The new
 workflow deliberately does not upload screenshots, artifacts, or learner data.
 Do not claim passing test evidence until an actual hosted runner has started
 and completed the tests.
+
+
+## Dental tool inventory · first imported batch
+
+Open **Journey → Open dental instrument inventory · rotating 3D models** in the desktop app. The separate, read-only inventory viewer shows the 19 pre-existing chairside study models plus six *newly browsable* static assets from the previously downloaded [3DAssets.dev Dental Practice and Surgery pack](https://3dassets.dev/packs/dental-practice-and-surgery):
+
+- Examination instrument tray (mirror, tapered probe and college tweezers on a single static tray)
+- Upper/lower impression tray set
+- Intraoral X-ray sensor tray
+- Dental suction unit
+- Articulator with model casts
+- Ultrasonic cleaning bath
+
+These are visual identification models, **not** calibrated or individually interactive instruments. The user can choose, rotate, read English/German labels and purposes, and open the original asset source. No chair interactions, lesson IDs, grades, clinical claims, stored progress or learner journal are changed.
+
+The native builder copies each **existing source-pack GLB** from `visual-qa/asset-research/assets/dental-practice-cc0-v1` only after checking the 54-model pack index ID, CDN URL, CC0 license, expected file name, original SHA256 and length. It preserves the unmodified original in `assets/inventory/*.glb.source`, deterministically converts quantized mesh attributes for Godot 4.7.2, checks the converted SHA256, and writes `assets/inventory/source-manifest.json`. No unpinned network downloads occur at build time. Source attribution: 3DAssets.dev / 3dassets, CC0 1.0.
+
+Run `node --test tests/dental_tool_inventory_contract.test.mjs` after checkout. **The actual Godot import, 3D visual quality, pointer interaction and full 20-bench regression still require owner Windows runtime acceptance**; a passing source check is not sufficient.
