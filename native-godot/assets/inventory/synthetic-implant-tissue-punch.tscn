@@ -1,0 +1,122 @@
+[gd_scene load_steps=13 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.056
+bottom_radius = 0.056
+height = 1.06
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.22
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.16
+bottom_radius = 0.16
+height = 0.35
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.119
+bottom_radius = 0.119
+height = 0.028
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.2
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.14
+bottom_radius = 0.14
+height = 0.03
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.063
+bottom_radius = 0.063
+height = 0.017
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.8, 0.84, 1)
+metallic = 0.75
+roughness = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.14, 0.17, 0.21, 1)
+metallic = 0.25
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.83, 0.68, 0.27, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.25, 0.54, 0.83, 1)
+metallic = 0.14
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.55, 0.49, 0.69, 1)
+metallic = 0.16
+roughness = 0.5
+
+[node name="SchematicCappedDentalSoftTissuePunch" type="Node3D"]
+
+[node name="TissuePunchLongShank" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.28, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="PunchCouplingSleeve" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.9, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="TissuePunchTubeOuterStudyCylinder" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.46, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="DarkHollowPunchOpeningStudyMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.64, 0.05)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="BluntPunchSafetyCover" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.72, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="PunchCoverEndMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.83, 0.02)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_grip")
+
+[node name="PunchShankRing0" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.18, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="PunchShankRing1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.32, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="PunchShankRing2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.46, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="PunchShankRing3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.6, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")

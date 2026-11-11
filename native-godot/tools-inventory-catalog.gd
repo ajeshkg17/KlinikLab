@@ -682,6 +682,112 @@ const FINISHING_ACCESSORY_TOOLS := [
 	},
 ]
 
+
+## Locally authored nonfunctional surgery/implant 3D recognition props.
+## Source links below are identification references, never sources of CAD files.
+const SURGICAL_IMPLANT_TOOLS := [
+	{
+		"id": "surgery_implant.minnesota_retractor",
+		"name": "Minnesota cheek retractor",
+		"german": "Minnesota-Wangenhalter / Wangenretraktor",
+		"kind": "Oral surgery · retraction",
+		"scene": "res://assets/inventory/synthetic-minnesota-retractor.tscn",
+		"cue": "Recognise the flattened angled handle and offset broad cheek-retraction paddle, distinct from a narrow elevator.",
+		"purpose": "Original nonfunctional silhouette; not patient-fitting, dimensionally calibrated or safe for tissue retraction.",
+		"source": "https://catalog.hu-friedy.com/surgical/files/basic-html/page114.html",
+	},
+	{
+		"id": "surgery_implant.frazier_aspirator",
+		"name": "Frazier surgical aspirator",
+		"german": "Frazier-Absaugkanüle / chirurgischer Sauger",
+		"kind": "Oral surgery · suction",
+		"scene": "res://assets/inventory/synthetic-frazier-aspirator.tscn",
+		"cue": "Find the narrow extended suction tube and control vent, unlike the wide HVE mouthpiece.",
+		"purpose": "No suction flow, lumen diameter, sterile status or device function; only a simplified visual study.",
+		"source": "https://www.hufriedygroup.com/en/surgical-aspirators/frazier-aspirator",
+	},
+	{
+		"id": "surgery_implant.friedman_rongeur",
+		"name": "Friedman bone rongeur",
+		"german": "Friedman-Knochenzange / Knochenrongeur",
+		"kind": "Oral surgery · bone instrumentation",
+		"scene": "res://assets/inventory/synthetic-friedman-rongeur.tscn",
+		"cue": "Compare heavy hinged handles and broad paired rongeur jaws with an extraction forceps.",
+		"purpose": "Schematic rounded study jaws; not cutting-capable or calibrated for bone removal or gripping forces.",
+		"source": "https://catalog.hu-friedy.com/surgical/files/basic-html/page21.html",
+	},
+	{
+		"id": "surgery_implant.miller_colburn_bone_file",
+		"name": "Miller-Colburn surgical bone file",
+		"german": "Miller-Colburn-Knochenfeile",
+		"kind": "Oral surgery · bone finishing",
+		"scene": "res://assets/inventory/synthetic-miller-colburn-bone-file.tscn",
+		"cue": "Identify the flattened rectangular working head with parallel illustrative serration marks.",
+		"purpose": "Not a functioning file: no calibrated tooth profile, sharpness, abrasiveness or bone-contact technique.",
+		"source": "https://catalog.hu-friedy.com/surgical/files/basic-html/page21.html",
+	},
+	{
+		"id": "surgery_implant.lucas_bone_curette",
+		"name": "Lucas double-ended surgical bone curette",
+		"german": "Lucas-Knochenkürette / chirurgischer Löffel",
+		"kind": "Oral surgery · curettage",
+		"scene": "res://assets/inventory/synthetic-lucas-bone-curette.tscn",
+		"cue": "Look for two small spoon-shaped working ends, different from a periodontal Gracey curette.",
+		"purpose": "Rounded, unsharpened schematic cups without clinical blade geometry, numbering or safe tissue-use properties.",
+		"source": "https://catalog.hu-friedy.com/product/files/basic-html/page211.html",
+	},
+	{
+		"id": "surgery_implant.implant_torque_wrench",
+		"name": "Dental implant torque ratchet wrench",
+		"german": "Implantat-Drehmomentratsche",
+		"kind": "Implantology · torque tools",
+		"scene": "res://assets/inventory/synthetic-implant-torque-wrench.tscn",
+		"cue": "Find a long torque-lever handle, circular ratchet head and noncalibrated visual scale markers.",
+		"purpose": "No mechanical torque control, ratchet operation, accurate Nm/Ncm scale or implant compatibility.",
+		"source": "https://dynadental.com/en/instruments/prosthetic/",
+	},
+	{
+		"id": "surgery_implant.implant_manual_driver",
+		"name": "Manual implant hex driver",
+		"german": "Implantat-Schraubendreher / Hex-Driver",
+		"kind": "Implantology · drivers",
+		"scene": "res://assets/inventory/synthetic-implant-hand-driver.tscn",
+		"cue": "Identify the short hexagonal driver tip, metal shank and thick textured hand grip.",
+		"purpose": "Illustrative hex bit only: no genuine platform dimensions, screw interface or mechanical torque.",
+		"source": "https://xgate.dental/surgical/",
+	},
+	{
+		"id": "surgery_implant.implant_tissue_punch",
+		"name": "Capped dental soft-tissue punch (implant concept)",
+		"german": "Implantologische Schleimhautstanze mit Schutzkappe",
+		"kind": "Implantology · soft tissue instruments",
+		"scene": "res://assets/inventory/synthetic-implant-tissue-punch.tscn",
+		"cue": "Recognise a tube-shaped working end and illustrative protective cover, not a typical scalpel blade.",
+		"purpose": "Protected, blunt educational study geometry; no skin/mucosal cutting, accurate diameter or surgical suitability.",
+		"source": "https://accessgudid.nlm.nih.gov/devices/search?query=FRIADENT%20tissue%20punch",
+	},
+	{
+		"id": "surgery_implant.bone_graft_packer",
+		"name": "Double-ended bone graft condenser / packer",
+		"german": "Knochenersatzmaterial-Stopfer / Knochenpacker",
+		"kind": "Implantology · graft placement",
+		"scene": "res://assets/inventory/synthetic-bone-graft-packer.tscn",
+		"cue": "Look for a robust double-ended instrument with flat blunt packing pads.",
+		"purpose": "Nonfunctional packing silhouette: no clinically defined diameter, pressure or graft-compaction mechanics.",
+		"source": "https://catalog.hu-friedy.com/product/files/basic-html/page194.html",
+	},
+	{
+		"id": "surgery_implant.bone_graft_syringe",
+		"name": "Bone graft delivery syringe / carrier",
+		"german": "Knochenaufbauspritze / Knochenersatzmaterial-Applikator",
+		"kind": "Implantology · graft delivery",
+		"scene": "res://assets/inventory/synthetic-bone-grafting-syringe.tscn",
+		"cue": "Compare a large barrel, plunger and blunt delivery nozzle with the finer anaesthetic syringe.",
+		"purpose": "Nonfunctional study syringe without graft material, sterilisation, pressure control or controlled dosing.",
+		"source": "https://catalog.hu-friedy.com/product/files/basic-html/page194.html",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -712,5 +818,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in PERIO_SURGERY_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in FINISHING_ACCESSORY_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in SURGICAL_IMPLANT_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
