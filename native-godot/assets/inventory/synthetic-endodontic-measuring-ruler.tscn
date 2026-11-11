@@ -1,0 +1,166 @@
+[gd_scene load_steps=15 format=3]
+
+[sub_resource type="BoxMesh" id="Mesh_0"]
+size = Vector3(1.55, 0.31, 0.16)
+
+[sub_resource type="BoxMesh" id="Mesh_1"]
+size = Vector3(1.39, 0.23, 0.022)
+
+[sub_resource type="BoxMesh" id="Mesh_2"]
+size = Vector3(0.019, 0.16, 0.023)
+
+[sub_resource type="BoxMesh" id="Mesh_3"]
+size = Vector3(0.019, 0.1, 0.023)
+
+[sub_resource type="BoxMesh" id="Mesh_4"]
+size = Vector3(0.07, 0.35, 0.18)
+
+[sub_resource type="BoxMesh" id="Mesh_5"]
+size = Vector3(0.22, 0.25, 0.16)
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.21
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_7"]
+size = Vector3(0.23, 0.055, 0.019)
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.8, 0.84, 1)
+metallic = 0.74
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.21, 1)
+metallic = 0.23
+roughness = 0.61
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.67, 0.32, 1)
+metallic = 0.46
+roughness = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.25, 0.54, 0.85, 1)
+metallic = 0.16
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.92, 0.93, 1)
+metallic = 0.1
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.59, 0.64, 0.7, 1)
+metallic = 0.17
+roughness = 0.5
+
+[node name="SchematicEndodonticWorkingLengthRuler" type="Node3D"]
+
+[node name="EndodonticLengthRulerPlate" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="DecorativeMeasurementScaleFace" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.1)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_light")
+
+[node name="DecorativeRulerScaleTick0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.67, -0.06, 0.12)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.574, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.478, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.382, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.286, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, -0.06, 0.12)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.094, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick7" type="MeshInstance3D" parent="."]
+position = Vector3(0.002, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick8" type="MeshInstance3D" parent="."]
+position = Vector3(0.098, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick9" type="MeshInstance3D" parent="."]
+position = Vector3(0.194, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick10" type="MeshInstance3D" parent="."]
+position = Vector3(0.29, -0.06, 0.12)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick11" type="MeshInstance3D" parent="."]
+position = Vector3(0.386, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick12" type="MeshInstance3D" parent="."]
+position = Vector3(0.482, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick13" type="MeshInstance3D" parent="."]
+position = Vector3(0.578, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="DecorativeRulerScaleTick14" type="MeshInstance3D" parent="."]
+position = Vector3(0.674, -0.06, 0.12)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="RightFileMeasuringStop" type="MeshInstance3D" parent="."]
+position = Vector3(0.69, 0, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_grip")
+
+[node name="FingerLengthGaugeSide" type="MeshInstance3D" parent="."]
+position = Vector3(-0.8, 0.01, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="SchematicEndodonticFileSeat" type="MeshInstance3D" parent="."]
+position = Vector3(0.66, 0, 0.11)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_gold")
+
+[node name="NoCalibratedLengthWarningTab" type="MeshInstance3D" parent="."]
+position = Vector3(-0.51, -0.06, 0.135)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_gold")
