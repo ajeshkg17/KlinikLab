@@ -174,6 +174,11 @@ try{
  const laboratoryImpressionScenes=["synthetic-alginate-mixing-bowl.tscn","synthetic-alginate-mixing-spatula.tscn","synthetic-plaster-mixing-spatula.tscn","synthetic-fahnenstock-wax-knife.tscn","synthetic-le-cron-wax-carver.tscn","synthetic-boley-caliper.tscn","synthetic-denture-cleaning-brush.tscn","synthetic-articulator-mounting-plate.tscn","synthetic-bite-registration-wax-rim.tscn","synthetic-dental-wax-heater.tscn"];
  for(const filename of laboratoryImpressionScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Ten locally authored nonfunctional advanced endodontic study props.
+ // Copy-only integration; no chair scoring, patient simulation or learner-data changes.
+ const advancedEndodonticScenes=["synthetic-hedstrom-h-file.tscn","synthetic-niti-rotary-file.tscn","synthetic-gates-glidden-drill.tscn","synthetic-peeso-reamer.tscn","synthetic-endodontic-measuring-ruler.tscn","synthetic-endodontic-file-stand.tscn","synthetic-gutta-percha-point-box.tscn","synthetic-endodontic-motor.tscn","synthetic-heated-obturation-pen.tscn","synthetic-gutta-percha-backfill-gun.tscn"];
+ for(const filename of advancedEndodonticScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);

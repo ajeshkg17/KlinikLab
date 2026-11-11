@@ -1,0 +1,135 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.096
+bottom_radius = 0.096
+height = 0.35
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.108
+bottom_radius = 0.108
+height = 0.055
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 1.47
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.093
+bottom_radius = 0.057
+height = 0.38
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_4"]
+radius = 0.053
+height = 0.08
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_5"]
+radius = 0.037
+height = 0.072
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.107
+bottom_radius = 0.107
+height = 0.06
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.8, 0.84, 1)
+metallic = 0.74
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.21, 1)
+metallic = 0.23
+roughness = 0.61
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.67, 0.32, 1)
+metallic = 0.46
+roughness = 0.32
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.25, 0.54, 0.85, 1)
+metallic = 0.16
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.92, 0.93, 1)
+metallic = 0.1
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.31, 0.58, 0.45, 1)
+metallic = 0.17
+roughness = 0.5
+
+[node name="SchematicGatesGliddenEndodonticDrill" type="Node3D"]
+
+[node name="GatesGliddenLatchCoupling" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_dark")
+
+[node name="LatchEngagementGroove" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.89, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_gold")
+
+[node name="LongThinGatesGliddenShank" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.04, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="OliveShapedCoronalFlute" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.88, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="GatesOliveFluteStudyLobe0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.01, 0.022)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="GatesOliveFluteStudyLobe1" type="MeshInstance3D" parent="."]
+position = Vector3(0.02435, -0.958, -0.005)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="GatesOliveFluteStudyLobe2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01106, -0.906, -0.01973)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="GatesOliveFluteStudyLobe3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.01932, -0.854, 0.01396)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="GatesOliveFluteStudyLobe4" type="MeshInstance3D" parent="."]
+position = Vector3(0.01984, -0.802, 0.01338)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="GatesOliveFluteStudyLobe5" type="MeshInstance3D" parent="."]
+position = Vector3(0.0103, -0.75, -0.02004)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="RoundedUncutGatesTip" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.12, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="GatesSizeBand" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.73, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")

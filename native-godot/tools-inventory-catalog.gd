@@ -1000,6 +1000,112 @@ const LABORATORY_IMPRESSION_TOOLS := [
 	},
 ]
 
+
+## Ten original nonfunctional advanced-endodontic study scenes, no proprietary CAD.
+## Source URLs identify instrument families only, not downloaded meshes.
+const ADVANCED_ENDODONTIC_TOOLS := [
+	{
+		"id": "advanced_endo.hedstrom_h_file",
+		"name": "Hedstrom H-file (hand-operated study model)",
+		"german": "Hedström-Feile / H-Feile",
+		"kind": "Endodontics · manual shaping instruments",
+		"scene": "res://assets/inventory/synthetic-hedstrom-h-file.tscn",
+		"cue": "Identify the red manual handle and elongated fluted working region; compare with the previous K-file.",
+		"purpose": "Illustrative non-cutting H-file: no ISO diameter, cross-section, real cutting spiral or canal shaping.",
+		"source": "https://www.trycare.co.uk/dental/categories/endodontics/endodontic-files",
+	},
+	{
+		"id": "advanced_endo.niti_rotary_file",
+		"name": "Nickel–titanium rotary root-canal file",
+		"german": "NiTi-Maschinenfeile / rotierende Wurzelkanalfeile",
+		"kind": "Endodontics · motor-driven files",
+		"scene": "res://assets/inventory/synthetic-niti-rotary-file.tscn",
+		"cue": "Find the short latch connector, size-code band and helical study flutes on a tapered shaft.",
+		"purpose": "Nonfunctional NiTi study shape: no true alloy properties, flute geometry, taper standard, RPM, torque or fracture behaviour.",
+		"source": "https://www.trycare.co.uk/dental/categories/endodontics/endodontic-files",
+	},
+	{
+		"id": "advanced_endo.gates_glidden_drill",
+		"name": "Gates Glidden orifice drill",
+		"german": "Gates-Glidden-Bohrer",
+		"kind": "Endodontics · coronal enlargement accessories",
+		"scene": "res://assets/inventory/synthetic-gates-glidden-drill.tscn",
+		"cue": "Recognise a long slender shank with a small olive/flame-like working head and latch-end connector.",
+		"purpose": "Stylized and blunt; no correct ISO working diameter, rotational performance, cutting tip geometry or safe clinical operation.",
+		"source": "https://www.pearsondental.com/catalog/product_bybrand_thumb.asp?mfgd=FKGDentaire",
+	},
+	{
+		"id": "advanced_endo.peeso_reamer",
+		"name": "Peeso (Largo) reamer",
+		"german": "Peeso-Bohrer / Largo-Bohrer",
+		"kind": "Endodontics · reamers",
+		"scene": "res://assets/inventory/synthetic-peeso-reamer.tscn",
+		"cue": "Compare the longer parallel-fluted cutting region with the shorter olive-shaped Gates Glidden head.",
+		"purpose": "Non-cutting educational outline; not a calibrated Peeso length or diameter, tooth-contact or drilling simulation.",
+		"source": "https://www.pearsondental.com/catalog/product_bybrand_thumb.asp?mfgd=FKGDentaire",
+	},
+	{
+		"id": "advanced_endo.endodontic_ruler",
+		"name": "Endodontic file measuring ruler / gauge",
+		"german": "Endodontisches Messlineal / Endo-Messlehre",
+		"kind": "Endodontics · length accessories",
+		"scene": "res://assets/inventory/synthetic-endodontic-measuring-ruler.tscn",
+		"cue": "Find a flat ruler plate with file stop, decorative graduations and file-seating point.",
+		"purpose": "The scale is decorative, not millimetre-accurate; no actual working-length determination or clinical calibration.",
+		"source": "https://www.qedendo.eu/search.php?searchFor=Dentsply+Sirona",
+	},
+	{
+		"id": "advanced_endo.endodontic_file_stand",
+		"name": "Endodontic file organiser / clean stand",
+		"german": "Endo-Feilenständer / Endo-Organisationsblock",
+		"kind": "Endodontics · instrument storage",
+		"scene": "res://assets/inventory/synthetic-endodontic-file-stand.tscn",
+		"cue": "Identify a perforated block containing six colour-coded sample files.",
+		"purpose": "No verified autoclave compatibility, sterility, actual ISO size coding or safe instrument holding.",
+		"source": "https://www.qedendo.eu/search.php?searchFor=Dentsply+Sirona",
+	},
+	{
+		"id": "advanced_endo.gutta_percha_points",
+		"name": "Gutta-percha obturation points in organiser",
+		"german": "Guttaperchaspitzen / Guttapercha-Stifte",
+		"kind": "Endodontics · obturation materials",
+		"scene": "res://assets/inventory/synthetic-gutta-percha-point-box.tscn",
+		"cue": "Find tapered yellow-orange gutta-percha point samples, distinct from white absorbent paper points.",
+		"purpose": "Generic illustrated points; actual sizes, material, handling, composition, sterility and sealing behaviour are not validated.",
+		"source": "https://www.qedendo.eu/search.php?searchFor=Dentsply+Sirona",
+	},
+	{
+		"id": "advanced_endo.endomotor",
+		"name": "Cordless endodontic motor with contra-angle study head",
+		"german": "Endomotor mit Winkelstück",
+		"kind": "Endodontics · powered instrument",
+		"scene": "res://assets/inventory/synthetic-endodontic-motor.tscn",
+		"cue": "Recognise a handheld motor body with screen, control button and angled rotary head, unlike a simple contra-angle.",
+		"purpose": "Static schematic with a capped demonstration file; no actual rotation, apex reading, torque calibration or canal treatment.",
+		"source": "https://endotech.nl/",
+	},
+	{
+		"id": "advanced_endo.heated_obturation_pen",
+		"name": "Heated obturation carrier / downpack pen",
+		"german": "Thermischer Wurzelkanal-Obturationsstift / Heizplugger",
+		"kind": "Endodontics · thermal obturation",
+		"scene": "res://assets/inventory/synthetic-heated-obturation-pen.tscn",
+		"cue": "Identify a pen-like body with display, heating button, curved carrier and protected distal tip.",
+		"purpose": "Non-heating, nonfunctioning training shape; no true temperature, gutta-percha phase behaviour, thermal safety or endodontic seal.",
+		"source": "https://endotech.nl/",
+	},
+	{
+		"id": "advanced_endo.obturation_gun",
+		"name": "Gutta-percha backfill obturation gun",
+		"german": "Guttapercha-Obturationspistole / Backfill-Pistole",
+		"kind": "Endodontics · thermal obturation",
+		"scene": "res://assets/inventory/synthetic-gutta-percha-backfill-gun.tscn",
+		"cue": "Recognise a trigger-handled delivery unit with enclosed cartridge and blunt angled injection nozzle.",
+		"purpose": "Static model only; no heat, actual injectable gutta-percha, pressure or compatibility with teeth or root canals.",
+		"source": "https://endotech.nl/",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -1036,5 +1142,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in DIAGNOSTIC_IMAGING_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in LABORATORY_IMPRESSION_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in ADVANCED_ENDODONTIC_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
