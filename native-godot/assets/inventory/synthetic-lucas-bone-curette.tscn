@@ -1,0 +1,155 @@
+[gd_scene load_steps=16 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 1.02
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.39
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.03
+bottom_radius = 0.03
+height = 0.23601
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_3"]
+radius = 0.16
+height = 0.095
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_4"]
+radius = 0.105
+height = 0.027
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.04
+bottom_radius = 0.05
+height = 0.35
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.029
+bottom_radius = 0.029
+height = 0.24187
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_7"]
+radius = 0.13
+height = 0.085
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_8"]
+radius = 0.088
+height = 0.023
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.104
+bottom_radius = 0.104
+height = 0.022
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.8, 0.84, 1)
+metallic = 0.75
+roughness = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.14, 0.17, 0.21, 1)
+metallic = 0.25
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.83, 0.68, 0.27, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.25, 0.54, 0.83, 1)
+metallic = 0.14
+roughness = 0.43
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.36, 0.51, 0.69, 1)
+metallic = 0.16
+roughness = 0.5
+
+[node name="SchematicLucasDoubleEndedBoneCurette" type="Node3D"]
+
+[node name="LucasBoneCuretteHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="LowerLucasNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.66, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerLucasAngledShank" type="MeshInstance3D" parent="."]
+position = Vector3(0.07, -0.915, 0)
+rotation_degrees = Vector3(0, 0, -143.61565)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerRoundedLucasSpoonStudyEnd" type="MeshInstance3D" parent="."]
+position = Vector3(0.17, -1.1, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerNoncuttingBowlContrast" type="MeshInstance3D" parent="."]
+position = Vector3(0.17, -1.1, 0.063)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UpperLucasNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.69, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="UpperLucasOffsetShank" type="MeshInstance3D" parent="."]
+position = Vector3(-0.06, 0.925, 0)
+rotation_degrees = Vector3(0, 0, 29.74488)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="UpperRoundedLucasSpoonStudyEnd" type="MeshInstance3D" parent="."]
+position = Vector3(-0.13, 1.13, 0)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="UpperBowlContrast" type="MeshInstance3D" parent="."]
+position = Vector3(-0.13, 1.13, 0.05)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="LucasCuretteGrip0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.19, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LucasCuretteGrip1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LucasCuretteGrip2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.09, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LucasCuretteGrip3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.23, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
