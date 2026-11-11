@@ -365,6 +365,112 @@ const ASSISTANT_RESTORATIVE_TOOLS := [
 	},
 ]
 
+
+## Original prosthodontic/orthodontic schematic 3D props; the source URLs
+## are independent identification references, not mesh downloads.
+const PROSTHO_ORTHO_TOOLS := [
+	{
+		"id": "prostho_ortho.impression_dispenser",
+		"name": "Cartridge impression-material dispenser",
+		"german": "Abformmaterial-Kartuschenpistole",
+		"kind": "Prosthodontics · dispensing",
+		"scene": "res://assets/inventory/synthetic-impression-dispenser.tscn",
+		"cue": "Identify the two cartridge barrels, mixing nozzle, pistol grip and trigger.",
+		"purpose": "Static original study model; not a working mixing gun, not calibrated for 48/50/75 ml cartridges and no impression material is dispensed.",
+		"source": "https://www.gc.dental/america/products/operatory/equipment/gc-cartridge-dispenser-ii",
+	},
+	{
+		"id": "prostho_ortho.articulating_paper_forceps",
+		"name": "Articulating-paper holding forceps",
+		"german": "Artikulationspapierpinzette / Miller-Pinzette",
+		"kind": "Prosthodontics · occlusion",
+		"scene": "res://assets/inventory/synthetic-articulating-paper-forceps.tscn",
+		"cue": "Distinguish long slender holding tips and the illustrative strip of occlusion paper from cutting scissors.",
+		"purpose": "Static prop; paper marking is decorative, not a clinically meaningful contact map or validated occlusion check.",
+		"source": "https://catalog.hu-friedy.com/hygiene/files/basic-html/page184.html",
+	},
+	{
+		"id": "prostho_ortho.crown_remover",
+		"name": "Sliding-weight crown remover (manual study shape)",
+		"german": "Kronenabnehmer mit Schlaggewicht",
+		"kind": "Prosthodontics · crown instruments",
+		"scene": "res://assets/inventory/synthetic-crown-remover.tscn",
+		"cue": "Identify the elongated shaft, sliding cylindrical weight, stop collars and blunt offset hook.",
+		"purpose": "Schematic shape only; no controlled impulse, crown-removal mechanism, tooth contact or force calibration.",
+		"source": "https://catalog.hu-friedy.com/product/",
+	},
+	{
+		"id": "prostho_ortho.crown_bridge_scissors",
+		"name": "Crown-and-bridge scissors",
+		"german": "Kronen- und Brückenschere",
+		"kind": "Prosthodontics · scissors",
+		"scene": "res://assets/inventory/synthetic-crown-bridge-scissors.tscn",
+		"cue": "Recognise ring handles, crossing joint and short schematic paired blades.",
+		"purpose": "Non-cutting teaching geometry; no sharp blades, trimming capability or clinically approved instrument specification.",
+		"source": "https://catalog.hu-friedy.com/product/",
+	},
+	{
+		"id": "prostho_ortho.bracket_holder",
+		"name": "Orthodontic direct-bond bracket holder",
+		"german": "Bracket-Haltepinzette / Bracketpositionierpinzette",
+		"kind": "Orthodontics · bracket setup",
+		"scene": "res://assets/inventory/synthetic-bracket-holder.tscn",
+		"cue": "Identify two spring-tweezer arms and the tiny illustrative bracket between tips.",
+		"purpose": "Static model; no adhesion, functional bracket grasp, bond positioning or orthodontic technique is assessed.",
+		"source": "https://catalog.hu-friedy.com/product/files/basic-html/page474.html",
+	},
+	{
+		"id": "prostho_ortho.distal_end_cutter",
+		"name": "Distal-end archwire cutter (cut-and-hold concept)",
+		"german": "Distal-End-Cutter / Distalendenschneider",
+		"kind": "Orthodontics · cutting tools",
+		"scene": "res://assets/inventory/synthetic-distal-end-cutter.tscn",
+		"cue": "Compare the heavier short opposing cutter jaws and study hold pad with the finer ligature cutter.",
+		"purpose": "Illustrative non-cutting jaws and wire marker; no safe cut-and-hold function, material performance or patient application.",
+		"source": "https://catalog.hu-friedy.com/orthodontic/files/basic-html/page17.html",
+	},
+	{
+		"id": "prostho_ortho.ligature_cutter",
+		"name": "Micro ligature-wire cutter",
+		"german": "Ligaturenschneider / Mikro-Ligaturenschneider",
+		"kind": "Orthodontics · cutting tools",
+		"scene": "res://assets/inventory/synthetic-ligature-cutter.tscn",
+		"cue": "Look for the compact pivot and smaller short cutter jaws compared with distal-end cutters.",
+		"purpose": "Schematic wire-tool classification only; no wire cutting, blade edge, tolerance or clinical safety is represented.",
+		"source": "https://catalog.hu-friedy.com/orthodontic/files/basic-html/page18.html",
+	},
+	{
+		"id": "prostho_ortho.weingart_pliers",
+		"name": "Weingart archwire utility pliers",
+		"german": "Weingart-Zange / Bogenzange",
+		"kind": "Orthodontics · utility pliers",
+		"scene": "res://assets/inventory/synthetic-weingart-pliers.tscn",
+		"cue": "Identify angular tapered jaws with illustrative grip serrations and two long handles.",
+		"purpose": "Tool-outline recognition only; no wire grasp, bending, working limit or functional serration specification.",
+		"source": "https://catalog.hu-friedy.com/orthodontic/files/basic-html/page19.html",
+	},
+	{
+		"id": "prostho_ortho.bracket_remover",
+		"name": "Orthodontic bracket-removing pliers",
+		"german": "Bracketentfernungszange",
+		"kind": "Orthodontics · debonding",
+		"scene": "res://assets/inventory/synthetic-bracket-remover.tscn",
+		"cue": "Compare the broad opposing jaw tips and demonstration bracket against the finer Weingart beaks.",
+		"purpose": "Schematic nonfunctional jaws; no debonding forces, enamel safety, adhesive removal or treatment claim.",
+		"source": "https://catalog.hu-friedy.com/orthodontic/files/basic-html/page21.html",
+	},
+	{
+		"id": "prostho_ortho.orthodontic_band_pusher",
+		"name": "Orthodontic band pusher",
+		"german": "Bandandrücker / Bandstopfer",
+		"kind": "Orthodontics · hand instruments",
+		"scene": "res://assets/inventory/synthetic-orthodontic-band-pusher.tscn",
+		"cue": "Identify the long textured handle, offset working neck and flattened band-seating pad.",
+		"purpose": "Static illustrated pusher tip; no actual band adaptation, cement handling, pressure or intraoral placement.",
+		"source": "https://catalog.hu-friedy.com/orthodontic/files/basic-html/page28.html",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -389,5 +495,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in ROTARY_ISOLATION_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in ASSISTANT_RESTORATIVE_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in PROSTHO_ORTHO_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
