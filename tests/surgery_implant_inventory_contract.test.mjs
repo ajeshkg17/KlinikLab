@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read=path=>readSourceContract('../'+path,import.meta.url);
 const catalog=read('native-godot/tools-inventory-catalog.gd');
@@ -36,7 +36,7 @@ test('surgery and implant inventory expands 83 study models to 93 while keeping 
  assert.equal(extraIds.length,74);
  assert.equal(new Set(extraIds).size,74);
  assert.match(catalog,/for entry: Dictionary in SURGICAL_IMPLANT_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
- assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+ assert.equal(countOriginalBenchToolEntries(bench),19);
  assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 
