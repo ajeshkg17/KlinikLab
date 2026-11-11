@@ -1,0 +1,154 @@
+[gd_scene load_steps=15 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.22091
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.20125
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.21401
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.22204
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.21954
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.22472
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.052
+bottom_radius = 0.052
+height = 0.26173
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_7"]
+size = Vector3(0.24, 0.11, 0.22)
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.062
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_9"]
+radius = 0.09
+height = 0.1
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.42, 0.64, 0.74, 1)
+metallic = 0.2
+roughness = 0.48
+
+[node name="SchematicRubberDamClamp" type="Node3D"]
+
+[node name="SpringBow_1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, 0.16, 0)
+rotation_degrees = Vector3(0, 0, -5.19443)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.355, 0.36, 0)
+rotation_degrees = Vector3(0, 0, -26.56505)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.225, 0.515, 0)
+rotation_degrees = Vector3(0, 0, -52.59464)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.03, 0.595, 0)
+rotation_degrees = Vector3(0, 0, -82.23483)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_5" type="MeshInstance3D" parent="."]
+position = Vector3(0.175, 0.555, 0)
+rotation_degrees = Vector3(0, 0, -120.06858)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_6" type="MeshInstance3D" parent="."]
+position = Vector3(0.33, 0.405, 0)
+rotation_degrees = Vector3(0, 0, -147.72436)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="SpringBow_7" type="MeshInstance3D" parent="."]
+position = Vector3(0.405, 0.18, 0)
+rotation_degrees = Vector3(0, 0, -173.41806)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftClampJaw" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43, -0.06, 0)
+rotation_degrees = Vector3(0, 0, -16)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="RightClampJaw" type="MeshInstance3D" parent="."]
+position = Vector3(0.43, -0.06, 0)
+rotation_degrees = Vector3(0, 0, 16)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftForcepsEngagementLoop" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, 0.14, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="RightForcepsEngagementLoop" type="MeshInstance3D" parent="."]
+position = Vector3(0.41, 0.14, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="LeftClampJawBluntContactMarker" type="MeshInstance3D" parent="."]
+position = Vector3(-0.27, -0.12, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_gold")
+
+[node name="RightClampJawBluntContactMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0.27, -0.12, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_gold")
