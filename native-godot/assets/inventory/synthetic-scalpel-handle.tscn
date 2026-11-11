@@ -1,0 +1,85 @@
+[gd_scene load_steps=10 format=3]
+
+[sub_resource type="BoxMesh" id="Shape0"]
+size = Vector3(0.22, 1.25, 0.12)
+
+[sub_resource type="BoxMesh" id="Shape1"]
+size = Vector3(0.14, 0.27, 0.1)
+
+[sub_resource type="BoxMesh" id="Shape2"]
+size = Vector3(0.25, 0.44, 0.06)
+
+[sub_resource type="BoxMesh" id="Shape3"]
+size = Vector3(0.31, 0.48, 0.11)
+
+[sub_resource type="BoxMesh" id="Shape4"]
+size = Vector3(0.23, 0.025, 0.13)
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.81, 0.85, 1)
+metallic = 0.75
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.84, 0.65, 0.32, 1)
+metallic = 0.45
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.22, 1)
+metallic = 0.25
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.39, 0.48, 0.67, 1)
+metallic = 0.15
+roughness = 0.48
+
+[node name="SchematicScalpelBladeProtected" type="Node3D"]
+
+[node name="FlatScalpelHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.13, 0)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_grip")
+
+[node name="BladeMountNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.68, 0)
+mesh = SubResource("Shape1")
+material_override = SubResource("Mat_steel")
+
+[node name="NonSharpBladeOutline" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, -1.07, 0)
+rotation_degrees = Vector3(0, 0, -14)
+mesh = SubResource("Shape2")
+material_override = SubResource("Mat_steel")
+
+[node name="BluntSafetyGuard" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, -1.07, 0)
+rotation_degrees = Vector3(0, 0, -14)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_gold")
+
+[node name="HandleTextureGroove0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_dark")
+
+[node name="HandleTextureGroove1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.01, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_dark")
+
+[node name="HandleTextureGroove2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.14, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_dark")
+
+[node name="HandleTextureGroove3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.27, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_dark")
+
+[node name="HandleTextureGroove4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_dark")
