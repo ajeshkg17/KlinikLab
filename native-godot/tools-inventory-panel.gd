@@ -73,7 +73,7 @@ func start() -> void:
 	content.add_child(_cue)
 	_source = LinkButton.new()
 	_source.name = "KL_INVENTORY_SOURCE"
-	_source.text = "View original model source"
+	_source.text = "View asset source or instrument reference"
 	content.add_child(_source)
 	if not _entries.is_empty():
 		_selector.select(0)
