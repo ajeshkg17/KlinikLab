@@ -1,0 +1,145 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="SphereMesh" id="Mesh_0"]
+radius = 0.1
+height = 0.16
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.055
+bottom_radius = 0.055
+height = 1.33222
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.029
+bottom_radius = 0.029
+height = 0.33838
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_3"]
+size = Vector3(0.07, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="Mesh_4"]
+size = Vector3(0.2, 0.17, 0.08)
+
+[sub_resource type="BoxMesh" id="Mesh_5"]
+size = Vector3(0.15, 0.03, 0.015)
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.06
+bottom_radius = 0.06
+height = 0.024
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.77
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.23, 1)
+metallic = 0.24
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.84, 0.67, 0.28, 1)
+metallic = 0.45
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.21, 0.59, 0.81, 1)
+metallic = 0.1
+roughness = 0.44
+
+[sub_resource type="StandardMaterial3D" id="Mat_red"]
+albedo_color = Color(0.81, 0.28, 0.31, 1)
+metallic = 0.05
+roughness = 0.53
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.26, 0.56, 0.68, 1)
+metallic = 0.18
+roughness = 0.49
+
+[node name="SchematicDirectBondBracketHolder" type="Node3D"]
+
+[node name="JoinedSpringCap" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.83, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_dark")
+
+[node name="LeftSpringGrip" type="MeshInstance3D" parent="."]
+position = Vector3(-0.14, 0.12, 0)
+rotation_degrees = Vector3(0, 0, 172.23483)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="RightSpringGrip" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 0.12, 0)
+rotation_degrees = Vector3(0, 0, -172.23483)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftBracketTip" type="MeshInstance3D" parent="."]
+position = Vector3(-0.175, -0.7, 0)
+rotation_degrees = Vector3(0, 0, -161.02959)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="RightBracketTip" type="MeshInstance3D" parent="."]
+position = Vector3(0.175, -0.7, 0)
+rotation_degrees = Vector3(0, 0, 161.02959)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftBracketHoldingPad" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12, -0.85, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="RightBracketHoldingPad" type="MeshInstance3D" parent="."]
+position = Vector3(0.12, -0.85, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="StudyBracketBody" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.93, 0.11)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_blue")
+
+[node name="BracketSlotMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.93, 0.16)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="LeftGripMarker0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16, -0.21, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="RightGripMarker0" type="MeshInstance3D" parent="."]
+position = Vector3(0.16, -0.21, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="LeftGripMarker1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16, 0, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="RightGripMarker1" type="MeshInstance3D" parent="."]
+position = Vector3(0.16, 0, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="LeftGripMarker2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16, 0.21, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
+
+[node name="RightGripMarker2" type="MeshInstance3D" parent="."]
+position = Vector3(0.16, 0.21, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_grip")
