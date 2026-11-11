@@ -259,6 +259,112 @@ const ROTARY_ISOLATION_TOOLS := [
 	},
 ]
 
+
+## Original assistant, matrix, rubber-dam and endodontic equipment study geometry.
+## The citations in "source" are category-identification references, NOT model downloads.
+const ASSISTANT_RESTORATIVE_TOOLS := [
+	{
+		"id": "assistant.air_water_syringe",
+		"name": "Three-way air-water syringe",
+		"german": "Dreiwegespritze / Luft-Wasser-Spritze",
+		"kind": "Chairside assistant tools",
+		"scene": "res://assets/inventory/synthetic-air-water-syringe.tscn",
+		"cue": "Compare the two control buttons and the angled fine spray nozzle with suction instruments.",
+		"purpose": "Static schematic only; no operational spray, aerosol handling, infection-control protocol or patient use.",
+		"source": "https://dental.a-dec.com/-/media/adecdotcom/resource-center/product-information/support-information/instructions-for-use/86050700.pdf",
+	},
+	{
+		"id": "assistant.hve_tip",
+		"name": "High-volume evacuator suction tip",
+		"german": "Große Absaugkanüle / HVE-Sauger",
+		"kind": "Chairside assistant tools",
+		"scene": "res://assets/inventory/synthetic-hve-evacuator-tip.tscn",
+		"cue": "Identify the wide-bore suction mouth and stout tube compared with the narrow saliva ejector.",
+		"purpose": "Illustrative high-volume suction tip; no applied suction, fluid flow, airflow capacity or clinical positioning.",
+		"source": "https://dental.a-dec.com/-/media/adecdotcom/resource-center/product-information/support-information/instructions-for-use/86050700.pdf",
+	},
+	{
+		"id": "assistant.saliva_ejector",
+		"name": "Low-volume saliva ejector",
+		"german": "Speichelsauger / kleiner Sauger",
+		"kind": "Chairside assistant tools",
+		"scene": "res://assets/inventory/synthetic-saliva-ejector.tscn",
+		"cue": "Look for the fine flexible bent tube and vented collection cap.",
+		"purpose": "Schematic saliva-collection accessory; dimensions, hygiene measures and soft-tissue safety not validated.",
+		"source": "https://dental.a-dec.com/-/media/adecdotcom/resource-center/product-information/support-information/instructions-for-use/86050700.pdf",
+	},
+	{
+		"id": "assistant.cartridge_aspirating_syringe",
+		"name": "Dental cartridge aspirating syringe (needle capped)",
+		"german": "Karpulenspritze / Aspirationsspritze",
+		"kind": "Local anaesthesia study",
+		"scene": "res://assets/inventory/synthetic-aspirating-cartridge-syringe.tscn",
+		"cue": "Identify thumb and finger rings, cartridge window, plunger and the protected needle-end cap.",
+		"purpose": "Only identification of a capped study object; no needle, injection, dosing, aspiration or anaesthetic use is simulated.",
+		"source": "https://azdentalassistants.com/wp-content/uploads/study-materials/delmars-handbook-complete.pdf",
+	},
+	{
+		"id": "assistant.tofflemire_retainer",
+		"name": "Universal Tofflemire matrix retainer",
+		"german": "Tofflemire-Matrizenhalter",
+		"kind": "Restorative matrix systems",
+		"scene": "res://assets/inventory/synthetic-tofflemire-matrix-retainer.tscn",
+		"cue": "Find the spindle, two adjustment knobs, retainer frame and stylised circumferential band.",
+		"purpose": "Study of component names only; no matrix tightening, proximal contact or actual tooth restoration.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28681/mKlXwO8UaBWrCiQR7PFe1g/dental%20instruments.pdf",
+	},
+	{
+		"id": "assistant.sectional_matrix_ring",
+		"name": "Sectional matrix separation ring",
+		"german": "Matrizenring / Separierring",
+		"kind": "Restorative matrix systems",
+		"scene": "res://assets/inventory/synthetic-sectional-matrix-ring.tscn",
+		"cue": "Compare the curved spring ring and two contact feet with the Tofflemire retainer.",
+		"purpose": "Illustrative ring without calibrated spring force, tooth morphology or functional interproximal separation.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28681/mKlXwO8UaBWrCiQR7PFe1g/dental%20instruments.pdf",
+	},
+	{
+		"id": "assistant.interdental_wedge",
+		"name": "Wooden interdental matrix wedge",
+		"german": "Interdentalkeil / Holzkeil",
+		"kind": "Restorative matrix systems",
+		"scene": "res://assets/inventory/synthetic-interdental-wooden-wedge.tscn",
+		"cue": "Find the gradually tapered wedge profile used in a matrix setup.",
+		"purpose": "Schematic solid study geometry; not a patient-fitting wedge, seal, or periodontal protection.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28681/mKlXwO8UaBWrCiQR7PFe1g/dental%20instruments.pdf",
+	},
+	{
+		"id": "assistant.rubber_dam_frame",
+		"name": "U-shaped rubber-dam frame",
+		"german": "Kofferdamrahmen / Spannrahmen",
+		"kind": "Rubber-dam equipment",
+		"scene": "res://assets/inventory/synthetic-rubber-dam-frame.tscn",
+		"cue": "Recognise the U-shaped frame and retention studs, distinct from the rubber-dam clamp.",
+		"purpose": "Tool identification only; dam stretching, isolation safety and placement technique are not simulated.",
+		"source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8161708/",
+	},
+	{
+		"id": "assistant.apex_locator",
+		"name": "Electronic endodontic apex locator",
+		"german": "Elektronischer Apexlokator",
+		"kind": "Endodontic equipment",
+		"scene": "res://assets/inventory/synthetic-endodontic-apex-locator.tscn",
+		"cue": "Identify the electronic display, cable sockets and schematic lip/file clips.",
+		"purpose": "Static educational electronic unit; no real electrical measurement, working-length reading or clinical result.",
+		"source": "https://azdentalassistants.com/wp-content/uploads/study-materials/delmars-handbook-complete.pdf",
+	},
+	{
+		"id": "assistant.bite_block",
+		"name": "Dental bite block / mouth prop",
+		"german": "Aufbissblock / Mundstütze",
+		"kind": "Patient positioning aids",
+		"scene": "res://assets/inventory/synthetic-dental-bite-block.tscn",
+		"cue": "Recognise a ribbed wedge-shaped bite support used as a mouth-opening aid.",
+		"purpose": "Static schematic support only; not size-graded, not for use in a patient's mouth and no jaw force tested.",
+		"source": "https://azdentalassistants.com/wp-content/uploads/study-materials/delmars-handbook-complete.pdf",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -281,5 +387,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in HAND_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in ROTARY_ISOLATION_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in ASSISTANT_RESTORATIVE_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
