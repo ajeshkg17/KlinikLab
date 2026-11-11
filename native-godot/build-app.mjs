@@ -135,7 +135,12 @@ try{
  // These are not source-pack downloads and are never used as clinical geometry.
  for(const filename of ['synthetic-explorer-23.tscn','synthetic-college-pliers.tscn','synthetic-spoon-excavator.tscn','synthetic-ball-burnisher.tscn','synthetic-k-file.tscn','synthetic-finger-spreader.tscn','synthetic-sickle-scaler.tscn','synthetic-composite-spatula.tscn'])
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
- const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
+ // Original, self-contained schematic tool meshes (not downloaded CAD).
+ // Their study labels and uncalibrated geometry must not affect chair simulations.
+ const additionalHandToolScenes=["synthetic-high-speed-handpiece.tscn","synthetic-contra-angle-handpiece.tscn","synthetic-straight-handpiece.tscn","synthetic-round-bur.tscn","synthetic-pear-bur-330.tscn","synthetic-endo-z-bur.tscn","synthetic-rubber-dam-clamp.tscn","synthetic-rubber-dam-clamp-forceps.tscn","synthetic-straight-elevator.tscn","synthetic-extraction-forceps.tscn"];
+ for(const filename of additionalHandToolScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
   if(row?.file!==original||row.source!==source||
