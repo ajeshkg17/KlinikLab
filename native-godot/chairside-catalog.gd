@@ -130,6 +130,34 @@ const ITEMS := {
 		"swatch": Color("#dfc09c"), "source": ADA_CHART,
 	},
 
+	"tool.bitewing_receptor_holder_study": {
+		"name": "Bitewing receptor holder (schematic 3D study)", "german": "Bissflügel-Sensorhalter (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-bitewing-receptor-holder.tscn",
+		"cue": "Original red-pattern bitewing holder silhouette with a horizontal receptor-grip and illustrated biteblock.",
+		"purpose": "The case-assigned holder identity for a simulated bitewing setup. This model cannot guide actual sensor placement, radiation exposure or safe beam alignment.",
+		"source": ADA_XRAYS,
+	},
+	"tool.endo_receptor_holder_study": {
+		"name": "Endodontic receptor holder (schematic 3D study)", "german": "Endodontischer Sensorhalter (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-endo-radiograph-holder.tscn",
+		"cue": "Different green-pattern endodontic holder silhouette with study space for an endodontic working instrument.",
+		"purpose": "A valid different equipment family but not this case's assigned bitewing holder; no actual endodontic X-ray acquisition or placement guidance.",
+		"source": ADA_XRAYS,
+	},
+	"material.bitewing_receptor_reference_key": {
+		"name": "Assigned bitewing holder and two-region image key (fictional)",
+		"german": "Bissflügel-Sensorhalter- und Bildstellen-Vorlage (Lehrkarte)",
+		"cue": "Illustration · pale blue instructor card labelling the BITEWING study holder plus the two existing image-region targets: proximal marker and unreadable overlap.",
+		"purpose": "This case-specific location key links an assigned model holder with two simulated bitewing image regions. No X-ray exposure, actual receptor position, patient chart or diagnostic inference.",
+		"swatch": Color("#b7dbe9"), "source": ADA_XRAYS,
+	},
+	"material.endodontic_apical_reference_key": {
+		"name": "Endodontic apical image-location key (fictional alternative)",
+		"german": "Endodontische apikale Bildreferenz-Vorlage (Vergleichskarte)",
+		"cue": "Illustration · warm orange endodontic apical-location reference rather than a bitewing proximal overlap diagram.",
+		"purpose": "A plausible reference for a different simulated radiography case; not the instructor's assigned bitewing holder and two-region key.",
+		"swatch": Color("#e6c9a7"), "source": ADA_XRAYS,
+	},
 	"tool.image_pointer": {
 		"name": "Image annotation pointer (synthetic 3D teaching model)", "german": "Bildmarkierungs-Zeiger (schematisch)",
 		"scene": "res://assets/bench/synthetic-image-pointer.tscn",
@@ -530,6 +558,34 @@ const BITEWING := {
 	"finish": "Record proximal landmark and unreadable overlap",
 	"finish_event": "record_bitewing_image_annotations",
 	"outcome": "Bitewing image-review simulation complete · The assigned proximal landmark and overlapping, unreadable region were recorded in the existing chair exercise. No radiograph was taken or interpreted for clinical diagnosis.",
+	"reference": ADA_XRAYS,
+}
+
+
+const BITEWING_HOLDER := {
+	"id": "bitewing_receptor_holder_reference_intro",
+	"scenario": "bitewing",
+	"title": "Bitewing sensor holder and image reference bench",
+	"case": "FICTIONAL assistant preparation and IMAGE-DIAGRAM exercise · The instructor assigns a BITEWING HOLDER MODEL (not an endodontic periapical holder) and an illustrated TWO-REGION BITEWING REFERENCE KEY. Compare the two rotatable 3D study holders, select the assigned card, then reuse the EXISTING bitewing image-review chair to identify the specified proximal model region and FLAG a deliberately overlapping region as unreadable. There is no actual X-ray image, sensor placement, radiation exposure, tube positioning, vertical or horizontal angulation, overlap prediction, caries diagnosis, patient record or clinical competency assessment.",
+	"tool": {
+		"label": "receptor holder study model",
+		"choices": ["tool.bitewing_receptor_holder_study", "tool.endo_receptor_holder_study"],
+		"expected": "tool.bitewing_receptor_holder_study",
+		"prompt": "Which rotatable study model matches the instructor-assigned bitewing receptor holder rather than the endodontic holder?",
+		"correct": "Correct. The bitewing holder study has a distinct biteblock and receptor shape; this does not demonstrate positioning or exposure safety.",
+		"incorrect": "The contrasting endodontic holder represents a different receptor-holding task; the fictional assignment specifies a bitewing holder.",
+	},
+	"material": {
+		"label": "assigned image location key",
+		"choices": ["material.bitewing_receptor_reference_key", "material.endodontic_apical_reference_key"],
+		"expected": "material.bitewing_receptor_reference_key",
+		"prompt": "Which instructor-made key connects the selected bitewing study holder to the two image-region markers in the existing simulation?",
+		"correct": "Correct. The two-region bitewing key identifies the proximal reference marker and the intentionally unreadable overlap zone.",
+		"incorrect": "The apical endodontic reference belongs to another simulated case and does not identify these bitewing diagram regions.",
+	},
+	"finish": "Record bitewing model-holder selection and two image-region labels",
+	"finish_event": "record_bitewing_holder_and_image_reference",
+	"outcome": "Bitewing holder identification and reference review complete · The unchanged bitewing chair verified the two assigned image-diagram actions, including one region that must be flagged unreadable. No real radiographic placement, exposure, diagnostic interpretation or patient treatment was performed.",
 	"reference": ADA_XRAYS,
 }
 

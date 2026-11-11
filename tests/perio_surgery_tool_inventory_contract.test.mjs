@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read=p=>readSourceContract('../'+p,import.meta.url);
 const catalog=read('native-godot/tools-inventory-catalog.gd');
@@ -33,7 +33,7 @@ test('ten new instrument entries extend inventory to 73 without modifying 20 ori
   const ids=[...catalog.matchAll(/^\t\t"id": "((?:inventory|handtool|rotary|assistant|prostho_ortho|perio_surgery)\.[^"]+)",/gm)].map(x=>x[1]);
   assert.equal(ids.length,54);
   assert.equal(new Set(ids).size,54);
-  assert.equal((original.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(original),19);
   assert.equal((original.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 

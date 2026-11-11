@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read=path=>readSourceContract('../'+path,import.meta.url);
 const catalog=read('native-godot/tools-inventory-catalog.gd');
@@ -35,7 +35,7 @@ test('ten periodontal instrument study entries increase inventory from 133 to 14
  assert.equal(ids.length,124);
  assert.equal(new Set(ids).size,124,'all non-bench IDs must be unique');
  assert.match(catalog,/for entry: Dictionary in PERIODONTAL_ASSESSMENT_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
- assert.equal((original.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+ assert.equal(countOriginalBenchToolEntries(original),19);
  assert.equal((original.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 test('ten periodontal meshes retain distinct identification features and complete standalone Godot scene resources',()=>{

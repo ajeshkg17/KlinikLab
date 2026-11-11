@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const get = path => readSourceContract('../' + path, import.meta.url);
 const inventory = get('native-godot/tools-inventory-catalog.gd');
@@ -29,7 +29,7 @@ test('add eight individually selectable 3D instruments while preserving six impo
   assert.match(inventory, /for entry: Dictionary in HAND_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
   assert.equal((inventory.match(/^\t\t"id": "inventory\.[^"]+",/gm) || []).length, 6,
     'old six CC0 imported entries must remain');
-  assert.equal((originalBench.match(/^\t"tool\.[^"]+": \{/gm) || []).length, 19,
+  assert.equal(countOriginalBenchToolEntries(originalBench), 19,
     'original bench instrument set must not drift');
   assert.equal((originalBench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm) || []).length, 20);
 });

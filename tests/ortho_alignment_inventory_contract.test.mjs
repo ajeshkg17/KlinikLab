@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const source = name => readSourceContract('../'+name,import.meta.url);
 const catalog=source('native-godot/tools-inventory-catalog.gd');
@@ -34,7 +34,7 @@ test('ten new orthodontic categories raise inventory to 133 with 114 unique addi
  assert.equal(allIds.length,114);
  assert.equal(new Set(allIds).size,114);
  assert.match(catalog,/for entry: Dictionary in ORTHO_ALIGNMENT_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
- assert.equal((original.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+ assert.equal(countOriginalBenchToolEntries(original),19);
  assert.equal((original.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 test('all ten original Godot study scenes have unique mesh nodes and complete resource references',()=>{

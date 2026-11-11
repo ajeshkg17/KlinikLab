@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const source=path=>readSourceContract('../'+path,import.meta.url);
 const catalog=source('native-godot/tools-inventory-catalog.gd');
@@ -35,7 +35,7 @@ test('ten individually named restorative models grow catalog to 83 while retaini
   const ids=[...catalog.matchAll(/^\t\t"id": "((?:inventory|handtool|rotary|assistant|prostho_ortho|perio_surgery|finishing)\.[^"]+)",/gm)].map(x=>x[1]);
   assert.equal(ids.length,64,'extra catalog entry count');
   assert.equal(new Set(ids).size,64,'new and old catalog IDs must be unique');
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(bench),19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 

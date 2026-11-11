@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const source = path => readSourceContract('../' + path, import.meta.url);
 const catalog = source('native-godot/tools-inventory-catalog.gd');
@@ -38,7 +38,7 @@ test('all ten prosthodontic/orthodontic tools are uniquely catalogued alongside 
   const allIds = [...catalog.matchAll(/^\t\t"id": "((?:inventory|handtool|rotary|assistant|prostho_ortho)\.[^"]+)",/gm)].map(x=>x[1]);
   assert.equal(allIds.length,44);
   assert.equal(new Set(allIds).size,44);
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(bench),19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 

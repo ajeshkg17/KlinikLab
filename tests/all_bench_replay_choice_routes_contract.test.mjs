@@ -63,7 +63,7 @@ const expressions = {
 
 test('all 20 benches replay the catalog-selected right and wrong IDs in six routes each', () => {
   const lessons = [...catalog.matchAll(/^const ([A-Z_]+) := \{([\s\S]*?)^\}/gm)]
-    .filter(([, name]) => name !== 'ITEMS');
+    .filter(([, name]) => ['composite','sealant','fluoride','cleaning','root_planing','chart','bitewing','oral_exam','veneer','inlay','crown','bridge','full_denture','partial_denture','implant','endo','retreat','aligner','mouthguard','extraction'].includes(name.toLowerCase()));
   assert.equal(lessons.length, 20);
   const uniqueScenarios = new Set();
   for (const [, constant, body] of lessons) {

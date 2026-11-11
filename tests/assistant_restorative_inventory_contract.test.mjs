@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read = path => readSourceContract('../' + path, import.meta.url);
 const catalog = read('native-godot/tools-inventory-catalog.gd');
@@ -34,7 +34,7 @@ test('catalog extends 43 prior models with ten labelled and distinct assistant/r
   assert.equal((catalog.match(/^\t\t"id": "inventory\.[^"]+",/gm)||[]).length,6);
   assert.equal((catalog.match(/^\t\t"id": "handtool\.[^"]+",/gm)||[]).length,8);
   assert.equal((catalog.match(/^\t\t"id": "rotary\.[^"]+",/gm)||[]).length,10);
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(bench),19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
   const allIds=[...catalog.matchAll(/^\t\t"id": "((?:inventory|handtool|rotary|assistant)\.[^"]+)",/gm)].map(m=>m[1]);
   assert.equal(allIds.length,34,'six CC0 + eight handheld + ten rotary + ten assistant');
