@@ -56,7 +56,7 @@ test('each laboratory scene has unique geometry, a distinguishing feature, and v
     assert.ok(links.length>=20,id+' visual links');
     for(const name of links)assert.ok(resources.includes(name),id+' unresolved '+name);
     assert.equal(Number(scene.match(/^\[gd_scene load_steps=(\d+)/m)?.[1]),resources.length+1,id+' load_steps');
-    for(const [,attribute,val] of scene.matchAll(/^(?:top_radius|bottom_radius|radius|height|radial_segments) = ([^\n]+)$/gm))
+    for(const [,attribute,val] of scene.matchAll(/^(top_radius|bottom_radius|radius|height|radial_segments) = ([^\n]+)$/gm))
       assert.ok(Number(val)>0,id+' nonpositive '+attribute);
   }
 });
