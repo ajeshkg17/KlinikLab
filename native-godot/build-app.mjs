@@ -150,6 +150,10 @@ try{
  const prosthoOrthoScenes=["synthetic-impression-dispenser.tscn","synthetic-articulating-paper-forceps.tscn","synthetic-crown-remover.tscn","synthetic-crown-bridge-scissors.tscn","synthetic-bracket-holder.tscn","synthetic-distal-end-cutter.tscn","synthetic-ligature-cutter.tscn","synthetic-weingart-pliers.tscn","synthetic-bracket-remover.tscn","synthetic-orthodontic-band-pusher.tscn"];
  for(const filename of prosthoOrthoScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Independent original schematic periodontal/surgical/endodontic models.
+ const perioSurgeryScenes=["synthetic-gracey-curette.tscn","synthetic-universal-curette.tscn","synthetic-hoe-scaler.tscn","synthetic-scalpel-handle.tscn","synthetic-periosteal-elevator.tscn","synthetic-tissue-forceps.tscn","synthetic-needle-holder.tscn","synthetic-mosquito-hemostat.tscn","synthetic-endo-plugger.tscn","synthetic-endo-irrigation-syringe.tscn"];
+ for(const filename of perioSurgeryScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
