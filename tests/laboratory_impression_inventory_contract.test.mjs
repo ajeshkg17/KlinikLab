@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read = filename => readSourceContract('../'+filename, import.meta.url);
 const catalog = read('native-godot/tools-inventory-catalog.gd');
@@ -35,7 +35,7 @@ test('ten laboratory/impression entries extend inventory to 113 and retain all e
   assert.equal(ids.length,94,'original 6 imported plus 88 new schematics');
   assert.equal(new Set(ids).size,94,'no duplicate catalog IDs');
   assert.match(catalog,/for entry: Dictionary in LABORATORY_IMPRESSION_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(bench),19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 
