@@ -1,0 +1,130 @@
+[gd_scene load_steps=12 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.125
+bottom_radius = 0.133
+height = 1.25
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.14
+bottom_radius = 0.14
+height = 0.17
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.06
+bottom_radius = 0.12
+height = 0.48
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.083
+bottom_radius = 0.083
+height = 0.19
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.028
+bottom_radius = 0.028
+height = 0.37
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.055
+bottom_radius = 0.035
+height = 0.16
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.133
+bottom_radius = 0.133
+height = 0.021
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.49, 0.29, 0.42, 1)
+metallic = 0.2
+roughness = 0.48
+
+[node name="SchematicStraightSurgicalHandpiece" type="Node3D"]
+
+[node name="StraightHandpieceGrip" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.3, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="CouplingShell" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.02, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="LongAxisTaper" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.55, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="NoseChuck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.88, 0)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="StraightBurShaft" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.17, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="ShortSchematicBur" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.43, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_gold")
+
+[node name="InstrumentSleeveRidge0" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.07, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.155, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.24, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.325, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.41, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge5" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.495, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentSleeveRidge6" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.58, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
