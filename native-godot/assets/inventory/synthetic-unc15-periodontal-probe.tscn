@@ -1,0 +1,202 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 1
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.062
+bottom_radius = 0.071
+height = 0.16
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.042
+bottom_radius = 0.042
+height = 0.25807
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.62298
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_4"]
+radius = 0.021
+height = 0.035
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_5"]
+radius = 0.03
+height = 0.06
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.11
+bottom_radius = 0.11
+height = 0.02
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.86, 1)
+metallic = 0.74
+roughness = 0.28
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.21, 1)
+metallic = 0.25
+roughness = 0.59
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.88, 0.7, 0.32, 1)
+metallic = 0.43
+roughness = 0.37
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.93, 0.95, 1)
+metallic = 0.08
+roughness = 0.48
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.33, 0.6, 0.87, 1)
+metallic = 0.16
+roughness = 0.47
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.34, 0.63, 0.77, 1)
+metallic = 0.18
+roughness = 0.5
+
+[node name="SchematicUNC15PeriodontalProbe" type="Node3D"]
+
+[node name="UNC15ErgonomicHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="UNC15DistalCollar" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.36, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="UNC15InitialAngle" type="MeshInstance3D" parent="."]
+position = Vector3(0.075, -0.535, 0)
+rotation_degrees = Vector3(0, 0, -144.46232)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="UNC15GraduatedMeasuringBlade" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, -0.935, 0)
+rotation_degrees = Vector3(0, 0, -161.27421)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="UncalibratedUNC15Graduation1" type="MeshInstance3D" parent="."]
+position = Vector3(0.1625, -0.67688, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation2" type="MeshInstance3D" parent="."]
+position = Vector3(0.175, -0.71375, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation3" type="MeshInstance3D" parent="."]
+position = Vector3(0.1875, -0.75062, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation4" type="MeshInstance3D" parent="."]
+position = Vector3(0.2, -0.7875, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation5" type="MeshInstance3D" parent="."]
+position = Vector3(0.2125, -0.82437, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_blue")
+
+[node name="UncalibratedUNC15Graduation6" type="MeshInstance3D" parent="."]
+position = Vector3(0.225, -0.86125, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation7" type="MeshInstance3D" parent="."]
+position = Vector3(0.2375, -0.89813, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation8" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, -0.935, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation9" type="MeshInstance3D" parent="."]
+position = Vector3(0.2625, -0.97188, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation10" type="MeshInstance3D" parent="."]
+position = Vector3(0.275, -1.00875, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_blue")
+
+[node name="UncalibratedUNC15Graduation11" type="MeshInstance3D" parent="."]
+position = Vector3(0.2875, -1.04563, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation12" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -1.0825, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation13" type="MeshInstance3D" parent="."]
+position = Vector3(0.3125, -1.11938, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation14" type="MeshInstance3D" parent="."]
+position = Vector3(0.325, -1.15625, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="UncalibratedUNC15Graduation15" type="MeshInstance3D" parent="."]
+position = Vector3(0.3375, -1.19312, 0.03)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_blue")
+
+[node name="UNC15RoundedProtectedTerminal" type="MeshInstance3D" parent="."]
+position = Vector3(0.35, -1.25, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_gold")
+
+[node name="UNC15HandleRidge0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.09, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="UNC15HandleRidge1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.04, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="UNC15HandleRidge2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.17, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="UNC15HandleRidge3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.3, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
+
+[node name="UNC15HandleRidge4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.43, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_dark")
