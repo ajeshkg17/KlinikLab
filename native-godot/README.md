@@ -366,3 +366,14 @@ Every newly added instrument is a locally authored primitive-based .tscn scene w
 Identification references: [GC Cartridge Dispenser II](https://www.gc.dental/america/products/operatory/equipment/gc-cartridge-dispenser-ii); [HuFriedy instrument catalog (orthodontic setup)](https://catalog.hu-friedy.com/product/files/basic-html/page474.html); [HuFriedy distal-end cutters](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page17.html); [ligature cutters](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page18.html); [Weingart pliers](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page19.html); [band pushers](https://catalog.hu-friedy.com/orthodontic/files/basic-html/page28.html).
 
 Execute the new source contracts with native Node 22 using node --test tests/prostho_ortho_tool_inventory_contract.test.mjs. **Do not merge** without Windows Godot 4.7.2 import, all 63 previews verified visually and 20-bench gameplay/journal regression. Source parsing is not runtime acceptance.
+
+
+### Periodontal, oral surgery and endodontic models · ten original schematic additions
+
+The inventory now includes a separate set of ten recognition models: Gracey curette, universal curette, periodontal hoe scaler, guarded scalpel handle, double-ended periosteal elevator (Molt concept), Adson-pattern tissue forceps, Mayo-Hegar needle holder, Mosquito-pattern hemostat, double-ended endodontic plugger and capped irrigation syringe.
+
+**The inventory total becomes 73 static, selectable/rotatable model entries:** 19 existing bench study models, 6 source-verified downloaded CC0 equipment GLBs and 48 additional locally authored instrument study scenes. These ten scenes are included in the isolated native builder as `synthetic-*.tscn` files with English/German catalog labels; no chair/scoring/profile/journal changes or new downloads.
+
+The Gracey and universal working ends are **visually differentiated schematically**, reflecting their distinct curvature/offset and cutting-edge concepts (see [Optident/American Eagle instrument guide](https://optident.co.uk/app/uploads/2016/06/2015-Instrument-Guide.pdf)). The actual tip angles, blade surfaces, sharpness, dimensions and numbered Gracey types are **not calibrated**. All surgical instruments have blunt demonstration geometry. Needle holder ratchet, hemostatic clamping, scalpel incision, plugger compaction and irrigation flow are **nonfunctional**. The syringe has a schematic protective cap and no exposed operating needle. These are not clinically safe product designs or technique guidance.
+
+New source-only tests: `tests/perio_surgery_tool_inventory_contract.test.mjs`. Verify with native Node 22, then require Godot 4.7.2 import, model previews and all 20 pre-existing bench/journal replays before merging.
