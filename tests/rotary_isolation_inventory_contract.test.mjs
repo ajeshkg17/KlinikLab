@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read = path => readSourceContract('../' + path, import.meta.url);
 const catalog = read('native-godot/tools-inventory-catalog.gd');
@@ -33,7 +33,7 @@ test('ten new categorized models extend inventory to 43 without changing 20 orig
   assert.match(catalog, /for entry: Dictionary in ROTARY_ISOLATION_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
   assert.equal((catalog.match(/^\t\t"id": "handtool\.[^"]+",/gm)||[]).length, 8);
   assert.equal((catalog.match(/^\t\t"id": "inventory\.[^"]+",/gm)||[]).length, 6);
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length, 19);
+  assert.equal(countOriginalBenchToolEntries(bench), 19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
   // English/German labels and caution notes exist for every new study prop.
   assert.equal((section.match(/^\t\t"german": "[^"]+",/gm)||[]).length,10);
