@@ -153,6 +153,112 @@ const HAND_TOOLS := [
 	},
 ]
 
+
+## Ten original schematic models for rotary tools, burs, isolation and extractions.
+## The URLs are independent instrument-identification references, not model downloads.
+const ROTARY_ISOLATION_TOOLS := [
+	{
+		"id": "rotary.high_speed_turbine",
+		"name": "High-speed air-turbine handpiece",
+		"german": "Turbinenwinkelstück / Turbine",
+		"kind": "Rotary instruments",
+		"scene": "res://assets/inventory/synthetic-high-speed-handpiece.tscn",
+		"cue": "Identify the large turbine head, angled neck, slim body and illustrated bur connection.",
+		"purpose": "Static recognition model only; no motor, water spray, rotational speed, torque or patient cutting geometry.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.contra_angle",
+		"name": "Low-speed contra-angle handpiece",
+		"german": "Winkelstück (Untersetzung/Drehzahl)",
+		"kind": "Rotary instruments",
+		"scene": "res://assets/inventory/synthetic-contra-angle-handpiece.tscn",
+		"cue": "Compare the angled head and latch-type working end with the high-speed turbine.",
+		"purpose": "Schematic motor attachment and head only; gear ratios, motor drive and bur coupling are not functional.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.straight_handpiece",
+		"name": "Straight dental handpiece",
+		"german": "Gerades Handstück",
+		"kind": "Rotary instruments",
+		"scene": "res://assets/inventory/synthetic-straight-handpiece.tscn",
+		"cue": "Look for the straight inline chuck and elongated handpiece body instead of the angled turbine head.",
+		"purpose": "Illustrative straight-handpiece form; no mechanical drive, sterilisation state or clinical performance.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.round_bur",
+		"name": "Round dental bur",
+		"german": "Rundbohrer / Rosenbohrer",
+		"kind": "Dental burs",
+		"scene": "res://assets/inventory/synthetic-round-bur.tscn",
+		"cue": "Look for the spherical working head and compare its round shape with the pear bur.",
+		"purpose": "Illustrative flutes and round silhouette only; cutting edges, ISO dimensions and indicated use are not calibrated.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.pear_bur_330",
+		"name": "Pear-shaped 330-pattern dental bur",
+		"german": "Birnenförmiger Bohrer (330-Form)",
+		"kind": "Dental burs",
+		"scene": "res://assets/inventory/synthetic-pear-bur-330.tscn",
+		"cue": "Compare the wider rounded pear-shaped working head and narrower neck with the round bur.",
+		"purpose": "Visual 330-pattern recognition only; NOT a size-correct or cutting-capable No. 330 CAD model.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.endo_z_bur",
+		"name": "Endo-Z access bur (non-cutting tip concept)",
+		"german": "Endo-Z-Bohrer mit nichtschneidender Spitze",
+		"kind": "Dental burs · endodontics",
+		"scene": "res://assets/inventory/synthetic-endo-z-bur.tscn",
+		"cue": "Identify the longer cutting-barrel silhouette and contrasting rounded safety-tip concept.",
+		"purpose": "Non-cutting tip is depicted schematically; no safe endodontic access geometry or cutting simulation.",
+		"source": "https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf",
+	},
+	{
+		"id": "rotary.rubber_dam_clamp",
+		"name": "Rubber dam retaining clamp",
+		"german": "Kofferdamklammer",
+		"kind": "Rubber dam equipment",
+		"scene": "res://assets/inventory/synthetic-rubber-dam-clamp.tscn",
+		"cue": "Compare the spring-bow shape, two jaws and tool-engagement lugs with the placement forceps.",
+		"purpose": "Generic visual outline, not a specific clamp number; no retention, tooth fit, contact force or safe placement.",
+		"source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8161708/",
+	},
+	{
+		"id": "rotary.rubber_dam_forceps",
+		"name": "Rubber dam clamp forceps",
+		"german": "Kofferdamklammerzange",
+		"kind": "Rubber dam equipment",
+		"scene": "res://assets/inventory/synthetic-rubber-dam-clamp-forceps.tscn",
+		"cue": "Identify finger rings, crossing arms and small clamp-engagement tips; compare with extraction forceps.",
+		"purpose": "Illustrative clamp-handling tool; no opening spring, locking mechanism, clamp expansion or patient application.",
+		"source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8161708/",
+	},
+	{
+		"id": "rotary.straight_elevator",
+		"name": "Straight dental root elevator",
+		"german": "Gerader Wurzelheber / Bein-Hebel",
+		"kind": "Extraction instruments",
+		"scene": "res://assets/inventory/synthetic-straight-elevator.tscn",
+		"cue": "Look for a stout palm grip, single straight shank and rounded wedge-like terminal study tip.",
+		"purpose": "Schematic recognition only; not a sharp elevator, root luxation force or patient extraction technique.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "rotary.extraction_forceps",
+		"name": "Dental extraction forceps (generic pattern)",
+		"german": "Zahnextraktionszange (schematisch)",
+		"kind": "Extraction instruments",
+		"scene": "res://assets/inventory/synthetic-extraction-forceps.tscn",
+		"cue": "Observe two hinged handles and opposing beaks; compare with ring-handled dam clamp forceps.",
+		"purpose": "Generic educational outline, not tooth-specific upper/lower forceps or clinically suitable beak geometry.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -173,5 +279,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in EXTRA:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in HAND_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in ROTARY_ISOLATION_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
