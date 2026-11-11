@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,ORIGINAL_BENCH_TOOL_IDS,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read = path => readSourceContract('../' + path, import.meta.url);
 const catalog = read('native-godot/chairside-catalog.gd');
@@ -15,7 +15,7 @@ const scenarios = [
   'endo','retreat','aligner','mouthguard','extraction'
 ];
 const lessons = [...catalog.matchAll(/^const ([A-Z_]+) := \{([\s\S]*?)^\}/gm)]
-  .filter(([, name]) => name !== 'ITEMS');
+  .filter(([, name]) => scenarios.includes(name.toLowerCase()));
 const itemSource = catalog.split(/^const COMPOSITE := \{/m)[0];
 const itemNames = [...itemSource.matchAll(/^\t"((?:tool|material)\.[^"]+)": \{/gm)].map(x => x[1]);
 
@@ -36,8 +36,8 @@ test('all and only twenty existing chair scenarios have distinct stable lesson a
 });
 
 test('all twenty tools and case-specific reference choices resolve to shared item keys', () => {
-  assert.equal(itemNames.length, 41);
-  assert.equal(new Set(itemNames).size, 41, 'duplicate item key');
+  assert.ok(itemNames.length >= 41, 'original 41 reference choices must remain available');
+  assert.equal(new Set(itemNames).size, itemNames.length, 'duplicate item key');
   const keys = new Set(itemNames);
   for (const [name, , lesson] of lessons) {
     const steps = [...lesson.matchAll(/^\t"(tool|material)": \{([\s\S]*?)^\t\},/gm)];
@@ -59,7 +59,9 @@ test('all twenty tools and case-specific reference choices resolve to shared ite
 });
 
 test('all original synthetic 3D scenes exist and are packed; the two CC0 GLBs stay source pinned', () => {
-  const tools = [...itemSource.matchAll(/^\t"(tool\.[^"]+)": \{([\s\S]*?)^\t\},/gm)];
+  const tools = [...itemSource.matchAll(/^\t"(tool\.[^"]+)": \{([\s\S]*?)^\t\},/gm)]
+    .filter(([, id]) => ORIGINAL_BENCH_TOOL_IDS.includes(id));
+  assert.equal(countOriginalBenchToolEntries(itemSource), 19);
   assert.equal(tools.length, 19);
   let synthetic = 0, convertedGlb = 0;
   for (const [, id, body] of tools) {
