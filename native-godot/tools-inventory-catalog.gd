@@ -471,6 +471,111 @@ const PROSTHO_ORTHO_TOOLS := [
 	},
 ]
 
+
+## Source references explain instrument types. All meshes below were newly authored.
+const PERIO_SURGERY_TOOLS := [
+	{
+		"id": "perio_surgery.gracey_curette",
+		"name": "Gracey periodontal curette (study geometry)",
+		"german": "Gracey-Kürette",
+		"kind": "Periodontal instruments",
+		"scene": "res://assets/inventory/synthetic-gracey-curette.tscn",
+		"cue": "Find the offset terminal working shank and rounded toe; contrast with the universal curette.",
+		"purpose": "Original schematic, not an accurately angled, sharpened or area-specific Gracey working blade.",
+		"source": "https://optident.co.uk/app/uploads/2016/06/2015-Instrument-Guide.pdf",
+	},
+	{
+		"id": "perio_surgery.universal_curette",
+		"name": "Universal periodontal curette",
+		"german": "Universalkürette",
+		"kind": "Periodontal instruments",
+		"scene": "res://assets/inventory/synthetic-universal-curette.tscn",
+		"cue": "Compare the more symmetric blade face and rounded toe with the offset Gracey study tip.",
+		"purpose": "Blade is an unsharpened study silhouette; no cutting edge angle, site suitability or technique validated.",
+		"source": "https://optident.co.uk/app/uploads/2016/06/2015-Instrument-Guide.pdf",
+	},
+	{
+		"id": "perio_surgery.hoe_scaler",
+		"name": "Periodontal hoe scaler",
+		"german": "Parodontaler Hohlmeißel / Hoe-Scaler",
+		"kind": "Periodontal instruments",
+		"scene": "res://assets/inventory/synthetic-hoe-scaler.tscn",
+		"cue": "Observe the perpendicular blunt working pad and angled terminal shank.",
+		"purpose": "Educational shape only; no actual sharp scaling end, clinical access or periodontal force.",
+		"source": "https://optident.co.uk/app/uploads/2016/06/2015-Instrument-Guide.pdf",
+	},
+	{
+		"id": "perio_surgery.scalpel_handle",
+		"name": "Scalpel with covered study blade",
+		"german": "Skalpellgriff mit geschützter Klinge",
+		"kind": "Oral surgery instruments",
+		"scene": "res://assets/inventory/synthetic-scalpel-handle.tscn",
+		"cue": "Identify the flat scalpel handle and guarded distal blade outline.",
+		"purpose": "Safety-covered visual prop; no sharp blade, blade size compatibility or incision simulation.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.periosteal_elevator",
+		"name": "Double-ended periosteal elevator (Molt concept)",
+		"german": "Raspatorium / Periostschieber",
+		"kind": "Oral surgery instruments",
+		"scene": "res://assets/inventory/synthetic-periosteal-elevator.tscn",
+		"cue": "Compare the two widened offset terminal ends with a straight root elevator.",
+		"purpose": "Original rounded nonfunctional study prop; no clinical reflection, tissue contact or blade geometry.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.surgical_tissue_forceps",
+		"name": "Adson-pattern tissue forceps",
+		"german": "Chirurgische Pinzette (Adson-Form)",
+		"kind": "Oral surgery instruments",
+		"scene": "res://assets/inventory/synthetic-tissue-forceps.tscn",
+		"cue": "Find the spring arms and two small terminal tooth markers.",
+		"purpose": "Blunt model without functioning grasp, tissue pressure or true toothed geometry.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.needle_holder",
+		"name": "Mayo-Hegar needle holder",
+		"german": "Mayo-Hegar-Nadelhalter",
+		"kind": "Suturing instruments",
+		"scene": "res://assets/inventory/synthetic-needle-holder.tscn",
+		"cue": "Identify ring handles, crossover pivot, heavier opposed jaws and schematic ratchet.",
+		"purpose": "No needle retention, torque, locking function, needle guidance or suturing skill is modelled.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.hemostat",
+		"name": "Mosquito hemostatic forceps",
+		"german": "Mosquito-Klemme / Arterienklemme",
+		"kind": "Suturing instruments",
+		"scene": "res://assets/inventory/synthetic-mosquito-hemostat.tscn",
+		"cue": "Compare slender long clamping beaks and ring handles with the sturdier needle holder.",
+		"purpose": "Nonfunctional clamp, no vessel occlusion or anatomical accuracy; instrument identification only.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.endodontic_plugger",
+		"name": "Double-ended endodontic plugger",
+		"german": "Wurzelkanalstopfer / Plugger",
+		"kind": "Endodontic instruments",
+		"scene": "res://assets/inventory/synthetic-endo-plugger.tscn",
+		"cue": "Identify the flat blunt condensation tips versus the point of a finger spreader.",
+		"purpose": "Working diameters, heat transfer and obturation pressure are not clinically calibrated.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+	{
+		"id": "perio_surgery.irrigation_syringe",
+		"name": "Capped endodontic irrigation syringe",
+		"german": "Endodontische Spülspritze mit Schutzkappe",
+		"kind": "Endodontic instruments",
+		"scene": "res://assets/inventory/synthetic-endo-irrigation-syringe.tscn",
+		"cue": "Look for the graduated barrel, plunger and capped bent delivery end.",
+		"purpose": "Visual study only; no liquid, syringe pressure, needle outlet design or safe canal irrigation.",
+		"source": "https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -497,5 +602,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in ASSISTANT_RESTORATIVE_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in PROSTHO_ORTHO_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in PERIO_SURGERY_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
