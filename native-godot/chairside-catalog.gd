@@ -96,6 +96,27 @@ const ITEMS := {
 		"purpose": "Represents a site-checking periodontal probe, not a scaler; no real pocket depth, probing force, tissue response or diagnosis is measured.",
 		"source": ADA_CHART,
 	},
+	"tool.nabers_furcation_study": {
+		"name": "Curved Nabers furcation probe (schematic 3D study)", "german": "Nabers-Furkationssonde (schematisches 3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-nabers-furcation-probe.tscn",
+		"cue": "Original rotating study geometry: pronounced curving terminal arm with a rounded noncalibrated tip, no anatomical insertion.",
+		"purpose": "Instructor-assigned instrument silhouette for recognising a Nabers probe. No true furcation penetration, classification, force or clinical measurement.",
+		"source": ADA_CHART,
+	},
+	"tool.unc15_furcation_distractor": {
+		"name": "UNC-15 pocket probe (schematic 3D alternative)", "german": "UNC-15-Parodontalsonde (schematisches Vergleichsmodell)",
+		"scene": "res://assets/inventory/synthetic-unc15-periodontal-probe.tscn",
+		"cue": "Original study model: straighter shank and fifteen decorative graduation marks, not the curved Nabers study tip.",
+		"purpose": "Recognise a different periodontal instrument; uncalibrated marks do not measure pocket depths.",
+		"source": ADA_CHART,
+	},
+	"material.assigned_furcation_locator": {
+		"name": "Instructor-assigned furcation-reference location key (fictional)",
+		"german": "Zugeordnete Furkations-Lokalisationsvorlage (Lehrmodell)",
+		"cue": "Illustration · turquoise card identifying exactly two assigned left/right model markers; not an image or patient record.",
+		"purpose": "The case-specific key for the two highlighted locations in the EXISTING chart chair, not a representation of furcation anatomy, attachment loss, probing depths or classification.",
+		"swatch": Color("#a6d5ce"), "source": ADA_CHART,
+	},
 	"material.site_chart": {
 		"name": "Tooth-and-site periodontal chart", "german": "Parodontalstatus mit Zahn- und Stellenzuordnung",
 		"cue": "Illustration · blue-green record card for assigned tooth/site identifiers, not real clinical data",
@@ -455,6 +476,34 @@ const CHART := {
 	"finish": "Confirm both simulated periodontal site records",
 	"finish_event": "record_periodontal_sites",
 	"outcome": "Periodontal charting exercise complete · The two assigned model locations were recorded and verified in the chair. No actual pocket depth, clinical finding, patient diagnosis or professional proficiency is claimed.",
+	"reference": ADA_CHART,
+}
+
+
+const FURCATION := {
+	"id": "furcation_model_landmark_review_intro",
+	"scenario": "chart",
+	"title": "Furcation probe and model-site recording bench",
+	"case": "FICTIONAL teaching-arch recognition exercise · The instructor labels two generic chart-fixture model landmarks LEFT and RIGHT as furcation-reference LOCATIONS. Identify the curved NABERS STUDY PROBE rather than the UNC-15 POCKET PROBE, select the ASSIGNED TWO-SITE LOCATOR KEY, and enter the UNCHANGED periodontal chart chair to record its two model site markers. That chair is NOT a furcation anatomy model. No patient tooth, horizontal probe passage, pocket depth, classification, periodontal finding, intervention or clinical competence is assessed.",
+	"tool": {
+		"label": "probe study model",
+		"choices": ["tool.nabers_furcation_study", "tool.unc15_furcation_distractor"],
+		"expected": "tool.nabers_furcation_study",
+		"prompt": "Which rotatable 3D model matches the instructor's curved Nabers furcation probe rather than a pocket-depth style probe?",
+		"correct": "Correct. The curved study shape represents the Nabers instrument family. It does not measure any real furcation.",
+		"incorrect": "The UNC-15 carries illustrative straight-shank marks; this instructor assigned the curved Nabers study model.",
+	},
+	"material": {
+		"label": "site locator key",
+		"choices": ["material.assigned_furcation_locator", "material.site_chart"],
+		"expected": "material.assigned_furcation_locator",
+		"prompt": "Which fictional record explicitly identifies the instructor's two assigned model reference locations for this bench?",
+		"correct": "Correct. The custom locator key identifies the LEFT and RIGHT model markers without claiming clinical findings.",
+		"incorrect": "A general periodontal chart serves another lesson; it does not provide this fictional instructor's two assigned site identifiers.",
+	},
+	"finish": "Record the two assigned furcation-reference model locations",
+	"finish_event": "record_furcation_model_reference_locations",
+	"outcome": "Furcation-reference location recognition complete · The unchanged chart chair verified two generic model locations. No actual furcation anatomy, grade, pocket depth, probing force, diagnosis or treatment outcome was evaluated.",
 	"reference": ADA_CHART,
 }
 

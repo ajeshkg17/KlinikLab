@@ -1743,6 +1743,8 @@ func _start_automated_trial(mode := "room") -> void:
 		trial_script = "res://root-planing-inspection-trial.gd"
 	elif mode == "chart_bench":
 		trial_script = "res://chart-inspection-trial.gd"
+	elif mode == "furcation_bench":
+		trial_script = "res://furcation-inspection-trial.gd"
 	elif mode == "bitewing_bench":
 		trial_script = "res://bitewing-inspection-trial.gd"
 	elif mode == "oral_exam_bench":
@@ -3589,6 +3591,7 @@ func _show_journey() -> void:
 		["cleaning", "Open professional cleaning bench", "KL_OPEN_CLEANING_BENCH"],
 		["root_planing", "Open scaling and root planing bench", "KL_OPEN_ROOT_PLANING_BENCH"],
 		["chart", "Open periodontal charting bench", "KL_OPEN_CHART_BENCH"],
+		["furcation", "Open furcation site-recording bench", "KL_OPEN_FURCATION_BENCH"],
 		["bitewing", "Open bitewing image review bench", "KL_OPEN_BITEWING_BENCH"],
 		["oral_exam", "Open oral soft-tissue screening bench", "KL_OPEN_ORAL_EXAM_BENCH"],
 		["veneer", "Open veneer try-in bench", "KL_OPEN_VENEER_BENCH"],
@@ -3615,6 +3618,7 @@ func _show_journey() -> void:
 		["Run professional cleaning bench replay", "cleaning_bench"],
 		["Run scaling and root planing bench replay", "root_planing_bench"],
 		["Run periodontal charting bench replay", "chart_bench"],
+		["Run furcation model-site bench replay", "furcation_bench"],
 		["Run bitewing image review bench replay", "bitewing_bench"],
 		["Run oral soft-tissue screening bench replay", "oral_exam_bench"],
 		["Run veneer try-in bench replay", "veneer_bench"],
@@ -3734,11 +3738,11 @@ func _open_tool_inventory() -> void:
 func _open_chairside_bench(lesson_id: String) -> void:
 	if is_instance_valid(_chairside_bench):
 		return
-	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard", "extraction"]:
+	if lesson_id not in ["composite", "sealant", "fluoride", "cleaning", "root_planing", "chart", "furcation", "bitewing", "oral_exam", "veneer", "inlay", "crown", "bridge", "full_denture", "partial_denture", "implant", "endo", "retreat", "aligner", "mouthguard", "extraction"]:
 		return
 	_chairside_bench = CHAIRSIDE_BENCH.new()
 	_shell.add_child(_chairside_bench)
-	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN if lesson_id == "crown" else CHAIRSIDE_CATALOG.BRIDGE if lesson_id == "bridge" else CHAIRSIDE_CATALOG.FULL_DENTURE if lesson_id == "full_denture" else CHAIRSIDE_CATALOG.PARTIAL_DENTURE if lesson_id == "partial_denture" else CHAIRSIDE_CATALOG.IMPLANT if lesson_id == "implant" else CHAIRSIDE_CATALOG.ENDO if lesson_id == "endo" else CHAIRSIDE_CATALOG.RETREAT if lesson_id == "retreat" else CHAIRSIDE_CATALOG.ALIGNER if lesson_id == "aligner" else CHAIRSIDE_CATALOG.MOUTHGUARD if lesson_id == "mouthguard" else CHAIRSIDE_CATALOG.EXTRACTION
+	var lesson: Dictionary = CHAIRSIDE_CATALOG.COMPOSITE if lesson_id == "composite" else CHAIRSIDE_CATALOG.SEALANT if lesson_id == "sealant" else CHAIRSIDE_CATALOG.FLUORIDE if lesson_id == "fluoride" else CHAIRSIDE_CATALOG.CLEANING if lesson_id == "cleaning" else CHAIRSIDE_CATALOG.ROOT_PLANING if lesson_id == "root_planing" else CHAIRSIDE_CATALOG.CHART if lesson_id == "chart" else CHAIRSIDE_CATALOG.BITEWING if lesson_id == "bitewing" else CHAIRSIDE_CATALOG.ORAL_EXAM if lesson_id == "oral_exam" else CHAIRSIDE_CATALOG.VENEER if lesson_id == "veneer" else CHAIRSIDE_CATALOG.INLAY if lesson_id == "inlay" else CHAIRSIDE_CATALOG.CROWN if lesson_id == "crown" else CHAIRSIDE_CATALOG.BRIDGE if lesson_id == "bridge" else CHAIRSIDE_CATALOG.FULL_DENTURE if lesson_id == "full_denture" else CHAIRSIDE_CATALOG.PARTIAL_DENTURE if lesson_id == "partial_denture" else CHAIRSIDE_CATALOG.IMPLANT if lesson_id == "implant" else CHAIRSIDE_CATALOG.ENDO if lesson_id == "endo" else CHAIRSIDE_CATALOG.RETREAT if lesson_id == "retreat" else CHAIRSIDE_CATALOG.ALIGNER if lesson_id == "aligner" else CHAIRSIDE_CATALOG.MOUTHGUARD if lesson_id == "mouthguard" else CHAIRSIDE_CATALOG.FURCATION if lesson_id == "furcation" else CHAIRSIDE_CATALOG.EXTRACTION
 	_chairside_bench.start(lesson)
 	_chairside_bench.practice_requested.connect(_enter_bench_practice)
 
