@@ -164,6 +164,11 @@ try{
  const surgeryImplantScenes=["synthetic-minnesota-retractor.tscn","synthetic-frazier-aspirator.tscn","synthetic-friedman-rongeur.tscn","synthetic-miller-colburn-bone-file.tscn","synthetic-lucas-bone-curette.tscn","synthetic-implant-torque-wrench.tscn","synthetic-implant-hand-driver.tscn","synthetic-implant-tissue-punch.tscn","synthetic-bone-graft-packer.tscn","synthetic-bone-grafting-syringe.tscn"];
  for(const filename of surgeryImplantScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Original static diagnostic and radiography study models (not acquired images).
+ // No change to clinical bench actions, scoring, or patient study data.
+ const diagnosticImagingScenes=["synthetic-wired-cmos-sensor.tscn","synthetic-psp-radiography-plate.tscn","synthetic-bitewing-receptor-holder.tscn","synthetic-xcp-aiming-ring-and-arm.tscn","synthetic-endo-radiograph-holder.tscn","synthetic-intraoral-camera.tscn","synthetic-tooth-shade-guide.tscn","synthetic-occlusal-photography-mirror.tscn","synthetic-electric-pulp-tester.tscn","synthetic-transillumination-wand.tscn"];
+ for(const filename of diagnosticImagingScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
