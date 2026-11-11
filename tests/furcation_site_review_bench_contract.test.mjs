@@ -34,7 +34,7 @@ test('two existing separately rotatable 3D probes and instructor site key make a
   ['tool.unc15_furcation_distractor','synthetic-unc15-periodontal-probe.tscn']]){
    assert.match(catalog,new RegExp('"'+key.replaceAll('.','\\.')+'": \\{'));
    assert.ok(catalog.includes('"scene": "res://assets/inventory/'+scene+'"'));
-   assert.ok(builder.includes("'"+scene+"'"),'native builder already packages '+scene);
+   assert.ok(builder.includes('"'+scene+'"'),'native builder already packages '+scene);
  }
  assert.match(nabers,/CurvedNabersFurcationWorkingEnd0/);
  assert.match(unc15,/UNC15GraduatedMeasuringBlade/);
