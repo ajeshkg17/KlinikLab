@@ -12,23 +12,29 @@ const replay = get('native-godot/composite-inspection-trial.gd');
 function selectForCase(expression, scenario) {
   const branches = expression.split(' else ');
   assert.ok(branches.length > 1, 'conditional chain absent');
+  let selected;
   for (let i = 0; i < branches.length; i++) {
     const branch = branches[i];
     if (i === branches.length - 1) {
       const fallback = branch.match(/^"([^"]+)"$/);
       assert.ok(fallback, 'malformed fallback: ' + branch);
-      return fallback[1];
+      if (selected === undefined) selected = fallback[1];
+      continue;
     }
     const matched = branch.match(
       /^"([^"]+)" if lesson_id (?:== "([^"]+)"|in \[([^\]]+)\])$/
     );
     assert.ok(matched, 'unsupported condition: ' + branch);
+    if (matched[3] !== undefined) {
+      assert.match(matched[3], /^"[a-z_][a-z_0-9]*"(?:, "[a-z_][a-z_0-9]*")*$/,
+        'malformed case list: ' + branch);
+    }
     const cases = matched[2] ? [matched[2]]
       : [...matched[3].matchAll(/"([^"]+)"/g)].map(x => x[1]);
     assert.ok(cases.length > 0, 'empty case condition');
-    if (cases.includes(scenario)) return matched[1];
+    if (selected === undefined && cases.includes(scenario)) selected = matched[1];
   }
-  throw new Error('unreachable conditional chain');
+  return selected;
 }
 
 function capture(pattern, label) {
@@ -99,4 +105,23 @@ test('all 20 benches replay the catalog-selected right and wrong IDs in six rout
   assert.match(replay, /_click\(bench, "KL_BENCH_PICK_" \+ correct_material\)/);
   assert.match(replay, /str\(retries\[kind \+ "_choice"\]\["selected_id"\]\)/);
   assert.match(replay, /str\(retries\[kind \+ "_choice"\]\["expected_id"\]\)/);
+});
+
+
+test('route parser accepts valid matches and rejects malformed late or list clauses', () => {
+  assert.equal(selectForCase('"A" if lesson_id == "composite" else "B"', 'composite'), 'A');
+  assert.equal(selectForCase('"A" if lesson_id == "composite" else "B"', 'sealant'), 'B');
+  assert.equal(selectForCase('"A" if lesson_id in ["composite", "sealant"] else "B"', 'sealant'), 'A');
+  assert.throws(() =>
+    selectForCase('"A" if lesson_id in ["composite", INVALID] else "B"', 'composite'),
+    /malformed case list/
+  );
+  assert.throws(() =>
+    selectForCase('"A" if lesson_id == "composite" else "X" if lesson_id != "sealant" else "B"', 'composite'),
+    /unsupported condition/
+  );
+  assert.throws(() =>
+    selectForCase('"A" if lesson_id == "composite" else NO_FALLBACK', 'composite'),
+    /malformed fallback/
+  );
 });
