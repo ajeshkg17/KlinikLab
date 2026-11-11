@@ -1,0 +1,201 @@
+[gd_scene load_steps=17 format=3]
+
+[sub_resource type="BoxMesh" id="Mesh_0"]
+size = Vector3(1.31, 0.64, 0.12)
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.27166
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.32894
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.29411
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.23345
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.068
+bottom_radius = 0.068
+height = 0.18358
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.068
+bottom_radius = 0.068
+height = 0.33941
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.068
+bottom_radius = 0.068
+height = 0.2184
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_8"]
+size = Vector3(0.023, 0.35, 0.025)
+
+[sub_resource type="SphereMesh" id="Mesh_9"]
+radius = 0.04
+height = 0.04
+radial_segments = 24
+rings = 12
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.73, 0.79, 0.84, 1)
+metallic = 0.72
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.13, 0.16, 0.21, 1)
+metallic = 0.17
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.63, 0.29, 1)
+metallic = 0.31
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.9, 0.92, 0.93, 1)
+metallic = 0.09
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.26, 0.56, 0.82, 1)
+metallic = 0.14
+roughness = 0.46
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.86, 0.52, 0.56, 1)
+metallic = 0.12
+roughness = 0.5
+
+[node name="SchematicDentureWaxOcclusionRim" type="Node3D"]
+
+[node name="DentureBaseplateStudyForm" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.42, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="UpperWaxRimArchStudyCurve0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.565, -0.155, 0.11)
+rotation_degrees = Vector3(0, 0, 6.34019)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.525, 0.135, 0.11)
+rotation_degrees = Vector3(0, 0, -19.53665)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.35, 0.375, 0.11)
+rotation_degrees = Vector3(0, 0, -54.68879)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.115, 0.48, 0.11)
+rotation_degrees = Vector3(0, 0, -80.13419)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve4" type="MeshInstance3D" parent="."]
+position = Vector3(0.115, 0.48, 0.11)
+rotation_degrees = Vector3(0, 0, -99.86581)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve5" type="MeshInstance3D" parent="."]
+position = Vector3(0.35, 0.375, 0.11)
+rotation_degrees = Vector3(0, 0, -125.31121)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve6" type="MeshInstance3D" parent="."]
+position = Vector3(0.525, 0.135, 0.11)
+rotation_degrees = Vector3(0, 0, -160.46335)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_gold")
+
+[node name="UpperWaxRimArchStudyCurve7" type="MeshInstance3D" parent="."]
+position = Vector3(0.565, -0.155, 0.11)
+rotation_degrees = Vector3(0, 0, 173.65981)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_gold")
+
+[node name="LowerWaxRimBorder0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.495, -0.26, 0.02)
+rotation_degrees = Vector3(0, 0, -29.35775)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerWaxRimBorder1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33, -0.06, 0.02)
+rotation_degrees = Vector3(0, 0, -45)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerWaxRimBorder2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.105, 0.09, 0.02)
+rotation_degrees = Vector3(0, 0, -74.0546)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerWaxRimBorder3" type="MeshInstance3D" parent="."]
+position = Vector3(0.105, 0.09, 0.02)
+rotation_degrees = Vector3(0, 0, -105.9454)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerWaxRimBorder4" type="MeshInstance3D" parent="."]
+position = Vector3(0.33, -0.06, 0.02)
+rotation_degrees = Vector3(0, 0, -135)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="LowerWaxRimBorder5" type="MeshInstance3D" parent="."]
+position = Vector3(0.495, -0.26, 0.02)
+rotation_degrees = Vector3(0, 0, -150.64225)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_steel")
+
+[node name="CenterlineForWaxStudy" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.29, 0.22)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="RimPositionReference0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.36, -0.49, 0.12)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_light")
+
+[node name="RimPositionReference1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.17, -0.49, 0.12)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_light")
+
+[node name="RimPositionReference2" type="MeshInstance3D" parent="."]
+position = Vector3(0.17, -0.49, 0.12)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_light")
+
+[node name="RimPositionReference3" type="MeshInstance3D" parent="."]
+position = Vector3(0.36, -0.49, 0.12)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_light")
