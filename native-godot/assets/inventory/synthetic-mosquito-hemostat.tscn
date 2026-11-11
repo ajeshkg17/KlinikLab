@@ -1,0 +1,250 @@
+[gd_scene load_steps=16 format=3]
+
+[sub_resource type="CylinderMesh" id="Shape0"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.121
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape1"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.10442
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape2"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.09271
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape3"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.10442
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape4"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.09271
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape5"]
+top_radius = 0.031
+bottom_radius = 0.031
+height = 0.09271
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape6"]
+top_radius = 0.044
+bottom_radius = 0.044
+height = 0.82079
+radial_segments = 20
+
+[sub_resource type="SphereMesh" id="Shape7"]
+radius = 0.095
+height = 0.14
+radial_segments = 20
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Shape8"]
+top_radius = 0.036
+bottom_radius = 0.036
+height = 0.53367
+radial_segments = 20
+
+[sub_resource type="SphereMesh" id="Shape9"]
+radius = 0.044
+height = 0.075
+radial_segments = 20
+rings = 12
+
+[sub_resource type="BoxMesh" id="Shape10"]
+size = Vector3(0.24, 0.07, 0.09)
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.81, 0.85, 1)
+metallic = 0.75
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.84, 0.65, 0.32, 1)
+metallic = 0.45
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.22, 1)
+metallic = 0.25
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.55, 0.41, 0.61, 1)
+metallic = 0.15
+roughness = 0.48
+
+[node name="SchematicMosquitoHemostat" type="Node3D"]
+
+[node name="LeftHemostatRing1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.11432, 0.83878, 0)
+rotation_degrees = Vector3(0, 0, 13.69546)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16615, 0.93388, 0)
+rotation_degrees = Vector3(0, 0, 45.91017)
+mesh = SubResource("Shape1")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.25, 0.97021, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Shape2")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing4" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33385, 0.93388, 0)
+rotation_degrees = Vector3(0, 0, 134.08983)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing5" type="MeshInstance3D" parent="."]
+position = Vector3(-0.38568, 0.83878, 0)
+rotation_degrees = Vector3(0, 0, 166.30454)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing6" type="MeshInstance3D" parent="."]
+position = Vector3(-0.38568, 0.72122, 0)
+rotation_degrees = Vector3(0, 0, -166.30454)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing7" type="MeshInstance3D" parent="."]
+position = Vector3(-0.33385, 0.62612, 0)
+rotation_degrees = Vector3(0, 0, -134.08983)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing8" type="MeshInstance3D" parent="."]
+position = Vector3(-0.25, 0.58979, 0)
+rotation_degrees = Vector3(0, 0, -90)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing9" type="MeshInstance3D" parent="."]
+position = Vector3(-0.16615, 0.62612, 0)
+rotation_degrees = Vector3(0, 0, -45.91017)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatRing10" type="MeshInstance3D" parent="."]
+position = Vector3(-0.11432, 0.72122, 0)
+rotation_degrees = Vector3(0, 0, -13.69546)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing1" type="MeshInstance3D" parent="."]
+position = Vector3(0.38568, 0.83878, 0)
+rotation_degrees = Vector3(0, 0, 13.69546)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing2" type="MeshInstance3D" parent="."]
+position = Vector3(0.33385, 0.93388, 0)
+rotation_degrees = Vector3(0, 0, 45.91017)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing3" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, 0.97021, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Shape5")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing4" type="MeshInstance3D" parent="."]
+position = Vector3(0.16615, 0.93388, 0)
+rotation_degrees = Vector3(0, 0, 134.08983)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing5" type="MeshInstance3D" parent="."]
+position = Vector3(0.11432, 0.83878, 0)
+rotation_degrees = Vector3(0, 0, 166.30454)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing6" type="MeshInstance3D" parent="."]
+position = Vector3(0.11432, 0.72122, 0)
+rotation_degrees = Vector3(0, 0, -166.30454)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing7" type="MeshInstance3D" parent="."]
+position = Vector3(0.16615, 0.62612, 0)
+rotation_degrees = Vector3(0, 0, -134.08983)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing8" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, 0.58979, 0)
+rotation_degrees = Vector3(0, 0, -90)
+mesh = SubResource("Shape2")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing9" type="MeshInstance3D" parent="."]
+position = Vector3(0.33385, 0.62612, 0)
+rotation_degrees = Vector3(0, 0, -45.91017)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatRing10" type="MeshInstance3D" parent="."]
+position = Vector3(0.38568, 0.72122, 0)
+rotation_degrees = Vector3(0, 0, -13.69546)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftHemostatArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.075, 0.19, 0)
+rotation_degrees = Vector3(0, 0, -157.80971)
+mesh = SubResource("Shape6")
+material_override = SubResource("Mat_steel")
+
+[node name="RightHemostatArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.075, 0.19, 0)
+rotation_degrees = Vector3(0, 0, 157.80971)
+mesh = SubResource("Shape6")
+material_override = SubResource("Mat_steel")
+
+[node name="HemostatBoxLock" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.19, 0)
+mesh = SubResource("Shape7")
+material_override = SubResource("Mat_dark")
+
+[node name="LeftCurvedClampingJaw" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, -0.47, 0)
+rotation_degrees = Vector3(0, 0, -167.00538)
+mesh = SubResource("Shape8")
+material_override = SubResource("Mat_steel")
+
+[node name="RightCurvedClampingJaw" type="MeshInstance3D" parent="."]
+position = Vector3(-0.14, -0.47, 0)
+rotation_degrees = Vector3(0, 0, 167.00538)
+mesh = SubResource("Shape8")
+material_override = SubResource("Mat_steel")
+
+[node name="LeftBluntHemostatTip" type="MeshInstance3D" parent="."]
+position = Vector3(0.2, -0.82, 0)
+mesh = SubResource("Shape9")
+material_override = SubResource("Mat_gold")
+
+[node name="RightBluntHemostatTip" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2, -0.82, 0)
+mesh = SubResource("Shape9")
+material_override = SubResource("Mat_gold")
+
+[node name="IllustrativeRatchet" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.24, 0)
+mesh = SubResource("Shape10")
+material_override = SubResource("Mat_dark")
