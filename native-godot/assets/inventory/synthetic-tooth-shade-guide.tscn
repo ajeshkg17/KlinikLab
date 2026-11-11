@@ -1,0 +1,177 @@
+[gd_scene load_steps=13 format=3]
+
+[sub_resource type="SphereMesh" id="Mesh_0"]
+radius = 0.16
+height = 0.18
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.76
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.76
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_3"]
+radius = 0.111
+height = 0.18
+radial_segments = 24
+rings = 12
+
+[sub_resource type="BoxMesh" id="Mesh_4"]
+size = Vector3(0.26, 0.31, 0.15)
+
+[sub_resource type="BoxMesh" id="Mesh_5"]
+size = Vector3(0.26, 0.11, 0.02)
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.73, 0.8, 0.84, 1)
+metallic = 0.73
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.13, 0.17, 0.23, 1)
+metallic = 0.23
+roughness = 0.56
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.92, 0.93, 1)
+metallic = 0.1
+roughness = 0.47
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.26, 0.57, 0.84, 1)
+metallic = 0.12
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.68, 0.28, 1)
+metallic = 0.44
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.46, 0.52, 0.61, 1)
+metallic = 0.16
+roughness = 0.5
+
+[node name="SchematicToothShadeTabFan" type="Node3D"]
+
+[node name="ShadeGuideCentralPivot" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.56, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_dark")
+
+[node name="FanShadeSampleStem0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.31128, -0.34204, 0)
+rotation_degrees = Vector3(0, 0, 55)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2493, -0.27321, 0)
+rotation_degrees = Vector3(0, 0, 41)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.17252, -0.22142, 0)
+rotation_degrees = Vector3(0, 0, 27)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.08548, -0.18974, 0)
+rotation_degrees = Vector3(0, 0, 13)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem4" type="MeshInstance3D" parent="."]
+position = Vector3(0.00663, -0.18006, 0)
+rotation_degrees = Vector3(0, 0, -1)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem5" type="MeshInstance3D" parent="."]
+position = Vector3(0.09835, -0.19295, 0)
+rotation_degrees = Vector3(0, 0, -15)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem6" type="MeshInstance3D" parent="."]
+position = Vector3(0.18423, -0.22764, 0)
+rotation_degrees = Vector3(0, 0, -29)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem7" type="MeshInstance3D" parent="."]
+position = Vector3(0.25916, -0.28209, 0)
+rotation_degrees = Vector3(0, 0, -43)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="FanShadeSampleStem8" type="MeshInstance3D" parent="."]
+position = Vector3(0.31869, -0.35304, 0)
+rotation_degrees = Vector3(0, 0, -57)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_metal")
+
+[node name="UncalibratedToothSample0" type="MeshInstance3D" parent="."]
+position = Vector3(-0.76181, -0.02657, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_light")
+
+[node name="UncalibratedToothSample1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.61013, 0.14188, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="UncalibratedToothSample2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.42221, 0.26864, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_grip")
+
+[node name="UncalibratedToothSample3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.2092, 0.34616, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_light")
+
+[node name="UncalibratedToothSample4" type="MeshInstance3D" parent="."]
+position = Vector3(0.01623, 0.36986, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="UncalibratedToothSample5" type="MeshInstance3D" parent="."]
+position = Vector3(0.2407, 0.33831, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_grip")
+
+[node name="UncalibratedToothSample6" type="MeshInstance3D" parent="."]
+position = Vector3(0.45087, 0.2534, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_light")
+
+[node name="UncalibratedToothSample7" type="MeshInstance3D" parent="."]
+position = Vector3(0.63426, 0.12016, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_gold")
+
+[node name="UncalibratedToothSample8" type="MeshInstance3D" parent="."]
+position = Vector3(0.77996, -0.05349, 0.02)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_grip")
+
+[node name="ShadeGuideHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.79, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_dark")
+
+[node name="NotARealShadeCalibrationLabel" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.76, 0.09)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_blue")
