@@ -324,3 +324,16 @@ The geometry is **original primitive-based schematic teaching geometry** checked
 
 Source-level regression: `node --test tests/dental_tool_inventory_contract.test.mjs tests/handheld_tool_inventory_contract.test.mjs`. Runtime Godot 4.7.2 import/3D appearance, pointer manipulation and a repeat of all 20 bench replays remain mandatory acceptance steps; no clinical-instrument use or measurement is implied.
 
+
+
+### Rotary, bur, isolation and extraction tools · ten additional schematic models
+
+The 3D inventory now also includes **ten original primitive-based teaching models**. Rotary models: high-speed turbine, contra-angle, straight handpiece. Bur models: spherical round, pear-shaped 330-pattern, Endo-Z safety-tip concept. Isolation: rubber-dam retaining clamp and clamp placement forceps. Extraction: straight root elevator and generic extraction forceps.
+
+The static inventory therefore offers **43 selectable model entries**: 19 existing bench study models, six pre-existing source-pinned CC0 equipment GLBs, eight earlier original handheld instruments, and these ten new original .tscn tool geometries. These ten are stored at native-godot/assets/inventory/synthetic-*.tscn and copied by build-app.mjs to the isolated output project. The original downloaded six models and their SHA-256 validation are unchanged.
+
+These are **schematic identification aids**, not CAD models with accurate dimensions, rake angles, bur cutting flutes, actual 330 specifications, Endo-Z non-cutting end design, turbine rotational speed, jaw force, or safe rubber-dam / extraction technique. A named instrument is not a certification of its safety, tooth specificity, clinical suitability or correctness. No new training case, score, clinical outcome claim or profile persistence was added.
+
+Identification reading references: [Basic Guide to Dental Instruments](https://resource.odmu.edu.ua/chair/download/28679/g0svA0dcTrmdbgxARzhhRA/dental%20instruments.pdf) (rotary and bur families), [A simple guide to using dental dam](https://pmc.ncbi.nlm.nih.gov/articles/PMC8161708/) (clamp versus placement forceps), and [ErgoDenta extraction tray instrument guide](https://www.ergodenta.dk/blog/information-12/dental-instruments-by-procedure-tray-set-ups-for-dental-nurses-and-assistants-204) (straight elevators versus extraction forceps). These are reference materials only, **not the source of copied meshes or textures**.
+
+Run node --test tests/rotary_isolation_inventory_contract.test.mjs together with the preceding inventory tests on an actual checkout. After successful Node and Godot import, visually inspect every model and repeat the original twenty-bench regression and clean learner-journal check before merging. Source validation alone is not gameplay acceptance.

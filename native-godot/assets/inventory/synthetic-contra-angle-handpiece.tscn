@@ -1,0 +1,144 @@
+[gd_scene load_steps=14 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.115
+bottom_radius = 0.115
+height = 1.05
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.13
+bottom_radius = 0.13
+height = 0.16
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.086
+bottom_radius = 0.09
+height = 0.41
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.082
+bottom_radius = 0.082
+height = 0.35609
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.19
+bottom_radius = 0.19
+height = 0.22
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.125
+bottom_radius = 0.125
+height = 0.058
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.026
+bottom_radius = 0.028
+height = 0.34
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_7"]
+radius = 0.059
+height = 0.11
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_8"]
+top_radius = 0.12
+bottom_radius = 0.12
+height = 0.021
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.25, 0.55, 0.39, 1)
+metallic = 0.2
+roughness = 0.48
+
+[node name="SchematicContraAngleLowSpeedHandpiece" type="Node3D"]
+
+[node name="LowSpeedGrip" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.34, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="Coupling" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.93, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="InstrumentNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.39, 0)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="ContraAngledDriveSegment" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, -0.7, 0)
+rotation_degrees = Vector3(0, 0, -128.15723)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="ContraAngleHead" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -0.88, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="PushButtonCap" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -0.88, 0.16)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="ShortLatchBur" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -1.15, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="RoundedBurMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -1.35, 0)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_gold")
+
+[node name="GreenGripRing0" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="GreenGripRing1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.14, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="GreenGripRing2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.25, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="GreenGripRing3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.36, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="GreenGripRing4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.47, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")

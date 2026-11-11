@@ -1,0 +1,168 @@
+[gd_scene load_steps=15 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.112
+bottom_radius = 0.095
+height = 1.22
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.12
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.084
+bottom_radius = 0.088
+height = 0.19
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.34731
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.205
+bottom_radius = 0.205
+height = 0.24
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.053
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.29
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_7"]
+radius = 0.043
+height = 0.078
+radial_segments = 24
+rings = 12
+
+[sub_resource type="SphereMesh" id="Mesh_8"]
+radius = 0.027
+height = 0.047
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.115
+bottom_radius = 0.115
+height = 0.021
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.75, 0.8, 0.85, 1)
+metallic = 0.75
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.17, 0.22, 1)
+metallic = 0.27
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.86, 0.69, 0.29, 1)
+metallic = 0.48
+roughness = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.15, 0.35, 0.57, 1)
+metallic = 0.2
+roughness = 0.48
+
+[node name="SchematicHighSpeedAirTurbineHandpiece" type="Node3D"]
+
+[node name="ErgonomicHighSpeedBody" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.25, 0)
+rotation_degrees = Vector3(0, 0, -9)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="RearCouplingCollar" type="MeshInstance3D" parent="."]
+position = Vector3(-0.1, 0.94, 0)
+rotation_degrees = Vector3(0, 0, -9)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="RearConnector" type="MeshInstance3D" parent="."]
+position = Vector3(-0.12, 1.08, 0)
+rotation_degrees = Vector3(0, 0, -9)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="AngledTurbineNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0.1325, -0.43, 0)
+rotation_degrees = Vector3(0, 0, -149.74356)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="TurbineHeadHousing" type="MeshInstance3D" parent="."]
+position = Vector3(0.23, -0.69, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="ChuckCap" type="MeshInstance3D" parent="."]
+position = Vector3(0.23, -0.69, 0.16)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_dark")
+
+[node name="IllustrativeBurShaft" type="MeshInstance3D" parent="."]
+position = Vector3(0.23, -0.94, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="BluntDemonstrationBurTip" type="MeshInstance3D" parent="."]
+position = Vector3(0.23, -1.11, 0)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_gold")
+
+[node name="WaterSprayPortA" type="MeshInstance3D" parent="."]
+position = Vector3(0.1, -0.75, 0.12)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="WaterSprayPortB" type="MeshInstance3D" parent="."]
+position = Vector3(0.37, -0.75, 0.12)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand0" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.13, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.23, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.33, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.43, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="GripBand5" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.53, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
