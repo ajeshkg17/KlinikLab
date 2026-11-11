@@ -179,9 +179,11 @@ var _procedure_drills := PROCEDURE_DRILLS.new()
 const PROCEDURE_LAB := preload("res://procedure-lab.gd")
 const CHAIRSIDE_BENCH := preload("res://chairside-bench.gd")
 const CHAIRSIDE_CATALOG := preload("res://chairside-catalog.gd")
+const TOOL_INVENTORY := preload("res://tools-inventory-panel.gd")
 const PRACTICE_HANDS := preload("res://practice-tool-handling.gd")
 var _procedure_lab: PROCEDURE_LAB
 var _chairside_bench: CHAIRSIDE_BENCH
+var _tool_inventory: TOOL_INVENTORY
 var _chair_lab_walk_selected := false
 
 
@@ -3576,6 +3578,10 @@ func _journey_procedure(index: int) -> void:
 	_refresh()
 
 func _show_journey() -> void:
+	var open_inventory := _button("Open dental instrument inventory · rotating 3D models")
+	open_inventory.name = "KL_OPEN_TOOL_INVENTORY"
+	open_inventory.pressed.connect(_open_tool_inventory)
+	_page.add_child(open_inventory)
 	for lesson in [
 		["composite", "Open composite restoration bench", "KL_OPEN_COMPOSITE_BENCH"],
 		["sealant", "Open fissure sealant bench", "KL_OPEN_SEALANT_BENCH"],
@@ -3717,6 +3723,13 @@ func _show_journey() -> void:
 	nav.add_child(forward)
 	_page.add_child(nav)
 
+
+func _open_tool_inventory() -> void:
+	if is_instance_valid(_tool_inventory):
+		return
+	_tool_inventory = TOOL_INVENTORY.new()
+	_shell.add_child(_tool_inventory)
+	_tool_inventory.start()
 
 func _open_chairside_bench(lesson_id: String) -> void:
 	if is_instance_valid(_chairside_bench):
