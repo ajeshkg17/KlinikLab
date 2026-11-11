@@ -169,6 +169,11 @@ try{
  const diagnosticImagingScenes=["synthetic-wired-cmos-sensor.tscn","synthetic-psp-radiography-plate.tscn","synthetic-bitewing-receptor-holder.tscn","synthetic-xcp-aiming-ring-and-arm.tscn","synthetic-endo-radiograph-holder.tscn","synthetic-intraoral-camera.tscn","synthetic-tooth-shade-guide.tscn","synthetic-occlusal-photography-mirror.tscn","synthetic-electric-pulp-tester.tscn","synthetic-transillumination-wand.tscn"];
  for(const filename of diagnosticImagingScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Original static dental laboratory and impression meshes; not downloaded CAD.
+ // Do not touch original clinical benches, learner progress, or journal.
+ const laboratoryImpressionScenes=["synthetic-alginate-mixing-bowl.tscn","synthetic-alginate-mixing-spatula.tscn","synthetic-plaster-mixing-spatula.tscn","synthetic-fahnenstock-wax-knife.tscn","synthetic-le-cron-wax-carver.tscn","synthetic-boley-caliper.tscn","synthetic-denture-cleaning-brush.tscn","synthetic-articulator-mounting-plate.tscn","synthetic-bite-registration-wax-rim.tscn","synthetic-dental-wax-heater.tscn"];
+ for(const filename of laboratoryImpressionScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);

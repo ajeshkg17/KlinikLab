@@ -894,6 +894,112 @@ const DIAGNOSTIC_IMAGING_TOOLS := [
 	},
 ]
 
+
+## Ten local original, nonfunctional dental laboratory/impression study models.
+## Reference URLs support terminology; no CAD was downloaded from them.
+const LABORATORY_IMPRESSION_TOOLS := [
+	{
+		"id": "lab.alginate_bowl",
+		"name": "Flexible alginate mixing bowl",
+		"german": "Alginat-Anmischbecher / Gummianmischschale",
+		"kind": "Impression materials · mixing",
+		"scene": "res://assets/inventory/synthetic-alginate-mixing-bowl.tscn",
+		"cue": "Identify a flexible tapered rubber bowl with a broad rim and an illustrative dark interior cavity.",
+		"purpose": "Original study silhouette without true cavity volume, standardized dimensions, material chemistry or mixing function.",
+		"source": "https://altmanndental.de/shop/labor/modellherstellung/anmischbecher-anmischschalen/",
+	},
+	{
+		"id": "lab.alginate_spatula",
+		"name": "Flexible alginate mixing spatula",
+		"german": "Alginatspatel / Abformmaterial-Anmischspatel",
+		"kind": "Impression materials · mixing",
+		"scene": "res://assets/inventory/synthetic-alginate-mixing-spatula.tscn",
+		"cue": "Compare its broad flexible mixing paddle with the smaller flat dental cement spatula.",
+		"purpose": "Illustrative nonfunctional mixing paddle; no calibrated flexibility or validated impression mixing technique.",
+		"source": "https://moltdms.com/product-category/laboratory/",
+	},
+	{
+		"id": "lab.plaster_spatula",
+		"name": "Heavy dental plaster mixing spatula",
+		"german": "Gipsspatel / Gipsanmischspatel",
+		"kind": "Dental laboratory · gypsum mixing",
+		"scene": "res://assets/inventory/synthetic-plaster-mixing-spatula.tscn",
+		"cue": "Observe the wide reinforced mixing blade and sturdy handle, compared with the flexible alginate spatula.",
+		"purpose": "A blunt static plaster-spatula study outline; no true strength, material processing or gypsum mixing performance.",
+		"source": "https://www.comdent.co.uk/product-category/dental-instruments/dental-lab-instruments/",
+	},
+	{
+		"id": "lab.fahnenstock_wax_knife",
+		"name": "Fahnenstock-style dental wax knife",
+		"german": "Fahnenstock-Wachsmesser",
+		"kind": "Dental laboratory · wax modelling",
+		"scene": "res://assets/inventory/synthetic-fahnenstock-wax-knife.tscn",
+		"cue": "Look for the long handle, flat knife-shaped wax-working end and contrasting opposite terminal tip.",
+		"purpose": "Original blunt study model; no cutting edge, wax carving precision, thermal performance or safe heated use.",
+		"source": "https://www.klardent.se/en/hand-instruments/dental-laboratory/",
+	},
+	{
+		"id": "lab.le_cron_wax_carver",
+		"name": "Le Cron dental wax carver",
+		"german": "Le-Cron-Wachsmodellierinstrument",
+		"kind": "Dental laboratory · wax modelling",
+		"scene": "res://assets/inventory/synthetic-le-cron-wax-carver.tscn",
+		"cue": "Distinguish a small curved carving tip opposite a flattened paddle from the broad wax knife.",
+		"purpose": "Illustrative non-sharp modelling tips; no exact curvatures, cutting edges, heated wax flow or crown anatomy.",
+		"source": "https://www.klardent.se/en/hand-instruments/dental-laboratory/",
+	},
+	{
+		"id": "lab.boley_caliper",
+		"name": "Boley-pattern dental sliding caliper",
+		"german": "Boley-Schieblehre / Zahntechniker-Messschieber",
+		"kind": "Dental laboratory · measuring",
+		"scene": "res://assets/inventory/synthetic-boley-caliper.tscn",
+		"cue": "Identify the long graduated beam, fixed jaw, sliding vernier jaw and locking screw.",
+		"purpose": "Graduation ticks are decorative; no millimetre accuracy, calibration or functional measurement.",
+		"source": "https://www.comdent.co.uk/product-category/dental-instruments/dental-lab-instruments/",
+	},
+	{
+		"id": "lab.denture_brush",
+		"name": "Dual-headed denture cleaning brush",
+		"german": "Prothesenbürste",
+		"kind": "Removable prosthodontics · care accessories",
+		"scene": "res://assets/inventory/synthetic-denture-cleaning-brush.tscn",
+		"cue": "Recognize a large main brush head and smaller detail-brush end on a long handle.",
+		"purpose": "Brush bristles are block-shaped demonstration geometry; no hygienic efficacy, compatibility or cleaning simulation.",
+		"source": "https://pocketdentistry.com/47-laboratory-materials-and-procedures/",
+	},
+	{
+		"id": "lab.articulator_mounting_plate",
+		"name": "Dental articulator mounting plate",
+		"german": "Artikulator-Montageplatte / Montageplatte",
+		"kind": "Dental laboratory · mounting accessories",
+		"scene": "res://assets/inventory/synthetic-articulator-mounting-plate.tscn",
+		"cue": "Look for a flat rectangular mounting plate with screw-hole markers and a central attachment stud.",
+		"purpose": "Generic mounting-plate silhouette, not compatible with a specific articulator or a validated occlusal record.",
+		"source": "https://pocketdentistry.com/47-laboratory-materials-and-procedures/",
+	},
+	{
+		"id": "lab.wax_bite_rim",
+		"name": "Wax occlusion rim on denture baseplate",
+		"german": "Wachsbisswall / Wachsbissschablone",
+		"kind": "Removable prosthodontics · jaw relation",
+		"scene": "res://assets/inventory/synthetic-bite-registration-wax-rim.tscn",
+		"cue": "Identify a horseshoe-shaped wax rim supported by a denture baseplate, distinct from a simple impression tray.",
+		"purpose": "Non-anatomical study piece, not a patient-derived occlusion rim or a usable jaw-relation record.",
+		"source": "https://pocketdentistry.com/47-laboratory-materials-and-procedures/",
+	},
+	{
+		"id": "lab.wax_heater",
+		"name": "Bench-top dental wax heater pot",
+		"german": "Dentales Wachswärmegerät / Wachsbad",
+		"kind": "Dental laboratory · wax equipment",
+		"scene": "res://assets/inventory/synthetic-dental-wax-heater.tscn",
+		"cue": "Observe the enclosed tabletop unit, round wax well and noncalibrated control dial.",
+		"purpose": "Static device model; it does not heat, melt wax, control temperature, protect against burns or meet electrical safety requirements.",
+		"source": "https://pocketdentistry.com/47-laboratory-materials-and-procedures/",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -928,5 +1034,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in SURGICAL_IMPLANT_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in DIAGNOSTIC_IMAGING_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in LABORATORY_IMPRESSION_TOOLS:
 		result.append(entry.duplicate(true))
 	return result

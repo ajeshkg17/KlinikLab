@@ -1,0 +1,164 @@
+[gd_scene load_steps=17 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.099
+bottom_radius = 0.099
+height = 1.13
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.041
+bottom_radius = 0.053
+height = 0.43
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.027
+bottom_radius = 0.027
+height = 0.19849
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.027
+bottom_radius = 0.027
+height = 0.14213
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.027
+bottom_radius = 0.027
+height = 0.11402
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_5"]
+radius = 0.034
+height = 0.065
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_6"]
+top_radius = 0.04
+bottom_radius = 0.051
+height = 0.38
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_7"]
+size = Vector3(0.16, 0.27, 0.047)
+
+[sub_resource type="SphereMesh" id="Mesh_8"]
+radius = 0.078
+height = 0.08
+radial_segments = 24
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Mesh_9"]
+top_radius = 0.105
+bottom_radius = 0.105
+height = 0.02
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.73, 0.79, 0.84, 1)
+metallic = 0.72
+roughness = 0.29
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.13, 0.16, 0.21, 1)
+metallic = 0.17
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.63, 0.29, 1)
+metallic = 0.31
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.9, 0.92, 0.93, 1)
+metallic = 0.09
+roughness = 0.52
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.26, 0.56, 0.82, 1)
+metallic = 0.14
+roughness = 0.46
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.4, 0.54, 0.63, 1)
+metallic = 0.12
+roughness = 0.5
+
+[node name="SchematicLeCronWaxCarvingTool" type="Node3D"]
+
+[node name="LeCronModelingHandle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="LeCronLowerShank" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.7, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_steel")
+
+[node name="LeCronSculptingHook0" type="MeshInstance3D" parent="."]
+position = Vector3(0.065, -0.945, 0)
+rotation_degrees = Vector3(0, 0, -139.08562)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_steel")
+
+[node name="LeCronSculptingHook1" type="MeshInstance3D" parent="."]
+position = Vector3(0.175, -1.075, 0)
+rotation_degrees = Vector3(0, 0, -140.71059)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_steel")
+
+[node name="LeCronSculptingHook2" type="MeshInstance3D" parent="."]
+position = Vector3(0.235, -1.185, 0)
+rotation_degrees = Vector3(0, 0, -164.74488)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_steel")
+
+[node name="BluntedLeCronSculptingTip" type="MeshInstance3D" parent="."]
+position = Vector3(0.25, -1.26, 0)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_gold")
+
+[node name="LeCronUpperShank" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.73, 0)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_steel")
+
+[node name="LeCronFlatCarvingPaddle" type="MeshInstance3D" parent="."]
+position = Vector3(0.07, 1.06, 0)
+rotation_degrees = Vector3(0, 0, 15)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_steel")
+
+[node name="BluntLeCronWaxCarvingEnd" type="MeshInstance3D" parent="."]
+position = Vector3(0.1, 1.19, 0)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_gold")
+
+[node name="LeCronHandleKnurl0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.24, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LeCronHandleKnurl1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.12, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LeCronHandleKnurl2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LeCronHandleKnurl3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.12, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
+
+[node name="LeCronHandleKnurl4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.24, 0)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_dark")
