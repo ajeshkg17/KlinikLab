@@ -576,6 +576,112 @@ const PERIO_SURGERY_TOOLS := [
 	},
 ]
 
+
+## The following ten original, nonfunctional study-model meshes were authored in-repo.
+## External URLs below identify tool categories, and are NOT mesh download sources.
+const FINISHING_ACCESSORY_TOOLS := [
+	{
+		"id": "finishing.gingival_cord_packer",
+		"name": "Gingival retraction cord packer",
+		"german": "Retraktionsfadenstopfer",
+		"kind": "Restorative / gingival retraction",
+		"scene": "res://assets/inventory/synthetic-retraction-cord-packer.tscn",
+		"cue": "Compare the blunt offset working paddle with a sharp scaler tip.",
+		"purpose": "Illustrative retraction-cord placement silhouette only; no calibrated tissue pressure or clinical technique.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.sectional_matrix_forceps",
+		"name": "Sectional matrix ring placement forceps",
+		"german": "Matrizenringzange / Ringseparierzange",
+		"kind": "Restorative / matrix instruments",
+		"scene": "res://assets/inventory/synthetic-sectional-matrix-forceps.tscn",
+		"cue": "Look for paired ring handles and engagement prongs; distinguish from rubber-dam clamp forceps.",
+		"purpose": "Nonfunctional ring expansion and no calibrated gripping force or safe intraoral placement.",
+		"source": "https://www.garrisondental.com/products/universal-other-ring-placement-forceps",
+	},
+	{
+		"id": "finishing.composite_compule_gun",
+		"name": "Composite compule dispensing gun",
+		"german": "Compule-Applikationspistole / Applikatorpistole",
+		"kind": "Restorative / composite placement",
+		"scene": "res://assets/inventory/synthetic-composite-compule-gun.tscn",
+		"cue": "Identify the small composite cartridge, piston, trigger and angled dispensing outlet.",
+		"purpose": "Study-only prop; no actual cartridge compatibility, extrusion, dose or material handling.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.composite_finishing_strip",
+		"name": "Interproximal composite finishing strip",
+		"german": "Interdental-Finierstreifen / Polierstreifen",
+		"kind": "Restorative / finishing",
+		"scene": "res://assets/inventory/synthetic-finishing-strip.tscn",
+		"cue": "Compare the long thin flexible study ribbon and contrasting abrasive zones with disc polishers.",
+		"purpose": "Schematic ribbon with illustrative abrasive zones; no grit value, surface removal or anatomical guidance.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.polishing_disc_mandrel",
+		"name": "Composite polishing disc with mandrel",
+		"german": "Komposit-Polierscheibe mit Mandrell",
+		"kind": "Restorative / finishing",
+		"scene": "res://assets/inventory/synthetic-polishing-disc-mandrel.tscn",
+		"cue": "Find the circular disc at the end of a straight mandrel, distinct from a rubber polishing cup.",
+		"purpose": "Visual model only; neither disc mounting security, rotational speed nor abrasive action is validated.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.prophy_rubber_cup",
+		"name": "Prophylaxis rubber polishing cup attachment",
+		"german": "Prophylaxe-Gummikelch / Polierkelch",
+		"kind": "Preventive care / polishing",
+		"scene": "res://assets/inventory/synthetic-prophylaxis-polishing-cup.tscn",
+		"cue": "Compare the cup-shaped polishing end and metal connector with the flat finishing disc.",
+		"purpose": "Schematic nonfunctional cup; no polish paste, RPM, pressure, tooth-contact or infection-control simulation.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.cement_mixing_spatula",
+		"name": "Double-ended dental cement mixing spatula",
+		"german": "Zementspatel / Anmischspatel",
+		"kind": "Restorative / material mixing",
+		"scene": "res://assets/inventory/synthetic-cement-mixing-spatula.tscn",
+		"cue": "Observe the broad flat mixing blade and narrower alternate paddle on the opposite end.",
+		"purpose": "Blunt educational instrument; no cement ratio, mix setting time or chemical handling is validated.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.microbrush_applicator",
+		"name": "Disposable dental microbrush applicator",
+		"german": "Microbrush-Applikator / Einmalpinsel",
+		"kind": "Restorative / adhesive accessories",
+		"scene": "res://assets/inventory/synthetic-dental-microbrush.tscn",
+		"cue": "Identify the slender disposable handle, flexible neck and soft brush tip.",
+		"purpose": "Study-only single-use applicator; no validated adhesive dose, bristle properties or bonding procedure.",
+		"source": "https://www.dentalbauer.de/verbrauchsmaterial/praxis/fuellung-restauration/zubehoer-sonstiges",
+	},
+	{
+		"id": "finishing.endo_paper_point_dispenser",
+		"name": "Endodontic absorbent paper points and dispenser",
+		"german": "Endodontische Papierspitzen mit Spender",
+		"kind": "Endodontics / canal drying accessories",
+		"scene": "res://assets/inventory/synthetic-paper-point-dispenser.tscn",
+		"cue": "Compare the tapered absorbent paper-point silhouettes with metallic endodontic files.",
+		"purpose": "Generic stylised points and box, not genuine ISO size, sterility indicator, absorbency or root canal length.",
+		"source": "https://www.vdw-dental.com/en/products/detail/reciproc-paper-points/",
+	},
+	{
+		"id": "finishing.rubber_dam_punch",
+		"name": "Ainsworth-style rubber-dam hole punch",
+		"german": "Kofferdam-Lochzange (Ainsworth-Form)",
+		"kind": "Rubber-dam / isolation equipment",
+		"scene": "res://assets/inventory/synthetic-rubber-dam-hole-punch.tscn",
+		"cue": "Identify the selection wheel with multiple hole positions and opposing punch stud, unlike clamp forceps.",
+		"purpose": "Schematic blunt punch without actual hole diameters, cutting action or safe dam preparation validation.",
+		"source": "https://products.coltene.com/DE/BE/products/treatment-auxiliaries/dental-dam-accessories/dental-dam-accessories/dental-dam-punch",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -604,5 +710,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in PROSTHO_ORTHO_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in PERIO_SURGERY_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in FINISHING_ACCESSORY_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
