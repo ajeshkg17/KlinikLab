@@ -788,6 +788,112 @@ const SURGICAL_IMPLANT_TOOLS := [
 	},
 ]
 
+
+## Ten nonfunctional imaging/diagnostic teaching geometries authored in this repository.
+## URLs are terminology references, NOT downloaded CAD or procedural instructions.
+const DIAGNOSTIC_IMAGING_TOOLS := [
+	{
+		"id": "diagnostic.wired_cmos_sensor",
+		"name": "Wired CMOS intraoral radiography sensor",
+		"german": "Digitaler Intraoralsensor (CMOS)",
+		"kind": "Radiography · imaging receptors",
+		"scene": "res://assets/inventory/synthetic-wired-cmos-sensor.tscn",
+		"cue": "Identify a thick protected rectangular digital receptor and its cable, as distinct from a thin phosphor plate.",
+		"purpose": "Original schematic electronic receptor, not a working or clinically calibrated radiation detector; no radiograph acquisition.",
+		"source": "https://isdent.org/DOIx.php?id=10.5624%2Fisd.20240248",
+	},
+	{
+		"id": "diagnostic.psp_plate",
+		"name": "Phosphor storage intraoral imaging plate (PSP)",
+		"german": "Speicherfolienplatte / intraorale Speicherfolie",
+		"kind": "Radiography · imaging receptors",
+		"scene": "res://assets/inventory/synthetic-psp-radiography-plate.tscn",
+		"cue": "Look for the thin flat imaging plate, protected-sleeve outline and orientation dot, without the cable of a CMOS sensor.",
+		"purpose": "Teaching silhouette only; no phosphor material, active imaging layer, calibration, scanning or protective barrier validation.",
+		"source": "https://isdent.org/DOIx.php?id=10.5624%2Fisd.20240248",
+	},
+	{
+		"id": "diagnostic.bitewing_holder",
+		"name": "Bitewing digital receptor holder (red study pattern)",
+		"german": "Bissflügel-Sensorhalter",
+		"kind": "Radiography · bitewing positioning",
+		"scene": "res://assets/inventory/synthetic-bitewing-receptor-holder.tscn",
+		"cue": "Find the horizontal receptor panel, red biteblock and lateral retaining arms.",
+		"purpose": "Generic schematic, not a certified or correctly sized patient-bite holder, receptor fit, or radiation-positioning procedure.",
+		"source": "https://www.dentsplysirona.com/content/dam/master/product-procedure-brand-categories/preventive/product-categories/x-ray/overarching-documents/PRE-NAM-doc-Rinn-product-catalog.pdf.coredownload.pdf",
+	},
+	{
+		"id": "diagnostic.aiming_ring_rod",
+		"name": "Dental X-ray aiming ring and positioning rod",
+		"german": "Röntgen-Zielring und Positionierungsstab",
+		"kind": "Radiography · alignment accessories",
+		"scene": "res://assets/inventory/synthetic-xcp-aiming-ring-and-arm.tscn",
+		"cue": "Recognise the large aiming ring and separate L-shaped indicator rod with small biteblock connector.",
+		"purpose": "XCP-family concept illustration only; no validated ring-to-sensor parallelism, cone alignment, exposure or radiation safety.",
+		"source": "https://www.dentsplysirona.com/content/dam/master/product-procedure-brand-categories/preventive/product-categories/x-ray/overarching-documents/PRE-NAM-doc-Rinn-product-catalog.pdf.coredownload.pdf",
+	},
+	{
+		"id": "diagnostic.endo_sensor_holder",
+		"name": "Endodontic receptor holder (green study pattern)",
+		"german": "Endodontischer Röntgen-Sensorhalter",
+		"kind": "Radiography · endodontic positioning",
+		"scene": "res://assets/inventory/synthetic-endo-radiograph-holder.tscn",
+		"cue": "Distinguish the green offset biteblock and file-clearance outline from the red bitewing holder.",
+		"purpose": "Schematic holder only; rubber-dam/file clearance, exact clinical access, beam positioning and safe fit are unverified.",
+		"source": "https://www.dentsplysirona.com/content/dam/master/product-procedure-brand-categories/preventive/product-categories/x-ray/overarching-documents/PRE-NAM-doc-Rinn-product-catalog.pdf.coredownload.pdf",
+	},
+	{
+		"id": "diagnostic.intraoral_camera",
+		"name": "Intraoral dental camera handpiece",
+		"german": "Intraoralkamera / Mundkamera",
+		"kind": "Diagnostic equipment · imaging",
+		"scene": "res://assets/inventory/synthetic-intraoral-camera.tscn",
+		"cue": "Identify a slim hand-held camera body, angled optical head, cable and snapshot control.",
+		"purpose": "Static model only; no digital optics, autofocus, image transmission, sterility or actual intraoral examination.",
+		"source": "https://www.kavo.com/de-de/produkte/praxisausstattung-dentaleinheiten/patientenkommunikation/diagnocam-vision-full-hd-intraoralkamera",
+	},
+	{
+		"id": "diagnostic.shade_guide",
+		"name": "Tooth shade-tab fan (visual shade guide)",
+		"german": "Zahnfarbschlüssel / Farbmusterfächer",
+		"kind": "Restorative diagnostics · shade matching",
+		"scene": "res://assets/inventory/synthetic-tooth-shade-guide.tscn",
+		"cue": "Look for multiple tooth-shaped shade tabs attached in a fan to a central pivot.",
+		"purpose": "Nine decorative study samples only; not the 16 calibrated VITA classical shade tabs, and not suitable for actual color matching.",
+		"source": "https://www.vitanorthamerica.com/en-US/VITA-classical-A1-D4-shade-guide-123.html",
+	},
+	{
+		"id": "diagnostic.occlusal_mirror",
+		"name": "Occlusal intraoral photography mirror",
+		"german": "Okklusaler Fotospiegel / Intraoralfotospiegel",
+		"kind": "Diagnostic equipment · clinical photography",
+		"scene": "res://assets/inventory/synthetic-occlusal-photography-mirror.tscn",
+		"cue": "Identify the broad reflective study oval and long handle, unlike a small dental examination mirror.",
+		"purpose": "Schematic reflective surface; no medically approved coating, image clarity, optical accuracy or sterilization.",
+		"source": "https://deutschedt.com/collections/dental-mirrors-for-intraoral-photography",
+	},
+	{
+		"id": "diagnostic.electric_pulp_tester",
+		"name": "Electric pulp sensibility tester",
+		"german": "Elektrischer Pulpatester / Pulpenvitalitätstester",
+		"kind": "Diagnostic equipment · pulp assessment",
+		"scene": "res://assets/inventory/synthetic-electric-pulp-tester.tscn",
+		"cue": "Recognise the handheld electronic display and capped contact-probe silhouette; distinct from the apex locator.",
+		"purpose": "No electrical stimulus, clinical response, pulp diagnosis or real test calibration; protective probe cap is illustrative.",
+		"source": "https://parkell.eu/product/pulp-vitality-tester/",
+	},
+	{
+		"id": "diagnostic.transillumination_probe",
+		"name": "Fibre-optic dental transillumination wand",
+		"german": "Faseroptische Transilluminationssonde",
+		"kind": "Diagnostic equipment · optical examination",
+		"scene": "res://assets/inventory/synthetic-transillumination-wand.tscn",
+		"cue": "Identify a pen-like illumination body and angled translucent optical guide instead of an electrical testing tip.",
+		"purpose": "Non-emitting static model; not a validated caries/crack imaging device, optical sensor or clinical diagnostic method.",
+		"source": "https://www.kavo.com/de-de/produkte/praxisausstattung-dentaleinheiten/patientenkommunikation/diagnocam-vision-full-hd-intraoralkamera",
+	},
+]
+
 static func entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for item_key in BENCH.ITEMS.keys():
@@ -820,5 +926,7 @@ static func entries() -> Array[Dictionary]:
 	for entry: Dictionary in FINISHING_ACCESSORY_TOOLS:
 		result.append(entry.duplicate(true))
 	for entry: Dictionary in SURGICAL_IMPLANT_TOOLS:
+		result.append(entry.duplicate(true))
+	for entry: Dictionary in DIAGNOSTIC_IMAGING_TOOLS:
 		result.append(entry.duplicate(true))
 	return result
