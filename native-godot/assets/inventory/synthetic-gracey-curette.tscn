@@ -1,0 +1,106 @@
+[gd_scene load_steps=11 format=3]
+
+[sub_resource type="CylinderMesh" id="Shape0"]
+top_radius = 0.09
+bottom_radius = 0.09
+height = 1.12
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape1"]
+top_radius = 0.041
+bottom_radius = 0.05
+height = 0.37
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape2"]
+top_radius = 0.029
+bottom_radius = 0.029
+height = 0.30414
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="Shape3"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 0.23259
+radial_segments = 20
+
+[sub_resource type="SphereMesh" id="Shape4"]
+radius = 0.039
+height = 0.075
+radial_segments = 20
+rings = 12
+
+[sub_resource type="CylinderMesh" id="Shape5"]
+top_radius = 0.09
+bottom_radius = 0.09
+height = 0.018
+radial_segments = 20
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel"]
+albedo_color = Color(0.76, 0.81, 0.85, 1)
+metallic = 0.75
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.84, 0.65, 0.32, 1)
+metallic = 0.45
+roughness = 0.38
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.15, 0.18, 0.22, 1)
+metallic = 0.25
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.25, 0.56, 0.63, 1)
+metallic = 0.15
+roughness = 0.48
+
+[node name="SchematicGraceyCurette" type="Node3D"]
+
+[node name="CuretteErgonomicGrip" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.18, 0)
+mesh = SubResource("Shape0")
+material_override = SubResource("Mat_grip")
+
+[node name="LowerNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.52, 0)
+mesh = SubResource("Shape1")
+material_override = SubResource("Mat_steel")
+
+[node name="GraceyOffsetTerminalShank" type="MeshInstance3D" parent="."]
+position = Vector3(0.105, -0.8, 0)
+rotation_degrees = Vector3(0, 0, -136.33222)
+mesh = SubResource("Shape2")
+material_override = SubResource("Mat_steel")
+
+[node name="GraceyLateralBladeStudyShape" type="MeshInstance3D" parent="."]
+position = Vector3(0.26, -1.015, 0)
+rotation_degrees = Vector3(0, 0, -154.53665)
+mesh = SubResource("Shape3")
+material_override = SubResource("Mat_gold")
+
+[node name="RoundedGraceyToe" type="MeshInstance3D" parent="."]
+position = Vector3(0.31, -1.21, 0)
+mesh = SubResource("Shape4")
+material_override = SubResource("Mat_gold")
+
+[node name="GraceyGripBand0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.13, 0)
+mesh = SubResource("Shape5")
+material_override = SubResource("Mat_dark")
+
+[node name="GraceyGripBand1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.02, 0)
+mesh = SubResource("Shape5")
+material_override = SubResource("Mat_dark")
+
+[node name="GraceyGripBand2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.09, 0)
+mesh = SubResource("Shape5")
+material_override = SubResource("Mat_dark")
+
+[node name="GraceyGripBand3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.2, 0)
+mesh = SubResource("Shape5")
+material_override = SubResource("Mat_dark")
