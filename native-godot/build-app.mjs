@@ -154,6 +154,11 @@ try{
  const perioSurgeryScenes=["synthetic-gracey-curette.tscn","synthetic-universal-curette.tscn","synthetic-hoe-scaler.tscn","synthetic-scalpel-handle.tscn","synthetic-periosteal-elevator.tscn","synthetic-tissue-forceps.tscn","synthetic-needle-holder.tscn","synthetic-mosquito-hemostat.tscn","synthetic-endo-plugger.tscn","synthetic-endo-irrigation-syringe.tscn"];
  for(const filename of perioSurgeryScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Ten additional original schematic restorative and preventive tool scenes.
+ // This only copies local assets into the independent, read-only inventory.
+ const finishingAccessoryScenes=["synthetic-retraction-cord-packer.tscn","synthetic-sectional-matrix-forceps.tscn","synthetic-composite-compule-gun.tscn","synthetic-finishing-strip.tscn","synthetic-polishing-disc-mandrel.tscn","synthetic-prophylaxis-polishing-cup.tscn","synthetic-cement-mixing-spatula.tscn","synthetic-dental-microbrush.tscn","synthetic-paper-point-dispenser.tscn","synthetic-rubber-dam-hole-punch.tscn"];
+ for(const filename of finishingAccessoryScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
