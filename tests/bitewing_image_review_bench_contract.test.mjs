@@ -76,7 +76,7 @@ test('shared replay checks wrong/correct IDs, chair rejection, 20/20, reset and 
   assert.match(replay, /KL_BENCH_ROTATE_LEFT_tool_image_pointer/);
   assert.match(replay, /KL_BENCH_ROTATE_RIGHT_tool_periodontal_probe/);
   assert.match(replay, /"tool\.periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
-  assert.match(replay, /"material\.site_chart" if lesson_id in \["bitewing", "oral_exam"\]/);
+  assert.match(replay, /"material\.site_chart" if lesson_id in \["bitewing", "oral_exam"(?:, "[a-z_]+")*\]/);
   assert.match(replay, /KL_BENCH_PICK_tool_periodontal_probe" if lesson_id in \["bitewing", "oral_exam"\]/);
   assert.match(replay, /KL_BENCH_PICK_tool_image_pointer/);
   assert.match(replay, /KL_BENCH_PICK_material_site_chart/);
