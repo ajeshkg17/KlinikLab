@@ -1,0 +1,168 @@
+[gd_scene load_steps=18 format=3]
+
+[sub_resource type="CylinderMesh" id="Mesh_0"]
+top_radius = 0.13
+bottom_radius = 0.145
+height = 1.22
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_1"]
+top_radius = 0.12
+bottom_radius = 0.12
+height = 0.21
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_2"]
+top_radius = 0.058
+bottom_radius = 0.058
+height = 0.18248
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_3"]
+top_radius = 0.058
+bottom_radius = 0.058
+height = 0.15811
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_4"]
+top_radius = 0.085
+bottom_radius = 0.1
+height = 0.35
+radial_segments = 24
+
+[sub_resource type="CylinderMesh" id="Mesh_5"]
+top_radius = 0.077
+bottom_radius = 0.077
+height = 0.29069
+radial_segments = 24
+
+[sub_resource type="BoxMesh" id="Mesh_6"]
+size = Vector3(0.36, 0.26, 0.21)
+
+[sub_resource type="CylinderMesh" id="Mesh_7"]
+top_radius = 0.092
+bottom_radius = 0.092
+height = 0.035
+radial_segments = 24
+
+[sub_resource type="SphereMesh" id="Mesh_8"]
+radius = 0.053
+height = 0.048
+radial_segments = 24
+rings = 12
+
+[sub_resource type="BoxMesh" id="Mesh_9"]
+size = Vector3(0.19, 0.1, 0.1)
+
+[sub_resource type="CylinderMesh" id="Mesh_10"]
+top_radius = 0.119
+bottom_radius = 0.119
+height = 0.018
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal"]
+albedo_color = Color(0.73, 0.8, 0.84, 1)
+metallic = 0.73
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark"]
+albedo_color = Color(0.13, 0.17, 0.23, 1)
+metallic = 0.23
+roughness = 0.56
+
+[sub_resource type="StandardMaterial3D" id="Mat_light"]
+albedo_color = Color(0.91, 0.92, 0.93, 1)
+metallic = 0.1
+roughness = 0.47
+
+[sub_resource type="StandardMaterial3D" id="Mat_blue"]
+albedo_color = Color(0.26, 0.57, 0.84, 1)
+metallic = 0.12
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="Mat_gold"]
+albedo_color = Color(0.85, 0.68, 0.28, 1)
+metallic = 0.44
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_grip"]
+albedo_color = Color(0.27, 0.55, 0.72, 1)
+metallic = 0.16
+roughness = 0.5
+
+[node name="SchematicIntraoralCameraWand" type="Node3D"]
+
+[node name="CameraErgonomicWand" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.11, 0)
+mesh = SubResource("Mesh_0")
+material_override = SubResource("Mat_grip")
+
+[node name="CameraRearConnector" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.84, 0)
+mesh = SubResource("Mesh_1")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraCableStrainRelief0" type="MeshInstance3D" parent="."]
+position = Vector3(0.015, 1.05, 0)
+rotation_degrees = Vector3(0, 0, -9.46232)
+mesh = SubResource("Mesh_2")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraCableStrainRelief1" type="MeshInstance3D" parent="."]
+position = Vector3(0.095, 1.185, 0)
+rotation_degrees = Vector3(0, 0, -55.30485)
+mesh = SubResource("Mesh_3")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraNeck" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.62, 0)
+mesh = SubResource("Mesh_4")
+material_override = SubResource("Mat_metal")
+
+[node name="AngledCameraHeadMount" type="MeshInstance3D" parent="."]
+position = Vector3(0.11, -0.865, 0)
+rotation_degrees = Vector3(0, 0, -130.81508)
+mesh = SubResource("Mesh_5")
+material_override = SubResource("Mat_metal")
+
+[node name="CameraHead" type="MeshInstance3D" parent="."]
+position = Vector3(0.28, -1.04, 0)
+rotation_degrees = Vector3(0, 0, -14)
+mesh = SubResource("Mesh_6")
+material_override = SubResource("Mat_metal")
+
+[node name="OpticLensDarkFace" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -1.04, 0.14)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_7")
+material_override = SubResource("Mat_dark")
+
+[node name="LensHighlight" type="MeshInstance3D" parent="."]
+position = Vector3(0.3, -1.05, 0.165)
+mesh = SubResource("Mesh_8")
+material_override = SubResource("Mat_blue")
+
+[node name="SnapshotButton" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.33, 0.16)
+mesh = SubResource("Mesh_9")
+material_override = SubResource("Mat_gold")
+
+[node name="CameraGripNotch0" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.24, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraGripNotch1" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.11, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraGripNotch2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_dark")
+
+[node name="CameraGripNotch3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.15, 0)
+mesh = SubResource("Mesh_10")
+material_override = SubResource("Mat_dark")
