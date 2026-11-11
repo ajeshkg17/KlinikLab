@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const source = file => readSourceContract('../'+file, import.meta.url);
 const catalog = source('native-godot/tools-inventory-catalog.gd');
@@ -34,7 +34,7 @@ test('ten diagnostic and imaging models extend inventory from 93 to 103 while pr
   assert.equal(extraIds.length,84);
   assert.equal(new Set(extraIds).size,84);
   assert.match(catalog,/for entry: Dictionary in DIAGNOSTIC_IMAGING_TOOLS:\s*\n\t\tresult\.append\(entry\.duplicate\(true\)\)/);
-  assert.equal((bench.match(/^\t"tool\.[^"]+": \{/gm)||[]).length,19);
+  assert.equal(countOriginalBenchToolEntries(bench),19);
   assert.equal((bench.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm)||[]).length,20);
 });
 
