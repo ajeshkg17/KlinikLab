@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSourceContract} from './source-contract-text.mjs';
+import {readSourceContract,countOriginalBenchToolEntries} from './source-contract-text.mjs';
 
 const read = path => readSourceContract('../' + path, import.meta.url);
 const catalog = read('native-godot/tools-inventory-catalog.gd');
@@ -31,7 +31,7 @@ test('six real source-pack models are catalogued, uniquely labelled and not chai
   assert.match(catalog, /return result/);
   // The 20 original chair benches and 19 study instruments remain unchanged.
   assert.equal((benchCatalog.match(/^const (?:COMPOSITE|SEALANT|FLUORIDE|CLEANING|ROOT_PLANING|CHART|BITEWING|ORAL_EXAM|VENEER|INLAY|CROWN|BRIDGE|FULL_DENTURE|PARTIAL_DENTURE|IMPLANT|ENDO|RETREAT|ALIGNER|MOUTHGUARD|EXTRACTION) := \{/gm) || []).length, 20);
-  assert.equal((benchCatalog.match(/^\t"tool\.[^"]+": \{/gm) || []).length, 19);
+  assert.equal(countOriginalBenchToolEntries(benchCatalog), 19);
 });
 
 test('all six downloadable GLBs are copied only from exact SHA256-pinned CC0 source pack', () => {
