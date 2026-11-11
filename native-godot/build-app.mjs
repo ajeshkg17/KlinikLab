@@ -159,6 +159,11 @@ try{
  const finishingAccessoryScenes=["synthetic-retraction-cord-packer.tscn","synthetic-sectional-matrix-forceps.tscn","synthetic-composite-compule-gun.tscn","synthetic-finishing-strip.tscn","synthetic-polishing-disc-mandrel.tscn","synthetic-prophylaxis-polishing-cup.tscn","synthetic-cement-mixing-spatula.tscn","synthetic-dental-microbrush.tscn","synthetic-paper-point-dispenser.tscn","synthetic-rubber-dam-hole-punch.tscn"];
  for(const filename of finishingAccessoryScenes)
   copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
+  // Original oral-surgery and implant study geometries; no downloaded CAD.
+ // Read-only 3D inventory use only, independent of chair/journal behavior.
+ const surgeryImplantScenes=["synthetic-minnesota-retractor.tscn","synthetic-frazier-aspirator.tscn","synthetic-friedman-rongeur.tscn","synthetic-miller-colburn-bone-file.tscn","synthetic-lucas-bone-curette.tscn","synthetic-implant-torque-wrench.tscn","synthetic-implant-hand-driver.tscn","synthetic-implant-tissue-punch.tscn","synthetic-bone-graft-packer.tscn","synthetic-bone-grafting-syringe.tscn"];
+ for(const filename of surgeryImplantScenes)
+  copy('native-godot/assets/inventory/'+filename,'assets/inventory/'+filename);
   const inventorySources=inventoryModels.map(([filename,id,original,sourceSha256])=>{
   const source='https://cdn.3dassets.dev/assets/'+id+'/v1/model.glb';
   const row=packIndex.find(asset=>asset.id===id);
