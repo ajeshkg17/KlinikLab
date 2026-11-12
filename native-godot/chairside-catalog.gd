@@ -21,6 +21,36 @@ const AAO_ALIGNERS := "https://aaoinfo.org/treatments/aligners/"
 const ADA_MOUTHGUARDS := "https://www.mouthhealthy.org/all-topics-a-z/mouthguards"
 const ADA_EXTRACTIONS := "https://www.mouthhealthy.org/all-topics-a-z/extractions"
 const ITEMS := {
+	"tool.sectional_matrix_placement_forceps": {
+		"name": "Sectional matrix ring placement forceps (schematic 3D study)",
+		"german": "Matrizenringzange / Ringseparierzange (3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-sectional-matrix-forceps.tscn",
+		"cue": "Original simplified 3D forceps with paired ring-engagement beaks, representing the family used to handle a sectional matrix separation ring.",
+		"purpose": "The instructor-assigned instrument-family recognition model. This is not a patient-safe placement tool and no ring spreading, contact formation or actual restoration is simulated.",
+		"source": ADA_MATERIALS,
+	},
+	"tool.rubber_dam_clamp_forceps_alternative": {
+		"name": "Rubber dam clamp forceps (schematic 3D alternative)",
+		"german": "Kofferdam-Klammerzange (3D-Vergleichsmodell)",
+		"scene": "res://assets/inventory/synthetic-rubber-dam-clamp-forceps.tscn",
+		"cue": "Original schematic clamp-placement forceps, visually similar but intended for engaging a rubber-dam clamp instead of a sectional matrix separation ring.",
+		"purpose": "A real different dental instrument family, but not the one assigned for this fictional matrix ring identification task. Does not demonstrate clinical clamp handling.",
+		"source": ADA_MATERIALS,
+	},
+	"material.sectional_matrix_ring_reference": {
+		"name": "Instructor's sectional matrix ring and tooth-contact diagram key (fictional)",
+		"german": "Lehrkarte: Teilmatrizenring und Kontaktpunkt-Modellmarkierung",
+		"cue": "Illustration · pale teal instructor card labels a sectional matrix ring and its assigned posterior model contact-region marker; no clinical gap measurement.",
+		"purpose": "A fictional identity/diagram-label reference for this assigned instrument family. The original composite chair still shows a virtual defect and restoration site, not actual matrix-ring placement.",
+		"swatch": Color("#abd6d4"), "source": ADA_MATERIALS,
+	},
+	"material.rubber_dam_clamp_reference": {
+		"name": "Rubber dam clamp positioning diagram key (fictional alternative)",
+		"german": "Lehrkarte: Kofferdamklammer und Isolationsbereich (Vergleich)",
+		"cue": "Illustration · soft orange study card denotes a rubber dam clamp and isolation fixture, not a sectional matrix ring.",
+		"purpose": "Plausible for a different model-isolation exercise, but not the assigned sectional matrix forceps and reference task. No physical isolation or patient treatment.",
+		"swatch": Color("#edc8a7"), "source": ADA_MATERIALS,
+	},
 	"tool.curing_light": {
 		"name": "Dental curing light", "german": "Polymerisationslampe",
 		"scene": "res://assets/bench/curing-light.glb",
@@ -426,6 +456,34 @@ const COMPOSITE := {
 	"finish": "Simulate curing with the selected light",
 	"finish_event": "simulate_cure",
 	"outcome": "Simulation complete · Composite placed, verified and marked cured in this exercise.",
+	"reference": ADA_MATERIALS,
+}
+
+
+const MATRIX_FORCEPS := {
+	"id": "sectional_matrix_vs_rubber_dam_forceps_intro",
+	"scenario": "composite",
+	"title": "Sectional matrix versus rubber-dam clamp forceps bench",
+	"case": "FICTIONAL assistant tray-preparation and diagram-label recognition task · The instructor specifies a SECTIONAL MATRIX RING PLACEMENT FORCEPS study object, rather than RUBBER-DAM CLAMP FORCEPS, for a posterior composite illustration. Compare and rotate two preexisting 3D instrument silhouettes, select the instructor's MATRIX RING DIAGRAM KEY rather than an isolation-clamp reference, and enter the UNCHANGED composite chair to REMOVE the marked virtual defect and PLACE virtual composite. The chair does NOT physically simulate matrix-ring engagement, ring separation, contact shaping or rubber-dam isolation. There is no real tooth, patient, working instrument, clinical restoration, or material placement outcome.",
+	"tool": {
+		"label": "matrix placement instrument study",
+		"choices": ["tool.sectional_matrix_placement_forceps", "tool.rubber_dam_clamp_forceps_alternative"],
+		"expected": "tool.sectional_matrix_placement_forceps",
+		"prompt": "Which rotatable study forceps was assigned for identifying a sectional matrix separation ring, not a rubber-dam clamp?",
+		"correct": "Correct. This schematic instrument represents sectional matrix ring placement forceps; no ring manipulation is modeled.",
+		"incorrect": "The rubber-dam clamp forceps belong to isolation tasks. This instructor assigned the separate sectional matrix ring forceps.",
+	},
+	"material": {
+		"label": "assigned matrix-ring diagram key",
+		"choices": ["material.sectional_matrix_ring_reference", "material.rubber_dam_clamp_reference"],
+		"expected": "material.sectional_matrix_ring_reference",
+		"prompt": "Which instructor reference card matches the sectional matrix instrument family and assigned restoration diagram?",
+		"correct": "Correct. The matrix ring teaching card identifies the assigned component without simulating placement or a patient contact.",
+		"incorrect": "The rubber-dam clamp card depicts a different isolation instrument. It is not the specified sectional matrix reference.",
+	},
+	"finish": "Record sectional matrix forceps identity and composite model labels",
+	"finish_event": "record_sectional_matrix_forceps_recognition",
+	"outcome": "Sectional matrix instrument recognition complete · The unchanged composite chair verified the two prescribed virtual restoration diagram actions. No matrix ring placement, contact point formation, rubber dam isolation, clinical restoration, or patient treatment was performed.",
 	"reference": ADA_MATERIALS,
 }
 
