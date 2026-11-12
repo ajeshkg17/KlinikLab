@@ -242,6 +242,27 @@ const ITEMS := {
 		"swatch": Color("#c6d9d0"), "source": ADA_BRIDGES,
 	},
 
+	"tool.wax_occlusion_rim_study": {
+		"name": "Wax occlusion rim on denture baseplate (schematic 3D study)", "german": "Wachsbisswall / Bissschablone (3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-bite-registration-wax-rim.tscn",
+		"cue": "Recognise an arch-shaped wax rim on a simple baseplate without individual prosthetic tooth crowns, unlike the completed full-arch denture.",
+		"purpose": "A plausible different prosthodontic laboratory stage, but not the completed denture object assigned for this case. No jaw-relation measurement, vertical dimension, patient anatomy or actual wax record.",
+		"source": ADA_DENTURES,
+	},
+	"material.finished_denture_posterior_key": {
+		"name": "Instructor's completed-denture arch and posterior target key (fictional)",
+		"german": "Lehrkarte: Vollprothese und hintere Modellmarkierung",
+		"cue": "Illustration · blue-green completed-denture model arch and instructor-designated posterior landmark; no patient records or fitting evidence.",
+		"purpose": "The case-specific key for matching the completed denture study arch and posterior teaching marker in the original full-denture chair.",
+		"swatch": Color("#b0d6d0"), "source": ADA_DENTURES,
+	},
+	"material.wax_rim_jaw_relation_key": {
+		"name": "Wax-rim jaw-relation record reference (fictional alternative)",
+		"german": "Lehrkarte: Bisswall und Kieferrelationsregistrat (Vergleich)",
+		"cue": "Illustration · amber record-making reference for a wax-rim study, rather than a finished full-arch denture.",
+		"purpose": "Plausible reference for a different laboratory learning exercise. Does not represent the completed-denture and posterior landmark assigned here.",
+		"swatch": Color("#e4c5a0"), "source": ADA_DENTURES,
+	},
 	"tool.complete_denture_arch": {
 		"name": "Complete removable denture (synthetic 3D arch study object)", "german": "Vollprothese (schematisches 3D-Lehrmodell)",
 		"scene": "res://assets/bench/synthetic-complete-denture.tscn",
@@ -775,6 +796,34 @@ const FULL_DENTURE := {
 	"finish": "Record simulated full-arch seating and posterior landmark",
 	"finish_event": "record_complete_denture_mock_fitting",
 	"outcome": "Complete denture model-fitting exercise complete · The assigned full-arch seating and posterior teaching landmark were verified in the existing chair simulation. No retention, pressure-area, occlusal, clinical-fit or patient outcome was assessed.",
+	"reference": ADA_DENTURES,
+}
+
+
+const DENTURE_VS_WAX_RIM := {
+	"id": "complete_denture_vs_wax_rim_recognition_intro",
+	"scenario": "full_denture",
+	"title": "Completed denture versus wax bite rim recognition bench",
+	"case": "FICTIONAL prosthodontic study-object identification · The instructor assigned a FINISHED FULL-DENTURE MODEL with a posterior reference marker, NOT a wax occlusion rim used as a separate jaw-relation record stage. Rotate the TWO ORIGINAL 3D STUDY OBJECTS and select the finished denture, then select its matching posterior marker key. Enter the UNCHANGED full-denture chair to SEAT THE COMPLETE MODEL ARCH and CHECK ITS POSTERIOR TEACHING LANDMARK. No impression, actual jaw relation, vertical dimension, functional fit, retention, occlusal assessment, patient anatomy, treatment or clinical competence is represented.",
+	"tool": {
+		"label": "prosthodontic 3D study object",
+		"choices": ["tool.complete_denture_arch", "tool.wax_occlusion_rim_study"],
+		"expected": "tool.complete_denture_arch",
+		"prompt": "Which rotatable study model is the completed full-arch denture, rather than a wax bite rim on a record base?",
+		"correct": "Correct. The complete denture study shows a full arch of prosthetic teeth; the wax rim represents a different laboratory stage.",
+		"incorrect": "The wax occlusion rim is an illustrative jaw-relation record base and is not the completed full-arch denture assigned here.",
+	},
+	"material": {
+		"label": "assigned finished-denture marker key",
+		"choices": ["material.finished_denture_posterior_key", "material.wax_rim_jaw_relation_key"],
+		"expected": "material.finished_denture_posterior_key",
+		"prompt": "Which instructor card links the completed denture arch to the posterior model landmark checked in this case?",
+		"correct": "Correct. This card identifies the assigned finished-arch and its fictional posterior teaching marker.",
+		"incorrect": "The wax-rim jaw-relation reference belongs to a different laboratory stage, not the assigned complete-denture model check.",
+	},
+	"finish": "Record completed-denture identity and posterior model landmark",
+	"finish_event": "record_finished_denture_vs_wax_rim_review",
+	"outcome": "Completed-denture model identification and reference review complete · The unchanged full-denture chair verified the preassigned full arch and posterior diagram landmark. No patient fit, retention, jaw-relation measurement, occlusion, treatment or clinical outcome was assessed.",
 	"reference": ADA_DENTURES,
 }
 
