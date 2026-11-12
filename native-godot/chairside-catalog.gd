@@ -244,6 +244,36 @@ const ITEMS := {
 		"swatch": Color("#b8d5e7"), "source": ADA_INLAYS,
 	},
 
+	"tool.articulating_paper_forceps_study": {
+		"name": "Articulating paper forceps (schematic 3D study)",
+		"german": "Artikulationspapierpinzette / Miller-Pinzette (3D-Lehrmodell)",
+		"scene": "res://assets/inventory/synthetic-articulating-paper-forceps.tscn",
+		"cue": "Observe the long hinged jaws for gripping a strip of articulating paper, not the fine spring-tweezer tips used for cotton rolls.",
+		"purpose": "Instructor-assigned visual identification instrument. No actual articulating paper is clamped; no bite-contact, force, accuracy, or occlusal assessment is implemented.",
+		"source": ADA_CROWNS,
+	},
+	"tool.college_cotton_pliers_alternative": {
+		"name": "College cotton tweezers (schematic 3D alternative)",
+		"german": "College-Pinzette / Wattepinzette (3D-Vergleichsmodell)",
+		"scene": "res://assets/inventory/synthetic-college-pliers.tscn",
+		"cue": "A slimmer spring-tweezer study shape for handling small cotton items rather than a hinged holder for articulating paper strips.",
+		"purpose": "A valid different dental instrument family, but not the articulating-paper forceps assigned for this tray-identification case. No real mouth manipulation or cotton handling.",
+		"source": ADA_CROWNS,
+	},
+	"material.crown_articulating_forceps_reference": {
+		"name": "Assigned crown teaching arch and paper-forceps identification card (fictional)",
+		"german": "Lehrkarte: Kronenmodell und Artikulationspapierpinzette",
+		"cue": "Illustration · blue-green instructor reference identifies the selected articulating-paper forceps and two existing CROWN DIAGRAM targets: model seating and cervical margin.",
+		"purpose": "A fictional matching reference for an instrument-identity exercise plus the original two model-arch landmarks. It does not display contact-paper marks or prove occlusal fit.",
+		"swatch": Color("#afd7d4"), "source": ADA_CROWNS,
+	},
+	"material.cotton_isolation_reference_alternative": {
+		"name": "Cotton-tweezer handling and isolation reference (fictional alternative)",
+		"german": "Lehrkarte: Wattepinzette und Trockenlegung (Vergleich)",
+		"cue": "Illustration · pale amber alternative card showing a cotton-tweezer study tool; no matched crown seating or margin marker.",
+		"purpose": "A plausible different tray setup reference. It is not the assigned articulating-paper forceps/crown model study card and does not demonstrate isolation.",
+		"swatch": Color("#e7c7a3"), "source": ADA_CROWNS,
+	},
 	"tool.crown_shell": {
 		"name": "Mock full-coverage crown (synthetic 3D study object)", "german": "Krone (schematisches Lehrmodell)",
 		"scene": "res://assets/bench/synthetic-crown-shell.tscn",
@@ -800,6 +830,34 @@ const CROWN := {
 	"finish": "Record crown seating and cervical landmark check",
 	"finish_event": "record_crown_mock_try_in",
 	"outcome": "Crown model try-in complete · The assigned crown seating and cervical teaching landmark were verified in the existing chair simulation. No clinical fit, margin quality, cementation or patient outcome was assessed.",
+	"reference": ADA_CROWNS,
+}
+
+
+const CROWN_PAPER_FORCEPS := {
+	"id": "crown_articulating_paper_forceps_recognition_intro",
+	"scenario": "crown",
+	"title": "Crown tray articulating-paper forceps recognition bench",
+	"case": "FICTIONAL dental-assistant tray INSTRUMENT RECOGNITION followed by a separate crown MODEL-DIAGRAM review. The instructor assigns ARTICULATING PAPER FORCEPS (Miller-Pinzette), NOT college cotton tweezers, and its matching crown-model reference card. Compare and rotate the TWO PREEXISTING 3D INSTRUMENT STUDIES, then enter the UNCHANGED crown teaching chair to SEAT the assigned virtual crown and CHECK its predetermined CERVICAL MARGIN landmark. The chair does NOT perform articulating-paper placement, occlusal contact mapping, crown adjustment or actual clinical try-in. No patient, real dental instruments, fitting quality, occlusion, cementation, or treatment are assessed.",
+	"tool": {
+		"label": "crown tray identification instrument",
+		"choices": ["tool.articulating_paper_forceps_study", "tool.college_cotton_pliers_alternative"],
+		"expected": "tool.articulating_paper_forceps_study",
+		"prompt": "Which rotatable instrument model matches the instructor's ARTICULATING PAPER FORCEPS, rather than college cotton tweezers?",
+		"correct": "Correct. The hinge-style articulating-paper holder is the assigned study model, without a real contact-checking procedure.",
+		"incorrect": "College cotton tweezers are a different tray instrument used for small items; choose the articulating-paper forceps model.",
+	},
+	"material": {
+		"label": "assigned crown model reference key",
+		"choices": ["material.crown_articulating_forceps_reference", "material.cotton_isolation_reference_alternative"],
+		"expected": "material.crown_articulating_forceps_reference",
+		"prompt": "Which fictional instructor card links the assigned forceps with the crown model's seating and cervical-margin diagram markers?",
+		"correct": "Correct. This identifies the assigned forceps family and the two generic crown-chair study locations, not real articulating-paper marks.",
+		"incorrect": "The cotton-tweezer isolation card is for a different lesson and lacks the assigned crown model reference markers.",
+	},
+	"finish": "Record articulating-paper forceps identity and crown model labels",
+	"finish_event": "record_crown_paper_forceps_recognition",
+	"outcome": "Crown tray instrument identification complete · The unchanged crown chair verified two virtual model actions: crown seating and the preset cervical margin landmark. No actual articulating paper placement, occlusal contact, adjustment, crown fit or patient care was performed.",
 	"reference": ADA_CROWNS,
 }
 
