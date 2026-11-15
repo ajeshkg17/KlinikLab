@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "kind": "PRODUCTION_CASE_AND_STATION_METADATA_NOT_FULL_APP",
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "sourceFile": "app.js",
+  "sourceFileSHA256": "2ad804cfa6b09697923a60fc631e5941a00637b9ce888bf64c35c37ba67f6468",
+  "caseCount": 6,
+  "stationCount": 7,
+  "cases": [
+    {
+      "id": "molar",
+      "fdi": "16",
+      "title": "Tiefe Karies am Zahn 16",
+      "subtitle": "Posterior restorative dentistry",
+      "complaint": "„Ich habe beim Kauen rechts oben Beschwerden. Kaltes ist unangenehm, aber der Schmerz hört schnell wieder auf.“",
+      "history": "Die Beschwerden bestehen seit etwa drei Wochen. Keine Spontanschmerzen, keine Schwellung, keine Fieberangabe. Regelmäßige Medikation: keine. Allergien werden verneint.",
+      "exam": "Zahn 16: klinisch okklusal-approximale Kavitation; sensibel auf Kälte, Reaktion klingt rasch ab; Perkussion unauffällig. Approximaler Kontakt und parodontale Situation müssen erhoben werden.",
+      "risk": "Tiefe Karies mit erhaltener Vitalität; Pulpastatus und Restaurierbarkeit vor jeder definitiven Therapie überprüfen.",
+      "diagnosis": "Karies dentinum, pulpanah möglich; pulpal diagnosis needs clinical testing",
+      "primaryPlan": "Direkte adhäsive Restauration, falls Defektgröße, Randverhältnisse und Höckerstabilität dies zulassen.",
+      "alternativePlan": "Indirekte Teilkrone/Onlay bei größerem Substanzverlust und erhöhtem Höckerfrakturrisiko.",
+      "prepType": "MOD"
+    },
+    {
+      "id": "endo",
+      "fdi": "36",
+      "title": "Pulpaschmerz am Zahn 36",
+      "subtitle": "Endodontics · differential diagnosis",
+      "complaint": "„Links unten habe ich seit gestern starke Zahnschmerzen. Bei Kaltem tut es lange weh und nachts werde ich wach.“",
+      "history": "Seit einigen Wochen Kälteempfindlichkeit; seit gestern anhaltender Schmerz, auch spontan. Kein berichtetes Fieber und keine Gesichtsschwellung. Medikamente und Allergien müssen aktiv erfragt werden.",
+      "exam": "Zahn 36 mit tiefer kariöser Läsion. Reizantwort und Perkussion sind systematisch zu untersuchen. Ein Röntgenbefund allein reicht für die pulpare Diagnose nicht aus.",
+      "risk": "Verdacht auf symptomatische irreversible Pulpitis, Differenzialdiagnose und Zahnerhaltungsfähigkeit abklären.",
+      "diagnosis": "Verdacht auf symptomatische irreversible Pulpitis",
+      "primaryPlan": "Nach Diagnose und Einwilligung endodontische Therapie zum Zahnerhalt mit adäquater definitiver koronaler Versorgung.",
+      "alternativePlan": "Extraktion nach Aufklärung, falls Zahn nicht erhaltungswürdig ist oder der Patient nach Beratung diesen Weg wählt.",
+      "prepType": "ENDO"
+    },
+    {
+      "id": "anterior",
+      "fdi": "11",
+      "title": "Frontzahntrauma am Zahn 11",
+      "subtitle": "Anterior composite · trauma triage",
+      "complaint": "„Ich bin vor zwei Tagen gestürzt. Ein Stück vom oberen Schneidezahn ist abgebrochen. Jetzt stört mich die Kante.“",
+      "history": "Sturz vor 48 Stunden; keine berichtete Bewusstlosigkeit, aber Unfallhergang und Begleitverletzungen sind gezielt zu erfragen. Schmerz bei Kälte möglich.",
+      "exam": "Zahn 11 mit inzisalem Substanzverlust. Vor Therapie: klinische Frakturklassifikation, Pulpa-/Sensibilitätstestung, Mobilität, Perkussion, Weichteile, Okklusion und indizierte Bildgebung.",
+      "risk": "Unkomplizierte Schmelz-Dentin-Fraktur möglich; pulpare Beteiligung, Luxation und Wurzelfraktur ausschließen.",
+      "diagnosis": "Verdacht auf unkomplizierte Kronenfraktur Zahn 11",
+      "primaryPlan": "Direkte adhäsive Kompositversorgung nach Ausschluss komplexer Verletzungen.",
+      "alternativePlan": "Je nach Defektgröße, Pulpa- und Wurzelbefund fragmentäre Wiederbefestigung, indirekte Versorgung oder weitere Behandlung.",
+      "prepType": "INCISAL"
+    },
+    {
+      "id": "crown",
+      "fdi": "26",
+      "title": "Kronen-/Teilkrone am Zahn 26",
+      "subtitle": "Fixed prosthodontics · impression",
+      "complaint": "„Meine große Füllung links oben ist mehrfach gebrochen. Ich kann auf dieser Seite kaum noch kauen.“",
+      "history": "Mehrfach erneuerte ausgedehnte Füllung an 26. Keine spontane Zahnschmerzen, aber Kauprobleme. Allgemeinanamnese und Erwartungen an Zahnerhalt erfragen.",
+      "exam": "Ausgedehnte Restauration mit Verdacht auf Höckenschwächung. Vor Präparation: Restzahnhartsubstanz, Pulpa, parodontale Prognose, Rissverdacht, Okklusion und restaurative Optionen prüfen.",
+      "risk": "Restaurierbarkeit und verbleibende gesunde Höcker bestimmen, ob eine Teilkrone, Vollkrone oder andere Versorgung sinnvoll ist.",
+      "diagnosis": "Defekte ausgedehnte Restauration Zahn 26",
+      "primaryPlan": "Höckerüberdeckende indirekte Teilkrone/Onlay bei ausreichender Restsubstanz und passender Indikation.",
+      "alternativePlan": "Vollkrone bei entsprechender Defektausdehnung; stärkerer Zahnhartsubstanzverlust muss begründet werden.",
+      "prepType": "CROWN"
+    },
+    {
+      "id": "surgery",
+      "fdi": "48",
+      "title": "Perikoronitis am Zahn 48",
+      "subtitle": "Oral surgery · instruments",
+      "complaint": "„Ganz hinten rechts unten tut das Zahnfleisch weh. Beim Essen klemme ich es manchmal ein.“",
+      "history": "Seit drei Tagen zunehmender Schmerz am teilweise durchgebrochenen 48. Allgemeinzustand, Fieber, Schwellung, Mundöffnung, Schluckbeschwerden und Risikofaktoren gezielt erfragen.",
+      "exam": "Operculum über einem teilweise durchgebrochenen 48 mit lokaler Irritation. Mundöffnung, vestibuläre Schwellung, lymphatische Zeichen, Okklusion und erforderliche Bildgebung prüfen.",
+      "risk": "Lokale Perikoronitis möglich; systemische Infektionszeichen müssen ausgeschlossen und Dringlichkeit beurteilt werden.",
+      "diagnosis": "Verdacht auf lokale Perikoronitis Zahn 48",
+      "primaryPlan": "Bei lokalem Befund konservative Akutmaßnahmen mit Reinigung/Spülung nach Indikation, Schmerztherapie und Verlaufskontrolle.",
+      "alternativePlan": "Nach Akutphase und Indikationsprüfung operative Entfernung bei wiederkehrenden Beschwerden; Risiken und Alternativen aufklären.",
+      "prepType": "SURGERY"
+    },
+    {
+      "id": "perio",
+      "fdi": "46",
+      "title": "Parodontalbefund am Zahn 46",
+      "subtitle": "Periodontology · instrument selection",
+      "complaint": "„Mein Zahnfleisch blutet oft beim Putzen und rechts unten fühlt sich ein Zahn manchmal locker an.“",
+      "history": "Wiederkehrendes Zahnfleischbluten, unregelmäßige Prophylaxe; Rauchstatus und Diabetesanamnese gezielt erfragen. Keine gesicherte parodontale Diagnose vor vollständigem Status.",
+      "exam": "Am Zahn 46 Blutung bei Sondierung, erhöhte Sondierungstiefe möglich. Vollständiger parodontaler Status, Lockerung, Furkation, Plaque- und Knochenbefund erforderlich.",
+      "risk": "Verdacht auf parodontale Erkrankung; Stadium und Grad erst nach vollständiger Diagnostik bestimmen.",
+      "diagnosis": "Verdacht auf Parodontitis",
+      "primaryPlan": "Systematische parodontale Therapie nach Diagnostik einschließlich Aufklärung, Mundhygieneinstruktion, supra-/subgingivaler Instrumentierung nach Indikation und Reevaluation.",
+      "alternativePlan": "Bei unzureichendem Ansprechen stufengerechte Weiterbehandlung, ggf. chirurgische Maßnahmen; Prognose und Risikofaktoren beachten.",
+      "prepType": "PERIO"
+    }
+  ],
+  "stations": [
+    {
+      "id": "interview",
+      "track": "fsp",
+      "title": "Anamnesegespräch",
+      "subtitle": "Patient-facing German",
+      "description": "Ask focused questions, respond empathetically and explain findings without excessive jargon."
+    },
+    {
+      "id": "letter",
+      "track": "fsp",
+      "title": "Arztbrief verfassen",
+      "subtitle": "Clinical documentation",
+      "description": "Write a structured German report from the consultation. In the actual SH FSP this is handwritten."
+    },
+    {
+      "id": "handover",
+      "track": "fsp",
+      "title": "Arzt–Arzt-Gespräch",
+      "subtitle": "Professional handover",
+      "description": "Present the case to a colleague using precise dental terminology and explain technical words in lay language."
+    },
+    {
+      "id": "written",
+      "track": "kp",
+      "title": "Schriftlicher Behandlungsplan",
+      "subtitle": "Two justified options",
+      "description": "Create a diagnostic assessment and at least two evidence-conscious treatment alternatives with reasoning."
+    },
+    {
+      "id": "practical",
+      "track": "kp",
+      "title": "Praktische Übungen",
+      "subtitle": "Operative decision + targeting",
+      "description": "Select the appropriate tooth and instruments; practise a schematic preparation and sequence of treatment decisions."
+    },
+    {
+      "id": "viva",
+      "track": "kp",
+      "title": "Mündliche KP-Fragen",
+      "subtitle": "Clinical reasoning",
+      "description": "Practise higher-level decisions across restorative dentistry, endodontics, prosthodontics, surgery and periodontology."
+    },
+    {
+      "id": "clinic",
+      "track": "clinic",
+      "title": "Deutscher Praxisalltag",
+      "subtitle": "Treatment plan + language",
+      "description": "Review planned treatment, instruct the assistant, communicate with the patient, and document a session."
+    }
+  ],
+  "missingNativeFeatures": [
+    "browser clinical journey",
+    "AI patient dialogue",
+    "clinical scoring and reports",
+    "3D non-FDI16 production tooth volumes",
+    "real drillable multi-tooth meshes",
+    "32-tooth atlas",
+    "Quest streaming"
+  ],
+  "syntheticCasesOnly": true,
+  "clinicalAssessmentValidated": false
+}

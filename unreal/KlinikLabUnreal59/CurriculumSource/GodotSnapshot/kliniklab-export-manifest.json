@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "SR1B KlinikLab native clinical-geometry SOURCE EXPORT (not GPU render)",
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "productionSource": "volumetric-lab.js",
+  "productionSourceSHA256": "7fe57b1b14ac6d9e9afb19bfbc8cda40d4dc7abfb24ae1a31b854c059bb42d2d",
+  "unrealVersionRequired": "5.8.x",
+  "fdi": "16",
+  "jaw": "upper",
+  "side": "right",
+  "toothClass": "molar",
+  "caseLabel": "16 · MOD / Komposit",
+  "procedure": "restoration",
+  "contentType": "own procedural schematic teaching geometry, not patient anatomy",
+  "importedThirdPartyAssets": [],
+  "clinicalAccuracyVerified": false,
+  "gpuRenderVerified": false,
+  "nativeScreenshotReviewed": false,
+  "sceneStates": {
+    "before": {
+      "triangles": 14856,
+      "byMaterial": {
+        "enamel": 10320,
+        "dentin": 112,
+        "pulp": 207,
+        "cementum": 4105,
+        "caries": 112
+      },
+      "boundsDisplayCm": {
+        "min": [
+          -10.71199082140065,
+          -9.212312246997959,
+          -15.258701422109173
+        ],
+        "max": [
+          10.71199082140065,
+          9.212312246997959,
+          12.877931595146874
+        ]
+      }
+    },
+    "after": {
+      "triangles": 14936,
+      "byMaterial": {
+        "enamel": 10308,
+        "dentin": 205,
+        "pulp": 207,
+        "cementum": 4105,
+        "caries": 111
+      },
+      "boundsDisplayCm": {
+        "min": [
+          -10.71199082140065,
+          -9.212312246997959,
+          -15.258701422109173
+        ],
+        "max": [
+          10.71199082140065,
+          9.212312246997959,
+          12.877931595146874
+        ]
+      },
+      "simulatedCut": {
+        "center": [
+          0,
+          1.01,
+          0
+        ],
+        "radius": 0.22,
+        "units": "unscaled educational model units"
+      }
+    }
+  },
+  "coordinateTransform": "app(x,y,z) -> Unreal OBJ (x,z,y); inverted triangle winding for axis swap",
+  "displayCentimetersPerModelUnit": 10,
+  "scaleIsClinicallyCalibrated": false,
+  "originals": {
+    "fdi16-before.obj": "4718edfd4ceb2d01506ad6315ddb1024fde0c40fa98f586b14644529aa7c727f",
+    "fdi16-after-cut.obj": "c6a508043f120463e00eb65c379454ece8843432ba5c7f89a4609d86719642da",
+    "kliniklab-fdi16.mtl": "ff7433cd60a27c8f0f9cea4c9173293918ddd2f4055ad5b8632f2ff053389e1c"
+  },
+  "notes": [
+    "Both OBJ assets are calculated by the actual browser production VoxelMesher, not hand-drawn substitutes.",
+    "Display size is intentionally enlarged; do not interpret 10 cm/model-unit as physical tooth measurements.",
+    "These files are not screenshots; Unreal import and dedicated-GPU native raster remain independent evidence gates."
+  ]
+}

@@ -1,0 +1,36 @@
+# KlinikLab educational palette; simple diffuse MTL; materials uncalibrated
+newmtl KL_enamel
+Ka 0.06 0.06 0.06
+Kd 0.937255 0.901961 0.803922
+Ks 0.20 0.20 0.20
+Ns 45
+d 1.0
+illum 2
+newmtl KL_dentin
+Ka 0.06 0.06 0.06
+Kd 0.866667 0.650980 0.415686
+Ks 0.20 0.20 0.20
+Ns 45
+d 1.0
+illum 2
+newmtl KL_pulp
+Ka 0.06 0.06 0.06
+Kd 0.713725 0.298039 0.380392
+Ks 0.20 0.20 0.20
+Ns 45
+d 1.0
+illum 2
+newmtl KL_cementum
+Ka 0.06 0.06 0.06
+Kd 0.623529 0.509804 0.427451
+Ks 0.20 0.20 0.20
+Ns 45
+d 1.0
+illum 2
+newmtl KL_caries
+Ka 0.06 0.06 0.06
+Kd 0.396078 0.266667 0.270588
+Ks 0.20 0.20 0.20
+Ns 45
+d 1.0
+illum 2

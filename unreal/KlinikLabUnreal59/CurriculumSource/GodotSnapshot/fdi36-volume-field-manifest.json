@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "productionFile": "volumetric-lab.js",
+  "productionSHA256": "7fe57b1b14ac6d9e9afb19bfbc8cda40d4dc7abfb24ae1a31b854c059bb42d2d",
+  "model": "ORIGINAL_PROCEDURAL_SYNTHETIC_CASE_VOLUME_UNCALIBRATED",
+  "caseId": "endo",
+  "fdi": "36",
+  "toothClass": "molar",
+  "upper": false,
+  "left": true,
+  "channels": [
+    "outer",
+    "dentin",
+    "pulp",
+    "caries"
+  ],
+  "resolution": 24,
+  "ny": 34,
+  "sampleCount": 21875,
+  "gridMin": [
+    -1.39,
+    -1.67,
+    -1.22
+  ],
+  "gridMax": [
+    1.39,
+    1.44,
+    1.22
+  ],
+  "layout": "channel-major i-y-z, IEEE754 float32 little-endian",
+  "file": "fdi36-volume-field.bin",
+  "fieldSHA256": "df9e2b7f36df99a2a6f55c6c5d8f6ba6f13af6a360b1c8a77a51c94d35cbbeac",
+  "patientScan": false,
+  "clinicalAccuracyValidated": false
+}
