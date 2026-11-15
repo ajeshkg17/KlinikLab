@@ -14,6 +14,15 @@ This is a separate local Unreal Engine 5.9.0 project copied from the installed F
 - The decorative clinic and chair are not clinically validated or dimension-calibrated.
 - Headless loading/import is not visual QA. The renderer has not been reviewed in an Unreal viewport or Play-in-Editor session.
 
+## Current treatment-room interaction prototype
+
+- The desktop first-person controller uses reduced walking speed (180 cm/s) and keeps the existing WASD/mouse controls.
+- Press E for the scaler lesson flow. The lesson includes a synthetic target marker, a slower demo preview, and the existing `HandGrip_R` attachment point for the scaler. The Blueprint changes compile, but the current hand/tool appearance and process motion still need a fresh visual Play-in-Editor review.
+- Press F while looking at a tagged room station (450 cm trace range) to show its task prompt and record a simulation acknowledgement. Tagged stations cover the patient proxy, chair, hand-hygiene points, instrument tray/scaler, sterile storage, reprocessing station, sharps containers, imaging equipment, operatory lights, and monitor.
+- The patient is a generic standing Manny mannequin proxy with a practice marker. F records a role-play reminder to introduce yourself, confirm identity, ask permission, and check comfort. There is no animated conversation, seated patient pose, treatment action, or real patient data.
+- Room acknowledgements do not move chairs, lights, cabinets, instruments, or clinical equipment. They are training prompts and progress flags only; this prototype is not clinical guidance or a validated procedure.
+- F/E and the current first-person trace/grip path are desktop inputs. Independent Meta Quest 2 hands/controllers, OpenXR input, hand pose/IK, and in-hand tracking are future work and have not been tested.
+
 ## Import approach
 
 Unreal Engine 5.9 Interchange imports glTF/GLB scenes into a level. This project uses the `*-float32.glb` files; the original quantized files are retained for provenance. No FBX conversion is required for this export.
@@ -22,7 +31,7 @@ See SourceAssets/clinic-manifest-godot.json for asset provenance, hashes, and li
 
 ## Unreal MCP (UE 5.9)
 
-UE 5.9 includes Epic's experimental Unreal MCP server. It runs inside the editor at `http://127.0.0.1:8000/mcp` by default; enable the specific toolsets or `All Toolsets` if you connect an MCP client. The current Codex session did not expose an Unreal MCP connection, so this export used Unreal's headless Python/Interchange workflow. Epic documents Codex client-config generation in the editor as `ModelContextProtocol.GenerateClientConfig Codex`.
+UE 5.9 includes Epic's experimental Unreal MCP server. It runs inside the editor at `http://127.0.0.1:8000/mcp` by default; enable the specific toolsets or `All Toolsets` if you connect an MCP client. This working copy has been inspected and edited through the editor MCP; the original scene import also used Unreal's headless Python/Interchange workflow. Epic documents Codex client-config generation in the editor as `ModelContextProtocol.GenerateClientConfig Codex`.
 
 The MCP server has no authentication. Keep it bound to loopback and do not expose it to a network. This project copy's `.uproject` currently enables `AllToolsets` for the editor MCP; keep the server bound to loopback.
 
@@ -43,3 +52,4 @@ The UE project enables Epic's `JsonBlueprintUtilities` plugin and stages `Klinik
 The installed JSON Blueprint Utilities plugin currently has UnrealEditor binaries only; standalone game packaging has not been verified. For the present development build, use Editor Play-in-Editor. Before packaging later, either build the plugin for the game target or convert this content to cooked Unreal data assets and remove the runtime plugin dependency.
 
 Official references: [Unreal MCP in UE 5.9](https://dev.epicgames.com/documentation/unreal-engine/unreal-mcp-in-unreal-editor?application_version=5.9), [Interchange import in UE 5.9](https://dev.epicgames.com/documentation/unreal-engine/importing-assets-using-interchange-in-unreal-engine?lang=en-US), [UE 5.9 First Person template](https://dev.epicgames.com/documentation/unreal-engine/first-person-template-in-unreal-engine).
+
