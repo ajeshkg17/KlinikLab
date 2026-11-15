@@ -1,0 +1,2263 @@
+{
+  "formatVersion": 1,
+  "kind": "KLINIKLAB_LEARNING_LIBRARY_INDEX",
+  "sourceSnapshotGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "defaultLanguage": "en",
+  "supportedLanguages": [
+    "en",
+    "de"
+  ],
+  "clinicalAssessmentValidated": false,
+  "contentTextPolicy": "preserve_source_wording; no automatic translation of clinical lesson text",
+  "summary": {
+    "learnerVisibleItems": 144,
+    "developerOnlyParityProbes": 68,
+    "materialsInventoryItems": 0
+  },
+  "categories": [
+    {
+      "id": "cases",
+      "titleKey": "catalog.case_studies",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 6,
+      "items": [
+        {
+          "id": "case_molar",
+          "recordKind": "case",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Tiefe Karies am Zahn 16",
+          "searchText": "case_molar case molar  Tiefe Karies am Zahn 16 16 Posterior restorative dentistry Frau Lena Neumann Seit drei Wochen. Vor allem, wenn ich etwas Hartes kaue. Nur kurz beim Kalten, nicht stundenlang. Nein, nachts tut es nicht von selbst weh. Mir sind keine Allergien bekannt, ich nehme keine Medikamente. Ja, Sie können sich den Zahn ansehen. Ist die Behandlung schmerzhaft? Ja, bitte erklären Sie mir die Alternativen. „Ich habe beim Kauen rechts oben Beschwerden. Kaltes ist unangenehm, aber der Schmerz hört schnell wieder auf.“ Die Beschwerden bestehen seit etwa drei Wochen. Keine Spontanschmerzen, keine Schwellung, keine Fieberangabe. Regelmäßige Medikation: keine. Allergien werden verneint. Tiefe Karies mit erhaltener Vitalität; Pulpastatus und Restaurierbarkeit vor jeder definitiven Therapie überprüfen. Karies dentinum, pulpanah möglich; pulpal diagnosis needs clinical testing Direkte adhäsive Restauration, falls Defektgröße, Randverhältnisse und Höckerstabilität dies zulassen. Indirekte Teilkrone/Onlay bei größerem Substanzverlust und erhöhtem Höckerfrakturrisiko. Was spricht für eine direkte Füllung statt einer Teilkrone? MOD die Karies tooth decay die Füllung restoration die Betäubung local anaesthesia die Teilkrone partial crown die Kofferdamisolierung rubber dam isolation okklusal / approximal occlusal / proximal Karies Kälte Vital adhäsiv",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/0"
+        },
+        {
+          "id": "case_endo",
+          "recordKind": "case",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Pulpaschmerz am Zahn 36",
+          "searchText": "case_endo case endo  Pulpaschmerz am Zahn 36 36 Endodontics · differential diagnosis Herr Daniel Krüger Das hat vor einigen Wochen beim Kalten angefangen. Jetzt hält der Schmerz nach dem Kältereiz länger an. Ja, ich bin sogar nachts wegen der Schmerzen aufgewacht. Nein, mein Gesicht ist nicht geschwollen und Fieber habe ich nicht bemerkt. Ja, Sie dürfen den Zahn testen und untersuchen. Muss der Zahn gezogen werden? Ich möchte den Zahn wenn möglich behalten. „Links unten habe ich seit gestern starke Zahnschmerzen. Bei Kaltem tut es lange weh und nachts werde ich wach.“ Zahn 36 mit tiefer kariöser Läsion. Reizantwort und Perkussion sind systematisch zu untersuchen. Ein Röntgenbefund allein reicht für die pulpare Diagnose nicht aus. Verdacht auf symptomatische irreversible Pulpitis, Differenzialdiagnose und Zahnerhaltungsfähigkeit abklären. Verdacht auf symptomatische irreversible Pulpitis Nach Diagnose und Einwilligung endodontische Therapie zum Zahnerhalt mit adäquater definitiver koronaler Versorgung. Extraktion nach Aufklärung, falls Zahn nicht erhaltungswürdig ist oder der Patient nach Beratung diesen Weg wählt. Welche Befunde stützen eine symptomatische irreversible Pulpitis? ENDO die Pulpitis pulp inflammation die Wurzelkanalbehandlung root canal treatment die Spontanschmerzen spontaneous pain der Kältetest cold sensitivity test die Perkussion percussion die Wurzelspitze root apex Schmerz Pulpitis Kälte Endodont",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/1"
+        },
+        {
+          "id": "case_anterior",
+          "recordKind": "case",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Frontzahntrauma am Zahn 11",
+          "searchText": "case_anterior case anterior  Frontzahntrauma am Zahn 11 11 Anterior composite · trauma triage Frau Sofia Berger Vorgestern bin ich auf einer Treppe ausgerutscht. Nein, ich war nicht bewusstlos. Die Ecke stört, kalte Getränke sind etwas unangenehm. Ich habe keine bekannte Medikamentenallergie. Ja, Sie dürfen den Zahn untersuchen. Wird mein Zahn wieder normal aussehen? Mir ist wichtig, dass der Zahn erhalten bleibt. „Ich bin vor zwei Tagen gestürzt. Ein Stück vom oberen Schneidezahn ist abgebrochen. Jetzt stört mich die Kante.“ Sturz vor 48 Stunden; keine berichtete Bewusstlosigkeit, aber Unfallhergang und Begleitverletzungen sind gezielt zu erfragen. Schmerz bei Kälte möglich. Unkomplizierte Schmelz-Dentin-Fraktur möglich; pulpare Beteiligung, Luxation und Wurzelfraktur ausschließen. Verdacht auf unkomplizierte Kronenfraktur Zahn 11 Direkte adhäsive Kompositversorgung nach Ausschluss komplexer Verletzungen. Je nach Defektgröße, Pulpa- und Wurzelbefund fragmentäre Wiederbefestigung, indirekte Versorgung oder weitere Behandlung. Was muss bei Frontzahntrauma vor dem Kompositaufbau untersucht werden? INCISAL die Kronenfraktur crown fracture die Schneidekante incisal edge die Sensibilitätsprüfung sensibility testing der Zahnunfall dental trauma der Kompositaufbau composite build-up die Wurzelfraktur root fracture Fraktur Trauma Pulpa Komposit",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/2"
+        },
+        {
+          "id": "case_crown",
+          "recordKind": "case",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Kronen-/Teilkrone am Zahn 26",
+          "searchText": "case_crown case crown  Kronen-/Teilkrone am Zahn 26 26 Fixed prosthodontics · impression Herr Markus Seidel Seit einigen Monaten bricht immer wieder eine Ecke ab. Beim Kauen ja, bei Kälte nur selten. Nein, nachts habe ich keine Schmerzen. Ich habe Bluthochdruck und nehme ein Medikament; den Namen bringe ich mit. Sie dürfen den Zahn gerne untersuchen. Muss der Zahn komplett abgeschliffen werden? Bitte erklären Sie mir die Unterschiede zwischen Teilkrone und Krone. „Meine große Füllung links oben ist mehrfach gebrochen. Ich kann auf dieser Seite kaum noch kauen.“ Mehrfach erneuerte ausgedehnte Füllung an 26. Keine spontane Zahnschmerzen, aber Kauprobleme. Allgemeinanamnese und Erwartungen an Zahnerhalt erfragen. Restaurierbarkeit und verbleibende gesunde Höcker bestimmen, ob eine Teilkrone, Vollkrone oder andere Versorgung sinnvoll ist. Defekte ausgedehnte Restauration Zahn 26 Höckerüberdeckende indirekte Teilkrone/Onlay bei ausreichender Restsubstanz und passender Indikation. Vollkrone bei entsprechender Defektausdehnung; stärkerer Zahnhartsubstanzverlust muss begründet werden. Wann ist eine Teilkrone gegenüber einer Vollkrone substanzschonender? CROWN die Teilkrone partial crown die Verblendkrone veneered crown die Präparationsgrenze finish line die Abformung impression das Provisorium temporary crown der Biss occlusion Krone Füllung Restsubstanz",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/3"
+        },
+        {
+          "id": "case_surgery",
+          "recordKind": "case",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Perikoronitis am Zahn 48",
+          "searchText": "case_surgery case surgery  Perikoronitis am Zahn 48 48 Oral surgery · instruments Frau Amelie Fischer Seit etwa drei Tagen ist es hinten rechts unangenehm. Beim Kauen wird es schlimmer, der Schmerz hält eine Weile an. Nachts stört es, aber ich kann schlafen. Ich habe bisher kein Fieber, keine Schluckstörung und keine Schwellung bemerkt. Ja, bitte schauen Sie nach. Brauche ich jetzt ein Antibiotikum? Ich möchte wissen, ob der Weisheitszahn herausmuss. „Ganz hinten rechts unten tut das Zahnfleisch weh. Beim Essen klemme ich es manchmal ein.“ Seit drei Tagen zunehmender Schmerz am teilweise durchgebrochenen 48. Allgemeinzustand, Fieber, Schwellung, Mundöffnung, Schluckbeschwerden und Risikofaktoren gezielt erfragen. Operculum über einem teilweise durchgebrochenen 48 mit lokaler Irritation. Mundöffnung, vestibuläre Schwellung, lymphatische Zeichen, Okklusion und erforderliche Bildgebung prüfen. Lokale Perikoronitis möglich; systemische Infektionszeichen müssen ausgeschlossen und Dringlichkeit beurteilt werden. Verdacht auf lokale Perikoronitis Zahn 48 Bei lokalem Befund konservative Akutmaßnahmen mit Reinigung/Spülung nach Indikation, Schmerztherapie und Verlaufskontrolle. Nach Akutphase und Indikationsprüfung operative Entfernung bei wiederkehrenden Beschwerden; Risiken und Alternativen aufklären. Wann wird aus einer lokalen Perikoronitis ein dringlicher Infektionsfall? SURGERY die Perikoronitis inflamed operculum der Weisheitszahn third molar die Mundöffnung mouth opening die Extraktion extraction die Schwellung swelling der Hebel elevator Perikoronitis Schwellung Weisheits",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/4"
+        },
+        {
+          "id": "case_perio",
+          "recordKind": "case",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Parodontalbefund am Zahn 46",
+          "searchText": "case_perio case perio  Parodontalbefund am Zahn 46 46 Periodontology · instrument selection Herr Tobias Richter Das Zahnfleisch blutet schon seit Monaten beim Putzen. Beim Kauen habe ich selten Beschwerden. Manchmal fühlt es sich lockerer an, besonders morgens. Ich rauche ungefähr zehn Zigaretten am Tag; Diabetes wurde noch nicht untersucht. Ja, eine Zahnfleischmessung ist in Ordnung. Können meine Zähne durch Parodontitis ausfallen? Ich würde gern wissen, was ich selbst verbessern kann. „Mein Zahnfleisch blutet oft beim Putzen und rechts unten fühlt sich ein Zahn manchmal locker an.“ Wiederkehrendes Zahnfleischbluten, unregelmäßige Prophylaxe; Rauchstatus und Diabetesanamnese gezielt erfragen. Keine gesicherte parodontale Diagnose vor vollständigem Status. Am Zahn 46 Blutung bei Sondierung, erhöhte Sondierungstiefe möglich. Vollständiger parodontaler Status, Lockerung, Furkation, Plaque- und Knochenbefund erforderlich. Verdacht auf parodontale Erkrankung; Stadium und Grad erst nach vollständiger Diagnostik bestimmen. Verdacht auf Parodontitis Systematische parodontale Therapie nach Diagnostik einschließlich Aufklärung, Mundhygieneinstruktion, supra-/subgingivaler Instrumentierung nach Indikation und Reevaluation. Bei unzureichendem Ansprechen stufengerechte Weiterbehandlung, ggf. chirurgische Maßnahmen; Prognose und Risikofaktoren beachten. Welche klinischen Befunde braucht man für eine moderne Parodontitisdiagnose? PERIO die Parodontitis periodontitis die Sondierungstiefe probing depth das Furkationsgebiet furcation die Kürette curette die Blutung auf Sondieren bleeding on probing die Reevaluation reassessment Zahnfleisch Sondierung Parodont",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/cases/5"
+        }
+      ]
+    },
+    {
+      "id": "stations",
+      "titleKey": "catalog.stations",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 7,
+      "items": [
+        {
+          "id": "station_interview",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Anamnesegespräch",
+          "searchText": "station_interview station  Anamnesegespräch interview Patient-facing German Ask focused questions, respond empathetically and explain findings without excessive jargon. fsp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/0"
+        },
+        {
+          "id": "station_letter",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Arztbrief verfassen",
+          "searchText": "station_letter station  Arztbrief verfassen letter Clinical documentation Write a structured German report from the consultation. In the actual SH FSP this is handwritten. fsp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/1"
+        },
+        {
+          "id": "station_handover",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Arzt–Arzt-Gespräch",
+          "searchText": "station_handover station  Arzt–Arzt-Gespräch handover Professional handover Present the case to a colleague using precise dental terminology and explain technical words in lay language. fsp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/2"
+        },
+        {
+          "id": "station_written",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Schriftlicher Behandlungsplan",
+          "searchText": "station_written station  Schriftlicher Behandlungsplan written Two justified options Create a diagnostic assessment and at least two evidence-conscious treatment alternatives with reasoning. kp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/3"
+        },
+        {
+          "id": "station_practical",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Praktische Übungen",
+          "searchText": "station_practical station  Praktische Übungen practical Operative decision + targeting Select the appropriate tooth and instruments; practise a schematic preparation and sequence of treatment decisions. kp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/4"
+        },
+        {
+          "id": "station_viva",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Mündliche KP-Fragen",
+          "searchText": "station_viva station  Mündliche KP-Fragen viva Clinical reasoning Practise higher-level decisions across restorative dentistry, endodontics, prosthodontics, surgery and periodontology. kp",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/5"
+        },
+        {
+          "id": "station_clinic",
+          "recordKind": "station",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Deutscher Praxisalltag",
+          "searchText": "station_clinic station  Deutscher Praxisalltag clinic Treatment plan + language Review planned treatment, instruct the assistant, communicate with the patient, and document a session.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/stations/6"
+        }
+      ]
+    },
+    {
+      "id": "instruments",
+      "titleKey": "catalog.tools",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 19,
+      "items": [
+        {
+          "id": "tool_mirror",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Mouth mirror",
+          "searchText": "tool_mirror tool  Mouth mirror mirror Mundspiegel",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/0",
+          "titleEnglish": "Mouth mirror",
+          "titleGerman": "Mundspiegel"
+        },
+        {
+          "id": "tool_probe",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Explorer / probe",
+          "searchText": "tool_probe tool  Explorer / probe probe Sonde",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/1",
+          "titleEnglish": "Explorer / probe",
+          "titleGerman": "Sonde"
+        },
+        {
+          "id": "tool_suction",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Suction",
+          "searchText": "tool_suction tool  Suction suction Absaugung",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/2",
+          "titleEnglish": "Suction",
+          "titleGerman": "Absaugung"
+        },
+        {
+          "id": "tool_excavator",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Excavator",
+          "searchText": "tool_excavator tool  Excavator excavator Exkavator",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/3",
+          "titleEnglish": "Excavator",
+          "titleGerman": "Exkavator"
+        },
+        {
+          "id": "tool_composite",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Composite",
+          "searchText": "tool_composite tool  Composite composite Komposit",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/4",
+          "titleEnglish": "Composite",
+          "titleGerman": "Komposit"
+        },
+        {
+          "id": "tool_rubberdam",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Rubber dam",
+          "searchText": "tool_rubberdam tool  Rubber dam rubberdam Kofferdam",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/5",
+          "titleEnglish": "Rubber dam",
+          "titleGerman": "Kofferdam"
+        },
+        {
+          "id": "tool_bur",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Rotary cutting instrument",
+          "searchText": "tool_bur tool  Rotary cutting instrument bur Rotierender Schleifer",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/6",
+          "titleEnglish": "Rotary cutting instrument",
+          "titleGerman": "Rotierender Schleifer"
+        },
+        {
+          "id": "tool_matrix",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Matrix + wedge",
+          "searchText": "tool_matrix tool  Matrix + wedge matrix Matrize + Keil",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/7",
+          "titleEnglish": "Matrix + wedge",
+          "titleGerman": "Matrize + Keil"
+        },
+        {
+          "id": "tool_endo",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Endodontic file",
+          "searchText": "tool_endo tool  Endodontic file endo Endo-Feile",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/8",
+          "titleEnglish": "Endodontic file",
+          "titleGerman": "Endo-Feile"
+        },
+        {
+          "id": "tool_apex",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Apex locator",
+          "searchText": "tool_apex tool  Apex locator apex Apexlokator",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/9",
+          "titleEnglish": "Apex locator",
+          "titleGerman": "Apexlokator"
+        },
+        {
+          "id": "tool_irrigation",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Irrigation needle",
+          "searchText": "tool_irrigation tool  Irrigation needle irrigation Spülkanüle",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/10",
+          "titleEnglish": "Irrigation needle",
+          "titleGerman": "Spülkanüle"
+        },
+        {
+          "id": "tool_putty",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Putty PVS",
+          "searchText": "tool_putty tool  Putty PVS putty Putty",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/11",
+          "titleEnglish": "Putty PVS",
+          "titleGerman": "Putty"
+        },
+        {
+          "id": "tool_lightbody",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Wash PVS",
+          "searchText": "tool_lightbody tool  Wash PVS lightbody Light body",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/12",
+          "titleEnglish": "Wash PVS",
+          "titleGerman": "Light body"
+        },
+        {
+          "id": "tool_heavybody",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Tray PVS",
+          "searchText": "tool_heavybody tool  Tray PVS heavybody Heavy body",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/13",
+          "titleEnglish": "Tray PVS",
+          "titleGerman": "Heavy body"
+        },
+        {
+          "id": "tool_mediumbody",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Monophase PVS",
+          "searchText": "tool_mediumbody tool  Monophase PVS mediumbody Medium body",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/14",
+          "titleEnglish": "Monophase PVS",
+          "titleGerman": "Medium body"
+        },
+        {
+          "id": "tool_curette",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Periodontal instruments",
+          "searchText": "tool_curette tool  Periodontal instruments curette Kürette / Scaler",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/15",
+          "titleEnglish": "Periodontal instruments",
+          "titleGerman": "Kürette / Scaler"
+        },
+        {
+          "id": "tool_forceps",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Extraction forceps",
+          "searchText": "tool_forceps tool  Extraction forceps forceps Extraktionszange",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/16",
+          "titleEnglish": "Extraction forceps",
+          "titleGerman": "Extraktionszange"
+        },
+        {
+          "id": "tool_elevator",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Dental elevator",
+          "searchText": "tool_elevator tool  Dental elevator elevator Luxator / Hebel",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/17",
+          "titleEnglish": "Dental elevator",
+          "titleGerman": "Luxator / Hebel"
+        },
+        {
+          "id": "tool_imptray",
+          "recordKind": "tool",
+          "caseId": "",
+          "phaseId": "",
+          "title": "Impression tray",
+          "searchText": "tool_imptray tool  Impression tray imptray Abformlöffel",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/tools/18",
+          "titleEnglish": "Impression tray",
+          "titleGerman": "Abformlöffel"
+        }
+      ]
+    },
+    {
+      "id": "practical_tasks",
+      "titleKey": "catalog.practice",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 41,
+      "items": [
+        {
+          "id": "practical_molar_01",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_molar_01 practical_task molar  Arbeitszahn identifizieren tooth Wählen Sie Zahn 16 im 3D-Modell oder im FDI-Schema. 16 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/0"
+        },
+        {
+          "id": "practical_molar_02",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_molar_02 practical_task molar  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/1"
+        },
+        {
+          "id": "practical_molar_03",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Instrument für die Präparationssimulation wählen",
+          "searchText": "practical_molar_03 practical_task molar  Instrument für die Präparationssimulation wählen tool Select the appropriate rotary cutting instrument from the instrument tray. bur Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/2"
+        },
+        {
+          "id": "practical_molar_04",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Konservative Präparation simulieren",
+          "searchText": "practical_molar_04 practical_task molar  Konservative Präparation simulieren drill",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/3"
+        },
+        {
+          "id": "practical_molar_05",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Approximale Versorgung planen",
+          "searchText": "practical_molar_05 practical_task molar  Approximale Versorgung planen choice When an approximal wall is involved, what supports a good proximal form? Ohne Separation ein flaches Füllungsmaterial aufbringen. Geeignetes Matrizensystem und Keil mit Kontaktpunkt- und Konturkontrolle. Immer den Nachbarzahn beschleifen. Select an appropriate matrix/separation system for proximal contour and contact.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/4"
+        },
+        {
+          "id": "practical_molar_06",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Adhäsivtechnik",
+          "searchText": "practical_molar_06 practical_task molar  Adhäsivtechnik choice Which is the safest general principle? Das Adhäsivsystem unabhängig vom Hersteller verwenden. Das Material niemals lichthärten. Feuchtigkeitskontrolle, korrektes materialspezifisches Ätz-/Bonding-Protokoll und ausreichende Polymerisation. Material-specific instructions and effective moisture control are critical.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/5"
+        },
+        {
+          "id": "practical_molar_07",
+          "recordKind": "practical_task",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Abschlusskontrolle",
+          "searchText": "practical_molar_07 practical_task molar  Abschlusskontrolle choice Before finishing a posterior restoration, check: Kontaktpunkt, Approximalrand, Okklusion, Oberfläche und dokumentierte Patienteninformation. Nur die Farbe der Unterlage. Nichts mehr nach der Polymerisation. Finishing and verification are part of the restoration workflow.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/0/6"
+        },
+        {
+          "id": "practical_endo_01",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_endo_01 practical_task endo  Arbeitszahn identifizieren tooth Wählen Sie Zahn 36 im 3D-Modell oder im FDI-Schema. 36 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/0"
+        },
+        {
+          "id": "practical_endo_02",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_endo_02 practical_task endo  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/1"
+        },
+        {
+          "id": "practical_endo_03",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Instrument für die Präparationssimulation wählen",
+          "searchText": "practical_endo_03 practical_task endo  Instrument für die Präparationssimulation wählen tool Select the appropriate rotary cutting instrument from the instrument tray. bur Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/2"
+        },
+        {
+          "id": "practical_endo_04",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Konservative Präparation simulieren",
+          "searchText": "practical_endo_04 practical_task endo  Konservative Präparation simulieren drill",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/3"
+        },
+        {
+          "id": "practical_endo_05",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Arbeitslänge bestimmen",
+          "searchText": "practical_endo_05 practical_task endo  Arbeitslänge bestimmen choice Select the most appropriate approach. Die Länge nach Augenmaß schätzen. Apexlokator und indizierte radiologische Kontrolle zusammen mit Kanalbefund einsetzen. Immer exakt 15 mm festlegen. Working length must be determined individually using appropriate validated methods.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/4"
+        },
+        {
+          "id": "practical_endo_06",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Spülung sicher durchführen",
+          "searchText": "practical_endo_06 practical_task endo  Spülung sicher durchführen choice Which principle is essential for safe root-canal irrigation? Unter Druck bis über die Wurzelspitze spülen. Nadel blockieren und starken Druck verwenden. Geeignetes Spülprotokoll, kontrollierte Abgabe ohne Blockierung/Extrusion und Schutzmaßnahmen. Avoid apical extrusion; protocols and concentrations must follow contemporary clinical guidance.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/5"
+        },
+        {
+          "id": "practical_endo_07",
+          "recordKind": "practical_task",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Wurzelkanalfüllung und koronaler Verschluss",
+          "searchText": "practical_endo_07 practical_task endo  Wurzelkanalfüllung und koronaler Verschluss choice What completes the planned endodontic therapy? Nach Aufbereitung immer offen lassen. Dichte, überprüfte Wurzelkanalfüllung und zeitgerechte suffiziente koronale Abdichtung. Einfach Watte einlegen und nicht dokumentieren. A suitable obturation and coronal seal, with follow-up, are important for long-term success.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/1/6"
+        },
+        {
+          "id": "practical_anterior_01",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_anterior_01 practical_task anterior  Arbeitszahn identifizieren tooth Wählen Sie Zahn 11 im 3D-Modell oder im FDI-Schema. 11 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/0"
+        },
+        {
+          "id": "practical_anterior_02",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_anterior_02 practical_task anterior  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/1"
+        },
+        {
+          "id": "practical_anterior_03",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Instrument für die Präparationssimulation wählen",
+          "searchText": "practical_anterior_03 practical_task anterior  Instrument für die Präparationssimulation wählen tool Select the appropriate rotary cutting instrument from the instrument tray. bur Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/2"
+        },
+        {
+          "id": "practical_anterior_04",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Konservative Präparation simulieren",
+          "searchText": "practical_anterior_04 practical_task anterior  Konservative Präparation simulieren drill",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/3"
+        },
+        {
+          "id": "practical_anterior_05",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Trauma und Pulpabefund",
+          "searchText": "practical_anterior_05 practical_task anterior  Trauma und Pulpabefund choice What has to be checked before definitive restoration? Nur die Kompositfarbe. Frakturtyp, Pulpa, Mobilität/Luxation, Okklusion, Weichgewebe und indizierte Bildgebung. Immer sofort eine Krone. Trauma classification and associated injury assessment precede adhesive reconstruction.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/4"
+        },
+        {
+          "id": "practical_anterior_06",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Adhäsive Rekonstruktion",
+          "searchText": "practical_anterior_06 practical_task anterior  Adhäsive Rekonstruktion choice How is the restoration chosen? Feuchtigkeitskontrolle und materialgerechtes Adhäsivprotokoll mit anatomischem Schichtaufbau. Ohne Prüfung der Okklusion fertigstellen. Jede Schmelzfraktur zwingend überkronen. Apply a material-specific adhesive protocol and restore anatomy and function.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/5"
+        },
+        {
+          "id": "practical_anterior_07",
+          "recordKind": "practical_task",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Nachkontrolle",
+          "searchText": "practical_anterior_07 practical_task anterior  Nachkontrolle choice What should be discussed? Kontrolle und Nachsorge nach Trauma einschließlich Pulpaüberwachung, Ästhetik und Okklusion. Keine Nachkontrolle ist je notwendig. Nur die Rechnungsadresse. Pulpal complications after trauma may emerge later and need review.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/2/6"
+        },
+        {
+          "id": "practical_crown_01",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_crown_01 practical_task crown  Arbeitszahn identifizieren tooth Wählen Sie Zahn 26 im 3D-Modell oder im FDI-Schema. 26 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/0"
+        },
+        {
+          "id": "practical_crown_02",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_crown_02 practical_task crown  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/1"
+        },
+        {
+          "id": "practical_crown_03",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Instrument für die Präparationssimulation wählen",
+          "searchText": "practical_crown_03 practical_task crown  Instrument für die Präparationssimulation wählen tool Select the appropriate rotary cutting instrument from the instrument tray. bur Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/2"
+        },
+        {
+          "id": "practical_crown_04",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Konservative Präparation simulieren",
+          "searchText": "practical_crown_04 practical_task crown  Konservative Präparation simulieren drill",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/3"
+        },
+        {
+          "id": "practical_crown_05",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Abformung / digitaler Scan",
+          "searchText": "practical_crown_05 practical_task crown  Abformung / digitaler Scan choice Welche Option ist fachlich korrekt? Randsituation, Feuchtigkeitskontrolle und geeignetes Abform-/Scansystem beachten. Jede Abformung ohne Präparationsgrenze durchführen. Nur mit einem Löffel probieren und nicht kontrollieren. Restoration quality requires accurate margin capture and appropriate impression technique.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/4"
+        },
+        {
+          "id": "practical_crown_06",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Abforminstrument identifizieren",
+          "searchText": "practical_crown_06 practical_task crown  Abforminstrument identifizieren tool Wählen Sie einen Abformlöffel für eine konventionelle Abformung. imptray Correct instrument. Choose tray/material and technique according to indication and manufacturer instructions.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/5"
+        },
+        {
+          "id": "practical_crown_07",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Abformmaterial sachgerecht wählen",
+          "searchText": "practical_crown_07 practical_task crown  Abformmaterial sachgerecht wählen choice Was ist bei PVS Putty/Wash, Heavy/Light oder Monophase entscheidend? Das Material wird unabhängig von Herstellervorgaben beliebig kombiniert. Systemkompatibilität, Viskosität, Platz für Wash, Feuchtigkeitskontrolle und Verarbeitungszeiten berücksichtigen. Leichtfließendes Material ersetzt in allen Fällen einen formstabilen Löffel. Technique and viscosity must suit the preparation and manufacturer-specific impression system.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/6"
+        },
+        {
+          "id": "practical_crown_08",
+          "recordKind": "practical_task",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Temporäre Versorgung",
+          "searchText": "practical_crown_08 practical_task crown  Temporäre Versorgung choice Was ist vor Abschluss einer Kronenbehandlung zu prüfen? Passung und Dichtigkeit des Provisoriums, Okklusion, Schutz des Zahnes, Hinweise und Terminplanung. Das Provisorium locker lassen. Keine Nachsorge vorsehen. Temporary restoration should protect the tooth and permit safe function.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/3/7"
+        },
+        {
+          "id": "practical_surgery_01",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_surgery_01 practical_task surgery  Arbeitszahn identifizieren tooth Wählen Sie Zahn 48 im 3D-Modell oder im FDI-Schema. 48 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/0"
+        },
+        {
+          "id": "practical_surgery_02",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_surgery_02 practical_task surgery  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/1"
+        },
+        {
+          "id": "practical_surgery_03",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Instrumente für die chirurgische Versorgung",
+          "searchText": "practical_surgery_03 practical_task surgery  Instrumente für die chirurgische Versorgung tool Welche Instrumentenkategorie wäre bei einer indizierten Extraktion sachgerecht? elevator Correct category. Instrument choice depends on the examination, tooth anatomy, imaging and clinical plan.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/2"
+        },
+        {
+          "id": "practical_surgery_04",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Risikoanalyse vor der Extraktion",
+          "searchText": "practical_surgery_04 practical_task surgery  Risikoanalyse vor der Extraktion choice Was muss vor einem Eingriff besonders berücksichtigt werden? Röntgenbefund, Lagebeziehung zu relevanten Strukturen, Allgemeinanamnese, Indikation und Einwilligung. Nur die Zahnfarbe. Immer ohne Lokalanästhesie operieren. Anatomy, indications, safety and informed consent determine the surgical approach.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/3"
+        },
+        {
+          "id": "practical_surgery_05",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Infektionsmanagement",
+          "searchText": "practical_surgery_05 practical_task surgery  Infektionsmanagement choice Welche Aussage zur Perikoronitis ist richtig? Antibiotika sind für jede lokale Entzündung automatisch indiziert. Lokale Maßnahmen und Ursachenbehandlung sind zentral; Antibiotika nur bei entsprechender Indikation, z. B. systemischer Beteiligung. Schluckbeschwerden können ignoriert werden. Avoid routine antibiotics for uncomplicated local disease; screen red flags.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/4"
+        },
+        {
+          "id": "practical_surgery_06",
+          "recordKind": "practical_task",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Postoperative Betreuung",
+          "searchText": "practical_surgery_06 practical_task surgery  Postoperative Betreuung choice Welche Nachsorge ist sinnvoll? Individuelle Blutungs-, Wund- und Warnzeichenhinweise mit Kontaktweg und Kontrolle nach Bedarf. Keine Hinweise geben. Zwingend gleich am Folgetag beliebig feste Nahrung essen. Provide a clear patient-specific plan and escalation advice.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/4/5"
+        },
+        {
+          "id": "practical_perio_01",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Arbeitszahn identifizieren",
+          "searchText": "practical_perio_01 practical_task perio  Arbeitszahn identifizieren tooth Wählen Sie Zahn 46 im 3D-Modell oder im FDI-Schema. 46 Correct tooth selected using FDI notation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/0"
+        },
+        {
+          "id": "practical_perio_02",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Isolierung und Sicherheitscheck",
+          "searchText": "practical_perio_02 practical_task perio  Isolierung und Sicherheitscheck choice Before any simulated operative step, choose the most appropriate setup. Ohne Anamnese und Einwilligung beginnen. Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen. Nur den Behandlungsstuhl einstellen. Safe setup and isolation are essential; individual clinical requirements must be assessed.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/1"
+        },
+        {
+          "id": "practical_perio_03",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Parodontales Instrument wählen",
+          "searchText": "practical_perio_03 practical_task perio  Parodontales Instrument wählen tool Wählen Sie das Instrument zur mechanischen subgingivalen Instrumentierung im geeigneten Kontext. curette Correct category. Instrument geometry and adaptation must be tailored to the tooth surface and site.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/2"
+        },
+        {
+          "id": "practical_perio_04",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Parodontalstatus erheben",
+          "searchText": "practical_perio_04 practical_task perio  Parodontalstatus erheben choice Welche Angaben gehören zur Ausgangsuntersuchung? Nur die Patientennummer. Sondierung, BOP, Attachment-/Röntgenbefund, Lockerung, Furkation und Risikofaktoren. Allein ein Panoramabild. Comprehensive assessment allows appropriate diagnosis and follow-up.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/3"
+        },
+        {
+          "id": "practical_perio_05",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Instrumentierung und Sicherheit",
+          "searchText": "practical_perio_05 practical_task perio  Instrumentierung und Sicherheit choice Was ist das sichere Grundprinzip? Mit jeder Kürette möglichst stark gegen die Wurzel drücken. Keine Aufklärung und keine Reevaluation. Angepasste Instrumentwahl und Kontrolle, Gewebeschonung, Infektionsschutz und stufenweiser Behandlungsplan. Subgingival instrumentation is a controlled professional procedure.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/4"
+        },
+        {
+          "id": "practical_perio_06",
+          "recordKind": "practical_task",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Reevaluation",
+          "searchText": "practical_perio_06 practical_task perio  Reevaluation choice Was folgt der initialen parodontalen Therapie? Erneute Befunderhebung, Risikofaktorbewertung und bedarfsgerechte unterstützende Parodontitistherapie. Niemals mehr messen. Jeder Zahn wird extrahiert. Reassessment guides further therapy and maintenance.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/practical/5/5"
+        }
+      ]
+    },
+    {
+      "id": "knowledge_checks",
+      "titleKey": "catalog.quizzes",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 25,
+      "items": [
+        {
+          "id": "quiz_interview_01",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Eröffnen und Leitsymptom erfragen",
+          "searchText": "quiz_interview_01 quiz  interview Eröffnen und Leitsymptom erfragen Open the consultation professionally and invite an open description. Guten Tag. Was führt Sie heute zu uns? Sie brauchen bestimmt eine Wurzelbehandlung. Nehmen Sie sofort ein Antibiotikum. A neutral open question avoids premature diagnosis.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/0"
+        },
+        {
+          "id": "quiz_interview_02",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Beschwerden zeitlich einordnen",
+          "searchText": "quiz_interview_02 quiz  interview Beschwerden zeitlich einordnen Clarify onset and course, including provoking factors. Ist der Schmerz stark, ja oder nein? Seit wann bestehen die Beschwerden und wodurch werden sie ausgelöst? Der Schmerz ist sicher nichts Ernstes. Duration and triggers are crucial to differential diagnosis.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/1"
+        },
+        {
+          "id": "quiz_interview_03",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Schmerzqualität und Dauer",
+          "searchText": "quiz_interview_03 quiz  interview Schmerzqualität und Dauer Differentiate pulpal and dentinal symptoms. Wie lange hält der Schmerz nach Kälte an und haben Sie auch Schmerzen ohne Reiz? Es reicht, wenn Sie mir die Seite zeigen. Ich möchte Ihre Telefonnummer wissen. Lingering stimulus pain and spontaneous pain are relevant for pulpal assessment.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/2"
+        },
+        {
+          "id": "quiz_interview_04",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Warnzeichen erfragen",
+          "searchText": "quiz_interview_04 quiz  interview Warnzeichen erfragen Screen for fever, spreading swelling, and other systemic warning signs. Wie viel Geld möchten Sie ausgeben? Hatten Sie Fieber, eine Schwellung oder Schwierigkeiten beim Schlucken? Ein Röntgenbild ist immer unnötig. Infection warning signs change urgency and treatment.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/3"
+        },
+        {
+          "id": "quiz_interview_05",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Medikamente / Allergien",
+          "searchText": "quiz_interview_05 quiz  interview Medikamente / Allergien Cover medication history and allergies before planning treatment. Sie haben sicher keine Allergien, oder? Sie brauchen nichts weiter zu erzählen. Nehmen Sie regelmäßig Medikamente ein? Gibt es bekannte Allergien oder Vorerkrankungen? Relevant medical history is necessary for safe patient care.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/4"
+        },
+        {
+          "id": "quiz_interview_06",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Untersuchung ankündigen",
+          "searchText": "quiz_interview_06 quiz  interview Untersuchung ankündigen Explain the planned clinical examination and obtain agreement. Ich untersuche jetzt die Zähne und teste je nach Befund die Reaktion auf Kälte. Ist das für Sie in Ordnung? Ich bohre sofort los. Sie müssen nicht wissen, was wir machen. Explain examination steps and involve the patient.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/5"
+        },
+        {
+          "id": "quiz_interview_07",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "interview",
+          "title": "Befund und Alternativen erklären",
+          "searchText": "quiz_interview_07 quiz  interview Befund und Alternativen erklären Summarise findings in language the patient understands, with uncertainties and alternatives. Es gibt nur eine Möglichkeit, dazu müssen Sie nichts wissen. Die Untersuchung deutet auf ein Problem am Zahn hin. Ich erläutere die Befunde, die möglichen Behandlungen und deren Vor- und Nachteile. Wir entscheiden später ohne Sie. Patients need an understandable explanation and opportunity to participate in informed decisions.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/interview/6"
+        },
+        {
+          "id": "quiz_handover_01",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "handover",
+          "title": "Struktur der Übergabe",
+          "searchText": "quiz_handover_01 quiz  handover Struktur der Übergabe Wie beginnt eine strukturierte kollegiale Fallvorstellung? Mit einem langen Materialkatalog. Mit Patientendaten, Leitsymptom, relevanter Anamnese und Befunden. Mit einer endgültigen Diagnose ohne Befunderhebung. Begin with concise patient identification, leading complaint, timeline and relevant findings.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/handover/0"
+        },
+        {
+          "id": "quiz_handover_02",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "handover",
+          "title": "Fachsprache korrekt benutzen",
+          "searchText": "quiz_handover_02 quiz  handover Fachsprache korrekt benutzen Wie dokumentieren Sie eine Reaktion auf Kältereiz, die nach Reizende lange anhält? Anhaltende Schmerzreaktion nach thermischem Reiz Der Zahn ist hundertprozentig avital Druckgefühl ohne weitere Angaben Describe the actual finding first; a diagnosis requires the full clinical context.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/handover/1"
+        },
+        {
+          "id": "quiz_handover_03",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "handover",
+          "title": "Fachwort patientengerecht erklären",
+          "searchText": "quiz_handover_03 quiz  handover Fachwort patientengerecht erklären Wie erklären Sie „Pulpitis“ einer Patientin? Eine Entzündung des Zahnhalteapparats Eine Entzündung des Gewebes mit Nerven und Blutgefäßen im Zahn Ein Loch im Knochen Pulpa = the soft tissue inside the tooth, containing nerves and blood vessels.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/handover/2"
+        },
+        {
+          "id": "quiz_handover_04",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "handover",
+          "title": "Klinische Unsicherheit",
+          "searchText": "quiz_handover_04 quiz  handover Klinische Unsicherheit Was ist korrekt, wenn eine radiologische Aufnahme einen Befund allein nicht klärt? „Die Aufnahme beweist die Diagnose.“ „Die Beschwerden sind psychisch.“ „Wir korrelieren die Bildgebung mit Anamnese und klinischer Untersuchung.“ Avoid overclaiming diagnostic certainty from an illustrative radiograph.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/handover/3"
+        },
+        {
+          "id": "quiz_handover_05",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "handover",
+          "title": "Abschluss des Arzt–Arzt-Gesprächs",
+          "searchText": "quiz_handover_05 quiz  handover Abschluss des Arzt–Arzt-Gesprächs Welche Information gehört in die Übergabe? Begründeter Arbeitsbefund, Alternativen, weiteres Vorgehen, Risiken und Einwilligung. Nur die Farbe des Komposits. Nur die geplanten Kosten. A complete handover supports informed, safe follow-through.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/handover/4"
+        },
+        {
+          "id": "quiz_viva_01",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Endodontie",
+          "searchText": "quiz_viva_01 quiz  viva Endodontie Welche Aussage zur pulparen Diagnostik ist am besten begründet? Ein einzelner Kältetest reicht immer für die definitive Diagnose. Anamnese, Sensibilitätstests, Perkussion und indizierte Bildgebung werden im Zusammenhang interpretiert. Röntgenbilder zeigen die Vitalität der Pulpa direkt. No single finding establishes all pulpal/periapical diagnoses in isolation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/0"
+        },
+        {
+          "id": "quiz_viva_02",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Zahnerhaltung",
+          "searchText": "quiz_viva_02 quiz  viva Zahnerhaltung Bei tiefer Karies an einem vitalen Seitenzahn gilt grundsätzlich: Möglichst viel gesundes Dentin entfernen. Immer eine vollständige pulpare Exposition anstreben. Zahnhartsubstanz und Pulpa erhalten; Exkavationsstrategie nach Befund auswählen. Conservative, diagnosis-led excavation is essential; exact intervention depends on clinical situation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/1"
+        },
+        {
+          "id": "quiz_viva_03",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Prothetik",
+          "searchText": "quiz_viva_03 quiz  viva Prothetik Was entscheidet zwischen direkter Füllung und indirekter Teilkrone? Restsubstanz, Defektgröße, Höckerstabilität, Okklusion und Patientenfaktoren. Nur der Wunsch nach einer bestimmten Farbe. Immer die Zahnnummer allein. A restoration strategy must be based on structural and functional criteria.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/2"
+        },
+        {
+          "id": "quiz_viva_04",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Parodontologie",
+          "searchText": "quiz_viva_04 quiz  viva Parodontologie Welche Information ist für die parodontale Befunderhebung wesentlich? Nur das Alter. Sondierungstiefen, Blutung, Attachment-/Knochenbefund und Risikofaktoren. Nur ein Foto des Gesichts. Periodontal evaluation uses multiple clinical/radiographic measures, not a single index.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/3"
+        },
+        {
+          "id": "quiz_viva_05",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Oralchirurgie",
+          "searchText": "quiz_viva_05 quiz  viva Oralchirurgie Bei möglicher odontogener Infektionsausbreitung mit Schluckstörung: Nur beobachten, unabhängig von weiteren Zeichen. Immer ohne Untersuchung antibiotisch behandeln. Dringlichkeit beurteilen und bei Warnzeichen sofortige geeignete Abklärung/Überweisung organisieren. Potential deep-space infection and airway compromise require prompt professional evaluation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/4"
+        },
+        {
+          "id": "quiz_viva_06",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Kieferorthopädie",
+          "searchText": "quiz_viva_06 quiz  viva Kieferorthopädie Worauf basiert eine seriöse kieferorthopädische Therapieplanung? Auf einer vollständigen Diagnostik mit klinischen Befunden, Okklusion und erforderlichen Unterlagen. Nur auf dem Alter. Nur auf einer isolierten Fotoaufnahme. Comprehensive, patient-specific assessment precedes treatment choice.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/5"
+        },
+        {
+          "id": "quiz_viva_07",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Röntgendiagnostik",
+          "searchText": "quiz_viva_07 quiz  viva Röntgendiagnostik Welcher Grundsatz gilt vor einer zahnärztlichen Röntgenaufnahme? Jede Kontrolle erhält automatisch eine Aufnahme. Die Aufnahme muss durch eine individuelle rechtfertigende Indikation begründet und strahlenschutzgerecht durchgeführt werden. Röntgenaufnahmen ersetzen grundsätzlich die klinische Untersuchung. Ionizing radiation requires justification, optimization, and correct interpretation.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/6"
+        },
+        {
+          "id": "quiz_viva_08",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "viva",
+          "title": "Hygiene",
+          "searchText": "quiz_viva_08 quiz  viva Hygiene Was gilt für die Wiederaufbereitung eines kritischen Instruments? Nur mit Wasser abspülen. Validiertes Verfahren entsprechend Einstufung und Herstellerangaben. Bei sichtbarer Sauberkeit auf Sterilisation verzichten. Instrument reprocessing depends on risk classification and validated protocols.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/viva/7"
+        },
+        {
+          "id": "quiz_clinic_01",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "clinic",
+          "title": "Termin und Tagesplan lesen",
+          "searchText": "quiz_clinic_01 quiz  clinic Termin und Tagesplan lesen Im Praxiscomputer steht „Füllung 16 okklusal-approximal geplant“. Wie gehen Sie vor? Die geplante Behandlung ersetzt jede aktuelle Untersuchung. Aktuelle Beschwerden, Befund, Vorbehandlung, Aufklärung und Einwilligung prüfen; Plan bei Bedarf aktualisieren. Ohne Einwilligung direkt präparieren. A stored treatment plan is not a substitute for current clinical assessment.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/clinic/0"
+        },
+        {
+          "id": "quiz_clinic_02",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "clinic",
+          "title": "Patientenansprache",
+          "searchText": "quiz_clinic_02 quiz  clinic Patientenansprache Welche Formulierung ist im deutschen Praxisalltag passend? „Bevor wir beginnen, erkläre ich Ihnen die einzelnen Schritte. Haben Sie noch Fragen?“ „Jetzt stillhalten, ich habe keine Zeit.“ „Machen Sie sich keine Gedanken; ich muss nichts erklären.“ Patient-centered German communication should be understandable and respectful.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/clinic/1"
+        },
+        {
+          "id": "quiz_clinic_03",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "clinic",
+          "title": "Teamkommunikation",
+          "searchText": "quiz_clinic_03 quiz  clinic Teamkommunikation Wie bitten Sie eine ZFA um Unterstützung bei adhäsiver Versorgung? „Sie müssen alles selbst entscheiden.“ „Bringen Sie irgendetwas.“ „Bitte bereiten Sie Kofferdam, Absaugung, Matrizensystem und das freigegebene Adhäsivsystem vor.“ Clear assignment improves workflow; the treating dentist remains responsible.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/clinic/2"
+        },
+        {
+          "id": "quiz_clinic_04",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "clinic",
+          "title": "Dokumentation",
+          "searchText": "quiz_clinic_04 quiz  clinic Dokumentation Was gehört zur zeitnahen Behandlungsdokumentation? Nur das Datum. Befund, Aufklärung/Einwilligung, Anästhesie, Materialien, durchgeführte Schritte und relevante Besonderheiten. Nur die verwendete Marke. Document actual findings and interventions. Billing codes are separate from the clinical record.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/clinic/3"
+        },
+        {
+          "id": "quiz_clinic_05",
+          "recordKind": "quiz",
+          "caseId": "",
+          "phaseId": "clinic",
+          "title": "Patientenabschluss",
+          "searchText": "quiz_clinic_05 quiz  clinic Patientenabschluss Welche Information geben Sie am Ende einer invasiven Behandlung? Individuelle Nachsorgehinweise, Warnzeichen, ggf. Kontrolltermin und Kontaktmöglichkeit. „Sie brauchen nichts zu wissen.“ Immer dieselbe Medikation für alle Patienten. Tailored advice and safety-netting are essential.",
+          "sourceFile": "app-content.json",
+          "sourcePointer": "/quiz/clinic/4"
+        }
+      ]
+    },
+    {
+      "id": "guided_pathways",
+      "titleKey": "catalog.pathways",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 24,
+      "items": [
+        {
+          "id": "pathway_molar_01",
+          "recordKind": "pathway_step",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Indikation, Vitalität und Restaurierbarkeit abschließend sichern",
+          "searchText": "pathway_molar_01 pathway_step molar  Indikation, Vitalität und Restaurierbarkeit abschließend sichern",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/molar/procedure/0"
+        },
+        {
+          "id": "pathway_molar_02",
+          "recordKind": "pathway_step",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Aufklärung, Einwilligung und geeignete Isolation planen",
+          "searchText": "pathway_molar_02 pathway_step molar  Aufklärung, Einwilligung und geeignete Isolation planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/molar/procedure/1"
+        },
+        {
+          "id": "pathway_molar_03",
+          "recordKind": "pathway_step",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Defektbezogen und substanzschonend präparieren; Pulpanähe beachten",
+          "searchText": "pathway_molar_03 pathway_step molar  Defektbezogen und substanzschonend präparieren; Pulpanähe beachten",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/molar/procedure/2"
+        },
+        {
+          "id": "pathway_molar_04",
+          "recordKind": "pathway_step",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "Restauration, Kontakt, Okklusion und Nachkontrolle prüfen",
+          "searchText": "pathway_molar_04 pathway_step molar  Restauration, Kontakt, Okklusion und Nachkontrolle prüfen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/molar/procedure/3"
+        },
+        {
+          "id": "pathway_endo_01",
+          "recordKind": "pathway_step",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Diagnose, Restaurierbarkeit, Bildgebung und Einwilligung prüfen",
+          "searchText": "pathway_endo_01 pathway_step endo  Diagnose, Restaurierbarkeit, Bildgebung und Einwilligung prüfen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/endo/procedure/0"
+        },
+        {
+          "id": "pathway_endo_02",
+          "recordKind": "pathway_step",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Isolieren und konservativen Zugang anatomiegerecht planen",
+          "searchText": "pathway_endo_02 pathway_step endo  Isolieren und konservativen Zugang anatomiegerecht planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/endo/procedure/1"
+        },
+        {
+          "id": "pathway_endo_03",
+          "recordKind": "pathway_step",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Kanäle auffinden, Arbeitslänge und Aufbereitung kontrolliert bestimmen",
+          "searchText": "pathway_endo_03 pathway_step endo  Kanäle auffinden, Arbeitslänge und Aufbereitung kontrolliert bestimmen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/endo/procedure/2"
+        },
+        {
+          "id": "pathway_endo_04",
+          "recordKind": "pathway_step",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "Desinfektion, Füllung, koronalen Verschluss und Nachsorge planen",
+          "searchText": "pathway_endo_04 pathway_step endo  Desinfektion, Füllung, koronalen Verschluss und Nachsorge planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/endo/procedure/3"
+        },
+        {
+          "id": "pathway_anterior_01",
+          "recordKind": "pathway_step",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Trauma- und Begleitverletzungen einschließlich Weichteile abklären",
+          "searchText": "pathway_anterior_01 pathway_step anterior  Trauma- und Begleitverletzungen einschließlich Weichteile abklären",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/anterior/procedure/0"
+        },
+        {
+          "id": "pathway_anterior_02",
+          "recordKind": "pathway_step",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Fraktur, Pulpa, Mobilität, Sensibilität und indizierte Bildgebung beurteilen",
+          "searchText": "pathway_anterior_02 pathway_step anterior  Fraktur, Pulpa, Mobilität, Sensibilität und indizierte Bildgebung beurteilen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/anterior/procedure/1"
+        },
+        {
+          "id": "pathway_anterior_03",
+          "recordKind": "pathway_step",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Patientenpräferenz, Fragmentoptionen und Einwilligung besprechen",
+          "searchText": "pathway_anterior_03 pathway_step anterior  Patientenpräferenz, Fragmentoptionen und Einwilligung besprechen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/anterior/procedure/2"
+        },
+        {
+          "id": "pathway_anterior_04",
+          "recordKind": "pathway_step",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "Konservierend versorgen und strukturierte Verlaufskontrollen planen",
+          "searchText": "pathway_anterior_04 pathway_step anterior  Konservierend versorgen und strukturierte Verlaufskontrollen planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/anterior/procedure/3"
+        },
+        {
+          "id": "pathway_crown_01",
+          "recordKind": "pathway_step",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Indikation, Prognose, Präparationsart und Zustimmung festlegen",
+          "searchText": "pathway_crown_01 pathway_step crown  Indikation, Prognose, Präparationsart und Zustimmung festlegen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/crown/procedure/0"
+        },
+        {
+          "id": "pathway_crown_02",
+          "recordKind": "pathway_step",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Substanzschonend präparieren und Präparationsgrenzen beurteilen",
+          "searchText": "pathway_crown_02 pathway_step crown  Substanzschonend präparieren und Präparationsgrenzen beurteilen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/crown/procedure/1"
+        },
+        {
+          "id": "pathway_crown_03",
+          "recordKind": "pathway_step",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Trockenlegung/Retraktion und geeignete Abformung bzw. Scan durchführen",
+          "searchText": "pathway_crown_03 pathway_step crown  Trockenlegung/Retraktion und geeignete Abformung bzw. Scan durchführen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/crown/procedure/2"
+        },
+        {
+          "id": "pathway_crown_04",
+          "recordKind": "pathway_step",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "Provisorium, Okklusion, Nachkontrolle und spätere Eingliederung planen",
+          "searchText": "pathway_crown_04 pathway_step crown  Provisorium, Okklusion, Nachkontrolle und spätere Eingliederung planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/crown/procedure/3"
+        },
+        {
+          "id": "pathway_surgery_01",
+          "recordKind": "pathway_step",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Infektionsausbreitung, Atemweg, Trismus und Risikofaktoren prüfen",
+          "searchText": "pathway_surgery_01 pathway_step surgery  Infektionsausbreitung, Atemweg, Trismus und Risikofaktoren prüfen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/surgery/procedure/0"
+        },
+        {
+          "id": "pathway_surgery_02",
+          "recordKind": "pathway_step",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Befund, Lagebeziehung und chirurgische Indikation beurteilen",
+          "searchText": "pathway_surgery_02 pathway_step surgery  Befund, Lagebeziehung und chirurgische Indikation beurteilen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/surgery/procedure/1"
+        },
+        {
+          "id": "pathway_surgery_03",
+          "recordKind": "pathway_step",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Lokale Akutmaßnahmen, Aufklärung und Medikamentenrisiken prüfen",
+          "searchText": "pathway_surgery_03 pathway_step surgery  Lokale Akutmaßnahmen, Aufklärung und Medikamentenrisiken prüfen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/surgery/procedure/2"
+        },
+        {
+          "id": "pathway_surgery_04",
+          "recordKind": "pathway_step",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "Verlauf, Kontrolltermin und ggf. indikationsgerechte Extraktionsplanung dokumentieren",
+          "searchText": "pathway_surgery_04 pathway_step surgery  Verlauf, Kontrolltermin und ggf. indikationsgerechte Extraktionsplanung dokumentieren",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/surgery/procedure/3"
+        },
+        {
+          "id": "pathway_perio_01",
+          "recordKind": "pathway_step",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Umfassenden PA-Status und Risikoprofil aufnehmen",
+          "searchText": "pathway_perio_01 pathway_step perio  Umfassenden PA-Status und Risikoprofil aufnehmen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/perio/procedure/0"
+        },
+        {
+          "id": "pathway_perio_02",
+          "recordKind": "pathway_step",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Mundhygieneinstruktion und Risikofaktormodifikation besprechen",
+          "searchText": "pathway_perio_02 pathway_step perio  Mundhygieneinstruktion und Risikofaktormodifikation besprechen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/perio/procedure/1"
+        },
+        {
+          "id": "pathway_perio_03",
+          "recordKind": "pathway_step",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Indikationsgerechte subgingivale Instrumentierung planen und durchführen lassen",
+          "searchText": "pathway_perio_03 pathway_step perio  Indikationsgerechte subgingivale Instrumentierung planen und durchführen lassen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/perio/procedure/2"
+        },
+        {
+          "id": "pathway_perio_04",
+          "recordKind": "pathway_step",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "Reevaluation, Erhaltungstherapie und dokumentierte Nachsorge planen",
+          "searchText": "pathway_perio_04 pathway_step perio  Reevaluation, Erhaltungstherapie und dokumentierte Nachsorge planen",
+          "sourceFile": "clinical-pathways.json",
+          "sourcePointer": "/cases/perio/procedure/3"
+        }
+      ]
+    },
+    {
+      "id": "fsp_kp_practice",
+      "titleKey": "catalog.fsp_kp",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 16,
+      "items": [
+        {
+          "id": "fsp_perio_anamnese",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "perio",
+          "phaseId": "anamnese",
+          "title": "Zahn 46 · Zahnfleischbluten und Lockerung · anamnese",
+          "searchText": "fsp_perio_anamnese fsp_kp_phase perio anamnese Zahn 46 · Zahnfleischbluten und Lockerung · anamnese Formulieren Sie auf Deutsch fünf patientengerechte Fragen zu Symptomen, Mundhygiene, Rauchen, Diabetes und Medikamenten. Behaupten Sie kein gesichertes Stadium. Seit wann blutet Ihr Zahnfleisch? Rauchen Sie? Sind Vorerkrankungen, insbesondere ein Diabetes mellitus, bekannt und wie ist dieser eingestellt? Verlauf und Blutung seit wann|blut Blutungsverlauf und Dauer erfragen. Lockerung locker|beweglich Nach Zahnbeweglichkeit fragen. Mundhygiene zahzwischen|zahnzwischen|interdental|reinigen|putz Reinigung und Interdentalpflege erfragen. Rauchen rauch|zigarett Tabakexposition erheben. Diabetes / Allgemeinanamnese diabetes|blutzucker|hba1c|medikament Diabeteskontrolle und Medikamente erfragen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/perio/tasks/anamnese"
+        },
+        {
+          "id": "fsp_perio_aufklaerung",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "perio",
+          "phaseId": "aufklaerung",
+          "title": "Zahn 46 · Zahnfleischbluten und Lockerung · aufklaerung",
+          "searchText": "fsp_perio_aufklaerung fsp_kp_phase perio aufklaerung Zahn 46 · Zahnfleischbluten und Lockerung · aufklaerung Das Zahnfleisch ist entzündet; wir müssen zunächst genauer untersuchen ... Für die Einstufung benötigen wir einen vollständigen Parodontalstatus und die Beurteilung des Knochenverlusts. Verständliche Verdachtserklärung zahnfleisch|zahnhalteapparat|entzünd Verdacht ohne gesicherte Stadieneinteilung erklären. Parodontalstatus parodontalstatus|untersuch|befund Vollständige Diagnostik vor Stadieneinteilung erläutern. Hygiene und Risikofaktoren hygiene|rauch|blutzucker|diabetes Beeinflussbare Risikofaktoren und Pflege ansprechen. Stufenweise Therapie / Nachsorge reinig|nachkontroll|therapie|behandl Mögliches stufenweises Vorgehen und Nachsorge erklären. Risiken, Alternativen und Einwilligung risik|alternativ|einwillig|fragen|entscheiden Entscheidung und Einwilligung nach angemessener Aufklärung ansprechen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/perio/tasks/aufklaerung"
+        },
+        {
+          "id": "fsp_perio_brief",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "perio",
+          "phaseId": "brief",
+          "title": "Zahn 46 · Zahnfleischbluten und Lockerung · brief",
+          "searchText": "fsp_perio_brief fsp_kp_phase perio brief Zahn 46 · Zahnfleischbluten und Lockerung · brief Anamnestisch besteht Zahnfleischbluten; Zahn 46 fühlt sich locker an ... Bei Verdacht auf Parodontitis ist die Stadien- und Gradzuordnung erst nach vollständiger Befunderhebung möglich ... FDI 46 (?:^|\\D)46(?:\\D|$) FDI-Zahnnummer im Befund verwenden. Anamnese / Risiken rauch|diabetes|blutung|hba1c Anamnestische Symptome und Risikofaktoren dokumentieren. Klinischer Befund sondier|locker|gingival Klinischen Status nennen. Bildgebung / Unsicherheit radiolog|röntgen|knochen Nur einen fiktiven, nicht abschließenden radiologischen Befund angeben. Arbeitsdiagnose / Plan verdacht|parodontitis|staging|reevalu Arbeitsdiagnose und weiteren Abklärungsbedarf dokumentieren.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/perio/tasks/brief"
+        },
+        {
+          "id": "fsp_perio_kollegen",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "perio",
+          "phaseId": "kollegen",
+          "title": "Zahn 46 · Zahnfleischbluten und Lockerung · kollegen",
+          "searchText": "fsp_perio_kollegen fsp_kp_phase perio kollegen Zahn 46 · Zahnfleischbluten und Lockerung · kollegen Bei Zahn 46 besteht eine Lockerung; die Patientin oder der Patient berichtet ... Eine Stadien- und Gradzuordnung ist aufgrund des noch unvollständigen Parodontalstatus nicht möglich. FDI 46 (?:^|\\D)46(?:\\D|$) Betroffenen Zahn nennen. Risikoprofil rauch|diabetes|glykäm|hba1c Relevante Risikofaktoren übergeben. Klinische / radiologische Befunde sondier|locker|knochen|radiolog Klinische und radiologische Befunde anführen. Unsicherheit der Diagnose verdacht|staging|grading|offen Nicht gesichertes Stadium und offenen Befund benennen. Stufenweise Planung parodontalstatus|reevalu|stufenweise|therapie Nächste diagnostische und therapeutische Schritte nennen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/perio/tasks/kollegen"
+        },
+        {
+          "id": "fsp_restoration_anamnese",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "restoration",
+          "phaseId": "anamnese",
+          "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · anamnese",
+          "searchText": "fsp_restoration_anamnese fsp_kp_phase restoration anamnese Zahn 16 · kariöser Defekt und kurze Kältereaktion · anamnese Formulieren Sie patientengerechte Fragen zu Dauer, Auslösern, spontanen Schmerzen, Infektionszeichen und Allgemeinanamnese. Tut es beim Kauen oder bei kalten Getränken weh? Hält der Schmerz nach Entfernen des Kältereizes an, und treten spontane oder nächtliche Beschwerden auf? Beginn seit wann|wie lange.{0,30}schmerz Dauer und Verlauf erfragen. Kauen / Kälte kauen|kälte|kalt Auslöser spezifizieren. Schmerzdauer nach Reiz wie lange hält|nach dem kälte|nach kälte Persistenz nach dem Kältereiz erfragen. Spontan / Nacht / Warnzeichen spontan|nachts|fieber|schwell Spontanschmerz und Infektionszeichen erfragen. Medikamente / Allergien medikament|allerg Allgemeinanamnese ergänzen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/restoration/tasks/anamnese"
+        },
+        {
+          "id": "fsp_restoration_aufklaerung",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "restoration",
+          "phaseId": "aufklaerung",
+          "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · aufklaerung",
+          "searchText": "fsp_restoration_aufklaerung fsp_kp_phase restoration aufklaerung Zahn 16 · kariöser Defekt und kurze Kältereaktion · aufklaerung Erklären Sie den Verdacht auf Karies mit noch offenem Pulpa- und Restaurierungsbefund. Besprechen Sie bedingte Füllungs- und Teilkronenoptionen und eine informierte Entscheidung. An Ihrem Backenzahn sehen wir einen Defekt; wie groß er ist, müssen wir prüfen. Je nach Defektausdehnung und Höckerstabilität kommen direkte oder indirekte restaurative Maßnahmen in Betracht. Patientengerechte Defekterklärung karies|kariös|loch|defekt Die vermutete Erkrankung verständlich erklären. Diagnostische Unsicherheit prüf|untersuch|tiefe|zahnnerv|pulpa Offenen Befund und fehlende Gewissheit benennen. Direkte Versorgung komposit|füllung Füllung als bedingte Option beschreiben. Indirekte Versorgung teilkrone|onlay Teilkronen-/Onlay-Alternative einordnen. Aufklärung / Entscheidung risik|kosten|alternativ|einwillig|fragen Risiken, Alternativen und Einwilligung besprechen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/restoration/tasks/aufklaerung"
+        },
+        {
+          "id": "fsp_restoration_brief",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "restoration",
+          "phaseId": "brief",
+          "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · brief",
+          "searchText": "fsp_restoration_brief fsp_kp_phase restoration brief Zahn 16 · kariöser Defekt und kurze Kältereaktion · brief Schreiben Sie einen neutralen Befundtext für Zahn 16. Trennen Sie berichtete Symptome, tatsächlich simulierte Tests und offene Indikationsfragen. An Zahn 16 zeigen sich eine Kavitation und eine kurze positive Kältereaktion. Die Pulpadiagnose und die restaurative Indikation bleiben bis zur vollständigen Defektbeurteilung offen. FDI 16 (?:^|\\D)16(?:\\D|$) Zahn 16 nach FDI nennen. Schmerzcharakter kauen|kälte|nachts|spontan Anamnestische Beschwerden dokumentieren. Klinischer Test kältetest|perkussion|palpation Klinische Befunde und Testreaktion anführen. Bildgebung bissflügel|radiolog|röntgen|dentin Fiktiven Röntgenbefund kennzeichnen. Offene Indikation pulpa|prüf|restaurier|arbeitsdiagnose Unsicherheit und weiteren diagnostischen Bedarf erklären.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/restoration/tasks/brief"
+        },
+        {
+          "id": "fsp_restoration_kollegen",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "restoration",
+          "phaseId": "kollegen",
+          "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · kollegen",
+          "searchText": "fsp_restoration_kollegen fsp_kp_phase restoration kollegen Zahn 16 · kariöser Defekt und kurze Kältereaktion · kollegen Übergeben Sie Zahn 16 einschließlich Anamnese, klinischer Befunde, fehlender Gewissheit und möglichen Restaurationen. Erklären Sie den Begriff Approximalkaries patientengerecht. Bei Zahn 16 besteht eine kariöse Läsion mit kurzer Kälteempfindlichkeit. Aus der isolierten kurzen Kälteantwort lässt sich der Pulpagewebezustand nicht sicher diagnostizieren. FDI 16 (?:^|\\D)16(?:\\D|$) Zahnbezeichnung nennen. Beschwerden kälte|kauen|nachts Relevante Anamnese übergeben. Untersuchung / Radiologie perkussion|kältetest|bissflügel|radiolog Befunde nachvollziehbar mitteilen. Unvollständige Diagnose pulpa|restaurier|abklär|unsicher Diagnoseunsicherheit kenntlich machen. Restauration / nächste Schritte komposit|teilkrone|onlay|füllung Indikationsabhängige Optionen benennen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/restoration/tasks/kollegen"
+        },
+        {
+          "id": "fsp_endo_anamnese",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "endo",
+          "phaseId": "anamnese",
+          "title": "Zahn 36 · anhaltende Kälteschmerzen · anamnese",
+          "searchText": "fsp_endo_anamnese fsp_kp_phase endo anamnese Zahn 36 · anhaltende Kälteschmerzen · anamnese Formulieren Sie patientengerechte Anamnesefragen mit der Höflichkeitsform Sie. Erfragen Sie noch nicht einfach die Musterdiagnose. Könnten Sie mir bitte sagen, seit wann ...? Treten die Beschwerden spontan oder ausschließlich reizabhängig auf? Zeitlicher Beginn seit wann|wann.{0,30}begonn|wie lange.{0,25}beschwerd Nach Beginn und Verlauf fragen. Kälteantwort kälte|kalt Art und Dauer der Kälteantwort erfragen. Spontan- oder Nachtschmerz nachts|spontan|ohne reiz Spontane und nächtliche Schmerzen erfragen. Warnzeichen fieber|schwell|schluckbeschwerd Mögliche Warnzeichen abklären. Medikamente und Allergien medikament|allerg Relevante Allgemeinanamnese erheben.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/endo/tasks/anamnese"
+        },
+        {
+          "id": "fsp_endo_aufklaerung",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "endo",
+          "phaseId": "aufklaerung",
+          "title": "Zahn 36 · anhaltende Kälteschmerzen · aufklaerung",
+          "searchText": "fsp_endo_aufklaerung fsp_kp_phase endo aufklaerung Zahn 36 · anhaltende Kälteschmerzen · aufklaerung Die bisherigen Untersuchungen deuten darauf hin, dass ... Nach Abklärung der Erhaltungswürdigkeit kommen folgende Alternativen in Betracht ... Patientenverständliche Erklärung entzünd|zahninner|zahnnerv|pulpa Die vermutete Erkrankung verständlich erklären. Wurzelkanalbehandlung wurzelkanal|endodont Eine mögliche zahnerhaltende Option erwähnen. Alternative alternativ|entfern|extraktion Alternativen ohne automatische Festlegung ansprechen. Risiken und Prognose risik|prognos|komplikation Risiken und Prognose individualisiert besprechen. Fragen / Einwilligung einwillig|einverstanden|fragen|entscheiden Rückfragen und informierte Entscheidung ermöglichen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/endo/tasks/aufklaerung"
+        },
+        {
+          "id": "fsp_endo_brief",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "endo",
+          "phaseId": "brief",
+          "title": "Zahn 36 · anhaltende Kälteschmerzen · brief",
+          "searchText": "fsp_endo_brief fsp_kp_phase endo brief Zahn 36 · anhaltende Kälteschmerzen · brief Schreiben Sie einen knappen, fachsprachlichen Befund-/Arztbrief. Nutzen Sie ausschließlich die vorgegebenen fiktiven Befunde; benennen Sie Unsicherheit. Bei Zahn 36 bestehen ... Die Untersuchung zeigte ... Anamnestisch ...; klinisch ...; radiologisch ...; als Arbeitsdiagnose ... FDI-Zahnnummer (?:^|\\D)36(?:\\D|$) Den betroffenen Zahn nach FDI nennen. Symptomverlauf nachts|spontan|seit gestern|seit wochen Beschwerden und zeitlichen Verlauf beschreiben. Klinischer Test perkussion|kälteantwort|kältetest|sensibil Konkrete klinische Untersuchungsbefunde notieren. Radiologischer Befund röntgen|radiolog|apikal Bildgebung nur als fiktiven Befundtext darstellen. Arbeitsdiagnose / Unsicherheit pulpitis|verdacht|v. a. Arbeitsdiagnose als solche kennzeichnen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/endo/tasks/brief"
+        },
+        {
+          "id": "fsp_endo_kollegen",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "endo",
+          "phaseId": "kollegen",
+          "title": "Zahn 36 · anhaltende Kälteschmerzen · kollegen",
+          "searchText": "fsp_endo_kollegen fsp_kp_phase endo kollegen Zahn 36 · anhaltende Kälteschmerzen · kollegen Es handelt sich um einen Fall an Zahn ... In Zusammenschau von Anamnese, Sensibilitätstest und radiologischem Befund besteht der Verdacht ... FDI-Zahnnummer (?:^|\\D)36(?:\\D|$) Zahnbezeichnung präzise nennen. Anamnestischer Verlauf nachts|spontan|kälte Leitsymptome kurz zusammenfassen. Befund / Test perkussion|kältetest|sensibil|reizantwort Relevante Untersuchungen benennen. Arbeitsdiagnose pulpitis|verdacht Arbeitsdiagnose samt Unsicherheit mitteilen. Plan / Bedingung endodont|wurzelkanal|restaurier|erhaltungs Indikation und geplantes weiteres Vorgehen erwähnen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/endo/tasks/kollegen"
+        },
+        {
+          "id": "fsp_surgery_anamnese",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "Zahn 48 · lokale Perikoronitis · anamnese",
+          "searchText": "fsp_surgery_anamnese fsp_kp_phase surgery anamnese Zahn 48 · lokale Perikoronitis · anamnese Formulieren Sie Anamnesefragen zu Beschwerden und gefährlichen Ausbreitungszeichen. Nehmen Sie eine mögliche akute Infektion ernst. Können Sie den Mund normal öffnen? Bestehen Dysphagie, Atembeschwerden oder eine progrediente Schwellung? Beginn / Dauer seit wann|wie lang|wann.{0,20}beginn Dauer und Verlauf erfragen. Fieber / Schwellung fieber|schwell Systemische und lokale Ausbreitung prüfen. Atemweg / Schlucken / Mundöffnung atmen|atemnot|schluck|mund öffn|mundöffnung|trismus Akute Gefährdung priorisieren. Medikamente / Allergien medikament|allerg Risiken aus der Allgemeinanamnese erheben. Rezidiv früher|wiederhol|schon einmal|erneut Vorangegangene Episoden erfragen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/surgery/tasks/anamnese"
+        },
+        {
+          "id": "fsp_surgery_aufklaerung",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "Zahn 48 · lokale Perikoronitis · aufklaerung",
+          "searchText": "fsp_surgery_aufklaerung fsp_kp_phase surgery aufklaerung Zahn 48 · lokale Perikoronitis · aufklaerung Erklären Sie die lokale Entzündung, das zunächst mögliche lokale Vorgehen, spätere Optionen sowie Warnzeichen. Stellen Sie keine pauschale Antibiotikaindikation. Das Zahnfleisch um Ihren hinteren Zahn ist entzündet ... Bei Ausbreitungszeichen wäre eine umgehende notfallmäßige Abklärung erforderlich. Lokale Erkrankung erklären zahnfleisch|entzünd|perikoronitis Laienverständliche Erklärung geben. Lokales Vorgehen lokal|spül|hygiene|reinig Lokale Maßnahmen als erste Möglichkeit ansprechen. Antibiotika nicht pauschal antibiotik Indikationsabhängigkeit erklären; Stichwortprüfung kann Negation nicht erkennen. Warnzeichen / Notfall atem|schluck|fieber|schwell|notfall Warnzeichen und erforderliche Eskalation erläutern. Optionen / Einwilligung entfern|extraktion|einwillig|fragen|alternativ Spätere Optionen und Einwilligung besprechen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/surgery/tasks/aufklaerung"
+        },
+        {
+          "id": "fsp_surgery_brief",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "surgery",
+          "phaseId": "brief",
+          "title": "Zahn 48 · lokale Perikoronitis · brief",
+          "searchText": "fsp_surgery_brief fsp_kp_phase surgery brief Zahn 48 · lokale Perikoronitis · brief Dokumentieren Sie die fiktive Vorstellung mit klinischem Befund, fehlenden Ausbreitungszeichen, Arbeitsdiagnose und Plan. Keine reale Bildinterpretation behaupten. Bei Zahn 48 zeigt sich ... Aktuell keine klinischen Hinweise auf systemische Ausbreitung im beschriebenen Übungsfall ... FDI-Zahnnummer (?:^|\\D)48(?:\\D|$) FDI-Nummer dokumentieren. Lokaler Befund operculum|teilweise durchgebroch|teilretin Lokalen Untersuchungsbefund nennen. Ausbreitungszeichen fieber|trismus|dysphag|schluck|atem Gefahrenzeichen samt Negativbefund dokumentieren. Arbeitsdiagnose perikoronitis|entzünd Arbeitsdiagnose klar kennzeichnen. Lokale Maßnahme / Verlauf lokal|hygiene|kontroll|reevalu Initialplan und Kontrolle festhalten.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/surgery/tasks/brief"
+        },
+        {
+          "id": "fsp_surgery_kollegen",
+          "recordKind": "fsp_kp_phase",
+          "caseId": "surgery",
+          "phaseId": "kollegen",
+          "title": "Zahn 48 · lokale Perikoronitis · kollegen",
+          "searchText": "fsp_surgery_kollegen fsp_kp_phase surgery kollegen Zahn 48 · lokale Perikoronitis · kollegen Am Zahn 48 zeigt sich eine lokale Entzündung ... Im gegenwärtigen Fall bestehen keine berichteten systemischen Ausbreitungszeichen; bei Änderung sofortige Reevaluation ... FDI-Zahnnummer (?:^|\\D)48(?:\\D|$) Betroffenen Zahn nennen. Lokaler Befund operculum|teilweise durchgebroch|teilretin Klinischen Befund übergeben. Gefährdungsprüfung trismus|fieber|dysphag|atemnot Ausbreitungszeichen beurteilen. Arbeitsdiagnose perikoronitis Fachdiagnose nennen. Plan / Reevaluation lokal|kontroll|reevalu|extraktion Indikationsabhängiges Vorgehen erläutern.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/cases/surgery/tasks/kollegen"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_models",
+      "titleKey": "catalog.models",
+      "audience": "learner",
+      "defaultVisible": true,
+      "count": 6,
+      "items": [
+        {
+          "id": "volume_molar",
+          "recordKind": "editable_case_volume",
+          "caseId": "molar",
+          "phaseId": "",
+          "title": "FDI 16 editable volume",
+          "searchText": "volume_molar editable_case_volume molar  FDI 16 editable volume 16 fdi16-volume-field.bin fdi16-volume-field-manifest.json bd36f64b53ba4ec9b0a3ed49f384b5aa438f26dc715dedaee597441e6200f6fa",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/molar"
+        },
+        {
+          "id": "volume_endo",
+          "recordKind": "editable_case_volume",
+          "caseId": "endo",
+          "phaseId": "",
+          "title": "FDI 36 editable volume",
+          "searchText": "volume_endo editable_case_volume endo  FDI 36 editable volume 36 fdi36-volume-field.bin fdi36-volume-field-manifest.json df9e2b7f36df99a2a6f55c6c5d8f6ba6f13af6a360b1c8a77a51c94d35cbbeac molar",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/endo"
+        },
+        {
+          "id": "volume_anterior",
+          "recordKind": "editable_case_volume",
+          "caseId": "anterior",
+          "phaseId": "",
+          "title": "FDI 11 editable volume",
+          "searchText": "volume_anterior editable_case_volume anterior  FDI 11 editable volume 11 fdi11-volume-field.bin fdi11-volume-field-manifest.json b89bbf81cb830d0af9a94928f1267649151ff623f0e1fb3b736c02f1a6f18ff3 incisor",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/anterior"
+        },
+        {
+          "id": "volume_crown",
+          "recordKind": "editable_case_volume",
+          "caseId": "crown",
+          "phaseId": "",
+          "title": "FDI 26 editable volume",
+          "searchText": "volume_crown editable_case_volume crown  FDI 26 editable volume 26 fdi26-volume-field.bin fdi26-volume-field-manifest.json bb01fdd61cc09b1b0526ef24c8facaef7c3a3d87af749d9acb05f78593c1ae92 molar",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/crown"
+        },
+        {
+          "id": "volume_surgery",
+          "recordKind": "editable_case_volume",
+          "caseId": "surgery",
+          "phaseId": "",
+          "title": "FDI 48 editable volume",
+          "searchText": "volume_surgery editable_case_volume surgery  FDI 48 editable volume 48 fdi48-volume-field.bin fdi48-volume-field-manifest.json dab79e955d388eb5c567f1a8327c567bf19f6b3dc8879a2c3e8396848283dbb8 molar",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/surgery"
+        },
+        {
+          "id": "volume_perio",
+          "recordKind": "editable_case_volume",
+          "caseId": "perio",
+          "phaseId": "",
+          "title": "FDI 46 editable volume",
+          "searchText": "volume_perio editable_case_volume perio  FDI 46 editable volume 46 fdi46-volume-field.bin fdi46-volume-field-manifest.json dab79e955d388eb5c567f1a8327c567bf19f6b3dc8879a2c3e8396848283dbb8 molar",
+          "sourceFile": "editable-case-volumes.json",
+          "sourcePointer": "/cases/perio"
+        }
+      ]
+    },
+    {
+      "id": "developer_parity",
+      "titleKey": "catalog.developer_parity",
+      "audience": "developer",
+      "defaultVisible": false,
+      "count": 68,
+      "items": [
+        {
+          "id": "parity_perio_anamnese_001",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "anamnese",
+          "title": "perio · anamnese probe 1",
+          "searchText": "parity_perio_anamnese_001 parity_probe perio anamnese perio · anamnese probe 1",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/0"
+        },
+        {
+          "id": "parity_perio_anamnese_002",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "anamnese",
+          "title": "perio · anamnese probe 2",
+          "searchText": "parity_perio_anamnese_002 parity_probe perio anamnese perio · anamnese probe 2 Seit wann blutet Ihr Zahnfleisch? Rauchen Sie?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/1"
+        },
+        {
+          "id": "parity_perio_anamnese_003",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "anamnese",
+          "title": "perio · anamnese probe 3",
+          "searchText": "parity_perio_anamnese_003 parity_probe perio anamnese perio · anamnese probe 3 Sind Vorerkrankungen, insbesondere ein Diabetes mellitus, bekannt und wie ist dieser eingestellt?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/2"
+        },
+        {
+          "id": "parity_perio_anamnese_004",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "anamnese",
+          "title": "perio · anamnese probe 4",
+          "searchText": "parity_perio_anamnese_004 parity_probe perio anamnese perio · anamnese probe 4",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/3"
+        },
+        {
+          "id": "parity_perio_aufklaerung_005",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "aufklaerung",
+          "title": "perio · aufklaerung probe 5",
+          "searchText": "parity_perio_aufklaerung_005 parity_probe perio aufklaerung perio · aufklaerung probe 5",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/4"
+        },
+        {
+          "id": "parity_perio_aufklaerung_006",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "aufklaerung",
+          "title": "perio · aufklaerung probe 6",
+          "searchText": "parity_perio_aufklaerung_006 parity_probe perio aufklaerung perio · aufklaerung probe 6 Das Zahnfleisch ist entzündet; wir müssen zunächst genauer untersuchen ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/5"
+        },
+        {
+          "id": "parity_perio_aufklaerung_007",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "aufklaerung",
+          "title": "perio · aufklaerung probe 7",
+          "searchText": "parity_perio_aufklaerung_007 parity_probe perio aufklaerung perio · aufklaerung probe 7 Für die Einstufung benötigen wir einen vollständigen Parodontalstatus und die Beurteilung des Knochenverlusts.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/6"
+        },
+        {
+          "id": "parity_perio_aufklaerung_008",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "aufklaerung",
+          "title": "perio · aufklaerung probe 8",
+          "searchText": "parity_perio_aufklaerung_008 parity_probe perio aufklaerung perio · aufklaerung probe 8",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/7"
+        },
+        {
+          "id": "parity_perio_brief_009",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "brief",
+          "title": "perio · brief probe 9",
+          "searchText": "parity_perio_brief_009 parity_probe perio brief perio · brief probe 9",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/8"
+        },
+        {
+          "id": "parity_perio_brief_010",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "brief",
+          "title": "perio · brief probe 10",
+          "searchText": "parity_perio_brief_010 parity_probe perio brief perio · brief probe 10 Anamnestisch besteht Zahnfleischbluten; Zahn 46 fühlt sich locker an ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/9"
+        },
+        {
+          "id": "parity_perio_brief_011",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "brief",
+          "title": "perio · brief probe 11",
+          "searchText": "parity_perio_brief_011 parity_probe perio brief perio · brief probe 11 Bei Verdacht auf Parodontitis ist die Stadien- und Gradzuordnung erst nach vollständiger Befunderhebung möglich ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/10"
+        },
+        {
+          "id": "parity_perio_brief_012",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "brief",
+          "title": "perio · brief probe 12",
+          "searchText": "parity_perio_brief_012 parity_probe perio brief perio · brief probe 12",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/11"
+        },
+        {
+          "id": "parity_perio_kollegen_013",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "kollegen",
+          "title": "perio · kollegen probe 13",
+          "searchText": "parity_perio_kollegen_013 parity_probe perio kollegen perio · kollegen probe 13",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/12"
+        },
+        {
+          "id": "parity_perio_kollegen_014",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "kollegen",
+          "title": "perio · kollegen probe 14",
+          "searchText": "parity_perio_kollegen_014 parity_probe perio kollegen perio · kollegen probe 14 Bei Zahn 46 besteht eine Lockerung; die Patientin oder der Patient berichtet ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/13"
+        },
+        {
+          "id": "parity_perio_kollegen_015",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "kollegen",
+          "title": "perio · kollegen probe 15",
+          "searchText": "parity_perio_kollegen_015 parity_probe perio kollegen perio · kollegen probe 15 Eine Stadien- und Gradzuordnung ist aufgrund des noch unvollständigen Parodontalstatus nicht möglich.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/14"
+        },
+        {
+          "id": "parity_perio_kollegen_016",
+          "recordKind": "parity_probe",
+          "caseId": "perio",
+          "phaseId": "kollegen",
+          "title": "perio · kollegen probe 16",
+          "searchText": "parity_perio_kollegen_016 parity_probe perio kollegen perio · kollegen probe 16",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/15"
+        },
+        {
+          "id": "parity_restoration_anamnese_017",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "anamnese",
+          "title": "restoration · anamnese probe 17",
+          "searchText": "parity_restoration_anamnese_017 parity_probe restoration anamnese restoration · anamnese probe 17",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/16"
+        },
+        {
+          "id": "parity_restoration_anamnese_018",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "anamnese",
+          "title": "restoration · anamnese probe 18",
+          "searchText": "parity_restoration_anamnese_018 parity_probe restoration anamnese restoration · anamnese probe 18 Tut es beim Kauen oder bei kalten Getränken weh?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/17"
+        },
+        {
+          "id": "parity_restoration_anamnese_019",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "anamnese",
+          "title": "restoration · anamnese probe 19",
+          "searchText": "parity_restoration_anamnese_019 parity_probe restoration anamnese restoration · anamnese probe 19 Hält der Schmerz nach Entfernen des Kältereizes an, und treten spontane oder nächtliche Beschwerden auf?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/18"
+        },
+        {
+          "id": "parity_restoration_anamnese_020",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "anamnese",
+          "title": "restoration · anamnese probe 20",
+          "searchText": "parity_restoration_anamnese_020 parity_probe restoration anamnese restoration · anamnese probe 20",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/19"
+        },
+        {
+          "id": "parity_restoration_aufklaerung_021",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "aufklaerung",
+          "title": "restoration · aufklaerung probe 21",
+          "searchText": "parity_restoration_aufklaerung_021 parity_probe restoration aufklaerung restoration · aufklaerung probe 21",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/20"
+        },
+        {
+          "id": "parity_restoration_aufklaerung_022",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "aufklaerung",
+          "title": "restoration · aufklaerung probe 22",
+          "searchText": "parity_restoration_aufklaerung_022 parity_probe restoration aufklaerung restoration · aufklaerung probe 22 An Ihrem Backenzahn sehen wir einen Defekt; wie groß er ist, müssen wir prüfen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/21"
+        },
+        {
+          "id": "parity_restoration_aufklaerung_023",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "aufklaerung",
+          "title": "restoration · aufklaerung probe 23",
+          "searchText": "parity_restoration_aufklaerung_023 parity_probe restoration aufklaerung restoration · aufklaerung probe 23 Je nach Defektausdehnung und Höckerstabilität kommen direkte oder indirekte restaurative Maßnahmen in Betracht.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/22"
+        },
+        {
+          "id": "parity_restoration_aufklaerung_024",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "aufklaerung",
+          "title": "restoration · aufklaerung probe 24",
+          "searchText": "parity_restoration_aufklaerung_024 parity_probe restoration aufklaerung restoration · aufklaerung probe 24",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/23"
+        },
+        {
+          "id": "parity_restoration_brief_025",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "brief",
+          "title": "restoration · brief probe 25",
+          "searchText": "parity_restoration_brief_025 parity_probe restoration brief restoration · brief probe 25",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/24"
+        },
+        {
+          "id": "parity_restoration_brief_026",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "brief",
+          "title": "restoration · brief probe 26",
+          "searchText": "parity_restoration_brief_026 parity_probe restoration brief restoration · brief probe 26 An Zahn 16 zeigen sich eine Kavitation und eine kurze positive Kältereaktion.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/25"
+        },
+        {
+          "id": "parity_restoration_brief_027",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "brief",
+          "title": "restoration · brief probe 27",
+          "searchText": "parity_restoration_brief_027 parity_probe restoration brief restoration · brief probe 27 Die Pulpadiagnose und die restaurative Indikation bleiben bis zur vollständigen Defektbeurteilung offen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/26"
+        },
+        {
+          "id": "parity_restoration_brief_028",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "brief",
+          "title": "restoration · brief probe 28",
+          "searchText": "parity_restoration_brief_028 parity_probe restoration brief restoration · brief probe 28",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/27"
+        },
+        {
+          "id": "parity_restoration_kollegen_029",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "kollegen",
+          "title": "restoration · kollegen probe 29",
+          "searchText": "parity_restoration_kollegen_029 parity_probe restoration kollegen restoration · kollegen probe 29",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/28"
+        },
+        {
+          "id": "parity_restoration_kollegen_030",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "kollegen",
+          "title": "restoration · kollegen probe 30",
+          "searchText": "parity_restoration_kollegen_030 parity_probe restoration kollegen restoration · kollegen probe 30 Bei Zahn 16 besteht eine kariöse Läsion mit kurzer Kälteempfindlichkeit.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/29"
+        },
+        {
+          "id": "parity_restoration_kollegen_031",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "kollegen",
+          "title": "restoration · kollegen probe 31",
+          "searchText": "parity_restoration_kollegen_031 parity_probe restoration kollegen restoration · kollegen probe 31 Aus der isolierten kurzen Kälteantwort lässt sich der Pulpagewebezustand nicht sicher diagnostizieren.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/30"
+        },
+        {
+          "id": "parity_restoration_kollegen_032",
+          "recordKind": "parity_probe",
+          "caseId": "restoration",
+          "phaseId": "kollegen",
+          "title": "restoration · kollegen probe 32",
+          "searchText": "parity_restoration_kollegen_032 parity_probe restoration kollegen restoration · kollegen probe 32",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/31"
+        },
+        {
+          "id": "parity_endo_anamnese_033",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "anamnese",
+          "title": "endo · anamnese probe 33",
+          "searchText": "parity_endo_anamnese_033 parity_probe endo anamnese endo · anamnese probe 33",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/32"
+        },
+        {
+          "id": "parity_endo_anamnese_034",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "anamnese",
+          "title": "endo · anamnese probe 34",
+          "searchText": "parity_endo_anamnese_034 parity_probe endo anamnese endo · anamnese probe 34 Könnten Sie mir bitte sagen, seit wann ...?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/33"
+        },
+        {
+          "id": "parity_endo_anamnese_035",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "anamnese",
+          "title": "endo · anamnese probe 35",
+          "searchText": "parity_endo_anamnese_035 parity_probe endo anamnese endo · anamnese probe 35 Treten die Beschwerden spontan oder ausschließlich reizabhängig auf?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/34"
+        },
+        {
+          "id": "parity_endo_anamnese_036",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "anamnese",
+          "title": "endo · anamnese probe 36",
+          "searchText": "parity_endo_anamnese_036 parity_probe endo anamnese endo · anamnese probe 36",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/35"
+        },
+        {
+          "id": "parity_endo_aufklaerung_037",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "aufklaerung",
+          "title": "endo · aufklaerung probe 37",
+          "searchText": "parity_endo_aufklaerung_037 parity_probe endo aufklaerung endo · aufklaerung probe 37",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/36"
+        },
+        {
+          "id": "parity_endo_aufklaerung_038",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "aufklaerung",
+          "title": "endo · aufklaerung probe 38",
+          "searchText": "parity_endo_aufklaerung_038 parity_probe endo aufklaerung endo · aufklaerung probe 38 Die bisherigen Untersuchungen deuten darauf hin, dass ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/37"
+        },
+        {
+          "id": "parity_endo_aufklaerung_039",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "aufklaerung",
+          "title": "endo · aufklaerung probe 39",
+          "searchText": "parity_endo_aufklaerung_039 parity_probe endo aufklaerung endo · aufklaerung probe 39 Nach Abklärung der Erhaltungswürdigkeit kommen folgende Alternativen in Betracht ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/38"
+        },
+        {
+          "id": "parity_endo_aufklaerung_040",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "aufklaerung",
+          "title": "endo · aufklaerung probe 40",
+          "searchText": "parity_endo_aufklaerung_040 parity_probe endo aufklaerung endo · aufklaerung probe 40",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/39"
+        },
+        {
+          "id": "parity_endo_brief_041",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "brief",
+          "title": "endo · brief probe 41",
+          "searchText": "parity_endo_brief_041 parity_probe endo brief endo · brief probe 41",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/40"
+        },
+        {
+          "id": "parity_endo_brief_042",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "brief",
+          "title": "endo · brief probe 42",
+          "searchText": "parity_endo_brief_042 parity_probe endo brief endo · brief probe 42 Bei Zahn 36 bestehen ... Die Untersuchung zeigte ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/41"
+        },
+        {
+          "id": "parity_endo_brief_043",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "brief",
+          "title": "endo · brief probe 43",
+          "searchText": "parity_endo_brief_043 parity_probe endo brief endo · brief probe 43 Anamnestisch ...; klinisch ...; radiologisch ...; als Arbeitsdiagnose ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/42"
+        },
+        {
+          "id": "parity_endo_brief_044",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "brief",
+          "title": "endo · brief probe 44",
+          "searchText": "parity_endo_brief_044 parity_probe endo brief endo · brief probe 44",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/43"
+        },
+        {
+          "id": "parity_endo_kollegen_045",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "kollegen",
+          "title": "endo · kollegen probe 45",
+          "searchText": "parity_endo_kollegen_045 parity_probe endo kollegen endo · kollegen probe 45",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/44"
+        },
+        {
+          "id": "parity_endo_kollegen_046",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "kollegen",
+          "title": "endo · kollegen probe 46",
+          "searchText": "parity_endo_kollegen_046 parity_probe endo kollegen endo · kollegen probe 46 Es handelt sich um einen Fall an Zahn ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/45"
+        },
+        {
+          "id": "parity_endo_kollegen_047",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "kollegen",
+          "title": "endo · kollegen probe 47",
+          "searchText": "parity_endo_kollegen_047 parity_probe endo kollegen endo · kollegen probe 47 In Zusammenschau von Anamnese, Sensibilitätstest und radiologischem Befund besteht der Verdacht ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/46"
+        },
+        {
+          "id": "parity_endo_kollegen_048",
+          "recordKind": "parity_probe",
+          "caseId": "endo",
+          "phaseId": "kollegen",
+          "title": "endo · kollegen probe 48",
+          "searchText": "parity_endo_kollegen_048 parity_probe endo kollegen endo · kollegen probe 48",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/47"
+        },
+        {
+          "id": "parity_surgery_anamnese_049",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 49",
+          "searchText": "parity_surgery_anamnese_049 parity_probe surgery anamnese surgery · anamnese probe 49",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/48"
+        },
+        {
+          "id": "parity_surgery_anamnese_050",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 50",
+          "searchText": "parity_surgery_anamnese_050 parity_probe surgery anamnese surgery · anamnese probe 50 Können Sie den Mund normal öffnen?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/49"
+        },
+        {
+          "id": "parity_surgery_anamnese_051",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 51",
+          "searchText": "parity_surgery_anamnese_051 parity_probe surgery anamnese surgery · anamnese probe 51 Bestehen Dysphagie, Atembeschwerden oder eine progrediente Schwellung?",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/50"
+        },
+        {
+          "id": "parity_surgery_anamnese_052",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 52",
+          "searchText": "parity_surgery_anamnese_052 parity_probe surgery anamnese surgery · anamnese probe 52",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/51"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_053",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 53",
+          "searchText": "parity_surgery_aufklaerung_053 parity_probe surgery aufklaerung surgery · aufklaerung probe 53",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/52"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_054",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 54",
+          "searchText": "parity_surgery_aufklaerung_054 parity_probe surgery aufklaerung surgery · aufklaerung probe 54 Das Zahnfleisch um Ihren hinteren Zahn ist entzündet ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/53"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_055",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 55",
+          "searchText": "parity_surgery_aufklaerung_055 parity_probe surgery aufklaerung surgery · aufklaerung probe 55 Bei Ausbreitungszeichen wäre eine umgehende notfallmäßige Abklärung erforderlich.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/54"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_056",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 56",
+          "searchText": "parity_surgery_aufklaerung_056 parity_probe surgery aufklaerung surgery · aufklaerung probe 56",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/55"
+        },
+        {
+          "id": "parity_surgery_brief_057",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "brief",
+          "title": "surgery · brief probe 57",
+          "searchText": "parity_surgery_brief_057 parity_probe surgery brief surgery · brief probe 57",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/56"
+        },
+        {
+          "id": "parity_surgery_brief_058",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "brief",
+          "title": "surgery · brief probe 58",
+          "searchText": "parity_surgery_brief_058 parity_probe surgery brief surgery · brief probe 58 Bei Zahn 48 zeigt sich ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/57"
+        },
+        {
+          "id": "parity_surgery_brief_059",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "brief",
+          "title": "surgery · brief probe 59",
+          "searchText": "parity_surgery_brief_059 parity_probe surgery brief surgery · brief probe 59 Aktuell keine klinischen Hinweise auf systemische Ausbreitung im beschriebenen Übungsfall ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/58"
+        },
+        {
+          "id": "parity_surgery_brief_060",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "brief",
+          "title": "surgery · brief probe 60",
+          "searchText": "parity_surgery_brief_060 parity_probe surgery brief surgery · brief probe 60",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/59"
+        },
+        {
+          "id": "parity_surgery_kollegen_061",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "kollegen",
+          "title": "surgery · kollegen probe 61",
+          "searchText": "parity_surgery_kollegen_061 parity_probe surgery kollegen surgery · kollegen probe 61",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/60"
+        },
+        {
+          "id": "parity_surgery_kollegen_062",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "kollegen",
+          "title": "surgery · kollegen probe 62",
+          "searchText": "parity_surgery_kollegen_062 parity_probe surgery kollegen surgery · kollegen probe 62 Am Zahn 48 zeigt sich eine lokale Entzündung ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/61"
+        },
+        {
+          "id": "parity_surgery_kollegen_063",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "kollegen",
+          "title": "surgery · kollegen probe 63",
+          "searchText": "parity_surgery_kollegen_063 parity_probe surgery kollegen surgery · kollegen probe 63 Im gegenwärtigen Fall bestehen keine berichteten systemischen Ausbreitungszeichen; bei Änderung sofortige Reevaluation ...",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/62"
+        },
+        {
+          "id": "parity_surgery_kollegen_064",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "kollegen",
+          "title": "surgery · kollegen probe 64",
+          "searchText": "parity_surgery_kollegen_064 parity_probe surgery kollegen surgery · kollegen probe 64",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/63"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_065",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 65",
+          "searchText": "parity_surgery_aufklaerung_065 parity_probe surgery aufklaerung surgery · aufklaerung probe 65 Antibiotika sind immer notwendig. Pauschale Antibiotikagabe ohne fallbezogene Indikation ist nicht gerechtfertigt. Bitte fachlich prüfen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/64"
+        },
+        {
+          "id": "parity_surgery_aufklaerung_066",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "aufklaerung",
+          "title": "surgery · aufklaerung probe 66",
+          "searchText": "parity_surgery_aufklaerung_066 parity_probe surgery aufklaerung surgery · aufklaerung probe 66 Antibiotika sind nicht immer notwendig.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/65"
+        },
+        {
+          "id": "parity_surgery_anamnese_067",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 67",
+          "searchText": "parity_surgery_anamnese_067 parity_probe surgery anamnese surgery · anamnese probe 67 Atemnot: zu Hause bleiben. Atem- oder relevante Schluckprobleme dürfen nicht mit Abwarten bagatellisiert werden. Bitte dringend fachlich prüfen.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/66"
+        },
+        {
+          "id": "parity_surgery_anamnese_068",
+          "recordKind": "parity_probe",
+          "caseId": "surgery",
+          "phaseId": "anamnese",
+          "title": "surgery · anamnese probe 68",
+          "searchText": "parity_surgery_anamnese_068 parity_probe surgery anamnese surgery · anamnese probe 68 Bei Atemnot keinesfalls abwarten.",
+          "sourceFile": "fsp-kp.json",
+          "sourcePointer": "/parityProbes/67"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "The index is staged data; the Unreal runtime browser is not connected yet.",
+    "Only the 19 source instrument records are listed; no separate materials inventory exists in the pinned source.",
+    "All records are fictional training content and do not establish clinical competency."
+  ]
+}

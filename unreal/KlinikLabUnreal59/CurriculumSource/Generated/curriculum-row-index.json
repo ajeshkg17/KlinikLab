@@ -1,0 +1,1941 @@
+{
+  "formatVersion": 1,
+  "kind": "KLINIKLAB_CURRICULUM_ROW_INDEX",
+  "sourceSnapshotGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "rowSchema": [
+    "row_name",
+    "record_kind",
+    "case_id",
+    "phase_id",
+    "title",
+    "source_file",
+    "source_pointer",
+    "payload_json"
+  ],
+  "records": [
+    {
+      "row_name": "case_molar",
+      "record_kind": "case",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Tiefe Karies am Zahn 16",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/0"
+    },
+    {
+      "row_name": "case_endo",
+      "record_kind": "case",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Pulpaschmerz am Zahn 36",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/1"
+    },
+    {
+      "row_name": "case_anterior",
+      "record_kind": "case",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Frontzahntrauma am Zahn 11",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/2"
+    },
+    {
+      "row_name": "case_crown",
+      "record_kind": "case",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Kronen-/Teilkrone am Zahn 26",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/3"
+    },
+    {
+      "row_name": "case_surgery",
+      "record_kind": "case",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Perikoronitis am Zahn 48",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/4"
+    },
+    {
+      "row_name": "case_perio",
+      "record_kind": "case",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Parodontalbefund am Zahn 46",
+      "source_file": "app-content.json",
+      "source_pointer": "/cases/5"
+    },
+    {
+      "row_name": "station_interview",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Anamnesegespräch",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/0"
+    },
+    {
+      "row_name": "station_letter",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Arztbrief verfassen",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/1"
+    },
+    {
+      "row_name": "station_handover",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Arzt–Arzt-Gespräch",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/2"
+    },
+    {
+      "row_name": "station_written",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Schriftlicher Behandlungsplan",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/3"
+    },
+    {
+      "row_name": "station_practical",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Praktische Übungen",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/4"
+    },
+    {
+      "row_name": "station_viva",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Mündliche KP-Fragen",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/5"
+    },
+    {
+      "row_name": "station_clinic",
+      "record_kind": "station",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Deutscher Praxisalltag",
+      "source_file": "app-content.json",
+      "source_pointer": "/stations/6"
+    },
+    {
+      "row_name": "tool_mirror",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Mouth mirror",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/0"
+    },
+    {
+      "row_name": "tool_probe",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Explorer / probe",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/1"
+    },
+    {
+      "row_name": "tool_suction",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Suction",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/2"
+    },
+    {
+      "row_name": "tool_excavator",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Excavator",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/3"
+    },
+    {
+      "row_name": "tool_composite",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Composite",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/4"
+    },
+    {
+      "row_name": "tool_rubberdam",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Rubber dam",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/5"
+    },
+    {
+      "row_name": "tool_bur",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Rotary cutting instrument",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/6"
+    },
+    {
+      "row_name": "tool_matrix",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Matrix + wedge",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/7"
+    },
+    {
+      "row_name": "tool_endo",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Endodontic file",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/8"
+    },
+    {
+      "row_name": "tool_apex",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Apex locator",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/9"
+    },
+    {
+      "row_name": "tool_irrigation",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Irrigation needle",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/10"
+    },
+    {
+      "row_name": "tool_putty",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Putty PVS",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/11"
+    },
+    {
+      "row_name": "tool_lightbody",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Wash PVS",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/12"
+    },
+    {
+      "row_name": "tool_heavybody",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Tray PVS",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/13"
+    },
+    {
+      "row_name": "tool_mediumbody",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Monophase PVS",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/14"
+    },
+    {
+      "row_name": "tool_curette",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Periodontal instruments",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/15"
+    },
+    {
+      "row_name": "tool_forceps",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Extraction forceps",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/16"
+    },
+    {
+      "row_name": "tool_elevator",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Dental elevator",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/17"
+    },
+    {
+      "row_name": "tool_imptray",
+      "record_kind": "tool",
+      "case_id": "",
+      "phase_id": "",
+      "title": "Impression tray",
+      "source_file": "app-content.json",
+      "source_pointer": "/tools/18"
+    },
+    {
+      "row_name": "practical_molar_01",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/0"
+    },
+    {
+      "row_name": "practical_molar_02",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/1"
+    },
+    {
+      "row_name": "practical_molar_03",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Instrument für die Präparationssimulation wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/2"
+    },
+    {
+      "row_name": "practical_molar_04",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Konservative Präparation simulieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/3"
+    },
+    {
+      "row_name": "practical_molar_05",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Approximale Versorgung planen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/4"
+    },
+    {
+      "row_name": "practical_molar_06",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Adhäsivtechnik",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/5"
+    },
+    {
+      "row_name": "practical_molar_07",
+      "record_kind": "practical_task",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Abschlusskontrolle",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/0/6"
+    },
+    {
+      "row_name": "practical_endo_01",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/0"
+    },
+    {
+      "row_name": "practical_endo_02",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/1"
+    },
+    {
+      "row_name": "practical_endo_03",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Instrument für die Präparationssimulation wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/2"
+    },
+    {
+      "row_name": "practical_endo_04",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Konservative Präparation simulieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/3"
+    },
+    {
+      "row_name": "practical_endo_05",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Arbeitslänge bestimmen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/4"
+    },
+    {
+      "row_name": "practical_endo_06",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Spülung sicher durchführen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/5"
+    },
+    {
+      "row_name": "practical_endo_07",
+      "record_kind": "practical_task",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Wurzelkanalfüllung und koronaler Verschluss",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/1/6"
+    },
+    {
+      "row_name": "practical_anterior_01",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/0"
+    },
+    {
+      "row_name": "practical_anterior_02",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/1"
+    },
+    {
+      "row_name": "practical_anterior_03",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Instrument für die Präparationssimulation wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/2"
+    },
+    {
+      "row_name": "practical_anterior_04",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Konservative Präparation simulieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/3"
+    },
+    {
+      "row_name": "practical_anterior_05",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Trauma und Pulpabefund",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/4"
+    },
+    {
+      "row_name": "practical_anterior_06",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Adhäsive Rekonstruktion",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/5"
+    },
+    {
+      "row_name": "practical_anterior_07",
+      "record_kind": "practical_task",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Nachkontrolle",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/2/6"
+    },
+    {
+      "row_name": "practical_crown_01",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/0"
+    },
+    {
+      "row_name": "practical_crown_02",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/1"
+    },
+    {
+      "row_name": "practical_crown_03",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Instrument für die Präparationssimulation wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/2"
+    },
+    {
+      "row_name": "practical_crown_04",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Konservative Präparation simulieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/3"
+    },
+    {
+      "row_name": "practical_crown_05",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Abformung / digitaler Scan",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/4"
+    },
+    {
+      "row_name": "practical_crown_06",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Abforminstrument identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/5"
+    },
+    {
+      "row_name": "practical_crown_07",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Abformmaterial sachgerecht wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/6"
+    },
+    {
+      "row_name": "practical_crown_08",
+      "record_kind": "practical_task",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Temporäre Versorgung",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/3/7"
+    },
+    {
+      "row_name": "practical_surgery_01",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/0"
+    },
+    {
+      "row_name": "practical_surgery_02",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/1"
+    },
+    {
+      "row_name": "practical_surgery_03",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Instrumente für die chirurgische Versorgung",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/2"
+    },
+    {
+      "row_name": "practical_surgery_04",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Risikoanalyse vor der Extraktion",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/3"
+    },
+    {
+      "row_name": "practical_surgery_05",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Infektionsmanagement",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/4"
+    },
+    {
+      "row_name": "practical_surgery_06",
+      "record_kind": "practical_task",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Postoperative Betreuung",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/4/5"
+    },
+    {
+      "row_name": "practical_perio_01",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Arbeitszahn identifizieren",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/0"
+    },
+    {
+      "row_name": "practical_perio_02",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Isolierung und Sicherheitscheck",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/1"
+    },
+    {
+      "row_name": "practical_perio_03",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Parodontales Instrument wählen",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/2"
+    },
+    {
+      "row_name": "practical_perio_04",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Parodontalstatus erheben",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/3"
+    },
+    {
+      "row_name": "practical_perio_05",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Instrumentierung und Sicherheit",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/4"
+    },
+    {
+      "row_name": "practical_perio_06",
+      "record_kind": "practical_task",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Reevaluation",
+      "source_file": "app-content.json",
+      "source_pointer": "/practical/5/5"
+    },
+    {
+      "row_name": "quiz_interview_01",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Eröffnen und Leitsymptom erfragen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/0"
+    },
+    {
+      "row_name": "quiz_interview_02",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Beschwerden zeitlich einordnen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/1"
+    },
+    {
+      "row_name": "quiz_interview_03",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Schmerzqualität und Dauer",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/2"
+    },
+    {
+      "row_name": "quiz_interview_04",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Warnzeichen erfragen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/3"
+    },
+    {
+      "row_name": "quiz_interview_05",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Medikamente / Allergien",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/4"
+    },
+    {
+      "row_name": "quiz_interview_06",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Untersuchung ankündigen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/5"
+    },
+    {
+      "row_name": "quiz_interview_07",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "interview",
+      "title": "Befund und Alternativen erklären",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/interview/6"
+    },
+    {
+      "row_name": "quiz_handover_01",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "handover",
+      "title": "Struktur der Übergabe",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/handover/0"
+    },
+    {
+      "row_name": "quiz_handover_02",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "handover",
+      "title": "Fachsprache korrekt benutzen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/handover/1"
+    },
+    {
+      "row_name": "quiz_handover_03",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "handover",
+      "title": "Fachwort patientengerecht erklären",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/handover/2"
+    },
+    {
+      "row_name": "quiz_handover_04",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "handover",
+      "title": "Klinische Unsicherheit",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/handover/3"
+    },
+    {
+      "row_name": "quiz_handover_05",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "handover",
+      "title": "Abschluss des Arzt–Arzt-Gesprächs",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/handover/4"
+    },
+    {
+      "row_name": "quiz_viva_01",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Endodontie",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/0"
+    },
+    {
+      "row_name": "quiz_viva_02",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Zahnerhaltung",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/1"
+    },
+    {
+      "row_name": "quiz_viva_03",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Prothetik",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/2"
+    },
+    {
+      "row_name": "quiz_viva_04",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Parodontologie",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/3"
+    },
+    {
+      "row_name": "quiz_viva_05",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Oralchirurgie",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/4"
+    },
+    {
+      "row_name": "quiz_viva_06",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Kieferorthopädie",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/5"
+    },
+    {
+      "row_name": "quiz_viva_07",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Röntgendiagnostik",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/6"
+    },
+    {
+      "row_name": "quiz_viva_08",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "viva",
+      "title": "Hygiene",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/viva/7"
+    },
+    {
+      "row_name": "quiz_clinic_01",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "clinic",
+      "title": "Termin und Tagesplan lesen",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/clinic/0"
+    },
+    {
+      "row_name": "quiz_clinic_02",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "clinic",
+      "title": "Patientenansprache",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/clinic/1"
+    },
+    {
+      "row_name": "quiz_clinic_03",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "clinic",
+      "title": "Teamkommunikation",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/clinic/2"
+    },
+    {
+      "row_name": "quiz_clinic_04",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "clinic",
+      "title": "Dokumentation",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/clinic/3"
+    },
+    {
+      "row_name": "quiz_clinic_05",
+      "record_kind": "quiz",
+      "case_id": "",
+      "phase_id": "clinic",
+      "title": "Patientenabschluss",
+      "source_file": "app-content.json",
+      "source_pointer": "/quiz/clinic/4"
+    },
+    {
+      "row_name": "pathway_molar_01",
+      "record_kind": "pathway_step",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Indikation, Vitalität und Restaurierbarkeit abschließend sichern",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/molar/procedure/0"
+    },
+    {
+      "row_name": "pathway_molar_02",
+      "record_kind": "pathway_step",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Aufklärung, Einwilligung und geeignete Isolation planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/molar/procedure/1"
+    },
+    {
+      "row_name": "pathway_molar_03",
+      "record_kind": "pathway_step",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Defektbezogen und substanzschonend präparieren; Pulpanähe beachten",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/molar/procedure/2"
+    },
+    {
+      "row_name": "pathway_molar_04",
+      "record_kind": "pathway_step",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "Restauration, Kontakt, Okklusion und Nachkontrolle prüfen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/molar/procedure/3"
+    },
+    {
+      "row_name": "pathway_endo_01",
+      "record_kind": "pathway_step",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Diagnose, Restaurierbarkeit, Bildgebung und Einwilligung prüfen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/endo/procedure/0"
+    },
+    {
+      "row_name": "pathway_endo_02",
+      "record_kind": "pathway_step",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Isolieren und konservativen Zugang anatomiegerecht planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/endo/procedure/1"
+    },
+    {
+      "row_name": "pathway_endo_03",
+      "record_kind": "pathway_step",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Kanäle auffinden, Arbeitslänge und Aufbereitung kontrolliert bestimmen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/endo/procedure/2"
+    },
+    {
+      "row_name": "pathway_endo_04",
+      "record_kind": "pathway_step",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "Desinfektion, Füllung, koronalen Verschluss und Nachsorge planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/endo/procedure/3"
+    },
+    {
+      "row_name": "pathway_anterior_01",
+      "record_kind": "pathway_step",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Trauma- und Begleitverletzungen einschließlich Weichteile abklären",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/anterior/procedure/0"
+    },
+    {
+      "row_name": "pathway_anterior_02",
+      "record_kind": "pathway_step",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Fraktur, Pulpa, Mobilität, Sensibilität und indizierte Bildgebung beurteilen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/anterior/procedure/1"
+    },
+    {
+      "row_name": "pathway_anterior_03",
+      "record_kind": "pathway_step",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Patientenpräferenz, Fragmentoptionen und Einwilligung besprechen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/anterior/procedure/2"
+    },
+    {
+      "row_name": "pathway_anterior_04",
+      "record_kind": "pathway_step",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "Konservierend versorgen und strukturierte Verlaufskontrollen planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/anterior/procedure/3"
+    },
+    {
+      "row_name": "pathway_crown_01",
+      "record_kind": "pathway_step",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Indikation, Prognose, Präparationsart und Zustimmung festlegen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/crown/procedure/0"
+    },
+    {
+      "row_name": "pathway_crown_02",
+      "record_kind": "pathway_step",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Substanzschonend präparieren und Präparationsgrenzen beurteilen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/crown/procedure/1"
+    },
+    {
+      "row_name": "pathway_crown_03",
+      "record_kind": "pathway_step",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Trockenlegung/Retraktion und geeignete Abformung bzw. Scan durchführen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/crown/procedure/2"
+    },
+    {
+      "row_name": "pathway_crown_04",
+      "record_kind": "pathway_step",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "Provisorium, Okklusion, Nachkontrolle und spätere Eingliederung planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/crown/procedure/3"
+    },
+    {
+      "row_name": "pathway_surgery_01",
+      "record_kind": "pathway_step",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Infektionsausbreitung, Atemweg, Trismus und Risikofaktoren prüfen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/surgery/procedure/0"
+    },
+    {
+      "row_name": "pathway_surgery_02",
+      "record_kind": "pathway_step",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Befund, Lagebeziehung und chirurgische Indikation beurteilen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/surgery/procedure/1"
+    },
+    {
+      "row_name": "pathway_surgery_03",
+      "record_kind": "pathway_step",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Lokale Akutmaßnahmen, Aufklärung und Medikamentenrisiken prüfen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/surgery/procedure/2"
+    },
+    {
+      "row_name": "pathway_surgery_04",
+      "record_kind": "pathway_step",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "Verlauf, Kontrolltermin und ggf. indikationsgerechte Extraktionsplanung dokumentieren",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/surgery/procedure/3"
+    },
+    {
+      "row_name": "pathway_perio_01",
+      "record_kind": "pathway_step",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Umfassenden PA-Status und Risikoprofil aufnehmen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/perio/procedure/0"
+    },
+    {
+      "row_name": "pathway_perio_02",
+      "record_kind": "pathway_step",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Mundhygieneinstruktion und Risikofaktormodifikation besprechen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/perio/procedure/1"
+    },
+    {
+      "row_name": "pathway_perio_03",
+      "record_kind": "pathway_step",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Indikationsgerechte subgingivale Instrumentierung planen und durchführen lassen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/perio/procedure/2"
+    },
+    {
+      "row_name": "pathway_perio_04",
+      "record_kind": "pathway_step",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "Reevaluation, Erhaltungstherapie und dokumentierte Nachsorge planen",
+      "source_file": "clinical-pathways.json",
+      "source_pointer": "/cases/perio/procedure/3"
+    },
+    {
+      "row_name": "fsp_perio_anamnese",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "perio",
+      "phase_id": "anamnese",
+      "title": "Zahn 46 · Zahnfleischbluten und Lockerung · anamnese",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/perio/tasks/anamnese"
+    },
+    {
+      "row_name": "fsp_perio_aufklaerung",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "perio",
+      "phase_id": "aufklaerung",
+      "title": "Zahn 46 · Zahnfleischbluten und Lockerung · aufklaerung",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/perio/tasks/aufklaerung"
+    },
+    {
+      "row_name": "fsp_perio_brief",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "perio",
+      "phase_id": "brief",
+      "title": "Zahn 46 · Zahnfleischbluten und Lockerung · brief",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/perio/tasks/brief"
+    },
+    {
+      "row_name": "fsp_perio_kollegen",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "perio",
+      "phase_id": "kollegen",
+      "title": "Zahn 46 · Zahnfleischbluten und Lockerung · kollegen",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/perio/tasks/kollegen"
+    },
+    {
+      "row_name": "fsp_restoration_anamnese",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "restoration",
+      "phase_id": "anamnese",
+      "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · anamnese",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/restoration/tasks/anamnese"
+    },
+    {
+      "row_name": "fsp_restoration_aufklaerung",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "restoration",
+      "phase_id": "aufklaerung",
+      "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · aufklaerung",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/restoration/tasks/aufklaerung"
+    },
+    {
+      "row_name": "fsp_restoration_brief",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "restoration",
+      "phase_id": "brief",
+      "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · brief",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/restoration/tasks/brief"
+    },
+    {
+      "row_name": "fsp_restoration_kollegen",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "restoration",
+      "phase_id": "kollegen",
+      "title": "Zahn 16 · kariöser Defekt und kurze Kältereaktion · kollegen",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/restoration/tasks/kollegen"
+    },
+    {
+      "row_name": "fsp_endo_anamnese",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "endo",
+      "phase_id": "anamnese",
+      "title": "Zahn 36 · anhaltende Kälteschmerzen · anamnese",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/endo/tasks/anamnese"
+    },
+    {
+      "row_name": "fsp_endo_aufklaerung",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "endo",
+      "phase_id": "aufklaerung",
+      "title": "Zahn 36 · anhaltende Kälteschmerzen · aufklaerung",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/endo/tasks/aufklaerung"
+    },
+    {
+      "row_name": "fsp_endo_brief",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "endo",
+      "phase_id": "brief",
+      "title": "Zahn 36 · anhaltende Kälteschmerzen · brief",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/endo/tasks/brief"
+    },
+    {
+      "row_name": "fsp_endo_kollegen",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "endo",
+      "phase_id": "kollegen",
+      "title": "Zahn 36 · anhaltende Kälteschmerzen · kollegen",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/endo/tasks/kollegen"
+    },
+    {
+      "row_name": "fsp_surgery_anamnese",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "Zahn 48 · lokale Perikoronitis · anamnese",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/surgery/tasks/anamnese"
+    },
+    {
+      "row_name": "fsp_surgery_aufklaerung",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "Zahn 48 · lokale Perikoronitis · aufklaerung",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/surgery/tasks/aufklaerung"
+    },
+    {
+      "row_name": "fsp_surgery_brief",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "surgery",
+      "phase_id": "brief",
+      "title": "Zahn 48 · lokale Perikoronitis · brief",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/surgery/tasks/brief"
+    },
+    {
+      "row_name": "fsp_surgery_kollegen",
+      "record_kind": "fsp_kp_phase",
+      "case_id": "surgery",
+      "phase_id": "kollegen",
+      "title": "Zahn 48 · lokale Perikoronitis · kollegen",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/cases/surgery/tasks/kollegen"
+    },
+    {
+      "row_name": "parity_perio_anamnese_001",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "anamnese",
+      "title": "perio · anamnese probe 1",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/0"
+    },
+    {
+      "row_name": "parity_perio_anamnese_002",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "anamnese",
+      "title": "perio · anamnese probe 2",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/1"
+    },
+    {
+      "row_name": "parity_perio_anamnese_003",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "anamnese",
+      "title": "perio · anamnese probe 3",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/2"
+    },
+    {
+      "row_name": "parity_perio_anamnese_004",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "anamnese",
+      "title": "perio · anamnese probe 4",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/3"
+    },
+    {
+      "row_name": "parity_perio_aufklaerung_005",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "aufklaerung",
+      "title": "perio · aufklaerung probe 5",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/4"
+    },
+    {
+      "row_name": "parity_perio_aufklaerung_006",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "aufklaerung",
+      "title": "perio · aufklaerung probe 6",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/5"
+    },
+    {
+      "row_name": "parity_perio_aufklaerung_007",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "aufklaerung",
+      "title": "perio · aufklaerung probe 7",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/6"
+    },
+    {
+      "row_name": "parity_perio_aufklaerung_008",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "aufklaerung",
+      "title": "perio · aufklaerung probe 8",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/7"
+    },
+    {
+      "row_name": "parity_perio_brief_009",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "brief",
+      "title": "perio · brief probe 9",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/8"
+    },
+    {
+      "row_name": "parity_perio_brief_010",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "brief",
+      "title": "perio · brief probe 10",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/9"
+    },
+    {
+      "row_name": "parity_perio_brief_011",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "brief",
+      "title": "perio · brief probe 11",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/10"
+    },
+    {
+      "row_name": "parity_perio_brief_012",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "brief",
+      "title": "perio · brief probe 12",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/11"
+    },
+    {
+      "row_name": "parity_perio_kollegen_013",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "kollegen",
+      "title": "perio · kollegen probe 13",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/12"
+    },
+    {
+      "row_name": "parity_perio_kollegen_014",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "kollegen",
+      "title": "perio · kollegen probe 14",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/13"
+    },
+    {
+      "row_name": "parity_perio_kollegen_015",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "kollegen",
+      "title": "perio · kollegen probe 15",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/14"
+    },
+    {
+      "row_name": "parity_perio_kollegen_016",
+      "record_kind": "parity_probe",
+      "case_id": "perio",
+      "phase_id": "kollegen",
+      "title": "perio · kollegen probe 16",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/15"
+    },
+    {
+      "row_name": "parity_restoration_anamnese_017",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "anamnese",
+      "title": "restoration · anamnese probe 17",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/16"
+    },
+    {
+      "row_name": "parity_restoration_anamnese_018",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "anamnese",
+      "title": "restoration · anamnese probe 18",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/17"
+    },
+    {
+      "row_name": "parity_restoration_anamnese_019",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "anamnese",
+      "title": "restoration · anamnese probe 19",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/18"
+    },
+    {
+      "row_name": "parity_restoration_anamnese_020",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "anamnese",
+      "title": "restoration · anamnese probe 20",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/19"
+    },
+    {
+      "row_name": "parity_restoration_aufklaerung_021",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "aufklaerung",
+      "title": "restoration · aufklaerung probe 21",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/20"
+    },
+    {
+      "row_name": "parity_restoration_aufklaerung_022",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "aufklaerung",
+      "title": "restoration · aufklaerung probe 22",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/21"
+    },
+    {
+      "row_name": "parity_restoration_aufklaerung_023",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "aufklaerung",
+      "title": "restoration · aufklaerung probe 23",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/22"
+    },
+    {
+      "row_name": "parity_restoration_aufklaerung_024",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "aufklaerung",
+      "title": "restoration · aufklaerung probe 24",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/23"
+    },
+    {
+      "row_name": "parity_restoration_brief_025",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "brief",
+      "title": "restoration · brief probe 25",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/24"
+    },
+    {
+      "row_name": "parity_restoration_brief_026",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "brief",
+      "title": "restoration · brief probe 26",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/25"
+    },
+    {
+      "row_name": "parity_restoration_brief_027",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "brief",
+      "title": "restoration · brief probe 27",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/26"
+    },
+    {
+      "row_name": "parity_restoration_brief_028",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "brief",
+      "title": "restoration · brief probe 28",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/27"
+    },
+    {
+      "row_name": "parity_restoration_kollegen_029",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "kollegen",
+      "title": "restoration · kollegen probe 29",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/28"
+    },
+    {
+      "row_name": "parity_restoration_kollegen_030",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "kollegen",
+      "title": "restoration · kollegen probe 30",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/29"
+    },
+    {
+      "row_name": "parity_restoration_kollegen_031",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "kollegen",
+      "title": "restoration · kollegen probe 31",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/30"
+    },
+    {
+      "row_name": "parity_restoration_kollegen_032",
+      "record_kind": "parity_probe",
+      "case_id": "restoration",
+      "phase_id": "kollegen",
+      "title": "restoration · kollegen probe 32",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/31"
+    },
+    {
+      "row_name": "parity_endo_anamnese_033",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "anamnese",
+      "title": "endo · anamnese probe 33",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/32"
+    },
+    {
+      "row_name": "parity_endo_anamnese_034",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "anamnese",
+      "title": "endo · anamnese probe 34",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/33"
+    },
+    {
+      "row_name": "parity_endo_anamnese_035",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "anamnese",
+      "title": "endo · anamnese probe 35",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/34"
+    },
+    {
+      "row_name": "parity_endo_anamnese_036",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "anamnese",
+      "title": "endo · anamnese probe 36",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/35"
+    },
+    {
+      "row_name": "parity_endo_aufklaerung_037",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "aufklaerung",
+      "title": "endo · aufklaerung probe 37",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/36"
+    },
+    {
+      "row_name": "parity_endo_aufklaerung_038",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "aufklaerung",
+      "title": "endo · aufklaerung probe 38",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/37"
+    },
+    {
+      "row_name": "parity_endo_aufklaerung_039",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "aufklaerung",
+      "title": "endo · aufklaerung probe 39",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/38"
+    },
+    {
+      "row_name": "parity_endo_aufklaerung_040",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "aufklaerung",
+      "title": "endo · aufklaerung probe 40",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/39"
+    },
+    {
+      "row_name": "parity_endo_brief_041",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "brief",
+      "title": "endo · brief probe 41",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/40"
+    },
+    {
+      "row_name": "parity_endo_brief_042",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "brief",
+      "title": "endo · brief probe 42",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/41"
+    },
+    {
+      "row_name": "parity_endo_brief_043",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "brief",
+      "title": "endo · brief probe 43",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/42"
+    },
+    {
+      "row_name": "parity_endo_brief_044",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "brief",
+      "title": "endo · brief probe 44",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/43"
+    },
+    {
+      "row_name": "parity_endo_kollegen_045",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "kollegen",
+      "title": "endo · kollegen probe 45",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/44"
+    },
+    {
+      "row_name": "parity_endo_kollegen_046",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "kollegen",
+      "title": "endo · kollegen probe 46",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/45"
+    },
+    {
+      "row_name": "parity_endo_kollegen_047",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "kollegen",
+      "title": "endo · kollegen probe 47",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/46"
+    },
+    {
+      "row_name": "parity_endo_kollegen_048",
+      "record_kind": "parity_probe",
+      "case_id": "endo",
+      "phase_id": "kollegen",
+      "title": "endo · kollegen probe 48",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/47"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_049",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 49",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/48"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_050",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 50",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/49"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_051",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 51",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/50"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_052",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 52",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/51"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_053",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 53",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/52"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_054",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 54",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/53"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_055",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 55",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/54"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_056",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 56",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/55"
+    },
+    {
+      "row_name": "parity_surgery_brief_057",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "brief",
+      "title": "surgery · brief probe 57",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/56"
+    },
+    {
+      "row_name": "parity_surgery_brief_058",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "brief",
+      "title": "surgery · brief probe 58",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/57"
+    },
+    {
+      "row_name": "parity_surgery_brief_059",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "brief",
+      "title": "surgery · brief probe 59",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/58"
+    },
+    {
+      "row_name": "parity_surgery_brief_060",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "brief",
+      "title": "surgery · brief probe 60",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/59"
+    },
+    {
+      "row_name": "parity_surgery_kollegen_061",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "kollegen",
+      "title": "surgery · kollegen probe 61",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/60"
+    },
+    {
+      "row_name": "parity_surgery_kollegen_062",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "kollegen",
+      "title": "surgery · kollegen probe 62",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/61"
+    },
+    {
+      "row_name": "parity_surgery_kollegen_063",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "kollegen",
+      "title": "surgery · kollegen probe 63",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/62"
+    },
+    {
+      "row_name": "parity_surgery_kollegen_064",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "kollegen",
+      "title": "surgery · kollegen probe 64",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/63"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_065",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 65",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/64"
+    },
+    {
+      "row_name": "parity_surgery_aufklaerung_066",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "aufklaerung",
+      "title": "surgery · aufklaerung probe 66",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/65"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_067",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 67",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/66"
+    },
+    {
+      "row_name": "parity_surgery_anamnese_068",
+      "record_kind": "parity_probe",
+      "case_id": "surgery",
+      "phase_id": "anamnese",
+      "title": "surgery · anamnese probe 68",
+      "source_file": "fsp-kp.json",
+      "source_pointer": "/parityProbes/67"
+    },
+    {
+      "row_name": "volume_molar",
+      "record_kind": "editable_case_volume",
+      "case_id": "molar",
+      "phase_id": "",
+      "title": "FDI 16 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/molar"
+    },
+    {
+      "row_name": "volume_endo",
+      "record_kind": "editable_case_volume",
+      "case_id": "endo",
+      "phase_id": "",
+      "title": "FDI 36 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/endo"
+    },
+    {
+      "row_name": "volume_anterior",
+      "record_kind": "editable_case_volume",
+      "case_id": "anterior",
+      "phase_id": "",
+      "title": "FDI 11 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/anterior"
+    },
+    {
+      "row_name": "volume_crown",
+      "record_kind": "editable_case_volume",
+      "case_id": "crown",
+      "phase_id": "",
+      "title": "FDI 26 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/crown"
+    },
+    {
+      "row_name": "volume_surgery",
+      "record_kind": "editable_case_volume",
+      "case_id": "surgery",
+      "phase_id": "",
+      "title": "FDI 48 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/surgery"
+    },
+    {
+      "row_name": "volume_perio",
+      "record_kind": "editable_case_volume",
+      "case_id": "perio",
+      "phase_id": "",
+      "title": "FDI 46 editable volume",
+      "source_file": "editable-case-volumes.json",
+      "source_pointer": "/cases/perio"
+    }
+  ],
+  "recordCounts": {
+    "case": 6,
+    "editable_case_volume": 6,
+    "fsp_kp_phase": 16,
+    "parity_probe": 68,
+    "pathway_step": 24,
+    "practical_task": 41,
+    "quiz": 25,
+    "station": 7,
+    "tool": 19
+  },
+  "limitations": [
+    "Fictional training content only; not clinical guidance or a competency assessment.",
+    "The source bundle and CSV are not yet loaded by the Unreal runtime.",
+    "No standalone materials inventory is present in this source snapshot."
+  ]
+}

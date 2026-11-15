@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "productionFile": "volumetric-lab.js",
+  "productionSHA256": "7fe57b1b14ac6d9e9afb19bfbc8cda40d4dc7abfb24ae1a31b854c059bb42d2d",
+  "model": "ORIGINAL_PROCEDURAL_SYNTHETIC_CASE_VOLUME_UNCALIBRATED",
+  "caseId": "surgery",
+  "fdi": "48",
+  "toothClass": "molar",
+  "upper": false,
+  "left": false,
+  "channels": [
+    "outer",
+    "dentin",
+    "pulp",
+    "caries"
+  ],
+  "resolution": 24,
+  "ny": 34,
+  "sampleCount": 21875,
+  "gridMin": [
+    -1.39,
+    -1.67,
+    -1.22
+  ],
+  "gridMax": [
+    1.39,
+    1.44,
+    1.22
+  ],
+  "layout": "channel-major i-y-z, IEEE754 float32 little-endian",
+  "file": "fdi48-volume-field.bin",
+  "fieldSHA256": "dab79e955d388eb5c567f1a8327c567bf19f6b3dc8879a2c3e8396848283dbb8",
+  "patientScan": false,
+  "clinicalAccuracyValidated": false
+}

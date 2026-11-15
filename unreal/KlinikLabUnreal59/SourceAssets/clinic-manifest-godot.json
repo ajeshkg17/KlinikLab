@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "REVIEWED_CC0_NATIVE_CLINIC_BACKGROUND_NOT_CLINICAL_APP_ANATOMY",
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "licenseSPDX": "CC0-1.0",
+  "publisher": "https://3dassets.dev/packs/dental-practice-and-surgery",
+  "reviewedAssetManifestSHA256": "1d9082feaebd3cbe4cc47a853eed82339bdc516c51aeebdea9540824c5f654d0",
+  "sourcePackReconciledBySHA256": true,
+  "godotConversion": "DETERMINISTIC_FLOAT32_VERTEX_ACCESSORS_PRESERVE_ORIGINAL_KHR_QUANTIZED_GLB",
+  "godotConverterSHA256": "87fc6954e9fd26eb9632041075fe51a1f66e907a2d40e5c3e4950d1c6fc3963e",
+  "clinicalAccuracyValidated": false,
+  "fullAppParityValidated": false,
+  "cataloguedSourceGLBs": 54,
+  "assets": [
+    {
+      "name": "whole-clinic-starter-v1.glb",
+      "originalFile": "whole-clinic-starter-v1.glb.source",
+      "sha256": "9af6dd52d96bf94d50eda63ee888db975fadabb230a5dcd2ff98a11a518db77a",
+      "bytes": 1177948,
+      "godotFile": "whole-clinic-starter-v1-godot.glb",
+      "godotSha256": "ba4f2f6cb8a85b8462bc63798b9057729de3ce467cdb52ed8ee4b212ada4a0b1",
+      "godotBytes": 2260216,
+      "godotFloat32Accessors": 413,
+      "sourcePackName": "Dental practice floor (Dental Practice and Surgery).glb",
+      "role": "assembledStaticEnvironment"
+    },
+    {
+      "name": "instrument-tray-v1.glb",
+      "originalFile": "instrument-tray-v1.glb.source",
+      "sha256": "63e3396b7ccd5c5227a8464473b25acb2cf79e5797ac7518b16f16c8f6228036",
+      "bytes": 30452,
+      "godotFile": "instrument-tray-v1-godot.glb",
+      "godotSha256": "64113073c0553c8eba17f0373811261e51d70a41ec2cddbde1972af55f7b92ed",
+      "godotBytes": 64656,
+      "godotFloat32Accessors": 8,
+      "sourcePackName": "Instrument Tray (Dental Practice and Surgery).glb",
+      "role": "staticInstrumentProp"
+    }
+  ],
+  "optionalChair": {
+    "sourcePackName": "Dental Chair (Dental Practice and Surgery).glb",
+    "sha256": "360ab5f97393f2cf0c8ba99e4d776d1a5d3e50d33889ec633f8eee03919bcfdd",
+    "bytes": 41804,
+    "name": "operatory-chair-v1.glb",
+    "godotFile": "operatory-chair-v1-godot.glb",
+    "available": true,
+    "role": "staticOperatoryChair",
+    "clinicalAccuracyValidated": false,
+    "godotSha256": "4d64637022f586cce62d6014edb21363f6ee6c8ab96eeab9ff4d9af506eb9ba1"
+  }
+}

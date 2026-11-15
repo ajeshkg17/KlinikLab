@@ -1,0 +1,154 @@
+{
+  "formatVersion": 1,
+  "kind": "KLINIKLAB_UI_LOCALIZATION",
+  "defaultLanguage": "en",
+  "supportedLanguages": [
+    {
+      "id": "en",
+      "label": "English"
+    },
+    {
+      "id": "de",
+      "label": "Deutsch"
+    }
+  ],
+  "contentTextPolicy": "preserve_source_wording; no automatic translation of clinical lesson text",
+  "strings": {
+    "settings.language": {
+      "en": "Interface language",
+      "de": "Anzeigesprache"
+    },
+    "settings.english_default": {
+      "en": "English (default)",
+      "de": "Englisch (Standard)"
+    },
+    "settings.german": {
+      "en": "German",
+      "de": "Deutsch"
+    },
+    "catalog.title": {
+      "en": "Learning library",
+      "de": "Lernbibliothek"
+    },
+    "catalog.search": {
+      "en": "Search lessons, cases, and instruments",
+      "de": "Lektionen, Fälle und Instrumente suchen"
+    },
+    "catalog.all_cases": {
+      "en": "All cases",
+      "de": "Alle Fälle"
+    },
+    "catalog.all_stations": {
+      "en": "All stations",
+      "de": "Alle Stationen"
+    },
+    "catalog.case_studies": {
+      "en": "Cases",
+      "de": "Fälle"
+    },
+    "catalog.stations": {
+      "en": "Training stations",
+      "de": "Trainingsstationen"
+    },
+    "catalog.tools": {
+      "en": "Instruments",
+      "de": "Instrumente"
+    },
+    "catalog.practice": {
+      "en": "Practical tasks",
+      "de": "Praktische Aufgaben"
+    },
+    "catalog.quizzes": {
+      "en": "Knowledge checks",
+      "de": "Wissensfragen"
+    },
+    "catalog.pathways": {
+      "en": "Guided pathways",
+      "de": "Geführte Lernpfade"
+    },
+    "catalog.fsp_kp": {
+      "en": "FSP/KP case practice",
+      "de": "FSP/KP-Fallübungen"
+    },
+    "catalog.models": {
+      "en": "Synthetic case models",
+      "de": "Synthetische Fallmodelle"
+    },
+    "catalog.developer_parity": {
+      "en": "Developer parity checks",
+      "de": "Entwickler-Paritätsprüfungen"
+    },
+    "catalog.results": {
+      "en": "Results",
+      "de": "Ergebnisse"
+    },
+    "catalog.no_results": {
+      "en": "No matching learning items.",
+      "de": "Keine passenden Lerninhalte gefunden."
+    },
+    "catalog.source_reference": {
+      "en": "Source reference",
+      "de": "Quellenverweis"
+    },
+    "catalog.source_wording_notice": {
+      "en": "Some learning text remains in its source language.",
+      "de": "Einige Lerntexte bleiben in ihrer Ausgangssprache."
+    },
+    "notice.simulation_only": {
+      "en": "Fictional simulation material; not clinical guidance or competency assessment.",
+      "de": "Fiktives Simulationsmaterial; keine klinische Anleitung oder Kompetenzbewertung."
+    },
+    "lesson.start": {
+      "en": "Start lesson",
+      "de": "Lektion starten"
+    },
+    "lesson.restart": {
+      "en": "Restart",
+      "de": "Neu starten"
+    },
+    "lesson.exit": {
+      "en": "Exit lesson",
+      "de": "Lektion beenden"
+    },
+    "lesson.objective": {
+      "en": "Objective",
+      "de": "Lernziel"
+    },
+    "lesson.current_step": {
+      "en": "Current step",
+      "de": "Aktueller Schritt"
+    },
+    "lesson.feedback": {
+      "en": "Feedback",
+      "de": "Rückmeldung"
+    },
+    "lesson.score": {
+      "en": "Score",
+      "de": "Punktestand"
+    },
+    "interaction.pickup": {
+      "en": "Pick up",
+      "de": "Aufnehmen"
+    },
+    "interaction.return": {
+      "en": "Return to tray",
+      "de": "Auf das Tablett zurücklegen"
+    },
+    "interaction.verify": {
+      "en": "Verify",
+      "de": "Überprüfen"
+    },
+    "interaction.wrong_target": {
+      "en": "Aim at the assigned target and try again.",
+      "de": "Zielen Sie auf das vorgegebene Ziel und versuchen Sie es erneut."
+    },
+    "interaction.wrong_tool": {
+      "en": "Choose the requested instrument and try again.",
+      "de": "Wählen Sie das geforderte Instrument und versuchen Sie es erneut."
+    },
+    "interaction.already_completed": {
+      "en": "This step is already complete.",
+      "de": "Dieser Schritt ist bereits abgeschlossen."
+    }
+  }
+}

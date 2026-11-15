@@ -1,0 +1,187 @@
+{
+  "formatVersion": 1,
+  "kind": "KLINIKLAB_GODOT_CURRICULUM_SOURCE_BUNDLE",
+  "sourceSnapshotGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "sourceAppSHA256": "99eca9ee002b144170ad56f61707daa8e285c454b5071f308f8ae5e290266b7e",
+  "declaredSourceAppSHA256": "2ad804cfa6b09697923a60fc631e5941a00637b9ce888bf64c35c37ba67f6468",
+  "sourcePathAtExport": "C:\\Users\\ajesh\\OneDrive\\study and learn\\coworker\\output\\KlinikLab-Treatment-Room-Render-20261113\\source",
+  "clinicalAssessmentValidated": false,
+  "clinicalReviewPending": true,
+  "catalogCoverage": {
+    "case": 6,
+    "editable_case_volume": 6,
+    "fsp_kp_phase": 16,
+    "parity_probe": 68,
+    "pathway_step": 24,
+    "practical_task": 41,
+    "quiz": 25,
+    "station": 7,
+    "tool": 19
+  },
+  "totalRecords": 212,
+  "materialsCatalog": {
+    "status": "not_separately_present_in_pinned_snapshot",
+    "count": 0,
+    "note": "The source has an instrument/tool list, but no standalone materials inventory."
+  },
+  "files": [
+    {
+      "file": "app-content.json",
+      "bytes": 53057,
+      "sha256": "99eca9ee002b144170ad56f61707daa8e285c454b5071f308f8ae5e290266b7e"
+    },
+    {
+      "file": "clinical-pathways.json",
+      "bytes": 21240,
+      "sha256": "23b6df61fd3cedd49a508955884e8fd634734c8dfe708b3750b9e7a5d527d845"
+    },
+    {
+      "file": "editable-case-volumes.json",
+      "bytes": 1852,
+      "sha256": "44fc2bbcc3ad0e427b4585899734e55ce986ac1ee497dd65af3008140cb0d791"
+    },
+    {
+      "file": "expected-sha.txt",
+      "bytes": 41,
+      "sha256": "8f72a9ce11b39493b28c9cd3acc9b481ee9c48538b9e359fe6e5cd38c4dc54b6"
+    },
+    {
+      "file": "fdi11-volume-field-manifest.json",
+      "bytes": 866,
+      "sha256": "ca937d454f65eadd5428b99cb9077c1ffcbc19e7a100b65cc85fb218994943c6"
+    },
+    {
+      "file": "fdi11-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "b89bbf81cb830d0af9a94928f1267649151ff623f0e1fb3b736c02f1a6f18ff3"
+    },
+    {
+      "file": "fdi16-after-cut.obj",
+      "bytes": 1595675,
+      "sha256": "c6a508043f120463e00eb65c379454ece8843432ba5c7f89a4609d86719642da"
+    },
+    {
+      "file": "fdi16-after-cut.obj.import",
+      "bytes": 741,
+      "sha256": "9339e9d3b9bf70fc2d1fd0b404a268bd6ad14d512bc7aaf8d8310e05dbd5f076"
+    },
+    {
+      "file": "fdi16-before.obj",
+      "bytes": 1587282,
+      "sha256": "4718edfd4ceb2d01506ad6315ddb1024fde0c40fa98f586b14644529aa7c727f"
+    },
+    {
+      "file": "fdi16-before.obj.import",
+      "bytes": 725,
+      "sha256": "c411334eaacee09567b1c48d3d5e1f40297554ad0a5b93e646ca57ad505f483c"
+    },
+    {
+      "file": "fdi16-volume-field-manifest.json",
+      "bytes": 861,
+      "sha256": "4a986d4ababa44a577fca5c48c4d21de9aa72fbb7f8943f005ab20da492468b1"
+    },
+    {
+      "file": "fdi16-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "bd36f64b53ba4ec9b0a3ed49f384b5aa438f26dc715dedaee597441e6200f6fa"
+    },
+    {
+      "file": "fdi26-volume-field-manifest.json",
+      "bytes": 860,
+      "sha256": "0f51a704be9697b049a19706dfbcb662c5c0beb57497ebcc296439012de75e27"
+    },
+    {
+      "file": "fdi26-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "bb01fdd61cc09b1b0526ef24c8facaef7c3a3d87af749d9acb05f78593c1ae92"
+    },
+    {
+      "file": "fdi36-volume-field-manifest.json",
+      "bytes": 860,
+      "sha256": "11a9d469f94655f8a9857dea1e325f34d2f4d2cb451a10720ddd89c0afcf8cd6"
+    },
+    {
+      "file": "fdi36-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "df9e2b7f36df99a2a6f55c6c5d8f6ba6f13af6a360b1c8a77a51c94d35cbbeac"
+    },
+    {
+      "file": "fdi46-volume-field-manifest.json",
+      "bytes": 862,
+      "sha256": "1b411acdbdd87ad128b7ad8b23019731ca6626539cd636c36c854de75b4ad18d"
+    },
+    {
+      "file": "fdi46-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "dab79e955d388eb5c567f1a8327c567bf19f6b3dc8879a2c3e8396848283dbb8"
+    },
+    {
+      "file": "fdi48-volume-field-manifest.json",
+      "bytes": 864,
+      "sha256": "b3f09d883671590061126879bb26452d0ed441501c10523d94087fbaceaeea0f"
+    },
+    {
+      "file": "fdi48-volume-field.bin",
+      "bytes": 350000,
+      "sha256": "dab79e955d388eb5c567f1a8327c567bf19f6b3dc8879a2c3e8396848283dbb8"
+    },
+    {
+      "file": "fsp-kp.json",
+      "bytes": 62864,
+      "sha256": "1eef85578e82aa80981ee5ee557d8eb2d937f97cca36ca411ad46f21908124b9"
+    },
+    {
+      "file": "kliniklab-export-manifest.json",
+      "bytes": 2693,
+      "sha256": "12179bc741b67252d716e454bcce80376c38611799d80de457b080161ba4d588"
+    },
+    {
+      "file": "kliniklab-fdi16.mtl",
+      "bytes": 591,
+      "sha256": "ff7433cd60a27c8f0f9cea4c9173293918ddd2f4055ad5b8632f2ff053389e1c"
+    },
+    {
+      "file": "kliniklab-native-cases.json",
+      "bytes": 9735,
+      "sha256": "d998c16f34e3430a76be0e78704e2d377299e228c6484e2d00ef1f57e93f3e30"
+    },
+    {
+      "file": "tooth-fdi26-manifest.json",
+      "bytes": 1488,
+      "sha256": "1b10e236df43ab30c410efdd2f6364c3cb0c1807ad35960c4b0e08b15abdf333"
+    },
+    {
+      "file": "tooth-fdi36-manifest.json",
+      "bytes": 1493,
+      "sha256": "36dd82d81695fc51bbda161b9504bf5c492d12dab0b7fb48a52d05f9d9d092f8"
+    }
+  ],
+  "runtimeIntegration": "loose .klabdata JSON staged; curriculum browser not yet wired",
+  "generatedArtifacts": [
+    {
+      "file": "KlinikLabCurriculumRows.csv",
+      "bytes": 114692,
+      "sha256": "06608506673c392391005cd57594f64c8eb33245369d37f32620720e2a8c035b"
+    },
+    {
+      "file": "curriculum-row-index.json",
+      "bytes": 59286,
+      "sha256": "4e6cbd6750229c78233ea7136b2250eef818a978ffc7fd50f0c71a086532bf0e"
+    },
+    {
+      "file": "curriculum-catalog.json",
+      "bytes": 174102,
+      "sha256": "a0e79f2a4db18e7268d2a36a7af8073eb34b7c5cd7d0b7adad2194fd400e6f7e"
+    },
+    {
+      "file": "curriculum-browser-index.json",
+      "bytes": 132350,
+      "sha256": "1c5e4d3987c1bf7b4e3127bdb921fd6cf536e3eff694bdadaa62c64cd89da5fa"
+    },
+    {
+      "file": "ui-locales.json",
+      "bytes": 4011,
+      "sha256": "3b0fa37fbd739c6e23196a647894b751865a89bbdfb9859dacb3a8b0ed8a1e65"
+    }
+  ]
+}

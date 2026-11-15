@@ -1,0 +1,574 @@
+{
+  "schemaVersion": 1,
+  "kind": "SYNTHETIC_SOURCE_CLINICAL_PATHWAYS_NOT_CERTIFIED",
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "sourceFile": "clinical-pathway.js",
+  "sourceFileSHA256": "08d39d87a3b875021bc501da0a98fe2e4b854074093ddbb1d30b6b13f7e1b332",
+  "clinicalAssessmentValidated": false,
+  "cases": {
+    "molar": {
+      "chief": "„Rechts oben tut es beim Kauen weh. Kaltes ist kurz unangenehm.“",
+      "history": [
+        [
+          "onset",
+          "Wann haben die Beschwerden begonnen?",
+          "Vor ungefähr drei Wochen.",
+          "yes"
+        ],
+        [
+          "cold",
+          "Wie lange hält der Schmerz bei Kälte an?",
+          "Nur kurz. Sobald das Getränk weg ist, lässt der Schmerz nach.",
+          "yes"
+        ],
+        [
+          "spontaneous",
+          "Haben Sie spontane oder nächtliche Schmerzen?",
+          "Nein, nicht ohne einen Reiz.",
+          "yes"
+        ],
+        [
+          "medical",
+          "Nehmen Sie Medikamente? Bestehen Allergien oder Allgemeinerkrankungen?",
+          "Ich nehme keine regelmäßigen Medikamente und kenne keine Allergien.",
+          "yes"
+        ],
+        [
+          "swelling",
+          "Gab es eine Schwellung oder Fieber?",
+          "Nein, weder Schwellung noch Fieber.",
+          "no"
+        ],
+        [
+          "previous",
+          "Ist der Zahn bereits behandelt worden?",
+          "Dort gab es vor langer Zeit eine kleine Füllung, soweit ich weiß.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "visual",
+          "Klinische Inspektion / Sondierung",
+          "Zahn 16: okklusal-approximale Kavitation, Defektausdehnung muss geklärt werden.",
+          "yes"
+        ],
+        [
+          "cold",
+          "Kältetest mit Kontrollzahn",
+          "Positiv, kurze abklingende Antwort; mit klinischem Bild vereinbar, nicht allein diagnostisch.",
+          "yes"
+        ],
+        [
+          "perc",
+          "Perkussion und Palpation",
+          "Unauffällige Perkussion/Palpation in diesem simulierten Fall.",
+          "yes"
+        ],
+        [
+          "bitewing",
+          "Indizierte Bissflügelaufnahme",
+          "Fiktiver Befundtext: approximale radiologische Läsion bis ins Dentin; keine echte Aufnahme.",
+          "no"
+        ],
+        [
+          "periodontal",
+          "Parodontalstatus / Kontaktpunkte",
+          "Kein isolierter tiefer Taschenbefund; approximale Randverhältnisse benötigen Prüfung.",
+          "no"
+        ],
+        [
+          "anesthesia",
+          "Ohne Diagnostik direkt anästhesieren und bohren",
+          "Keine diagnostische Untersuchung. Erst Befund und Einwilligung.",
+          "bad"
+        ]
+      ],
+      "differential": [
+        "Symptomatische irreversible Pulpitis gesichert",
+        "Dentinläsion mit abklärungsbedürftigem Pulpastatus",
+        "Akuter apikaler Abszess gesichert",
+        "Primäre parodontale Ursache gesichert"
+      ],
+      "correct": 1,
+      "why": "Die kurze Kältereaktion allein beweist weder die genaue Pulpagewebesituation noch die spätere Restaurierbarkeit. Defektgröße, pulpale und parodontale Befunde sind entscheidend.",
+      "options": [
+        "Direkte adhäsive Kompositrestauration bei geeigneten Defekt-/Randverhältnissen",
+        "Indirekte Teilkrone/Onlay bei größerem Substanzverlust und Höckenschwächung",
+        "Antibiotika als alleinige Therapie ohne Infektionszeichen",
+        "Extraktion ohne vorherige Prüfung der Erhaltungswürdigkeit"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Indikation, Vitalität und Restaurierbarkeit abschließend sichern",
+        "Aufklärung, Einwilligung und geeignete Isolation planen",
+        "Defektbezogen und substanzschonend präparieren; Pulpanähe beachten",
+        "Restauration, Kontakt, Okklusion und Nachkontrolle prüfen"
+      ],
+      "safety": "Keine automatische vollständige Entfernung pulpanahen Dentins; bei tiefen Läsionen ist pulpenschonendes Vorgehen indikationsabhängig."
+    },
+    "endo": {
+      "chief": "„Links unten habe ich starke Schmerzen, auch nachts.“",
+      "history": [
+        [
+          "onset",
+          "Seit wann bestehen die Schmerzen?",
+          "Seit einigen Wochen empfindlich, seit gestern deutlich schlimmer.",
+          "yes"
+        ],
+        [
+          "lingering",
+          "Wie lange tut es nach Kälte weh?",
+          "Es hält nach dem Kältereiz ziemlich lange an.",
+          "yes"
+        ],
+        [
+          "spontaneous",
+          "Kommt der Schmerz ohne Reiz oder nachts?",
+          "Ja, gestern Nacht bin ich davon aufgewacht.",
+          "yes"
+        ],
+        [
+          "medical",
+          "Welche Medikamente und Allergien bestehen?",
+          "Ich nehme gelegentlich Schmerzmittel. Eine Allergie ist mir nicht bekannt.",
+          "yes"
+        ],
+        [
+          "swelling",
+          "Bestehen Fieber, Schluckprobleme oder Gesichtsschwellung?",
+          "Nein, kein Fieber und keine Schwellung.",
+          "no"
+        ],
+        [
+          "bite",
+          "Tut es beim Aufbeißen weh?",
+          "Ein wenig; die Kälte ist schlimmer.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "cold",
+          "Kälte- und ggf. ergänzende Sensibilitätsprüfung",
+          "Reizantwort am 36 verlängert, Kontrollzähne reagieren kürzer.",
+          "yes"
+        ],
+        [
+          "perc",
+          "Perkussion / Palpation",
+          "Leichte Perkussionsempfindlichkeit im simulierten Befund.",
+          "yes"
+        ],
+        [
+          "radiology",
+          "Indizierte intraorale Röntgendiagnostik",
+          "Fiktiver Befundtext: tiefe Karies an 36; kein eindeutig abgrenzbarer apikaler Befund.",
+          "yes"
+        ],
+        [
+          "perio",
+          "Parodontalstatus / Restaurierbarkeit",
+          "Kein isolierter tiefer Taschenbefund; Erhaltungswürdigkeit muss geprüft werden.",
+          "no"
+        ],
+        [
+          "coldonly",
+          "Allein vom Röntgenbild Pulpaerkrankung sicher ableiten",
+          "Radiologie allein reicht nicht für eine pulpare Diagnose.",
+          "bad"
+        ]
+      ],
+      "differential": [
+        "Vermutete symptomatische irreversible Pulpitis nach kombinierter Befunderhebung",
+        "Gesicherte Pulpanekrose allein wegen des Röntgenbefunds",
+        "Lokale Perikoronitis am Zahn 48",
+        "Asymptomatischer gesunder Zahn"
+      ],
+      "correct": 0,
+      "why": "Anhaltende Reizantwort plus Spontan-/Nachtschmerz sprechen für eine symptomatische irreversible Pulpitis; die Diagnose beruht auf Anamnese und klinischen Tests, nicht auf einem Einzelbefund.",
+      "options": [
+        "Endodontische Behandlung nach Sicherung von Diagnose, Indikation und Erhaltungswürdigkeit",
+        "Extraktion nach informierter Entscheidung und Abwägung von Alternativen",
+        "Routinemäßige Antibiotika ohne Zeichen systemischer Ausbreitung",
+        "Nur abwarten, unabhängig von starken Beschwerden"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Diagnose, Restaurierbarkeit, Bildgebung und Einwilligung prüfen",
+        "Isolieren und konservativen Zugang anatomiegerecht planen",
+        "Kanäle auffinden, Arbeitslänge und Aufbereitung kontrolliert bestimmen",
+        "Desinfektion, Füllung, koronalen Verschluss und Nachsorge planen"
+      ],
+      "safety": "Die Simulation kann weder reale Kanalkrümmung noch Feilenbruch, Spüllösungsextrusion oder tatsächliche Arbeitslänge beurteilen."
+    },
+    "anterior": {
+      "chief": "„Nach einem Sturz ist die Ecke meines Frontzahns abgebrochen.“",
+      "history": [
+        [
+          "mechanism",
+          "Wie ist der Unfall passiert und wann?",
+          "Vor zwei Tagen bin ich auf einer Treppe gestürzt.",
+          "yes"
+        ],
+        [
+          "head",
+          "Gab es Bewusstlosigkeit, Schwindel oder Kopfverletzung?",
+          "Nein, ich war nicht bewusstlos.",
+          "yes"
+        ],
+        [
+          "fragment",
+          "Haben Sie das abgebrochene Fragment aufgehoben?",
+          "Ja, ich habe ein kleines Stück zu Hause.",
+          "yes"
+        ],
+        [
+          "medical",
+          "Gibt es Allergien und relevante Medikamente?",
+          "Keine bekannten Allergien, keine Dauermedikamente.",
+          "yes"
+        ],
+        [
+          "pain",
+          "Haben Sie starke Schmerzen oder Kälteempfindlichkeit?",
+          "Kalte Getränke sind unangenehm; die Kante stört.",
+          "no"
+        ],
+        [
+          "occlusion",
+          "Hat sich Ihr Biss verändert?",
+          "Nicht, soweit ich es bemerkt habe.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "soft",
+          "Weichteil- und extraorale Untersuchung",
+          "Kleine verheilte Lippenläsion; auf Fremdkörper bei Bedarf gezielt untersuchen.",
+          "yes"
+        ],
+        [
+          "mobility",
+          "Mobilität, Perkussion, Okklusion",
+          "Keine deutliche Mobilität, Okklusion im Fall unauffällig.",
+          "yes"
+        ],
+        [
+          "pulp",
+          "Sensibilität und Pulpaexposition beurteilen",
+          "Keine sichtbare Pulpaexposition; Sensibilität positiv, Verlaufskontrollen erforderlich.",
+          "yes"
+        ],
+        [
+          "images",
+          "Indizierte Röntgendiagnostik",
+          "Fiktiver Befundtext: keine sichere Wurzelfraktur; radiologische Abklärung gemäß Indikation.",
+          "no"
+        ],
+        [
+          "photo",
+          "Fotodokumentation / Fragmentprüfung",
+          "Hilfreich zur Verlaufskontrolle und ggf. Fragmentbefestigung.",
+          "no"
+        ]
+      ],
+      "differential": [
+        "Gesicherte Avulsion",
+        "Verdacht auf unkomplizierte Kronenfraktur ohne gesicherte Begleitverletzung",
+        "Akuter odontogener Abszess",
+        "Generalisierte Parodontitis als alleinige Traumaerklärung"
+      ],
+      "correct": 1,
+      "why": "Frakturtyp und mögliche luxationsbedingte Begleitverletzungen müssen vor Versorgung geklärt werden; anfänglich normale Sensibilität schließt spätere Pulpaänderungen nicht aus.",
+      "options": [
+        "Direkte adhäsive Versorgung nach Befund und Ausschluss komplexer Verletzungen",
+        "Fragmentwiederbefestigung bei geeignetem Fragment und Befund",
+        "Sofortige Wurzelkanalbehandlung bei jedem Schmelz-Dentin-Trauma",
+        "Extraktion trotz erhaltungswürdigem und stabilem Zahn"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Trauma- und Begleitverletzungen einschließlich Weichteile abklären",
+        "Fraktur, Pulpa, Mobilität, Sensibilität und indizierte Bildgebung beurteilen",
+        "Patientenpräferenz, Fragmentoptionen und Einwilligung besprechen",
+        "Konservierend versorgen und strukturierte Verlaufskontrollen planen"
+      ],
+      "safety": "Bei Kopfverletzungszeichen, starken neurologischen Symptomen oder komplexem Trauma ist prioritäre ärztliche Abklärung erforderlich."
+    },
+    "crown": {
+      "chief": "„Meine große Füllung links oben bricht immer wieder.“",
+      "history": [
+        [
+          "fail",
+          "Wie oft ist die Füllung bereits gebrochen?",
+          "In den letzten Monaten mehrfach.",
+          "yes"
+        ],
+        [
+          "pain",
+          "Gibt es Spontan-, Kälte- oder Aufbissschmerzen?",
+          "Keine spontanen Schmerzen, beim Kauen Beschwerden.",
+          "yes"
+        ],
+        [
+          "medical",
+          "Welche Erkrankungen, Medikamente und Allergien bestehen?",
+          "Ich habe Bluthochdruck und nehme ein Medikament; den Namen kann ich nachreichen.",
+          "yes"
+        ],
+        [
+          "expect",
+          "Was ist Ihnen bei der Versorgung wichtig?",
+          "Ich möchte den Zahn erhalten und möglichst wenig abschleifen lassen.",
+          "yes"
+        ],
+        [
+          "brux",
+          "Knirschen oder Pressen Sie nachts?",
+          "Das weiß ich nicht genau.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "rest",
+          "Klinischer Restsubstanz- und Rissbefund",
+          "Große defekte Restauration; Erhaltungsfähigkeit der Höcker und Risse unklar.",
+          "yes"
+        ],
+        [
+          "pulp",
+          "Sensibilität, Perkussion und parodontaler Befund",
+          "Sensibilität positiv, Perkussion unauffällig im Übungsfall.",
+          "yes"
+        ],
+        [
+          "occlusion",
+          "Okklusion, Gegenkiefer und Platzangebot",
+          "Belastungs- und Platzverhältnisse müssen in der Planung berücksichtigt werden.",
+          "yes"
+        ],
+        [
+          "radio",
+          "Indizierte Bildgebung",
+          "Fiktiver Befundtext: periapikal kein eindeutiger pathologischer Befund.",
+          "no"
+        ],
+        [
+          "impression",
+          "Ohne Präparation direkt eine definitive Abformung",
+          "Noch nicht bereit: Indikation, Präparation und Randmanagement zuvor klären.",
+          "bad"
+        ]
+      ],
+      "differential": [
+        "Defekte große Restauration mit möglicher Höckenschwächung",
+        "Gesicherte akute apikale Parodontitis",
+        "Gesicherter pulpal bedingter Abszess",
+        "Gesunde unbehandelte Zahnkrone"
+      ],
+      "correct": 0,
+      "why": "Eine Vollkrone ist nicht automatisch erforderlich: Restzahnhartsubstanz, Höckerstabilität, Pulpa und okklusale Faktoren sind zu berücksichtigen.",
+      "options": [
+        "Indizierte höckerüberdeckende Teilkrone/Onlay bei genügend tragfähiger Restsubstanz",
+        "Vollkrone, falls Umfang der Schädigung sie rechtfertigt",
+        "Extraktion ohne diagnostische Prüfung",
+        "Nur neue kleine direkte Füllung unabhängig vom Defektumfang"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Indikation, Prognose, Präparationsart und Zustimmung festlegen",
+        "Substanzschonend präparieren und Präparationsgrenzen beurteilen",
+        "Trockenlegung/Retraktion und geeignete Abformung bzw. Scan durchführen",
+        "Provisorium, Okklusion, Nachkontrolle und spätere Eingliederung planen"
+      ],
+      "safety": "Keine modellinternen Millimeter oder Wandwinkel als verbindliche klinische Präparationsnorm interpretieren."
+    },
+    "surgery": {
+      "chief": "„Hinten rechts unten tut das Zahnfleisch weh.“",
+      "history": [
+        [
+          "onset",
+          "Wie lange bestehen die Beschwerden?",
+          "Etwa drei Tage, zunehmend beim Kauen.",
+          "yes"
+        ],
+        [
+          "redflags",
+          "Haben Sie Fieber, Schluckbeschwerden oder Atemnot?",
+          "Nein, zurzeit nichts davon.",
+          "yes"
+        ],
+        [
+          "opening",
+          "Können Sie den Mund normal öffnen?",
+          "Ja, aber ganz hinten ist es unangenehm.",
+          "yes"
+        ],
+        [
+          "medical",
+          "Immunsuppression, relevante Medikamente, Allergien?",
+          "Keine bekannten Allergien, ich nehme nichts regelmäßig.",
+          "yes"
+        ],
+        [
+          "recurrence",
+          "Ist das schon einmal vorgekommen?",
+          "Vor ein paar Monaten war es kurz ähnlich.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "airway",
+          "Allgemeinzustand, Mundöffnung und Ausbreitungszeichen",
+          "Kein Trismus, keine Dysphagie, keine Atemwegszeichen im Fall.",
+          "yes"
+        ],
+        [
+          "site",
+          "Inspektion Operculum, lokale Entzündung",
+          "Teilweise durchgebrochener 48 mit lokal gereiztem Operculum.",
+          "yes"
+        ],
+        [
+          "radio",
+          "Indizierte Bildgebung für Lage/Behandlungsplanung",
+          "Fiktiver Befundtext: retinierter Anteil des 48; keine echte radiologische Aufnahme.",
+          "no"
+        ],
+        [
+          "occlusion",
+          "Okklusion / traumatisierender Oberkieferzahn",
+          "Mögliche lokale Schleimhauttraumatisierung berücksichtigen.",
+          "no"
+        ],
+        [
+          "antibiotic",
+          "Antibiotika als alleiniger erster Test",
+          "Kein diagnostischer Test und kein Routineersatz für lokale Ursachenbehandlung.",
+          "bad"
+        ]
+      ],
+      "differential": [
+        "Lokale Perikoronitis ohne berichtete systemische Ausbreitung",
+        "Sichere tiefe Halsphlegmone",
+        "Irreversible Pulpitis Zahn 11",
+        "Generalisierte Gingivitis allein"
+      ],
+      "correct": 0,
+      "why": "Die Untersuchung muss mögliche schwere Ausbreitung ausschließen; Indikation zu weiterer Diagnostik, Akuttherapie oder operativer Entfernung ist fallbezogen.",
+      "options": [
+        "Lokale Akutmaßnahmen, Hygieneberatung, Analgesie nach Indikation und Reevaluation",
+        "Nach Abklingen und erneuter Indikation geplante operative Entfernung bei Rezidiv",
+        "Routinemäßige Antibiotika bei jedem lokal gereizten Operculum",
+        "Nicht untersuchen, sondern sofort invasiv handeln"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Infektionsausbreitung, Atemweg, Trismus und Risikofaktoren prüfen",
+        "Befund, Lagebeziehung und chirurgische Indikation beurteilen",
+        "Lokale Akutmaßnahmen, Aufklärung und Medikamentenrisiken prüfen",
+        "Verlauf, Kontrolltermin und ggf. indikationsgerechte Extraktionsplanung dokumentieren"
+      ],
+      "safety": "Atemnot, Schluckstörung, progrediente Schwellung oder schwerer Allgemeinzustand erfordern sofortige ärztliche Notfallbewertung."
+    },
+    "perio": {
+      "chief": "„Mein Zahnfleisch blutet beim Putzen, und ein Zahn fühlt sich locker an.“",
+      "history": [
+        [
+          "bleeding",
+          "Seit wann besteht das Zahnfleischbluten?",
+          "Seit vielen Monaten.",
+          "yes"
+        ],
+        [
+          "smoking",
+          "Rauchen Sie oder haben Sie früher geraucht?",
+          "Ich rauche etwa zehn Zigaretten am Tag.",
+          "yes"
+        ],
+        [
+          "diabetes",
+          "Ist Diabetes bekannt oder gibt es einen HbA1c-Befund?",
+          "Mein Hausarzt kontrolliert den Blutzucker; Details kenne ich nicht.",
+          "yes"
+        ],
+        [
+          "hygiene",
+          "Wie putzen und reinigen Sie die Interdentalräume?",
+          "Zweimal am Tag, aber selten zwischen den Zähnen.",
+          "yes"
+        ],
+        [
+          "meds",
+          "Welche Medikamente nehmen Sie?",
+          "Gelegentlich Schmerzmittel, sonst nichts Bekanntes.",
+          "no"
+        ]
+      ],
+      "tests": [
+        [
+          "full",
+          "Vollständiger parodontaler Status / BOP",
+          "Generalisiert entzündliche Zeichen, erhöhte Sondierungswerte; ein Einzelzahn reicht nicht für Staging.",
+          "yes"
+        ],
+        [
+          "xray",
+          "Indizierter radiologischer Knochenbefund",
+          "Fiktiver Befundtext: mögliche horizontale Knochenverlustzeichen, Ausmaß zu quantifizieren.",
+          "yes"
+        ],
+        [
+          "risk",
+          "Risikofaktoren inklusive Rauchen und Diabetes erfassen",
+          "Rauchen positiv; glykämische Kontrolle und Risikobeurteilung erforderlich.",
+          "yes"
+        ],
+        [
+          "furcation",
+          "Furkation, Lockerung, Plaque und Prognose",
+          "Zahn 46 zeigt simuliert erhöhten Lockerungsgrad; Furkation noch abzuklären.",
+          "no"
+        ],
+        [
+          "extract",
+          "Sofortige Extraktion nur wegen Blutung",
+          "Nicht gerechtfertigt ohne vollständige Diagnostik.",
+          "bad"
+        ]
+      ],
+      "differential": [
+        "Gesicherte Grad-C-Parodontitis allein aus einer Taschentiefe",
+        "Verdacht auf Parodontitis; Staging/Grading erst nach vollständiger Befundung",
+        "Akute irreversible Pulpitis Zahn 16",
+        "Gingivitis sicher ohne jeglichen Attachmentverlust"
+      ],
+      "correct": 1,
+      "why": "Stadium und Grad benötigen vollständige klinische und radiologische Information einschließlich Risikofaktoren und Knochen-/Attachmentverlust.",
+      "options": [
+        "Systematische parodontale Diagnostik und stufenweise kausale Therapie mit Risikokontrolle",
+        "Erweiterte Behandlung/Überweisung nach Reevaluation und individueller Indikation",
+        "Systemische Antibiotika als Standard bei jeder Zahnfleischblutung",
+        "Extraktion aller blutenden Zähne ohne Status"
+      ],
+      "primary": 0,
+      "alternative": 1,
+      "procedure": [
+        "Umfassenden PA-Status und Risikoprofil aufnehmen",
+        "Mundhygieneinstruktion und Risikofaktormodifikation besprechen",
+        "Indikationsgerechte subgingivale Instrumentierung planen und durchführen lassen",
+        "Reevaluation, Erhaltungstherapie und dokumentierte Nachsorge planen"
+      ],
+      "safety": "Gingivale Blutung allein erlaubt keine Parodontitis-Stadienzuordnung; die 3D-Geometrie misst keine subgingivale Instrumentierung."
+    }
+  }
+}

@@ -1,0 +1,1327 @@
+{
+  "schemaVersion": 2,
+  "kind": "SOURCE_DERIVED_NATIVE_APP_CONTENT_NOT_FUNCTIONAL_PARITY",
+  "sourceGitSHA": "e707c9c32afe5bfda870d137e28a8dc1e7851969",
+  "sourceAppSHA256": "2ad804cfa6b09697923a60fc631e5941a00637b9ce888bf64c35c37ba67f6468",
+  "syntheticCasesOnly": true,
+  "clinicalAssessmentValidated": false,
+  "cases": [
+    {
+      "id": "molar",
+      "fdi": "16",
+      "title": "Tiefe Karies am Zahn 16",
+      "subtitle": "Posterior restorative dentistry",
+      "patientName": "Frau Lena Neumann",
+      "patientAge": 38,
+      "patientReply": [
+        "Seit drei Wochen. Vor allem, wenn ich etwas Hartes kaue.",
+        "Nur kurz beim Kalten, nicht stundenlang.",
+        "Nein, nachts tut es nicht von selbst weh.",
+        "Mir sind keine Allergien bekannt, ich nehme keine Medikamente.",
+        "Ja, Sie können sich den Zahn ansehen.",
+        "Ist die Behandlung schmerzhaft?",
+        "Ja, bitte erklären Sie mir die Alternativen."
+      ],
+      "complaint": "„Ich habe beim Kauen rechts oben Beschwerden. Kaltes ist unangenehm, aber der Schmerz hört schnell wieder auf.“",
+      "history": "Die Beschwerden bestehen seit etwa drei Wochen. Keine Spontanschmerzen, keine Schwellung, keine Fieberangabe. Regelmäßige Medikation: keine. Allergien werden verneint.",
+      "exam": "Zahn 16: klinisch okklusal-approximale Kavitation; sensibel auf Kälte, Reaktion klingt rasch ab; Perkussion unauffällig. Approximaler Kontakt und parodontale Situation müssen erhoben werden.",
+      "risk": "Tiefe Karies mit erhaltener Vitalität; Pulpastatus und Restaurierbarkeit vor jeder definitiven Therapie überprüfen.",
+      "diagnosis": "Karies dentinum, pulpanah möglich; pulpal diagnosis needs clinical testing",
+      "primaryPlan": "Direkte adhäsive Restauration, falls Defektgröße, Randverhältnisse und Höckerstabilität dies zulassen.",
+      "alternativePlan": "Indirekte Teilkrone/Onlay bei größerem Substanzverlust und erhöhtem Höckerfrakturrisiko.",
+      "question": "Was spricht für eine direkte Füllung statt einer Teilkrone?",
+      "prepType": "MOD",
+      "vocab": [
+        [
+          "die Karies",
+          "tooth decay"
+        ],
+        [
+          "die Füllung",
+          "restoration"
+        ],
+        [
+          "die Betäubung",
+          "local anaesthesia"
+        ],
+        [
+          "die Teilkrone",
+          "partial crown"
+        ],
+        [
+          "die Kofferdamisolierung",
+          "rubber dam isolation"
+        ],
+        [
+          "okklusal / approximal",
+          "occlusal / proximal"
+        ]
+      ],
+      "keywords": [
+        "16",
+        "Karies",
+        "Kälte",
+        "Vital",
+        "adhäsiv"
+      ]
+    },
+    {
+      "id": "endo",
+      "fdi": "36",
+      "title": "Pulpaschmerz am Zahn 36",
+      "subtitle": "Endodontics · differential diagnosis",
+      "patientName": "Herr Daniel Krüger",
+      "patientAge": 45,
+      "patientReply": [
+        "Das hat vor einigen Wochen beim Kalten angefangen.",
+        "Jetzt hält der Schmerz nach dem Kältereiz länger an.",
+        "Ja, ich bin sogar nachts wegen der Schmerzen aufgewacht.",
+        "Nein, mein Gesicht ist nicht geschwollen und Fieber habe ich nicht bemerkt.",
+        "Ja, Sie dürfen den Zahn testen und untersuchen.",
+        "Muss der Zahn gezogen werden?",
+        "Ich möchte den Zahn wenn möglich behalten."
+      ],
+      "complaint": "„Links unten habe ich seit gestern starke Zahnschmerzen. Bei Kaltem tut es lange weh und nachts werde ich wach.“",
+      "history": "Seit einigen Wochen Kälteempfindlichkeit; seit gestern anhaltender Schmerz, auch spontan. Kein berichtetes Fieber und keine Gesichtsschwellung. Medikamente und Allergien müssen aktiv erfragt werden.",
+      "exam": "Zahn 36 mit tiefer kariöser Läsion. Reizantwort und Perkussion sind systematisch zu untersuchen. Ein Röntgenbefund allein reicht für die pulpare Diagnose nicht aus.",
+      "risk": "Verdacht auf symptomatische irreversible Pulpitis, Differenzialdiagnose und Zahnerhaltungsfähigkeit abklären.",
+      "diagnosis": "Verdacht auf symptomatische irreversible Pulpitis",
+      "primaryPlan": "Nach Diagnose und Einwilligung endodontische Therapie zum Zahnerhalt mit adäquater definitiver koronaler Versorgung.",
+      "alternativePlan": "Extraktion nach Aufklärung, falls Zahn nicht erhaltungswürdig ist oder der Patient nach Beratung diesen Weg wählt.",
+      "question": "Welche Befunde stützen eine symptomatische irreversible Pulpitis?",
+      "prepType": "ENDO",
+      "vocab": [
+        [
+          "die Pulpitis",
+          "pulp inflammation"
+        ],
+        [
+          "die Wurzelkanalbehandlung",
+          "root canal treatment"
+        ],
+        [
+          "die Spontanschmerzen",
+          "spontaneous pain"
+        ],
+        [
+          "der Kältetest",
+          "cold sensitivity test"
+        ],
+        [
+          "die Perkussion",
+          "percussion"
+        ],
+        [
+          "die Wurzelspitze",
+          "root apex"
+        ]
+      ],
+      "keywords": [
+        "36",
+        "Schmerz",
+        "Pulpitis",
+        "Kälte",
+        "Endodont"
+      ]
+    },
+    {
+      "id": "anterior",
+      "fdi": "11",
+      "title": "Frontzahntrauma am Zahn 11",
+      "subtitle": "Anterior composite · trauma triage",
+      "patientName": "Frau Sofia Berger",
+      "patientAge": 29,
+      "patientReply": [
+        "Vorgestern bin ich auf einer Treppe ausgerutscht.",
+        "Nein, ich war nicht bewusstlos.",
+        "Die Ecke stört, kalte Getränke sind etwas unangenehm.",
+        "Ich habe keine bekannte Medikamentenallergie.",
+        "Ja, Sie dürfen den Zahn untersuchen.",
+        "Wird mein Zahn wieder normal aussehen?",
+        "Mir ist wichtig, dass der Zahn erhalten bleibt."
+      ],
+      "complaint": "„Ich bin vor zwei Tagen gestürzt. Ein Stück vom oberen Schneidezahn ist abgebrochen. Jetzt stört mich die Kante.“",
+      "history": "Sturz vor 48 Stunden; keine berichtete Bewusstlosigkeit, aber Unfallhergang und Begleitverletzungen sind gezielt zu erfragen. Schmerz bei Kälte möglich.",
+      "exam": "Zahn 11 mit inzisalem Substanzverlust. Vor Therapie: klinische Frakturklassifikation, Pulpa-/Sensibilitätstestung, Mobilität, Perkussion, Weichteile, Okklusion und indizierte Bildgebung.",
+      "risk": "Unkomplizierte Schmelz-Dentin-Fraktur möglich; pulpare Beteiligung, Luxation und Wurzelfraktur ausschließen.",
+      "diagnosis": "Verdacht auf unkomplizierte Kronenfraktur Zahn 11",
+      "primaryPlan": "Direkte adhäsive Kompositversorgung nach Ausschluss komplexer Verletzungen.",
+      "alternativePlan": "Je nach Defektgröße, Pulpa- und Wurzelbefund fragmentäre Wiederbefestigung, indirekte Versorgung oder weitere Behandlung.",
+      "question": "Was muss bei Frontzahntrauma vor dem Kompositaufbau untersucht werden?",
+      "prepType": "INCISAL",
+      "vocab": [
+        [
+          "die Kronenfraktur",
+          "crown fracture"
+        ],
+        [
+          "die Schneidekante",
+          "incisal edge"
+        ],
+        [
+          "die Sensibilitätsprüfung",
+          "sensibility testing"
+        ],
+        [
+          "der Zahnunfall",
+          "dental trauma"
+        ],
+        [
+          "der Kompositaufbau",
+          "composite build-up"
+        ],
+        [
+          "die Wurzelfraktur",
+          "root fracture"
+        ]
+      ],
+      "keywords": [
+        "11",
+        "Fraktur",
+        "Trauma",
+        "Pulpa",
+        "Komposit"
+      ]
+    },
+    {
+      "id": "crown",
+      "fdi": "26",
+      "title": "Kronen-/Teilkrone am Zahn 26",
+      "subtitle": "Fixed prosthodontics · impression",
+      "patientName": "Herr Markus Seidel",
+      "patientAge": 53,
+      "patientReply": [
+        "Seit einigen Monaten bricht immer wieder eine Ecke ab.",
+        "Beim Kauen ja, bei Kälte nur selten.",
+        "Nein, nachts habe ich keine Schmerzen.",
+        "Ich habe Bluthochdruck und nehme ein Medikament; den Namen bringe ich mit.",
+        "Sie dürfen den Zahn gerne untersuchen.",
+        "Muss der Zahn komplett abgeschliffen werden?",
+        "Bitte erklären Sie mir die Unterschiede zwischen Teilkrone und Krone."
+      ],
+      "complaint": "„Meine große Füllung links oben ist mehrfach gebrochen. Ich kann auf dieser Seite kaum noch kauen.“",
+      "history": "Mehrfach erneuerte ausgedehnte Füllung an 26. Keine spontane Zahnschmerzen, aber Kauprobleme. Allgemeinanamnese und Erwartungen an Zahnerhalt erfragen.",
+      "exam": "Ausgedehnte Restauration mit Verdacht auf Höckenschwächung. Vor Präparation: Restzahnhartsubstanz, Pulpa, parodontale Prognose, Rissverdacht, Okklusion und restaurative Optionen prüfen.",
+      "risk": "Restaurierbarkeit und verbleibende gesunde Höcker bestimmen, ob eine Teilkrone, Vollkrone oder andere Versorgung sinnvoll ist.",
+      "diagnosis": "Defekte ausgedehnte Restauration Zahn 26",
+      "primaryPlan": "Höckerüberdeckende indirekte Teilkrone/Onlay bei ausreichender Restsubstanz und passender Indikation.",
+      "alternativePlan": "Vollkrone bei entsprechender Defektausdehnung; stärkerer Zahnhartsubstanzverlust muss begründet werden.",
+      "question": "Wann ist eine Teilkrone gegenüber einer Vollkrone substanzschonender?",
+      "prepType": "CROWN",
+      "vocab": [
+        [
+          "die Teilkrone",
+          "partial crown"
+        ],
+        [
+          "die Verblendkrone",
+          "veneered crown"
+        ],
+        [
+          "die Präparationsgrenze",
+          "finish line"
+        ],
+        [
+          "die Abformung",
+          "impression"
+        ],
+        [
+          "das Provisorium",
+          "temporary crown"
+        ],
+        [
+          "der Biss",
+          "occlusion"
+        ]
+      ],
+      "keywords": [
+        "26",
+        "Krone",
+        "Füllung",
+        "Restsubstanz"
+      ]
+    },
+    {
+      "id": "surgery",
+      "fdi": "48",
+      "title": "Perikoronitis am Zahn 48",
+      "subtitle": "Oral surgery · instruments",
+      "patientName": "Frau Amelie Fischer",
+      "patientAge": 24,
+      "patientReply": [
+        "Seit etwa drei Tagen ist es hinten rechts unangenehm.",
+        "Beim Kauen wird es schlimmer, der Schmerz hält eine Weile an.",
+        "Nachts stört es, aber ich kann schlafen.",
+        "Ich habe bisher kein Fieber, keine Schluckstörung und keine Schwellung bemerkt.",
+        "Ja, bitte schauen Sie nach.",
+        "Brauche ich jetzt ein Antibiotikum?",
+        "Ich möchte wissen, ob der Weisheitszahn herausmuss."
+      ],
+      "complaint": "„Ganz hinten rechts unten tut das Zahnfleisch weh. Beim Essen klemme ich es manchmal ein.“",
+      "history": "Seit drei Tagen zunehmender Schmerz am teilweise durchgebrochenen 48. Allgemeinzustand, Fieber, Schwellung, Mundöffnung, Schluckbeschwerden und Risikofaktoren gezielt erfragen.",
+      "exam": "Operculum über einem teilweise durchgebrochenen 48 mit lokaler Irritation. Mundöffnung, vestibuläre Schwellung, lymphatische Zeichen, Okklusion und erforderliche Bildgebung prüfen.",
+      "risk": "Lokale Perikoronitis möglich; systemische Infektionszeichen müssen ausgeschlossen und Dringlichkeit beurteilt werden.",
+      "diagnosis": "Verdacht auf lokale Perikoronitis Zahn 48",
+      "primaryPlan": "Bei lokalem Befund konservative Akutmaßnahmen mit Reinigung/Spülung nach Indikation, Schmerztherapie und Verlaufskontrolle.",
+      "alternativePlan": "Nach Akutphase und Indikationsprüfung operative Entfernung bei wiederkehrenden Beschwerden; Risiken und Alternativen aufklären.",
+      "question": "Wann wird aus einer lokalen Perikoronitis ein dringlicher Infektionsfall?",
+      "prepType": "SURGERY",
+      "vocab": [
+        [
+          "die Perikoronitis",
+          "inflamed operculum"
+        ],
+        [
+          "der Weisheitszahn",
+          "third molar"
+        ],
+        [
+          "die Mundöffnung",
+          "mouth opening"
+        ],
+        [
+          "die Extraktion",
+          "extraction"
+        ],
+        [
+          "die Schwellung",
+          "swelling"
+        ],
+        [
+          "der Hebel",
+          "elevator"
+        ]
+      ],
+      "keywords": [
+        "48",
+        "Perikoronitis",
+        "Schwellung",
+        "Weisheits"
+      ]
+    },
+    {
+      "id": "perio",
+      "fdi": "46",
+      "title": "Parodontalbefund am Zahn 46",
+      "subtitle": "Periodontology · instrument selection",
+      "patientName": "Herr Tobias Richter",
+      "patientAge": 51,
+      "patientReply": [
+        "Das Zahnfleisch blutet schon seit Monaten beim Putzen.",
+        "Beim Kauen habe ich selten Beschwerden.",
+        "Manchmal fühlt es sich lockerer an, besonders morgens.",
+        "Ich rauche ungefähr zehn Zigaretten am Tag; Diabetes wurde noch nicht untersucht.",
+        "Ja, eine Zahnfleischmessung ist in Ordnung.",
+        "Können meine Zähne durch Parodontitis ausfallen?",
+        "Ich würde gern wissen, was ich selbst verbessern kann."
+      ],
+      "complaint": "„Mein Zahnfleisch blutet oft beim Putzen und rechts unten fühlt sich ein Zahn manchmal locker an.“",
+      "history": "Wiederkehrendes Zahnfleischbluten, unregelmäßige Prophylaxe; Rauchstatus und Diabetesanamnese gezielt erfragen. Keine gesicherte parodontale Diagnose vor vollständigem Status.",
+      "exam": "Am Zahn 46 Blutung bei Sondierung, erhöhte Sondierungstiefe möglich. Vollständiger parodontaler Status, Lockerung, Furkation, Plaque- und Knochenbefund erforderlich.",
+      "risk": "Verdacht auf parodontale Erkrankung; Stadium und Grad erst nach vollständiger Diagnostik bestimmen.",
+      "diagnosis": "Verdacht auf Parodontitis",
+      "primaryPlan": "Systematische parodontale Therapie nach Diagnostik einschließlich Aufklärung, Mundhygieneinstruktion, supra-/subgingivaler Instrumentierung nach Indikation und Reevaluation.",
+      "alternativePlan": "Bei unzureichendem Ansprechen stufengerechte Weiterbehandlung, ggf. chirurgische Maßnahmen; Prognose und Risikofaktoren beachten.",
+      "question": "Welche klinischen Befunde braucht man für eine moderne Parodontitisdiagnose?",
+      "prepType": "PERIO",
+      "vocab": [
+        [
+          "die Parodontitis",
+          "periodontitis"
+        ],
+        [
+          "die Sondierungstiefe",
+          "probing depth"
+        ],
+        [
+          "das Furkationsgebiet",
+          "furcation"
+        ],
+        [
+          "die Kürette",
+          "curette"
+        ],
+        [
+          "die Blutung auf Sondieren",
+          "bleeding on probing"
+        ],
+        [
+          "die Reevaluation",
+          "reassessment"
+        ]
+      ],
+      "keywords": [
+        "46",
+        "Zahnfleisch",
+        "Sondierung",
+        "Parodont"
+      ]
+    }
+  ],
+  "stations": [
+    {
+      "id": "interview",
+      "title": "Anamnesegespräch",
+      "subtitle": "Patient-facing German",
+      "description": "Ask focused questions, respond empathetically and explain findings without excessive jargon.",
+      "track": "fsp"
+    },
+    {
+      "id": "letter",
+      "title": "Arztbrief verfassen",
+      "subtitle": "Clinical documentation",
+      "description": "Write a structured German report from the consultation. In the actual SH FSP this is handwritten.",
+      "track": "fsp"
+    },
+    {
+      "id": "handover",
+      "title": "Arzt–Arzt-Gespräch",
+      "subtitle": "Professional handover",
+      "description": "Present the case to a colleague using precise dental terminology and explain technical words in lay language.",
+      "track": "fsp"
+    },
+    {
+      "id": "written",
+      "title": "Schriftlicher Behandlungsplan",
+      "subtitle": "Two justified options",
+      "description": "Create a diagnostic assessment and at least two evidence-conscious treatment alternatives with reasoning.",
+      "track": "kp"
+    },
+    {
+      "id": "practical",
+      "title": "Praktische Übungen",
+      "subtitle": "Operative decision + targeting",
+      "description": "Select the appropriate tooth and instruments; practise a schematic preparation and sequence of treatment decisions.",
+      "track": "kp"
+    },
+    {
+      "id": "viva",
+      "title": "Mündliche KP-Fragen",
+      "subtitle": "Clinical reasoning",
+      "description": "Practise higher-level decisions across restorative dentistry, endodontics, prosthodontics, surgery and periodontology.",
+      "track": "kp"
+    },
+    {
+      "id": "clinic",
+      "title": "Deutscher Praxisalltag",
+      "subtitle": "Treatment plan + language",
+      "description": "Review planned treatment, instruct the assistant, communicate with the patient, and document a session.",
+      "track": "clinic"
+    }
+  ],
+  "quiz": {
+    "interview": [
+      {
+        "title": "Eröffnen und Leitsymptom erfragen",
+        "question": "Open the consultation professionally and invite an open description.",
+        "options": [
+          "Guten Tag. Was führt Sie heute zu uns?",
+          "Sie brauchen bestimmt eine Wurzelbehandlung.",
+          "Nehmen Sie sofort ein Antibiotikum."
+        ],
+        "correct": 0,
+        "explanation": "A neutral open question avoids premature diagnosis."
+      },
+      {
+        "title": "Beschwerden zeitlich einordnen",
+        "question": "Clarify onset and course, including provoking factors.",
+        "options": [
+          "Ist der Schmerz stark, ja oder nein?",
+          "Seit wann bestehen die Beschwerden und wodurch werden sie ausgelöst?",
+          "Der Schmerz ist sicher nichts Ernstes."
+        ],
+        "correct": 1,
+        "explanation": "Duration and triggers are crucial to differential diagnosis."
+      },
+      {
+        "title": "Schmerzqualität und Dauer",
+        "question": "Differentiate pulpal and dentinal symptoms.",
+        "options": [
+          "Wie lange hält der Schmerz nach Kälte an und haben Sie auch Schmerzen ohne Reiz?",
+          "Es reicht, wenn Sie mir die Seite zeigen.",
+          "Ich möchte Ihre Telefonnummer wissen."
+        ],
+        "correct": 0,
+        "explanation": "Lingering stimulus pain and spontaneous pain are relevant for pulpal assessment."
+      },
+      {
+        "title": "Warnzeichen erfragen",
+        "question": "Screen for fever, spreading swelling, and other systemic warning signs.",
+        "options": [
+          "Wie viel Geld möchten Sie ausgeben?",
+          "Hatten Sie Fieber, eine Schwellung oder Schwierigkeiten beim Schlucken?",
+          "Ein Röntgenbild ist immer unnötig."
+        ],
+        "correct": 1,
+        "explanation": "Infection warning signs change urgency and treatment."
+      },
+      {
+        "title": "Medikamente / Allergien",
+        "question": "Cover medication history and allergies before planning treatment.",
+        "options": [
+          "Sie haben sicher keine Allergien, oder?",
+          "Sie brauchen nichts weiter zu erzählen.",
+          "Nehmen Sie regelmäßig Medikamente ein? Gibt es bekannte Allergien oder Vorerkrankungen?"
+        ],
+        "correct": 2,
+        "explanation": "Relevant medical history is necessary for safe patient care."
+      },
+      {
+        "title": "Untersuchung ankündigen",
+        "question": "Explain the planned clinical examination and obtain agreement.",
+        "options": [
+          "Ich untersuche jetzt die Zähne und teste je nach Befund die Reaktion auf Kälte. Ist das für Sie in Ordnung?",
+          "Ich bohre sofort los.",
+          "Sie müssen nicht wissen, was wir machen."
+        ],
+        "correct": 0,
+        "explanation": "Explain examination steps and involve the patient."
+      },
+      {
+        "title": "Befund und Alternativen erklären",
+        "question": "Summarise findings in language the patient understands, with uncertainties and alternatives.",
+        "options": [
+          "Es gibt nur eine Möglichkeit, dazu müssen Sie nichts wissen.",
+          "Die Untersuchung deutet auf ein Problem am Zahn hin. Ich erläutere die Befunde, die möglichen Behandlungen und deren Vor- und Nachteile.",
+          "Wir entscheiden später ohne Sie."
+        ],
+        "correct": 1,
+        "explanation": "Patients need an understandable explanation and opportunity to participate in informed decisions."
+      }
+    ],
+    "handover": [
+      {
+        "title": "Struktur der Übergabe",
+        "question": "Wie beginnt eine strukturierte kollegiale Fallvorstellung?",
+        "options": [
+          "Mit einem langen Materialkatalog.",
+          "Mit Patientendaten, Leitsymptom, relevanter Anamnese und Befunden.",
+          "Mit einer endgültigen Diagnose ohne Befunderhebung."
+        ],
+        "correct": 1,
+        "explanation": "Begin with concise patient identification, leading complaint, timeline and relevant findings."
+      },
+      {
+        "title": "Fachsprache korrekt benutzen",
+        "question": "Wie dokumentieren Sie eine Reaktion auf Kältereiz, die nach Reizende lange anhält?",
+        "options": [
+          "Anhaltende Schmerzreaktion nach thermischem Reiz",
+          "Der Zahn ist hundertprozentig avital",
+          "Druckgefühl ohne weitere Angaben"
+        ],
+        "correct": 0,
+        "explanation": "Describe the actual finding first; a diagnosis requires the full clinical context."
+      },
+      {
+        "title": "Fachwort patientengerecht erklären",
+        "question": "Wie erklären Sie „Pulpitis“ einer Patientin?",
+        "options": [
+          "Eine Entzündung des Zahnhalteapparats",
+          "Eine Entzündung des Gewebes mit Nerven und Blutgefäßen im Zahn",
+          "Ein Loch im Knochen"
+        ],
+        "correct": 1,
+        "explanation": "Pulpa = the soft tissue inside the tooth, containing nerves and blood vessels."
+      },
+      {
+        "title": "Klinische Unsicherheit",
+        "question": "Was ist korrekt, wenn eine radiologische Aufnahme einen Befund allein nicht klärt?",
+        "options": [
+          "„Die Aufnahme beweist die Diagnose.“",
+          "„Die Beschwerden sind psychisch.“",
+          "„Wir korrelieren die Bildgebung mit Anamnese und klinischer Untersuchung.“"
+        ],
+        "correct": 2,
+        "explanation": "Avoid overclaiming diagnostic certainty from an illustrative radiograph."
+      },
+      {
+        "title": "Abschluss des Arzt–Arzt-Gesprächs",
+        "question": "Welche Information gehört in die Übergabe?",
+        "options": [
+          "Begründeter Arbeitsbefund, Alternativen, weiteres Vorgehen, Risiken und Einwilligung.",
+          "Nur die Farbe des Komposits.",
+          "Nur die geplanten Kosten."
+        ],
+        "correct": 0,
+        "explanation": "A complete handover supports informed, safe follow-through."
+      }
+    ],
+    "viva": [
+      {
+        "title": "Endodontie",
+        "question": "Welche Aussage zur pulparen Diagnostik ist am besten begründet?",
+        "options": [
+          "Ein einzelner Kältetest reicht immer für die definitive Diagnose.",
+          "Anamnese, Sensibilitätstests, Perkussion und indizierte Bildgebung werden im Zusammenhang interpretiert.",
+          "Röntgenbilder zeigen die Vitalität der Pulpa direkt."
+        ],
+        "correct": 1,
+        "explanation": "No single finding establishes all pulpal/periapical diagnoses in isolation."
+      },
+      {
+        "title": "Zahnerhaltung",
+        "question": "Bei tiefer Karies an einem vitalen Seitenzahn gilt grundsätzlich:",
+        "options": [
+          "Möglichst viel gesundes Dentin entfernen.",
+          "Immer eine vollständige pulpare Exposition anstreben.",
+          "Zahnhartsubstanz und Pulpa erhalten; Exkavationsstrategie nach Befund auswählen."
+        ],
+        "correct": 2,
+        "explanation": "Conservative, diagnosis-led excavation is essential; exact intervention depends on clinical situation."
+      },
+      {
+        "title": "Prothetik",
+        "question": "Was entscheidet zwischen direkter Füllung und indirekter Teilkrone?",
+        "options": [
+          "Restsubstanz, Defektgröße, Höckerstabilität, Okklusion und Patientenfaktoren.",
+          "Nur der Wunsch nach einer bestimmten Farbe.",
+          "Immer die Zahnnummer allein."
+        ],
+        "correct": 0,
+        "explanation": "A restoration strategy must be based on structural and functional criteria."
+      },
+      {
+        "title": "Parodontologie",
+        "question": "Welche Information ist für die parodontale Befunderhebung wesentlich?",
+        "options": [
+          "Nur das Alter.",
+          "Sondierungstiefen, Blutung, Attachment-/Knochenbefund und Risikofaktoren.",
+          "Nur ein Foto des Gesichts."
+        ],
+        "correct": 1,
+        "explanation": "Periodontal evaluation uses multiple clinical/radiographic measures, not a single index."
+      },
+      {
+        "title": "Oralchirurgie",
+        "question": "Bei möglicher odontogener Infektionsausbreitung mit Schluckstörung:",
+        "options": [
+          "Nur beobachten, unabhängig von weiteren Zeichen.",
+          "Immer ohne Untersuchung antibiotisch behandeln.",
+          "Dringlichkeit beurteilen und bei Warnzeichen sofortige geeignete Abklärung/Überweisung organisieren."
+        ],
+        "correct": 2,
+        "explanation": "Potential deep-space infection and airway compromise require prompt professional evaluation."
+      },
+      {
+        "title": "Kieferorthopädie",
+        "question": "Worauf basiert eine seriöse kieferorthopädische Therapieplanung?",
+        "options": [
+          "Auf einer vollständigen Diagnostik mit klinischen Befunden, Okklusion und erforderlichen Unterlagen.",
+          "Nur auf dem Alter.",
+          "Nur auf einer isolierten Fotoaufnahme."
+        ],
+        "correct": 0,
+        "explanation": "Comprehensive, patient-specific assessment precedes treatment choice."
+      },
+      {
+        "title": "Röntgendiagnostik",
+        "question": "Welcher Grundsatz gilt vor einer zahnärztlichen Röntgenaufnahme?",
+        "options": [
+          "Jede Kontrolle erhält automatisch eine Aufnahme.",
+          "Die Aufnahme muss durch eine individuelle rechtfertigende Indikation begründet und strahlenschutzgerecht durchgeführt werden.",
+          "Röntgenaufnahmen ersetzen grundsätzlich die klinische Untersuchung."
+        ],
+        "correct": 1,
+        "explanation": "Ionizing radiation requires justification, optimization, and correct interpretation."
+      },
+      {
+        "title": "Hygiene",
+        "question": "Was gilt für die Wiederaufbereitung eines kritischen Instruments?",
+        "options": [
+          "Nur mit Wasser abspülen.",
+          "Validiertes Verfahren entsprechend Einstufung und Herstellerangaben.",
+          "Bei sichtbarer Sauberkeit auf Sterilisation verzichten."
+        ],
+        "correct": 1,
+        "explanation": "Instrument reprocessing depends on risk classification and validated protocols."
+      }
+    ],
+    "clinic": [
+      {
+        "title": "Termin und Tagesplan lesen",
+        "question": "Im Praxiscomputer steht „Füllung 16 okklusal-approximal geplant“. Wie gehen Sie vor?",
+        "options": [
+          "Die geplante Behandlung ersetzt jede aktuelle Untersuchung.",
+          "Aktuelle Beschwerden, Befund, Vorbehandlung, Aufklärung und Einwilligung prüfen; Plan bei Bedarf aktualisieren.",
+          "Ohne Einwilligung direkt präparieren."
+        ],
+        "correct": 1,
+        "explanation": "A stored treatment plan is not a substitute for current clinical assessment."
+      },
+      {
+        "title": "Patientenansprache",
+        "question": "Welche Formulierung ist im deutschen Praxisalltag passend?",
+        "options": [
+          "„Bevor wir beginnen, erkläre ich Ihnen die einzelnen Schritte. Haben Sie noch Fragen?“",
+          "„Jetzt stillhalten, ich habe keine Zeit.“",
+          "„Machen Sie sich keine Gedanken; ich muss nichts erklären.“"
+        ],
+        "correct": 0,
+        "explanation": "Patient-centered German communication should be understandable and respectful."
+      },
+      {
+        "title": "Teamkommunikation",
+        "question": "Wie bitten Sie eine ZFA um Unterstützung bei adhäsiver Versorgung?",
+        "options": [
+          "„Sie müssen alles selbst entscheiden.“",
+          "„Bringen Sie irgendetwas.“",
+          "„Bitte bereiten Sie Kofferdam, Absaugung, Matrizensystem und das freigegebene Adhäsivsystem vor.“"
+        ],
+        "correct": 2,
+        "explanation": "Clear assignment improves workflow; the treating dentist remains responsible."
+      },
+      {
+        "title": "Dokumentation",
+        "question": "Was gehört zur zeitnahen Behandlungsdokumentation?",
+        "options": [
+          "Nur das Datum.",
+          "Befund, Aufklärung/Einwilligung, Anästhesie, Materialien, durchgeführte Schritte und relevante Besonderheiten.",
+          "Nur die verwendete Marke."
+        ],
+        "correct": 1,
+        "explanation": "Document actual findings and interventions. Billing codes are separate from the clinical record."
+      },
+      {
+        "title": "Patientenabschluss",
+        "question": "Welche Information geben Sie am Ende einer invasiven Behandlung?",
+        "options": [
+          "Individuelle Nachsorgehinweise, Warnzeichen, ggf. Kontrolltermin und Kontaktmöglichkeit.",
+          "„Sie brauchen nichts zu wissen.“",
+          "Immer dieselbe Medikation für alle Patienten."
+        ],
+        "correct": 0,
+        "explanation": "Tailored advice and safety-netting are essential."
+      }
+    ]
+  },
+  "tools": [
+    {
+      "id": "mirror",
+      "german": "Mundspiegel",
+      "english": "Mouth mirror"
+    },
+    {
+      "id": "probe",
+      "german": "Sonde",
+      "english": "Explorer / probe"
+    },
+    {
+      "id": "suction",
+      "german": "Absaugung",
+      "english": "Suction"
+    },
+    {
+      "id": "excavator",
+      "german": "Exkavator",
+      "english": "Excavator"
+    },
+    {
+      "id": "composite",
+      "german": "Komposit",
+      "english": "Composite"
+    },
+    {
+      "id": "rubberdam",
+      "german": "Kofferdam",
+      "english": "Rubber dam"
+    },
+    {
+      "id": "bur",
+      "german": "Rotierender Schleifer",
+      "english": "Rotary cutting instrument"
+    },
+    {
+      "id": "matrix",
+      "german": "Matrize + Keil",
+      "english": "Matrix + wedge"
+    },
+    {
+      "id": "endo",
+      "german": "Endo-Feile",
+      "english": "Endodontic file"
+    },
+    {
+      "id": "apex",
+      "german": "Apexlokator",
+      "english": "Apex locator"
+    },
+    {
+      "id": "irrigation",
+      "german": "Spülkanüle",
+      "english": "Irrigation needle"
+    },
+    {
+      "id": "putty",
+      "german": "Putty",
+      "english": "Putty PVS"
+    },
+    {
+      "id": "lightbody",
+      "german": "Light body",
+      "english": "Wash PVS"
+    },
+    {
+      "id": "heavybody",
+      "german": "Heavy body",
+      "english": "Tray PVS"
+    },
+    {
+      "id": "mediumbody",
+      "german": "Medium body",
+      "english": "Monophase PVS"
+    },
+    {
+      "id": "curette",
+      "german": "Kürette / Scaler",
+      "english": "Periodontal instruments"
+    },
+    {
+      "id": "forceps",
+      "german": "Extraktionszange",
+      "english": "Extraction forceps"
+    },
+    {
+      "id": "elevator",
+      "german": "Luxator / Hebel",
+      "english": "Dental elevator"
+    },
+    {
+      "id": "imptray",
+      "german": "Abformlöffel",
+      "english": "Impression tray"
+    }
+  ],
+  "practical": [
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 16 im 3D-Modell oder im FDI-Schema.",
+        "target": "16",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Instrument für die Präparationssimulation wählen",
+        "detail": "Select the appropriate rotary cutting instrument from the instrument tray.",
+        "target": "bur",
+        "success": "Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "drill",
+        "title": "Konservative Präparation simulieren",
+        "detail": "Open Preparation and remove most of the shaded target with your pointer. Avoid the surrounding intact tooth. For endodontics the target represents an access outline, not canal anatomy.",
+        "target": "",
+        "success": "",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Approximale Versorgung planen",
+        "detail": "When an approximal wall is involved, what supports a good proximal form?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Separation ein flaches Füllungsmaterial aufbringen.",
+          "Geeignetes Matrizensystem und Keil mit Kontaktpunkt- und Konturkontrolle.",
+          "Immer den Nachbarzahn beschleifen."
+        ],
+        "correct": 1,
+        "explanation": "Select an appropriate matrix/separation system for proximal contour and contact."
+      },
+      {
+        "type": "choice",
+        "title": "Adhäsivtechnik",
+        "detail": "Which is the safest general principle?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Das Adhäsivsystem unabhängig vom Hersteller verwenden.",
+          "Das Material niemals lichthärten.",
+          "Feuchtigkeitskontrolle, korrektes materialspezifisches Ätz-/Bonding-Protokoll und ausreichende Polymerisation."
+        ],
+        "correct": 2,
+        "explanation": "Material-specific instructions and effective moisture control are critical."
+      },
+      {
+        "type": "choice",
+        "title": "Abschlusskontrolle",
+        "detail": "Before finishing a posterior restoration, check:",
+        "target": "",
+        "success": "",
+        "options": [
+          "Kontaktpunkt, Approximalrand, Okklusion, Oberfläche und dokumentierte Patienteninformation.",
+          "Nur die Farbe der Unterlage.",
+          "Nichts mehr nach der Polymerisation."
+        ],
+        "correct": 0,
+        "explanation": "Finishing and verification are part of the restoration workflow."
+      }
+    ],
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 36 im 3D-Modell oder im FDI-Schema.",
+        "target": "36",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Instrument für die Präparationssimulation wählen",
+        "detail": "Select the appropriate rotary cutting instrument from the instrument tray.",
+        "target": "bur",
+        "success": "Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "drill",
+        "title": "Konservative Präparation simulieren",
+        "detail": "Open Preparation and remove most of the shaded target with your pointer. Avoid the surrounding intact tooth. For endodontics the target represents an access outline, not canal anatomy.",
+        "target": "",
+        "success": "",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Arbeitslänge bestimmen",
+        "detail": "Select the most appropriate approach.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Die Länge nach Augenmaß schätzen.",
+          "Apexlokator und indizierte radiologische Kontrolle zusammen mit Kanalbefund einsetzen.",
+          "Immer exakt 15 mm festlegen."
+        ],
+        "correct": 1,
+        "explanation": "Working length must be determined individually using appropriate validated methods."
+      },
+      {
+        "type": "choice",
+        "title": "Spülung sicher durchführen",
+        "detail": "Which principle is essential for safe root-canal irrigation?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Unter Druck bis über die Wurzelspitze spülen.",
+          "Nadel blockieren und starken Druck verwenden.",
+          "Geeignetes Spülprotokoll, kontrollierte Abgabe ohne Blockierung/Extrusion und Schutzmaßnahmen."
+        ],
+        "correct": 2,
+        "explanation": "Avoid apical extrusion; protocols and concentrations must follow contemporary clinical guidance."
+      },
+      {
+        "type": "choice",
+        "title": "Wurzelkanalfüllung und koronaler Verschluss",
+        "detail": "What completes the planned endodontic therapy?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Nach Aufbereitung immer offen lassen.",
+          "Dichte, überprüfte Wurzelkanalfüllung und zeitgerechte suffiziente koronale Abdichtung.",
+          "Einfach Watte einlegen und nicht dokumentieren."
+        ],
+        "correct": 1,
+        "explanation": "A suitable obturation and coronal seal, with follow-up, are important for long-term success."
+      }
+    ],
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 11 im 3D-Modell oder im FDI-Schema.",
+        "target": "11",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Instrument für die Präparationssimulation wählen",
+        "detail": "Select the appropriate rotary cutting instrument from the instrument tray.",
+        "target": "bur",
+        "success": "Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "drill",
+        "title": "Konservative Präparation simulieren",
+        "detail": "Open Preparation and remove most of the shaded target with your pointer. Avoid the surrounding intact tooth. For endodontics the target represents an access outline, not canal anatomy.",
+        "target": "",
+        "success": "",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Trauma und Pulpabefund",
+        "detail": "What has to be checked before definitive restoration?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Nur die Kompositfarbe.",
+          "Frakturtyp, Pulpa, Mobilität/Luxation, Okklusion, Weichgewebe und indizierte Bildgebung.",
+          "Immer sofort eine Krone."
+        ],
+        "correct": 1,
+        "explanation": "Trauma classification and associated injury assessment precede adhesive reconstruction."
+      },
+      {
+        "type": "choice",
+        "title": "Adhäsive Rekonstruktion",
+        "detail": "How is the restoration chosen?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Feuchtigkeitskontrolle und materialgerechtes Adhäsivprotokoll mit anatomischem Schichtaufbau.",
+          "Ohne Prüfung der Okklusion fertigstellen.",
+          "Jede Schmelzfraktur zwingend überkronen."
+        ],
+        "correct": 0,
+        "explanation": "Apply a material-specific adhesive protocol and restore anatomy and function."
+      },
+      {
+        "type": "choice",
+        "title": "Nachkontrolle",
+        "detail": "What should be discussed?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Kontrolle und Nachsorge nach Trauma einschließlich Pulpaüberwachung, Ästhetik und Okklusion.",
+          "Keine Nachkontrolle ist je notwendig.",
+          "Nur die Rechnungsadresse."
+        ],
+        "correct": 0,
+        "explanation": "Pulpal complications after trauma may emerge later and need review."
+      }
+    ],
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 26 im 3D-Modell oder im FDI-Schema.",
+        "target": "26",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Instrument für die Präparationssimulation wählen",
+        "detail": "Select the appropriate rotary cutting instrument from the instrument tray.",
+        "target": "bur",
+        "success": "Correct. The next step is a schematic preparation exercise, not a simulated patient procedure.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "drill",
+        "title": "Konservative Präparation simulieren",
+        "detail": "Open Preparation and remove most of the shaded target with your pointer. Avoid the surrounding intact tooth. For endodontics the target represents an access outline, not canal anatomy.",
+        "target": "",
+        "success": "",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Abformung / digitaler Scan",
+        "detail": "Welche Option ist fachlich korrekt?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Randsituation, Feuchtigkeitskontrolle und geeignetes Abform-/Scansystem beachten.",
+          "Jede Abformung ohne Präparationsgrenze durchführen.",
+          "Nur mit einem Löffel probieren und nicht kontrollieren."
+        ],
+        "correct": 0,
+        "explanation": "Restoration quality requires accurate margin capture and appropriate impression technique."
+      },
+      {
+        "type": "tool",
+        "title": "Abforminstrument identifizieren",
+        "detail": "Wählen Sie einen Abformlöffel für eine konventionelle Abformung.",
+        "target": "imptray",
+        "success": "Correct instrument. Choose tray/material and technique according to indication and manufacturer instructions.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Abformmaterial sachgerecht wählen",
+        "detail": "Was ist bei PVS Putty/Wash, Heavy/Light oder Monophase entscheidend?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Das Material wird unabhängig von Herstellervorgaben beliebig kombiniert.",
+          "Systemkompatibilität, Viskosität, Platz für Wash, Feuchtigkeitskontrolle und Verarbeitungszeiten berücksichtigen.",
+          "Leichtfließendes Material ersetzt in allen Fällen einen formstabilen Löffel."
+        ],
+        "correct": 1,
+        "explanation": "Technique and viscosity must suit the preparation and manufacturer-specific impression system."
+      },
+      {
+        "type": "choice",
+        "title": "Temporäre Versorgung",
+        "detail": "Was ist vor Abschluss einer Kronenbehandlung zu prüfen?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Passung und Dichtigkeit des Provisoriums, Okklusion, Schutz des Zahnes, Hinweise und Terminplanung.",
+          "Das Provisorium locker lassen.",
+          "Keine Nachsorge vorsehen."
+        ],
+        "correct": 0,
+        "explanation": "Temporary restoration should protect the tooth and permit safe function."
+      }
+    ],
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 48 im 3D-Modell oder im FDI-Schema.",
+        "target": "48",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Instrumente für die chirurgische Versorgung",
+        "detail": "Welche Instrumentenkategorie wäre bei einer indizierten Extraktion sachgerecht?",
+        "target": "elevator",
+        "success": "Correct category. Instrument choice depends on the examination, tooth anatomy, imaging and clinical plan.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Risikoanalyse vor der Extraktion",
+        "detail": "Was muss vor einem Eingriff besonders berücksichtigt werden?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Röntgenbefund, Lagebeziehung zu relevanten Strukturen, Allgemeinanamnese, Indikation und Einwilligung.",
+          "Nur die Zahnfarbe.",
+          "Immer ohne Lokalanästhesie operieren."
+        ],
+        "correct": 0,
+        "explanation": "Anatomy, indications, safety and informed consent determine the surgical approach."
+      },
+      {
+        "type": "choice",
+        "title": "Infektionsmanagement",
+        "detail": "Welche Aussage zur Perikoronitis ist richtig?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Antibiotika sind für jede lokale Entzündung automatisch indiziert.",
+          "Lokale Maßnahmen und Ursachenbehandlung sind zentral; Antibiotika nur bei entsprechender Indikation, z. B. systemischer Beteiligung.",
+          "Schluckbeschwerden können ignoriert werden."
+        ],
+        "correct": 1,
+        "explanation": "Avoid routine antibiotics for uncomplicated local disease; screen red flags."
+      },
+      {
+        "type": "choice",
+        "title": "Postoperative Betreuung",
+        "detail": "Welche Nachsorge ist sinnvoll?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Individuelle Blutungs-, Wund- und Warnzeichenhinweise mit Kontaktweg und Kontrolle nach Bedarf.",
+          "Keine Hinweise geben.",
+          "Zwingend gleich am Folgetag beliebig feste Nahrung essen."
+        ],
+        "correct": 0,
+        "explanation": "Provide a clear patient-specific plan and escalation advice."
+      }
+    ],
+    [
+      {
+        "type": "tooth",
+        "title": "Arbeitszahn identifizieren",
+        "detail": "Wählen Sie Zahn 46 im 3D-Modell oder im FDI-Schema.",
+        "target": "46",
+        "success": "Correct tooth selected using FDI notation.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Isolierung und Sicherheitscheck",
+        "detail": "Before any simulated operative step, choose the most appropriate setup.",
+        "target": "",
+        "success": "",
+        "options": [
+          "Ohne Anamnese und Einwilligung beginnen.",
+          "Befund und Einwilligung prüfen, Kofferdam erwägen/anlegen wenn indiziert, persönliche Schutzausrüstung sicherstellen.",
+          "Nur den Behandlungsstuhl einstellen."
+        ],
+        "correct": 1,
+        "explanation": "Safe setup and isolation are essential; individual clinical requirements must be assessed."
+      },
+      {
+        "type": "tool",
+        "title": "Parodontales Instrument wählen",
+        "detail": "Wählen Sie das Instrument zur mechanischen subgingivalen Instrumentierung im geeigneten Kontext.",
+        "target": "curette",
+        "success": "Correct category. Instrument geometry and adaptation must be tailored to the tooth surface and site.",
+        "options": [],
+        "correct": -1,
+        "explanation": ""
+      },
+      {
+        "type": "choice",
+        "title": "Parodontalstatus erheben",
+        "detail": "Welche Angaben gehören zur Ausgangsuntersuchung?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Nur die Patientennummer.",
+          "Sondierung, BOP, Attachment-/Röntgenbefund, Lockerung, Furkation und Risikofaktoren.",
+          "Allein ein Panoramabild."
+        ],
+        "correct": 1,
+        "explanation": "Comprehensive assessment allows appropriate diagnosis and follow-up."
+      },
+      {
+        "type": "choice",
+        "title": "Instrumentierung und Sicherheit",
+        "detail": "Was ist das sichere Grundprinzip?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Mit jeder Kürette möglichst stark gegen die Wurzel drücken.",
+          "Keine Aufklärung und keine Reevaluation.",
+          "Angepasste Instrumentwahl und Kontrolle, Gewebeschonung, Infektionsschutz und stufenweiser Behandlungsplan."
+        ],
+        "correct": 2,
+        "explanation": "Subgingival instrumentation is a controlled professional procedure."
+      },
+      {
+        "type": "choice",
+        "title": "Reevaluation",
+        "detail": "Was folgt der initialen parodontalen Therapie?",
+        "target": "",
+        "success": "",
+        "options": [
+          "Erneute Befunderhebung, Risikofaktorbewertung und bedarfsgerechte unterstützende Parodontitistherapie.",
+          "Niemals mehr messen.",
+          "Jeder Zahn wird extrahiert."
+        ],
+        "correct": 0,
+        "explanation": "Reassessment guides further therapy and maintenance."
+      }
+    ]
+  ],
+  "migrationGates": {
+    "clinicalCases": "SOURCE_CONTENT_EXPORTED",
+    "stationExercises": "SOURCE_QUIZ_CONTENT_EXPORTED",
+    "guidedPatientResponse": "ORIGINAL_PATIENT_REPLIES_EXPORTED_MCQ_TRIGGERED",
+    "caseSpecificPracticalChoices": "SOURCE_TASKS_EXPORTED_NATIVE_INTERACTION_PARTIAL",
+    "interactiveThreeDPreparation": "NOT_PORTED",
+    "fspKpFormativeRubric": "NOT_PORTED",
+    "scanImportAndRadiography": "NOT_PORTED",
+    "reportingAndExport": "NOT_PORTED",
+    "optionalServerAI": "NOT_PORTED",
+    "immersiveQuestInput": "NOT_PORTED",
+    "anatomyAtlas": "NOT_PORTED"
+  }
+}

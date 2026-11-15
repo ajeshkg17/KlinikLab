@@ -1,0 +1,15 @@
+# Generated/local Unreal outputs
+/Binaries/
+/DerivedDataCache/
+/Intermediate/
+/Saved/
+/.gemini/
+/.git/
+/Config/DefaultEditorPerProjectUserSettings.ini
+/Config/Layouts/
+__pycache__/
+*.py[cod]
+*.sln
+*.suo
+*.pdb
+*.log
